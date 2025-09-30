@@ -1,13 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { BookmarkIcon, ScaleIcon, Clock, Calendar, DollarSign, MapPin, ArrowLeftIcon, StarIcon, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon } from 'lucide-react';
-import { RelatedCourses } from '../components/RelatedCourses';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { graphqlClient } from '../services/graphql/client';
-import { GET_COURSE_DETAILS, GET_RELATED_COURSES } from '../services/graphql/queries';
-import { CourseType } from '../components/CourseMarketplace';
-import { ErrorDisplay } from '../components/SkeletonLoader';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  BookmarkIcon,
+  ScaleIcon,
+  Clock,
+  Calendar,
+  DollarSign,
+  MapPin,
+  ArrowLeftIcon,
+  StarIcon,
+  CheckCircleIcon,
+  ExternalLinkIcon,
+  ChevronRightIcon,
+  HomeIcon,
+} from "lucide-react";
+import { RelatedCourses } from "../components/RelatedCourses";
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
+import { graphqlClient } from "../services/graphql/client";
+import {
+  GET_COURSE_DETAILS,
+  GET_RELATED_COURSES,
+} from "../services/graphql/queries";
 interface CourseDetailPageProps {
   bookmarkedCourses: string[];
   onToggleBookmark: (courseId: string) => void;
@@ -16,16 +30,14 @@ interface CourseDetailPageProps {
 export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   bookmarkedCourses = [],
   onToggleBookmark = () => {},
-  onAddToComparison = () => {}
+  onAddToComparison = () => {},
 }) => {
-  const {
-    courseId
-  } = useParams<{
+  const { courseId } = useParams<{
     courseId: string;
   }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const shouldEnroll = searchParams.get('enroll') === 'true';
+  const shouldEnroll = searchParams.get("enroll") === "true";
   const [course, setCourse] = useState<CourseType | null>(null);
   const [relatedCourses, setRelatedCourses] = useState<CourseType[]>([]);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -42,44 +54,43 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
       setError(null);
       try {
         // Fetch course details
-        const {
-          course
-        } = await graphqlClient.request(GET_COURSE_DETAILS, {
-          id: courseId
+        const { course } = await graphqlClient.request(GET_COURSE_DETAILS, {
+          id: courseId,
         });
         if (course) {
           setCourse(course);
           setIsBookmarked(bookmarkedCourses.includes(course.id));
           // Fetch related courses
-          const {
-            relatedCourses
-          } = await graphqlClient.request(GET_RELATED_COURSES, {
-            id: courseId,
-            category: course.category,
-            provider: course.provider.name
-          });
+          const { relatedCourses } = await graphqlClient.request(
+            GET_RELATED_COURSES,
+            {
+              id: courseId,
+              category: course.category,
+              provider: course.provider.name,
+            }
+          );
           setRelatedCourses(relatedCourses || []);
           // If the enroll parameter is true, scroll to the enrollment section
           if (shouldEnroll) {
             setTimeout(() => {
-              const enrollSection = document.getElementById('enroll-section');
+              const enrollSection = document.getElementById("enroll-section");
               if (enrollSection) {
                 enrollSection.scrollIntoView({
-                  behavior: 'smooth'
+                  behavior: "smooth",
                 });
               }
             }, 100);
           }
         } else {
           // Course not found
-          setError('Course not found');
+          setError("Course not found");
           setTimeout(() => {
-            navigate('/courses');
+            navigate("/courses");
           }, 3000);
         }
       } catch (err) {
-        console.error('Error fetching course details:', err);
-        setError('Failed to load course details');
+        console.error("Error fetching course details:", err);
+        setError("Failed to load course details");
       } finally {
         setLoading(false);
       }
@@ -105,8 +116,12 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
     }
   };
   if (loading) {
-    return <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[300px] flex-grow">
           <div className="animate-pulse flex flex-col items-center">
             <div className="h-8 w-32 bg-gray-200 rounded mb-4"></div>
@@ -114,20 +129,30 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
           </div>
         </div>
         <Footer isLoggedIn={false} />
-      </div>;
+      </div>
+    );
   }
   if (error) {
-    return <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
         <div className="container mx-auto px-4 py-8 flex-grow">
           <ErrorDisplay message={error} onRetry={retryFetch} />
         </div>
         <Footer isLoggedIn={false} />
-      </div>;
+      </div>
+    );
   }
   if (!course) {
-    return <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[300px] flex-grow">
           <div className="text-center">
             <h2 className="text-xl font-medium text-gray-900 mb-2">
@@ -136,23 +161,34 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
             <p className="text-gray-500 mb-4">
               The course you're looking for doesn't exist or has been removed.
             </p>
-            <button onClick={() => navigate('/courses')} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+            <button
+              onClick={() => navigate("/courses")}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
               Back to Courses
             </button>
           </div>
         </div>
         <Footer isLoggedIn={false} />
-      </div>;
+      </div>
+    );
   }
-  return <div className="bg-white min-h-screen flex flex-col">
-      <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+  return (
+    <div className="bg-white min-h-screen flex flex-col">
+      <Header
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        sidebarOpen={sidebarOpen}
+      />
       <main className="flex-grow">
         {/* Breadcrumbs */}
         <div className="container mx-auto px-4 py-4">
           <nav className="flex" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-2">
               <li className="inline-flex items-center">
-                <a href="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center">
+                <a
+                  href="/"
+                  className="text-gray-600 hover:text-gray-900 inline-flex items-center"
+                >
                   <HomeIcon size={16} className="mr-1" />
                   <span>Home</span>
                 </a>
@@ -160,7 +196,10 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               <li>
                 <div className="flex items-center">
                   <ChevronRightIcon size={16} className="text-gray-400" />
-                  <a href="/courses" className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
+                  <a
+                    href="/courses"
+                    className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2"
+                  >
                     Courses
                   </a>
                 </div>
@@ -184,7 +223,11 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               {/* Left side - Course info */}
               <div className="lg:w-2/3">
                 <div className="flex items-center mb-3">
-                  <img src={course.provider.logoUrl} alt={`${course.provider.name} logo`} className="h-12 w-12 object-contain mr-3 rounded-md shadow-sm" />
+                  <img
+                    src={course.provider.logoUrl}
+                    alt={`${course.provider.name} logo`}
+                    className="h-12 w-12 object-contain mr-3 rounded-md shadow-sm"
+                  />
                   <span className="text-gray-600 font-medium">
                     {course.provider.name}
                   </span>
@@ -207,7 +250,17 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 {/* Rating */}
                 <div className="flex items-center mb-5">
                   <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map(star => <StarIcon key={star} size={16} className={`${parseFloat(rating) >= star ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />)}
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <StarIcon
+                        key={star}
+                        size={16}
+                        className={`${
+                          parseFloat(rating) >= star
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    ))}
                   </div>
                   <span className="ml-2 text-sm font-medium text-gray-700">
                     {rating}
@@ -230,10 +283,29 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                     <ExternalLinkIcon size={16} className="ml-2" />
                   </button>
                   <div className="flex items-center space-x-3 ml-auto">
-                    <button onClick={handleToggleBookmark} className={`p-2 rounded-full ${isBookmarked ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`} aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'} title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
-                      <BookmarkIcon size={20} className={isBookmarked ? 'fill-yellow-600' : ''} />
+                    <button
+                      onClick={handleToggleBookmark}
+                      className={`p-2 rounded-full ${
+                        isBookmarked
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                      }`}
+                      aria-label={
+                        isBookmarked ? "Remove bookmark" : "Add bookmark"
+                      }
+                      title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                    >
+                      <BookmarkIcon
+                        size={20}
+                        className={isBookmarked ? "fill-yellow-600" : ""}
+                      />
                     </button>
-                    <button onClick={handleAddToComparison} className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200" aria-label="Add to comparison" title="Add to comparison">
+                    <button
+                      onClick={handleAddToComparison}
+                      className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200"
+                      aria-label="Add to comparison"
+                      title="Add to comparison"
+                    >
                       <ScaleIcon size={20} />
                     </button>
                   </div>
@@ -242,7 +314,11 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               {/* Right side - Image */}
               <div className="lg:w-1/3 w-full">
                 <div className="relative rounded-lg overflow-hidden shadow-lg aspect-video">
-                  <img src={`https://source.unsplash.com/random/800x450?${course.category.toLowerCase()},education`} alt={course.title} className="w-full h-full object-cover" />
+                  <img
+                    src={`https://source.unsplash.com/random/800x450?${course.category.toLowerCase()},education`}
+                    alt={course.title}
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 </div>
               </div>
@@ -264,10 +340,18 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   Key Highlights
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {course.learningOutcomes.slice(0, 4).map((outcome, index) => <div key={index} className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-100 h-full">
-                      <CheckCircleIcon size={20} className="text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                  {course.learningOutcomes.slice(0, 4).map((outcome, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-100 h-full"
+                    >
+                      <CheckCircleIcon
+                        size={20}
+                        className="text-green-500 mr-3 mt-0.5 flex-shrink-0"
+                      />
                       <span className="text-gray-700">{outcome}</span>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </section>
 
@@ -279,14 +363,14 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 <div className="prose max-w-none">
                   <p className="text-gray-700 mb-5">
                     This comprehensive course is designed to provide you with
-                    the skills and knowledge needed to excel in{' '}
+                    the skills and knowledge needed to excel in{" "}
                     {course.category}. Whether you're just starting out or
                     looking to advance your existing skills, this course offers
                     practical insights and hands-on experience to help you
                     achieve your goals.
                   </p>
                   <p className="text-gray-700">
-                    The course is structured to accommodate{' '}
+                    The course is structured to accommodate{" "}
                     {course.businessStage} businesses, with a focus on practical
                     applications that you can implement immediately. Our
                     experienced instructors bring real-world expertise to help
@@ -301,12 +385,17 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   What You'll Learn
                 </h2>
                 <div className="grid gap-4">
-                  {course.learningOutcomes.map((outcome, index) => <div key={index} className="flex items-start bg-white p-5 rounded-lg shadow-sm">
+                  {course.learningOutcomes.map((outcome, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start bg-white p-5 rounded-lg shadow-sm"
+                    >
                       <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center mr-4 flex-shrink-0 mt-0.5">
                         <span className="text-sm font-bold">{index + 1}</span>
                       </div>
                       <span className="text-gray-700">{outcome}</span>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </section>
 
@@ -317,10 +406,13 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 </h2>
                 <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
                   <div className="flex flex-col md:flex-row md:items-center mb-6 bg-blue-50 p-3 rounded-lg">
-                    <Calendar className="text-blue-600 mr-3 mb-2 md:mb-0" size={20} />
+                    <Calendar
+                      className="text-blue-600 mr-3 mb-2 md:mb-0"
+                      size={20}
+                    />
                     <div className="flex-grow">
                       <p className="font-medium text-gray-800">
-                        Start Date:{' '}
+                        Start Date:{" "}
                         <span className="text-blue-700">
                           {course.startDate}
                         </span>
@@ -351,7 +443,9 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                         Core principles and practical exercises
                       </p>
                     </div>
-                    {course.durationType === 'Medium' || course.durationType === 'Long' ? <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
+                    {course.durationType === "Medium" ||
+                    course.durationType === "Long" ? (
+                      <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
                         <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
                         <h4 className="font-semibold text-gray-900">
                           Week 3-4
@@ -359,8 +453,10 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                         <p className="text-gray-700">
                           Advanced techniques and final projects
                         </p>
-                      </div> : null}
-                    {course.durationType === 'Long' ? <div className="relative pl-8">
+                      </div>
+                    ) : null}
+                    {course.durationType === "Long" ? (
+                      <div className="relative pl-8">
                         <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
                         <h4 className="font-semibold text-gray-900">
                           Final Week
@@ -368,10 +464,12 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                         <p className="text-gray-700">
                           Project presentations and certification
                         </p>
-                      </div> : null}
+                      </div>
+                    ) : null}
                   </div>
                   {/* Location if applicable */}
-                  {course.location && <div className="mt-4 pt-4 border-t border-gray-100">
+                  {course.location && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex items-center">
                         <MapPin className="text-blue-600 mr-2" size={18} />
                         <h4 className="font-medium text-gray-800">Location</h4>
@@ -379,7 +477,8 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                       <p className="text-gray-700 mt-1 ml-6">
                         {course.location}
                       </p>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </section>
 
@@ -390,7 +489,11 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 </h2>
                 <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
                   <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                    <img src={course.provider.logoUrl} alt={course.provider.name} className="h-16 w-16 object-contain rounded-lg shadow-sm" />
+                    <img
+                      src={course.provider.logoUrl}
+                      alt={course.provider.name}
+                      className="h-16 w-16 object-contain rounded-lg shadow-sm"
+                    />
                     <div>
                       <h3 className="text-xl font-bold text-gray-900">
                         {course.provider.name}
@@ -431,7 +534,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Price:</span>
                       <span className="font-bold text-gray-900">
-                        {course.price || 'Free'}
+                        {course.price || "Free"}
                       </span>
                     </div>
                     <div className="flex justify-between mb-2">
@@ -459,35 +562,53 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                     </h4>
                     <ul className="space-y-2">
                       <li className="flex items-start">
-                        <CheckCircleIcon size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                        <CheckCircleIcon
+                          size={16}
+                          className="text-green-500 mr-2 mt-1 flex-shrink-0"
+                        />
                         <span className="text-gray-700 text-sm">
                           Comprehensive course materials
                         </span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircleIcon size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                        <CheckCircleIcon
+                          size={16}
+                          className="text-green-500 mr-2 mt-1 flex-shrink-0"
+                        />
                         <span className="text-gray-700 text-sm">
                           Expert-led sessions
                         </span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircleIcon size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                        <CheckCircleIcon
+                          size={16}
+                          className="text-green-500 mr-2 mt-1 flex-shrink-0"
+                        />
                         <span className="text-gray-700 text-sm">
                           Certificate of completion
                         </span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircleIcon size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                        <CheckCircleIcon
+                          size={16}
+                          className="text-green-500 mr-2 mt-1 flex-shrink-0"
+                        />
                         <span className="text-gray-700 text-sm">
                           Access to exclusive resources
                         </span>
                       </li>
                     </ul>
                   </div>
-                  <button id="enroll-section" className="w-full px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md mb-3">
+                  <button
+                    id="enroll-section"
+                    className="w-full px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md mb-3"
+                  >
                     Enroll Now
                   </button>
-                  <button onClick={handleAddToComparison} className="w-full px-4 py-3 text-blue-600 font-medium bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center">
+                  <button
+                    onClick={handleAddToComparison}
+                    className="w-full px-4 py-3 text-blue-600 font-medium bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center"
+                  >
                     <ScaleIcon size={16} className="mr-2" />
                     Add to Comparison
                   </button>
@@ -504,14 +625,29 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               <h2 className="text-2xl font-bold text-gray-900">
                 Related Courses
               </h2>
-              <a href="/courses" className="text-blue-600 font-medium hover:text-blue-800 flex items-center">
+              <a
+                href="/courses"
+                className="text-blue-600 font-medium hover:text-blue-800 flex items-center"
+              >
                 See All Courses
                 <ChevronRightIcon size={16} className="ml-1" />
               </a>
             </div>
-            {relatedCourses.length > 0 ? <RelatedCourses currentCourse={course} courses={relatedCourses} onCourseSelect={selectedCourse => navigate(`/courses/${selectedCourse.id}`)} bookmarkedCourses={bookmarkedCourses} onToggleBookmark={onToggleBookmark} /> : <div className="text-center py-8 bg-white rounded-lg shadow">
+            {relatedCourses.length > 0 ? (
+              <RelatedCourses
+                currentCourse={course}
+                courses={relatedCourses}
+                onCourseSelect={(selectedCourse) =>
+                  navigate(`/courses/${selectedCourse.id}`)
+                }
+                bookmarkedCourses={bookmarkedCourses}
+                onToggleBookmark={onToggleBookmark}
+              />
+            ) : (
+              <div className="text-center py-8 bg-white rounded-lg shadow">
                 <p className="text-gray-500">No related courses found</p>
-              </div>}
+              </div>
+            )}
           </div>
         </section>
       </main>
@@ -521,7 +657,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         <div className="flex items-center justify-between">
           <div className="mr-3">
             <div className="text-gray-900 font-bold">
-              {course.price || 'Free'}
+              {course.price || "Free"}
             </div>
             <div className="text-sm text-gray-600">{course.duration}</div>
           </div>
@@ -531,5 +667,6 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         </div>
       </div>
       <Footer isLoggedIn={false} />
-    </div>;
+    </div>
+  );
 };
