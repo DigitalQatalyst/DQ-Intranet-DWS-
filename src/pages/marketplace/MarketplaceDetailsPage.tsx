@@ -393,6 +393,22 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const provider = item.provider;
   const primaryAction = config.primaryCTA;
   const secondaryAction = config.secondaryCTA;
+
+  // Get the appropriate form route based on marketplace type
+  const getFormRoute = () => {
+    switch (marketplaceType) {
+      case "financial":
+        return `/marketplace/financial/${itemId}/apply`;
+      case "non-financial":
+        return "/dashboard/forms/request-for-membership";
+      case "courses":
+        return "/dashboard/forms/book-consultation-for-entrepreneurship";
+      case "knowledge-hub":
+        return "/dashboard/forms/needs-assessment-form";
+      default:
+        return "/dashboard/forms/request-for-funding";
+    }
+  };
   // Extract tags based on marketplace type
   const displayTags =
     item.tags ||
@@ -1052,12 +1068,12 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             ))}
           </ul>
         </div>
-        <button
-          id="action-section"
-          className="w-full px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md mb-3"
+        <Link
+          to={getFormRoute()}
+          className="w-full px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md mb-3 text-center block"
         >
           {primaryAction}
-        </button>
+        </Link>
         <button
           onClick={handleAddToComparison}
           className="w-full px-4 py-2.5 text-blue-600 font-medium bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center"
@@ -1417,9 +1433,12 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   {item.duration || item.serviceType || ""}
                 </div>
               </div>
-              <button className="flex-1 px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md">
+              <Link
+                to={getFormRoute()}
+                className="flex-1 px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md text-center block"
+              >
                 {primaryAction}
-              </button>
+              </Link>
             </div>
           </div>
         )}
