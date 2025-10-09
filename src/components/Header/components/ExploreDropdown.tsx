@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, LucideProps } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, FileText, LucideProps } from 'lucide-react';
 
 interface Marketplace {
   id: string;
@@ -67,6 +67,13 @@ const marketplaces: Marketplace[] = [
     description: 'Company updates and internal notices.',
     icon: SparklesIcon,
     href: '/marketplace/opportunities',
+  },
+  {
+    id: 'asset-library',
+    name: 'Asset Library',
+    description: 'Shared design, deployment and marketing artefacts.',
+    icon: FileText,
+    href: '/marketplace/asset-library',
   },
 ];
 
