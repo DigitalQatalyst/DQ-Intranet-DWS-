@@ -3,7 +3,9 @@ import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { MarketplaceCard } from '../../components/Cards';
 import { ResponsiveCardGrid } from '../../components/Cards/ResponsiveCardGrid';
-import { FileText, ArrowLeft } from 'lucide-react';
+import { FileText, ArrowLeft, HomeIcon, ChevronRightIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { SearchBar } from '../../components/SearchBar';
 import { listFiles } from '../../services/SharePointService';
 
 type TopLevelCategory = 'DT2.0 DESIGN' | 'DT2.0 DEPLOY' | 'MARKETING ARTEFACTS';
@@ -42,25 +44,26 @@ function useSharePointFiles(pathSegments: string[]) {
   const [error, setError] = useState<string | null>(null);
 
   React.useEffect(() => {
+    const joinedPath = pathSegments.join('/');
     const load = async () => {
-      if (pathSegments.length === 0) {
+      if (joinedPath.length === 0) {
         setFiles(null);
         return;
       }
       setLoading(true);
       setError(null);
       try {
-        const folderPath = pathSegments.join('/');
-        const result = await listFiles(folderPath);
+        const result = await listFiles(joinedPath);
         setFiles(result);
-      } catch (e: any) {
+      } catch (err) {
+        const e = err as { message?: string } | undefined;
         setError(e?.message || 'Failed to load files');
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [pathSegments.join('/')]);
+  }, [pathSegments]);
 
   return { files, loading, error };
 }
@@ -71,12 +74,10 @@ export default function AssetLibraryPage() {
 
   const isMarketing = level1 === 'MARKETING ARTEFACTS';
 
-  const breadcrumbs = useMemo(() => {
-    const crumbs: string[] = ['Asset Library'];
-    if (level1) crumbs.push(level1);
-    if (level2) crumbs.push(level2);
-    return crumbs;
-  }, [level1, level2]);
+  // breadcrumbs previously used for a compact inline trail; the header now uses marketplace-style markup
+
+  // Local search state for UI parity with marketplaces (visual only)
+  const [searchQuery, setSearchQuery] = useState('');
 
   const pathSegments = useMemo(() => {
     const segments: string[] = [];
@@ -102,13 +103,28 @@ export default function AssetLibraryPage() {
       <Header />
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-            {breadcrumbs.map((c, idx) => (
-              <React.Fragment key={idx}>
-                {idx > 0 && <span>/</span>}
-                <span>{c}</span>
-              </React.Fragment>
-            ))}
+          <div className="container mx-auto px-0">
+            <nav className="flex mb-4" aria-label="Breadcrumb">
+              <ol className="inline-flex items-center space-x-1 md:space-x-2">
+                <li className="inline-flex items-center">
+                  <Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center">
+                    <HomeIcon size={16} className="mr-1" />
+                    <span>Home</span>
+                  </Link>
+                </li>
+                <li aria-current="page">
+                  <div className="flex items-center">
+                    <ChevronRightIcon size={16} className="text-gray-400" />
+                    <span className="ml-1 text-gray-500 md:ml-2">Asset Library</span>
+                  </div>
+                </li>
+              </ol>
+            </nav>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Asset Library</h1>
+            <p className="text-gray-600 mb-6">Browse shared design, deployment and marketing artefacts.</p>
+            <div className="mb-6">
+              <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            </div>
           </div>
 
           {(showSecond || showFiles) && (
