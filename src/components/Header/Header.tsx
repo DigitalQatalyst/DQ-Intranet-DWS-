@@ -79,7 +79,7 @@ export function Header({
           }`}
         >
           <img
-            src="/dq_logo2.png"
+            src="/dq_logo8.png"
             alt="DQ"
             className={`transition-all duration-300 ${isSticky ? 'h-10' : 'h-12'}`}
           />

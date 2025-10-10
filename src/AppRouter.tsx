@@ -5,6 +5,8 @@ import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
 import { App } from './App';
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
+import AssetLibraryPage from "./pages/assetLibrary";
+import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { DiscoverAbuDhabi } from "./pages/discoverAbuDhabi";
@@ -70,6 +72,8 @@ export function AppRouter() {
                 // </ProtectedRoute>
               }
             />
+            <Route path="/asset-library" element={<AssetLibraryPage />} />
+            <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
             <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
             <Route path="/404" element={<NotFound />} />
 
