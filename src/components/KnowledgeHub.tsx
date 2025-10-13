@@ -95,121 +95,120 @@ const newsItems: NewsItem[] = [{
 
 const events: Event[] = [{
   id: '1',
-  title: 'Abu Dhabi Business Forum 2023',
-  date: 'June 15-16, 2023',
-  location: 'Abu Dhabi National Exhibition Centre',
-  type: 'Conference',
-  organizer: 'Abu Dhabi Chamber of Commerce',
+  title: 'DQ Strategy & Mission Forum 2025',
+  date: 'October 18–19, 2025',
+  location: 'OPAL Tower, Business Bay, Dubai',
+  type: 'Forum',
+  organizer: 'Digital Qatalyst',
   imageUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'
 }, {
   id: '2',
-  title: 'Startup Pitch Competition',
-  date: 'May 25, 2023',
-  location: 'Hub71, Abu Dhabi',
-  type: 'Competition',
-  organizer: 'Hub71',
+  title: 'Agile Delivery Circle – Sprint Planning Masterclass',
+  date: 'October 25, 2025',
+  location: 'OPAL Tower, Business Bay, Dubai',
+  type: 'Workshop',
+  organizer: 'DQ Agile office',
   imageUrl: 'https://images.unsplash.com/photo-1591115765373-5207764f72e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'
 }, {
   id: '3',
-  title: 'Digital Transformation Workshop',
-  date: 'June 5, 2023',
-  location: 'Yas Creative Hub',
+  title: 'Leadership & Emotional Intelligence Session',
+  date: 'November 4, 2025',
+  location: 'OPAL Tower, Business Bay, Dubai',
   type: 'Workshop',
-  organizer: 'Digital Abu Dhabi',
+  organizer: 'DQ Culture & Community',
   imageUrl: 'https://images.unsplash.com/photo-1540317580384-e5d43867caa6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'
 }, {
   id: '4',
-  title: 'Export Market Opportunities Seminar',
-  date: 'July 10, 2023',
-  location: 'ADGM, Al Maryah Island',
-  type: 'Seminar',
-  organizer: 'Abu Dhabi Export Office',
+  title: 'Data Fluency Week – Power BI Hands-on',
+  date: 'November 11–15, 2025',
+  location: 'OPAL Tower, Business Bay, Dubai',
+  type: 'Bootcamp',
+  organizer: 'DQ Analytics Office',
   imageUrl: 'https://images.unsplash.com/photo-1559223607-a43f990c095d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'
 }, {
   id: '5',
-  title: 'Global Trade Summit',
-  date: 'August 3-5, 2023',
-  location: 'Etihad Towers Conference Centre',
-  type: 'Summit',
-  organizer: 'Ministry of Economy',
+  title: 'Product Growth & Value Streams Meetup',
+  date: 'November 21, 2025',
+  location: 'OPAL Tower, Business Bay, Dubai',
+  type: 'Meetup',
+  organizer: 'DQ Deploy Team',
   imageUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80'
 }, {
   id: '6',
-  title: 'Entrepreneurship Masterclass',
-  date: 'September 15, 2023',
-  location: 'NYU Abu Dhabi',
-  type: 'Workshop',
-  organizer: 'Khalifa Fund',
+  title: 'DQ End-of-Year Learning Showcase',
+  date: 'December 10, 2025',
+  location: 'OPAL Tower, Business Bay, Dubai',
+  type: 'Showcase',
+  organizer: 'DQ Academy',
   imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'
 }];
 
 const resources: Resource[] = [{
   id: '1',
-  title: 'Business Plan Template',
-  type: 'Templates',
-  description: 'Comprehensive business plan template with financial projections, market analysis, and strategic planning sections. Perfect for startups.',
+  title: 'DQ Handbook – Working the Catalyst Way',
+  type: 'Guide',
+  description: 'Your essential guide to Digital Qatalyst — principles, culture, and collaboration practices that power every team.',
   icon: <FileText size={24} className="text-blue-600" />,
   downloadUrl: '#',
   fileSize: '2.5 MB',
   downloadCount: 1847,
   lastUpdated: 'January 2024',
-  tags: ['Business', 'Template']
+  tags: ['Culture', 'Guide']
 }, {
   id: '2',
-  title: 'Export Market Analysis Report',
-  type: 'Guide',
-  description: 'Detailed analysis of export opportunities for Abu Dhabi businesses with market insights and regulatory information.',
+  title: 'Agile Playbook – SEDU Framework',
+  type: 'Template',
+  description: 'Standard agile templates and sprint planning boards aligned to the SEDU delivery model for teams across DQ.',
   icon: <BookOpen size={24} className="text-blue-600" />,
   downloadUrl: '#',
   fileSize: '4.1 MB',
   downloadCount: 3254,
   lastUpdated: 'December 2023',
-  tags: ['Export', 'Market Research']
+  tags: ['Agile', 'Delivery']
 }, {
   id: '3',
-  title: 'Financial Planning Templates',
-  type: 'Templates',
-  description: 'Ready-to-use templates for financial planning and forecasting with automated calculations and projections.',
+  title: 'Power BI Dashboard Starter Pack',
+  type: 'Toolkit',
+  description: 'Get prebuilt dashboard templates and data model examples for reporting within DQ projects.',
   icon: <FileText size={24} className="text-blue-600" />,
   downloadUrl: '#',
   fileSize: '1.8 MB',
   downloadCount: 5632,
   lastUpdated: 'February 2024',
-  tags: ['Finance', 'Planning']
+  tags: ['Analytics', 'Power BI']
 }, {
   id: '4',
-  title: 'SME Growth Toolkit',
-  type: 'Guide',
-  description: 'Essential resources and strategies for small and medium enterprise growth in Abu Dhabi market conditions.',
+  title: 'LLAD Template – Repository Setup',
+  type: 'Template',
+  description: 'A ready-to-use Logical Layered Architecture Document (LLAD) format for Ardoq and Abacus repository configurations.',
   icon: <BookOpen size={24} className="text-blue-600" />,
   downloadUrl: '#',
   fileSize: '3.2 MB',
   downloadCount: 2187,
   lastUpdated: 'January 2024',
-  tags: ['SME', 'Growth']
+  tags: ['Architechture', 'Template']
 }, {
   id: '5',
-  title: 'Digital Marketing Handbook',
+  title: 'DQ Governance & Compliance Guide',
   type: 'Guide',
-  description: 'Complete guide to digital marketing strategies including SEO, social media, content marketing, and paid advertising best practices.',
+  description: 'Comprehensive overview of DQ governance workflows, approvals, and compliance practices for associates.',
   icon: <BookOpen size={24} className="text-blue-600" />,
   downloadUrl: '#',
   fileSize: '4.5 MB',
   downloadCount: 8967,
   lastUpdated: 'December 2023',
-  tags: ['Marketing', 'Digital']
+  tags: ['Governace', 'Comliance']
 }, {
   id: '6',
-  title: 'Financial Calculator Tool',
+  title: 'Collaboration Toolkit – Viva & Teams',
   type: 'Tool',
-  description: 'Interactive online calculator for loan payments, investment returns, and financial planning. Access powerful calculations instantly.',
+  description: 'Quick-access resources for setting up Viva Engage posts, Teams collaboration boards, and L&D channels.',
   icon: <Calculator size={24} className="text-blue-600" />,
   downloadUrl: '#',
   fileSize: 'External',
   downloadCount: 12456,
   lastUpdated: 'February 2024',
-  isExternal: true,
-  tags: ['Finance', 'Calculator']
+  tags: ['Collaboration', 'L&D']
 }];
 
 // Define interface for tab items
@@ -275,15 +274,15 @@ const KnowledgeHubContent = ({
   const tabs: TabItem[] = [{
     id: 'news',
     label: 'News',
-    icon: '📰'
+    icon: <Newspaper size={16} className="#030F35-600" />
   }, {
     id: 'events',
     label: 'Events',
-    icon: '📅'
+    icon: <Calendar size={16} className="#030F35-600" />
   }, {
     id: 'resources',
     label: 'Resources',
-    icon: '📖'
+    icon: <BookOpen size={16} className="#030F35-600" />
   }];
   
   // Handle tab change with animation
@@ -305,13 +304,13 @@ const KnowledgeHubContent = ({
   const getResourceIconByType = type => {
     switch (type?.toLowerCase()) {
       case 'guide':
-        return <BookOpen size={24} className="text-blue-600" />;
+        return <BookOpen size={24} className="#030F35-600" />;
       case 'templates':
-        return <FileText size={24} className="text-blue-600" />;
+        return <FileText size={24} className="#030F35-600" />;
       case 'tool':
-        return <Calculator size={24} className="text-blue-600" />;
+        return <Calculator size={24} className="#030F35-600" />;
       default:
-        return <FileText size={24} className="text-blue-600" />;
+        return <FileText size={24} className="#030F35-600" />;
     }
   };
   

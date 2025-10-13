@@ -95,7 +95,8 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
       </CardHeader>
       <CardFooter primaryCTA={{
       text: item.isExternal ? 'Visit Resource' : 'Access Resource',
-      onClick: handleAccessResource
+      onClick: handleAccessResource,
+      variant: 'navy'
     }} secondaryCTA={onDownload && !item.isExternal ? {
       text: 'Download',
       onClick: handleDownload

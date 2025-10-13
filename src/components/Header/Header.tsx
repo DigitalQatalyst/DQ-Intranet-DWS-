@@ -74,14 +74,14 @@ export function Header({
         {/* Logo Section */}
         <Link
           to="/"
-          className={`bg-[#030F35] py-2 px-4 flex items-center transition-all duration-300 ${
+          className={`bg-[#030F3] py-2 px-4 flex items-center transition-all duration-300 ${
             isSticky ? 'h-12' : 'h-16'
           }`}
         >
           <img
-            src="/logo/dq_logo2.png"
+            src="/dq_logo8.png"
             alt="DQ"
-            className={`transition-all duration-300 ${isSticky ? 'h-8' : 'h-10'}`}
+            className={`transition-all duration-300 ${isSticky ? 'h-10' : 'h-12'}`}
           />
         </Link>
 

@@ -3,7 +3,7 @@ export interface CardFooterProps {
   primaryCTA?: {
     text: string;
     onClick: (e: React.MouseEvent) => void;
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'navy';
   };
   secondaryCTA?: {
     text: string;
@@ -25,7 +25,13 @@ export const CardFooter: React.FC<CardFooterProps> = ({
           {secondaryCTA && <button onClick={secondaryCTA.onClick} className="px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors whitespace-nowrap min-w-[120px] flex-1">
               {secondaryCTA.text}
             </button>}
-          {primaryCTA && <button onClick={primaryCTA.onClick} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors whitespace-nowrap flex-1 ${primaryCTA.variant === 'secondary' ? 'text-blue-600 bg-white border border-blue-600 hover:bg-blue-50' : 'text-white bg-blue-600 hover:bg-blue-700'}`}>
+          {primaryCTA && <button onClick={primaryCTA.onClick} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors whitespace-nowrap flex-1 ${
+              primaryCTA.variant === 'secondary'
+                ? 'text-blue-600 bg-white border border-blue-600 hover:bg-blue-50'
+                : primaryCTA.variant === 'navy'
+                  ? 'text-white bg-[#030F35] hover:bg-[#04114A]'
+                  : 'text-white bg-blue-600 hover:bg-blue-700'
+            }`}>
               {primaryCTA.text}
             </button>}
         </div>}

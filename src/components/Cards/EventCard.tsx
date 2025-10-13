@@ -67,7 +67,8 @@ export const EventCard: React.FC<EventCardProps> = ({
       </CardHeader>
       <CardFooter primaryCTA={{
       text: 'Register',
-      onClick: handleRegister
+      onClick: handleRegister,
+      variant: 'navy'
     }} secondaryCTA={onViewDetails ? {
       text: 'View Details',
       onClick: handleViewDetails

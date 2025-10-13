@@ -26,10 +26,10 @@ const HomePage: React.FC = () => {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h2 className="text-white text-xl font-bold">
-            Loading Enterprise Journey Platform
+            Loading Digital Workspace
           </h2>
           <p className="text-blue-200 mt-2">
-            Your gateway to business growth in Abu Dhabi
+            Your trusted hub for tools, requests, learning, and collaboration at DQ.
           </p>
         </div>
       </div>

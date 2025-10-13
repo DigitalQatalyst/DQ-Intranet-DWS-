@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Lightbulb, Code, Rocket, TrendingUp, BarChart3, Award, Globe, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Lightbulb, Rocket, TrendingUp, BarChart3, BadgeCheck, ShieldCheck, Globe, Sparkles, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FadeInUpOnScroll, HorizontalScrollReveal } from './AnimationUtils';
 interface StageCardProps {
@@ -55,7 +55,7 @@ const StageCard: React.FC<StageCardProps> = ({
       </div>
       {/* Stage number indicator */}
       <div className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isActive ? 'bg-dq-coral text-white' : 'bg-gray-200 text-gray-600'}`}>
-        {index + 1}
+        {index}
       </div>
     </div>;
 };
@@ -65,23 +65,6 @@ const EnterpriseStages: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const timelineRef = useRef<HTMLDivElement>(null);
-  // Scroll left/right controls
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: -300,
-        behavior: 'smooth'
-      });
-    }
-  };
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: 300,
-        behavior: 'smooth'
-      });
-    }
-  };
   // Animate timeline when in view
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -104,73 +87,97 @@ const EnterpriseStages: React.FC = () => {
     id: 'learn',
     level: 'L0',
     order: 1,
-    title: 'Learn',
-    description: 'Get onboarded and build foundational DQ knowledge.',
-    benefits: ['Onboarding guides & workspace flows', 'LMS starter courses', 'Access to the DQ Knowledge Hub'],
+    title: 'Starting (Learning)',
+    description: 'Build DQ foundations.',
+    benefits: ['Onboarding guides', 'LMS starter courses', 'Knowledge Hub access'],
     icon: <Lightbulb size={24} className="transition-colors duration-300" />,
-    ctaText: 'Start Learning',
+    ctaText: 'Start Learning ',
     path: '/stages/learn'
   }, {
     id: 'follow',
     level: 'L1',
     order: 2,
-    title: 'Follow',
-    description: 'Learn by doing with guidance and practice DQ’s agile ways.',
-    benefits: ['Task checklists & daily templates', 'Buddy & mentorship system', 'Workspace orientation'],
+    title: 'Follow (Self Aware)',
+    description: 'Practice with guidance.',
+    benefits: ['Daily checklists', 'Buddy system', 'Workspace orientation'],
     icon: <Rocket size={24} className="transition-colors duration-300" />,
-    ctaText: 'Follow the Path',
+    ctaText: 'Follow the Path ',
     path: '/stages/follow'
   }, {
     id: 'assist',
     level: 'L2',
     order: 3,
-    title: 'Assist',
-    description: 'Contribute independently and collaborate across your team.',
-    benefits: ['Agile boards & teamwork tools', 'DQ Services & Requests access', 'Team deliverables participation'],
+    title: 'Assist (Self Lead)',
+    description: 'Contribute and collaborate.',
+    benefits: ['Agile boards', 'Services & Requests', 'Team deliverables'],
     icon: <TrendingUp size={24} className="transition-colors duration-300" />,
-    ctaText: 'Assist Your Team',
+    ctaText: 'Assist Your Team ',
     path: '/stages/assist'
   }, {
     id: 'apply',
     level: 'L3',
     order: 4,
-    title: 'Apply',
-    description: 'Own outcomes and strengthen delivery discipline.',
-    benefits: ['Productivity dashboards', 'Specialized LMS modules', 'Cross-unit project opportunities'],
+    title: 'Apply (Drive Squad)',
+    description: 'Own outcomes.',
+    benefits: ['Productivity dashboards', 'Specialized LMS', 'Cross-unit projects'],
     icon: <BarChart3 size={24} className="transition-colors duration-300" />,
-    ctaText: 'Apply Your Skills',
+    ctaText: 'Apply Your Skills ',
     path: '/stages/apply'
   }, {
     id: 'enable',
     level: 'L4',
     order: 5,
-    title: 'Enable',
-    description: 'Lead small initiatives and empower others through collaboration.',
-    benefits: ['Leadership & facilitation guides', 'Workflow automation tools', 'Collaboration workspaces'],
-    icon: <Award size={24} className="transition-colors duration-300" />,
-    ctaText: 'Enable Others',
+    title: 'Enable (Drive Team)',
+    description: 'Lead initiatives.',
+    benefits: ['Leadership guides', 'Workflow automation', 'Collab workspaces'],
+    icon: <BadgeCheck size={24} className="transition-colors duration-300" />,
+    ctaText: 'Enable Others ',
     path: '/stages/enable'
+  }, {
+    id: 'ensure',
+    level: 'L5',
+    order: 6,
+    title: 'Ensure (Steer Org)',
+    description: 'Steer organization outcomes.',
+    benefits: ['Governance playbooks', 'Release discipline', 'Risk & compliance flows'],
+    icon: <ShieldCheck size={24} className="transition-colors duration-300" />,
+    ctaText: 'Ensure at Org Level ',
+    path: '/stages/ensure'
   }, {
     id: 'influence',
     level: 'L6',
-    order: 6,
-    title: 'Influence',
-    description: 'Steer cross-unit outcomes and scale good practices.',
-    benefits: ['Playbooks for cross-unit delivery', 'Community of practice leadership', 'Change & adoption toolkits'],
+    order: 7,
+    title: 'Influence (Steer Cross)',
+    description: 'Scale good practices.',
+    benefits: ['Cross-unit playbooks', 'Communities of practice', 'Change toolkits'],
     icon: <Globe size={24} className="transition-colors duration-300" />,
-    ctaText: 'Influence at Scale',
+    ctaText: 'Influence at Scale ',
     path: '/stages/influence'
   }, {
     id: 'inspire',
     level: 'L7',
-    order: 7,
-    title: 'Inspire',
-    description: 'Shape the future of work and inspire the wider ecosystem.',
-    benefits: ['Strategy & vision hubs', 'Innovation & transformation forums', 'External thought leadership'],
-    icon: <Code size={24} className="transition-colors duration-300" />,
-    ctaText: 'Inspire the Market',
+    order: 8,
+    title: 'Inspire (Inspire Market)',
+    description: 'Shape the ecosystem.',
+    benefits: ['Strategy hubs', 'Innovation forums', 'Thought leadership'],
+    icon: <Sparkles size={24} className="transition-colors duration-300" />,
+    ctaText: 'Inspire the Market ',
     path: '/stages/inspire'
   }];
+  const [page, setPage] = useState(0);
+  const pages = useMemo(() => [stages.slice(0, 6), stages.slice(6)], [stages]);
+  const showPrevPage = () => {
+    if (page === 1) {
+      setPage(0);
+      setActiveIndex(prev => (prev > 5 ? 0 : prev));
+    }
+  };
+  const showNextPage = () => {
+    if (page === 0 && pages[1].length) {
+      setPage(1);
+      setActiveIndex(6);
+    }
+  };
   return <div className="bg-gray-50 py-16">
       <div className="container mx-auto px-4">
         <FadeInUpOnScroll className="text-center mb-8">
@@ -179,7 +186,7 @@ const EnterpriseStages: React.FC = () => {
           </h2>
           <div>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto clamp-2">
-              Every step of your journey matters — learn, co-work, and grow through every stage of your DQ career.
+              Every step of your journey matters — learn, collaborate, and grow to shape your success at DQ.
             </p>
           </div>
         </FadeInUpOnScroll>
@@ -197,10 +204,10 @@ const EnterpriseStages: React.FC = () => {
         </div>
         {/* Scroll Controls - Desktop */}
         <div className="hidden md:flex justify-end mb-4 space-x-2">
-          <button onClick={scrollLeft} className="p-2 rounded-full bg-white shadow hover:bg-gray-100 transition-colors duration-300" aria-label="Scroll left">
+          <button onClick={showPrevPage} className={`p-2 rounded-full bg-white shadow hover:bg-gray-100 transition-colors duration-300 ${page === 0 ? 'opacity-40 pointer-events-none' : ''}`} aria-label="Scroll left" disabled={page === 0}>
             <ChevronLeft size={20} />
           </button>
-          <button onClick={scrollRight} className="p-2 rounded-full bg-white shadow hover:bg-gray-100 transition-colors duration-300" aria-label="Scroll right">
+          <button onClick={showNextPage} className={`p-2 rounded-full bg-white shadow hover:bg-gray-100 transition-colors duration-300 ${page === 1 || pages[1].length === 0 ? 'opacity-40 pointer-events-none' : ''}`} aria-label="Scroll right" disabled={page === 1 || pages[1].length === 0}>
             <ChevronRight size={20} />
           </button>
         </div>
@@ -209,9 +216,14 @@ const EnterpriseStages: React.FC = () => {
         scrollbarWidth: 'none',
         msOverflowStyle: 'none'
       }}>
-          {stages.map((stage, index) => <HorizontalScrollReveal key={stage.id} direction={index % 2 === 0 ? 'left' : 'right'} distance={50} threshold={0.2}>
-              <StageCard title={stage.title} description={stage.description} benefits={stage.benefits} icon={stage.icon} ctaText={stage.ctaText} onClick={() => navigate(stage.path)} index={index} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
-            </HorizontalScrollReveal>)}
+          {pages[page].map(stage => {
+            const stageIndex = stage.order - 1;
+            return (
+              <HorizontalScrollReveal key={stage.id} direction={stageIndex % 2 === 0 ? 'left' : 'right'} distance={50} threshold={0.2}>
+                <StageCard title={stage.title} description={stage.description} benefits={stage.benefits} icon={stage.icon} ctaText={stage.ctaText} onClick={() => navigate(stage.path)} index={stageIndex} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
+              </HorizontalScrollReveal>
+            );
+          })}
         </div>
         {/* Mobile Scroll Indicator */}
         <div className="flex md:hidden justify-center mt-4">

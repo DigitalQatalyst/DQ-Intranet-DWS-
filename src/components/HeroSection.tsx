@@ -108,7 +108,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </FadeInUpOnScroll>
         {/* Call to Action Buttons with animations */}
         <StaggeredFadeIn staggerDelay={0.2} className="flex flex-col sm:flex-row gap-4 mt-2">
-          <a href="/register" className="px-8 py-3 bg-[image:var(--dq-cta-gradient)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group">
+          <a href="/register" className="px-8 py-3 bg-[linear-gradient(135deg,_#FB5535_0%,_#1A2E6E_50%,_#030F35_100%)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group">
             <span className="relative z-10">Start Your Digital Workspace Journey</span>
             <ArrowRight size={18} className="ml-2 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
             {/* Ripple effect on hover */}
