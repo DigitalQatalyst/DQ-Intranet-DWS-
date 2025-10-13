@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import KfBot from "./bot/KfBot";
+import ThankYou from "./pages/ThankYou";
 
 export function AppRouter() {
   const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
@@ -50,8 +51,7 @@ export function AppRouter() {
         <AuthProvider>
           <KfBot />
           <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/courses" element={<App />} />
+            <Route path="/*" element={<App />} />
             <Route
               path="/courses/:itemId"
               element={
@@ -75,6 +75,7 @@ export function AppRouter() {
             <Route path="/asset-library" element={<AssetLibraryPage />} />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
             <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
+            <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />

@@ -6,7 +6,7 @@ import ProofAndTrust from './ProofAndTrust';
 import EnterpriseStages from './EnterpriseStages';
 import Home from './Home';
 import KnowledgeHub from './KnowledgeHub';
-import CallToAction from './CallToAction';
+import LeadApplySection from './LeadApplySection';
 
 const HomePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -48,7 +48,7 @@ const HomePage: React.FC = () => {
         <EnterpriseStages />
         <Home />
         <KnowledgeHub graphqlEndpoint={null} />
-        <CallToAction />
+        <LeadApplySection />
       </main>
       <Footer isLoggedIn={false} />
     </div>

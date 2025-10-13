@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Send, ChevronDown, ArrowRight, Building } from 'lucide-react';
+import { Send, ChevronDown, ArrowRight, Users } from 'lucide-react';
 import { AnimatedText, FadeInUpOnScroll, StaggeredFadeIn } from './AnimationUtils';
+import { scrollToReadyMove } from '../utils/scroll';
 interface HeroSectionProps {
   'data-id'?: string;
 }
@@ -116,9 +117,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               <span className="absolute inset-0 bg-white/20 transform scale-0 opacity-0 group-hover:scale-[2.5] group-hover:opacity-100 rounded-full transition-all duration-700 origin-center"></span>
             </span>
           </a>
-          <a href="/partners" className="px-8 py-3 bg-white text-dq-navy hover:bg-white/90 font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-            Become a Qatalyst
-            <Building size={18} />
+          <a
+            href="#ready-move"
+            className="group px-8 py-3 rounded-lg border border-[#1A2E6E] bg-white text-[#1A2E6E] font-semibold shadow-lg inline-flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-[#1A2E6E] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#FB5535]"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToReadyMove();
+            }}
+          >
+            Become a Lead
+            <Users size={18} className="text-[#1A2E6E] transition-colors duration-300 group-hover:text-white" />
           </a>
         </StaggeredFadeIn>
       </div>
