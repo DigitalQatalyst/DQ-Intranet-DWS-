@@ -1,5 +1,5 @@
 import React from 'react'
-import { Calendar, Clock, User, Building2 } from 'lucide-react'
+import { Calendar, Clock, Building2 } from 'lucide-react'
 import { toTimeBucket } from '../../utils/guides'
 import { getGuideImageUrl } from '../../utils/guideImageMap'
 
@@ -37,7 +37,6 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
         {guide.guideType && <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">{guide.guideType}</span>}
       </div>
       <div className="flex items-center text-xs text-gray-500 gap-3 mb-3">
-        {guide.skillLevel && <span className="flex items-center"><User size={14} className="mr-1" />{guide.skillLevel}</span>}
         {timeBucket && <span className="flex items-center"><Clock size={14} className="mr-1" />{timeBucket}</span>}
         {lastUpdated && <span className="flex items-center"><Calendar size={14} className="mr-1" />{lastUpdated}</span>}
       </div>
