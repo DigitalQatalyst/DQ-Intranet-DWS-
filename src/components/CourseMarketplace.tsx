@@ -95,7 +95,6 @@ export const CourseMarketplace: React.FC = () => {
     (filterType: string, value: string) => {
       setFilters((prev) => ({
         ...prev,
-        //@ts-ignore
         [filterType]: value === prev[filterType] ? "" : value,
       }));
     },

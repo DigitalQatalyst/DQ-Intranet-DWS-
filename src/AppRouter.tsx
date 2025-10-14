@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CourseType } from "./utils/mockData";
 import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
-import { App } from './App';
+import { App } from "./App";
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
 import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
@@ -38,7 +38,6 @@ export function AppRouter() {
     }
   };
 
-
   const client = new ApolloClient({
     link: new HttpLink({
       uri: "https://9609a7336af8.ngrok-free.app/services-api",
@@ -70,13 +69,17 @@ export function AppRouter() {
               path="/dashboard/*"
               element={
                 // <ProtectedRoute>
-                  <DashboardRouter />
+                <DashboardRouter />
                 // </ProtectedRoute>
               }
             />
             <Route path="/asset-library" element={<AssetLibraryPage />} />
             <Route path="/blueprints" element={<BlueprintsPage />} />
             <Route path="/blueprints/:projectId" element={<BlueprintsPage />} />
+            <Route
+              path="/blueprints/:projectId/:folderId"
+              element={<BlueprintsPage />}
+            />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
             <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
             <Route path="/events" element={<DQEventsCalendar />} />
