@@ -29,38 +29,87 @@ export default async function handler(req: AnyRequest, res: AnyResponse) {
       const pageSize = Math.min(50, Math.max(1, parseInt(urlObj.searchParams.get('pageSize') || '12', 10)));
       const sort = (urlObj.searchParams.get('sort') || 'relevance') as string;
       const parseCsv = (k: string) => (urlObj.searchParams.get(k) || '').split(',').map(v => v.trim()).filter(Boolean);
-      const filters = { type: parseCsv('type'), skill: parseCsv('skill') };
+      // New simplified filter dimensions
+      const filters = {
+        domain: parseCsv('domain'),
+        guide_type: parseCsv('guide_type'),
+        function_area: parseCsv('function_area'),
+        status: parseCsv('status'),
+      } as Record<string, string[]>;
 
-      try {
-        const { data, error } = await supabaseAdmin.rpc('rpc_guides_search', { q, filters, sort, page, page_size: pageSize });
-        if (error) throw error;
-        res.status?.(200); res.json?.(data || { items: [], total: 0, facets: {} }); return;
-      } catch (e) {
-        // Fallback: simple list of Published guides (no facets)
-        let query = supabaseAdmin.from('guides').select('*', { count: 'exact' }).eq('status', 'Published');
-        if (q) query = query.or(`title.ilike.%${q}%,summary.ilike.%${q}%`);
-        const from = (page - 1) * pageSize; const to = from + pageSize - 1;
-        const { data: rows, error } = await query.range(from, to); if (error) throw error;
-        let items = (rows || []).map((r: any) => ({
-          id: r.id, slug: r.slug, title: r.title, summary: r.summary,
-          heroImageUrl: r.hero_image_url ?? r.heroImageUrl,
-          skillLevel: r.skill_level ?? r.skillLevel,
-          estimatedTimeMin: r.estimated_time_min ?? r.estimatedTimeMin,
-          lastUpdatedAt: r.last_updated_at ?? r.lastUpdatedAt,
-          authorName: r.author_name ?? r.authorName,
-          authorOrg: r.author_org ?? r.authorOrg,
-          isEditorsPick: r.is_editors_pick ?? r.isEditorsPick,
-          downloadCount: r.download_count ?? r.downloadCount,
-          guideType: r.guide_type ?? r.guideType,
-        }));
-        if (filters.type?.length) items = items.filter((m: any) => filters.type.includes(m.guideType));
-        if (filters.skill?.length) items = items.filter((m: any) => filters.skill.includes(m.skillLevel));
-        if (sort === 'updated') items.sort((a:any,b:any)=> new Date(b.lastUpdatedAt||0).getTime()-new Date(a.lastUpdatedAt||0).getTime());
-        else if (sort === 'downloads') items.sort((a:any,b:any)=> (b.downloadCount||0)-(a.downloadCount||0));
-        else if (sort === 'editorsPick') items.sort((a:any,b:any)=> (Number(b.isEditorsPick)||0)-(Number(a.isEditorsPick)||0) || new Date(b.lastUpdatedAt||0).getTime()-new Date(a.lastUpdatedAt||0).getTime());
-        else items.sort((a:any,b:any)=> (Number(b.isEditorsPick)||0)-(Number(a.isEditorsPick)||0) || (b.downloadCount||0)-(a.downloadCount||0) || new Date(b.lastUpdatedAt||0).getTime()-new Date(a.lastUpdatedAt||0).getTime());
-        res.status?.(200); res.json?.({ items, total: items.length, facets: {} }); return;
-      }
+      // Note: Even though service role bypasses RLS, we intentionally only expose Approved in this endpoint
+      const enforcedStatus = (filters.status && filters.status.length > 0)
+        ? filters.status.filter(s => s === 'Approved')
+        : ['Approved'];
+
+      // Build base query
+      let query = supabaseAdmin.from('guides').select('*', { count: 'exact' });
+      // Search
+      if (q) query = query.or(`title.ilike.%${q}%,summary.ilike.%${q}%`);
+      // Filters (AND between groups, OR within group)
+      if (enforcedStatus.length) query = query.in('status', enforcedStatus);
+      if (filters.domain && filters.domain.length) query = query.in('domain', filters.domain);
+      if (filters.guide_type && filters.guide_type.length) query = query.in('guide_type', filters.guide_type);
+      if (filters.function_area && filters.function_area.length) query = query.in('function_area', filters.function_area);
+
+      // Sorting
+      if (sort === 'updated') query = query.order('last_updated_at', { ascending: false, nullsFirst: false });
+      else if (sort === 'downloads') query = query.order('download_count', { ascending: false, nullsFirst: false });
+      else if (sort === 'editorsPick') query = query.order('is_editors_pick', { ascending: false, nullsFirst: false }).order('last_updated_at', { ascending: false, nullsFirst: false });
+      else query = query.order('is_editors_pick', { ascending: false, nullsFirst: false }).order('download_count', { ascending: false, nullsFirst: false }).order('last_updated_at', { ascending: false, nullsFirst: false });
+
+      const from = (page - 1) * pageSize; const to = from + pageSize - 1;
+      const { data: rows, count, error } = await query.range(from, to);
+      if (error) throw error;
+
+      const items = (rows || []).map((r: any) => ({
+        id: r.id,
+        slug: r.slug,
+        title: r.title,
+        summary: r.summary,
+        heroImageUrl: r.hero_image_url ?? r.heroImageUrl,
+        skillLevel: r.skill_level ?? r.skillLevel,
+        estimatedTimeMin: r.estimated_time_min ?? r.estimatedTimeMin,
+        lastUpdatedAt: r.last_updated_at ?? r.lastUpdatedAt,
+        authorName: r.author_name ?? r.authorName,
+        authorOrg: r.author_org ?? r.authorOrg,
+        isEditorsPick: r.is_editors_pick ?? r.isEditorsPick,
+        downloadCount: r.download_count ?? r.downloadCount,
+        guideType: r.guide_type ?? r.guideType,
+        domain: r.domain ?? null,
+        functionArea: r.function_area ?? null,
+        status: r.status ?? null,
+        complexityLevel: r.complexity_level ?? null,
+      }));
+
+      // Compute facets from matching set (without pagination)
+      let facetBase = supabaseAdmin.from('guides').select('domain,guide_type,function_area,status');
+      if (q) facetBase = facetBase.or(`title.ilike.%${q}%,summary.ilike.%${q}%`);
+      if (enforcedStatus.length) facetBase = facetBase.in('status', enforcedStatus);
+      if (filters.domain && filters.domain.length) facetBase = facetBase.in('domain', filters.domain);
+      if (filters.guide_type && filters.guide_type.length) facetBase = facetBase.in('guide_type', filters.guide_type);
+      if (filters.function_area && filters.function_area.length) facetBase = facetBase.in('function_area', filters.function_area);
+      const { data: facetRows, error: facetErr } = await facetBase;
+      if (facetErr) throw facetErr;
+
+      const countBy = (arr: any[], key: 'domain'|'guide_type'|'function_area'|'status') => {
+        const m = new Map<string, number>();
+        for (const r of arr || []) {
+          const v = (r as any)[key];
+          if (!v) continue;
+          m.set(v, (m.get(v) || 0) + 1);
+        }
+        return Array.from(m.entries()).map(([id, cnt]) => ({ id, name: id, count: cnt })).sort((a,b)=> a.name.localeCompare(b.name));
+      };
+
+      const facets = {
+        domain: countBy(facetRows || [], 'domain'),
+        guide_type: countBy(facetRows || [], 'guide_type'),
+        function_area: countBy(facetRows || [], 'function_area'),
+        status: countBy(facetRows || [], 'status'),
+      } as any;
+
+      res.status?.(200); res.json?.({ items, total: count || items.length, facets }); return;
     }
 
     res.status?.(405); res.json?.({ error: 'Method not allowed' });
@@ -69,4 +118,3 @@ export default async function handler(req: AnyRequest, res: AnyResponse) {
     res.status?.(500); res.json?.({ error: err?.message || 'Server error' });
   }
 }
-

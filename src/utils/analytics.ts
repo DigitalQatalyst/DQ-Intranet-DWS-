@@ -1,4 +1,16 @@
-type EventName = 'Guides.ViewList' | 'Guides.Search' | 'Guides.FilterChanged' | 'Guides.SortChanged' | 'Guides.CardClick' | 'Guides.CTA'
+type EventName =
+  | 'Guides.ViewList'
+  | 'Guides.Search'
+  | 'Guides.FilterChanged'
+  | 'Guides.SortChanged'
+  | 'Guides.CardClick'
+  | 'Guides.CTA'
+  | 'Guides.ViewDetail'
+  | 'Guides.OpenGuide'
+  | 'Guides.Download'
+  | 'Guides.RelatedClick'
+  | 'Guides.Share'
+  | 'Guides.Print'
 
 export const track = (name: EventName, payload: Record<string, any>) => {
   try {
@@ -6,4 +18,3 @@ export const track = (name: EventName, payload: Record<string, any>) => {
     console.info('[analytics]', name, payload)
   } catch {}
 }
-

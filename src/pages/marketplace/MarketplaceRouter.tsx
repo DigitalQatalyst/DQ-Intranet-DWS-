@@ -119,7 +119,7 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/guides/:itemId" element={<GuideDetailPage />} />
       {/* Backward compatibility: Knowledge Hub routes (aliased to Guides) */}
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
-      <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />
+      <Route path="/knowledge-hub/:itemId" element={<GuideDetailPage />} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
     </Routes>;
 };
