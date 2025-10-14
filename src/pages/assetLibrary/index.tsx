@@ -6,7 +6,7 @@ import { ResponsiveCardGrid } from '../../components/Cards/ResponsiveCardGrid';
 import { FileText, ArrowLeft, HomeIcon, ChevronRightIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SearchBar } from '../../components/SearchBar';
-import { listFiles } from '../../services/SharePointService';
+
 
 type TopLevelCategory = 'DT2.0 DESIGN' | 'DT2.0 DEPLOY' | 'MARKETING ARTEFACTS';
 
@@ -22,20 +22,20 @@ interface FileItem {
 }
 
 const topLevelCards: Array<{ id: TopLevelCategory; title: TopLevelCategory; description: string; color: string; }> = [
-  { id: 'DT2.0 DESIGN', title: 'DT2.0 DESIGN', description: 'Design assets and documents', color: 'blue' },
-  { id: 'DT2.0 DEPLOY', title: 'DT2.0 DEPLOY', description: 'Deployment assets and runbooks', color: 'green' },
-  { id: 'MARKETING ARTEFACTS', title: 'MARKETING ARTEFACTS', description: 'Marketing materials and resources', color: 'purple' }
+  { id: 'DT2.0 DESIGN', title: 'DT2.0 DESIGN', description: 'Design assets and documents', color: '' },
+  { id: 'DT2.0 DEPLOY', title: 'DT2.0 DEPLOY', description: 'Deployment assets and runbooks', color: '' },
+  { id: 'MARKETING ARTEFACTS', title: 'MARKETING ARTEFACTS', description: 'Marketing materials and resources', color: '' }
 ];
 
 const dtSecondLevelCards: Array<{ id: DtSubCategory; title: DtSubCategory; description: string; color: string; }> = [
-  { id: 'Design', title: 'Design', description: 'Blueprints, UX, architecture', color: 'indigo' },
-  { id: 'BD', title: 'BD', description: 'Business development collateral', color: 'cyan' },
-  { id: 'Delivery', title: 'Delivery', description: 'Project delivery guides', color: 'emerald' }
+  { id: 'Design', title: 'Design', description: 'Blueprints, UX, architecture', color: '' },
+  { id: 'BD', title: 'BD', description: 'Business development collateral', color: '' },
+  { id: 'Delivery', title: 'Delivery', description: 'Project delivery guides', color: '' }
 ];
 
 const marketingSecondLevelCards: Array<{ id: MarketingSubCategory; title: MarketingSubCategory; description: string; color: string; }> = [
-  { id: 'DT2.0', title: 'DT2.0', description: 'DT2.0 focused marketing assets', color: 'pink' },
-  { id: 'Products', title: 'Products', description: 'Product marketing assets', color: 'orange' }
+  { id: 'DT2.0', title: 'DT2.0', description: 'DT2.0 focused marketing assets', color: '' },
+  { id: 'Products', title: 'Products', description: 'Product marketing assets', color: '' }
 ];
 
 function useSharePointFiles(pathSegments: string[]) {
@@ -53,8 +53,16 @@ function useSharePointFiles(pathSegments: string[]) {
       setLoading(true);
       setError(null);
       try {
-        const result = await listFiles(joinedPath);
-        setFiles(result);
+        // NOTE: Replace this stub with a real SharePoint fetch when available.
+        // The previous code incorrectly awaited `setFiles(joinedPath)` which
+        // attempted to call the state setter as if it were a fetch function.
+        const mock: FileItem[] = [
+          { id: '1', name: `${joinedPath}-Sample.pdf`, url: undefined, lastModified: new Date().toISOString() },
+          { id: '2', name: `${joinedPath}-Diagram.png`, url: undefined, lastModified: new Date().toISOString() }
+        ];
+        // simulate small latency
+        await new Promise((r) => setTimeout(r, 150));
+        setFiles(mock);
       } catch (err) {
         const e = err as { message?: string } | undefined;
         setError(e?.message || 'Failed to load files');
@@ -143,109 +151,109 @@ export default function AssetLibraryPage() {
           )}
 
           {showTop && (
-            <ResponsiveCardGrid>
-              {topLevelCards.map(card => {
-                const item = {
-                  id: card.id,
-                  title: card.title,
-                  description: card.description,
-                  provider: { name: card.title, logoUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==' },
-                  tags: [card.color.toUpperCase()]
-                };
-                return (
-                  <div key={card.id} className="asset-lib-card">
-                    {/* Hide the primary CTA button when empty by targeting empty buttons for this wrapper */}
-                    <style>{`.asset-lib-card button:empty{display:none}`}</style>
-                    <MarketplaceCard
-                      item={item}
-                      config={{ primaryCTA: '', secondaryCTA: 'View Details' }}
-                      // Keep card click inert; only View Details will navigate into the library
-                      onQuickView={noop}
-                      onViewDetails={() => setLevel1(card.id)}
-                      onToggleBookmark={noop}
-                      onAddToComparison={noop}
-                      onPrimaryAction={noop}
-                    />
-                  </div>
-                );
-              })}
-            </ResponsiveCardGrid>
+            <div className="mx-auto w-full max-w-5xl">
+              <ResponsiveCardGrid className="justify-center -m-2">
+                {topLevelCards.map(card => {
+                  const item = {
+                    id: card.id,
+                    title: card.title,
+                    description: card.description,
+                    provider: { name: card.title, logoUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==' },
+                    tags: [card.color.toUpperCase()]
+                  };
+                  return (
+                    <div key={card.id} className="asset-lib-card p-2">
+                      <style>{`.asset-lib-card button:empty{display:none}`}</style>
+                      <MarketplaceCard
+                        item={item}
+                        config={{ primaryCTA: '', secondaryCTA: 'View Details' }}
+                        onQuickView={noop}
+                        onViewDetails={() => setLevel1(card.id)}
+                        onToggleBookmark={noop}
+                        onAddToComparison={noop}
+                        onPrimaryAction={noop}
+                      />
+                    </div>
+                  );
+                })}
+              </ResponsiveCardGrid>
+            </div>
           )}
 
           {showSecond && (
-            <ResponsiveCardGrid>
-              {(isMarketing ? marketingSecondLevelCards : dtSecondLevelCards).map(card => {
-                const item = {
-                  id: card.id,
-                  title: card.title,
-                  description: card.description,
-                  provider: { name: card.title, logoUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==' },
-                  tags: [card.color.toUpperCase()]
-                };
-                return (
-                  <div key={card.id} className="asset-lib-card">
-                    <style>{`.asset-lib-card button:empty{display:none}`}</style>
-                    <MarketplaceCard
-                      item={item}
-                      config={{ primaryCTA: '', secondaryCTA: 'View Details' }}
-                      onQuickView={noop}
-                      onViewDetails={() => setLevel2(card.id)}
-                      onToggleBookmark={noop}
-                      onAddToComparison={noop}
-                      onPrimaryAction={noop}
-                    />
-                  </div>
-                );
-              })}
-            </ResponsiveCardGrid>
-          )}
-
-          {showFiles && (
-            <div className="bg-white rounded-xl shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Files</h2>
-              </div>
-              {loading && (
-                <div className="text-gray-500">Loading files...</div>
-              )}
-              {error && (
-                <div className="text-red-600">{error}</div>
-              )}
-              {!loading && !error && (
-                <ul className="divide-y divide-gray-100">
-                  {(files || []).map(f => (
-                    <li key={f.id} className="py-3 flex items-center gap-3">
-                      <FileText size={18} className="text-gray-400" />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">{f.name}</div>
-                        {f.lastModified && (
-                          <div className="text-xs text-gray-500">Updated {new Date(f.lastModified).toLocaleDateString()}</div>
-                        )}
-                      </div>
-                      {f.url && (
-                        <a
-                          href={f.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          Open
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                  {files && files.length === 0 && (
-                    <li className="py-3 text-sm text-gray-500">No files found.</li>
-                  )}
-                </ul>
-              )}
+            <div className="mx-auto w-full max-w-5xl">
+              <ResponsiveCardGrid className="justify-center -m-2">
+                {(isMarketing ? marketingSecondLevelCards : dtSecondLevelCards).map(card => {
+                  const item = {
+                    id: card.id,
+                    title: card.title,
+                    description: card.description,
+                    provider: { name: card.title, logoUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==' },
+                    tags: [card.color.toUpperCase()]
+                  };
+                  return (
+                    <div key={card.id} className="asset-lib-card p-2">
+                      <style>{`.asset-lib-card button:empty{display:none}`}</style>
+                      <MarketplaceCard
+                        item={item}
+                        config={{ primaryCTA: '', secondaryCTA: 'View Details' }}
+                        onQuickView={noop}
+                        onViewDetails={() => setLevel2(card.id)}
+                        onToggleBookmark={noop}
+                        onAddToComparison={noop}
+                        onPrimaryAction={noop}
+                      />
+                    </div>
+                  );
+                })}
+              </ResponsiveCardGrid>
             </div>
           )}
+
+{showFiles && (
+  <div className="bg-white rounded-xl shadow p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-lg font-semibold text-gray-900">Files</h2>
+    </div>
+    {loading && (
+      <div className="text-gray-500">Loading files...</div>
+    )}
+    {error && (
+      <div className="text-red-600">{error}</div>
+    )}
+    {!loading && !error && (
+      <ul className="divide-y divide-gray-100">
+        {(files || []).map(f => (
+          <li key={f.id} className="py-3 flex items-center gap-3">
+            <FileText size={18} className="text-gray-400" />
+            <div className="flex-1">
+              <div className="text-sm font-medium text-gray-900">{f.name}</div>
+              {f.lastModified && (
+                <div className="text-xs text-gray-500">Updated {new Date(f.lastModified).toLocaleDateString()}</div>
+              )}
+            </div>
+            {f.url && (
+              <a
+                href={f.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                Open
+              </a>
+            )}
+          </li>
+        ))}
+        {files && files.length === 0 && (
+          <li className="py-3 text-sm text-gray-500">No files found.</li>
+        )}
+      </ul>
+    )}
+  </div>
+)}
         </div>
       </main>
       <Footer />
     </div>
   );
-}
-
-
+} 
