@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { MenuIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon } from 'lucide-react';
+import { scrollToSupport } from '../../../utils/scroll';
 interface MobileDrawerProps {
   isCompact?: boolean;
   onSignIn: () => void;
@@ -85,7 +86,11 @@ export function MobileDrawer({
   };
   // Sign out is handled via profile dropdown in desktop; mobile can add later if needed
   const handleCTAClick = (action: string) => {
-    console.log(`${action} clicked`);
+    if (action === 'Request Support') {
+      scrollToSupport();
+    } else {
+      console.log(`${action} clicked`);
+    }
     setIsDrawerOpen(false);
   };
   const handleMarketplaceClick = (href: string) => {

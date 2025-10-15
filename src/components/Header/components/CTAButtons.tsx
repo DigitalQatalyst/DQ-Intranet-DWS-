@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MenuIcon, XIcon } from 'lucide-react';
+import { scrollToSupport } from '../../../utils/scroll';
 interface CTAButtonsProps {
   isCompact?: boolean;
   onSignIn: () => void;
@@ -16,7 +17,11 @@ export function CTAButtons({
     setIsMobileMenuOpen(false);
   };
   const handleCTAClick = (action: string) => {
-    console.log(`${action} clicked`);
+    if (action === 'Request Support') {
+      scrollToSupport();
+    } else {
+      console.log(`${action} clicked`);
+    }
     setIsMobileMenuOpen(false);
   };
   return <>

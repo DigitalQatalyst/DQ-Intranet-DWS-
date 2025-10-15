@@ -37,3 +37,20 @@
   -webkit-line-clamp: 2 !important;
   overflow: hidden !important;
 }
+
+input,
+textarea {
+  color: #0B1220;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9CA3AF;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: #0B1220 !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+}

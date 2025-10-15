@@ -7,6 +7,7 @@ import { NotificationCenter } from './notifications/NotificationCenter';
 import { mockNotifications } from './utils/mockNotifications';
 import { useAuth } from './context/AuthContext';
 import { Link } from 'react-router-dom';
+import { scrollToSupport } from '../../utils/scroll';
 
 interface HeaderProps {
   toggleSidebar?: () => void;
@@ -48,6 +49,9 @@ export function Header({
 
   const handleSignIn = () => login();
   const handleSignUp = () => console.log('Sign up clicked');
+  const handleRequestSupport = () => {
+    scrollToSupport();
+  };
 
   useEffect(() => {
     if (!user) {
@@ -126,6 +130,7 @@ export function Header({
                     className={`px-4 py-2 bg-white text-[#030F35] font-medium rounded-md hover:bg-white/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
                       isSticky ? 'text-sm px-3 py-1.5' : ''
                     }`}
+                    onClick={handleRequestSupport}
                   >
                     Request Support
                   </button>
@@ -145,6 +150,7 @@ export function Header({
                     className={`px-3 py-2 bg-white text-[#030F35] rounded-md hover:bg-white/90 transition-all duration-200 font-medium ${
                       isSticky ? 'text-sm px-2 py-1.5' : 'text-sm'
                     }`}
+                    onClick={handleRequestSupport}
                   >
                     Request Support
                   </button>

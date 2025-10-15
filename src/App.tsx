@@ -4,7 +4,7 @@ import SignInPage from "./pages/SignInPage";
 import CreateAccountPage from "./pages/CreateAccountPage";
 import LeadFormPopup from "./components/LeadFormPopup";
 import OnboardingFlowsPage from "./pages/OnboardingFlowsPage";
-import WorkspaceComingSoon from "./pages/WorkspaceComingSoon";
+import WorkspaceLanding from "./pages/WorkspaceLanding";
 
 export function App() {
   return (
@@ -57,7 +57,7 @@ export function App() {
             </div>
           }
         />
-        <Route path="/workspace" element={<WorkspaceComingSoon />} />
+        <Route path="/workspace" element={<WorkspaceLanding />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </>
