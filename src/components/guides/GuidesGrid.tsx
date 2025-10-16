@@ -25,4 +25,3 @@ export const GuidesGrid: React.FC<Props> = ({ items, onClickGuide }) => {
 }
 
 export default GuidesGrid
-

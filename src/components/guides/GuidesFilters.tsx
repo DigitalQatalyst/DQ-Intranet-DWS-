@@ -95,9 +95,7 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange }) => {
       <Section title="Function Area" category="function_area" collapsed={collapsedSet.has('function_area')} onToggle={toggleCollapsed}>
         <CheckboxList name="function_area" options={facets.function_area || []} query={query} onChange={onChange} />
       </Section>
-      <Section title="Status" category="status" collapsed={collapsedSet.has('status')} onToggle={toggleCollapsed}>
-        <CheckboxList name="status" options={facets.status || []} query={query} onChange={onChange} />
-      </Section>
+      {/* Status filter intentionally hidden in Guidelines catalog */}
     </div>
   )
 }

@@ -9,7 +9,7 @@ export default defineConfig({
     strictPort: true,
     host: 'localhost',
     proxy: {
-      '/api': 'http://localhost:3001',
+      '/api': 'http://localhost:3002',
     },
   },
   preview: {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FilterSidebar, FilterConfig } from './FilterSidebar';
 import { MarketplaceGrid } from './MarketplaceGrid';
@@ -42,6 +42,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   // Items & filters state
   const [items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
@@ -49,6 +51,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   // Guides facets + URL state
   const [facets, setFacets] = useState<GuidesFacets>({});
   const [queryParams, setQueryParams] = useState(() => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''));
+  const searchStartRef = useRef<number | null>(null);
+  const inFlightController = useRef<AbortController | null>(null);
 
   // UI state
   const [showFilters, setShowFilters] = useState(false);
@@ -189,7 +193,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           }
           setItems(data.items || []);
           setFilteredItems(data.items || []);
+          setCursor((data as any).cursor || null);
+          setHasMore(!!(data as any).has_more);
           setFacets(data.facets || {});
+          const start = searchStartRef.current; if (start) { const latency = Date.now() - start; track('Guides.Search', { q: queryParams.get('q') || '', latency_ms: latency }); searchStartRef.current = null; }
           track('Guides.ViewList', { q: queryParams.get('q') || '', sort: queryParams.get('sort') || 'relevance', page: queryParams.get('page') || '1' });
         } catch (e) {
           console.error('Error fetching guides:', e);
@@ -387,6 +394,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             ) : error && !isGuidesLike(marketplaceType) ? (
               <ErrorDisplay message={error} onRetry={retryFetch} />
             ) : isGuidesLike(marketplaceType) ? (
+              <>
               <GuidesGrid
                 items={filteredItems}
                 onClickGuide={(g) => {
@@ -394,6 +402,34 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`, { state: { fromQuery: qs } });
                 }}
               />
+              {hasMore && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={async () => {
+                      if (!cursor) return;
+                      try {
+                        if (inFlightController.current) { inFlightController.current.abort(); }
+                        const controller = new AbortController(); inFlightController.current = controller;
+                        const qp = new URLSearchParams(queryParams.toString());
+                        if (!qp.get('pageSize')) qp.set('pageSize', '24');
+                        qp.set('cursor', cursor);
+                        const res = await fetch(`/api/guides?${qp.toString()}`, { signal: controller.signal });
+                        if (res.ok) {
+                          const data = await res.json();
+                          setItems(prev => [...prev, ...data.items]);
+                          setFilteredItems(prev => [...prev, ...data.items]);
+                          setCursor(data.cursor || null);
+                          setHasMore(!!data.has_more);
+                        }
+                      } catch {}
+                    }}
+                    className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200"
+                  >
+                    Load more
+                  </button>
+                </div>
+              )}
+              </>
             ) : (
               <MarketplaceGrid
                 items={filteredItems}
@@ -423,3 +459,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 };
 
 export default MarketplacePage;
+
+
+
+
+
+
+
