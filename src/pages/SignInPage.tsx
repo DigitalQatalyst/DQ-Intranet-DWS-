@@ -1,4 +1,10 @@
-import { FormEvent, SVGProps, useState } from "react";
+import { FormEvent, SVGProps, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../components/Header";
+
+type SignInPageProps = {
+  redirectTo?: string;
+};
 
 /**
  * SignInPage (Microsoft SSO)
@@ -10,17 +16,44 @@ import { FormEvent, SVGProps, useState } from "react";
  *   GET  /api/auth/microsoft        (redirects to Microsoft OAuth)
  */
 
-export default function SignInPage() {
+export default function SignInPage({ redirectTo = "/onboarding/start" }: SignInPageProps = {}) {
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const redirectTarget = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const candidate = params.get("redirect") ?? redirectTo;
+    if (!candidate) return redirectTo;
+    if (/^https?:\/\//i.test(candidate)) return redirectTo;
+    return candidate.startsWith("/") ? candidate : redirectTo;
+  }, [location.search, redirectTo]);
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate(redirectTarget, { replace: true });
+    }
+  }, [isLoading, user, redirectTarget, navigate]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#73c5ff] via-[#7ed0ff] to-[#b7e3ff] p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background:
+          "linear-gradient(115deg, #FF6A3D 0%, #B24B5A 35%, #2E3A6D 70%, #0C1E54 100%)",
+      }}
+    >
       <div className="w-full max-w-md">
-        <SignInCard />
+        <SignInCard redirectTarget={redirectTarget} />
       </div>
     </div>
   );
 }
 
-function SignInCard() {
+type SignInCardProps = {
+  redirectTarget: string;
+};
+
+function SignInCard({ redirectTarget }: SignInCardProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -51,18 +84,19 @@ function SignInCard() {
 
   function microsoftSignIn() {
     // Your server should start the OAuth flow here and redirect to Microsoft
-    window.location.href = "/api/auth/microsoft";
+    const params = new URLSearchParams({ redirect: redirectTarget });
+    window.location.href = `/api/auth/microsoft?${params.toString()}`;
   }
 
   return (
     <div className="bg-white/95 rounded-xl shadow-xl border border-black/5">
       <div className="p-6 sm:p-8">
         <div className="text-xs tracking-widest text-[#030F35] font-bold mb-2">
-          DQ_CLIENT_PROJ
+          DQ WORKSPACE
         </div>
         <h1 className="text-2xl font-semibold text-[#030F35]">Sign in</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Sign in to access <span className="font-medium">DQ_Client_Proj</span>
+          Sign in to access <span className="font-medium">DQ Workspace</span>
         </p>
 
         <form onSubmit={handleNext} className="mt-6 space-y-4">

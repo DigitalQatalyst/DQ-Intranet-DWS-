@@ -9,11 +9,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const state = crypto.randomBytes(16).toString("hex");
   const nonce = crypto.randomBytes(16).toString("hex");
+  const redirectQuery = req.query.redirect;
+  const redirectTargetRaw = Array.isArray(redirectQuery) ? redirectQuery[0] : redirectQuery;
+  const redirectTarget =
+    typeof redirectTargetRaw === "string" && redirectTargetRaw.startsWith("/")
+      ? redirectTargetRaw
+      : undefined;
 
-  res.setHeader("Set-Cookie", [
+  const cookieHeaders = [
     `ms_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax`,
     `ms_nonce=${nonce}; Path=/; HttpOnly; Secure; SameSite=Lax`,
-  ]);
+  ];
+  if (redirectTarget) {
+    cookieHeaders.push(
+      `ms_redirect=${encodeURIComponent(redirectTarget)}; Path=/; HttpOnly; Secure; SameSite=Lax`
+    );
+  }
+
+  res.setHeader("Set-Cookie", cookieHeaders);
 
   const params = new URLSearchParams({
     client_id: clientId,

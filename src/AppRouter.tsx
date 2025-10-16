@@ -10,6 +10,7 @@ import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { DiscoverAbuDhabi } from "./pages/discoverAbuDhabi";
+import { DiscoverDQ } from "./pages/DiscoverDQ";
 import NotFound from "./pages/NotFound";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
@@ -63,6 +64,22 @@ export function AppRouter() {
                 />
               }
             />
+            <Route
+              path="/onboarding/:itemId"
+              element={
+                <MarketplaceDetailsPage
+                  marketplaceType="onboarding"
+                />
+              }
+            />
+            <Route
+              path="/onboarding/:itemId/details"
+              element={
+                <MarketplaceDetailsPage
+                  marketplaceType="onboarding"
+                />
+              }
+            />
             <Route path="/marketplace/*" element={<MarketplaceRouter />} />
             <Route
               path="/dashboard/*"
@@ -75,6 +92,7 @@ export function AppRouter() {
             <Route path="/asset-library" element={<AssetLibraryPage />} />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
             <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
+            <Route path="/discover-dq" element={<DiscoverDQ />} />
             <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/404" element={<NotFound />} />
 

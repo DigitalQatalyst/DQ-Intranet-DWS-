@@ -99,7 +99,7 @@ const partnerCategories = [{
 
 const partnerLogos = [
   { name: 'Prodev',   logo: '/logo/prodev.png' },
-  { name: 'Soldew',   logo: '/logo/soldew.png' },
+  { name: 'Soldev',   logo: '/logo/soldev.png' },
   { name: 'Finance',  logo: '/logo/finance.png' },
   { name: 'HRA',      logo: '/logo/hra.png' },
   { name: 'Inteldev', logo: '/logo/inteldev.png' },
@@ -107,7 +107,7 @@ const partnerLogos = [
 
 const strategicPartners = [
   { name: 'Prodev',   logo: '/logo/prodev.png' },
-  { name: 'Soldew',   logo: '/logo/soldew.png' },
+  { name: 'Soldev',   logo: '/logo/soldev.png' },
   { name: 'Finance',  logo: '/logo/finance.png' },
   { name: 'HRA',      logo: '/logo/hra.png' },
   { name: 'Inteldev', logo: '/logo/inteldev.png' },

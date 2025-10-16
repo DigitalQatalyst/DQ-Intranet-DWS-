@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 /**
  * CreateAccountPage
@@ -13,6 +14,14 @@ export default function CreateAccountPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const location = useLocation();
+  const redirectTarget = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const redirect = params.get("redirect");
+    if (!redirect) return "/onboarding/start";
+    if (/^https?:\/\//i.test(redirect)) return "/onboarding/start";
+    return redirect.startsWith("/") ? redirect : "/onboarding/start";
+  }, [location.search]);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -32,7 +41,7 @@ export default function CreateAccountPage() {
       });
       if (!res.ok) throw new Error("Create failed");
       // Move into the HR-style onboarding flow:
-      window.location.href = "/onboarding/start";
+      window.location.href = redirectTarget;
     } catch {
       setMessage("Could not create account. Try again.");
     } finally {
@@ -41,14 +50,20 @@ export default function CreateAccountPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#73c5ff] via-[#7ed0ff] to-[#b7e3ff] p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background:
+          "linear-gradient(115deg, #FF6A3D 0%, #B24B5A 35%, #2E3A6D 70%, #0C1E54 100%)",
+      }}
+    >
       <div className="w-full max-w-md bg-white/95 rounded-xl shadow-xl border border-black/5 p-6 sm:p-8">
         <div className="text-xs tracking-widest text-[#030F35] font-bold mb-2">
-          DQ_CLIENT_PROJ
+          DQ WORKSPACE
         </div>
-        <h1 className="text-2xl font-semibold text-[#030F35]">Create account</h1>
+        <h1 className="text-2xl font-semibold text-[#030F35]">Create your DQ Workspace account</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Use your Microsoft work email to start onboarding.
+          Use your Microsoft work email to get started.
         </p>
 
         <form onSubmit={handleCreate} className="mt-6 space-y-4">

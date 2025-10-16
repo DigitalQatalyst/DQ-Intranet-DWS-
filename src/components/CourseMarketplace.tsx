@@ -165,17 +165,17 @@ export const CourseMarketplace: React.FC = () => {
           <li aria-current="page">
             <div className="flex items-center">
               <ChevronRightIcon size={16} className="text-gray-400" />
-              <span className="ml-1 text-gray-500 md:ml-2">Onboarding</span>
+              <span className="ml-1 text-gray-500 md:ml-2">Onboarding Flows</span>
             </div>
           </li>
         </ol>
       </nav>
 
       <h1 className="text-3xl font-bold text-gray-800 mb-2">
-        DQ Onboarding Marketplace
+        DQ Onboarding Flows
       </h1>
       <p className="text-gray-600 mb-6">
-        Discover focused, practical onboarding flows to help you get productive faster at DQ.
+        Discover guided flows to get productive fast in the Digital Workspace.
       </p>
 
       <div className="mb-6">

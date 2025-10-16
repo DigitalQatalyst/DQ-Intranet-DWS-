@@ -13,6 +13,13 @@ interface Marketplace {
 
 const marketplaces: Marketplace[] = [
   {
+    id: 'discover-dq',
+    name: 'Discover DQ',
+    description: 'Tour the digital workspace zones and teams across DQ.',
+    icon: SparklesIcon,
+    href: '/discover-dq',
+  },
+  {
     id: 'non-financial',
     name: 'IT & Systems Support',
     description: 'Helpdesk, access requests, device & app support.',

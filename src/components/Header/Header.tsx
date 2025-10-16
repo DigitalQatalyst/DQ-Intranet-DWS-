@@ -6,7 +6,7 @@ import { NotificationsMenu } from './notifications/NotificationsMenu';
 import { NotificationCenter } from './notifications/NotificationCenter';
 import { mockNotifications } from './utils/mockNotifications';
 import { useAuth } from './context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { scrollToSupport } from '../../utils/scroll';
 
 interface HeaderProps {
@@ -23,7 +23,9 @@ export function Header({
   const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
-  const { user, login } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const onboardingPath = '/onboarding/start';
 
   // Count unread notifications
   const unreadCount = mockNotifications.filter(notif => !notif.read).length;
@@ -47,7 +49,13 @@ export function Header({
 
   const closeNotificationCenter = () => setShowNotificationCenter(false);
 
-  const handleSignIn = () => login();
+  const handleSignIn = () => {
+    if (user) {
+      navigate(onboardingPath);
+      return;
+    }
+    navigate(`/signin?redirect=${encodeURIComponent(onboardingPath)}`);
+  };
   const handleSignUp = () => console.log('Sign up clicked');
   const handleRequestSupport = () => {
     scrollToSupport();

@@ -260,7 +260,7 @@ export const HomePage: React.FC = () => {
           title: 'DQ Onboarding Flows',
           description: 'Navigate clear onboarding flows to connect faster and feel confident from your first day.',
           icon: <Compass />,
-          path: '/onboarding-flows',
+          path: '/onboarding',
           isActive: true
         },
         {

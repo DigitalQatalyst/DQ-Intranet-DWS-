@@ -2,12 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { Send, ChevronDown, ArrowRight, Users } from 'lucide-react';
 import { AnimatedText, FadeInUpOnScroll, StaggeredFadeIn } from './AnimationUtils';
 import { scrollToReadyMove } from '../utils/scroll';
+import { Link } from 'react-router-dom';
+import { useAuth } from './Header';
 interface HeroSectionProps {
   'data-id'?: string;
 }
 const HeroSection: React.FC<HeroSectionProps> = ({
   'data-id': dataId
 }) => {
+  const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
+  const onboardingPath = '/onboarding/start';
+  const ctaHref = isAuthenticated
+    ? onboardingPath
+    : `/signin?redirect=${encodeURIComponent(onboardingPath)}`;
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -109,14 +117,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </FadeInUpOnScroll>
         {/* Call to Action Buttons with animations */}
         <StaggeredFadeIn staggerDelay={0.2} className="flex flex-col sm:flex-row gap-4 mt-2">
-          <a href="/register" className="px-8 py-3 bg-[linear-gradient(135deg,_#FB5535_0%,_#1A2E6E_50%,_#030F35_100%)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group">
+          <Link to={ctaHref} className="px-8 py-3 bg-[linear-gradient(135deg,_#FB5535_0%,_#1A2E6E_50%,_#030F35_100%)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group">
             <span className="relative z-10">Start Your Digital Workspace Journey</span>
             <ArrowRight size={18} className="ml-2 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
             {/* Ripple effect on hover */}
             <span className="absolute inset-0 overflow-hidden rounded-lg">
               <span className="absolute inset-0 bg-white/20 transform scale-0 opacity-0 group-hover:scale-[2.5] group-hover:opacity-100 rounded-full transition-all duration-700 origin-center"></span>
             </span>
-          </a>
+          </Link>
           <a
             href="#ready-move"
             className="group px-8 py-3 rounded-lg border border-[#1A2E6E] bg-white text-[#1A2E6E] font-semibold shadow-lg inline-flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-[#1A2E6E] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#FB5535]"

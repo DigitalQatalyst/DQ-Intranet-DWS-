@@ -27,7 +27,7 @@ export const CourseGrid: React.FC<CourseGridProps> = ({
     title: 'Ready to Accelerate?',
     description: 'Explore guided onboarding journeys and essentials that help you ramp faster at DQ.',
     icon: <Calendar size={24} className="text-white" />,
-    path: '/onboarding-flows',
+    path: '/onboarding',
     gradientFrom: 'from-[#030F35]',
     gradientTo: 'to-[#FB5535]',
     ctaLabel: 'Explore Now'

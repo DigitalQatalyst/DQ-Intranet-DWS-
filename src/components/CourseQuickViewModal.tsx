@@ -71,7 +71,7 @@ export const CourseQuickViewModal: React.FC<CourseQuickViewModalProps> = ({
               <li>
                 <div className="flex items-center">
                   <ChevronRightIcon size={14} className="text-gray-400" />
-                  <a href="/onboarding-flows" className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2 text-sm">
+                  <a href="/onboarding" className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2 text-sm">
                     Onboarding
                   </a>
                 </div>

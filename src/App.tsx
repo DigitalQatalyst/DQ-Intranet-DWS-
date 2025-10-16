@@ -3,8 +3,8 @@ import HomePage from "./components/HomePage";
 import SignInPage from "./pages/SignInPage";
 import CreateAccountPage from "./pages/CreateAccountPage";
 import LeadFormPopup from "./components/LeadFormPopup";
-import OnboardingFlowsPage from "./pages/OnboardingFlowsPage";
 import WorkspaceLanding from "./pages/WorkspaceLanding";
+import OnboardingMarketplacePage from "./pages/OnboardingMarketplace";
 
 export function App() {
   return (
@@ -13,9 +13,10 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/courses" element={<HomePage />} />
-        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/signin" element={<SignInPage redirectTo="/onboarding/start" />} />
         <Route path="/signup" element={<CreateAccountPage />} />
-        <Route path="/onboarding-flows" element={<OnboardingFlowsPage />} />
+        <Route path="/onboarding" element={<OnboardingMarketplacePage />} />
+        <Route path="/onboarding-flows" element={<Navigate to="/onboarding" replace />} />
         <Route path="/onboarding/start" element={<div>HR-style form lives here</div>} />
         <Route
           path="/onboarding/welcome"
