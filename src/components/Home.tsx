@@ -396,7 +396,7 @@ export const HomePage: React.FC = () => {
           description:
             "Access logos, templates, and infographics to communicate and brand consistently.",
           icon: <Building />,
-          path: "#",
+          path: "/asset-library",
           isActive: true,
         },
         {

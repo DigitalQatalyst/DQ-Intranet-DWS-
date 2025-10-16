@@ -357,15 +357,11 @@ export default function AssetLibraryPage() {
         return false;
       }
 
-      // Projects filter (check if author contains any of the selected projects)
+      // Projects filter (check if file.project matches any selected projects)
       if (filters.projects.length > 0) {
-        const hasMatchingProject = filters.projects.some(
-          (project) =>
-            file.author?.includes(project) ||
-            file.name.includes(project) ||
-            file.description.includes(project)
-        );
-        if (!hasMatchingProject) return false;
+        if (!file.project || !filters.projects.includes(file.project)) {
+          return false;
+        }
       }
 
       return true;

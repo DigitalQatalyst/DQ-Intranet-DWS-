@@ -73,7 +73,7 @@ const marketplaces: Marketplace[] = [
     name: 'Asset Library',
     description: 'Shared design, deployment and marketing artefacts.',
     icon: FileText,
-    href: '/marketplace/asset-library',
+    href: '/asset-library',
   },
 ];
 

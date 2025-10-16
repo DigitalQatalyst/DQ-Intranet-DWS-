@@ -10,275 +10,251 @@ export interface AssetFile {
   type: 'pdf' | 'docx' | 'pptx' | 'png' | 'jpg' | 'svg' | 'zip' | 'xlsx';
   category: string;
   subcategory: string;
+  project?: string; // Add project field
 }
 
 export const mockAssetFiles: AssetFile[] = [
-  // DT2.0 DESIGN > Deploy files
+  // DT2.0 DESIGN > Govern > ABB
   {
-    id: 'dt-deploy-1',
-    name: 'DT2.0 Deployment Architecture',
-    description: 'Comprehensive deployment architecture and infrastructure patterns for DT2.0 platform implementation.',
+    id: 'dt-design-govern-abb-1',
+    name: 'ABB Digital Transformation Strategy',
+    description: 'Comprehensive digital transformation strategy document for ABB project implementation.',
     url: '/assets/sample-document.pdf',
     size: 2500000,
     lastModified: '2024-01-15',
-    author: 'Infrastructure Team',
+    author: 'ABB Strategy Team',
     type: 'pdf',
     category: 'DT2.0 DESIGN',
-    subcategory: 'Deploy'
+    subcategory: 'Govern',
+    project: 'ABB'
   },
   {
-    id: 'dt-deploy-2',
-    name: 'Cloud Infrastructure Templates',
-    description: 'Ready-to-use cloud infrastructure templates and configuration files for rapid deployment.',
+    id: 'dt-design-govern-abb-2',
+    name: 'ABB Governance Framework',
+    description: 'Governance framework and compliance guidelines for ABB digital initiatives.',
     url: '#',
-    size: 15000000,
+    size: 1800000,
     lastModified: '2024-01-20',
-    author: 'DevOps Team',
-    type: 'zip',
-    category: 'DT2.0 DESIGN',
-    subcategory: 'Deploy'
-  },
-  {
-    id: 'dt-deploy-3',
-    name: 'Deployment Runbook Template',
-    description: 'Standardized runbook template for deployment procedures and rollback strategies.',
-    url: '/assets/sample-template.pptx',
-    size: 5200000,
-    lastModified: '2024-01-18',
-    author: 'Operations Team',
-    type: 'pptx',
-    category: 'DT2.0 DESIGN',
-    subcategory: 'Deploy'
-  },
-  {
-    id: 'dt-deploy-4',
-    name: 'Environment Configuration Guide',
-    description: 'Detailed guide for configuring development, staging, and production environments.',
-    url: '#',
-    size: 3100000,
-    lastModified: '2024-01-22',
-    author: 'Platform Team',
-    type: 'pdf',
-    category: 'DT2.0 DESIGN',
-    subcategory: 'Deploy'
-  },
-
-  // DT2.0 DESIGN > BD files
-  {
-    id: 'dt-bd-1',
-    name: 'Business Case Template',
-    description: 'Comprehensive business case template with ROI calculations and risk assessments.',
-    url: '#',
-    size: 850000,
-    lastModified: '2024-01-10',
-    author: 'Business Development Team',
+    author: 'ABB Governance Team',
     type: 'docx',
     category: 'DT2.0 DESIGN',
-    subcategory: 'BD'
+    subcategory: 'Govern',
+    project: 'ABB'
   },
+
+  // DT2.0 DESIGN > Govern > ADIB
   {
-    id: 'dt-bd-2',
-    name: 'ROI Calculator',
-    description: 'Advanced ROI calculator with scenario modeling and financial projections.',
-    url: '/assets/sample-spreadsheet.xlsx',
-    size: 1200000,
-    lastModified: '2024-01-25',
-    author: 'Financial Analysis Team',
-    type: 'xlsx',
-    category: 'DT2.0 DESIGN',
-    subcategory: 'BD'
-  },
-  {
-    id: 'dt-bd-3',
-    name: 'Client Presentation Template',
-    description: 'Professional presentation template for client proposals and project pitches.',
-    url: '#',
-    size: 8500000,
-    lastModified: '2024-01-12',
-    author: 'Sales Team',
+    id: 'dt-design-govern-adib-1',
+    name: 'ADIB Digital Banking Blueprint',
+    description: 'Digital banking transformation blueprint for ADIB with regulatory compliance.',
+    url: '/assets/sample-template.pptx',
+    size: 3200000,
+    lastModified: '2024-01-18',
+    author: 'ADIB Digital Team',
     type: 'pptx',
     category: 'DT2.0 DESIGN',
-    subcategory: 'BD'
+    subcategory: 'Govern',
+    project: 'ADIB'
   },
-
-  // DT2.0 DESIGN > Delivery files
   {
-    id: 'dt-delivery-1',
-    name: 'Project Kickoff Checklist',
-    description: 'Comprehensive checklist for project initiation and stakeholder alignment.',
+    id: 'dt-design-govern-adib-2',
+    name: 'ADIB Risk Management Framework',
+    description: 'Comprehensive risk management framework for ADIB digital transformation.',
     url: '#',
-    size: 650000,
-    lastModified: '2024-01-08',
-    author: 'Project Management Office',
+    size: 2100000,
+    lastModified: '2024-01-22',
+    author: 'ADIB Risk Team',
     type: 'pdf',
     category: 'DT2.0 DESIGN',
-    subcategory: 'Delivery'
+    subcategory: 'Govern',
+    project: 'ADIB'
   },
+
+  // DT2.0 DESIGN > Govern > DFSA
   {
-    id: 'dt-delivery-2',
-    name: 'Sprint Planning Template',
-    description: 'Agile sprint planning template with capacity planning and story estimation.',
+    id: 'dt-design-govern-dfsa-1',
+    name: 'DFSA Regulatory Compliance Guide',
+    description: 'DFSA regulatory compliance guide for financial technology implementations.',
     url: '#',
-    size: 950000,
-    lastModified: '2024-01-30',
-    author: 'Agile Coaching Team',
+    size: 2800000,
+    lastModified: '2024-01-25',
+    author: 'DFSA Compliance Team',
+    type: 'pdf',
+    category: 'DT2.0 DESIGN',
+    subcategory: 'Govern',
+    project: 'DFSA'
+  },
+
+  // DT2.0 DESIGN > BD > Hail & Cotton
+  {
+    id: 'dt-design-bd-hail-1',
+    name: 'Hail & Cotton Business Case',
+    description: 'Business case and ROI analysis for Hail & Cotton digital transformation project.',
+    url: '/assets/sample-spreadsheet.xlsx',
+    size: 1200000,
+    lastModified: '2024-01-12',
+    author: 'Hail & Cotton BD Team',
     type: 'xlsx',
     category: 'DT2.0 DESIGN',
-    subcategory: 'Delivery'
-  },
-
-  // DT2.0 DEPLOY > Deploy files
-  {
-    id: 'deploy-deploy-1',
-    name: 'Infrastructure Deployment Guide',
-    description: 'Step-by-step guide for deploying infrastructure components and monitoring setup.',
-    url: '#',
-    size: 4200000,
-    lastModified: '2024-01-14',
-    author: 'Infrastructure Team',
-    type: 'pdf',
-    category: 'DT2.0 DEPLOY',
-    subcategory: 'Deploy'
+    subcategory: 'BD',
+    project: 'Hail & Cotton'
   },
   {
-    id: 'deploy-deploy-2',
-    name: 'Cloud Architecture Diagrams',
-    description: 'Comprehensive collection of cloud architecture diagrams and network topologies.',
-    url: '#',
-    size: 12000000,
-    lastModified: '2024-01-28',
-    author: 'Solution Architects',
-    type: 'zip',
-    category: 'DT2.0 DEPLOY',
-    subcategory: 'Deploy'
-  },
-
-  // DT2.0 DEPLOY > BD files
-  {
-    id: 'deploy-bd-1',
-    name: 'Deployment Cost Analysis',
-    description: 'Detailed cost analysis for deployment scenarios with optimization recommendations.',
+    id: 'dt-design-bd-hail-2',
+    name: 'Hail & Cotton Market Analysis',
+    description: 'Market analysis and competitive landscape for Hail & Cotton expansion.',
     url: '#',
     size: 1800000,
     lastModified: '2024-01-16',
-    author: 'Cost Optimization Team',
-    type: 'xlsx',
-    category: 'DT2.0 DEPLOY',
-    subcategory: 'BD'
+    author: 'Hail & Cotton Research Team',
+    type: 'pptx',
+    category: 'DT2.0 DESIGN',
+    subcategory: 'BD',
+    project: 'Hail & Cotton'
   },
 
-  // DT2.0 DEPLOY > Delivery files
+  // DT2.0 DESIGN > BD > Khalifa Fund
   {
-    id: 'deploy-delivery-1',
-    name: 'Production Deployment Runbook',
-    description: 'Production-ready deployment runbook with rollback procedures and monitoring.',
+    id: 'dt-design-bd-khalifa-1',
+    name: 'Khalifa Fund Investment Strategy',
+    description: 'Investment strategy and portfolio management for Khalifa Fund digital initiatives.',
     url: '#',
     size: 2200000,
-    lastModified: '2024-01-26',
-    author: 'Release Management Team',
-    type: 'docx',
-    category: 'DT2.0 DEPLOY',
-    subcategory: 'Delivery'
-  },
-  {
-    id: 'deploy-delivery-2',
-    name: 'Environment Setup Scripts',
-    description: 'Automated scripts for environment provisioning and configuration management.',
-    url: '#',
-    size: 5500000,
-    lastModified: '2024-01-24',
-    author: 'Automation Team',
-    type: 'zip',
-    category: 'DT2.0 DEPLOY',
-    subcategory: 'Delivery'
+    lastModified: '2024-01-14',
+    author: 'Khalifa Fund Strategy Team',
+    type: 'pdf',
+    category: 'DT2.0 DESIGN',
+    subcategory: 'BD',
+    project: 'Khalifa Fund'
   },
 
-  // MARKETING ARTEFACTS > DT2.0 files
+  // DT2.0 DESIGN > Delivery > ADIB
   {
-    id: 'marketing-dt-1',
-    name: 'DT2.0 Brand Guidelines',
-    description: 'Complete brand guidelines including logo usage, color palettes, and typography standards.',
+    id: 'dt-design-delivery-adib-1',
+    name: 'ADIB Project Delivery Plan',
+    description: 'Comprehensive project delivery plan for ADIB digital transformation.',
     url: '#',
-    size: 8900000,
-    lastModified: '2024-01-05',
-    author: 'Brand Team',
+    size: 1900000,
+    lastModified: '2024-01-10',
+    author: 'ADIB Delivery Team',
+    type: 'docx',
+    category: 'DT2.0 DESIGN',
+    subcategory: 'Delivery',
+    project: 'ADIB'
+  },
+
+  // DT2.0 DEPLOY > Govern > DFSA
+  {
+    id: 'dt-deploy-govern-dfsa-1',
+    name: 'DFSA Infrastructure Deployment Guide',
+    description: 'Infrastructure deployment guide for DFSA regulatory technology platform.',
+    url: '#',
+    size: 3500000,
+    lastModified: '2024-01-28',
+    author: 'DFSA Infrastructure Team',
     type: 'pdf',
-    category: 'MARKETING ARTEFACTS',
-    subcategory: 'DT2.0'
+    category: 'DT2.0 DEPLOY',
+    subcategory: 'Govern',
+    project: 'DFSA'
   },
   {
-    id: 'marketing-dt-2',
-    name: 'DT2.0 Logo Pack',
-    description: 'Comprehensive logo pack with various formats and usage variations.',
+    id: 'dt-deploy-govern-dfsa-2',
+    name: 'DFSA Security Architecture',
+    description: 'Security architecture and implementation guidelines for DFSA systems.',
+    url: '#',
+    size: 2900000,
+    lastModified: '2024-01-30',
+    author: 'DFSA Security Team',
+    type: 'pptx',
+    category: 'DT2.0 DEPLOY',
+    subcategory: 'Govern',
+    project: 'DFSA'
+  },
+
+  // DT2.0 DEPLOY > BD > Commercials
+  {
+    id: 'dt-deploy-bd-commercials-1',
+    name: 'Commercial Deployment Package',
+    description: 'Commercial deployment package with pricing and licensing information.',
+    url: '#',
+    size: 1600000,
+    lastModified: '2024-01-24',
+    author: 'Commercial Team',
+    type: 'xlsx',
+    category: 'DT2.0 DEPLOY',
+    subcategory: 'BD',
+    project: 'Commercials'
+  },
+
+  // DT2.0 DEPLOY > Delivery > DFSA
+  {
+    id: 'dt-deploy-delivery-dfsa-1',
+    name: 'DFSA Production Deployment Runbook',
+    description: 'Production deployment runbook for DFSA regulatory systems.',
+    url: '#',
+    size: 2700000,
+    lastModified: '2024-01-26',
+    author: 'DFSA Operations Team',
+    type: 'docx',
+    category: 'DT2.0 DEPLOY',
+    subcategory: 'Delivery',
+    project: 'DFSA'
+  },
+
+  // MARKETING ARTEFACTS > DT2.0 > Marketing Library
+  {
+    id: 'marketing-dt-library-1',
+    name: 'DT2.0 Brand Guidelines',
+    description: 'Complete brand guidelines for DT2.0 marketing campaigns.',
+    url: '#',
+    size: 4200000,
+    lastModified: '2024-01-05',
+    author: 'Marketing Library Team',
+    type: 'pdf',
+    category: 'MARKETING ARTEFACTS',
+    subcategory: 'DT2.0',
+    project: 'Marketing Library'
+  },
+  {
+    id: 'marketing-dt-library-2',
+    name: 'DT2.0 Social Media Kit',
+    description: 'Social media assets and templates for DT2.0 campaigns.',
     url: '#',
     size: 15000000,
     lastModified: '2024-01-11',
-    author: 'Creative Team',
+    author: 'Marketing Library Team',
     type: 'zip',
     category: 'MARKETING ARTEFACTS',
-    subcategory: 'DT2.0'
-  },
-  {
-    id: 'marketing-dt-3',
-    name: 'DT2.0 Presentation Template',
-    description: 'Professional presentation template aligned with DT2.0 brand guidelines.',
-    url: '#',
-    size: 12500000,
-    lastModified: '2024-01-19',
-    author: 'Design Team',
-    type: 'pptx',
-    category: 'MARKETING ARTEFACTS',
-    subcategory: 'DT2.0'
-  },
-  {
-    id: 'marketing-dt-4',
-    name: 'DT2.0 Social Media Assets',
-    description: 'Complete social media asset pack with templates for various platforms.',
-    url: '#',
-    size: 25000000,
-    lastModified: '2024-01-21',
-    author: 'Social Media Team',
-    type: 'zip',
-    category: 'MARKETING ARTEFACTS',
-    subcategory: 'DT2.0'
+    subcategory: 'DT2.0',
+    project: 'Marketing Library'
   },
 
-  // MARKETING ARTEFACTS > Products files
+  // MARKETING ARTEFACTS > Products > DTMA
   {
-    id: 'marketing-products-1',
-    name: 'Product Brochure Template',
-    description: 'Professional brochure template for product marketing and sales materials.',
+    id: 'marketing-products-dtma-1',
+    name: 'DTMA Product Brochure',
+    description: 'Product brochure and marketing materials for DTMA platform.',
     url: '#',
-    size: 6800000,
+    size: 3800000,
     lastModified: '2024-01-13',
-    author: 'Product Marketing Team',
+    author: 'DTMA Marketing Team',
     type: 'pptx',
     category: 'MARKETING ARTEFACTS',
-    subcategory: 'Products'
+    subcategory: 'Products',
+    project: 'DTMA'
   },
   {
-    id: 'marketing-products-2',
-    name: 'Product Photography Guidelines',
-    description: 'Comprehensive guidelines for product photography and visual standards.',
+    id: 'marketing-products-dtma-2',
+    name: 'DTMA Case Studies',
+    description: 'Customer case studies and success stories for DTMA implementation.',
     url: '#',
-    size: 3200000,
+    size: 2400000,
     lastModified: '2024-01-17',
-    author: 'Visual Content Team',
+    author: 'DTMA Success Team',
     type: 'pdf',
     category: 'MARKETING ARTEFACTS',
-    subcategory: 'Products'
-  },
-  {
-    id: 'marketing-products-3',
-    name: 'Product Launch Checklist',
-    description: 'Complete checklist for product launch activities and marketing campaigns.',
-    url: '#',
-    size: 750000,
-    lastModified: '2024-01-29',
-    author: 'Product Launch Team',
-    type: 'docx',
-    category: 'MARKETING ARTEFACTS',
-    subcategory: 'Products'
+    subcategory: 'Products',
+    project: 'DTMA'
   }
 ];
 
