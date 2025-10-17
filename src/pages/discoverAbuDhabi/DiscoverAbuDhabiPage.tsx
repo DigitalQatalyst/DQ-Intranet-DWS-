@@ -1,11 +1,22 @@
 import React from "react";
+import HeroSection from "./HeroSection";
+import GrowthAreasSection from "./GrowthAreasSection";
+import DirectorySection from "./DirectorySection";
+
+const containerStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "72px",
+  background: "#f8f9fb",
+};
 
 const DiscoverAbuDhabiPage: React.FC = () => {
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Discover Abu Dhabi</h1>
-      <p>Stub page loaded successfully.</p>
-    </main>
+    <div style={containerStyle}>
+      <HeroSection />
+      <GrowthAreasSection />
+      <DirectorySection />
+    </div>
   );
 };
 
