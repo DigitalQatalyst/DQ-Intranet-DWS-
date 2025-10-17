@@ -1,312 +1,349 @@
-import React, { useMemo, useState } from "react";
-import { UsersIcon, PhoneIcon, MailIcon, GlobeIcon } from "lucide-react";
-
-type DirectoryEntry = {
-  name: string;
-  tag: string;
-  summary: string;
-  phone: string;
-  email: string;
-  website: string;
+import React, { useEffect, useState, useRef } from 'react';
+import SearchBar from './SearchBar';
+import ProfileCard from './ProfileCard';
+import ProfileModal from './ProfileModal';
+const initialProfiles = [
+    {
+        id: 1,
+        name: 'Abu Dhabi Global Market',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Finance',
+        description:
+            'International financial center located on Al Maryah Island, providing a broad range of financial services.',
+        phone: '+971 2 333 8888',
+        email: 'contact@adgm.com',
+        website: 'adgm.com',
+        address: 'Al Maryah Island, Abu Dhabi, UAE',
+        founded: '2013',
+        employees: '500+',
+        revenue: '$100M+',
+        services: [
+            'Financial Licensing',
+            'Regulatory Framework',
+            'Business Setup',
+            'Legal Services',
+        ],
+    },
+    {
+        id: 2,
+        name: 'Masdar',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Energy',
+        description:
+            'Renewable energy company that advances the development, commercialization and deployment of clean energy solutions.',
+        phone: '+971 2 653 3333',
+        email: 'info@masdar.ae',
+        website: 'masdar.ae',
+        address: 'Masdar City, Abu Dhabi, UAE',
+        founded: '2006',
+        employees: '1,500+',
+        revenue: '$500M+',
+        services: [
+            'Renewable Energy',
+            'Sustainable Development',
+            'Clean Technology',
+            'Urban Planning',
+        ],
+    },
+    {
+        id: 3,
+        name: 'Hub71',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Technology',
+        description:
+            'Global tech ecosystem that enables startups to scale globally through access to funding, networks, and business opportunities.',
+        phone: '+971 2 449 7777',
+        email: 'hello@hub71.com',
+        website: 'hub71.com',
+        address: 'Al Maryah Island, Abu Dhabi, UAE',
+        founded: '2019',
+        employees: '200+',
+        services: [
+            'Startup Incubation',
+            'Venture Capital',
+            'Mentorship',
+            'Networking',
+        ],
+    },
+    {
+        id: 4,
+        name: 'Cleveland Clinic Abu Dhabi',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Healthcare',
+        description:
+            'Multispecialty hospital offering patients the highest level of specialized care across 40+ medical and surgical specialties.',
+        phone: '+971 2 659 9999',
+        email: 'info@ccad.ae',
+        website: 'clevelandclinicabudhabi.ae',
+        address: 'Al Maryah Island, Abu Dhabi, UAE',
+        founded: '2015',
+        employees: '3,000+',
+        revenue: '$1B+',
+        services: [
+            'Medical Care',
+            'Surgical Services',
+            'Research',
+            'Medical Education',
+        ],
+    },
+    {
+        id: 5,
+        name: 'Yas Mall',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Retail',
+        description:
+            'Premier shopping, dining and entertainment destination located on Yas Island, featuring over 370 international brands.',
+        phone: '+971 2 565 7000',
+        email: 'customerservice@yasmall.ae',
+        website: 'yasmall.ae',
+        address: 'Yas Island, Abu Dhabi, UAE',
+        founded: '2014',
+        employees: '1,000+',
+        services: ['Retail Space', 'Entertainment', 'Dining', 'Events'],
+    },
+    {
+        id: 6,
+        name: 'Emirates Palace',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Tourism',
+        description:
+            'Luxury hotel located in the heart of Abu Dhabi, offering world-class hospitality and stunning Arabian Gulf views.',
+        phone: '+971 2 690 9000',
+        email: 'reservations@emiratespalace.ae',
+        website: 'emiratespalace.com',
+        address: 'West Corniche Road, Abu Dhabi, UAE',
+        founded: '2005',
+        employees: '1,500+',
+        revenue: '$300M+',
+        services: [
+            'Luxury Accommodation',
+            'Fine Dining',
+            'Conference Facilities',
+            'Spa Services',
+        ],
+    },
+];
+// Additional profiles that can be loaded
+const additionalProfiles = [
+    {
+        id: 7,
+        name: 'Etihad Airways',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Tourism',
+        description:
+            'The national airline of the UAE, connecting Abu Dhabi to the world with a fleet of modern aircraft.',
+        phone: '+971 2 599 0000',
+        email: 'info@etihad.ae',
+        website: 'etihad.com',
+        address: 'Khalifa City, Abu Dhabi, UAE',
+        founded: '2003',
+        employees: '10,000+',
+        revenue: '$5B+',
+        services: [
+            'Air Travel',
+            'Cargo Services',
+            'Loyalty Program',
+            'Holiday Packages',
+        ],
+    },
+    {
+        id: 8,
+        name: 'Mubadala Investment Company',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Finance',
+        description:
+            'Sovereign wealth fund investing in diversified sectors globally to transform the UAE economy.',
+        phone: '+971 2 413 0000',
+        email: 'info@mubadala.ae',
+        website: 'mubadala.com',
+        address: 'Al Mamoura Building, Abu Dhabi, UAE',
+        founded: '2002',
+        employees: '50,000+',
+        revenue: '$50B+',
+        services: [
+            'Investment Management',
+            'Strategic Development',
+            'Portfolio Management',
+            'Economic Diversification',
+        ],
+    },
+    {
+        id: 9,
+        name: 'Aldar Properties',
+        logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bG9nb3xlbnwwfHwwfHx8MA%3D%3D',
+        category: 'Retail',
+        description:
+            'Leading real estate developer with iconic developments across Abu Dhabi and beyond.',
+        phone: '+971 2 810 5555',
+        email: 'customercare@aldar.com',
+        website: 'aldar.com',
+        address: 'Al Raha Beach, Abu Dhabi, UAE',
+        founded: '2005',
+        employees: '1,500+',
+        revenue: '$2B+',
+        services: [
+            'Property Development',
+            'Asset Management',
+            'Retail Management',
+            'Hospitality',
+        ],
+    },
+];
+const DirectorySection = () => {
+    const [profiles, setProfiles] = useState(initialProfiles);
+    const [filteredProfiles, setFilteredProfiles] = useState(initialProfiles);
+    const [isSearching, setIsSearching] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasMoreProfiles, setHasMoreProfiles] = useState(true);
+    const [selectedProfile, setSelectedProfile] = useState(null);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const sectionRef = useRef(null);
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                }
+            },
+            {
+                threshold: 0.1,
+            },
+        );
+        if (sectionRef.current) {
+            observer.observe(sectionRef.current);
+        }
+        // Listen for search events from header
+        const handleHeaderSearch = (event) => {
+            const { query } = event.detail;
+            if (query) {
+                handleSearch(query, []);
+            }
+        };
+        document.addEventListener('headerSearch', handleHeaderSearch);
+        return () => {
+            if (sectionRef.current) {
+                observer.unobserve(sectionRef.current);
+            }
+            document.removeEventListener('headerSearch', handleHeaderSearch);
+        };
+    }, []);
+    const handleSearch = (query: string, filters: string[]) => {
+        setIsSearching(true);
+        setTimeout(() => {
+            let results = [...profiles];
+            if (query) {
+                const lowercaseQuery = query.toLowerCase();
+                results = results.filter(
+                    (profile) =>
+                        profile.name.toLowerCase().includes(lowercaseQuery) ||
+                        profile.description.toLowerCase().includes(lowercaseQuery) ||
+                        profile.category.toLowerCase().includes(lowercaseQuery),
+                );
+            }
+            if (filters.length > 0) {
+                results = results.filter((profile) =>
+                    filters.includes(profile.category),
+                );
+            }
+            setFilteredProfiles(results);
+            setIsSearching(false);
+            setHasMoreProfiles(additionalProfiles.length > 0);
+        }, 500);
+    };
+    const handleLoadMore = () => {
+        setIsLoading(true);
+        // Simulate API call delay
+        setTimeout(() => {
+            const newProfiles = [...profiles, ...additionalProfiles];
+            setProfiles(newProfiles);
+            // Apply current filters to new profiles
+            handleSearch('', []); // This will apply any active filters
+            setIsLoading(false);
+            setHasMoreProfiles(false); // No more profiles to load
+        }, 1000);
+    };
+    const handleViewProfile = (profile) => {
+        setSelectedProfile(profile);
+        setIsProfileModalOpen(true);
+    };
+    return (
+        <section
+            id="directory"
+            ref={sectionRef}
+            className="py-28 px-6 md:px-12 opacity-0 -translate-y-4 transition-all duration-1000"
+        >
+            <div className="container mx-auto">
+                <div className="text-center mb-20">
+                    <h2 className="font-display text-4xl md:text-5xl font-bold mb-6 tracking-tight">
+                        Business Directory
+                    </h2>
+                    <p className="font-body text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                        Connect with leading organizations and service providers in Abu
+                        Dhabi's dynamic business ecosystem.
+                    </p>
+                </div>
+                <div className="mb-16">
+                    <SearchBar onSearch={handleSearch} />
+                </div>
+                {isSearching ? (
+                    <div className="flex justify-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {filteredProfiles.length > 0 ? (
+                                filteredProfiles.map((profile) => (
+                                    <ProfileCard
+                                        key={profile.id}
+                                        name={profile.name}
+                                        logo={profile.logo}
+                                        category={profile.category}
+                                        description={profile.description}
+                                        phone={profile.phone}
+                                        email={profile.email}
+                                        website={profile.website}
+                                        onViewProfile={() => handleViewProfile(profile)}
+                                    />
+                                ))
+                            ) : (
+                                <div className="col-span-full text-center py-20 bg-gray-50 rounded-xl">
+                                    <p className="text-gray-500 font-body text-lg mb-4">
+                                        No results found.
+                                    </p>
+                                    <p className="text-gray-400 font-body">
+                                        Please try a different search term or filter.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                        {filteredProfiles.length > 0 && hasMoreProfiles && (
+                            <div className="mt-16 text-center">
+                                <button
+                                    className={`px-10 py-4 bg-white border-2 border-primary text-primary font-body font-medium rounded-lg hover:bg-primary hover:text-white transition-colors shadow-sm hover:shadow-md ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                                    onClick={handleLoadMore}
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <span className="flex items-center justify-center">
+                                            <span className="mr-2">Loading</span>
+                                            <span className="animate-spin h-4 w-4 border-t-2 border-b-2 border-primary rounded-full"></span>
+                                        </span>
+                                    ) : (
+                                        'Load More'
+                                    )}
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+            <ProfileModal
+                isOpen={isProfileModalOpen}
+                onClose={() => setIsProfileModalOpen(false)}
+                profile={selectedProfile}
+            />
+        </section>
+    );
 };
-
-const DirectorySection: React.FC = () => {
-  const [query, setQuery] = useState("");
-
-  const entries: DirectoryEntry[] = useMemo(
-    () => [
-      {
-        name: "Learning & Development Team",
-        tag: "Learning & Development",
-        summary: "Empowering growth through curated learning journeys and certifications.",
-        phone: "+1 (555) 010-2200",
-        email: "learning@dqworkspace.com",
-        website: "learning",
-      },
-      {
-        name: "Project Management Office",
-        tag: "Project Delivery",
-        summary: "Driving delivery excellence and agility across programmes and squads.",
-        phone: "+1 (555) 010-2455",
-        email: "pmo@dqworkspace.com",
-        website: "projects",
-      },
-      {
-        name: "Innovation Council",
-        tag: "Innovation",
-        summary: "Turning ideas into scalable solutions with playbooks, pilots, and funding.",
-        phone: "+1 (555) 010-2870",
-        email: "innovation@dqworkspace.com",
-        website: "innovation",
-      },
-      {
-        name: "Support & Service Desk",
-        tag: "Support & Services",
-        summary: "Always ready to assist you with workspace requests, access, and tooling.",
-        phone: "+1 (555) 010-2000",
-        email: "support@dqworkspace.com",
-        website: "support",
-      },
-      {
-        name: "Technology Squad",
-        tag: "Technology",
-        summary: "Building and integrating the systems that power the DQ workspace daily.",
-        phone: "+1 (555) 010-3050",
-        email: "technology@dqworkspace.com",
-        website: "technology",
-      },
-      {
-        name: "Communications Hub",
-        tag: "Community",
-        summary: "Connecting stories, announcements, and engagement across teams.",
-        phone: "+1 (555) 010-2980",
-        email: "communications@dqworkspace.com",
-        website: "communications",
-      },
-    ],
-    []
-  );
-
-  const filteredEntries = entries.filter((entry) =>
-    [entry.name, entry.tag, entry.summary]
-      .join(" ")
-      .toLowerCase()
-      .includes(query.toLowerCase())
-  );
-
-  return (
-    <section className="dq-directory">
-      <style>
-        {`
-          .dq-directory {
-            --dq-orange: #E85A3E;
-            --dq-maroon: #6B3E5C;
-            --dq-navy: #162356;
-            --dq-bg: #F7F8FB;
-            --dq-text: #0B1220;
-            padding: 64px 0 72px;
-            background: #ffffff;
-            color: var(--dq-text);
-          }
-          .dq-directory-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 28px;
-            text-align: center;
-          }
-          .dq-directory-title {
-            margin: 0;
-            font-size: clamp(2.1rem, 2.5vw, 2.5rem);
-          }
-          .dq-directory-subtitle {
-            margin: 0 auto;
-            max-width: 640px;
-            color: rgba(11,18,32,0.7);
-            line-height: 1.6;
-          }
-          .dq-directory-search {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-          }
-          .dq-directory-input {
-            flex: 1 1 320px;
-            min-width: 280px;
-            padding: 12px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(22,35,86,0.18);
-            box-shadow: inset 0 1px 2px rgba(22,35,86,0.05);
-            font-size: 1rem;
-          }
-          .dq-directory-search button {
-            padding: 12px 22px;
-            border-radius: 14px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            color: #fff;
-            background: linear-gradient(90deg, var(--dq-orange) 0%, var(--dq-maroon) 45%, var(--dq-navy) 100%);
-            box-shadow: 0 12px 22px rgba(11,18,32,0.18);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-          }
-          .dq-directory-search button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 18px 30px rgba(11,18,32,0.22);
-          }
-          .dq-directory-grid {
-            display: grid;
-            gap: 20px;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            text-align: left;
-          }
-          .dq-directory-card {
-            border-radius: 16px;
-            padding: 22px 24px;
-            border: 1px solid rgba(22,35,86,0.12);
-            background: linear-gradient(145deg, rgba(247,248,251,0.9), #ffffff 65%);
-            box-shadow: 0 14px 30px rgba(11,18,32,0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-          }
-          .dq-directory-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 34px rgba(11,18,32,0.12);
-          }
-          .dq-directory-card-header {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-          }
-          .dq-directory-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: rgba(232,90,62,0.12);
-            color: var(--dq-orange);
-            display: grid;
-            place-items: center;
-          }
-          .dq-directory-tag {
-            display: inline-block;
-            margin-top: 4px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: rgba(22,35,86,0.08);
-            color: rgba(22,35,86,0.75);
-            font-size: 0.75rem;
-            font-weight: 600;
-          }
-          .dq-directory-summary {
-            margin: 0;
-            color: rgba(11,18,32,0.68);
-            line-height: 1.55;
-            font-size: 0.95rem;
-          }
-          .dq-directory-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            color: rgba(11,18,32,0.7);
-            font-size: 0.9rem;
-          }
-          .dq-directory-meta-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-          }
-          .dq-directory-meta-row a {
-            color: inherit;
-            text-decoration: none;
-          }
-          .dq-directory-meta-row a:hover {
-            text-decoration: underline;
-          }
-          .dq-directory-view {
-            display: flex;
-            justify-content: flex-end;
-          }
-          .dq-directory-view button {
-            padding: 10px 18px;
-            border-radius: 12px;
-            border: 1px solid rgba(22,35,86,0.2);
-            background: #ffffff;
-            color: var(--dq-navy);
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-          }
-          .dq-directory-view button:hover {
-            background: rgba(232,90,62,0.08);
-            border-color: rgba(232,90,62,0.5);
-            color: var(--dq-orange);
-          }
-          .dq-directory-footer {
-            margin-top: 12px;
-          }
-          .dq-directory-footer button {
-            padding: 10px 20px;
-            border-radius: 12px;
-            border: 1px solid rgba(22,35,86,0.25);
-            background: #ffffff;
-            color: var(--dq-navy);
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-          }
-          .dq-directory-footer button:hover {
-            background: rgba(22,35,86,0.08);
-            border-color: rgba(22,35,86,0.45);
-            color: var(--dq-orange);
-          }
-        `}
-      </style>
-      <div className="dq-directory-inner">
-        <header>
-          <h2 className="dq-directory-title">People &amp; Teams Directory</h2>
-          <p className="dq-directory-subtitle">
-            Connect with DQ associates and teams driving workspace impact.
-          </p>
-        </header>
-        <div className="dq-directory-search">
-          <input
-            className="dq-directory-input"
-            placeholder="Search people, teams, or projects…"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-          <button type="button">Search</button>
-        </div>
-        <div className="dq-directory-grid">
-          {filteredEntries.map((entry) => (
-            <article key={entry.email} className="dq-directory-card">
-              <div className="dq-directory-card-header">
-                <div className="dq-directory-avatar">
-                  <UsersIcon size={20} />
-                </div>
-                <div>
-                  <strong style={{ display: "block", fontSize: "1.05rem" }}>{entry.name}</strong>
-                  <span className="dq-directory-tag">{entry.tag}</span>
-                </div>
-              </div>
-              <p className="dq-directory-summary">{entry.summary}</p>
-              <div className="dq-directory-meta">
-                <div className="dq-directory-meta-row">
-                  <PhoneIcon size={16} color="var(--dq-orange)" />
-                  <a href={`tel:${entry.phone}`}>{entry.phone}</a>
-                </div>
-                <div className="dq-directory-meta-row">
-                  <MailIcon size={16} color="var(--dq-orange)" />
-                  <a href={`mailto:${entry.email}`}>{entry.email}</a>
-                </div>
-                <div className="dq-directory-meta-row">
-                  <GlobeIcon size={16} color="var(--dq-orange)" />
-                  <a
-                    href={`https://${entry.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {entry.website}
-                  </a>
-                </div>
-              </div>
-              <div className="dq-directory-view">
-                <button type="button">View Profile</button>
-              </div>
-            </article>
-          ))}
-        </div>
-        <div className="dq-directory-footer">
-          <button type="button">View Full Directory</button>
-        </div>
-      </div>
-    </section>
-  );
-};
-
 export default DirectorySection;
