@@ -1,100 +1,46 @@
 import React, { useMemo, useState } from "react";
 
-type Company = {
-  name: string;
-  summary: string;
-};
-
-const sectionStyle: React.CSSProperties = {
-  background: "#ffffff",
-  padding: "72px 24px 96px",
-};
-
-const containerStyle: React.CSSProperties = {
-  maxWidth: "1200px",
-  margin: "0 auto",
-  display: "flex",
-  flexDirection: "column",
-  gap: "24px",
-};
-
-const gridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-  gap: "20px",
-};
-
-const cardStyle: React.CSSProperties = {
-  border: "1px solid rgba(148, 163, 184, 0.4)",
-  borderRadius: "16px",
-  padding: "20px",
-  background: "#f9fafb",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-  gap: "12px",
-  boxShadow: "0 8px 18px rgba(2,6,23,0.05)",
-};
-
 const DirectorySection: React.FC = () => {
   const [query, setQuery] = useState("");
 
-  const companies: Company[] = useMemo(
+  const companies = useMemo(
     () => [
       {
         name: "Abu Dhabi Global Market",
-        summary: "International financial centre enabling capital connectivity and regulatory excellence.",
+        summary: "Capital markets powerhouse connecting investors with regulatory certainty.",
       },
-      {
-        name: "Masdar",
-        summary: "Global clean energy champion delivering renewable solutions across continents.",
-      },
-      {
-        name: "Hub71",
-        summary: "Tech ecosystem supporting founders with mentorship, incentives, and venture networks.",
-      },
+      { name: "Masdar", summary: "Global renewable energy leader advancing net-zero solutions." },
+      { name: "Hub71", summary: "Startup ecosystem offering incentives, mentorship, and venture access." },
       {
         name: "Cleveland Clinic Abu Dhabi",
-        summary: "World-class medical complex providing advanced care and research partnerships.",
+        summary: "World-class healthcare complex delivering advanced treatment and research.",
       },
-      {
-        name: "Yas Mall",
-        summary: "Flagship destination merging retail, entertainment, and experiential activations.",
-      },
-      {
-        name: "Emirates Palace",
-        summary: "Iconic hospitality landmark offering luxury events, tourism, and cultural experiences.",
-      },
+      { name: "Yas Mall", summary: "Destination retail hub blending luxury, lifestyle, and entertainment." },
+      { name: "Emirates Palace", summary: "Iconic hospitality landmark hosting global events and cultural showcases." },
     ],
     []
   );
 
-  const filteredCompanies = companies.filter((company) =>
-    company.name.toLowerCase().includes(query.toLowerCase())
+  const filtered = companies.filter((company) =>
+    [company.name, company.summary].join(" ").toLowerCase().includes(query.toLowerCase())
   );
 
   return (
-    <section style={sectionStyle}>
-      <div style={containerStyle}>
+    <section style={{ padding: "72px 24px", background: "#ffffff" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
         <div style={{ textAlign: "center" }}>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "clamp(2rem, 2.5vw, 2.4rem)",
-              color: "#0b1220",
-            }}
-          >
+          <h2 style={{ margin: 0, fontSize: "clamp(2rem, 2.4vw, 2.3rem)", color: "#0b1220" }}>
             Business Directory
           </h2>
-          <p style={{ color: "#4b5563", maxWidth: "620px", margin: "12px auto 0" }}>
-            Connect with leading organizations shaping Abu Dhabi’s dynamic business landscape.
-            Discover strategic partners, investors, and innovators to accelerate your growth.
+          <p style={{ margin: "12px auto 0", maxWidth: 640, color: "#475569" }}>
+            Connect with leading organizations shaping Abu Dhabi’s growth and discover partners to
+            accelerate your market entry.
           </p>
         </div>
         <div
           style={{
             display: "flex",
-            gap: "12px",
+            gap: 12,
             flexWrap: "wrap",
             justifyContent: "center",
           }}
@@ -105,17 +51,17 @@ const DirectorySection: React.FC = () => {
             placeholder="Search businesses, services, or keywords…"
             style={{
               flex: "1 1 320px",
-              minWidth: "280px",
+              minWidth: 280,
               padding: "12px 16px",
-              borderRadius: "12px",
+              borderRadius: 12,
               border: "1px solid rgba(148, 163, 184, 0.6)",
-              fontSize: "1rem",
             }}
           />
           <button
+            type="button"
             style={{
               padding: "12px 20px",
-              borderRadius: "12px",
+              borderRadius: 12,
               border: "none",
               background: "#1d4ed8",
               color: "#ffffff",
@@ -126,18 +72,37 @@ const DirectorySection: React.FC = () => {
             Search
           </button>
         </div>
-        <div style={gridStyle}>
-          {filteredCompanies.map((company) => (
-            <article key={company.name} style={cardStyle}>
+        <div
+          style={{
+            display: "grid",
+            gap: 20,
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          }}
+        >
+          {filtered.map((company) => (
+            <article
+              key={company.name}
+              style={{
+                padding: 20,
+                borderRadius: 16,
+                border: "1px solid rgba(148, 163, 184, 0.4)",
+                background: "#f8fafc",
+                boxShadow: "0 10px 22px rgba(15, 23, 42, 0.08)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
               <div>
                 <h3 style={{ margin: "0 0 6px", color: "#111827" }}>{company.name}</h3>
-                <p style={{ margin: 0, color: "#6b7280", lineHeight: 1.5 }}>{company.summary}</p>
+                <p style={{ margin: 0, color: "#64748b", lineHeight: 1.6 }}>{company.summary}</p>
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <button
+                  type="button"
                   style={{
-                    padding: "10px 16px",
-                    borderRadius: "12px",
+                    padding: "10px 18px",
+                    borderRadius: 12,
                     border: "1px solid rgba(29, 78, 216, 0.5)",
                     background: "#ffffff",
                     color: "#1d4ed8",
@@ -150,6 +115,22 @@ const DirectorySection: React.FC = () => {
               </div>
             </article>
           ))}
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <button
+            type="button"
+            style={{
+              padding: "10px 18px",
+              borderRadius: 12,
+              border: "1px solid rgba(29, 78, 216, 0.5)",
+              background: "#ffffff",
+              color: "#1d4ed8",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            View Full Directory
+          </button>
         </div>
       </div>
     </section>
