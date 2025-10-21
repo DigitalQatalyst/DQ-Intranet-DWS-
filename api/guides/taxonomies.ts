@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '../lib/supabaseAdmin';
+import { supabaseAdmin } from '../lib/supabaseAdmin.js';
 
 type AnyRequest = {
   method?: string;
@@ -18,18 +18,22 @@ type AnyResponse = {
 export default async function handler(req: AnyRequest, res: AnyResponse) {
   try {
     if (req.method !== 'GET') { res.status?.(405); res.json?.({ error: 'Method not allowed' }); return; }
-    const q = async (table: string) => {
-      const { data, error } = await supabaseAdmin.from(table).select('id,name').order('id')
-      if (error) throw error
-      return data || []
-    }
+    // Pull distinct values from guides for simplified facets
+    const { data, error } = await supabaseAdmin
+      .from('guides')
+      .select('domain,guide_type,function_area,status');
+    if (error) throw error;
+    const uniq = (arr: any[], key: 'domain'|'guide_type'|'function_area'|'status') => {
+      const set = new Set<string>();
+      for (const r of arr || []) { const v = (r as any)[key]; if (v) set.add(String(v)); }
+      return Array.from(set).sort().map((name, i) => ({ id: i + 1, name }));
+    };
     const out = {
-      guideType: await q('guide_type'),
-      audience: await q('guide_audiences'),
-      topic: await q('guide_topics'),
-      format: await q('guide_formats'),
-      language: await q('guide_languages'),
-    } as any
+      domain: uniq(data || [], 'domain'),
+      guideType: uniq(data || [], 'guide_type'),
+      functionArea: uniq(data || [], 'function_area'),
+      status: uniq(data || [], 'status'),
+    } as any;
     res.status?.(200); res.json?.(out);
   } catch (err: any) {
     console.error('api/guides/taxonomies error:', err);

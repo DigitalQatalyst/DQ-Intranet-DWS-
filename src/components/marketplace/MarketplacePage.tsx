@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FilterSidebar, FilterConfig } from './FilterSidebar';
 import { MarketplaceGrid } from './MarketplaceGrid';
@@ -42,6 +42,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   // Items & filters state
   const [items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
@@ -49,6 +51,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   // Guides facets + URL state
   const [facets, setFacets] = useState<GuidesFacets>({});
   const [queryParams, setQueryParams] = useState(() => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''));
+  const searchStartRef = useRef<number | null>(null);
+  const inFlightController = useRef<AbortController | null>(null);
 
   // UI state
   const [showFilters, setShowFilters] = useState(false);
@@ -120,7 +124,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             let q = supabaseClient
               .from('guides')
               .select('*', { count: 'exact' })
-              .eq('status', 'Published');
+              .eq('status', 'Approved');
             const qStr = queryParams.get('q') || '';
             if (qStr) q = q.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
             // (filter/sort is applied after mapping below)
@@ -143,23 +147,56 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               isEditorsPick: r.is_editors_pick ?? r.isEditorsPick,
               downloadCount: r.download_count ?? r.downloadCount,
               guideType: r.guide_type ?? r.guideType,
+              domain: r.domain ?? null,
+              functionArea: r.function_area ?? null,
+              status: r.status ?? null,
+              complexityLevel: r.complexity_level ?? null,
             }));
             // client-side filter/sort for fallback
-            const type = (queryParams.get('type') || '').split(',').filter(Boolean);
-            const skill = (queryParams.get('skill') || '').split(',').filter(Boolean);
+            const domains = (queryParams.get('domain') || '').split(',').filter(Boolean);
+            const types = (queryParams.get('guide_type') || '').split(',').filter(Boolean);
+            const functions = (queryParams.get('function_area') || '').split(',').filter(Boolean);
+            const statuses = (queryParams.get('status') || '').split(',').filter(Boolean);
             let out = mapped;
-            if (type.length) out = out.filter(it => type.includes(it.guideType));
-            if (skill.length) out = out.filter(it => skill.includes(it.skillLevel));
+            if (domains.length) out = out.filter(it => it.domain && domains.includes(it.domain));
+            if (types.length) out = out.filter(it => it.guideType && types.includes(it.guideType));
+            if (functions.length) out = out.filter(it => it.functionArea && functions.includes(it.functionArea));
+            if (statuses.length) out = out.filter(it => it.status && statuses.includes(it.status));
             const sort = queryParams.get('sort') || 'relevance';
             if (sort === 'updated') out.sort((a,b) => new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
             else if (sort === 'downloads') out.sort((a,b) => (b.downloadCount||0)-(a.downloadCount||0));
             else if (sort === 'editorsPick') out.sort((a,b) => (Number(b.isEditorsPick)||0)-(Number(a.isEditorsPick)||0) || new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
             else out.sort((a,b) => (Number(b.isEditorsPick)||0)-(Number(a.isEditorsPick)||0) || (b.downloadCount||0)-(a.downloadCount||0) || new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
-            data = { items: out, total: count || out.length, facets: {} };
+            // Facets fallback: compute from Supabase for current filter context
+            let facetQ = supabaseClient
+              .from('guides')
+              .select('domain,guide_type,function_area,status')
+              .eq('status', 'Approved');
+            if (qStr) facetQ = facetQ.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
+            if (domains.length) facetQ = facetQ.in('domain', domains);
+            if (types.length) facetQ = facetQ.in('guide_type', types);
+            if (functions.length) facetQ = facetQ.in('function_area', functions);
+            if (statuses.length) facetQ = facetQ.in('status', statuses);
+            const { data: facetRows } = await facetQ;
+            const countBy = (arr: any[] | null | undefined, key: 'domain'|'guide_type'|'function_area'|'status') => {
+              const m = new Map<string, number>();
+              for (const r of (arr || [])) { const v = (r as any)[key]; if (!v) continue; m.set(v, (m.get(v)||0)+1); }
+              return Array.from(m.entries()).map(([id, cnt]) => ({ id, name: id, count: cnt })).sort((a,b)=> a.name.localeCompare(b.name));
+            };
+            const facets = {
+              domain: countBy(facetRows, 'domain'),
+              guide_type: countBy(facetRows, 'guide_type'),
+              function_area: countBy(facetRows, 'function_area'),
+              status: countBy(facetRows, 'status'),
+            } as any;
+            data = { items: out, total: count || out.length, facets };
           }
           setItems(data.items || []);
           setFilteredItems(data.items || []);
+          setCursor((data as any).cursor || null);
+          setHasMore(!!(data as any).has_more);
           setFacets(data.facets || {});
+          const start = searchStartRef.current; if (start) { const latency = Date.now() - start; track('Guides.Search', { q: queryParams.get('q') || '', latency_ms: latency }); searchStartRef.current = null; }
           track('Guides.ViewList', { q: queryParams.get('q') || '', sort: queryParams.get('sort') || 'relevance', page: queryParams.get('page') || '1' });
         } catch (e) {
           console.error('Error fetching guides:', e);
@@ -357,7 +394,42 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             ) : error && !isGuidesLike(marketplaceType) ? (
               <ErrorDisplay message={error} onRetry={retryFetch} />
             ) : isGuidesLike(marketplaceType) ? (
-              <GuidesGrid items={filteredItems} onClickGuide={(g) => navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`)} />
+              <>
+              <GuidesGrid
+                items={filteredItems}
+                onClickGuide={(g) => {
+                  const qs = queryParams.toString();
+                  navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`, { state: { fromQuery: qs } });
+                }}
+              />
+              {hasMore && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={async () => {
+                      if (!cursor) return;
+                      try {
+                        if (inFlightController.current) { inFlightController.current.abort(); }
+                        const controller = new AbortController(); inFlightController.current = controller;
+                        const qp = new URLSearchParams(queryParams.toString());
+                        if (!qp.get('pageSize')) qp.set('pageSize', '24');
+                        qp.set('cursor', cursor);
+                        const res = await fetch(`/api/guides?${qp.toString()}`, { signal: controller.signal });
+                        if (res.ok) {
+                          const data = await res.json();
+                          setItems(prev => [...prev, ...data.items]);
+                          setFilteredItems(prev => [...prev, ...data.items]);
+                          setCursor(data.cursor || null);
+                          setHasMore(!!data.has_more);
+                        }
+                      } catch {}
+                    }}
+                    className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200"
+                  >
+                    Load more
+                  </button>
+                </div>
+              )}
+              </>
             ) : (
               <MarketplaceGrid
                 items={filteredItems}
@@ -387,3 +459,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 };
 
 export default MarketplacePage;
+
+
+
+
+
+
+

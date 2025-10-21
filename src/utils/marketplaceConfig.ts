@@ -697,7 +697,13 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
   },
   'knowledge-hub': knowledgeHubBaseConfig,
   // Compatibility alias for new Guides marketplace
-  guides: { ...knowledgeHubBaseConfig, id: 'guides', route: '/marketplace/guides', title: 'Guides Marketplace' }
+  guides: {
+    ...knowledgeHubBaseConfig,
+    id: 'guides',
+    route: '/marketplace/guides',
+    title: 'Guidelines',
+    description: 'Access practical guidelines, templates, and processes to support everyday delivery and collaboration.'
+  }
 };
 // Helper to get config by marketplace type
 export const getMarketplaceConfig = (type: string): MarketplaceConfig => {
