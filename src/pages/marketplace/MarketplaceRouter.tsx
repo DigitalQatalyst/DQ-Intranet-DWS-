@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { MarketplacePage } from '../../components/marketplace/MarketplacePage';
 import MarketplaceDetailsPage from './MarketplaceDetailsPage';
 import ActivitiesPage from './ActivitiesPage';
 import { DollarSign, Briefcase, Users, Calendar, Newspaper, BookOpen, Video } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
+const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
 // Promo cards for courses marketplace
 const coursePromoCards = [{
   id: 'finance-promo',
@@ -83,12 +84,14 @@ export const MarketplaceRouter: React.FC = () => {
   const financialConfig = getMarketplaceConfig('financial');
   const nonFinancialConfig = getMarketplaceConfig('non-financial');
   const knowledgeHubConfig = getMarketplaceConfig('knowledge-hub');
+  const guidesConfig = getMarketplaceConfig('guides');
   // State for bookmarked items and comparison
   const [bookmarkedItems, setBookmarkedItems] = useState<Record<string, string[]>>({
     courses: [],
     financial: [],
     'non-financial': [],
-    'knowledge-hub': []
+    'knowledge-hub': [],
+    guides: []
   });
   // Toggle bookmark for an item
   const handleToggleBookmark = (marketplaceType: string, itemId: string) => {
@@ -111,9 +114,13 @@ export const MarketplaceRouter: React.FC = () => {
       {/* Non-Financial Services Marketplace */}
       <Route path="/non-financial" element={<MarketplacePage marketplaceType="non-financial" title={nonFinancialConfig.title} description={nonFinancialConfig.description} promoCards={nonFinancialPromoCards} />} />
       <Route path="/non-financial/:itemId" element={<MarketplaceDetailsPage marketplaceType="non-financial" bookmarkedItems={bookmarkedItems['non-financial']} onToggleBookmark={itemId => handleToggleBookmark('non-financial', itemId)} />} />
-      {/* Knowledge Hub Marketplace */}
+      {/* Guides Marketplace (canonical) */}
+      <Route path="/guides" element={<MarketplacePage marketplaceType="guides" title={guidesConfig.title} description={guidesConfig.description} promoCards={knowledgeHubPromoCards} />} />
+      <Route path="/guides/:itemId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailPage /></React.Suspense>} />
+      {/* Backward compatibility: Knowledge Hub routes (aliased to Guides) */}
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
-      <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />
+      <Route path="/knowledge-hub/:itemId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailPage /></React.Suspense>} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
     </Routes>;
 };
+

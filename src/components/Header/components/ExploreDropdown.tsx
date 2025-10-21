@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, FileText, LucideProps } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, SparklesIcon, FileText, LucideProps, BookOpen } from 'lucide-react';
 
 interface Marketplace {
   id: string;
@@ -55,11 +55,11 @@ const marketplaces: Marketplace[] = [
     href: '/marketplace/investment',
   },
   {
-    id: 'calendar',
-    name: 'Calendar & Events',
-    description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
-    icon: CalendarIcon,
-    href: '/events',
+    id: 'guides',
+    name: 'Guides Marketplace',
+    description: 'Guides, playbooks, and how-to resources.',
+    icon: BookOpen,
+    href: '/marketplace/guides',
   },
   {
     id: 'opportunity',

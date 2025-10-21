@@ -11,6 +11,8 @@ import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { DiscoverAbuDhabi } from "./pages/discoverAbuDhabi";
 import NotFound from "./pages/NotFound";
+import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
+import GuideEditor from "./pages/admin/guides/GuideEditor";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import { DQEventsCalendar } from "./components/DQEventsCalendar";
@@ -65,6 +67,13 @@ export function AppRouter() {
               }
             />
             <Route path="/marketplace/*" element={<MarketplaceRouter />} />
+            {/* Admin - Guides CRUD */}
+            <Route path="/admin/guides" element={<AdminGuidesList />} />
+            <Route path="/admin/guides/new" element={<GuideEditor />} />
+            <Route path="/admin/guides/:id" element={<GuideEditor />} />
+          {/* Canonical and compatibility routes for Guides marketplace */}
+          <Route path="/guides" element={<Navigate to="/marketplace/guides" replace />} />
+          <Route path="/knowledge-hub" element={<Navigate to="/marketplace/guides" replace />} />
             <Route
               path="/dashboard/*"
               element={

@@ -93,8 +93,8 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
         {itemsWithPromos.map((entry, idx) => {
         if (entry.type === 'item') {
           const item = entry.data as MarketplaceItem;
-          // Use KnowledgeHubCard for knowledge-hub marketplace type
-          if (marketplaceType === 'knowledge-hub') {
+          // Use KnowledgeHubCard for guides/knowledge-hub marketplace types
+          if (marketplaceType === 'knowledge-hub' || marketplaceType === 'guides') {
             return <KnowledgeHubCard key={`item-${item.id || idx}`} item={item} isBookmarked={bookmarkedItems.includes(item.id)} onToggleBookmark={() => onToggleBookmark(item.id)} onAddToComparison={() => onAddToComparison(item)} onQuickView={() => setQuickViewItem(item)} />;
           }
           // Use standard MarketplaceCard for other marketplace types
