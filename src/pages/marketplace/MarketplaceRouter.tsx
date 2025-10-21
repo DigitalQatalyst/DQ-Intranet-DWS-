@@ -1,5 +1,6 @@
 ﻿import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import AssetLibraryPage from '../assetLibrary';
 import { MarketplacePage } from '../../components/marketplace/MarketplacePage';
 import MarketplaceDetailsPage from './MarketplaceDetailsPage';
 import ActivitiesPage from './ActivitiesPage';
@@ -119,8 +120,10 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/guides/:itemId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailPage /></React.Suspense>} />
       {/* Backward compatibility: Knowledge Hub routes (aliased to Guides) */}
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
-      <Route path="/knowledge-hub/:itemId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailPage /></React.Suspense>} />
-      <Route path="/marketplace/activities" element={<ActivitiesPage />} />
+      <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />
+  {/* Asset Library */}
+  <Route path="/asset-library" element={<AssetLibraryPage />} />
+  <Route path="/marketplace/activities" element={<ActivitiesPage />} />
     </Routes>;
 };
 
