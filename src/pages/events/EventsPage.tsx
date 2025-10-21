@@ -27,111 +27,103 @@ export const EventsPage: React.FC = () => {
 
   // Load events data
   useEffect(() => {
-    const loadEvents = async () => {
-      setLoading(true);
-      try {
-        // Using mock data - can be replaced with API call
-        const eventsData = mockEvents;
-        
-        // Apply filters based on query params
-        let filtered = [...eventsData];
-        
-        // Filter by search query
-        const searchQuery = queryParams.get('q') || '';
-        if (searchQuery) {
-          filtered = filtered.filter(event => 
-            event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.location.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        }
+    setLoading(true);
+    
+    // Using mock data directly
+    const eventsData = mockEvents;
+    
+    // Apply filters based on query params
+    let filtered = [...eventsData];
+    
+    // Filter by search query
+    const searchQuery = queryParams.get('q') || '';
+    if (searchQuery) {
+      filtered = filtered.filter(event => 
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.location.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-        // Filter by category
-        const categories = (queryParams.get('category') || '').split(',').filter(Boolean);
-        if (categories.length > 0) {
-          filtered = filtered.filter(event => categories.includes(event.category));
-        }
+    // Filter by category
+    const categories = (queryParams.get('category') || '').split(',').filter(Boolean);
+    if (categories.length > 0) {
+      filtered = filtered.filter(event => categories.includes(event.category));
+    }
 
-        // Filter by month
-        const months = (queryParams.get('month') || '').split(',').filter(Boolean);
-        if (months.length > 0) {
-          filtered = filtered.filter(event => {
-            const eventMonth = new Date(event.start).toLocaleString('en-US', { month: 'long' });
-            return months.includes(eventMonth);
-          });
-        }
+    // Filter by month
+    const months = (queryParams.get('month') || '').split(',').filter(Boolean);
+    if (months.length > 0) {
+      filtered = filtered.filter(event => {
+        const eventMonth = new Date(event.start).toLocaleString('en-US', { month: 'long' });
+        return months.includes(eventMonth);
+      });
+    }
 
-        // Filter by location type
-        const locationTypes = (queryParams.get('location') || '').split(',').filter(Boolean);
-        if (locationTypes.length > 0) {
-          filtered = filtered.filter(event => {
-            const location = event.location.toLowerCase();
-            return locationTypes.some(type => {
-              if (type === 'virtual') return location.includes('zoom') || location.includes('teams') || location.includes('virtual');
-              if (type === 'hybrid') return location.includes('+');
-              if (type === 'in-person') return !location.includes('zoom') && !location.includes('teams') && !location.includes('virtual') && !location.includes('+');
-              return false;
-            });
-          });
-        }
-
-        // Sort by date
-        const sort = queryParams.get('sort') || 'date';
-        if (sort === 'date') {
-          filtered.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-        } else if (sort === 'title') {
-          filtered.sort((a, b) => a.title.localeCompare(b.title));
-        }
-
-        setItems(eventsData);
-        setFilteredItems(filtered);
-
-        // Compute facets
-        const categoryMap = new Map<string, number>();
-        const monthMap = new Map<string, number>();
-        const locationMap = new Map<string, number>();
-
-        filtered.forEach(event => {
-          // Category facets
-          if (event.category) {
-            categoryMap.set(event.category, (categoryMap.get(event.category) || 0) + 1);
-          }
-
-          // Month facets
-          const month = new Date(event.start).toLocaleString('en-US', { month: 'long' });
-          monthMap.set(month, (monthMap.get(month) || 0) + 1);
-
-          // Location type facets
-          const location = event.location.toLowerCase();
-          if (location.includes('zoom') || location.includes('teams') || location.includes('virtual')) {
-            locationMap.set('virtual', (locationMap.get('virtual') || 0) + 1);
-          } else if (location.includes('+')) {
-            locationMap.set('hybrid', (locationMap.get('hybrid') || 0) + 1);
-          } else {
-            locationMap.set('in-person', (locationMap.get('in-person') || 0) + 1);
-          }
+    // Filter by location type
+    const locationTypes = (queryParams.get('location') || '').split(',').filter(Boolean);
+    if (locationTypes.length > 0) {
+      filtered = filtered.filter(event => {
+        const location = event.location.toLowerCase();
+        return locationTypes.some(type => {
+          if (type === 'virtual') return location.includes('zoom') || location.includes('teams') || location.includes('virtual');
+          if (type === 'hybrid') return location.includes('+');
+          if (type === 'in-person') return !location.includes('zoom') && !location.includes('teams') && !location.includes('virtual') && !location.includes('+');
+          return false;
         });
+      });
+    }
 
-        setFacets({
-          category: Array.from(categoryMap.entries()).map(([id, count]) => ({ id, name: id, count })),
-          month: Array.from(monthMap.entries()).map(([id, count]) => ({ id, name: id, count })),
-          location: Array.from(locationMap.entries()).map(([id, count]) => ({ 
-            id, 
-            name: id.charAt(0).toUpperCase() + id.slice(1), 
-            count 
-          })),
-        });
-      } catch (e) {
-        console.error('Error loading events:', e);
-        setItems([]);
-        setFilteredItems([]);
-        setFacets({});
-      } finally {
-        setLoading(false);
+    // Sort by date
+    const sort = queryParams.get('sort') || 'date';
+    if (sort === 'date') {
+      filtered.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+    } else if (sort === 'title') {
+      filtered.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    setItems(eventsData);
+    setFilteredItems(filtered);
+
+    // Compute facets from all events (not just filtered)
+    const categoryMap = new Map<string, number>();
+    const monthMap = new Map<string, number>();
+    const locationMap = new Map<string, number>();
+
+    eventsData.forEach(event => {
+      // Category facets
+      if (event.category) {
+        categoryMap.set(event.category, (categoryMap.get(event.category) || 0) + 1);
       }
-    };
 
-    loadEvents();
+      // Month facets
+      const month = new Date(event.start).toLocaleString('en-US', { month: 'long' });
+      monthMap.set(month, (monthMap.get(month) || 0) + 1);
+
+      // Location type facets
+      const location = event.location.toLowerCase();
+      if (location.includes('zoom') || location.includes('teams') || location.includes('virtual')) {
+        locationMap.set('virtual', (locationMap.get('virtual') || 0) + 1);
+      }
+      if (location.includes('+')) {
+        locationMap.set('hybrid', (locationMap.get('hybrid') || 0) + 1);
+      }
+      if (!location.includes('zoom') && !location.includes('teams') && !location.includes('virtual') && !location.includes('+')) {
+        locationMap.set('in-person', (locationMap.get('in-person') || 0) + 1);
+      }
+    });
+
+    setFacets({
+      category: Array.from(categoryMap.entries()).map(([id, count]) => ({ id, name: id, count })).sort((a, b) => a.name.localeCompare(b.name)),
+      month: Array.from(monthMap.entries()).map(([id, count]) => ({ id, name: id, count })),
+      location: Array.from(locationMap.entries()).map(([id, count]) => ({ 
+        id, 
+        name: id.charAt(0).toUpperCase() + id.slice(1), 
+        count 
+      })).sort((a, b) => a.name.localeCompare(b.name)),
+    });
+    
+    setLoading(false);
   }, [queryParams]);
 
   // UI helpers
