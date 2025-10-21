@@ -10,7 +10,15 @@ export const ResponsiveCardGrid: React.FC<ResponsiveCardGridProps> = ({
   className = '',
   'data-id': dataId
 }) => {
-  return <div className={`grid ${designTokens.responsive.grid.mobile} ${designTokens.responsive.grid.tablet} ${designTokens.responsive.grid.desktop} ${designTokens.responsive.gap} ${className}`} data-id={dataId}>
+  // Use an auto-fit grid so cards are centered and extra empty columns don't appear
+  // by default we create columns that are at least 280px and grow to fill available space
+  const autoFitClass = 'grid-cols-[repeat(auto-fit,minmax(280px,1fr))]';
+  return (
+    <div
+      className={`grid ${autoFitClass} ${designTokens.responsive.gap} ${className}`}
+      data-id={dataId}
+    >
       {children}
-    </div>;
+    </div>
+  );
 };
