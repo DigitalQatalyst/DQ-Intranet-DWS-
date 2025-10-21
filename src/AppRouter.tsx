@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CourseType } from "./utils/mockData";
 import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
-import { App } from "./App";
+import { App } from './App';
+
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
 import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
@@ -16,7 +17,7 @@ import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
-import { DQEventsCalendar } from "./components/DQEventsCalendar";
+import EventsPage from "./pages/events/EventsPage";
 import KfBot from "./bot/KfBot";
 
 export function AppRouter() {
@@ -91,7 +92,7 @@ export function AppRouter() {
             />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
             <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
-            <Route path="/events" element={<DQEventsCalendar />} />
+            <Route path="/events" element={<EventsPage />} />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />
