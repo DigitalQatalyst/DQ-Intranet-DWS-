@@ -20,7 +20,7 @@ interface ComparisonItem {
   [key: string]: any;
 }
 export interface MarketplacePageProps {
-  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub';
+  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding';
   title: string;
   description: string;
   promoCards?: any[];

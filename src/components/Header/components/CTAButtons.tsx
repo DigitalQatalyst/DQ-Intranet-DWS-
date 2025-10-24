@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MenuIcon, XIcon } from 'lucide-react';
+import { scrollToSupport } from '../../../utils/scroll';
 interface CTAButtonsProps {
   isCompact?: boolean;
   onSignIn: () => void;
@@ -16,7 +17,11 @@ export function CTAButtons({
     setIsMobileMenuOpen(false);
   };
   const handleCTAClick = (action: string) => {
-    console.log(`${action} clicked`);
+    if (action === 'Request Support') {
+      scrollToSupport();
+    } else {
+      console.log(`${action} clicked`);
+    }
     setIsMobileMenuOpen(false);
   };
   return <>
@@ -29,7 +34,7 @@ export function CTAButtons({
           Request Support
         </button>
         <button className={`px-4 py-2 text-white border border-white/50 rounded-md hover:bg-white/10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/30 ${isCompact ? 'text-sm px-3 py-1.5' : ''}`} onClick={handleSignIn}>
-          Sign In
+          Sign In to DQ Workspace
         </button>
       </div>
       {/* Mobile - Always visible primary CTA */}

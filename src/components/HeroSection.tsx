@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Send, ChevronDown, ArrowRight, Building } from 'lucide-react';
+import { Send, ChevronDown, ArrowRight, Users } from 'lucide-react';
 import { AnimatedText, FadeInUpOnScroll, StaggeredFadeIn } from './AnimationUtils';
+import { scrollToReadyMove } from '../utils/scroll';
+import { Link } from 'react-router-dom';
+import { useAuth } from './Header';
 interface HeroSectionProps {
   'data-id'?: string;
 }
 const HeroSection: React.FC<HeroSectionProps> = ({
   'data-id': dataId
 }) => {
+  const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
+  const onboardingPath = '/onboarding/start';
+  const ctaHref = isAuthenticated
+    ? onboardingPath
+    : `/signin?redirect=${encodeURIComponent(onboardingPath)}`;
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -43,7 +52,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   }, [isSearchFocused]);
   const suggestionPills = ['Open an IT service request', 'Where’s the HR leave policy?', 'Start "Day in DQ" onboarding', 'Show this week’s LMS courses'];
   return <div className="relative w-full bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 overflow-hidden" style={{
-    backgroundImage: "linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1470&auto=format&fit=crop')",
+    backgroundImage: "linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url('https://images.unsplash.com/photo-1517651685227-828652601fa3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2670')",
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     height: '100vh'
@@ -64,7 +73,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           </h1>
           <FadeInUpOnScroll delay={0.8}>
             <p className="text-xl text-white/90 mb-8">
-              One trusted hub for tools, requests, learning, and collaboration—so every Qatalyst can move work forward, fast.
+              One trusted hub for tools, requests, learning, and collaboration so every Qatalyst can move work forward, fast.
             </p>
           </FadeInUpOnScroll>
         </div>
@@ -108,17 +117,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </FadeInUpOnScroll>
         {/* Call to Action Buttons with animations */}
         <StaggeredFadeIn staggerDelay={0.2} className="flex flex-col sm:flex-row gap-4 mt-2">
-          <a href="/register" className="px-8 py-3 bg-[linear-gradient(135deg,_#FB5535_0%,_#1A2E6E_50%,_#030F35_100%)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group">
+          <Link to={ctaHref} className="px-8 py-3 bg-[linear-gradient(135deg,_#FB5535_0%,_#1A2E6E_50%,_#030F35_100%)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group">
             <span className="relative z-10">Start Your Digital Workspace Journey</span>
             <ArrowRight size={18} className="ml-2 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
             {/* Ripple effect on hover */}
             <span className="absolute inset-0 overflow-hidden rounded-lg">
               <span className="absolute inset-0 bg-white/20 transform scale-0 opacity-0 group-hover:scale-[2.5] group-hover:opacity-100 rounded-full transition-all duration-700 origin-center"></span>
             </span>
-          </a>
-          <a href="/partners" className="px-8 py-3 bg-white text-dq-navy hover:bg-white/90 font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-            Become a Qatalyst
-            <Building size={18} />
+          </Link>
+          <a
+            href="#ready-move"
+            className="group px-8 py-3 rounded-lg border border-[#1A2E6E] bg-white text-[#1A2E6E] font-semibold shadow-lg inline-flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-[#1A2E6E] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#FB5535]"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToReadyMove();
+            }}
+          >
+            Become a Lead
+            <Users size={18} className="text-[#1A2E6E] transition-colors duration-300 group-hover:text-white" />
           </a>
         </StaggeredFadeIn>
       </div>
