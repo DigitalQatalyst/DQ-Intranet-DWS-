@@ -198,13 +198,15 @@ export default function LeadFormPopup() {
               Tell us where you'd like to contribute — we'll connect with you
               about available leadership roles.
             </p>
-            <p className="mt-2 text-sm opacity-80">
+            <p className="mt-2 text-sm">
+              <strong className="font-medium text-[#131E42]">Before you apply:</strong>{" "}
               <a
                 href="https://digital-qatalyst.shorthandstories.com/d77fd279-6d03-4f27-8211-745c3df5bbf3/index.html"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="text-[#0030E3] underline underline-offset-4 hover:text-[#002180]"
               >
-                Learn what sets great leaders apart — read the 6 leadership principles →
+                read the 6 leadership principles ↗
               </a>
             </p>
           </div>
