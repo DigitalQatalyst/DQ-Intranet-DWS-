@@ -22,8 +22,7 @@ import {
   GraduationCap,
   BarChart,
   CircleDot,
-  ClipboardList,
-  ChevronRight
+  ClipboardList
 } from 'lucide-react';
 import { AnimatedCounter, FadeInUpOnScroll, useInView } from './AnimationUtils';
 import ServiceCarousel from './marketplace/ServiceCarousel';
@@ -218,7 +217,7 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({ icon, title, count = nu
   return (
     <div className="mb-6" ref={ref} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <div className="flex items-center mb-2">
-        <div className="w-10 h-10 rounded-full bg-dq-navy/10 flex items-center justify-center mr-3 text-dq-navy">
+        <div className={`w-10 h-10 rounded-full bg-dq-navy/10 flex items-center justify-center mr-3 text-dq-navy transition-all duration-300 ${isHovered ? 'scale-110 bg-dq-navy/15' : ''}`}>
           {icon}
         </div>
         <h2 className="text-2xl font-bold text-gray-800 clamp-1">{title}</h2>
