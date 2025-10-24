@@ -423,7 +423,7 @@ export const HomePage: React.FC = () => {
           description: "Explore insights, data, and reports powering DQ's continuous transformation and decision making.",
           icon: <Lightbulb />,
           path: '#',
-          isActive: true
+          isActive: false
         },
         {
           id: 'template-library',
