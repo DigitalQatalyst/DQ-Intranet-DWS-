@@ -261,16 +261,16 @@ export const HomePage: React.FC = () => {
         },
         {
           id: 'dq-guideline-center-dco',
-          title: 'DQ Guideline Centre (DCO Working)',
-          description: 'Explore how DQ operates — policies, workflows, and guidelines that drive daily operations.',
+          title: 'DQ DCO Guidelines',
+          description: 'Discover DQ’s core workflows, policies, and daily operational standards.',
           icon: <BookIcon />,
           path: '#',
           isActive: true
         },
         {
           id: 'dq-guideline-center-dbp',
-          title: 'DQ Guideline Centre (DBP Build)',
-          description: 'Explore how DQ develops — standards, templates, and processes for DBP development.',
+          title: 'DQ DBP Guidelines',
+          description: 'Explore DQ’s build standards,templates, and development processes.',
           icon: <BookIcon />,
           path: '#',
           isActive: true
