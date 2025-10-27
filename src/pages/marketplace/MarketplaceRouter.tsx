@@ -5,6 +5,7 @@ import MarketplaceDetailsPage from './MarketplaceDetailsPage';
 import ActivitiesPage from './ActivitiesPage';
 import { DollarSign, Briefcase, Users, Calendar, Newspaper, BookOpen, Video } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
+import NewsPage from './NewsPage';
 // Promo cards for courses marketplace
 const coursePromoCards = [{
   id: 'finance-promo',
@@ -114,6 +115,8 @@ export const MarketplaceRouter: React.FC = () => {
       {/* Knowledge Hub Marketplace */}
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
       <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />
+      {/* News Marketplace */}
+      <Route path="/news" element={<NewsPage />} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
     </Routes>;
 };

@@ -95,6 +95,8 @@ export function AppRouter() {
             <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
             <Route path="/discover-dq" element={<DiscoverDQ />} />
             <Route path="/thank-you" element={<ThankYou />} />
+            {/* Redirect encoded leading-space path to canonical route */}
+            <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />
