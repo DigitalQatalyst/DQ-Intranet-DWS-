@@ -1,6 +1,6 @@
 import React from 'react';
 import { BasePost } from '../types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/communities/components/ui/button';
 interface PostCardTextProps {
   post: BasePost;
 }

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/communities/components/ui/skeleton';
 import { AlertCircle, FileText, MessageSquare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/communities/components/ui/button';
 interface Post {
   id: string;
   title: string;

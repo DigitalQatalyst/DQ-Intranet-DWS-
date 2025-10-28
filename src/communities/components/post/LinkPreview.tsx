@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ExternalLink, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/communities/components/ui/button';
 interface LinkPreviewProps {
   url: string;
   onRemove: () => void;

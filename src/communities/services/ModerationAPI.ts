@@ -1,5 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
 import { RealtimeChannel } from '@supabase/supabase-js';
 export interface ModerationMetrics {
   totalReports: number;

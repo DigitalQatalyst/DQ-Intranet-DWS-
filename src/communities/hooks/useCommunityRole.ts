@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/communities/integrations/supabase/client';
 export type CommunityRole = 'owner' | 'moderator' | 'member';
 export function useCommunityRole(userId: string | undefined, communityId: string | undefined) {
   const [role, setRole] = useState<CommunityRole | null>(null);

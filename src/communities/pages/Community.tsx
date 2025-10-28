@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthProvider';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { MainLayout } from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/button';
-import { StickyActionButton } from '@/components/KF eJP Library/Button';
+import { useAuth } from '@/communities/contexts/AuthProvider';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { MainLayout } from '@/communities/components/layout/MainLayout';
+import { Button } from '@/communities/components/ui/button';
+import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
 import { Users, UserPlus, UserMinus, AlertCircle, Plus, Settings, Home, ChevronRight, Upload, X, Pencil, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
-import { MemberList } from '@/components/communities/MemberList';
-import { InlineComposer } from '@/components/post/InlineComposer';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { MemberList } from '@/communities/components/communities/MemberList';
+import { InlineComposer } from '@/communities/components/post/InlineComposer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
+import { Label } from '@/communities/components/ui/label';
+import { Input } from '@/communities/components/ui/input';
 import { format } from 'date-fns';
-import { PostCard } from '@/components/posts/PostCard';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PostCard } from '@/communities/components/posts/PostCard';
+import { Skeleton } from '@/communities/components/ui/skeleton';
 // Import PageLayout components
-import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs, BreadcrumbItem } from '@/components/KF eJP Library/PageLayout';
+import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs, BreadcrumbItem } from '@/communities/components/KF eJP Library/PageLayout';
 interface Community {
   id: string;
   name: string;

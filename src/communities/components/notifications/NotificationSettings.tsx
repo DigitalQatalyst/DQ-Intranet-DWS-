@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthProvider';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { useAuth } from '@/communities/contexts/AuthProvider';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Switch } from '@/communities/components/ui/switch';
+import { Label } from '@/communities/components/ui/label';
 import { toast } from 'sonner';
 import { MessageSquare, AtSign, AlertTriangle, Megaphone, Info } from 'lucide-react';
 interface NotificationSettingsData {

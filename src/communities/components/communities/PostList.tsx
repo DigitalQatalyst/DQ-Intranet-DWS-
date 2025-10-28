@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/communities/components/ui/card';
+import { Button } from '@/communities/components/ui/button';
+import { Skeleton } from '@/communities/components/ui/skeleton';
 import { AlertCircle, FileText, Eye, ChevronRight, ThumbsUp, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
 interface Post {
   id: string;
   title: string;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, MapPin, Clock, Users, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/communities/components/ui/button';
 import { format, isPast } from 'date-fns';
 interface EventPostContentProps {
   postId: string;

@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthProvider';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Header } from '@/components/layout/Header';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { NotificationCard } from '@/components/notifications/NotificationCard';
-import { NotificationSettings } from '@/components/notifications/NotificationSettings';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Header } from '@/communities/components/layout/Header';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
+import { NotificationCard } from '@/communities/components/notifications/NotificationCard';
+import { NotificationSettings } from '@/communities/components/notifications/NotificationSettings';
+import { Skeleton } from '@/communities/components/ui/skeleton';
+import { Button } from '@/communities/components/ui/button';
 import { Bell, AlertCircle, Settings } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/communities/components/ui/dialog';
 interface Notification {
   id: string;
   type: string;

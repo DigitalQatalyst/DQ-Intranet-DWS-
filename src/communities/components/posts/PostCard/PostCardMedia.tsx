@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BasePost, MediaFile } from '../types';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/communities/integrations/supabase/client';
 import { ImageIcon, Video, FileImage } from 'lucide-react';
 interface PostCardMediaProps {
   post: BasePost;

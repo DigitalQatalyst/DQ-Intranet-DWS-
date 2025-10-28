@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthProvider';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAuth } from '@/communities/contexts/AuthProvider';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/communities/components/ui/card';
+import { Button } from '@/communities/components/ui/button';
+import { Badge } from '@/communities/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/communities/components/ui/tooltip';
 import { Users, Eye, UserPlus, UserMinus, CheckCircle2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 interface CommunityCardProps {

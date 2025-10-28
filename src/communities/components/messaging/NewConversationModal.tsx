@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
+import { Button } from '@/communities/components/ui/button';
+import { Input } from '@/communities/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
 import { Search, User, Users } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/communities/hooks/use-toast';
+import { ScrollArea } from '@/communities/components/ui/scroll-area';
 interface User {
   id: string;
   username: string | null;

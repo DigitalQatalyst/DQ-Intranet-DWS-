@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthProvider';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 import { PostCardBase } from './PostCardBase';
 import { PostCardText } from './PostCardText';
 import { PostCardMedia } from './PostCardMedia';
@@ -9,7 +9,7 @@ import { PostCardPoll } from './PostCardPoll';
 import { PostCardEvent } from './PostCardEvent';
 import { PostCardAnnouncement } from './PostCardAnnouncement';
 import { BasePost } from '../types';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/communities/hooks/usePermissions';
 import { AlertCircle } from 'lucide-react';
 interface PostCardProps {
   post: BasePost;

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthProvider';
-import { Header } from '@/components/layout/Header';
-import { ConversationList } from '@/components/messaging/ConversationList';
-import { ChatWindow } from '@/components/messaging/ChatWindow';
-import { NewConversationModal } from '@/components/messaging/NewConversationModal';
-import { GroupChatModal } from '@/components/messaging/GroupChatModal';
-import { Button } from '@/components/ui/button';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { useAuth } from '@/communities/contexts/AuthProvider';
+import { Header } from '@/communities/components/layout/Header';
+import { ConversationList } from '@/communities/components/messaging/ConversationList';
+import { ChatWindow } from '@/communities/components/messaging/ChatWindow';
+import { NewConversationModal } from '@/communities/components/messaging/NewConversationModal';
+import { GroupChatModal } from '@/communities/components/messaging/GroupChatModal';
+import { Button } from '@/communities/components/ui/button';
 import { Plus, WifiOff, Users } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/communities/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 export default function MessagingDashboard() {
   const {

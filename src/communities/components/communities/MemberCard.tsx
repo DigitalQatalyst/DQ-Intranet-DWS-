@@ -1,12 +1,12 @@
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { GradientAvatar } from '@/components/ui/gradient-avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { Button } from '@/communities/components/ui/button';
+import { Badge } from '@/communities/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/communities/components/ui/dropdown-menu';
+import { GradientAvatar } from '@/communities/components/ui/gradient-avatar';
 import { MoreVertical, Shield, UserCog, UserMinus } from 'lucide-react';
 import { format } from 'date-fns';
-import { useCommunityRole, formatCommunityRole, getCommunityRoleBadgeVariant, CommunityRole } from '@/hooks/useCommunityRole';
+import { useCommunityRole, formatCommunityRole, getCommunityRoleBadgeVariant, CommunityRole } from '@/communities/hooks/useCommunityRole';
 interface MemberCardProps {
   member: {
     id: string;

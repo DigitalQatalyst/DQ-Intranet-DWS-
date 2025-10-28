@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText, ImageIcon, BarChart3, Calendar, Megaphone, BookOpen } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/communities/components/ui/badge';
 import { PostType } from '../types';
 interface PostTypeBadgeProps {
   postType?: PostType;

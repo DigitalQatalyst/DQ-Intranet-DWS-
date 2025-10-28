@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '@/communities/contexts/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 import { CommunitiesLayout } from './CommunitiesLayout';
+import { Button } from '@/communities/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
+import { LoginForm } from '@/communities/components/auth/LoginForm';
+import { Sparkles } from 'lucide-react';
 
 export function CommunityHome() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+
   return (
     <CommunitiesLayout>
       <div className="flex flex-col min-h-screen">
@@ -36,12 +46,13 @@ export function CommunityHome() {
                 </p>
                 
                 <div className="mt-6 flex items-center justify-center gap-4 flex-wrap">
-                  <button className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5 rounded-lg transition-colors">
+                  <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
+                    <Sparkles className="mr-2 h-5 w-5" />
                     Join the Community
-                  </button>
-                  <a href="/communities/communities" className="bg-white/10 text-white ring-1 ring-white/40 hover:bg-white/15 font-medium px-6 py-2.5 rounded-lg transition-colors inline-block">
+                  </Button>
+                  <Button onClick={() => navigate('/communities')} className="bg-white/10 text-white ring-1 ring-white/40 hover:bg-white/15 font-medium px-6 py-2.5" size="lg" variant="outline">
                     Explore Communities
-                  </a>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -111,14 +122,24 @@ export function CommunityHome() {
                   Join thousands of innovators already collaborating, sharing ideas, and growing together on our platform.
                 </p>
                 <div className="mt-6 flex justify-center">
-                  <button className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5 rounded-lg transition-colors">
+                  <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
+                    <Sparkles className="mr-2 h-5 w-5" />
                     Join Now
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
           </section>
         </div>
+        {/* Login Modal */}
+        <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="sr-only">Sign In</DialogTitle>
+            </DialogHeader>
+            <LoginForm onSuccess={() => setLoginModalOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
     </CommunitiesLayout>
   );

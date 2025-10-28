@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
 import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { Skeleton } from '@/communities/components/ui/skeleton';
 import { AlertCircle, MessageSquare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { HiddenContentPlaceholder } from '@/components/moderation/HiddenContentPlaceholder';
-import { usePermissions } from '@/hooks/usePermissions';
+import { Button } from '@/communities/components/ui/button';
+import { HiddenContentPlaceholder } from '@/communities/components/moderation/HiddenContentPlaceholder';
+import { usePermissions } from '@/communities/hooks/usePermissions';
 interface Comment {
   id: string;
   content: string;

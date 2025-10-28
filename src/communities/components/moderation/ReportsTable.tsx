@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
 import { format } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/communities/components/ui/skeleton';
+import { Badge } from '@/communities/components/ui/badge';
+import { Button } from '@/communities/components/ui/button';
 import { AlertCircle, FileText, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/communities/components/ui/table';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
 interface Report {
   id: string;
   report_type: 'post' | 'comment';

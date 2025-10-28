@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { BasePost, PollOption } from '../types';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/communities/integrations/supabase/client';
 import { BarChart3, Clock } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/communities/components/ui/badge';
 interface PostCardPollProps {
   post: BasePost;
 }

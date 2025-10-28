@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthProvider';
-import { Header, AuthProvider as KFAuthProvider } from '@/components/Header';
+import { useAuth } from '@/communities/contexts/AuthProvider';
+import { Header, AuthProvider as KFAuthProvider } from '@/communities/components/Header';
 //import { Header } from "../../components/Header";
-import { Footer } from '@/components/Footer';
-import { Sidebar } from '@/components/AppSidebar';
-import { PageLayout, PageSection, SectionContent } from '@/components/PageLayout';
+import { Footer } from '@/communities/components/Footer';
+import { Sidebar } from '@/communities/components/AppSidebar';
+import { PageLayout, PageSection, SectionContent } from '@/communities/components/PageLayout';
 interface MainLayoutProps {
   children: React.ReactNode;
   title?: string;

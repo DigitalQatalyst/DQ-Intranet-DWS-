@@ -1,7 +1,7 @@
 import React from 'react';
 import { BasePost } from '../types';
 import { Calendar, MapPin, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/communities/components/ui/button';
 import { format, formatDistanceToNow } from 'date-fns';
 interface PostCardEventProps {
   post: BasePost;

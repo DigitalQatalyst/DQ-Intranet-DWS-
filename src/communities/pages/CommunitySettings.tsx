@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthProvider';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Header } from '@/components/layout/Header';
-import { GeneralSettingsCard } from '@/components/community-settings/GeneralSettingsCard';
-import { RolesAndPermissionsCard } from '@/components/community-settings/RolesAndPermissionsCard';
-import { InviteMembersCard } from '@/components/community-settings/InviteMembersCard';
-import { AuditLogCard } from '@/components/community-settings/AuditLogCard';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/communities/contexts/AuthProvider';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Header } from '@/communities/components/layout/Header';
+import { GeneralSettingsCard } from '@/communities/components/community-settings/GeneralSettingsCard';
+import { RolesAndPermissionsCard } from '@/communities/components/community-settings/RolesAndPermissionsCard';
+import { InviteMembersCard } from '@/communities/components/community-settings/InviteMembersCard';
+import { AuditLogCard } from '@/communities/components/community-settings/AuditLogCard';
+import { Skeleton } from '@/communities/components/ui/skeleton';
 import { AlertCircle, ChevronLeft, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/communities/components/ui/button';
 interface Community {
   id: string;
   name: string;

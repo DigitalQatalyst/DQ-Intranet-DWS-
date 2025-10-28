@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/communities/components/ui/card';
+import { Skeleton } from '@/communities/components/ui/skeleton';
+import { Button } from '@/communities/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 interface TrendingSectionProps {
   title: string;

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthProvider';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { MainLayout } from '@/components/layout/MainLayout';
-import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/components/KF eJP Library/PageLayout';
-import { TabsFeed } from '@/components/feed/TabsFeed';
-import { FeedSidebar } from '@/components/feed/FeedSidebar';
-import { InlineComposer } from '@/components/post/InlineComposer';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { StickyActionButton } from '@/components/KF eJP Library/Button';
-import { Button } from '@/components/ui/button';
+import { MainLayout } from '@/communities/components/layout/MainLayout';
+import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/KF eJP Library/PageLayout';
+import { TabsFeed } from '@/communities/components/feed/TabsFeed';
+import { FeedSidebar } from '@/communities/components/feed/FeedSidebar';
+import { InlineComposer } from '@/communities/components/post/InlineComposer';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
+import { Button } from '@/communities/components/ui/button';
 import { X, Search } from 'lucide-react';
 interface Post {
   id: string;

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
 import { Link } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { GradientAvatar } from '@/components/ui/gradient-avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { Button } from '@/communities/components/ui/button';
+import { Skeleton } from '@/communities/components/ui/skeleton';
+import { GradientAvatar } from '@/communities/components/ui/gradient-avatar';
 import { AlertCircle, Users, ChevronRight } from 'lucide-react';
 interface Member {
   id: string;

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Button } from '@/communities/components/ui/button';
+import { Input } from '@/communities/components/ui/input';
+import { Textarea } from '@/communities/components/ui/textarea';
+import { Label } from '@/communities/components/ui/label';
 import { toast } from 'sonner';
 import { Save, X, Loader2 } from 'lucide-react';
 interface Community {

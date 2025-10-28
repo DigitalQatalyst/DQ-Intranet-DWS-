@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/communities/components/ui/button';
+import { Input } from '@/communities/components/ui/input';
+import { Label } from '@/communities/components/ui/label';
 import { toast } from 'sonner';
 import { UserPlus, Mail } from 'lucide-react';
 interface InviteMembersCardProps {

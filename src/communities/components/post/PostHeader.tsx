@@ -1,8 +1,8 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GradientAvatar } from '@/components/ui/gradient-avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { GradientAvatar } from '@/communities/components/ui/gradient-avatar';
 interface Post {
   id: string;
   title: string;

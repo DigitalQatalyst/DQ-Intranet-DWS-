@@ -1,7 +1,7 @@
 import React from 'react';
 import { BasePost } from '../types';
 import { Pin } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/communities/components/ui/badge';
 interface PostCardAnnouncementProps {
   post: BasePost;
 }

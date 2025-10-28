@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthProvider';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/communities/contexts/AuthProvider';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Button } from '@/communities/components/ui/button';
+import { Textarea } from '@/communities/components/ui/textarea';
 import { Loader2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { LoginForm } from '@/communities/components/auth/LoginForm';
+import { Dialog, DialogContent } from '@/communities/components/ui/dialog';
 interface AddCommentFormProps {
   postId: string;
   onCommentAdded: () => void;

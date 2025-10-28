@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/communities/integrations/supabase/client';
 export type UserRole = 'admin' | 'moderator' | 'member';
 export function useUserRole(userId: string | undefined) {
   const [role, setRole] = useState<UserRole>('member');

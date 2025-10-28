@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthProvider';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 import { ThumbsUp, Lightbulb, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/communities/components/ui/button';
 import { toast } from 'sonner';
 interface PostReactionsProps {
   postId: string;

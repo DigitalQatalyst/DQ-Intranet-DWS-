@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { Button } from '@/communities/components/ui/button';
+import { Input } from '@/communities/components/ui/input';
 import { X, Upload, Image as ImageIcon, Video, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 interface UploadedFile {

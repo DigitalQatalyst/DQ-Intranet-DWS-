@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/communities/components/ui/card';
+import { Badge } from '@/communities/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
 import { Users, TrendingUp, Calendar, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/communities/components/ui/button';
+import { supabase } from '@/communities/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { useAuth } from '@/contexts/AuthProvider';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 interface TrendingTopic {
   tag: string;
   post_count: number;

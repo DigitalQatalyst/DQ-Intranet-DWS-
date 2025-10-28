@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/communities/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Users } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { Skeleton } from '@/components/ui/skeleton';
-import { GradientAvatar } from '@/components/ui/gradient-avatar';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { Skeleton } from '@/communities/components/ui/skeleton';
+import { GradientAvatar } from '@/communities/components/ui/gradient-avatar';
 interface Community {
   id: string;
   name: string;

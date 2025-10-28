@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
-import { UserRole, getRoleBadgeVariant, formatRole } from '@/hooks/useUserRole';
+import { Badge } from '@/communities/components/ui/badge';
+import { UserRole, getRoleBadgeVariant, formatRole } from '@/communities/hooks/useUserRole';
 import { Shield, Star, User } from 'lucide-react';
 interface RoleBadgeProps {
   role: UserRole;

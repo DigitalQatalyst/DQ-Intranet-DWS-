@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { useAuth } from '@/contexts/AuthProvider';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 import { BarChart3, Check, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/communities/components/ui/button';
+import { Progress } from '@/communities/components/ui/progress';
 import { addDays, format, isPast } from 'date-fns';
 interface PollOption {
   id: string;

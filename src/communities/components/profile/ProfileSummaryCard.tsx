@@ -1,13 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/communities/components/ui/card';
+import { Button } from '@/communities/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
 import { Edit2, Calendar, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState } from 'react';
-import { GradientAvatar } from '@/components/ui/gradient-avatar';
+import { GradientAvatar } from '@/communities/components/ui/gradient-avatar';
 import { RoleBadge } from './RoleBadge';
-import { useUserRole } from '@/hooks/useUserRole';
+import { useUserRole } from '@/communities/hooks/useUserRole';
 interface UserProfile {
   id: string;
   username: string;

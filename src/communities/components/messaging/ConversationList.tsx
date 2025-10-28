@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { Input } from '@/communities/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { Badge } from '@/communities/components/ui/badge';
 import { Search, Users, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/communities/components/ui/skeleton';
+import { ScrollArea } from '@/communities/components/ui/scroll-area';
 interface Conversation {
   id: string;
   type: 'direct' | 'group';

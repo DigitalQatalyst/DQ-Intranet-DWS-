@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { Badge } from '@/communities/components/ui/badge';
+import { Input } from '@/communities/components/ui/input';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/communities/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/communities/components/ui/popover';
 import { X, TrendingUp } from 'lucide-react';
 interface TagData {
   tag: string;

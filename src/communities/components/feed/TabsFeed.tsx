@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
+import { Card, CardContent, CardHeader } from '@/communities/components/ui/card';
+import { Button } from '@/communities/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/communities/components/ui/select';
 import { Home, Globe, TrendingUp, Plus, ArrowUpDown } from 'lucide-react';
-import { PostCard } from '@/components/posts/PostCard';
+import { PostCard } from '@/communities/components/posts/PostCard';
 interface Post {
   id: string;
   title: string;

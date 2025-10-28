@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthProvider';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/communities/components/ui/button';
+import { LoginForm } from '@/communities/components/auth/LoginForm';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/communities/components/ui/dropdown-menu';
 import { LogOut, User, LogIn, Shield, BarChart3, Bell, MessageSquare } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { NotificationsDrawer } from '@/components/notifications/NotificationsDrawer';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Badge } from '@/components/ui/badge';
-import { BurgerMenuButton } from '@/components/AppSidebar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/communities/components/ui/dialog';
+import { NotificationsDrawer } from '@/communities/components/notifications/NotificationsDrawer';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Badge } from '@/communities/components/ui/badge';
+import { BurgerMenuButton } from '@/communities/components/AppSidebar';
 interface HeaderProps {
   toggleSidebar?: () => void;
   sidebarOpen?: boolean;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Shield, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/communities/components/ui/button';
+import { Badge } from '@/communities/components/ui/badge';
 interface HiddenContentPlaceholderProps {
   contentType: 'post' | 'comment';
   reason?: string;

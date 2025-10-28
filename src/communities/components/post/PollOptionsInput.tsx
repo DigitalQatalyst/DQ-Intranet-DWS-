@@ -1,6 +1,6 @@
 import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/communities/components/ui/input';
+import { Button } from '@/communities/components/ui/button';
 import { X, Plus } from 'lucide-react';
 interface PollOptionsInputProps {
   options: string[];

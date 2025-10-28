@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/communities/lib/utils';
 interface GradientAvatarProps {
   className?: string;
   seed?: string;

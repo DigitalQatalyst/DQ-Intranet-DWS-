@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { safeFetch } from '@/utils/safeFetch';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { safeFetch } from '@/communities/utils/safeFetch';
+import { Button } from '@/communities/components/ui/button';
+import { useToast } from '@/communities/hooks/use-toast';
 import { CheckCircle2 } from 'lucide-react';
 interface PollOption {
   id: string;

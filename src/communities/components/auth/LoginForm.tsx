@@ -1,10 +1,10 @@
 import { useState, FormEvent } from 'react';
-import { useAuth } from '@/contexts/AuthProvider';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/communities/components/ui/button';
+import { Input } from '@/communities/components/ui/input';
+import { Label } from '@/communities/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/communities/components/ui/card';
 import { LogIn, Loader2 } from 'lucide-react';
 interface LoginFormProps {
   onSuccess?: () => void;

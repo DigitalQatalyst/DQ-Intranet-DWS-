@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { Button } from '@/communities/components/ui/button';
 import { UserPlus } from 'lucide-react';
-import { GradientAvatar } from '@/components/ui/gradient-avatar';
+import { GradientAvatar } from '@/communities/components/ui/gradient-avatar';
 interface PostAuthorCardProps {
   authorId?: string;
   authorUsername: string;

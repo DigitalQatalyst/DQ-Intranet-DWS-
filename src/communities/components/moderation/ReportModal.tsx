@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthProvider';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/communities/components/ui/dialog';
+import { Button } from '@/communities/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/communities/components/ui/radio-group';
+import { Label } from '@/communities/components/ui/label';
+import { Textarea } from '@/communities/components/ui/textarea';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 import { toast } from 'sonner';
 import { AlertTriangle } from 'lucide-react';
 interface ReportModalProps {

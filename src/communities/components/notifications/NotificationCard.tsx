@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
+import { Button } from '@/communities/components/ui/button';
+import { Badge } from '@/communities/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, AtSign, AlertTriangle, Info, Megaphone, X } from 'lucide-react';
 interface Notification {

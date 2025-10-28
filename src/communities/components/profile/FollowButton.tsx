@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/communities/components/ui/button';
 import { UserPlus, UserCheck } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/communities/integrations/supabase/client';
+import { useToast } from '@/communities/hooks/use-toast';
 interface FollowButtonProps {
   currentUserId: string;
   targetUserId: string;

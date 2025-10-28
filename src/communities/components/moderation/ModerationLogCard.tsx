@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/communities/components/ui/card';
+import { ScrollArea } from '@/communities/components/ui/scroll-area';
+import { Skeleton } from '@/communities/components/ui/skeleton';
+import { Badge } from '@/communities/components/ui/badge';
 import { AlertCircle, CheckCircle, EyeOff, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { ModerationAPI } from '@/services/ModerationAPI';
-import { cn } from '@/lib/utils';
+import { cn } from '@/communities/lib/utils';
 type ActionFilter = 'all' | 'warn' | 'hide' | 'approve' | 'delete' | 'restore';
 interface ModerationLogCardProps {
   communityIds: string[];
