@@ -1,7 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-defaulticon-compatibility';
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import mapboxgl from 'mapbox-gl';
 import type { RasterLayerSpecification, RasterSourceSpecification, Style } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -15,7 +12,7 @@ import {
   getUniqueTypes,
 } from '../api/MAPAPI';
 
-mapboxgl.accessToken = (import.meta as any).env?.VITE_MAPBOX_TOKEN || '';
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN!;
 
 type AllOption<T> = T | 'All';
 type FilterControl = {
@@ -35,7 +32,7 @@ const MARKER_COLORS: Record<LocationType | 'Default', string> = {
 };
 
 const MAPBOX_STYLES: Record<MapStyle, string> = {
-  standard: 'mapbox://styles/mapbox/streets-v12',
+  standard: 'mapbox://styles/mapbox/light-v11',
   satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
   hybrid: 'mapbox://styles/mapbox/satellite-v9',
 };
@@ -134,7 +131,7 @@ const buildPopupMarkup = (location: MapLocation) =>
 
 type DQMapProps = { className?: string; height?: number };
 
-export const DQMap: React.FC<DQMapProps> = ({ className = '', height = 440 }) => {
+export const DQMap: React.FC<DQMapProps> = ({ className = '', height = 560 }) => {
   const mapNodeRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -168,8 +165,11 @@ export const DQMap: React.FC<DQMapProps> = ({ className = '', height = 440 }) =>
     mapRef.current = map;
     map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right'); map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
 
-    const handleLoad = () => forceResize(map);
-    map.on('load', handleLoad);
+    const resizeOnLoad = () => {
+      map.resize();
+      forceResize(map);
+    };
+    map.on('load', resizeOnLoad);
     const handleStyleData = () => forceResize(map);
     map.on('styledata', handleStyleData);
 
@@ -187,7 +187,7 @@ export const DQMap: React.FC<DQMapProps> = ({ className = '', height = 440 }) =>
 
     return () => {
       if (fallbackTimer) window.clearTimeout(fallbackTimer);
-      map.off('load', handleLoad);
+      map.off('load', resizeOnLoad);
       map.off('styledata', handleStyleData);
       map.off('error', switchToOsm);
       markersRef.current.forEach((marker) => marker.remove()); markersRef.current = [];
@@ -297,7 +297,7 @@ export const DQMap: React.FC<DQMapProps> = ({ className = '', height = 440 }) =>
         </header>
 
         <div className="relative flex-1">
-          <div ref={mapNodeRef} className="w-full" style={{ height }} />
+          <div ref={mapNodeRef} className="w-full h-[560px]" style={{ height }} />
           {loading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 backdrop-blur-sm">
               <span className="text-sm font-semibold text-slate-600">Loading map…</span>
