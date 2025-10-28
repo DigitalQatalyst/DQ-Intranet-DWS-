@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
-import type { RasterLayerSpecification, RasterSourceSpecification, Style } from 'mapbox-gl';
+import type { MapboxEvent, RasterLayerSpecification, RasterSourceSpecification, Style } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import type { LocationType, MapLocation, MapStyle, Region } from '../types/map';
@@ -167,7 +167,8 @@ export const DQMap: React.FC<DQMapProps> = ({ className = '', height = 560 }) =>
     });
 
     mapRef.current = map;
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right'); map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
+    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+    map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
 
     const resizeHandler = () => map.resize();
     map.on('load', resizeHandler);
@@ -183,15 +184,21 @@ export const DQMap: React.FC<DQMapProps> = ({ className = '', height = 560 }) =>
       map.once('styledata', () => forceResize(map));
     };
 
+    const logAndSwitch = (event: MapboxEvent) => {
+      console.error('Mapbox GL error encountered', event);
+      switchToOsm();
+    };
+
     const fallbackTimer = hasToken ? window.setTimeout(switchToOsm, 1800) : undefined;
-    map.on('error', switchToOsm);
+    map.on('error', logAndSwitch);
 
     return () => {
       if (fallbackTimer) window.clearTimeout(fallbackTimer);
       map.off('load', resizeHandler);
       map.off('styledata', handleStyleData);
-      map.off('error', switchToOsm);
-      markersRef.current.forEach((marker) => marker.remove()); markersRef.current = [];
+      map.off('error', logAndSwitch);
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current = [];
       map.remove();
       mapRef.current = null;
     };
