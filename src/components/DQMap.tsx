@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.web.css';
 import mapboxgl from 'mapbox-gl';
 import type { RasterLayerSpecification, RasterSourceSpecification, Style } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
