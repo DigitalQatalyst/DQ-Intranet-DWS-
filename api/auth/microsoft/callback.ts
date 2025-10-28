@@ -48,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
   if (!userRes.ok) return res.status(500).send(`Fetching userinfo failed: ${await userRes.text()}`);
-  const _user = await userRes.json();
+  await userRes.json();
 
   // TODO: create/find user + set session cookie (JWT). For now, just continue.
   const cookies = parseCookies(req.headers.cookie);
