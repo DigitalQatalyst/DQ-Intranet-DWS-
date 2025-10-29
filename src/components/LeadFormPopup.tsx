@@ -195,8 +195,19 @@ export default function LeadFormPopup() {
             <p className="mt-2 text-sm md:text-[15px] text-gray-600">
               Step forward in your DQ journey. Leads drive collaboration,
               mentor associates, and shape how our digital workspace grows.
-              Tell us where you’d like to contribute — we’ll connect with you
+              Tell us where you'd like to contribute — we'll connect with you
               about available leadership roles.
+            </p>
+            <p className="mt-2 text-sm">
+              <strong className="font-medium text-[#131E42]">Before you apply:</strong>{" "}
+              <a
+                href="https://digital-qatalyst.shorthandstories.com/d77fd279-6d03-4f27-8211-745c3df5bbf3/index.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0030E3] underline underline-offset-4 hover:text-[#002180]"
+              >
+                read the 6 leadership principles ↗
+              </a>
             </p>
           </div>
           <button

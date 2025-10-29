@@ -22,8 +22,7 @@ import {
   GraduationCap,
   BarChart,
   CircleDot,
-  ClipboardList,
-  ChevronRight
+  ClipboardList
 } from 'lucide-react';
 import { AnimatedCounter, FadeInUpOnScroll, useInView } from './AnimationUtils';
 import ServiceCarousel from './marketplace/ServiceCarousel';
@@ -218,7 +217,7 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({ icon, title, count = nu
   return (
     <div className="mb-6" ref={ref} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <div className="flex items-center mb-2">
-        <div className="w-10 h-10 rounded-full bg-dq-navy/10 flex items-center justify-center mr-3 text-dq-navy">
+        <div className={`w-10 h-10 rounded-full bg-dq-navy/10 flex items-center justify-center mr-3 text-dq-navy transition-all duration-300 ${isHovered ? 'scale-110 bg-dq-navy/15' : ''}`}>
           {icon}
         </div>
         <h2 className="text-2xl font-bold text-gray-800 clamp-1">{title}</h2>
@@ -261,16 +260,16 @@ export const HomePage: React.FC = () => {
         },
         {
           id: 'dq-guideline-center-dco',
-          title: 'DQ Guideline Centre (DCO Working)',
-          description: 'Explore how DQ operates — policies, workflows, and guidelines that drive daily operations.',
+          title: 'DQ DCO Guidelines',
+          description: 'Discover DQ’s core workflows, policies, and daily operational standards.',
           icon: <BookIcon />,
           path: '#',
           isActive: true
         },
         {
           id: 'dq-guideline-center-dbp',
-          title: 'DQ Guideline Centre (DBP Build)',
-          description: 'Explore how DQ develops — standards, templates, and processes for DBP development.',
+          title: 'DQ DBP Guidelines',
+          description: 'Explore DQ’s build standards,templates, and development processes.',
           icon: <BookIcon />,
           path: '#',
           isActive: true
@@ -371,7 +370,7 @@ export const HomePage: React.FC = () => {
         },
         {
           id: 'blueprint-library',
-          title: 'DQ Reference Library (DBP Blueprints)',
+          title: 'DQ DBP Blueprints Library',
           description: 'Access blueprint structures and delivery frameworks for DBP development.',
           icon: <Compass />,
           path: '#',
@@ -379,7 +378,7 @@ export const HomePage: React.FC = () => {
         },
         {
           id: 'reference-library-products',
-          title: 'DQ Reference Library (Products)',
+          title: 'DQ Product Library',
           description: 'Find product reference materials and documentation for ongoing builds.',
           icon: <Compass />,
           path: '#',
@@ -423,7 +422,7 @@ export const HomePage: React.FC = () => {
           description: "Explore insights, data, and reports powering DQ's continuous transformation and decision making.",
           icon: <Lightbulb />,
           path: '#',
-          isActive: true
+          isActive: false
         },
         {
           id: 'template-library',
@@ -471,10 +470,10 @@ export const HomePage: React.FC = () => {
         'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
     },
 
-    // ROW 3 — Indigo gradient
+    // ROW 3 — Navy gradient (matching Learning & Enablement)
     'Collaboration & Communities': {
       cardClasses:
-        'bg-[linear-gradient(90deg,rgba(25,25,112,0.95)0%,rgba(25,25,112,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
       headingClass: 'text-white',
       descriptionClass: 'text-white/90',
       iconClass: 'text-[#030F35]',
@@ -484,7 +483,7 @@ export const HomePage: React.FC = () => {
       hoverOverlayClass: 'bg-white/10',
       iconWrapperClass: 'w-10 h-10',
       disabledCardClasses:
-        'bg-[linear-gradient(90deg,rgba(25,25,112,0.65)0%,rgba(25,25,112,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
     },
 
     // ROW 4 — Navy gradient (matching Learning & Enablement)

@@ -251,10 +251,9 @@ export const DQSectors: React.FC<DQSectorsProps> = ({
                   {/* CTA Button */}
                   <button
                     onClick={() => navigate(card.href)}
-                    className="w-full h-11 rounded-xl text-white font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-3"
+                    className="w-full h-11 rounded-xl text-white font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2334A0]"
                     style={{
                       background: 'linear-gradient(to right, #002180, #2334A0, #FB5535)',
-                      focusRingColor: '#2334A0',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.filter = 'brightness(1.06)';
@@ -300,4 +299,3 @@ export const DQSectors: React.FC<DQSectorsProps> = ({
     </section>
   );
 };
-

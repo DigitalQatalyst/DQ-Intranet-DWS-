@@ -8,7 +8,7 @@ const mockMapLocations: MapLocation[] = [
   {
     id: 'dq-dubai-hq',
     name: 'DQ Office — OPAL Tower',
-    position: [25.1888, 55.2620], // Business Bay, Dubai
+    position: [25.187780, 55.271940], // Business Bay, Dubai
     description: 'DQ Digital Workspace Headquarters in the heart of Dubai Business Bay.',
     address: 'OPAL Tower, Business Bay, Dubai, UAE',
     contactPhone: '+971 4 XXX XXXX',
@@ -19,8 +19,8 @@ const mockMapLocations: MapLocation[] = [
   },
   {
     id: 'dq-nairobi-office',
-    name: 'DQ Office — Nairobi',
-    position: [-1.2864, 36.8172], // Nairobi, Kenya
+    name: 'NBO – Nairobi, Kenya',
+    position: [-1.285590, 36.819940], // Nairobi, Kenya
     description: 'DQ Regional Office serving East Africa markets.',
     address: 'Nairobi, Kenya',
     contactPhone: '+254 XXX XXX XXX',
@@ -32,9 +32,9 @@ const mockMapLocations: MapLocation[] = [
   {
     id: 'dq-riyadh-office',
     name: 'DQ Office — Riyadh',
-    position: [24.7136, 46.6753], // Riyadh, Saudi Arabia
+    position: [24.689600, 46.686300], // Riyadh, Saudi Arabia
     description: 'DQ Regional Office serving Kingdom of Saudi Arabia.',
-    address: 'Riyadh, Saudi Arabia',
+    address: 'King Fahd Road, Riyadh, Saudi Arabia',
     contactPhone: '+966 XXX XXX XXX',
     type: 'Regional Office',
     region: 'Riyadh',
@@ -47,8 +47,8 @@ const mockMapLocations: MapLocation[] = [
   // ========================================
   {
     id: 'khalifa-fund',
-    name: 'Khalifa Fund',
-    position: [24.4539, 54.3773], // Abu Dhabi
+    name: 'Khalifa Fund (KF) HQ',
+    position: [24.466667, 54.366669], // Abu Dhabi
     description: 'Supporting UAE entrepreneurship and SME development.',
     address: 'Abu Dhabi, UAE',
     type: 'Client',
@@ -56,19 +56,19 @@ const mockMapLocations: MapLocation[] = [
     services: ['Digital Banking', 'Enterprise Solutions'],
   },
   {
-    id: 'neom-bank',
-    name: 'NEOM Bank',
-    position: [24.7136, 46.6753], // Riyadh
+    id: 'neom-hq',
+    name: 'NEOM HQ',
+    position: [27.632000, 35.300000], // NEOM Bay, KSA
     description: 'Future-focused digital banking solutions.',
-    address: 'Riyadh, Saudi Arabia',
+    address: 'NEOM Bay, Saudi Arabia',
     type: 'Client',
     region: 'Riyadh',
     services: ['Core Banking', 'Digital Channels'],
   },
   {
     id: 'saib',
-    name: 'SAIB (The Saudi Investment Bank)',
-    position: [24.7241, 46.6383], // Riyadh
+    name: 'SAIB (Saudi Investment Bank) HQ',
+    position: [24.689000, 46.685000], // Riyadh
     description: 'Leading investment bank in Saudi Arabia.',
     address: 'King Fahd Road, Riyadh, Saudi Arabia',
     type: 'Client',
@@ -76,10 +76,10 @@ const mockMapLocations: MapLocation[] = [
     services: ['Investment Banking', 'Wealth Management'],
   },
   {
-    id: 'stc-bank',
-    name: 'stc bank',
-    position: [24.7483, 46.6544], // Riyadh
-    description: 'Digital-first banking powered by stc.',
+    id: 'stc-hq',
+    name: 'STC HQ',
+    position: [24.722600, 46.642300], // Riyadh
+    description: 'Digital-first banking powered by STC.',
     address: 'Riyadh, Saudi Arabia',
     type: 'Client',
     region: 'Riyadh',
@@ -87,8 +87,8 @@ const mockMapLocations: MapLocation[] = [
   },
   {
     id: 'adib',
-    name: 'ADIB (Abu Dhabi Islamic Bank)',
-    position: [24.4945, 54.3898], // Abu Dhabi
+    name: 'ADIB HQ',
+    position: [24.495800, 54.370500], // Abu Dhabi
     description: 'Leading Islamic bank in the UAE.',
     address: 'Sheikh Rashid Bin Saeed Street, Abu Dhabi, UAE',
     type: 'Client',
@@ -101,8 +101,8 @@ const mockMapLocations: MapLocation[] = [
   // ========================================
   {
     id: 'dfsa',
-    name: 'DFSA — The Gate, DIFC',
-    position: [25.2125, 55.2786], // DIFC, Dubai
+    name: 'DFSA (DIFC)',
+    position: [25.209400, 55.272100], // DIFC, Dubai
     description: 'Dubai Financial Services Authority regulating DIFC.',
     address: 'The Gate, DIFC, Dubai, UAE',
     type: 'Authority',
@@ -112,8 +112,8 @@ const mockMapLocations: MapLocation[] = [
   },
   {
     id: 'dewa',
-    name: 'DEWA — Head Office',
-    position: [25.2289, 55.2916], // Dubai
+    name: 'DEWA HQ',
+    position: [25.216500, 55.260700], // Dubai
     description: 'Dubai Electricity and Water Authority.',
     address: 'Al Hudaiba, Dubai, UAE',
     type: 'Authority',

@@ -9,6 +9,7 @@ import {
   Tooltip,
   Bar,
   Legend,
+  Cell,
 } from 'recharts';
 import { ArrowRight } from 'lucide-react';
 
@@ -104,7 +105,7 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
                 DQ DNA Growth Potential
               </h2>
               <p className="text-neutral-600 mt-3 text-sm md:text-base">
-                Data-driven signals of how DQ teams learn, deliver, and collaborate across the seven DNA dimensions.
+                Data-driven signals of how DQ teams learn, deliver, and collaborate across the seven DNA dimensions...
               </p>
             </div>
 
@@ -243,7 +244,7 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
                     {showComparison && (
                       <Bar
                         dataKey="previousValue"
-                        fill="#AFC2FF"
+                        fill="#131E42"
                         radius={[6, 6, 0, 0]}
                         barSize={24}
                         animationDuration={600}
@@ -254,16 +255,26 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
                     {/* Current Year Bars */}
                     <Bar
                       dataKey="value"
-                      fill="#1447FF"
+                      fill="#131E42"
                       radius={[6, 6, 0, 0]}
                       barSize={24}
                       animationDuration={600}
                       animationBegin={0}
-                      opacity={hoveredBar ? 
-                        (dataPoint: any) => dataPoint.name === hoveredBar ? 0.85 : 1 
-                        : 1
-                      }
-                    />
+                    >
+                      {chartData.map((entry, index) => {
+                        const cellOpacity = hoveredBar
+                          ? entry.name === hoveredBar
+                            ? 0.85
+                            : 1
+                          : 1;
+                        return (
+                          <Cell
+                            key={`current-bar-${entry.name}-${index}`}
+                            opacity={cellOpacity}
+                          />
+                        );
+                      })}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -288,4 +299,3 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
 };
 
 export default WorkspaceInsights;
-

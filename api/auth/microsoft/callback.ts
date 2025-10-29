@@ -16,7 +16,7 @@ function parseCookies(header?: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { code, state, error, error_description } = req.query as Record<string, string | undefined>;
+  const { code, state: _state, error, error_description } = req.query as Record<string, string | undefined>;
   if (error) return res.status(400).send(`Microsoft OAuth error: ${error_description || error}`);
 
   const tenant = process.env.AZURE_AD_TENANT_ID!;
@@ -48,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
   if (!userRes.ok) return res.status(500).send(`Fetching userinfo failed: ${await userRes.text()}`);
-  const user = await userRes.json();
+  await userRes.json();
 
   // TODO: create/find user + set session cookie (JWT). For now, just continue.
   const cookies = parseCookies(req.headers.cookie);

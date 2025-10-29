@@ -1,16 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { ArrowRight, ChevronRight, XIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  XIcon,
-} from "lucide-react";
 import { Header } from "../components/Header/Header";
 import { Footer } from "../components/Footer/Footer";
-import { HeroDiscoverDQ } from "../components/Discover/HeroDiscoverDQ";
-import { VisionMission } from "../components/Discover/VisionMission";
-import { DQDNA } from "../components/Discover/DQDNA";
-import { WorkspaceInsights } from "../components/Discover/WorkspaceInsights";
-import { DQDirectory } from "../components/Discover/DQDirectory";
-import type { DirectoryItem, AssociateItem } from "../components/Discover/DirectorySection";
+import VisionMission from "../components/Discover/VisionMission";
+import DQDNA from "../components/Discover/DQDNA";
+import WorkspaceInsights from "../components/Discover/WorkspaceInsights";
+import DQDirectory from "../components/Discover/DQDirectory";
+import DQ6xDigitalView from "../components/Discover/DQ6xDigitalView";
+import { DQMap } from "../components/DQMap";
 import styles from "./DiscoverDQ.module.css";
 
 const insightsData = [
@@ -23,564 +21,17 @@ const insightsData = [
   { name: "Agile DTMF", value: 82, previousValue: 75 },
 ];
 
-// DQ2.0 Official Organizational Units (WIP25.08)
-const directoryEntries: DirectoryItem[] = [
-  // ========================================
-  // DCO OPERATIONS SECTOR
-  // ========================================
-  
-  // Factory: HRA (Human Resources & Admin)
-  {
-    id: "dco-hra-h2o",
-    name: "H2O",
-    description: "Hiring to Onboarding — Full-cycle recruitment, talent acquisition, and onboarding processes for DQ associates.",
-    sector: "DCO Operations",
-    factory: "HRA",
-    region: "Anyshore",
-    phone: "+1 (555) 100-1001",
-    email: "h2o@dq.workforce",
-    website: "hra.dq.workspace",
-    href: "/directory/units/h2o",
-  },
-  {
-    id: "dco-hra-q2p",
-    name: "Q2P",
-    description: "Qualification to Performance — Skills assessment, training, and performance management across all DQ teams.",
-    sector: "DCO Operations",
-    factory: "HRA",
-    region: "Offshore",
-    phone: "+1 (555) 100-1002",
-    email: "q2p@dq.workforce",
-    website: "hra.dq.workspace",
-    href: "/directory/units/q2p",
-  },
-  {
-    id: "dco-hra-smart-dws",
-    name: "Smart DWS",
-    description: "Smart Digital Workplace Services — Workspace optimization, tools, and associate experience programs.",
-    sector: "DCO Operations",
-    factory: "HRA",
-    region: "Nearshore",
-    phone: "+1 (555) 100-1003",
-    email: "smart-dws@dq.workforce",
-    website: "hra.dq.workspace",
-    href: "/directory/units/smart-dws",
-  },
-  {
-    id: "dco-hra-coshare",
-    name: "Co-share DWS",
-    description: "Collaborative workspace sharing — Cross-team collaboration tools, shared resources, and knowledge systems.",
-    sector: "DCO Operations",
-    factory: "HRA",
-    region: "Anyshore",
-    phone: "+1 (555) 100-1004",
-    email: "coshare@dq.workforce",
-    website: "hra.dq.workspace",
-    href: "/directory/units/coshare-dws",
-  },
-
-  // Factory: Finance
-  {
-    id: "dco-fin-receivables",
-    name: "Receivables",
-    description: "Revenue collection, invoicing, and accounts receivable management for DQ projects and services.",
-    sector: "DCO Operations",
-    factory: "Finance",
-    region: "Offshore",
-    phone: "+1 (555) 100-2001",
-    email: "receivables@dq.finance",
-    website: "finance.dq.workspace",
-    href: "/directory/units/receivables",
-  },
-  {
-    id: "dco-fin-payables",
-    name: "Payables",
-    description: "Vendor payments, expense management, and accounts payable processing across DQ operations.",
-    sector: "DCO Operations",
-    factory: "Finance",
-    region: "Nearshore",
-    phone: "+1 (555) 100-2002",
-    email: "payables@dq.finance",
-    website: "finance.dq.workspace",
-    href: "/directory/units/payables",
-  },
-  {
-    id: "dco-fin-investment",
-    name: "Investment",
-    description: "Strategic investments, capital allocation, and portfolio management for DQ growth initiatives.",
-    sector: "DCO Operations",
-    factory: "Finance",
-    region: "Anyshore",
-    phone: "+1 (555) 100-2003",
-    email: "investment@dq.finance",
-    website: "finance.dq.workspace",
-    href: "/directory/units/investment",
-  },
-  {
-    id: "dco-fin-budget-gprc",
-    name: "Budget | GPRC",
-    description: "Budget planning and Governance, Planning, Risk & Compliance — Financial controls and oversight.",
-    sector: "DCO Operations",
-    factory: "Finance",
-    region: "Nearshore",
-    phone: "+1 (555) 100-2004",
-    email: "budget-gprc@dq.finance",
-    website: "finance.dq.workspace",
-    href: "/directory/units/budget-gprc",
-  },
-
-  // Factory: Deals
-  {
-    id: "dco-deals-marcom",
-    name: "MarCom",
-    description: "Marketing & Communications — Brand positioning, campaigns, and market outreach for DQ solutions.",
-    sector: "DCO Operations",
-    factory: "Deals",
-    region: "Anyshore",
-    phone: "+1 (555) 100-3001",
-    email: "marcom@dq.deals",
-    website: "deals.dq.workspace",
-    href: "/directory/units/marcom",
-  },
-  {
-    id: "dco-deals-bd",
-    name: "BD",
-    description: "Business Development — Client acquisition, proposals, and deal structuring for DQ engagements.",
-    sector: "DCO Operations",
-    factory: "Deals",
-    region: "Offshore",
-    phone: "+1 (555) 100-3002",
-    email: "bd@dq.deals",
-    website: "deals.dq.workspace",
-    href: "/directory/units/bd",
-  },
-  {
-    id: "dco-deals-partners",
-    name: "Partners",
-    description: "Strategic partnerships, alliances, and ecosystem collaboration across the DQ network.",
-    sector: "DCO Operations",
-    factory: "Deals",
-    region: "Nearshore",
-    phone: "+1 (555) 100-3003",
-    email: "partners@dq.deals",
-    website: "deals.dq.workspace",
-    href: "/directory/units/partners",
-  },
-
-  // Factory: Stories
-  {
-    id: "dco-stories-blueprints",
-    name: "Blueprints",
-    description: "Solution blueprints, technical documentation, and architecture frameworks for DQ products.",
-    sector: "DCO Operations",
-    factory: "Stories",
-    region: "Anyshore",
-    phone: "+1 (555) 100-4001",
-    email: "blueprints@dq.stories",
-    website: "stories.dq.workspace",
-    href: "/directory/units/blueprints",
-  },
-  {
-    id: "dco-stories-collaterals",
-    name: "Collaterals",
-    description: "Marketing collaterals, case studies, and sales enablement materials for DQ offerings.",
-    sector: "DCO Operations",
-    factory: "Stories",
-    region: "Offshore",
-    phone: "+1 (555) 100-4002",
-    email: "collaterals@dq.stories",
-    website: "stories.dq.workspace",
-    href: "/directory/units/collaterals",
-  },
-  {
-    id: "dco-stories-intranet-lms",
-    name: "Intranet | LMS",
-    description: "Internal communication hub and Learning Management System for DQ knowledge and training.",
-    sector: "DCO Operations",
-    factory: "Stories",
-    region: "Nearshore",
-    phone: "+1 (555) 100-4003",
-    email: "intranet-lms@dq.stories",
-    website: "stories.dq.workspace",
-    href: "/directory/units/intranet-lms",
-  },
-
-  // ========================================
-  // DBP PLATFORM SECTOR
-  // ========================================
-
-  // Factory: Intelligence
-  {
-    id: "dbp-intel-pipe-api",
-    name: "Pipe | API",
-    description: "Data pipelines and API orchestration — Integration layer for DQ platform services.",
-    sector: "DBP Platform",
-    factory: "Intelligence",
-    region: "Anyshore",
-    phone: "+1 (555) 200-1001",
-    email: "pipe-api@dq.platform",
-    website: "intelligence.dq.workspace",
-    href: "/directory/units/pipe-api",
-  },
-  {
-    id: "dbp-intel-ai",
-    name: "AI",
-    description: "Artificial Intelligence and machine learning solutions — Powering intelligent automation for DQ.",
-    sector: "DBP Platform",
-    factory: "Intelligence",
-    region: "Offshore",
-    phone: "+1 (555) 200-1002",
-    email: "ai@dq.platform",
-    website: "intelligence.dq.workspace",
-    href: "/directory/units/ai",
-  },
-  {
-    id: "dbp-intel-analytics",
-    name: "Analytics",
-    description: "Data analytics, insights, and reporting — Business intelligence for DQ decision-making.",
-    sector: "DBP Platform",
-    factory: "Intelligence",
-    region: "Nearshore",
-    phone: "+1 (555) 200-1003",
-    email: "analytics@dq.platform",
-    website: "intelligence.dq.workspace",
-    href: "/directory/units/analytics",
-  },
-  {
-    id: "dbp-intel-dtmp-plant4",
-    name: "DTMP | Plant4.0",
-    description: "Digital Twin Management Platform and Plant 4.0 — Next-gen factory and operational modeling.",
-    sector: "DBP Platform",
-    factory: "Intelligence",
-    region: "Anyshore",
-    phone: "+1 (555) 200-1004",
-    email: "dtmp-plant4@dq.platform",
-    website: "intelligence.dq.workspace",
-    href: "/directory/units/dtmp-plant4",
-  },
-
-  // Factory: Solution
-  {
-    id: "dbp-sol-dxp-vendure",
-    name: "DXP | Vendure",
-    description: "Digital Experience Platform and Vendure commerce — Headless CMS and e-commerce solutions.",
-    sector: "DBP Platform",
-    factory: "Solution",
-    region: "Offshore",
-    phone: "+1 (555) 200-2001",
-    email: "dxp-vendure@dq.platform",
-    website: "solution.dq.workspace",
-    href: "/directory/units/dxp-vendure",
-  },
-  {
-    id: "dbp-sol-us-stack",
-    name: "US Stack",
-    description: "Universal Stack — Full-stack development frameworks and component libraries for DQ products.",
-    sector: "DBP Platform",
-    factory: "Solution",
-    region: "Nearshore",
-    phone: "+1 (555) 200-2002",
-    email: "us-stack@dq.platform",
-    website: "solution.dq.workspace",
-    href: "/directory/units/us-stack",
-  },
-  {
-    id: "dbp-sol-ms-stack",
-    name: "MS Stack",
-    description: "Microsoft Stack — Azure, .NET, and Microsoft ecosystem solutions for enterprise clients.",
-    sector: "DBP Platform",
-    factory: "Solution",
-    region: "Anyshore",
-    phone: "+1 (555) 200-2003",
-    email: "ms-stack@dq.platform",
-    website: "solution.dq.workspace",
-    href: "/directory/units/ms-stack",
-  },
-  {
-    id: "dbp-sol-p4-stack",
-    name: "P4.0 Stack",
-    description: "Plant 4.0 Stack — IoT, edge computing, and industrial automation technology stacks.",
-    sector: "DBP Platform",
-    factory: "Solution",
-    region: "Offshore",
-    phone: "+1 (555) 200-2004",
-    email: "p4-stack@dq.platform",
-    website: "solution.dq.workspace",
-    href: "/directory/units/p4-stack",
-  },
-
-  // Factory: DevOps
-  {
-    id: "dbp-devops-test-debug",
-    name: "Test | Debug",
-    description: "Quality assurance, automated testing, and debugging services for all DQ solutions.",
-    sector: "DBP Platform",
-    factory: "DevOps",
-    region: "Nearshore",
-    phone: "+1 (555) 200-3001",
-    email: "test-debug@dq.platform",
-    website: "devops.dq.workspace",
-    href: "/directory/units/test-debug",
-  },
-  {
-    id: "dbp-devops-cicd",
-    name: "CI/CD",
-    description: "Continuous Integration and Continuous Deployment — Automated pipelines for rapid delivery.",
-    sector: "DBP Platform",
-    factory: "DevOps",
-    region: "Anyshore",
-    phone: "+1 (555) 200-3002",
-    email: "cicd@dq.platform",
-    website: "devops.dq.workspace",
-    href: "/directory/units/cicd",
-  },
-  {
-    id: "dbp-devops-host-secure",
-    name: "Host | Secure",
-    description: "Cloud hosting, infrastructure security, and compliance management for DQ platforms.",
-    sector: "DBP Platform",
-    factory: "DevOps",
-    region: "Offshore",
-    phone: "+1 (555) 200-3003",
-    email: "host-secure@dq.platform",
-    website: "devops.dq.workspace",
-    href: "/directory/units/host-secure",
-  },
-  {
-    id: "dbp-devops-support",
-    name: "Support",
-    description: "Technical support, incident management, and L1/L2/L3 support for DQ clients and users.",
-    sector: "DBP Platform",
-    factory: "DevOps",
-    region: "Nearshore",
-    phone: "+1 (555) 200-3004",
-    email: "support@dq.platform",
-    website: "devops.dq.workspace",
-    href: "/directory/units/support",
-  },
-
-  // Factory: Products
-  {
-    id: "dbp-prod-manage",
-    name: "Manage",
-    description: "Product management, roadmaps, and portfolio governance for all DQ product lines.",
-    sector: "DBP Platform",
-    factory: "Products",
-    region: "Anyshore",
-    phone: "+1 (555) 200-4001",
-    email: "manage@dq.platform",
-    website: "products.dq.workspace",
-    href: "/directory/units/manage",
-  },
-  {
-    id: "dbp-prod-ux",
-    name: "UX",
-    description: "User experience design, research, and interaction design for DQ digital products.",
-    sector: "DBP Platform",
-    factory: "Products",
-    region: "Offshore",
-    phone: "+1 (555) 200-4002",
-    email: "ux@dq.platform",
-    website: "products.dq.workspace",
-    href: "/directory/units/ux",
-  },
-  {
-    id: "dbp-prod-patterns",
-    name: "Patterns",
-    description: "Design systems, UI patterns, and reusable components for consistent DQ experiences.",
-    sector: "DBP Platform",
-    factory: "Products",
-    region: "Nearshore",
-    phone: "+1 (555) 200-4003",
-    email: "patterns@dq.platform",
-    website: "products.dq.workspace",
-    href: "/directory/units/patterns",
-  },
-
-  // ========================================
-  // DBP DELIVERY SECTOR
-  // ========================================
-
-  // DQ Delivery: Deploys
-  {
-    id: "dbp-del-deploys-sm",
-    name: "Deploys — Scrum Master",
-    description: "Scrum Masters facilitating deployment cycles, sprint planning, and delivery coordination.",
-    sector: "DBP Delivery",
-    factory: "Deploys",
-    region: "Anyshore",
-    phone: "+1 (555) 300-1001",
-    email: "deploys-sm@dq.delivery",
-    website: "delivery.dq.workspace",
-    href: "/directory/units/deploys-sm",
-  },
-  {
-    id: "dbp-del-deploys-us",
-    name: "Deploys — User Stories",
-    description: "User story definition, backlog refinement, and story-level delivery management.",
-    sector: "DBP Delivery",
-    factory: "Deploys",
-    region: "Offshore",
-    phone: "+1 (555) 300-1002",
-    email: "deploys-us@dq.delivery",
-    website: "delivery.dq.workspace",
-    href: "/directory/units/deploys-us",
-  },
-
-  // DQ Delivery: Designs
-  {
-    id: "dbp-del-designs-sm",
-    name: "Designs — Scrum Master",
-    description: "Scrum Masters for design sprints, creative workflows, and UX/UI delivery cycles.",
-    sector: "DBP Delivery",
-    factory: "Designs",
-    region: "Nearshore",
-    phone: "+1 (555) 300-2001",
-    email: "designs-sm@dq.delivery",
-    website: "delivery.dq.workspace",
-    href: "/directory/units/designs-sm",
-  },
-  {
-    id: "dbp-del-designs-us-features",
-    name: "Designs — User Stories & Features",
-    description: "Design-driven user stories and feature specifications for DQ product experiences.",
-    sector: "DBP Delivery",
-    factory: "Designs",
-    region: "Anyshore",
-    phone: "+1 (555) 300-2002",
-    email: "designs-us@dq.delivery",
-    website: "delivery.dq.workspace",
-    href: "/directory/units/designs-us-features",
-  },
-
-  // DQ Delivery: Accounts
-  {
-    id: "dbp-del-accounts-sm",
-    name: "Accounts — Scrum Master",
-    description: "Scrum Masters managing client accounts, stakeholder engagement, and account delivery.",
-    sector: "DBP Delivery",
-    factory: "Accounts",
-    region: "Offshore",
-    phone: "+1 (555) 300-3001",
-    email: "accounts-sm@dq.delivery",
-    website: "delivery.dq.workspace",
-    href: "/directory/units/accounts-sm",
-  },
-  {
-    id: "dbp-del-accounts-engagements",
-    name: "Accounts — Engagements",
-    description: "Client engagement management, relationship building, and account growth strategies.",
-    sector: "DBP Delivery",
-    factory: "Accounts",
-    region: "Nearshore",
-    phone: "+1 (555) 300-3002",
-    email: "accounts-eng@dq.delivery",
-    website: "delivery.dq.workspace",
-    href: "/directory/units/accounts-engagements",
-  },
-  {
-    id: "dbp-del-accounts-stakeholders",
-    name: "Accounts — Stakeholders",
-    description: "Stakeholder communication, expectation management, and executive relationship coordination.",
-    sector: "DBP Delivery",
-    factory: "Accounts",
-    region: "Anyshore",
-    phone: "+1 (555) 300-3003",
-    email: "accounts-sh@dq.delivery",
-    website: "delivery.dq.workspace",
-    href: "/directory/units/accounts-stakeholders",
-  },
-];
-
-const associateEntries: AssociateItem[] = [
-  {
-    id: "a1",
-    name: "Sarah Mitchell",
-    role: "Strategy Lead",
-    unit: "Vision & Strategy Team",
-    email: "sarah.mitchell@dqworkspace.com",
-    phone: "+1 (555) 100-0101",
-    href: "/directory/associates/sarah-mitchell",
-  },
-  {
-    id: "a2",
-    name: "Marcus Chen",
-    role: "Culture Architect",
-    unit: "Culture & Values Team",
-    email: "marcus.chen@dqworkspace.com",
-    phone: "+1 (555) 100-0102",
-    href: "/directory/associates/marcus-chen",
-  },
-  {
-    id: "a3",
-    name: "Priya Sharma",
-    role: "Competency Designer",
-    unit: "Roles & Competency Team",
-    email: "priya.sharma@dqworkspace.com",
-    phone: "+1 (555) 100-0103",
-    href: "/directory/associates/priya-sharma",
-  },
-  {
-    id: "a4",
-    name: "James Rodriguez",
-    role: "Delivery Manager",
-    unit: "Task & Delivery Squad",
-    email: "james.rodriguez@dqworkspace.com",
-    phone: "+1 (555) 100-0104",
-    href: "/directory/associates/james-rodriguez",
-  },
-  {
-    id: "a5",
-    name: "Emily Watson",
-    role: "Governance Specialist",
-    unit: "Governance & Leadership Team",
-    email: "emily.watson@dqworkspace.com",
-    phone: "+1 (555) 100-0105",
-    href: "/directory/associates/emily-watson",
-  },
-  {
-    id: "a6",
-    name: "Alex Okafor",
-    role: "Value Stream Coordinator",
-    unit: "Value Streams Team",
-    email: "alex.okafor@dqworkspace.com",
-    phone: "+1 (555) 100-0106",
-    href: "/directory/associates/alex-okafor",
-  },
-  {
-    id: "a7",
-    name: "Lisa Tanaka",
-    role: "Product Owner",
-    unit: "Product & Services Team",
-    email: "lisa.tanaka@dqworkspace.com",
-    phone: "+1 (555) 100-0107",
-    href: "/directory/associates/lisa-tanaka",
-  },
-  {
-    id: "a8",
-    name: "David Kim",
-    role: "Innovation Strategist",
-    unit: "Innovation & Research Lab",
-    email: "david.kim@dqworkspace.com",
-    phone: "+1 (555) 100-0108",
-    href: "/directory/associates/david-kim",
-  },
-  {
-    id: "a9",
-    name: "Rachel Anderson",
-    role: "Learning Experience Designer",
-    unit: "Learning & Development Hub",
-    email: "rachel.anderson@dqworkspace.com",
-    phone: "+1 (555) 100-0109",
-    href: "/directory/associates/rachel-anderson",
-  },
+const heroStats = [
+  { value: "5 000+", label: "Active Users" },
+  { value: "120+", label: "Ongoing Projects" },
+  { value: "90%", label: "Collaboration Satisfaction" },
 ];
 
 const DiscoverDQ: React.FC = () => {
-  const navigate = useNavigate();
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportStatus, setSupportStatus] = useState<string | null>(null);
   const [isSubmittingSupport, setSubmittingSupport] = useState(false);
+  const navigate = useNavigate();
 
   const prefersReducedMotion = useMemo(
     () =>
@@ -588,6 +39,21 @@ const DiscoverDQ: React.FC = () => {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     []
   );
+
+  const handleExploreClick = () => {
+    navigate("/work-zones");
+  };
+
+  const handleGrowthClick = () => {
+    navigate("/growth");
+  };
+
+  const scrollToZones = () => {
+    const dnaSection = document.getElementById("dna");
+    if (dnaSection) {
+      dnaSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     if (!supportOpen) return;
@@ -625,8 +91,82 @@ const DiscoverDQ: React.FC = () => {
     <>
       <Header />
     <div className={`${styles.dwsDiscover} ${prefersReducedMotion ? styles.reducedMotion : ""}`}>
-        {/* Section 1: Hero - White EJP Style */}
-        <HeroDiscoverDQ />
+        {/* Section 1: Hero */}
+        <section className="relative w-full bg-white">
+          <div className="mx-auto max-w-[1280px] px-6 py-16 lg:py-20 xl:py-24 2xl:py-28">
+            <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-10">
+              <div className="lg:col-span-6 max-w-[560px] space-y-6 lg:space-y-8">
+                <nav className="flex items-center gap-2 text-sm font-semibold text-gray-500" aria-label="Breadcrumb">
+                  <span>Explore</span>
+                  <span>›</span>
+                  <span className="text-[#0E1446]">Discover DQ</span>
+                </nav>
+
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#0E1446] leading-[1.05]">
+                  Discover DQ
+                </h1>
+
+                <p className="text-base sm:text-lg lg:text-xl text-gray-700 max-w-[54ch] leading-relaxed">
+                  A unified workspace where teams connect, co-work, and grow through purpose-driven collaboration.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                  <button
+                    onClick={handleExploreClick}
+                    className="group inline-flex items-center gap-2 px-6 py-3 bg-[#0E1446] text-white font-semibold rounded-full transition-all duration-200 hover:bg-[#1a2056] hover:shadow-lg hover:shadow-[#0E1446]/20 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E1446]/40 focus-visible:ring-offset-2"
+                    aria-label="Explore Work Zones"
+                  >
+                    Explore Work Zones
+                    <ArrowRight
+                      size={16}
+                      className="transition-transform group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  <button
+                    onClick={handleGrowthClick}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#0E1446] font-semibold rounded-full border border-gray-300 transition-all duration-200 hover:bg-gray-50 hover:border-gray-400 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E1446]/40 focus-visible:ring-offset-2"
+                    aria-label="View Growth Opportunities"
+                  >
+                    View Growth Opportunities
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-4">
+                  {heroStats.map((stat, index) => (
+                    <div
+                      key={index}
+                      className="relative bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow duration-200"
+                    >
+                      <div className="text-2xl sm:text-3xl font-bold text-[#FB5535] mb-1">
+                        {stat.value}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-600 font-medium">
+                        {stat.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="md:hidden">
+                  <button
+                    onClick={scrollToZones}
+                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-orange-50 to-blue-50 text-[#0E1446] font-semibold rounded-xl border border-gray-200 transition-all duration-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FB5535]/40"
+                    aria-label="Browse DQ DNA dimensions"
+                  >
+                    Browse DQ DNA
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+
+              <aside className="lg:col-span-6 w-full mt-10 lg:mt-0">
+                <DQMap height={440} />
+              </aside>
+            </div>
+          </div>
+        </section>
 
         {/* Section 2: Vision & Mission - DWS Theme */}
         <VisionMission />
@@ -634,10 +174,13 @@ const DiscoverDQ: React.FC = () => {
         {/* Section 3: DQ DNA - 7 Core Dimensions */}
         <DQDNA />
 
-        {/* Section 4: Workspace Performance Insights */}
+        {/* Section 4: DQ DNA Growth Potential */}
         <WorkspaceInsights data={insightsData} />
 
-        {/* Section 5: DQ Directory - Full Directory with Search & Filters */}
+        {/* Section 5: DQ2.0 | Products (6x Digital View) */}
+        <DQ6xDigitalView />
+
+        {/* Section 6: DQ Directory - Full Directory with Search & Filters */}
         <DQDirectory />
 
       {supportOpen && (

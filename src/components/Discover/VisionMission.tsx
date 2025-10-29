@@ -35,9 +35,7 @@ export const VisionMission: React.FC = () => {
             
             <div className="flex-1 mb-6">
               <p className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--dws-text)' }}>
-                We empower associates to create value through innovation and operational excellence.
-Bold ideas become dependable workflows that make collaboration effortless.
-Every workspace achieves seamless, meaningful progress.
+                We empower associates to turn innovation into impact through seamless, dependable workflows that make collaboration effortless and progress meaningful.
               </p>
             </div>
 
@@ -61,9 +59,7 @@ Every workspace achieves seamless, meaningful progress.
             
             <div className="flex-1 mb-6">
               <p className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--dws-text)' }}>
-                We connect people, processes, and platforms to enable smarter work.
-The DQ Workspace helps teams adapt quickly and operate with clarity.
-Together, we learn faster, collaborate better, and lead with purpose.
+                We connect people, processes, and platforms to enable smarter work—helping every Qatalyst learn faster, collaborate better, and lead with purpose.
               </p>
             </div>
 

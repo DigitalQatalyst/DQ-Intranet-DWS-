@@ -16,6 +16,9 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": [
+      "vite/client"
+    ],
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -30,7 +33,9 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "vite.config.ts",
+    "src/vite-env.d.ts"
   ],
   "references": [
     {
