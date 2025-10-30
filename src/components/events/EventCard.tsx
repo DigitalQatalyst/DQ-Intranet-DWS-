@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, Tag } from 'lucide-react';
+import { EventDetailsModal } from '../DQEventsCalendar/EventDetailsModal';
 
 export interface EventCardProps {
   event: any;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', { 
       month: 'short', 
@@ -38,10 +40,18 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
     }
   };
 
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
   return (
     <div 
       className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col" 
-      onClick={onClick}
+      onClick={handleCardClick}
     >
       <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[40px]" title={event.title}>
         {event.title}
@@ -77,10 +87,23 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
       </div>
 
       <div className="mt-auto">
-        <button className="w-full px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsModalOpen(true);
+          }}
+          className="w-full px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        >
           View Details
         </button>
       </div>
+
+      {/* Event Details Modal */}
+      <EventDetailsModal 
+        event={event}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

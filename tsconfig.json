@@ -7,8 +7,11 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "module": "ESNext",
+    "module": "NodeNext",
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
     /* Use Node ESM-compatible resolution so API functions compile under Vercel */
     "moduleResolution": "nodenext",
     "resolveJsonModule": true,

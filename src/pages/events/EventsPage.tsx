@@ -129,10 +129,7 @@ export const EventsPage: React.FC = () => {
   // UI helpers
   const toggleFilters = useCallback(() => setShowFilters(prev => !prev), []);
 
-  const handleEventClick = (event: any) => {
-    // Navigate to event detail page (to be implemented)
-    console.log('Event clicked:', event);
-  };
+  // Event click is now handled within EventCard component
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -271,7 +268,7 @@ export const EventsPage: React.FC = () => {
             ) : (
               <EventsGrid
                 items={filteredItems}
-                onClickEvent={handleEventClick}
+                onClickEvent={() => {}} // No longer needed as modal is handled in EventCard
               />
             )}
           </div>
