@@ -40,63 +40,63 @@ const NewsDetailPage: React.FC = () => {
   const newsItems: NewsItem[] = [
     { 
       id: '1', 
-      title: 'New Project Management Tool Rollout', 
-      description: "We're excited to announce the launch of our new project management tool that will streamline collaboration across teams.", 
-      date: 'June 15, 2023', 
-      category: 'IT', 
-      tags: ['Project Management'], 
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop',
-      provider: { name: 'DQ Intranet' }
+      title: 'Digital Qatalyst Launches AI-Powered Workspace Platform', 
+      description: "We're thrilled to announce the launch of our revolutionary AI-powered Digital Workspace Platform, designed to transform how teams collaborate and innovate in 2025.", 
+      date: 'October 28, 2025', 
+      category: 'Technology', 
+      tags: ['AI', 'Innovation'], 
+      image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=600&fit=crop',
+      provider: { name: 'Digital Qatalyst • Technology' }
     },
     { 
       id: '2', 
-      title: 'Q3 Town Hall Meeting', 
-      description: 'Join us for our quarterly town hall meeting where leadership will share company updates and answer questions.', 
-      date: 'June 12, 2023', 
-      category: 'HR', 
-      tags: ['Town Hall'], 
+      title: 'Q4 2025 Town Hall: Year-End Achievements & 2026 Vision', 
+      description: 'Join our leadership team on November 5th as we celebrate our accomplishments this year and unveil our strategic vision for 2026.', 
+      date: 'October 25, 2025', 
+      category: 'Company', 
+      tags: ['Town Hall', 'Leadership'], 
       image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&h=600&fit=crop',
-      provider: { name: 'DQ Intranet' }
+      provider: { name: 'Digital Qatalyst • HR' }
     },
     { 
       id: '3', 
-      title: 'Summer Team Building Event', 
-      description: "Get ready for our annual summer team-building event! This year we'll be having a beach day with activities and food.", 
-      date: 'June 10, 2023', 
-      category: 'Social', 
-      tags: ['Team Building'], 
-      image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=600&fit=crop',
-      provider: { name: 'DQ Intranet' }
+      title: 'Annual Innovation Week: November 10-14, 2025', 
+      description: "Save the date! Our annual Innovation Week returns with workshops, hackathons, and guest speakers from leading tech companies. Let's innovate together!", 
+      date: 'October 22, 2025', 
+      category: 'Events', 
+      tags: ['Innovation', 'Team Building'], 
+      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+      provider: { name: 'Digital Qatalyst • Events' }
     },
     { 
       id: '4', 
-      title: 'DQ Team Wins Industry Award', 
-      description: "Congratulations to our product team for winning the prestigious Innovation Award at this year's Tech Summit!", 
-      date: 'June 8, 2023', 
+      title: 'DQ Recognized as Top Workplace for Innovation 2025', 
+      description: "Proud moment! Digital Qatalyst has been named one of the Top 10 Most Innovative Workplaces by Tech Excellence Awards 2025.", 
+      date: 'October 20, 2025', 
       category: 'Achievement', 
-      tags: ['Award'], 
+      tags: ['Award', 'Recognition'], 
       image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
-      provider: { name: 'DQ Intranet' }
+      provider: { name: 'Digital Qatalyst • Communications' }
     },
     { 
       id: '5', 
-      title: 'New Security Training Required', 
-      description: "All employees must complete the updated security awareness training by the end of the month.", 
-      date: 'June 5, 2023', 
-      category: 'Training', 
-      tags: ['Security'], 
+      title: 'New Cybersecurity Protocols: Mandatory Training by Nov 15', 
+      description: "As part of our commitment to data security, all team members must complete the updated cybersecurity training module by November 15, 2025.", 
+      date: 'October 18, 2025', 
+      category: 'Security', 
+      tags: ['Training', 'Compliance'], 
       image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop',
-      provider: { name: 'DQ Intranet' }
+      provider: { name: 'Digital Qatalyst • IT Security' }
     },
     { 
       id: '6', 
-      title: 'Office Renovation Updates', 
-      description: 'Check out the latest updates on our office renovation project, including new meeting rooms and collaborative spaces.', 
-      date: 'June 1, 2023', 
-      category: 'HR', 
-      tags: ['Renovation'], 
+      title: 'New Abu Dhabi Office Space: Grand Opening December 2025', 
+      description: 'Exciting news! Our expanded Abu Dhabi office featuring state-of-the-art collaboration spaces, wellness areas, and innovation labs opens next month.', 
+      date: 'October 15, 2025', 
+      category: 'Facilities', 
+      tags: ['Office', 'Expansion'], 
       image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
-      provider: { name: 'DQ Intranet' }
+      provider: { name: 'Digital Qatalyst • Facilities' }
     },
   ];
 
@@ -264,55 +264,62 @@ const NewsDetailPage: React.FC = () => {
                 {/* Article Content */}
                 <div className="prose max-w-none">
                     <h2 className="text-xl font-bold text-gray-900 mb-4">
-                      Purpose
+                      Overview
                     </h2>
                     <p className="text-gray-700 mb-6 leading-relaxed">
-                      This announcement represents a significant development for our organization. 
-                      The initiatives outlined here are designed to enhance collaboration, improve 
-                      efficiency, and create new opportunities for growth and innovation across all teams.
+                      At Digital Qatalyst, we believe in keeping our team informed and engaged with the latest 
+                      developments across our organization. This announcement reflects our commitment to transparency, 
+                      innovation, and continuous improvement as we work together to deliver exceptional value to our clients 
+                      and stakeholders.
                     </p>
 
                     <h2 className="text-xl font-bold text-gray-900 mb-4">
-                      Lifecycle
+                      Key Highlights
+                    </h2>
+                    <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
+                      <li>Enhanced collaboration tools and processes to streamline team workflows</li>
+                      <li>New opportunities for professional development and skill enhancement</li>
+                      <li>Initiatives aligned with our core values of innovation, excellence, and integrity</li>
+                      <li>Focus on employee well-being and work-life balance</li>
+                      <li>Commitment to sustainable growth and community impact</li>
+                    </ul>
+
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">
+                      Impact on Teams
+                    </h2>
+                    <p className="text-gray-700 mb-6 leading-relaxed">
+                      This initiative will positively impact various teams across Digital Qatalyst, fostering 
+                      better communication, knowledge sharing, and cross-functional collaboration. We encourage 
+                      all team members to actively participate and contribute their insights to make this a success.
+                    </p>
+
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">
+                      Next Steps
                     </h2>
                     <ol className="list-decimal list-inside text-gray-700 mb-6 space-y-2">
-                      <li><strong>Draft</strong>: authored by domain SME</li>
-                      <li><strong>Review</strong>: peer and PMO review</li>
-                      <li><strong>Approve</strong>: sign-off by owner</li>
-                      <li><strong>Publish</strong>: catalog entry with version tag</li>
-                      <li><strong>Retire</strong>: superseded, archived</li>
+                      <li>Review the details and familiarize yourself with the changes</li>
+                      <li>Attend upcoming information sessions and Q&A forums</li>
+                      <li>Reach out to your team lead or HR for any questions or clarifications</li>
+                      <li>Provide feedback through our internal communication channels</li>
+                      <li>Stay tuned for follow-up announcements and updates</li>
                     </ol>
 
                     <h2 className="text-xl font-bold text-gray-900 mb-4">
-                      Versioning Rules
-                    </h2>
-                    <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
-                      <li>SemVer (MAJOR.MINOR.PATCH)</li>
-                      <li>Changelog and migration notes required</li>
-                    </ul>
-
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">
-                      Quality Gates
-                    </h2>
-                    <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
-                      <li>Customer outcomes defined</li>
-                      <li>Risks and controls identified</li>
-                      <li>Templates and metrics attached</li>
-                    </ul>
-
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">
-                      Ownership
-                    </h2>
-                    <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
-                      <li>Blueprint owner maintains roadmap and reviews every 6 months</li>
-                    </ul>
-
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">
-                      Process
+                      Our Culture
                     </h2>
                     <p className="text-gray-700 mb-6 leading-relaxed">
-                      Detailed process information and workflows will be outlined here to guide 
-                      implementation and ensure consistency across all teams.
+                      This announcement embodies Digital Qatalyst's culture of continuous learning, adaptability, 
+                      and excellence. We value every team member's contribution and are committed to creating an 
+                      environment where innovation thrives and everyone can reach their full potential.
+                    </p>
+
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">
+                      Get Involved
+                    </h2>
+                    <p className="text-gray-700 mb-6 leading-relaxed">
+                      We encourage you to engage with this initiative by sharing your thoughts, asking questions, 
+                      and collaborating with your colleagues. Together, we can make Digital Qatalyst an even better 
+                      place to work and grow.
                     </p>
                   </div>
 
