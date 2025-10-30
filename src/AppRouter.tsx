@@ -108,7 +108,6 @@ export function AppRouter() {
               element={<BlueprintsPage />}
             />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
-            <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/communities/*" element={<CommunitiesRouter />} />
             <Route path="/404" element={<NotFound />} />
