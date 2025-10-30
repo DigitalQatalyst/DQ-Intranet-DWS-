@@ -1,18 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FilterSidebar, FilterConfig } from './FilterSidebar';
-import { MarketplaceGrid } from './MarketplaceGrid';
-import { SearchBar } from '../SearchBar';
+import { FilterSidebar, FilterConfig } from './FilterSidebar.js';
+import { MarketplaceGrid } from './MarketplaceGrid.js';
+import { SearchBar } from '../SearchBar.js';
 import { FilterIcon, XIcon, HomeIcon, ChevronRightIcon } from 'lucide-react';
-import { ErrorDisplay, CourseCardSkeleton } from '../SkeletonLoader';
-import { fetchMarketplaceItems, fetchMarketplaceFilters } from '../../services/marketplace';
-import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
-import { MarketplaceComparison } from './MarketplaceComparison';
+import { ErrorDisplay, CourseCardSkeleton } from '../SkeletonLoader.js';
+import { fetchMarketplaceItems, fetchMarketplaceFilters } from '../../services/marketplace.js';
+import { getMarketplaceConfig } from '../../utils/marketplaceConfig.js';
+import { MarketplaceComparison } from './MarketplaceComparison.js';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
-import { getFallbackItems } from '../../utils/fallbackData';
-import GuidesFilters, { GuidesFacets } from '../guides/GuidesFilters';
-import GuidesGrid from '../guides/GuidesGrid';
+import { getFallbackItems } from '../../utils/fallbackData.js';
+import GuidesFilters, { GuidesFacets } from '../guides/GuidesFilters.js';
+import GuidesGrid from '../guides/GuidesGrid.js';
 import { supabaseClient } from '../../lib/supabaseClient';
 import { track } from '../../utils/analytics';
 
@@ -114,83 +114,84 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       const loadGuides = async () => {
         setLoading(true);
         try {
-          const res = await fetch(`/api/guides?${queryParams.toString()}`);
+          // const res = await fetch(`/api/guides?${queryParams.toString()}`);
           let data: any = null;
-          const ct = res.headers.get('content-type') || '';
-          if (res.ok && ct.includes('application/json')) {
-            data = await res.json();
-          } else {
+          // const ct = res.headers.get('content-type') || '';
+          // if (res.ok && ct.includes('application/json')) {
+          //   data = await res.json();
+          // } else {
             // Dev fallback: query Supabase anon directly when serverless API isn't running
-            let q = supabaseClient
-              .from('guides')
-              .select('*', { count: 'exact' })
-              .eq('status', 'Approved');
-            const qStr = queryParams.get('q') || '';
-            if (qStr) q = q.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
-            // (filter/sort is applied after mapping below)
-            const page = Math.max(1, parseInt(queryParams.get('page') || '1', 10));
-            const pageSize = Math.min(50, Math.max(1, parseInt(queryParams.get('pageSize') || '12', 10)));
-            const from = (page - 1) * pageSize;
-            const to = from + pageSize - 1;
-            const { data: rows, count, error } = await q.range(from, to); if (error) throw error;
-            const mapped = (rows || []).map((r: any) => ({
-              id: r.id,
-              slug: r.slug,
-              title: r.title,
-              summary: r.summary,
-              heroImageUrl: r.hero_image_url ?? r.heroImageUrl,
-              skillLevel: r.skill_level ?? r.skillLevel,
-              estimatedTimeMin: r.estimated_time_min ?? r.estimatedTimeMin,
-              lastUpdatedAt: r.last_updated_at ?? r.lastUpdatedAt,
-              authorName: r.author_name ?? r.authorName,
-              authorOrg: r.author_org ?? r.authorOrg,
-              isEditorsPick: r.is_editors_pick ?? r.isEditorsPick,
-              downloadCount: r.download_count ?? r.downloadCount,
-              guideType: r.guide_type ?? r.guideType,
-              domain: r.domain ?? null,
-              functionArea: r.function_area ?? null,
-              status: r.status ?? null,
-              complexityLevel: r.complexity_level ?? null,
-            }));
-            // client-side filter/sort for fallback
-            const domains = (queryParams.get('domain') || '').split(',').filter(Boolean);
-            const types = (queryParams.get('guide_type') || '').split(',').filter(Boolean);
-            const functions = (queryParams.get('function_area') || '').split(',').filter(Boolean);
-            const statuses = (queryParams.get('status') || '').split(',').filter(Boolean);
-            let out = mapped;
-            if (domains.length) out = out.filter(it => it.domain && domains.includes(it.domain));
-            if (types.length) out = out.filter(it => it.guideType && types.includes(it.guideType));
-            if (functions.length) out = out.filter(it => it.functionArea && functions.includes(it.functionArea));
-            if (statuses.length) out = out.filter(it => it.status && statuses.includes(it.status));
-            const sort = queryParams.get('sort') || 'relevance';
-            if (sort === 'updated') out.sort((a,b) => new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
-            else if (sort === 'downloads') out.sort((a,b) => (b.downloadCount||0)-(a.downloadCount||0));
-            else if (sort === 'editorsPick') out.sort((a,b) => (Number(b.isEditorsPick)||0)-(Number(a.isEditorsPick)||0) || new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
-            else out.sort((a,b) => (Number(b.isEditorsPick)||0)-(Number(a.isEditorsPick)||0) || (b.downloadCount||0)-(a.downloadCount||0) || new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
-            // Facets fallback: compute from Supabase for current filter context
-            let facetQ = supabaseClient
-              .from('guides')
-              .select('domain,guide_type,function_area,status')
-              .eq('status', 'Approved');
-            if (qStr) facetQ = facetQ.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
-            if (domains.length) facetQ = facetQ.in('domain', domains);
-            if (types.length) facetQ = facetQ.in('guide_type', types);
-            if (functions.length) facetQ = facetQ.in('function_area', functions);
-            if (statuses.length) facetQ = facetQ.in('status', statuses);
-            const { data: facetRows } = await facetQ;
-            const countBy = (arr: any[] | null | undefined, key: 'domain'|'guide_type'|'function_area'|'status') => {
-              const m = new Map<string, number>();
-              for (const r of (arr || [])) { const v = (r as any)[key]; if (!v) continue; m.set(v, (m.get(v)||0)+1); }
-              return Array.from(m.entries()).map(([id, cnt]) => ({ id, name: id, count: cnt })).sort((a,b)=> a.name.localeCompare(b.name));
-            };
-            const facets = {
-              domain: countBy(facetRows, 'domain'),
-              guide_type: countBy(facetRows, 'guide_type'),
-              function_area: countBy(facetRows, 'function_area'),
-              status: countBy(facetRows, 'status'),
-            } as any;
-            data = { items: out, total: count || out.length, facets };
-          }
+          let q = supabaseClient
+            .from('guides')
+            .select('*', { count: 'exact' })
+            .eq('status', 'Approved');
+          const qStr = queryParams.get('q') || '';
+          if (qStr) q = q.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
+          // (filter/sort is applied after mapping below)
+          const page = Math.max(1, parseInt(queryParams.get('page') || '1', 10));
+          const pageSize = Math.min(50, Math.max(1, parseInt(queryParams.get('pageSize') || '12', 10)));
+          const from = (page - 1) * pageSize;
+          const to = from + pageSize - 1;
+          const { data: rows, count, error } = await q.range(from, to); if (error) throw error;
+          const mapped = (rows || []).map((r: any) => ({
+            id: r.id,
+            slug: r.slug,
+            title: r.title,
+            summary: r.summary,
+            heroImageUrl: r.hero_image_url ?? r.heroImageUrl,
+            skillLevel: r.skill_level ?? r.skillLevel,
+            estimatedTimeMin: r.estimated_time_min ?? r.estimatedTimeMin,
+            lastUpdatedAt: r.last_updated_at ?? r.lastUpdatedAt,
+            authorName: r.author_name ?? r.authorName,
+            authorOrg: r.author_org ?? r.authorOrg,
+            isEditorsPick: r.is_editors_pick ?? r.isEditorsPick,
+            downloadCount: r.download_count ?? r.downloadCount,
+            guideType: r.guide_type ?? r.guideType,
+            domain: r.domain ?? null,
+            functionArea: r.function_area ?? null,
+            status: r.status ?? null,
+            complexityLevel: r.complexity_level ?? null,
+          }));
+          // client-side filter/sort for fallback
+          const domains = (queryParams.get('domain') || '').split(',').filter(Boolean);
+          const types = (queryParams.get('guide_type') || '').split(',').filter(Boolean);
+          const functions = (queryParams.get('function_area') || '').split(',').filter(Boolean);
+          const statuses = (queryParams.get('status') || '').split(',').filter(Boolean);
+          let out = mapped;
+          if (domains.length) out = out.filter(it => it.domain && domains.includes(it.domain));
+          if (types.length) out = out.filter(it => it.guideType && types.includes(it.guideType));
+          if (functions.length) out = out.filter(it => it.functionArea && functions.includes(it.functionArea));
+          if (statuses.length) out = out.filter(it => it.status && statuses.includes(it.status));
+          const sort = queryParams.get('sort') || 'relevance';
+          if (sort === 'updated') out.sort((a,b) => new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
+          else if (sort === 'downloads') out.sort((a,b) => (b.downloadCount||0)-(a.downloadCount||0));
+          else if (sort === 'editorsPick') out.sort((a,b) => (Number(b.isEditorsPick)||0)-(Number(a.isEditorsPick)||0) || new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
+          else out.sort((a,b) => (Number(b.isEditorsPick)||0)-(Number(a.isEditorsPick)||0) || (b.downloadCount||0)-(a.downloadCount||0) || new Date(b.lastUpdatedAt||0).getTime() - new Date(a.lastUpdatedAt||0).getTime());
+          // Facets fallback: compute from Supabase for current filter context
+          let facetQ = supabaseClient
+            .from('guides')
+            .select('domain,guide_type,function_area,status')
+            .eq('status', 'Approved');
+          if (qStr) facetQ = facetQ.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
+          if (domains.length) facetQ = facetQ.in('domain', domains);
+          if (types.length) facetQ = facetQ.in('guide_type', types);
+          if (functions.length) facetQ = facetQ.in('function_area', functions);
+          if (statuses.length) facetQ = facetQ.in('status', statuses);
+          const { data: facetRows } = await facetQ;
+          const countBy = (arr: any[] | null | undefined, key: 'domain'|'guide_type'|'function_area'|'status') => {
+            const m = new Map<string, number>();
+            for (const r of (arr || [])) { const v = (r as any)[key]; if (!v) continue; m.set(v, (m.get(v)||0)+1); }
+            return Array.from(m.entries()).map(([id, cnt]) => ({ id, name: id, count: cnt })).sort((a,b)=> a.name.localeCompare(b.name));
+          };
+          const facets = {
+            domain: countBy(facetRows, 'domain'),
+            guide_type: countBy(facetRows, 'guide_type'),
+            function_area: countBy(facetRows, 'function_area'),
+            status: countBy(facetRows, 'status'),
+          } as any;
+          data = { items: out, total: count || out.length, facets };
+          console.log('Guides fetched from Supabase fallback:', data);
+          // }
           setItems(data.items || []);
           setFilteredItems(data.items || []);
           setCursor((data as any).cursor || null);
@@ -240,7 +241,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const retryFetch = useCallback(() => { setError(null); setLoading(true); }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className={`min-h-screen flex flex-col bg-gray-50 ${isGuidesLike(marketplaceType) ? 'guidelines-theme' : ''}`}>
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
       <div className="container mx-auto px-4 py-8 flex-grow">
         {/* Breadcrumbs */}
@@ -252,12 +253,29 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <span>Home</span>
               </Link>
             </li>
-            <li aria-current="page">
-              <div className="flex items-center">
-                <ChevronRightIcon size={16} className="text-gray-400" />
-                <span className="ml-1 text-gray-500 md:ml-2">{config.itemNamePlural}</span>
-              </div>
-            </li>
+            {isGuidesLike(marketplaceType) ? (
+              <>
+                <li>
+                  <div className="flex items-center">
+                    <ChevronRightIcon size={16} className="text-gray-400" />
+                    <span className="ml-1 text-gray-500 md:ml-2">Resources</span>
+                  </div>
+                </li>
+                <li aria-current="page">
+                  <div className="flex items-center">
+                    <ChevronRightIcon size={16} className="text-gray-400" />
+                    <span className="ml-1 text-gray-700 md:ml-2">Guidelines</span>
+                  </div>
+                </li>
+              </>
+            ) : (
+              <li aria-current="page">
+                <div className="flex items-center">
+                  <ChevronRightIcon size={16} className="text-gray-400" />
+                  <span className="ml-1 text-gray-500 md:ml-2">{config.itemNamePlural}</span>
+                </div>
+              </li>
+            )}
           </ol>
         </nav>
 
@@ -284,7 +302,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           </div>
           {isGuidesLike(marketplaceType) && (
             <select
-              className="border rounded px-2 py-2"
+              className="border rounded px-2 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-primary)] focus:border-[var(--guidelines-primary)]"
               aria-label="Sort guides"
               value={queryParams.get('sort') || 'relevance'}
               onChange={(e) => {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MenuIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, BookOpen } from 'lucide-react';
 interface MobileDrawerProps {
   isCompact?: boolean;
   onSignIn: () => void;
@@ -55,6 +56,12 @@ const marketplaces = [{
   description: 'Company updates and internal notices.',
   icon: SparklesIcon,
   href: '/marketplace/opportunities'
+}, {
+  id: 'guides',
+  name: 'Guidelines Marketplace',
+  description: 'Access practical guidelines, templates, and processes.',
+  icon: BookOpen,
+  href: '/marketplace/guides'
 }];
 export function MobileDrawer({
   isCompact = false,
@@ -64,6 +71,8 @@ export function MobileDrawer({
 }: MobileDrawerProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isExploreExpanded, setIsExploreExpanded] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
   useEffect(() => {
     if (isDrawerOpen) {
       const scrollY = window.scrollY;
@@ -89,7 +98,7 @@ export function MobileDrawer({
     setIsDrawerOpen(false);
   };
   const handleMarketplaceClick = (href: string) => {
-    console.log('Navigate to:', href);
+    navigate(href);
     setIsDrawerOpen(false);
   };
   const handleDiscoverClick = () => {
@@ -144,7 +153,8 @@ export function MobileDrawer({
                 {isExploreExpanded && <div className="mt-1 ml-3 space-y-0.5">
                   {marketplaces.map(marketplace => {
                     const Icon = marketplace.icon;
-                    return <button key={marketplace.id} className="w-full flex items-start px-2.5 py-2 text-left hover:bg-dq-coral/10 rounded-lg transition-colors md:py-1.5 sm:py-1" onClick={() => handleMarketplaceClick(marketplace.href)}>
+                    const isActive = marketplace.id === 'guides' && (location.pathname.startsWith('/marketplace/guides') || location.pathname.startsWith('/marketplace/knowledge-hub'));
+                    return <button key={marketplace.id} className={`w-full flex items-start px-2.5 py-2 text-left hover:bg-dq-coral/10 rounded-lg transition-colors md:py-1.5 sm:py-1 ${isActive ? 'border-l-4 border-dq-coral bg-dq-coral/5 font-semibold' : ''}`} onClick={() => handleMarketplaceClick(marketplace.href)} aria-current={isActive ? 'page' : undefined}>
                       <div className="flex-shrink-0 mt-0.5">
                         <Icon size={14} className="text-dq-coral md:w-3 md:h-3 sm:w-3 sm:h-3" />
                       </div>

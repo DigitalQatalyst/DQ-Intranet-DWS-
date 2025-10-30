@@ -34,7 +34,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
       <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px] mb-3">{guide.summary}</p>
       <div className="flex flex-wrap gap-1 mb-3">
         {domain && <span className={`px-2 py-0.5 text-xs rounded-full ${domainStyles(domain)}`}>{domain}</span>}
-        {guide.guideType && <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">{guide.guideType}</span>}
+        {guide.guideType && <span className="px-2 py-0.5 text-[var(--guidelines-primary)] bg-[var(--guidelines-primary-surface)] text-xs rounded-full">{guide.guideType}</span>}
       </div>
       <div className="flex items-center text-xs text-gray-500 gap-3 mb-3">
         {timeBucket && <span className="flex items-center"><Clock size={14} className="mr-1" />{timeBucket}</span>}
@@ -47,7 +47,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
         </div>
       )}
       <div className="mt-auto">
-        <button className="w-full px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+        <button className="w-full px-4 py-2 text-sm font-bold text-white bg-[var(--guidelines-primary-solid)] hover:bg-[var(--guidelines-primary-solid-hover)] rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]">
           {cta}
         </button>
       </div>

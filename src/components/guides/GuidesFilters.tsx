@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useId, useMemo, useState } from 'react'
 import { parseCsv, toCsv } from '../../utils/guides'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 
@@ -16,8 +16,8 @@ interface Props {
   onChange: (next: URLSearchParams) => void
 }
 
-const Section: React.FC<{ title: string; category: string; collapsed: boolean; onToggle: (category: string) => void }> = ({ title, category, collapsed, onToggle, children }) => {
-  const contentId = `filters-${category}`
+const Section: React.FC<{ idPrefix: string; title: string; category: string; collapsed: boolean; onToggle: (category: string) => void }> = ({ idPrefix, title, category, collapsed, onToggle, children }) => {
+  const contentId = `${idPrefix}-filters-${category}`
   return (
     <div className="border-b border-gray-100 pb-3 mb-3">
       <button
@@ -37,7 +37,7 @@ const Section: React.FC<{ title: string; category: string; collapsed: boolean; o
   )
 }
 
-const CheckboxList: React.FC<{ name: string; options: Facet[]; query: URLSearchParams; onChange: (n: URLSearchParams)=>void }> = ({ name, options, query, onChange }) => {
+const CheckboxList: React.FC<{ idPrefix: string; name: string; options: Facet[]; query: URLSearchParams; onChange: (n: URLSearchParams)=>void }> = ({ idPrefix, name, options, query, onChange }) => {
   const selected = new Set(parseCsv(query.get(name)))
   const toggle = (id: string) => {
     const next = new URLSearchParams(query.toString())
@@ -50,11 +50,11 @@ const CheckboxList: React.FC<{ name: string; options: Facet[]; query: URLSearchP
   return (
     <div className="space-y-1">
       {options.map((opt, idx) => {
-        const id = `${name}-${idx}`
+        const id = `${idPrefix}-${name}-${idx}`
         const checked = selected.has(opt.id)
         return (
           <div key={opt.id} className="flex items-center">
-            <input type="checkbox" id={id} checked={checked} onChange={() => toggle(opt.id)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" aria-label={`${name} ${opt.name}`} />
+            <input type="checkbox" id={id} checked={checked} onChange={() => toggle(opt.id)} className="h-4 w-4 rounded border-gray-300 text-[var(--guidelines-primary)] focus:ring-[var(--guidelines-primary)] accent-[var(--guidelines-primary)]" aria-label={`${name} ${opt.name}`} />
             <label htmlFor={id} className="ml-2 text-sm text-gray-700">
               {opt.name}
             </label>
@@ -66,22 +66,29 @@ const CheckboxList: React.FC<{ name: string; options: Facet[]; query: URLSearchP
 }
 
 export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange }) => {
+  const instanceId = useId()
   const clearAll = () => {
     const next = new URLSearchParams()
     onChange(next)
   }
-  // Persist collapsed categories in URL param 'collapsed' as CSV
-  const collapsedSet = useMemo(() => {
+  // Persist collapsed categories in URL param 'collapsed' as CSV; also keep local state to avoid cross-instance glitches
+  const initialCollapsed = useMemo(() => {
     const fromUrl = parseCsv(query.get('collapsed'))
-    if (fromUrl.length > 0) return new Set(fromUrl)
-    // Default: collapse all except Domain
-    return new Set(['guide_type', 'function_area', 'status'])
+    return new Set(fromUrl.length > 0 ? fromUrl : ['guide_type', 'function_area', 'status'])
+  }, [query])
+  const [collapsedSet, setCollapsedSet] = useState<Set<string>>(initialCollapsed)
+  // Keep local collapsed state in sync if URL changes from outside
+  useEffect(() => {
+    const next = new Set(parseCsv(query.get('collapsed')))
+    if (next.size > 0) setCollapsedSet(next)
   }, [query])
   const toggleCollapsed = (key: string) => {
+    const nextSet = new Set(collapsedSet)
+    if (nextSet.has(key)) nextSet.delete(key); else nextSet.add(key)
+    setCollapsedSet(nextSet)
+    // reflect in URL
     const next = new URLSearchParams(query.toString())
-    const set = new Set(parseCsv(next.get('collapsed')))
-    if (set.has(key)) set.delete(key); else set.add(key)
-    const value = Array.from(set).join(',')
+    const value = Array.from(nextSet).join(',')
     if (value) next.set('collapsed', value); else next.delete('collapsed')
     onChange(next)
   }
@@ -89,16 +96,16 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange }) => {
     <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} aria-label="Guides filters">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Filters</h2>
-        <button onClick={clearAll} className="text-blue-600 text-sm font-medium">Clear all</button>
+        <button onClick={clearAll} className="text-[var(--guidelines-primary)] text-sm font-medium">Clear all</button>
       </div>
-      <Section title="Domain" category="domain" collapsed={collapsedSet.has('domain')} onToggle={toggleCollapsed}>
-        <CheckboxList name="domain" options={facets.domain || []} query={query} onChange={onChange} />
+      <Section idPrefix={instanceId} title="Domain" category="domain" collapsed={collapsedSet.has('domain')} onToggle={toggleCollapsed}>
+        <CheckboxList idPrefix={instanceId} name="domain" options={facets.domain || []} query={query} onChange={onChange} />
       </Section>
-      <Section title="Guide Type" category="guide_type" collapsed={collapsedSet.has('guide_type')} onToggle={toggleCollapsed}>
-        <CheckboxList name="guide_type" options={facets.guide_type || []} query={query} onChange={onChange} />
+      <Section idPrefix={instanceId} title="Guide Type" category="guide_type" collapsed={collapsedSet.has('guide_type')} onToggle={toggleCollapsed}>
+        <CheckboxList idPrefix={instanceId} name="guide_type" options={facets.guide_type || []} query={query} onChange={onChange} />
       </Section>
-      <Section title="Function Area" category="function_area" collapsed={collapsedSet.has('function_area')} onToggle={toggleCollapsed}>
-        <CheckboxList name="function_area" options={facets.function_area || []} query={query} onChange={onChange} />
+      <Section idPrefix={instanceId} title="Function Area" category="function_area" collapsed={collapsedSet.has('function_area')} onToggle={toggleCollapsed}>
+        <CheckboxList idPrefix={instanceId} name="function_area" options={facets.function_area || []} query={query} onChange={onChange} />
       </Section>
       {/* Status filter intentionally hidden in Guidelines catalog */}
     </div>

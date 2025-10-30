@@ -12,6 +12,34 @@
   --dq-cta-gradient: linear-gradient(90deg, var(--dq-navy) 0%, var(--dq-coral) 100%);
 }
 
+/* Guidelines section theme */
+.guidelines-theme {
+  --guidelines-primary: var(--dq-coral);
+  --guidelines-primary-surface: color-mix(in srgb, var(--dq-coral) 15%, white);
+  --guidelines-primary-solid: color-mix(in srgb, var(--dq-coral) 60%, black);
+  --guidelines-primary-solid-hover: color-mix(in srgb, var(--dq-coral) 70%, black);
+  --guidelines-ring-color: color-mix(in srgb, var(--dq-coral) 35%, transparent);
+}
+
+.guidelines-theme input[type="text"]:focus,
+.guidelines-theme select:focus,
+.guidelines-theme input[type="checkbox"]:focus {
+  --tw-ring-color: var(--guidelines-primary);
+  border-color: var(--guidelines-primary);
+}
+
+.guidelines-theme input[type="checkbox"] {
+  accent-color: var(--guidelines-primary);
+}
+
+.dark .guidelines-theme {
+  --guidelines-primary: var(--dq-coral);
+  --guidelines-primary-surface: color-mix(in srgb, var(--dq-coral) 25%, white);
+  --guidelines-primary-solid: color-mix(in srgb, var(--dq-coral) 65%, black);
+  --guidelines-primary-solid-hover: color-mix(in srgb, var(--dq-coral) 75%, black);
+  --guidelines-ring-color: color-mix(in srgb, var(--dq-coral) 45%, transparent);
+}
+
 .no-scroll {
   overflow: hidden;
 }
