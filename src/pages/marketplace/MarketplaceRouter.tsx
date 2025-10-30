@@ -3,9 +3,10 @@ import { Routes, Route } from 'react-router-dom';
 import { MarketplacePage } from '../../components/marketplace/MarketplacePage';
 import MarketplaceDetailsPage from './MarketplaceDetailsPage';
 import ActivitiesPage from './ActivitiesPage';
-import { DollarSign, Briefcase, Users, Calendar, Newspaper, BookOpen, Video } from 'lucide-react';
+import { DollarSign, Briefcase, Calendar, BookOpen } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 import NewsPage from './NewsPage';
+import NewsDetailPage from './NewsDetailPage';
 // Promo cards for courses marketplace
 const coursePromoCards = [{
   id: 'finance-promo',
@@ -115,8 +116,11 @@ export const MarketplaceRouter: React.FC = () => {
       {/* Knowledge Hub Marketplace */}
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
       <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />
-      {/* News Marketplace */}
+      {/* News & Opportunities Marketplace */}
       <Route path="/news" element={<NewsPage />} />
+      <Route path="/news/:id" element={<NewsDetailPage />} />
+      <Route path="/opportunities" element={<NewsPage />} />
+      <Route path="/opportunities/:id" element={<NewsDetailPage />} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
     </Routes>;
 };

@@ -65,8 +65,8 @@ const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
         </div>
         
         <Link 
-          to={`/media/news/${item.id}`} 
-          className="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2.5 rounded font-medium transition-colors"
+          to={`/marketplace/opportunities/${item.id}`} 
+          className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 rounded font-medium transition-colors"
         >
           Read More
         </Link>
@@ -130,11 +130,31 @@ const NewsPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-      <main className="container mx-auto px-4 py-8 flex-grow flex">
-        {/* Sidebar Filters */}
-        <div className="w-64 bg-white shadow-sm border-r border-gray-200">
-          <div className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Filters</h2>
+      <main className="container mx-auto px-4 py-8 flex-grow">
+        {/* Header Section */}
+        <header className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Latest News & Announcements</h1>
+          <p className="text-gray-600 mt-2">Stay up-to-date with the latest company news and announcements</p>
+        </header>
+
+        {/* Search Bar */}
+        <div className="mb-6 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by title or description"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Main Content with Sidebar */}
+        <div className="flex gap-6">
+          {/* Sidebar Filters */}
+          <aside className="w-64 flex-shrink-0">
+            <div className="bg-white shadow-sm rounded-lg p-6">
+              <h2 className="text-lg font-semibold mb-4">Filters</h2>
 
             {/* Category Filter */}
             <div className="mb-4 border-b border-gray-200 pb-4">
@@ -207,40 +227,24 @@ const NewsPage: React.FC = () => {
                 </div>
               )}
             </div>
+            </div>
+          </aside>
+
+          {/* Main Content Area */}
+          <div className="flex-1">
+            {/* Available Items Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Available Items ({filteredItems.length})</h2>
+              <span className="text-sm text-gray-500">Showing {filteredItems.length} of {items.length} items</span>
+            </div>
+
+            {/* News Cards */}
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredItems.map((item) => (
+                <NewsCard key={item.id} item={item} />
+              ))}
+            </section>
           </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 px-8 py-6">
-          <header className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Latest News & Announcements</h1>
-            <p className="text-gray-600 mt-2">Stay up-to-date with the latest company news and announcements</p>
-          </header>
-
-          {/* Search Bar */}
-          <div className="mb-6 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by title or description"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {/* Available Items Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Available Items ({filteredItems.length})</h2>
-            <span className="text-sm text-gray-500">Showing {filteredItems.length} of {items.length} items</span>
-          </div>
-
-          {/* News Cards */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <NewsCard key={item.id} item={item} />
-            ))}
-          </section>
         </div>
       </main>
       <Footer isLoggedIn={false} />
