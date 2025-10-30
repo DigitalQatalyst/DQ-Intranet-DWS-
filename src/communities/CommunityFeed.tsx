@@ -6,7 +6,7 @@ import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } f
 import { TabsFeed } from '@/communities/components/feed/TabsFeed';
 import { FeedSidebar } from '@/communities/components/feed/FeedSidebar';
 import { InlineComposer } from '@/communities/components/post/InlineComposer';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabaseClient } from '../lib/supabaseClient';
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
 import { Button } from '@/communities/components/ui/button';
@@ -67,105 +67,195 @@ export function CommunityFeed() {
     if (!user) return;
     setMyLoading(true);
     
-    // Mock data - in real app this would use Supabase
-    const mockPosts: Post[] = [
-      {
-        id: '1',
-        title: 'Welcome to the Digital Transformation Hub!',
-        content: 'Excited to share insights about the latest trends in digital transformation across Abu Dhabi. What technologies are you most excited about?',
-        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        created_by: user.id,
-        community_id: '2',
-        community_name: 'Digital Transformation Hub',
-        author_username: 'sarah_tech',
-        helpful_count: 24,
-        insightful_count: 8,
-        comment_count: 12,
-        post_type: 'text'
-      },
-      {
-        id: '2',
-        title: 'Startup Funding Opportunities in UAE',
-        content: 'Just attended an amazing session on startup funding. Here are the key takeaways for early-stage companies looking for investment...',
-        created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        created_by: user.id,
-        community_id: '3',
-        community_name: 'Startup Ecosystem UAE',
-        author_username: 'ahmed_founder',
-        helpful_count: 42,
-        insightful_count: 15,
-        comment_count: 28,
-        post_type: 'text'
-      }
-    ];
+    try {
+      // Fetch posts from communities the user is a member of
+      let query = supabaseClient
+        .from('posts')
+        .select(`
+          *,
+          community:communities(id, name),
+          author:users_local(id, username, avatar_url),
+          reactions(reaction_type),
+          comments(id)
+        `)
+        .eq('status', 'active')
+        .in('community_id', 
+          supabaseClient
+            .from('memberships')
+            .select('community_id')
+            .eq('user_id', user.id)
+        );
 
-    let filteredData = mockPosts;
-    if (filterTag) {
-      filteredData = mockPosts.filter((post: Post) => post.tags?.includes(filterTag));
+      // Apply tag filter if present
+      if (filterTag) {
+        query = query.contains('tags', [filterTag]);
+      }
+
+      // Apply sorting
+      if (sortBy === 'recent') {
+        query = query.order('created_at', { ascending: false });
+      } else if (sortBy === 'popular') {
+        // Sort by reaction count (calculated client-side)
+        query = query.order('created_at', { ascending: false });
+      }
+
+      const { data, error } = await query.range(offset, offset + 9);
+
+      if (error) throw error;
+
+      // Transform data to match Post interface
+      const posts: Post[] = (data || []).map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        created_at: post.created_at,
+        created_by: post.created_by,
+        community_id: post.community_id,
+        community_name: post.community?.name || 'Unknown',
+        author_username: post.author?.username || 'Anonymous',
+        author_avatar: post.author?.avatar_url,
+        helpful_count: post.reactions?.filter((r: any) => r.reaction_type === 'helpful').length || 0,
+        insightful_count: post.reactions?.filter((r: any) => r.reaction_type === 'insightful').length || 0,
+        comment_count: post.comments?.length || 0,
+        tags: post.tags,
+        post_type: post.post_type,
+        metadata: post.metadata,
+        event_date: post.event_date,
+        event_location: post.event_location,
+      }));
+
+      setMyPosts(offset === 0 ? posts : [...myPosts, ...posts]);
+    } catch (error) {
+      console.error('Error fetching my posts:', error);
+    } finally {
+      setMyLoading(false);
     }
-    setMyPosts(offset === 0 ? filteredData : [...myPosts, ...filteredData]);
-    setMyLoading(false);
   };
 
   const fetchGlobalPosts = async (sortBy: string = 'recent', offset: number = 0) => {
     if (!user) return;
     setGlobalLoading(true);
     
-    // Mock data - in real app this would use Supabase
-    const mockPosts: Post[] = [
-      {
-        id: '3',
-        title: 'Tech Meetup: AI in Healthcare',
-        content: 'Join us next week for an exciting discussion on AI applications in healthcare. We\'ll have industry experts sharing their experiences.',
-        created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-        created_by: 'user3',
-        community_id: '1',
-        community_name: 'Tech Innovators Abu Dhabi',
-        author_username: 'dr_innovation',
-        helpful_count: 18,
-        insightful_count: 5,
-        comment_count: 9,
-        post_type: 'event',
-        event_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        event_location: 'Abu Dhabi Tech Hub'
-      }
-    ];
+    try {
+      // Fetch all public posts
+      let query = supabaseClient
+        .from('posts')
+        .select(`
+          *,
+          community:communities!inner(id, name, isprivate),
+          author:users_local(id, username, avatar_url),
+          reactions(reaction_type),
+          comments(id)
+        `)
+        .eq('status', 'active')
+        .eq('community.isprivate', false);
 
-    let filteredData = mockPosts;
-    if (filterTag) {
-      filteredData = mockPosts.filter((post: Post) => post.tags?.includes(filterTag));
+      // Apply tag filter if present
+      if (filterTag) {
+        query = query.contains('tags', [filterTag]);
+      }
+
+      // Apply sorting
+      if (sortBy === 'recent') {
+        query = query.order('created_at', { ascending: false });
+      }
+
+      const { data, error } = await query.range(offset, offset + 9);
+
+      if (error) throw error;
+
+      // Transform data to match Post interface
+      const posts: Post[] = (data || []).map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        created_at: post.created_at,
+        created_by: post.created_by,
+        community_id: post.community_id,
+        community_name: post.community?.name || 'Unknown',
+        author_username: post.author?.username || 'Anonymous',
+        author_avatar: post.author?.avatar_url,
+        helpful_count: post.reactions?.filter((r: any) => r.reaction_type === 'helpful').length || 0,
+        insightful_count: post.reactions?.filter((r: any) => r.reaction_type === 'insightful').length || 0,
+        comment_count: post.comments?.length || 0,
+        tags: post.tags,
+        post_type: post.post_type,
+        metadata: post.metadata,
+        event_date: post.event_date,
+        event_location: post.event_location,
+      }));
+
+      setGlobalPosts(offset === 0 ? posts : [...globalPosts, ...posts]);
+    } catch (error) {
+      console.error('Error fetching global posts:', error);
+    } finally {
+      setGlobalLoading(false);
     }
-    setGlobalPosts(offset === 0 ? filteredData : [...globalPosts, ...filteredData]);
-    setGlobalLoading(false);
   };
 
   const fetchTrendingPosts = async (sortBy: string = 'recent', offset: number = 0) => {
     setTrendingLoading(true);
     
-    // Mock trending posts - in real app this would use Supabase RPC
-    const mockTrendingPosts: Post[] = [
-      {
-        id: '4',
-        title: 'The Future of Blockchain in UAE',
-        content: 'Exploring how blockchain technology is transforming various sectors in the UAE...',
-        created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-        created_by: 'user4',
-        community_id: '1',
-        community_name: 'Tech Innovators Abu Dhabi',
-        author_username: 'blockchain_expert',
-        helpful_count: 67,
-        insightful_count: 23,
-        comment_count: 45,
-        post_type: 'article'
-      }
-    ];
+    try {
+      // Fetch trending posts (posts with most reactions in last 7 days)
+      let query = supabaseClient
+        .from('posts')
+        .select(`
+          *,
+          community:communities!inner(id, name, isprivate),
+          author:users_local(id, username, avatar_url),
+          reactions(reaction_type),
+          comments(id)
+        `)
+        .eq('status', 'active')
+        .eq('community.isprivate', false)
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
-    let filteredData = mockTrendingPosts;
-    if (filterTag) {
-      filteredData = mockTrendingPosts.filter((post: Post) => post.tags?.includes(filterTag));
+      // Apply tag filter if present
+      if (filterTag) {
+        query = query.contains('tags', [filterTag]);
+      }
+
+      query = query.order('created_at', { ascending: false });
+
+      const { data, error } = await query.range(offset, offset + 9);
+
+      if (error) throw error;
+
+      // Transform and sort by engagement (reactions + comments)
+      const posts: Post[] = (data || []).map((post: any) => {
+        const helpful = post.reactions?.filter((r: any) => r.reaction_type === 'helpful').length || 0;
+        const insightful = post.reactions?.filter((r: any) => r.reaction_type === 'insightful').length || 0;
+        const comments = post.comments?.length || 0;
+        
+        return {
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          created_at: post.created_at,
+          created_by: post.created_by,
+          community_id: post.community_id,
+          community_name: post.community?.name || 'Unknown',
+          author_username: post.author?.username || 'Anonymous',
+          author_avatar: post.author?.avatar_url,
+          helpful_count: helpful,
+          insightful_count: insightful,
+          comment_count: comments,
+          tags: post.tags,
+          post_type: post.post_type,
+          metadata: post.metadata,
+          event_date: post.event_date,
+          event_location: post.event_location,
+          _engagement: helpful + insightful + comments,
+        };
+      }).sort((a: any, b: any) => b._engagement - a._engagement);
+
+      setTrendingPosts(offset === 0 ? posts : [...trendingPosts, ...posts]);
+    } catch (error) {
+      console.error('Error fetching trending posts:', error);
+    } finally {
+      setTrendingLoading(false);
     }
-    setTrendingPosts(offset === 0 ? filteredData : [...trendingPosts, ...filteredData]);
-    setTrendingLoading(false);
   };
 
   const handlePostCreated = () => {
