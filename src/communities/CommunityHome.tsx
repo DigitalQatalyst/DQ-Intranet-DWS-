@@ -120,7 +120,7 @@ export function CommunityHome() {
           {/* CTA Section */}
           <section className="bg-white py-16 md:py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-8 md:p-10">
+              <div className="rounded-2xl bg-[#030F35] text-white p-8 md:p-10">
                 <h2 className="text-2xl md:text-3xl font-bold text-center">
                   Ready to Get Started?
                 </h2>
