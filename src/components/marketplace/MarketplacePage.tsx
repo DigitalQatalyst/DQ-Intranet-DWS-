@@ -551,14 +551,14 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <FilterIcon size={18} />
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
-              {((isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
+              {(isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
                  isKnowledgeHub ? activeFilters.length > 0 :
                  isGuidesLike(marketplaceType) ? false :
                  Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''))) && (
                 <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
                   Reset
                 </button>
-              ))}
+              )}
             </div>
           </div>
 
@@ -600,7 +600,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                     </div>
                   ) : (
                     <FilterSidebar
-                      filters={isCourses ? urlBasedFilters : filters}
+                      filters={isCourses ? urlBasedFilters : (Object.fromEntries(Object.entries(filters).map(([k, v]) => [k, Array.isArray(v) ? v : (v ? [v] : [])])) as Record<string, string[]>)}
                       filterConfig={filterConfig}
                       onFilterChange={handleFilterChange}
                       onResetFilters={resetFilters}
@@ -620,7 +620,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               <div className="bg-white rounded-lg shadow p-4 sticky top-24">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Filters</h2>
-                  {((isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
+                  {(isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
                      isKnowledgeHub ? activeFilters.length > 0 :
                      Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''))) && (
                     <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>
@@ -640,7 +640,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   </div>
                 ) : (
                   <FilterSidebar
-                    filters={isCourses ? urlBasedFilters : filters}
+                    filters={isCourses ? urlBasedFilters : (Object.fromEntries(Object.entries(filters).map(([k, v]) => [k, Array.isArray(v) ? v : (v ? [v] : [])])) as Record<string, string[]>)}
                     filterConfig={filterConfig}
                     onFilterChange={handleFilterChange}
                     onResetFilters={resetFilters}
