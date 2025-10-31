@@ -43,7 +43,9 @@ if (container) {
           window.location.replace("/dashboard/onboarding");
           return;
         }
-      } catch {}
+      } catch (error) {
+        console.warn("Error processing authentication state:", error);
+      }
       root.render(
         <ApolloProvider client={client}>
           <MsalProvider instance={msalInstance}>

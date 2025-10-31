@@ -1,0 +1,293 @@
+{
+  "guides": [
+    {
+      "slug": "set-up-supabase-auth-nextjs",
+      "topics": ["engineering-and-devops"],
+      "audiences": ["engineer-dev", "product-manager"],
+      "tools": ["supabase", "nextjs", "react"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "design-a-one-page-product-brief",
+      "topics": ["product-and-design", "strategy-and-leadership"],
+      "audiences": ["product-manager", "designer-ux", "manager"],
+      "tools": ["notion", "miro"],
+      "formats": ["checklist"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "roll-out-feature-flags-with-github-and-react",
+      "topics": ["engineering-and-devops"],
+      "audiences": ["engineer-dev", "scrum-master"],
+      "tools": ["github", "react"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "implement-incident-response-policy",
+      "topics": ["security-and-compliance"],
+      "audiences": ["security-officer", "it-admin", "ops"],
+      "tools": ["slack", "jira"],
+      "formats": ["policy-procedure"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "model-financial-forecast-in-tableau",
+      "topics": ["finance-and-funding", "data-and-analytics"],
+      "audiences": ["analyst", "manager", "finance-compliance"],
+      "tools": ["tableau", "postgres"],
+      "formats": ["template-pack"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "stand-up-ci-cd-with-github-actions-and-azure",
+      "topics": ["engineering-and-devops", "project-management"],
+      "audiences": ["engineer-dev", "it-admin"],
+      "tools": ["github", "azure"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "run-a-sprint-planning-session",
+      "topics": ["project-management"],
+      "audiences": ["scrum-master", "product-manager"],
+      "tools": ["jira", "notion"],
+      "formats": ["checklist"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "create-a-customer-journey-map",
+      "topics": ["product-and-design", "marketing-and-growth"],
+      "audiences": ["designer-ux", "product-manager", "marketer-growth"],
+      "tools": ["miro"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "build-a-data-pipeline-on-postgres",
+      "topics": ["data-and-analytics"],
+      "audiences": ["analyst", "engineer-dev"],
+      "tools": ["postgres", "tableau"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "standardize-code-review-checklist",
+      "topics": ["engineering-and-devops"],
+      "audiences": ["engineer-dev", "manager"],
+      "tools": ["github"],
+      "formats": ["checklist"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "notion-crm-template-for-startups",
+      "topics": ["marketing-and-growth", "operations-and-productivity"],
+      "audiences": ["founder", "marketer-growth"],
+      "tools": ["notion"],
+      "formats": ["template-pack"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "automate-standups-in-slack",
+      "topics": ["operations-and-productivity"],
+      "audiences": ["scrum-master", "ops"],
+      "tools": ["slack"],
+      "formats": ["interactive-tool"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "kanban-workflow-with-jira",
+      "topics": ["project-management"],
+      "audiences": ["scrum-master", "product-manager"],
+      "tools": ["jira"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "secure-secrets-with-github-actions",
+      "topics": ["security-and-compliance"],
+      "audiences": ["security-officer", "it-admin"],
+      "tools": ["github", "azure"],
+      "formats": ["policy-procedure"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "product-discovery-interview-guide",
+      "topics": ["product-and-design", "strategy-and-leadership"],
+      "audiences": ["product-manager", "designer-ux"],
+      "tools": ["miro", "notion"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "data-governance-policy-overview",
+      "topics": ["security-and-compliance", "data-and-analytics"],
+      "audiences": ["security-officer", "analyst", "manager"],
+      "tools": ["postgres", "tableau"],
+      "formats": ["policy-procedure"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "arabic-landing-page-checklist",
+      "topics": ["product-and-design", "marketing-and-growth"],
+      "audiences": ["designer-ux", "marketer-growth"],
+      "tools": ["miro", "notion"],
+      "formats": ["checklist"],
+      "languages": ["ar"]
+    },
+    {
+      "slug": "build-self-service-analytics-in-tableau",
+      "topics": ["data-and-analytics"],
+      "audiences": ["analyst", "manager"],
+      "tools": ["tableau", "postgres"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "ship-a-minimum-viable-playbook",
+      "topics": ["strategy-and-leadership", "operations-and-productivity"],
+      "audiences": ["manager", "product-manager"],
+      "tools": ["notion"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "arabic-brand-voice-checklist",
+      "topics": ["marketing-and-growth"],
+      "audiences": ["marketer-growth", "designer-ux"],
+      "tools": ["notion"],
+      "formats": ["checklist"],
+      "languages": ["ar"]
+    },
+    {
+      "slug": "interactive-costing-tool-in-notion",
+      "topics": ["operations-and-productivity", "finance-and-funding"],
+      "audiences": ["ops", "analyst"],
+      "tools": ["notion"],
+      "formats": ["interactive-tool"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "ops-onboarding-template-pack",
+      "topics": ["operations-and-productivity"],
+      "audiences": ["ops", "hr-manager", "manager"],
+      "tools": ["notion", "slack"],
+      "formats": ["template-pack"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "marketing-experiment-tracker",
+      "topics": ["marketing-and-growth"],
+      "audiences": ["marketer-growth", "product-manager"],
+      "tools": ["notion", "jira"],
+      "formats": ["template-pack"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "sql-style-guide-checklist",
+      "topics": ["data-and-analytics"],
+      "audiences": ["analyst", "engineer-dev"],
+      "tools": ["postgres"],
+      "formats": ["checklist"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "supabase-row-level-security-setup",
+      "topics": ["engineering-and-devops", "security-and-compliance"],
+      "audiences": ["engineer-dev", "security-officer"],
+      "tools": ["supabase", "postgres"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "react-accessibility-checklist",
+      "topics": ["product-and-design"],
+      "audiences": ["engineer-dev", "designer-ux"],
+      "tools": ["react"],
+      "formats": ["checklist"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "slack-incident-communications-tool",
+      "topics": ["security-and-compliance", "operations-and-productivity"],
+      "audiences": ["security-officer", "ops"],
+      "tools": ["slack", "jira"],
+      "formats": ["interactive-tool"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "tableau-dashboard-template-pack",
+      "topics": ["data-and-analytics"],
+      "audiences": ["analyst", "manager"],
+      "tools": ["tableau"],
+      "formats": ["template-pack"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "product-roadmap-with-notion-and-github",
+      "topics": ["project-management", "strategy-and-leadership"],
+      "audiences": ["product-manager", "manager"],
+      "tools": ["notion", "github", "slack"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "azure-landing-zone-checklist",
+      "topics": ["security-and-compliance", "engineering-and-devops"],
+      "audiences": ["it-admin", "security-officer"],
+      "tools": ["azure"],
+      "formats": ["checklist"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "supabase-storage-template-pack",
+      "topics": ["engineering-and-devops"],
+      "audiences": ["engineer-dev"],
+      "tools": ["supabase"],
+      "formats": ["template-pack"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "miro-retrospective-template",
+      "topics": ["project-management"],
+      "audiences": ["scrum-master", "product-manager"],
+      "tools": ["miro", "jira"],
+      "formats": ["template-pack"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "jira-workflow-policy",
+      "topics": ["project-management"],
+      "audiences": ["scrum-master", "manager"],
+      "tools": ["jira"],
+      "formats": ["policy-procedure"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "react-performance-profiling-playbook",
+      "topics": ["engineering-and-devops"],
+      "audiences": ["engineer-dev", "product-manager"],
+      "tools": ["react"],
+      "formats": ["step-by-step"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "gitops-checklist-for-azure",
+      "topics": ["engineering-and-devops"],
+      "audiences": ["engineer-dev", "it-admin"],
+      "tools": ["github", "azure"],
+      "formats": ["checklist"],
+      "languages": ["en"]
+    },
+    {
+      "slug": "notion-hr-onboarding-policy",
+      "topics": ["operations-and-productivity"],
+      "audiences": ["hr-manager", "manager"],
+      "tools": ["notion"],
+      "formats": ["policy-procedure"],
+      "languages": ["en"]
+    }
+  ]
+}
+

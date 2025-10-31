@@ -1,5 +1,5 @@
-import React, { useMemo, useState, cloneElement } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useMemo, useState, cloneElement } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Briefcase,
@@ -91,14 +91,14 @@ interface SectionStyle {
 const defaultSectionStyle: SectionStyle = {
   // not used directly; each row overrides
   cardClasses:
-    'bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
-  headingClass: 'text-white',
-  descriptionClass: 'text-white/90',
-  iconClass: 'text-white',
+    "bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white",
+  headingClass: "text-white",
+  descriptionClass: "text-white/90",
+  iconClass: "text-white",
   buttonClasses:
-    'text-white bg-[rgba(255,255,255,0.14)] hover:bg-[rgba(255,255,255,0.18)] border border-[rgba(255,255,255,0.22)] focus:ring-[#030F35] focus:ring-offset-2 focus:ring-offset-transparent',
-  hoverOverlayClass: 'bg-white/10',
-  iconWrapperClass: 'w-10 h-10',
+    "text-white bg-[rgba(255,255,255,0.14)] hover:bg-[rgba(255,255,255,0.18)] border border-[rgba(255,255,255,0.22)] focus:ring-[#030F35] focus:ring-offset-2 focus:ring-offset-transparent",
+  hoverOverlayClass: "bg-white/10",
+  iconWrapperClass: "w-10 h-10",
   disabledCardClasses:
     'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
 };
@@ -108,7 +108,7 @@ const ServiceCard = ({
   service,
   onClick,
   isComingSoon = false,
-  sectionStyle = defaultSectionStyle
+  sectionStyle = defaultSectionStyle,
 }: {
   service: any;
   onClick: () => void;
@@ -120,7 +120,7 @@ const ServiceCard = ({
   const activeCardClasses = `${sectionStyle.cardClasses} hover:shadow-md hover:-translate-y-0.5 cursor-pointer`;
   const disabledClasses =
     sectionStyle.disabledCardClasses ??
-    'bg-dqsec-tint text-white/70 opacity-70 cursor-not-allowed border border-transparent';
+    "bg-dqsec-tint text-white/70 opacity-70 cursor-not-allowed border border-transparent";
 
   const baseLayoutClasses =
     'rounded-2xl p-6 flex flex-col justify-between min-h-[260px] shadow-sm overflow-hidden transition-all duration-300 transform backdrop-blur-sm';
@@ -131,18 +131,26 @@ const ServiceCard = ({
   const hoverOverlayClass = sectionStyle.hoverOverlayClass ?? 'bg-white/10';
   const iconWrapperClasses = sectionStyle.iconWrapperClass ?? 'w-12 h-12';
   const descriptionClasses = `text-sm text-gray-600 leading-snug text-balance line-clamp-2 mt-3 mb-4 ${
-    isComingSoon ? 'text-white/70' : sectionStyle.descriptionClass
+    isComingSoon ? "text-white/70" : sectionStyle.descriptionClass
   }`;
 
-  const iconNode = service.icon ? service.icon : <CircleDot aria-hidden="true" />;
+  const iconNode = service.icon ? (
+    service.icon
+  ) : (
+    <CircleDot aria-hidden="true" />
+  );
   const iconElement = cloneElement(iconNode, {
     size: 20,
-    'aria-hidden': true,
-    className: `${iconColorClass} ${iconNode.props?.className ?? ''}`.trim()
+    "aria-hidden": true,
+    className: `${iconColorClass} ${iconNode.props?.className ?? ""}`.trim(),
   });
 
-  const wrapperClasses = `${isComingSoon ? disabledClasses : activeCardClasses} ${baseLayoutClasses}`;
-  const titleClass = `${isComingSoon ? 'text-white/80' : sectionStyle.headingClass} text-base font-semibold text-white mb-1 truncate`;
+  const wrapperClasses = `${
+    isComingSoon ? disabledClasses : activeCardClasses
+  } ${baseLayoutClasses}`;
+  const titleClass = `${
+    isComingSoon ? "text-white/80" : sectionStyle.headingClass
+  } text-base font-semibold text-white mb-1 truncate`;
 
   return (
     <div
@@ -161,15 +169,15 @@ const ServiceCard = ({
       )}
 
       <div className="flex items-start gap-3">
-        <div className={`${iconWrapperClasses} rounded-full bg-white border border-white/40 shadow-sm flex items-center justify-center mb-3`}>
+        <div
+          className={`${iconWrapperClasses} rounded-full bg-white border border-white/40 shadow-sm flex items-center justify-center mb-3`}
+        >
           {iconElement}
         </div>
         <h2 className={titleClass}>{service.title}</h2>
       </div>
 
-      <p className={descriptionClasses}>
-        {service.description}
-      </p>
+      <p className={descriptionClasses}>{service.description}</p>
 
       <button
         className={isComingSoon ? disabledButtonClasses : 'cta-ejp'}
@@ -210,12 +218,21 @@ interface CategoryHeaderProps {
   count?: number | null;
 }
 
-const CategoryHeader: React.FC<CategoryHeaderProps> = ({ icon, title, count = null }) => {
+const CategoryHeader: React.FC<CategoryHeaderProps> = ({
+  icon,
+  title,
+  count = null,
+}) => {
   const [isHovered, setIsHovered] = useState(false);
   const [ref] = useInView({ threshold: 0.1 });
 
   return (
-    <div className="mb-6" ref={ref} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+    <div
+      className="mb-6"
+      ref={ref}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className="flex items-center mb-2">
         <div className={`w-10 h-10 rounded-full bg-dq-navy/10 flex items-center justify-center mr-3 text-dq-navy transition-all duration-300 ${isHovered ? 'scale-110 bg-dq-navy/15' : ''}`}>
           {icon}
@@ -247,13 +264,14 @@ export const HomePage: React.FC = () => {
           title: 'DQ LMS Courses',
           description: "Access DQ's Learning Hub to grow skills and master courses that shape your professional journey",
           icon: <GraduationCap />,
-          path: '/marketplace/courses',
-          isActive: true
+          path: "/marketplace/courses",
+          isActive: true,
         },
         {
-          id: 'dq-onboarding-flows',
-          title: 'DQ Onboarding Flows',
-          description: 'Navigate clear onboarding flows to connect faster and feel confident from your first day.',
+          id: "dq-onboarding-flows",
+          title: "DQ Onboarding Flows",
+          description:
+            "Navigate clear onboarding flows to connect faster and feel confident from your first day.",
           icon: <Compass />,
           path: '/onboarding',
           isActive: true
@@ -263,8 +281,8 @@ export const HomePage: React.FC = () => {
           title: 'DQ DCO Guidelines',
           description: 'Discover DQ’s core workflows, policies, and daily operational standards.',
           icon: <BookIcon />,
-          path: '#',
-          isActive: true
+          path: "#",
+          isActive: true,
         },
         {
           id: 'dq-guideline-center-dbp',
@@ -277,79 +295,88 @@ export const HomePage: React.FC = () => {
       ],
       advisory: [
         {
-          id: 'dq-services-requests',
-          title: 'DQ Services & Requests',
-          description: 'Access HR, IT, and Finance services in one place. Track requests and manage workflows easily.',
+          id: "dq-services-requests",
+          title: "DQ Services & Requests",
+          description:
+            "Access HR, IT, and Finance services in one place. Track requests and manage workflows easily.",
           icon: <Briefcase />,
-          path: '#',
-          isActive: true
+          path: "#",
+          isActive: true,
         },
         {
-          id: 'self-service-center',
-          title: 'Self-Service Center',
-          description: 'Find templates and dashboards that empower independent, efficient daily work.',
+          id: "self-service-center",
+          title: "Self-Service Center",
+          description:
+            "Find templates and dashboards that empower independent, efficient daily work.",
           icon: <Globe />,
-          path: '#',
-          isActive: true
+          path: "#",
+          isActive: true,
         },
         {
-          id: 'self-service-tools',
-          title: 'Self-Service Tools',
-          description: 'Use smart digital shortcuts and assistants that simplify your everyday tasks.',
+          id: "self-service-tools",
+          title: "Self-Service Tools",
+          description:
+            "Use smart digital shortcuts and assistants that simplify your everyday tasks.",
           icon: <Lightbulb />,
-          path: '#',
-          isActive: false
+          path: "#",
+          isActive: false,
         },
         {
-          id: 'service-integrations',
-          title: 'Service Integrations',
-          description: 'Connect your favorite DQ apps and automate workflows seamlessly.',
+          id: "service-integrations",
+          title: "Service Integrations",
+          description:
+            "Connect your favorite DQ apps and automate workflows seamlessly.",
           icon: <TrendingUp />,
-          path: '#',
-          isActive: false
-        }
+          path: "#",
+          isActive: false,
+        },
       ],
       growth: [
         {
-          id: 'units-directory',
-          title: 'Units & Associates Directory',
-          description: "Explore people and units across DQ to connect, collaborate, and grow together.",
+          id: "units-directory",
+          title: "Units & Associates Directory",
+          description:
+            "Explore people and units across DQ to connect, collaborate, and grow together.",
           icon: <Users />,
-          path: '#',
-          isActive: true
+          path: "#",
+          isActive: true,
         },
         {
-          id: 'communities-surveys',
-          title: 'Communities & Surveys',
-          description: "Join conversations that shape DQ's culture and share feedback that drives improvement.",
+          id: "communities-surveys",
+          title: "Communities & Surveys",
+          description:
+            "Join conversations that shape DQ's culture and share feedback that drives improvement.",
           icon: <HeartHandshake />,
           path: '/communities',
-          isActive: true
+          isActive: true,
         },
         {
-          id: 'events-calendars',
-          title: 'Events & Calendars',
-          description: 'Stay in sync with everything DQ, from weekly huddles to cultural events.',
+          id: "events-calendars",
+          title: "Events & Calendars",
+          description:
+            "Stay in sync with everything DQ, from weekly huddles to cultural events.",
           icon: <Calendar />,
-          path: '#',
-          isActive: true
+          path: "#",
+          isActive: true,
         },
         {
-          id: 'dq-activities',
-          title: 'DQ Activities',
-          description: "Track priorities, manage tasks, and collaborate seamlessly within DQ's workspaces.",
+          id: "dq-activities",
+          title: "DQ Activities",
+          description:
+            "Track priorities, manage tasks, and collaborate seamlessly within DQ's workspaces.",
           icon: <ClipboardList />,
-          path: '/marketplace/activities',
-          isActive: true
+          path: "/marketplace/activities",
+          isActive: true,
         },
         {
-          id: 'news-announcements',
-          title: 'News & Announcements',
-          description: "See daily DQ updates, success stories, and highlights that keep every team informed and inspired.",
+          id: "news-announcements",
+          title: "News & Announcements",
+          description:
+            "See daily DQ updates, success stories, and highlights that keep every team informed and inspired.",
           icon: <Newspaper />,
-          path: '#',
-          isActive: true
-        }
+          path: "#",
+          isActive: true,
+        },
       ],
       learning: [
         {
@@ -365,8 +392,8 @@ export const HomePage: React.FC = () => {
           title: 'DQ Glossary',
           description: 'Decode DQ terminology with clear definitions updated by teams across the organization.',
           icon: <Building />,
-          path: '#',
-          isActive: true
+          path: "#",
+          isActive: true,
         },
         {
           id: 'blueprint-library',
@@ -381,24 +408,26 @@ export const HomePage: React.FC = () => {
           title: 'DQ Product Library',
           description: 'Find product reference materials and documentation for ongoing builds.',
           icon: <Compass />,
-          path: '#',
-          isActive: true
+          path: "/blueprints",
+          isActive: true,
         },
         {
-          id: 'strategy-center',
-          title: 'Strategy Center',
-          description: "Understand how DQ's initiatives align with its purpose, DNA, and vision.",
+          id: "strategy-center",
+          title: "Strategy Center",
+          description:
+            "Understand how DQ's initiatives align with its purpose, DNA, and vision.",
           icon: <BarChart />,
-          path: '#',
-          isActive: true
+          path: "#",
+          isActive: true,
         },
         {
-          id: 'job-center',
-          title: 'Job Center',
-          description: 'Find roles, mobility opportunities, and career paths to grow within DQ.',
+          id: "job-center",
+          title: "Job Center",
+          description:
+            "Find roles, mobility opportunities, and career paths to grow within DQ.",
           icon: <JobIcon />,
-          path: '#',
-          isActive: true
+          path: "#",
+          isActive: true,
         },
         {
           id: 'asset-libraey',
@@ -409,30 +438,33 @@ export const HomePage: React.FC = () => {
           isActive: true
         },
         {
-          id: 'knowledge-base',
-          title: 'Knowledge Base',
-          description: "Follow step-by-step answers covering tools, governance, and support workflows across DQ.",
+          id: "knowledge-base",
+          title: "Knowledge Base",
+          description:
+            "Follow step-by-step answers covering tools, governance, and support workflows across DQ.",
           icon: <BookIcon />,
           path: '#',
           isActive: true
         },
         {
-          id: 'research-hub',
-          title: 'Research Hub',
-          description: "Explore insights, data, and reports powering DQ's continuous transformation and decision making.",
+          id: "research-hub",
+          title: "Research Hub",
+          description:
+            "Explore insights, data, and reports powering DQ's continuous transformation and decision making.",
           icon: <Lightbulb />,
-          path: '#',
-          isActive: false
+          path: "#",
+          isActive: false,
         },
         {
-          id: 'template-library',
-          title: 'Template Library',
-          description: 'Download ready-to-use decks and documents to share DQ initiatives with polish and consistency.',
+          id: "template-library",
+          title: "Template Library",
+          description:
+            "Download ready-to-use decks and documents to share DQ initiatives with polish and consistency.",
           icon: <Award />,
-          path: '#',
-          isActive: false
-        }
-      ]
+          path: "#",
+          isActive: false,
+        },
+      ],
     };
   }, []);
 
@@ -511,10 +543,13 @@ export const HomePage: React.FC = () => {
         {/* Marketplaces by Category */}
         <div className="mb-16">
           <FadeInUpOnScroll className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">Services & Marketplaces</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
+              Services & Marketplaces
+            </h2>
             <div>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto clamp-2">
-                Explore the tools, spaces, and learning paths that fuel growth and collaboration inside DQ.
+                Explore the tools, spaces, and learning paths that fuel growth
+                and collaboration inside DQ.
               </p>
             </div>
           </FadeInUpOnScroll>
@@ -522,17 +557,23 @@ export const HomePage: React.FC = () => {
           {/* Row 1 */}
           <div className="mb-10">
             <FadeInUpOnScroll>
-              <CategoryHeader icon={<GraduationCap size={24} />} title="Learning & Enablement" count={4} />
+              <CategoryHeader
+                icon={<GraduationCap size={24} />}
+                title="Learning & Enablement"
+                count={4}
+              />
             </FadeInUpOnScroll>
             <ServiceCarousel
               services={allServices.finance}
-              renderCard={service => {
-                const index = allServices.finance.findIndex(item => item.id === service.id);
+              renderCard={(service) => {
+                const index = allServices.finance.findIndex(
+                  (item) => item.id === service.id
+                );
                 return (
                   <FadeInUpOnScroll key={service.id} delay={index * 0.1}>
                     <ServiceCard
                       service={service}
-                      sectionStyle={sectionStyles['Learning & Enablement']}
+                      sectionStyle={sectionStyles["Learning & Enablement"]}
                       onClick={() => handleServiceClick(service.path)}
                       isComingSoon={!service.isActive}
                     />
@@ -545,17 +586,23 @@ export const HomePage: React.FC = () => {
           {/* Row 2 */}
           <div className="mb-10">
             <FadeInUpOnScroll>
-              <CategoryHeader icon={<Briefcase size={24} />} title="Services & Requests" count={4} />
+              <CategoryHeader
+                icon={<Briefcase size={24} />}
+                title="Services & Requests"
+                count={4}
+              />
             </FadeInUpOnScroll>
             <ServiceCarousel
               services={allServices.advisory}
-              renderCard={service => {
-                const index = allServices.advisory.findIndex(item => item.id === service.id);
+              renderCard={(service) => {
+                const index = allServices.advisory.findIndex(
+                  (item) => item.id === service.id
+                );
                 return (
                   <FadeInUpOnScroll key={service.id} delay={index * 0.1}>
                     <ServiceCard
                       service={service}
-                      sectionStyle={sectionStyles['Services & Requests']}
+                      sectionStyle={sectionStyles["Services & Requests"]}
                       onClick={() => handleServiceClick(service.path)}
                       isComingSoon={!service.isActive}
                     />
@@ -568,17 +615,25 @@ export const HomePage: React.FC = () => {
           {/* Row 3 */}
           <div className="mb-10">
             <FadeInUpOnScroll>
-              <CategoryHeader icon={<Users size={24} />} title="Collaboration & Communities" count={5} />
+              <CategoryHeader
+                icon={<Users size={24} />}
+                title="Collaboration & Communities"
+                count={5}
+              />
             </FadeInUpOnScroll>
             <ServiceCarousel
               services={allServices.growth}
-              renderCard={service => {
-                const index = allServices.growth.findIndex(item => item.id === service.id);
+              renderCard={(service) => {
+                const index = allServices.growth.findIndex(
+                  (item) => item.id === service.id
+                );
                 return (
                   <FadeInUpOnScroll key={service.id} delay={index * 0.1}>
                     <ServiceCard
                       service={service}
-                      sectionStyle={sectionStyles['Collaboration & Communities']}
+                      sectionStyle={
+                        sectionStyles["Collaboration & Communities"]
+                      }
                       onClick={() => handleServiceClick(service.path)}
                       isComingSoon={!service.isActive}
                     />
@@ -595,13 +650,15 @@ export const HomePage: React.FC = () => {
             </FadeInUpOnScroll>
             <ServiceCarousel
               services={allServices.learning}
-              renderCard={service => {
-                const index = allServices.learning.findIndex(item => item.id === service.id);
+              renderCard={(service) => {
+                const index = allServices.learning.findIndex(
+                  (item) => item.id === service.id
+                );
                 return (
                   <FadeInUpOnScroll key={service.id} delay={index * 0.1}>
                     <ServiceCard
                       service={service}
-                      sectionStyle={sectionStyles['Resources & Libraries']}
+                      sectionStyle={sectionStyles["Resources & Libraries"]}
                       onClick={() => handleServiceClick(service.path)}
                       isComingSoon={!service.isActive}
                     />

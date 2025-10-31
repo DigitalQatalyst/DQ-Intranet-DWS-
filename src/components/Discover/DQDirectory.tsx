@@ -137,10 +137,15 @@ const getDescription = (associate: Associate): string => {
   return title || role || '';
 };
 
+const getOneLiner = (a: Associate): string => {
+  const parts = [a.title?.trim(), a.role?.trim()].filter(Boolean);
+  return parts.join(' • ');
+};
+
 const CARD_BASE =
   'rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:ring-1 hover:ring-slate-200 transition';
-const PAD = 'flex min-h-[340px] flex-col p-6';
-const META_PANEL = 'mt-6 rounded-xl bg-slate-50 p-4';
+const PAD = 'flex min-h-[360px] flex-col p-6';
+const META_PANEL = 'rounded-xl bg-slate-50 p-4 mb-4';
 const CTA_NAVY =
   'w-full rounded-xl bg-[#131E42] text-white text-sm py-2.5 font-semibold hover:bg-[#0F1633] transition-colors';
 
@@ -154,6 +159,7 @@ const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
   const mailHref = email ? `mailto:${email}` : undefined;
   const phoneHref = mobile ? `tel:${sanitizeTelHref(mobile)}` : undefined;
   const description = getDescription(associate);
+  const oneLiner = getOneLiner(associate);
   const locationLabel = website ? website.replace(/^https?:\/\//, '') : location;
   const websiteHref =
     website && (website.startsWith('http://') || website.startsWith('https://'))
@@ -176,6 +182,7 @@ const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
       className={`${CARD_BASE} focus:outline-none focus:ring-2 focus:ring-[#131E42]/40`}
     >
       <div className={PAD}>
+        {/* Header */}
         <div className="flex items-start gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-sm font-semibold text-slate-700">
             {initials(name)}
@@ -191,9 +198,15 @@ const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
             {description && (
               <p className="mt-1 text-sm text-slate-600">{description}</p>
             )}
+            {oneLiner && (
+              <p className="mt-2 text-[13px] leading-5 text-slate-600 line-clamp-2">{oneLiner}</p>
+            )}
           </div>
         </div>
 
+        <div className="flex-grow" />
+
+        {/* Contact panel sits just above CTA */}
         <div className={META_PANEL}>
           {mobile && (
             <div className="flex items-center gap-2 text-sm text-slate-700">
@@ -238,6 +251,7 @@ const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
             </div>
           )}
         </div>
+
         <div className="mt-auto pt-4">
           <button
             type="button"
@@ -674,15 +688,17 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {sectors.map((sector) => (
+              {['Governance', 'Operations', 'Platform', 'Delivery'].map((sector) => (
                 <button
                   key={sector}
-                  onClick={() => toggleSector(sector)}
+                  onClick={() => toggleSector(sector as SectorType)}
                   className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
                   style={{
-                    backgroundColor: selectedSectors.includes(sector) ? '#131E42' : '#F9FAFB',
-                    color: selectedSectors.includes(sector) ? '#fff' : '#334266',
-                    border: `1px solid ${selectedSectors.includes(sector) ? '#131E42' : '#E3E7F8'}`,
+                    backgroundColor: selectedSectors.includes(sector as SectorType) ? '#131E42' : '#F9FAFB',
+                    color: selectedSectors.includes(sector as SectorType) ? '#fff' : '#334266',
+                    border: `1px solid ${
+                      selectedSectors.includes(sector as SectorType) ? '#131E42' : '#E3E7F8'
+                    }`,
                   }}
                 >
                   {sector}
@@ -695,21 +711,13 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
         {/* Results Count */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-sm font-medium" style={{ color: '#334266', opacity: 0.85 }}>
-            {resultCount} {viewMode === 'units' ? 'units' : 'associates'} found
+            {viewMode === 'units' ? filteredUnits.length : filteredAssociates.length}{' '}
+            {viewMode === 'units' ? 'units' : 'associates'} found
           </p>
         </div>
 
         {/* Grid */}
-        {resultCount === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-base font-medium mb-2" style={{ color: '#131E42' }}>
-              No results found
-            </p>
-            <p className="text-sm" style={{ color: '#334266', opacity: 0.75 }}>
-              Try adjusting your search or filters
-            </p>
-          </div>
-        ) : viewMode === 'associates' ? (
+        {viewMode === 'associates' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {filteredAssociates.map((person, index) => (
               <AssociateCard

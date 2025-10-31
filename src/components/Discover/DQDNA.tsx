@@ -73,7 +73,7 @@ const NODES: Node[] = [
   },
   {
     id: 7, role: "leftMid",
-    title: "Agile DTMF", subtitle: "(Products)", fill: "white",
+    title: "Agile 6xD", subtitle: "(Products)", fill: "white",
     kbUrl: "/marketplace/knowledge?dna=agile-dtmf",
     lmsUrl: "/lms/courses?dna=agile-dtmf"
   },
@@ -114,16 +114,50 @@ const CALLOUTS: { role: Role; text: string; side: Side }[] = [
 ];
 
 /* ===== Hex (flat-top) ===== */
-function Hex({ fill }: { fill: "navy" | "white" }) {
+function Hex({ fill, id }: { fill: "navy" | "white"; id?: number }) {
   const w = HEX_W, h = HEX_H;
   const d = `M${w/2} 4 L${w-4} ${h*0.25} L${w-4} ${h*0.75} L${w/2} ${h-4} L4 ${h*0.75} L4 ${h*0.25} Z`;
+  const uniqueId = id ?? Math.random().toString(36).substr(2, 9);
+  
+  if (fill === "white") {
+    // Textured fill: subtle blend of blue, orange, and white
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ display: "block" }}>
+        <defs>
+          <pattern id={`texture-${uniqueId}`} x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <circle cx="10" cy="10" r="2" fill={NAVY} opacity="0.03" />
+            <circle cx="30" cy="20" r="1.5" fill={ORANGE} opacity="0.04" />
+            <circle cx="20" cy="30" r="1.5" fill={NAVY} opacity="0.02" />
+          </pattern>
+          <linearGradient id={`whiteHexGradient-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="50%" stopColor="#f8f9fb" />
+            <stop offset="100%" stopColor="#f0f3f7" />
+          </linearGradient>
+        </defs>
+        <path
+          d={d}
+          fill={`url(#whiteHexGradient-${uniqueId})`}
+          stroke={NAVY}
+          strokeWidth={3}
+        />
+        <path
+          d={d}
+          fill={`url(#texture-${uniqueId})`}
+          stroke="none"
+        />
+      </svg>
+    );
+  }
+  
+  // Solid navy for center hexagons
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ display: "block" }}>
       <path
         d={d}
-        fill={fill === "navy" ? NAVY : "#fff"}
-        stroke={fill === "white" ? ORANGE : LINE} // orange border for 4/5/6/7 (white hexes)
-        strokeWidth={3}
+        fill={NAVY}
+        stroke="none"
+        strokeWidth={0}
       />
     </svg>
   );
@@ -248,7 +282,6 @@ function DQDNA() {
           ).map((n) => {
             const left = CANVAS_W / 2 + POS[n.role].x;
             const top  = CANVAS_H / 2 + POS[n.role].y;
-            const textColor = n.fill === "navy" ? "#fff" : NAVY;
 
             return (
               <button
@@ -265,23 +298,33 @@ function DQDNA() {
                 onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-50%, -50%)"; }}
               >
                 <div style={{ position: "relative" }}>
-                  <Hex fill={n.fill} />
-                  {/* number chip */}
+                  <Hex fill={n.fill} id={n.id} />
+                  {/* number chip - dark blue circle with white number at top */}
                   <div style={{
                     position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)",
-                    width: 28, height: 28, borderRadius: 9999, background: NAVY, color: "#fff",
+                    width: 32, height: 32, borderRadius: "50%", background: NAVY, color: "#fff",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 700, fontSize: 13
+                    fontWeight: 700, fontSize: 14
                   }}>{n.id}</div>
 
-                  {/* labels */}
+                  {/* labels - navy text on hex 4,5,6,7 (white hexes), white text on navy hexes */}
                   <div style={{
                     position: "absolute", inset: 0, display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center", textAlign: "center",
-                    padding: "0 14px", color: textColor
+                    padding: "0 14px", color: n.fill === "white" ? NAVY : "#fff"
                   }}>
-                    <div style={{ fontWeight: 800, fontSize: 18, lineHeight: 1.1 }}>{n.title}</div>
-                    <div style={{ marginTop: 4, fontSize: 13, opacity: 0.85 }}>{n.subtitle}</div>
+                    <div style={{ 
+                      fontWeight: 800, 
+                      fontSize: 18, 
+                      lineHeight: 1.1, 
+                      textShadow: n.fill === "white" ? "none" : "0 1px 2px rgba(0,0,0,0.1)" 
+                    }}>{n.title}</div>
+                    <div style={{ 
+                      marginTop: 4, 
+                      fontSize: 13, 
+                      opacity: 0.9, 
+                      textShadow: n.fill === "white" ? "none" : "0 1px 2px rgba(0,0,0,0.1)" 
+                    }}>{n.subtitle}</div>
                   </div>
                 </div>
               </button>

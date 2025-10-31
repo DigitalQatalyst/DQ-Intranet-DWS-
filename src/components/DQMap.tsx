@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
@@ -7,6 +7,10 @@ import 'leaflet-defaulticon-compatibility';
 import type { LocationType, MapLocation, MapStyle, Region } from '../types/map';
 import { MARKER_COLORS } from './map/constants';
 import { fetchAllLocations, fetchLocationsByRegion, fetchLocationsByType } from '../api/MAPAPI';
+
+export type DQMapRef = {
+  locateUser: () => void;
+};
 
 const DEFAULT_CENTER: [number, number] = [24.453, 54.377];
 const DEFAULT_ZOOM = 6;
@@ -58,18 +62,19 @@ const buildPopupMarkup = (location: MapLocation) =>
     .filter(Boolean)
     .join('')}</div>`;
 
-export const DQMap: React.FC<DQMapProps> = ({
+export const DQMap = forwardRef<DQMapRef, DQMapProps>(({
   className = '',
   mapStyle: _mapStyle,
   regionFilter = 'All',
   typeFilter = 'All',
   onStateChange,
   onMapboxAvailabilityChange,
-}) => {
+}, ref) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const mapNodeRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const userLocationMarkerRef = useRef<L.Marker | null>(null);
   const locationsRef = useRef<MapLocation[]>([]);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
@@ -77,6 +82,7 @@ export const DQMap: React.FC<DQMapProps> = ({
   const [mapReady, setMapReady] = useState<boolean>(false);
   const [locations, setLocations] = useState<MapLocation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
   const effectiveRegion = regionFilter;
   const effectiveType = useMemo<AllOption<LocationType>>(() => {
@@ -123,6 +129,112 @@ export const DQMap: React.FC<DQMapProps> = ({
     forceResize(map);
     renderMarkers();
   }, [renderMarkers]);
+
+  const createUserLocationMarker = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !userLocation) return;
+
+    // Remove existing user location marker
+    if (userLocationMarkerRef.current) {
+      userLocationMarkerRef.current.remove();
+    }
+
+    // Create a custom icon for user location (blue pulsing circle)
+    const userIcon = L.divIcon({
+      html: `
+        <div style="position: relative; width: 40px; height: 40px;">
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #030F35;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          "></div>
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 2px solid #030F35;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: pulse 2s infinite;
+          "></div>
+        </div>
+        <style>
+          @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+          }
+        </style>
+      `,
+      className: '',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+    });
+
+    const marker = L.marker([userLocation[0], userLocation[1]], { icon: userIcon })
+      .bindPopup('Your Location')
+      .addTo(map);
+
+    userLocationMarkerRef.current = marker;
+  }, [userLocation]);
+
+  const locateUser = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    const map = mapRef.current;
+    if (!map) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const userPos: [number, number] = [latitude, longitude];
+        
+        setUserLocation(userPos);
+        
+        // Center map on user location with zoom
+        map.setView([latitude, longitude], 13, {
+          animate: true,
+          duration: 1.0,
+        });
+
+        // Add or update user location marker
+        createUserLocationMarker();
+      },
+      (error) => {
+        console.error('[DQMap] Geolocation error:', error);
+        let message = 'Unable to retrieve your location.';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'Location access denied. Please enable location permissions in your browser.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            message = 'Location request timed out.';
+            break;
+        }
+        alert(message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  }, [createUserLocationMarker]);
 
   useEffect(() => {
     onMapboxAvailabilityChange?.(mapboxEnabled);
@@ -175,6 +287,10 @@ export const DQMap: React.FC<DQMapProps> = ({
       resizeObserverRef.current = null;
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
+      if (userLocationMarkerRef.current) {
+        userLocationMarkerRef.current.remove();
+        userLocationMarkerRef.current = null;
+      }
       map.remove();
       mapRef.current = null;
     };
@@ -227,6 +343,17 @@ export const DQMap: React.FC<DQMapProps> = ({
     }
   }, [locations, loading, ensureMarkers]);
 
+  useEffect(() => {
+    if (userLocation) {
+      createUserLocationMarker();
+    }
+  }, [userLocation, createUserLocationMarker]);
+
+  // Expose locateUser function via ref
+  useImperativeHandle(ref, () => ({
+    locateUser,
+  }), [locateUser]);
+
   return (
     <div
       ref={wrapperRef}
@@ -242,6 +369,8 @@ export const DQMap: React.FC<DQMapProps> = ({
       )}
     </div>
   );
-};
+});
+
+DQMap.displayName = 'DQMap';
 
 export default DQMap;

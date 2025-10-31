@@ -14,8 +14,8 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
     host: 'localhost',
-    hmr: {
-      overlay: true,
+    proxy: {
+      '/api': 'http://localhost:3002',
     },
   },
   preview: {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, FileText, LucideProps } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, SparklesIcon, FileText, LucideProps, BookOpen, CalendarIcon } from 'lucide-react';
 
 interface Marketplace {
   id: string;
@@ -10,6 +10,7 @@ interface Marketplace {
   icon: React.ComponentType<LucideProps>;
   href: string;
 }
+
 
 const marketplaces: Marketplace[] = [
   {
@@ -62,11 +63,18 @@ const marketplaces: Marketplace[] = [
     href: '/marketplace/investment',
   },
   {
-    id: 'calendar',
-    name: 'Training Materials',
+    id: 'guides',
+    name: 'Guides Marketplace',
     description: 'Guides, playbooks, and how-to resources.',
+    icon: BookOpen,
+    href: '/marketplace/guides',
+  },
+  {
+    id: 'calendar',
+    name: 'Calendar & Events',
+    description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
     icon: CalendarIcon,
-    href: '/marketplace/calendar',
+    href: '/events',
   },
   {
     id: 'opportunity',
@@ -81,6 +89,13 @@ const marketplaces: Marketplace[] = [
     description: 'Shared design, deployment and marketing artefacts.',
     icon: FileText,
     href: '/marketplace/asset-library',
+  },
+  {
+    id: 'communities',
+    name: 'DQ Communities',
+    description: 'Connect, collaborate, and engage with peers in vibrant communities.',
+    icon: UsersIcon,
+    href: '/communities',
   },
 ];
 

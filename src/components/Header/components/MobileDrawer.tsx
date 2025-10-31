@@ -45,12 +45,12 @@ const marketplaces = [{
   icon: TrendingUpIcon,
   href: '/marketplace/investment'
 }, {
-  id: 'calendar',
-  name: 'Training Materials',
-  description: 'Guides, playbooks, and how-to resources.',
-  icon: CalendarIcon,
-  href: '/marketplace/calendar'
-}, {
+    id: 'calendar',
+    name: 'Calendar & Events',
+    description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
+    icon: CalendarIcon,
+    href: '/events',
+  },{
   id: 'opportunity',
   name: 'News & Announcements',
   description: 'Company updates and internal notices.',

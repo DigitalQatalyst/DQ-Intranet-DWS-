@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, LocateFixed, Maximize2, Search, MapPin, List, Grid3x3 } from 'lucide-react';
+import { ChevronDown, LocateFixed, Maximize2, Search, MapPin, List, Grid3x3, Navigation } from 'lucide-react';
 
-import { DQMap } from '../DQMap';
+import { DQMap, type DQMapRef } from '../DQMap';
 import { MARKER_COLORS } from './constants';
 import { getUniqueRegions, getUniqueTypes, fetchAllLocations } from '../../api/MAPAPI';
 import type { MapStyle, MapLocation, Region, LocationType } from '../../types/map';
@@ -47,6 +47,7 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
   const [allLocations, setAllLocations] = useState<MapLocation[]>([]);
   const styleMenuRef = useRef<HTMLDivElement | null>(null);
   const filterMenuRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<DQMapRef | null>(null);
 
   // Load all locations for filtering
   useEffect(() => {
@@ -159,8 +160,8 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
         boxShadow: '0 12px 40px rgba(2,6,23,0.08)',
       }}
     >
-      <div className="pointer-events-none absolute inset-x-3 top-3 z-20 flex items-center gap-2 flex-wrap">
-        <div className="pointer-events-auto relative flex-1 min-w-[200px]">
+      <div className="pointer-events-none absolute inset-x-3 top-3 z-[100] flex items-center gap-2 flex-wrap">
+        <div className="pointer-events-auto relative flex-1 min-w-[200px]" onClick={(e) => e.stopPropagation()}>
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             value={searchQuery}
@@ -169,9 +170,10 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
             className="h-9 w-full rounded-lg border border-gray-200 bg-white/90 px-9 text-sm text-slate-700 placeholder:text-gray-400 shadow-sm outline-none transition focus:border-[#030F35] focus:ring-2 focus:ring-[#030F35]/30"
             type="search"
             aria-label="Search locations"
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
-        <div className="pointer-events-auto inline-flex items-center gap-1">
+        <div className="pointer-events-auto inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <div className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white/90 px-1 py-1 shadow-sm">
             {(['Sectors', 'Zones'] as const).map((tab) => {
               const isActive = tab === activeTab;
@@ -179,7 +181,10 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
                 <button
                   key={tab}
                   type="button"
-                  onClick={() => setActiveTab(tab)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTab(tab);
+                  }}
                   className={`h-7 rounded-full px-3 text-xs font-semibold transition ${
                     isActive ? 'bg-[#030F35] text-white shadow-sm' : 'text-slate-600 hover:text-slate-800'
                   }`}
@@ -193,7 +198,10 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
           <div className="pointer-events-auto relative" ref={filterMenuRef}>
             <button
               type="button"
-              onClick={toggleFilterMenu}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFilterMenu();
+              }}
               className="inline-flex h-9 items-center gap-2 rounded-lg border border-gray-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[#030F35]/50 hover:text-[#030F35]"
               aria-haspopup="listbox"
               aria-expanded={filterMenuOpen}
@@ -209,12 +217,13 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
               <ChevronDown className="h-4 w-4" />
             </button>
             {filterMenuOpen && (
-              <div className="absolute left-0 mt-2 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg z-30">
+              <div className="absolute left-0 mt-2 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg z-[110]">
                 <ul className="py-1 max-h-60 overflow-y-auto" role="listbox" aria-label={`${activeTab} options`}>
                   <li>
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (activeTab === 'Zones') {
                           setSelectedRegion('All');
                         } else {
@@ -241,7 +250,8 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
                       <li key={option}>
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (activeTab === 'Zones') {
                               setSelectedRegion(option);
                             } else {
@@ -264,10 +274,13 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
             )}
           </div>
         </div>
-        <div className="pointer-events-auto inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white/90 px-1 py-1 shadow-sm">
+        <div className="pointer-events-auto inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white/90 px-1 py-1 shadow-sm" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            onClick={() => setViewMode('map')}
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewMode('map');
+            }}
             className={`h-7 w-7 rounded-md flex items-center justify-center transition ${
               viewMode === 'map' ? 'bg-[#030F35] text-white' : 'text-slate-600 hover:bg-slate-100'
             }`}
@@ -278,7 +291,10 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
           </button>
           <button
             type="button"
-            onClick={() => setViewMode('list')}
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewMode('list');
+            }}
             className={`h-7 w-7 rounded-md flex items-center justify-center transition ${
               viewMode === 'list' ? 'bg-[#030F35] text-white' : 'text-slate-600 hover:bg-slate-100'
             }`}
@@ -289,7 +305,10 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
           </button>
           <button
             type="button"
-            onClick={() => setViewMode('grid')}
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewMode('grid');
+            }}
             className={`h-7 w-7 rounded-md flex items-center justify-center transition ${
               viewMode === 'grid' ? 'bg-[#030F35] text-white' : 'text-slate-600 hover:bg-slate-100'
             }`}
@@ -299,10 +318,15 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
             <Grid3x3 className="h-4 w-4" />
           </button>
         </div>
-        <div className="pointer-events-auto relative" ref={styleMenuRef}>
+        <div className="pointer-events-auto relative" ref={styleMenuRef} onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            onClick={mapState.mapboxEnabled ? toggleStyleMenu : undefined}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (mapState.mapboxEnabled) {
+                toggleStyleMenu();
+              }
+            }}
             className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition ${
               mapState.mapboxEnabled
                 ? 'border-gray-200 bg-white/90 text-slate-700 shadow-sm hover:border-[#030F35]/50 hover:text-[#030F35]'
@@ -316,7 +340,7 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
             <ChevronDown className="h-4 w-4" />
           </button>
           {styleMenuOpen && mapState.mapboxEnabled && (
-            <div className="absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+            <div className="absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg z-[110]">
               <ul className="py-1" role="listbox" aria-label="Map style options">
                 {mapStyleOptions.map((option) => {
                   const isActive = option.value === mapStyle;
@@ -324,7 +348,8 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
                     <li key={option.value}>
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setMapStyle(option.value);
                           closeStyleMenu();
                         }}
@@ -342,9 +367,29 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
             </div>
           )}
         </div>
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Trigger locate user location
+              if (mapRef.current) {
+                mapRef.current.locateUser();
+              }
+            }}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white/90 text-slate-600 shadow-sm transition hover:border-[#030F35]/40 hover:text-[#030F35] hover:bg-[#030F35]/5"
+            aria-label="Locate my location"
+            title="Locate my location"
+          >
+            <Navigation className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Toggle fullscreen - could be implemented later
+              console.log('Fullscreen clicked');
+            }}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white/90 text-slate-600 shadow-sm transition hover:border-[#030F35]/40 hover:text-[#030F35]"
             aria-label="Toggle fullscreen map"
           >
@@ -376,6 +421,7 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
       <div className="relative flex flex-1 min-h-0 h-full">
         {viewMode === 'map' && (
           <DQMap
+            ref={mapRef}
             className="relative flex-1 min-h-0 h-full"
             mapStyle={mapStyle}
             regionFilter={activeTab === 'Zones' ? selectedRegion : 'All'}

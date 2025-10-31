@@ -1020,3 +1020,4 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     </div>;
 };
 export default MarketplaceDetailsPage;
+
