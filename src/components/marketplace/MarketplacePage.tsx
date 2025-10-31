@@ -126,6 +126,26 @@ const SUBDOMAIN_BY_DOMAIN: Record<string, string[]> = {
 };
 
 const DEFAULT_GUIDE_PAGE_SIZE = 9;
+const GUIDE_LIST_SELECT = [
+  'id',
+  'slug',
+  'title',
+  'summary',
+  'hero_image_url',
+  'last_updated_at',
+  'author_name',
+  'author_org',
+  'is_editors_pick',
+  'download_count',
+  'guide_type',
+  'domain',
+  'function_area',
+  'unit',
+  'sub_domain',
+  'location',
+  'status',
+  'complexity_level',
+].join(',');
 
 const parseFilterValues = (params: URLSearchParams, key: string): string[] =>
   (params.get(key) || '')
@@ -139,7 +159,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   description: _description,
   promoCards = []
 }) => {
-  const isGuidesLike = (type: string) => type === 'guides';
+  const isGuides = marketplaceType === 'guides';
   const isCourses = marketplaceType === 'courses';
   const isKnowledgeHub = marketplaceType === 'knowledge-hub';
   
@@ -253,10 +273,12 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       setLoading(false);
       return;
     }
-    const loadFilterOptions = async () => {
-      if (isGuidesLike(marketplaceType) || isKnowledgeHub) {
-        setFilterConfig([]);
-        setFilters({});
+  const loadFilterOptions = async () => {
+      if (isGuides || isKnowledgeHub) {
+        if (filterConfig.length || Object.keys(filters).length) {
+          setFilterConfig([]);
+          setFilters({});
+        }
         return;
       }
       try {
@@ -275,7 +297,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }
     };
     loadFilterOptions();
-  }, [marketplaceType, config, isCourses, isGuidesLike, isKnowledgeHub]);
+  }, [marketplaceType, config, isCourses, isGuides, isKnowledgeHub, filterConfig.length, Object.keys(filters).length]);
   
   // Fetch items based on marketplace type
   useEffect(() => {
@@ -302,10 +324,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }
 
       // GUIDES: Supabase query + facets
-      if (isGuidesLike(marketplaceType)) {
+      if (isGuides) {
         setLoading(true);
         try {
-          let q = supabaseClient.from('guides').select('*', { count: 'exact' });
+          let q = supabaseClient.from('guides').select(GUIDE_LIST_SELECT, { count: 'exact' });
 
           const qStr = queryParams.get('q') || '';
           const domains     = parseFilterValues(queryParams, 'domain');
@@ -353,8 +375,27 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
           const from = (currentPage - 1) * pageSize;
           const to   = from + pageSize - 1;
-          const { data: rows, count, error } = await q.range(from, to);
+
+          const listPromise = q.range(from, to);
+          let facetQ = supabaseClient
+            .from('guides')
+            .select('domain,sub_domain,guide_type,function_area,unit,location,status')
+            .eq('status', 'Approved');
+
+          if (qStr)              facetQ = facetQ.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
+          if (domains.length)    facetQ = facetQ.in('domain', domains);
+          if (subDomains.length) facetQ = facetQ.in('sub_domain', subDomains);
+          if (guideTypes.length) facetQ = facetQ.in('guide_type', guideTypes);
+          if (units.length)      facetQ = facetQ.in('unit', units);
+          if (locations.length)  facetQ = facetQ.in('location', locations);
+          if (statuses.length)   facetQ = facetQ.in('status', statuses);
+
+          const [{ data: rows, count, error }, { data: facetRows, error: facetError }] = await Promise.all([
+            listPromise,
+            facetQ,
+          ]);
           if (error) throw error;
+          if (facetError) console.warn('Facet query failed', facetError);
 
           const mapped = (rows || []).map((r: any) => {
             const unitValue = r.unit ?? r.function_area ?? null;
@@ -365,7 +406,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               title: r.title,
               summary: r.summary,
               heroImageUrl: r.hero_image_url ?? r.heroImageUrl,
-              skillLevel: r.skill_level ?? r.skillLevel,
+              // skillLevel: r.skill_level ?? r.skillLevel,
               estimatedTimeMin: r.estimated_time_min ?? r.estimatedTimeMin,
               lastUpdatedAt: r.last_updated_at ?? r.lastUpdatedAt,
               authorName: r.author_name ?? r.authorName,
@@ -416,21 +457,6 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           }
 
           // facets query (unchanged)
-          let facetQ = supabaseClient
-            .from('guides')
-            .select('domain,sub_domain,guide_type,function_area,unit,location,status')
-            .eq('status', 'Approved');
-
-          if (qStr)               facetQ = facetQ.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
-          if (domains.length)     facetQ = facetQ.in('domain', domains);
-          if (subDomains.length)  facetQ = facetQ.in('sub_domain', subDomains);
-          if (guideTypes.length)  facetQ = facetQ.in('guide_type', guideTypes);
-          if (units.length)       facetQ = facetQ.in('unit', units);
-          if (locations.length)   facetQ = facetQ.in('location', locations);
-          if (statuses.length)    facetQ = facetQ.in('status', statuses);
-
-          const { data: facetRows } = await facetQ;
-
           const countBy = (arr: any[] | null | undefined, key: string) => {
             const m = new Map<string, number>();
             for (const r of (arr || [])) { const v = (r as any)[key]; if (!v) continue; m.set(v, (m.get(v)||0)+1); }
@@ -501,7 +527,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     };
 
     run();
-    // Keep deps lean; no need to include functions like isGuidesLike
+    // Keep deps lean; no need to include functions like isGuides
   }, [marketplaceType, filters, searchQuery, queryParams, isCourses, isKnowledgeHub, currentPage, pageSize]);
 
   // Handle filter changes
@@ -510,7 +536,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       toggleFilter(filterType, value);
       return;
     }
-    if (isGuidesLike(marketplaceType)) {
+    if (isGuides) {
       // Guides filters are handled via queryParams in GuidesFilters component
       return;
     }
@@ -524,7 +550,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         return { ...prev, [filterType]: value === prev[filterType] ? '' : value };
       }
     });
-  }, [isCourses, isGuidesLike, marketplaceType, toggleFilter]);
+  }, [isCourses, isGuides, marketplaceType, toggleFilter]);
   
   // Reset all filters
   const resetFilters = useCallback(() => {
@@ -535,7 +561,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     } else if (isKnowledgeHub) {
       setActiveFilters([]);
       setSearchQuery('');
-    } else if (isGuidesLike(marketplaceType)) {
+    } else if (isGuides) {
       const newParams = new URLSearchParams();
       const qs = newParams.toString();
       window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
@@ -547,7 +573,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       setFilters(empty);
       setSearchQuery('');
     }
-  }, [isCourses, isKnowledgeHub, isGuidesLike, marketplaceType, filterConfig, setSearchParams]);
+  }, [isCourses, isKnowledgeHub, isGuides, marketplaceType, filterConfig, setSearchParams]);
   
   // Knowledge Hub filter handlers
   const handleKnowledgeHubFilterChange = useCallback((filter: string) => {
@@ -591,7 +617,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   }, [queryParams, totalPages]);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-gray-50 ${isGuidesLike(marketplaceType) ? 'guidelines-theme' : ''}`}>
+    <div className={`min-h-screen flex flex-col bg-gray-50 ${isGuides ? 'guidelines-theme' : ''}`}>
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
       <div className="container mx-auto px-4 py-8 flex-grow">
         {/* Breadcrumbs */}
@@ -603,7 +629,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <span>Home</span>
               </Link>
             </li>
-            {isGuidesLike(marketplaceType) ? (
+            {isGuides ? (
               <>
                 <li>
                   <div className="flex items-center">
@@ -636,9 +662,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         <div className="mb-6 flex items-center gap-3">
           <div className="flex-1">
             <SearchBar
-              searchQuery={isGuidesLike(marketplaceType) ? (queryParams.get('q') || '') : searchQuery}
+              searchQuery={isGuides ? (queryParams.get('q') || '') : searchQuery}
               setSearchQuery={(q: string) => {
-                if (isGuidesLike(marketplaceType)) {
+                if (isGuides) {
                   const next = new URLSearchParams(queryParams.toString());
                   next.delete('page');
                   if (q) next.set('q', q); else next.delete('q');
@@ -651,7 +677,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               }}
             />
           </div>
-          {isGuidesLike(marketplaceType) && (
+          {isGuides && (
             <select
               className="border rounded px-2 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-primary)] focus:border-[var(--guidelines-primary)]"
               aria-label="Sort guides"
@@ -688,7 +714,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               </button>
               {(isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
                  isKnowledgeHub ? activeFilters.length > 0 :
-                 isGuidesLike(marketplaceType) ? false :
+                 isGuides ? false :
                  Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''))) && (
                 <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
                   Reset
@@ -719,7 +745,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   </button>
                 </div>
                 <div className="p-4">
-                  {isGuidesLike(marketplaceType) ? (
+                  {isGuides ? (
                     <GuidesFilters facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
                   ) : (
                     <FilterSidebar
@@ -737,7 +763,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
           {/* Filter sidebar - desktop */}
           <div className="hidden xl:block xl:w-1/4">
-            {isGuidesLike(marketplaceType) ? (
+            {isGuides ? (
               <GuidesFilters facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
             ) : (
               <div className="bg-white rounded-lg shadow p-4 sticky top-24">
@@ -780,7 +806,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {[...Array(6)].map((_, idx) => <CourseCardSkeleton key={idx} />)}
               </div>
-            ) : error && !isGuidesLike(marketplaceType) && !isKnowledgeHub ? (
+            ) : error && !isGuides && !isKnowledgeHub ? (
               <ErrorDisplay message={error} onRetry={retryFetch} />
             ) : isKnowledgeHub ? (
               <KnowledgeHubGrid
@@ -792,7 +818,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 onFilterChange={handleKnowledgeHubFilterChange}
                 onClearFilters={clearKnowledgeHubFilters}
               />
-            ) : isGuidesLike(marketplaceType) ? (
+            ) : isGuides ? (
               <>
                 <GuidesGrid
                   items={filteredItems}

@@ -63,13 +63,6 @@ const marketplaces: Marketplace[] = [
     href: '/marketplace/investment',
   },
   {
-    id: 'guides',
-    name: 'Guides Marketplace',
-    description: 'Guides, playbooks, and how-to resources.',
-    icon: BookOpen,
-    href: '/marketplace/guides',
-  },
-  {
     id: 'calendar',
     name: 'Calendar & Events',
     description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
@@ -77,7 +70,7 @@ const marketplaces: Marketplace[] = [
     href: '/events',
   },
   {
-    id: 'guides',
+    id: 'guidelines',
     name: 'Guidelines Marketplace',
     description: 'Access practical guidelines, templates, and processes.',
     icon: BookOpen,
