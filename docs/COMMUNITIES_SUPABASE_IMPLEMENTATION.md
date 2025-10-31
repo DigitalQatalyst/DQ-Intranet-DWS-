@@ -129,7 +129,7 @@ const { data, error } = await supabaseClient
 ### Tables:
 - **communities**: Community information
 - **posts**: Post content and metadata
-- **users_local**: User profiles
+- **users**: User profiles
 - **memberships**: User-community relationships
 - **reactions**: Post reactions (helpful, insightful)
 - **comments**: Post comments
@@ -142,12 +142,12 @@ communities
 
 posts
   ├── community (foreign key)
-  ├── author/users_local (created_by)
+  ├── author/users (created_by)
   ├── reactions (post_id)
   └── comments (post_id)
 
 memberships
-  ├── user_id (users_local)
+  ├── user_id (users)
   └── community_id (communities)
 ```
 

@@ -160,7 +160,7 @@ export function CommunityList() {
                         {community.name}
                       </h3>
                       {community.category && (
-                        <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                        <span className="ml-2 px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#E6EBF5', color: '#030F35' }}>
                           {community.category}
                         </span>
                       )}
@@ -186,7 +186,7 @@ export function CommunityList() {
                           <span className="ml-2">· <span className="font-medium">{community.activemembers}</span> active</span>
                         )}
                       </div>
-                      <span className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors">
+                      <span className="text-white px-4 py-2 rounded-md text-sm font-medium transition-colors" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#051633'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030F35'}>
                         View
                       </span>
                     </div>

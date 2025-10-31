@@ -74,7 +74,7 @@ export function CommunityFeed() {
         .select(`
           *,
           community:communities(id, name),
-          author:users_local(id, username, avatar_url),
+          author:users(id, username, avatar_url),
           reactions(reaction_type),
           comments(id)
         `)
@@ -143,7 +143,7 @@ export function CommunityFeed() {
         .select(`
           *,
           community:communities!inner(id, name, isprivate),
-          author:users_local(id, username, avatar_url),
+          author:users(id, username, avatar_url),
           reactions(reaction_type),
           comments(id)
         `)
@@ -203,7 +203,7 @@ export function CommunityFeed() {
         .select(`
           *,
           community:communities!inner(id, name, isprivate),
-          author:users_local(id, username, avatar_url),
+          author:users(id, username, avatar_url),
           reactions(reaction_type),
           comments(id)
         `)
@@ -323,9 +323,9 @@ export function CommunityFeed() {
             <SectionContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-700">Filtered by:</span>
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-brand-lightBlue text-brand-blue rounded-full text-xs font-medium">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#E6EBF5', color: '#030F35' }}>
                   #{filterTag}
-                  <button onClick={clearTagFilter} className="ml-1 hover:text-brand-darkBlue transition-colors">
+                  <button onClick={clearTagFilter} className="ml-1 transition-colors" style={{ color: '#030F35' }} onMouseEnter={(e) => e.currentTarget.style.color = '#051633'} onMouseLeave={(e) => e.currentTarget.style.color = '#030F35'}>
                     <X className="h-3 w-3" />
                   </button>
                 </span>
@@ -375,8 +375,11 @@ export function CommunityFeed() {
                   </div>
                   <input 
                     type="text" 
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-brand-blue focus:border-brand-blue sm:text-sm" 
-                    placeholder="Search posts..." 
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 sm:text-sm" 
+                    placeholder="Search posts..."
+                    style={{ '--tw-ring-color': '#030F35' } as React.CSSProperties}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#030F35'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
                   />
                 </div>
               </SectionContent>
