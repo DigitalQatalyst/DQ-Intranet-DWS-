@@ -92,6 +92,10 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
     setMapState(snapshot);
   }, []);
 
+  const handleMapboxAvailabilityChange = useCallback((value: boolean) => {
+    setMapState((prev) => ({ ...prev, mapboxEnabled: value }));
+  }, []);
+
   const toggleStyleMenu = useCallback(() => {
     setStyleMenuOpen((open) => !open);
   }, []);
@@ -427,9 +431,7 @@ export const MapCard: React.FC<MapCardProps> = ({ className = '' }) => {
             regionFilter={activeTab === 'Zones' ? selectedRegion : 'All'}
             typeFilter={activeTab === 'Sectors' ? selectedType : 'All'}
             onStateChange={handleMapStateChange}
-            onMapboxAvailabilityChange={(value) =>
-              setMapState((prev) => ({ ...prev, mapboxEnabled: value }))
-            }
+            onMapboxAvailabilityChange={handleMapboxAvailabilityChange}
           />
         )}
         {viewMode === 'list' && (

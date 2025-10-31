@@ -179,7 +179,7 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
         </div>
         {/* Description with consistent height */}
         <div className="mb-5">
-          <p className="text-sm text-gray-600 line-clamp-3 min-h-[60px] leading-relaxed">
+          <p className="text-sm text-gray-600 clamp-2 min-h-[60px] leading-relaxed">
             {item.description}
           </p>
         </div>

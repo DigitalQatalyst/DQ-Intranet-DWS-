@@ -102,7 +102,7 @@ export const DirectoryCard: React.FC<DirectoryCardData> = ({
 
       {/* Description (exactly 2 lines) */}
       <p
-        className="text-sm leading-relaxed line-clamp-2 mb-4 flex-grow"
+        className="text-sm leading-relaxed clamp-2 mb-4 flex-grow"
         style={{
           color: '#3C4659',
           fontSize: '14px',

@@ -34,7 +34,7 @@ export const VisionMissionSection: React.FC = () => {
             </h3>
             
             <div className="flex-1 space-y-4 mb-6">
-              <p className="text-base md:text-lg leading-relaxed text-neutral-700">
+              <p className="text-base md:text-lg leading-relaxed text-neutral-700 clamp-2">
                 At DQ, we empower associates to create value through digital innovation, human experience, and operational excellence. We convert bold ideas into dependable workflows that keep collaboration effortless. That clarity helps every workspace achieve meaningful, seamless progress.
               </p>
             </div>
@@ -62,7 +62,7 @@ export const VisionMissionSection: React.FC = () => {
             </h3>
             
             <div className="flex-1 space-y-4 mb-6">
-              <p className="text-base md:text-lg leading-relaxed text-neutral-700">
+              <p className="text-base md:text-lg leading-relaxed text-neutral-700 clamp-2">
                 We connect people, processes, and platforms to build smarter, more agile work environments. We orchestrate the digital workspace so that context travels with the work and teams stay in sync. That alignment enables associates to learn faster, collaborate better, and lead with purpose.
               </p>
             </div>

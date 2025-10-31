@@ -222,8 +222,8 @@ function DQDNA() {
           <h2 style={{ color: NAVY, fontWeight: 800, fontSize: 44, margin: "0 0 8px" }}>
             Growth Dimensions
           </h2>
-          <p style={{ color: "#5b667a", margin: 0 }}>
-            Seven connected dimensions shaping how DQ learns, collaborates, and delivers value.
+          <p className="clamp-2" style={{ color: "#5b667a", margin: 0 }}>
+            Seven connected dimensions shaping how DQ learns, collaborates, and delivers value across its global ecosystem.
           </p>
         </div>
 
