@@ -59,6 +59,7 @@ export function AppRouter() {
         <AuthProvider>
           <KfBot />
           <Routes>
+            <Route path="/discover-dq" element={<DiscoverDQ />} />
             <Route path="/*" element={<App />} />
             <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
             <Route path="/lms" element={<LmsCourses />} />
