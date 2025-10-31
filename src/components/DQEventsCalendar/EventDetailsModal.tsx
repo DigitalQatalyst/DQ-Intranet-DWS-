@@ -356,7 +356,7 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

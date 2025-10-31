@@ -205,8 +205,8 @@ export const DqDnaSection: React.FC = () => {
                     {item.title}
                   </h3>
 
-                  {/* Description - Max 3 lines */}
-                  <p className="text-sm text-neutral-600 leading-relaxed mb-4 flex-1 line-clamp-3">
+                  {/* Description - 2 lines */}
+                  <p className="text-sm text-neutral-600 leading-relaxed mb-4 flex-1 clamp-2">
                     {item.description}
                   </p>
 

@@ -190,9 +190,9 @@ export const DQSectors: React.FC<DQSectorsProps> = ({
                     </div>
                   </div>
 
-                  {/* Description (2-3 lines clamped) */}
+                  {/* Description (2 lines clamped) */}
                   <p
-                    className="text-sm line-clamp-3"
+                    className="text-sm clamp-2"
                     style={{ color: '#475569', lineHeight: '1.6' }}
                     title={card.description}
                   >

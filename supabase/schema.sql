@@ -1,5 +1,5 @@
 -- Supabase schema for Discover DQ (6x Digital View) and DQ DNA
--- Safe to run multiple times (checks exist before creating)
+-- Safe to run multiple times (drops and recreates tables with image_url columns)
 
 -- ===== Enums =====
 DO $$ BEGIN
@@ -26,6 +26,14 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+-- ===== Drop tables in correct order (due to foreign key constraints) =====
+DROP TABLE IF EXISTS public.dq_lane_tile_map CASCADE;
+DROP TABLE IF EXISTS public.dq_dna_callouts CASCADE;
+DROP TABLE IF EXISTS public.dq_dna_nodes CASCADE;
+DROP TABLE IF EXISTS public.dq_tiles CASCADE;
+DROP TABLE IF EXISTS public.dq_lanes CASCADE;
+DROP TABLE IF EXISTS public.dq_6x_page_copy CASCADE;
+
 -- ===== DQ 6x: Lanes and Tiles =====
 CREATE TABLE IF NOT EXISTS public.dq_lanes (
   id text PRIMARY KEY,                -- e.g. 'd1'..'d5'
@@ -45,6 +53,7 @@ CREATE TABLE IF NOT EXISTS public.dq_tiles (
   tone dq_tone NOT NULL,
   href text,
   sort_order integer NOT NULL DEFAULT 0,
+  image_url text,                     -- NEW: Unsplash image URL for tile
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -71,6 +80,7 @@ CREATE TABLE IF NOT EXISTS public.dq_dna_nodes (
   details text[],                     -- optional bullet points
   kb_url text NOT NULL,
   lms_url text NOT NULL,
+  image_url text,                     -- NEW: Unsplash image URL for DNA node
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -89,55 +99,18 @@ ALTER TABLE public.dq_6x_page_copy ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.dq_dna_nodes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.dq_dna_callouts ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (clean slate)
+DROP POLICY IF EXISTS dq_lanes_select ON public.dq_lanes;
+DROP POLICY IF EXISTS dq_tiles_select ON public.dq_tiles;
+DROP POLICY IF EXISTS dq_lane_tile_map_select ON public.dq_lane_tile_map;
+DROP POLICY IF EXISTS dq_6x_page_copy_select ON public.dq_6x_page_copy;
+DROP POLICY IF EXISTS dq_dna_nodes_select ON public.dq_dna_nodes;
+DROP POLICY IF EXISTS dq_dna_callouts_select ON public.dq_dna_callouts;
+
 -- Read for all (anon) - write restricted to service role
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='dq_lanes' AND policyname='dq_lanes_select'
-  ) THEN
-    CREATE POLICY dq_lanes_select ON public.dq_lanes FOR SELECT USING (true);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='dq_tiles' AND policyname='dq_tiles_select'
-  ) THEN
-    CREATE POLICY dq_tiles_select ON public.dq_tiles FOR SELECT USING (true);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='dq_lane_tile_map' AND policyname='dq_lane_tile_map_select'
-  ) THEN
-    CREATE POLICY dq_lane_tile_map_select ON public.dq_lane_tile_map FOR SELECT USING (true);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='dq_6x_page_copy' AND policyname='dq_6x_page_copy_select'
-  ) THEN
-    CREATE POLICY dq_6x_page_copy_select ON public.dq_6x_page_copy FOR SELECT USING (true);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='dq_dna_nodes' AND policyname='dq_dna_nodes_select'
-  ) THEN
-    CREATE POLICY dq_dna_nodes_select ON public.dq_dna_nodes FOR SELECT USING (true);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='dq_dna_callouts' AND policyname='dq_dna_callouts_select'
-  ) THEN
-    CREATE POLICY dq_dna_callouts_select ON public.dq_dna_callouts FOR SELECT USING (true);
-  END IF;
-END $$;
-
--- Optional: Restrict writes to service role only
--- In Supabase dashboard: assign inserts/updates/deletes via Service Role only (no policy here),
--- or add explicit policies for authenticated roles if you have a CMS.
+CREATE POLICY dq_lanes_select ON public.dq_lanes FOR SELECT USING (true);
+CREATE POLICY dq_tiles_select ON public.dq_tiles FOR SELECT USING (true);
+CREATE POLICY dq_lane_tile_map_select ON public.dq_lane_tile_map FOR SELECT USING (true);
+CREATE POLICY dq_6x_page_copy_select ON public.dq_6x_page_copy FOR SELECT USING (true);
+CREATE POLICY dq_dna_nodes_select ON public.dq_dna_nodes FOR SELECT USING (true);
+CREATE POLICY dq_dna_callouts_select ON public.dq_dna_callouts FOR SELECT USING (true);

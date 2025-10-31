@@ -196,10 +196,10 @@ const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
               </span>
             </div>
             {description && (
-              <p className="mt-1 text-sm text-slate-600">{description}</p>
+              <p className="mt-1 text-sm text-slate-600 clamp-2">{description}</p>
             )}
             {oneLiner && (
-              <p className="mt-2 text-[13px] leading-5 text-slate-600 line-clamp-2">{oneLiner}</p>
+              <p className="mt-2 text-[13px] leading-5 text-slate-600 clamp-2">{oneLiner}</p>
             )}
           </div>
         </div>
@@ -326,7 +326,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose, person }) =>
                   {tag}
                 </span>
               </div>
-              <p className="mt-2 text-sm text-slate-600">{description}</p>
+              <p className="mt-2 text-sm text-slate-600 clamp-2">{description}</p>
               {showTitleLine && (
                 <p className="mt-1 text-xs font-medium text-slate-500">{title}</p>
               )}

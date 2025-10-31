@@ -77,6 +77,8 @@ export const DQMap = forwardRef<DQMapRef, DQMapProps>(({
   const userLocationMarkerRef = useRef<L.Marker | null>(null);
   const locationsRef = useRef<MapLocation[]>([]);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const onMapboxAvailabilityChangeRef = useRef(onMapboxAvailabilityChange);
+  const onStateChangeRef = useRef(onStateChange);
 
   const [mapboxEnabled] = useState<boolean>(false);
   const [mapReady, setMapReady] = useState<boolean>(false);
@@ -236,17 +238,28 @@ export const DQMap = forwardRef<DQMapRef, DQMapProps>(({
     );
   }, [createUserLocationMarker]);
 
+  // Update refs when callbacks change (without triggering effects)
   useEffect(() => {
-    onMapboxAvailabilityChange?.(mapboxEnabled);
-  }, [mapboxEnabled, onMapboxAvailabilityChange]);
+    onMapboxAvailabilityChangeRef.current = onMapboxAvailabilityChange;
+  }, [onMapboxAvailabilityChange]);
 
   useEffect(() => {
-    onStateChange?.({
+    onStateChangeRef.current = onStateChange;
+  }, [onStateChange]);
+
+  // Only notify when mapboxEnabled changes (using ref to avoid infinite loops)
+  useEffect(() => {
+    onMapboxAvailabilityChangeRef.current?.(mapboxEnabled);
+  }, [mapboxEnabled]);
+
+  // Notify when state changes (using ref to avoid infinite loops)
+  useEffect(() => {
+    onStateChangeRef.current?.({
       loading,
       locationsCount: locations.length,
       mapboxEnabled,
     });
-  }, [loading, locations.length, mapboxEnabled, onStateChange]);
+  }, [loading, locations.length, mapboxEnabled]);
 
   useEffect(() => {
     if (!mapNodeRef.current || mapRef.current) return;
@@ -297,9 +310,7 @@ export const DQMap = forwardRef<DQMapRef, DQMapProps>(({
   }, [ensureMarkers]);
 
   // Map style switching is a no-op with Leaflet; keep signals consistent
-  useEffect(() => {
-    onMapboxAvailabilityChange?.(false);
-  }, [onMapboxAvailabilityChange]);
+  // This is handled by the mapboxEnabled effect above, so remove this duplicate
 
   useEffect(() => {
     let cancelled = false;

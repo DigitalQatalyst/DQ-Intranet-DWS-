@@ -105,7 +105,7 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
                 DQ DNA Growth Potential
               </h2>
               <p className="text-neutral-600 mt-3 text-sm md:text-base">
-                Data-driven signals of how DQ teams learn, deliver, and collaborate across the seven DNA dimensions...
+                Data-driven signals of how DQ teams learn, deliver, and collaborate across the seven DNA dimensions.
               </p>
             </div>
 
