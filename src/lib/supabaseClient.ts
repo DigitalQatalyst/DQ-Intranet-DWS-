@@ -14,3 +14,7 @@ if (!url || !anon) {
 export const supabaseClient = createClient(url, anon, {
   auth: { persistSession: true, autoRefreshToken: true },
 })
+
+// Backwards compatibility: also export as 'supabase'
+export const supabase = supabaseClient
+export default supabaseClient

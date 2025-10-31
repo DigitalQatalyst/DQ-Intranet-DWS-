@@ -1,10 +1,9 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { DirectoryCard, DirectoryCardData } from '../Directory/DirectoryCard';
-import { AssociateModal } from '../Directory/AssociateModal';
-import { unitsData, associatesData } from '../../data/directoryData';
-import type { Unit, Associate, ViewMode, SectorType } from '../../types/directory';
+import { unitsData } from '../../data/directoryData';
+import type { Unit, ViewMode, SectorType } from '../../types/directory';
 
 interface DQDirectoryProps {
   title?: string;
@@ -23,24 +22,411 @@ const mapUnitToCard = (unit: Unit, onViewProfile: () => void): DirectoryCardData
   onClick: onViewProfile,
 });
 
-/**
- * Map Associate to unified DirectoryCardData
- */
-const mapAssociateToCard = (
-  associate: Associate,
-  onViewProfile: () => void
-): DirectoryCardData => ({
-  logoUrl: associate.avatarUrl,
-  title: associate.name,
-  tag: associate.sector,
-  description: associate.description || '',
-  roleInfo: {
-    role: associate.roleTitle,
-    unit: associate.unitName,
-    email: associate.email,
-  },
-  onClick: onViewProfile,
-});
+type Associate = {
+  name: string;
+  title: string;
+  role: string;
+  unit: string;
+  tag: string;
+  email?: string;
+  mobile?: string;
+  location?: string;
+  company?: string;
+  website?: string;
+  sector?: SectorType;
+};
+
+const RAW_ASSOCIATES_SHOWCASE = `
+Anthony Mwangi	Product Owner	Sector Lead (DBP Platforms)	DBP Platforms	DBP Platform	anthony.mwangi@digitalqatalyst.com		NBO
+Pelagie Njiki	Operation Analyst	Unit Lead (CoE)	CoE | Lead	CoE Lead	njiki.pelagie@digitalqatalyst.com	+971 55 623 1439	Dubai
+Bilal Waqar	Enterprise Architect	Unit Lead (Designs)	DBP Delivery	DBP Delivery	bilal.waqar@digitalqatalyst.com	+971 544 757 550	Dubai
+Rayyan Basha	Business Analyst	Delivery Lead (KSA Accounts)	DBP Delivery | Deploys	Account	rayyan.basha@digitalqatalyst.com	+971 559 295 369	Saudi Arabia
+Mohamed Thameez	Solution Analyst	Delivery Scrum Master (Designs)	DBP Delivery | Designs	Designs	mohamed.thameez@digitalqatalyst.com	+971 585 046 171	Dubai
+Habab Siddique	Scrum Master 	Product Owner (Deploys)	DBP Delivery | Deploys	Deploy	habab.siddig@digitalqatalyst.com	+971 561 314 934	Dubai
+Mart-Pearly Iyondong	Operation Analyst	HR Analyst	DCO Operations | HRA	O2P	mart-pearly.iyondong@digitalqatalyst.com	+971 569 590 488	Dubai
+Simon Kariuki	Data Enginner	Tower Lead (Intelligence)	DBP Platform | Intelligence	DBs | Pipe | API	simon.kariuki@digitalqatalyst.com	+254 790 504 948	Nairobi
+Stephanie Njunge	Solution Engineer	Tower Lead (Solutions)	DBP Platform | Solutions	eCom | DXP	stephanie.njunge@digitalqatalyst.com	+254 700 702 332	NBO
+Wilson Chege	Product Owner	Factory Lead (Products)	DBP Platform | Products	Products	wilson.chege@digitalqatalyst.com	+254 715 673 582	NBO
+Freshia Njoki	Solution Engineer	Factory Lead (SecDevOps)	DBP Platform | SecDevOps	SecDevOps	freshia.njoki@digitalqatalyst.com	+254 745 756 365	NBO
+Michael Kimeu	DevOps Engineer	Endpoint Developer	DBP Platform | SecDevOps	CICD | Test | Host	michael.kimeu@digitalqatalyst.com	+254 115 391 736	NBO
+Joseph Mwangi	CRM Engineer	Tower Lead (Solutions)	DBP Platform | Solutions	eCom | DWS	joseph.mwangi@digitalqatalyst.com	+254 768 280 212	NBO
+Mercy Wangari	Industrial Automative Engineer	Process Automation Developer	DBP Platform | Intelligence	DT2.0 | DTMP	mercy.wangari@digitalqatalyst.com	+254 705 123 305	NBO
+Dominic Paul	DevOps Engineer	Factory Lead (SecDevOps)	DBP Platform | SecDevOps	SecDevOps	dominic.paul@digitalqatalyst.com	+254 708 251 527	NBO
+Ian Kipkorir	Full-Stack Developer 	Factory Lead (Solutions)	DBP Platform | Solutions	eCom | DWS	ian.kipkorir@digitalqatalyst.com	+254 799 567 379	NBO
+Debra Wangari	Product Owner	Sector Lead (DBP Platforms)	DBP Platform | Products	DBP Platform	debra.wangari@digitalqatalyst.com	+254 717 574 734	NBO
+Eugene Ndichu	Product Owner	Tower Lead (DT2.0 | DTMP)	DBP Platform | Products	DT2.0 | DTMP	eugene.ndichu@digitalqatalyst.com	+254 797 680 821	NBO
+`.trim();
+
+const initials = (name: string): string =>
+  name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0] || '')
+    .join('')
+    .toUpperCase();
+
+const sanitizeTelHref = (value: string): string => value.replace(/\s+/g, '');
+
+const inferSectorFromTag = (tag: string, unit: string): SectorType => {
+  const text = `${tag} ${unit}`.toLowerCase();
+  if (text.includes('governance')) return 'Governance';
+  if (
+    text.includes('operation') ||
+    text.includes('hra') ||
+    text.includes('coe') ||
+    text.includes('o2p')
+  ) {
+    return 'Operations';
+  }
+  if (
+    text.includes('deliver') ||
+    text.includes('deploy') ||
+    text.includes('design') ||
+    text.includes('account')
+  ) {
+    return 'Delivery';
+  }
+  return 'Platform';
+};
+
+const parseAssociates = (raw: string): Associate[] =>
+  raw
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.split(/\t+|\s{2,}/).map((part) => part.trim()))
+    .map((parts) => {
+      const [
+        name = '',
+        title = '',
+        role = '',
+        unit = '',
+        tag = '',
+        email = '',
+        mobile = '',
+        location = '',
+        company = '',
+        website = '',
+      ] = parts;
+
+      const associate: Associate = {
+        name,
+        title,
+        role,
+        unit,
+        tag,
+        email: email || undefined,
+        mobile: mobile || undefined,
+        location: location || undefined,
+        company: company || 'DigitalQatalyst',
+        website: website || undefined,
+      };
+
+      associate.sector = inferSectorFromTag(associate.tag, associate.unit);
+
+      return associate;
+    })
+    .filter((item) => item.name);
+
+const getDescription = (associate: Associate): string => {
+  const title = associate.title?.trim();
+  const role = associate.role?.trim();
+  if (title && role) {
+    return title.length <= role.length ? title : role;
+  }
+  return title || role || '';
+};
+
+const getOneLiner = (a: Associate): string => {
+  const parts = [a.title?.trim(), a.role?.trim()].filter(Boolean);
+  return parts.join(' • ');
+};
+
+const CARD_BASE =
+  'rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:ring-1 hover:ring-slate-200 transition';
+const PAD = 'flex min-h-[360px] flex-col p-6';
+const META_PANEL = 'rounded-xl bg-slate-50 p-4 mb-4';
+const CTA_NAVY =
+  'w-full rounded-xl bg-[#131E42] text-white text-sm py-2.5 font-semibold hover:bg-[#0F1633] transition-colors';
+
+interface AssociateCardProps {
+  associate: Associate;
+  onOpen: (associate: Associate) => void;
+}
+
+const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
+  const { name, tag, email, mobile, location, website } = associate;
+  const mailHref = email ? `mailto:${email}` : undefined;
+  const phoneHref = mobile ? `tel:${sanitizeTelHref(mobile)}` : undefined;
+  const description = getDescription(associate);
+  const oneLiner = getOneLiner(associate);
+  const locationLabel = website ? website.replace(/^https?:\/\//, '') : location;
+  const websiteHref =
+    website && (website.startsWith('http://') || website.startsWith('https://'))
+      ? website
+      : website
+      ? `https://${website}`
+      : undefined;
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(associate)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpen(associate);
+        }
+      }}
+      className={`${CARD_BASE} focus:outline-none focus:ring-2 focus:ring-[#131E42]/40`}
+    >
+      <div className={PAD}>
+        {/* Header */}
+        <div className="flex items-start gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-sm font-semibold text-slate-700">
+            {initials(name)}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-base font-semibold text-slate-900">{name}</h3>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                {tag}
+              </span>
+            </div>
+            {description && (
+              <p className="mt-1 text-sm text-slate-600">{description}</p>
+            )}
+            {oneLiner && (
+              <p className="mt-2 text-[13px] leading-5 text-slate-600 line-clamp-2">{oneLiner}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-grow" />
+
+        {/* Contact panel sits just above CTA */}
+        <div className={META_PANEL}>
+          {mobile && (
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <span aria-hidden="true">📞</span>
+              <a
+                href={phoneHref}
+                onClick={(event) => event.stopPropagation()}
+                className="underline underline-offset-2 hover:text-slate-900"
+              >
+                {mobile}
+              </a>
+            </div>
+          )}
+          {email && (
+            <div className="mt-1 flex items-center gap-2 text-sm text-slate-700">
+              <span aria-hidden="true">✉️</span>
+              <a
+                href={mailHref}
+                onClick={(event) => event.stopPropagation()}
+                className="truncate underline underline-offset-2 hover:text-slate-900"
+              >
+                {email}
+              </a>
+            </div>
+          )}
+          {locationLabel && (
+            <div className="mt-1 flex items-center gap-2 text-sm text-slate-700">
+              <span aria-hidden="true">🌐</span>
+              {websiteHref ? (
+                <a
+                  href={websiteHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                  className="underline underline-offset-2 hover:text-slate-900"
+                >
+                  {locationLabel}
+                </a>
+              ) : (
+                <span>{locationLabel}</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-auto pt-4">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onOpen(associate);
+            }}
+            className={CTA_NAVY}
+          >
+            View Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface ProfileModalProps {
+  open: boolean;
+  onClose: () => void;
+  person: Associate | null;
+}
+
+const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose, person }) => {
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [open, onClose]);
+
+  if (!open || !person) return null;
+
+  const { name, tag, title, role, unit, email, mobile, location, company, website } = person;
+  const mailHref = email ? `mailto:${email}` : undefined;
+  const phoneHref = mobile ? `tel:${sanitizeTelHref(mobile)}` : undefined;
+  const displayWebsite = website;
+  const description = getDescription(person);
+  const showTitleLine = Boolean(title && title.trim() && title.trim() !== description);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profile-modal-title"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-3xl bg-white shadow-xl ring-1 ring-slate-200"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-6">
+          <div className="flex items-start gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-sm font-semibold text-slate-700">
+              {initials(name)}
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 id="profile-modal-title" className="text-xl font-semibold text-slate-900">
+                  {name}
+                </h2>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                  {tag}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-slate-600">{description}</p>
+              {showTitleLine && (
+                <p className="mt-1 text-xs font-medium text-slate-500">{title}</p>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
+            aria-label="Close profile"
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="px-6 py-6 space-y-6">
+          <div className="rounded-2xl bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-slate-900">{role}</p>
+            <p className="mt-2 text-sm text-slate-600">{unit}</p>
+          </div>
+          <div className="space-y-3">
+            {mobile && (
+              <a
+                href={phoneHref}
+                className="flex items-center gap-3 text-sm text-slate-700 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
+                  <span aria-hidden="true">📞</span>
+                </div>
+                {mobile}
+              </a>
+            )}
+            {email && (
+              <a
+                href={mailHref}
+                className="flex items-center gap-3 text-sm text-slate-700 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
+                  <span aria-hidden="true">✉️</span>
+                </div>
+                {email}
+              </a>
+            )}
+            {(displayWebsite || location) && (
+              <div className="flex items-center gap-3 text-sm text-slate-700">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
+                  <span aria-hidden="true">🌐</span>
+                </div>
+                {displayWebsite ? (
+                  <a
+                    href={displayWebsite.startsWith('http') ? displayWebsite : `https://${displayWebsite}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline underline-offset-2 transition hover:text-slate-900"
+                  >
+                    {displayWebsite.replace(/^https?:\/\//, '')}
+                  </a>
+                ) : (
+                  <span>{location}</span>
+                )}
+              </div>
+            )}
+            {company && (
+              <div className="flex items-center gap-3 text-sm text-slate-700">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
+                  <span aria-hidden="true">🏢</span>
+                </div>
+                {company}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-5 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 sm:w-auto"
+          >
+            Close
+          </button>
+          {email && (
+            <a
+              href={mailHref}
+              className="w-full rounded-2xl border-2 border-[#1E40FF] px-4 py-2.5 text-center text-sm font-semibold text-[#1E40FF] transition hover:bg-[#1E40FF] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 sm:w-auto"
+            >
+              Email
+            </a>
+          )}
+          {mobile && (
+            <a
+              href={phoneHref}
+              className="w-full rounded-2xl border-2 border-slate-900 px-4 py-2.5 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 sm:w-auto"
+            >
+              Call
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const DQDirectory: React.FC<DQDirectoryProps> = ({
   subtitle = 'Connect with DQ sectors, teams, and associates driving collaboration, delivery, and innovation across the Digital Workspace.',
@@ -56,8 +442,8 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
   const [selectedSectors, setSelectedSectors] = useState<SectorType[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedAssociate, setSelectedAssociate] = useState<Associate | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selected, setSelected] = useState<Associate | null>(null);
+  const [open, setOpen] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -77,6 +463,8 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
     
     setSearchParams(params, { replace: true });
   }, [debouncedQuery, viewMode, selectedSectors, selectedStreams, setSearchParams]);
+
+  const showcaseAssociates = useMemo<Associate[]>(() => parseAssociates(RAW_ASSOCIATES_SHOWCASE), []);
 
   // Filter logic
   const filteredUnits = useMemo(() => {
@@ -110,7 +498,7 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
   }, [debouncedQuery, selectedSectors, selectedStreams]);
 
   const filteredAssociates = useMemo(() => {
-    let filtered = [...associatesData];
+    let filtered = [...showcaseAssociates];
 
     // Search
     if (debouncedQuery.trim()) {
@@ -118,10 +506,16 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
       filtered = filtered.filter((person) =>
         [
           person.name,
-          person.roleTitle,
-          person.unitName,
+          person.title,
+          person.role,
+          person.unit,
           person.sector,
-          ...(person.skills || []),
+          person.tag,
+          person.email,
+          person.mobile,
+          person.location,
+          person.company,
+          person.website,
         ]
           .filter(Boolean)
           .join(' ')
@@ -132,21 +526,13 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
 
     // Sector filter
     if (selectedSectors.length > 0) {
-      filtered = filtered.filter((person) => selectedSectors.includes(person.sector));
+      filtered = filtered.filter(
+        (person) => person.sector && selectedSectors.includes(person.sector)
+      );
     }
 
     return filtered;
-  }, [debouncedQuery, selectedSectors]);
-
-  const handleViewProfile = useCallback((person: Associate) => {
-    setSelectedAssociate(person);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    setTimeout(() => setSelectedAssociate(null), 300);
-  }, []);
+  }, [debouncedQuery, selectedSectors, showcaseAssociates]);
 
   const toggleSector = (sector: SectorType) => {
     setSelectedSectors((prev) =>
@@ -161,9 +547,17 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
   };
 
   const hasActiveFilters = selectedSectors.length > 0 || selectedStreams.length > 0 || searchQuery.trim();
-
-  const currentData = viewMode === 'units' ? filteredUnits : filteredAssociates;
   const sectors: SectorType[] = ['Governance', 'Operations', 'Platform', 'Delivery'];
+  const resultCount = viewMode === 'units' ? filteredUnits.length : filteredAssociates.length;
+  const openModal = (person: Associate) => {
+    setSelected(person);
+    setOpen(true);
+  };
+
+  const closeModal = () => {
+    setOpen(false);
+    setTimeout(() => setSelected(null), 200);
+  };
 
   return (
     <section
@@ -294,15 +688,17 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {sectors.map((sector) => (
+              {['Governance', 'Operations', 'Platform', 'Delivery'].map((sector) => (
                 <button
                   key={sector}
-                  onClick={() => toggleSector(sector)}
+                  onClick={() => toggleSector(sector as SectorType)}
                   className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
                   style={{
-                    backgroundColor: selectedSectors.includes(sector) ? '#131E42' : '#F9FAFB',
-                    color: selectedSectors.includes(sector) ? '#fff' : '#334266',
-                    border: `1px solid ${selectedSectors.includes(sector) ? '#131E42' : '#E3E7F8'}`,
+                    backgroundColor: selectedSectors.includes(sector as SectorType) ? '#131E42' : '#F9FAFB',
+                    color: selectedSectors.includes(sector as SectorType) ? '#fff' : '#334266',
+                    border: `1px solid ${
+                      selectedSectors.includes(sector as SectorType) ? '#131E42' : '#E3E7F8'
+                    }`,
                   }}
                 >
                   {sector}
@@ -315,37 +711,32 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
         {/* Results Count */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-sm font-medium" style={{ color: '#334266', opacity: 0.85 }}>
-            {currentData.length} {viewMode === 'units' ? 'units' : 'associates'} found
+            {viewMode === 'units' ? filteredUnits.length : filteredAssociates.length}{' '}
+            {viewMode === 'units' ? 'units' : 'associates'} found
           </p>
         </div>
 
         {/* Grid */}
-        {currentData.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-base font-medium mb-2" style={{ color: '#131E42' }}>
-              No results found
-            </p>
-            <p className="text-sm" style={{ color: '#334266', opacity: 0.75 }}>
-              Try adjusting your search or filters
-            </p>
+        {viewMode === 'associates' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {filteredAssociates.map((person, index) => (
+              <AssociateCard
+                key={`${person.name}-${person.unit}-${index}`}
+                associate={person}
+                onOpen={openModal}
+              />
+            ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 mb-12">
-            {viewMode === 'units'
-              ? (currentData as Unit[]).map((unit) => (
-                  <DirectoryCard
-                    key={unit.id}
-                    {...mapUnitToCard(unit, () => {
-                      window.open(unit.marketplaceUrl, '_blank');
-                    })}
-                  />
-                ))
-              : (currentData as Associate[]).map((person) => (
-                  <DirectoryCard
-                    key={person.id}
-                    {...mapAssociateToCard(person, () => handleViewProfile(person))}
-                  />
-                ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {filteredUnits.map((unit) => (
+              <DirectoryCard
+                key={unit.id}
+                {...mapUnitToCard(unit, () => {
+                  window.open(unit.marketplaceUrl, '_blank');
+                })}
+              />
+            ))}
           </div>
         )}
 
@@ -361,11 +752,9 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
         </div>
       </div>
 
-      {/* Associate Modal */}
-      <AssociateModal person={selectedAssociate} isOpen={isModalOpen} onClose={handleCloseModal} />
+      <ProfileModal open={open} onClose={closeModal} person={selected} />
     </section>
   );
 };
 
 export default DQDirectory;
-

@@ -10,6 +10,7 @@ const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
 // Promo cards for courses marketplace
 const coursePromoCards = [{
   id: 'finance-promo',
+  type: 'promo' as const,
   title: 'Looking for funding?',
   description: 'Explore financial opportunities and resources to grow your business.',
   icon: <DollarSign size={24} className="text-white" />,
@@ -18,6 +19,7 @@ const coursePromoCards = [{
   gradientTo: 'to-indigo-700'
 }, {
   id: 'advisory-promo',
+  type: 'promo' as const,
   title: 'Need expert advice?',
   description: 'Connect with industry experts and get personalized guidance.',
   icon: <Briefcase size={24} className="text-white" />,
@@ -25,6 +27,7 @@ const coursePromoCards = [{
   gradientFrom: 'from-purple-600',
   gradientTo: 'to-pink-500'
 }];
+export const coursePromoTiles = coursePromoCards;
 // Promo cards for financial services marketplace
 const financialPromoCards = [{
   id: 'courses-promo',
@@ -107,7 +110,7 @@ export const MarketplaceRouter: React.FC = () => {
   };
   return <Routes>
       {/* Courses Marketplace */}
-      <Route path="/courses" element={<MarketplacePage marketplaceType="courses" title={coursesConfig.title} description={coursesConfig.description} promoCards={coursePromoCards} />} />
+      <Route path="/courses" element={<MarketplacePage marketplaceType="courses" title={coursesConfig.title} description={coursesConfig.description} promoCards={[]} />} />
       <Route path="/courses/:itemId" element={<MarketplaceDetailsPage marketplaceType="courses" bookmarkedItems={bookmarkedItems.courses} onToggleBookmark={itemId => handleToggleBookmark('courses', itemId)} />} />
       {/* Financial Services Marketplace */}
       <Route path="/financial" element={<MarketplacePage marketplaceType="financial" title={financialConfig.title} description={financialConfig.description} promoCards={financialPromoCards} />} />

@@ -8,7 +8,7 @@ import DQDNA from "../components/Discover/DQDNA";
 import WorkspaceInsights from "../components/Discover/WorkspaceInsights";
 import DQDirectory from "../components/Discover/DQDirectory";
 import DQ6xDigitalView from "../components/Discover/DQ6xDigitalView";
-import { DQMap } from "../components/DQMap";
+import { MapCard } from "../components/map/MapCard";
 import styles from "./DiscoverDQ.module.css";
 
 const insightsData = [
@@ -93,9 +93,9 @@ const DiscoverDQ: React.FC = () => {
     <div className={`${styles.dwsDiscover} ${prefersReducedMotion ? styles.reducedMotion : ""}`}>
         {/* Section 1: Hero */}
         <section className="relative w-full bg-white">
-          <div className="mx-auto max-w-[1280px] px-6 py-16 lg:py-20 xl:py-24 2xl:py-28">
-            <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-10">
-              <div className="lg:col-span-6 max-w-[560px] space-y-6 lg:space-y-8">
+          <div className="mx-auto max-w-[1400px] px-6 py-16 lg:py-20 xl:py-24 2xl:py-28">
+            <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_680px] xl:gap-14 xl:items-start">
+              <div className="max-w-[640px] space-y-6 lg:space-y-8">
                 <nav className="flex items-center gap-2 text-sm font-semibold text-gray-500" aria-label="Breadcrumb">
                   <span>Explore</span>
                   <span>›</span>
@@ -159,10 +159,14 @@ const DiscoverDQ: React.FC = () => {
                     <ChevronRight size={18} aria-hidden="true" />
                   </button>
                 </div>
+
+                <div className="mt-10 xl:hidden">
+                  <MapCard />
+                </div>
               </div>
 
-              <aside className="lg:col-span-6 w-full mt-10 lg:mt-0">
-                <DQMap height={440} />
+              <aside className="hidden xl:flex xl:items-start">
+                <MapCard />
               </aside>
             </div>
           </div>

@@ -7,6 +7,9 @@ import { CommunitiesRouter } from "./communities/CommunitiesRouter";
 import { App } from './App';
 
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
+import LmsCourseDetailPage from "./pages/lms/LmsCourseDetailPage";
+import LmsCourseDetail from "./pages/LmsCourseDetail";
+import LmsCourses from "./pages/LmsCourses";
 import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
@@ -57,17 +60,9 @@ export function AppRouter() {
           <KfBot />
           <Routes>
             <Route path="/*" element={<App />} />
-            <Route
-              path="/courses/:itemId"
-              element={
-                <MarketplaceDetailsPage
-                  marketplaceType="courses"
-                  bookmarkedItems={bookmarkedCourses}
-                  onToggleBookmark={toggleBookmark}
-                  onAddToComparison={handleAddToComparison}
-                />
-              }
-            />
+            <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
+            <Route path="/lms" element={<LmsCourses />} />
+            <Route path="/lms/:slug" element={<LmsCourseDetail />} />
             <Route
               path="/onboarding/:itemId"
               element={

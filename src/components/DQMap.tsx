@@ -1,124 +1,53 @@
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import type { MapboxEvent, RasterLayerSpecification, RasterSourceSpecification, Style } from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import 'leaflet-defaulticon-compatibility';
 
 import type { LocationType, MapLocation, MapStyle, Region } from '../types/map';
-import {
-  fetchAllLocations,
-  fetchLocationsByRegion,
-  fetchLocationsByType,
-  getUniqueRegions,
-  getUniqueTypes,
-} from '../api/MAPAPI';
+import { MARKER_COLORS } from './map/constants';
+import { fetchAllLocations, fetchLocationsByRegion, fetchLocationsByType } from '../api/MAPAPI';
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN as string;
+export type DQMapRef = {
+  locateUser: () => void;
+};
 
-const mapboxMajorVersion = Number((mapboxgl.version || '').split('.')[0] || '2');
-const STANDARD_STYLE =
-  mapboxMajorVersion >= 3 ? 'mapbox://styles/mapbox/standard' : 'mapbox://styles/mapbox/light-v11';
+const DEFAULT_CENTER: [number, number] = [24.453, 54.377];
+const DEFAULT_ZOOM = 6;
 
 type AllOption<T> = T | 'All';
-type FilterControl = {
-  key: string;
-  label: string;
-  value: string;
-  disabled: boolean;
-  onChange: (value: string) => void;
-  options: { label: string; value: string }[];
-};
-const MARKER_COLORS: Record<LocationType | 'Default', string> = {
-  Headquarters: '#111827',
-  'Regional Office': '#6C63FF',
-  Client: '#3BA6E8',
-  Authority: '#F59E0B',
-  Default: '#6B7280',
+
+type MapStateSnapshot = {
+  loading: boolean;
+  locationsCount: number;
+  mapboxEnabled: boolean;
 };
 
-const MAPBOX_STYLES: Record<MapStyle, string> = {
-  standard: STANDARD_STYLE,
-  satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
-  hybrid: 'mapbox://styles/mapbox/satellite-v9',
+type DQMapProps = {
+  className?: string;
+  mapStyle: MapStyle;
+  regionFilter?: AllOption<Region>;
+  typeFilter?: AllOption<LocationType>;
+  onStateChange?: (snapshot: MapStateSnapshot) => void;
+  onMapboxAvailabilityChange?: (available: boolean) => void;
 };
 
-const OSM_RASTER_SOURCE: RasterSourceSpecification = {
-  type: 'raster',
-  tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-  tileSize: 256,
-  attribution: '© OpenStreetMap contributors',
+const forceResize = (map: L.Map) => {
+  map.invalidateSize();
+  requestAnimationFrame(() => map.invalidateSize());
 };
 
-const OSM_RASTER_LAYER: RasterLayerSpecification = {
-  id: 'osm-layer',
-  type: 'raster',
-  source: 'osm-tiles',
-};
-
-const OSM_STYLE: Style = {
-  version: 8,
-  sources: {
-    'osm-tiles': OSM_RASTER_SOURCE,
-  },
-  layers: [OSM_RASTER_LAYER],
-};
-
-const DEFAULT_CENTER: [number, number] = [54.3773, 24.4539];
-const DEFAULT_ZOOM = 9;
-
-const withAlpha = (hex: string, alpha: number) => {
-  const n = parseInt(hex.replace('#', ''), 16);
-  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
-};
-
-const forceResize = (map: mapboxgl.Map) => {
-  map.resize();
-  requestAnimationFrame(() => (map.resize(), requestAnimationFrame(() => map.resize())));
-};
-
-const markerSVG = (color: string, size = 36) =>
-  `<svg width="${size}" height="${size}" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="18" r="18" fill="rgba(255,255,255,0.45)"/><circle cx="18" cy="18" r="15.2" fill="${withAlpha(
-    color,
-    0.12,
-  )}" stroke="${color}" stroke-width="2.4"/><circle cx="18" cy="15" r="3.2" stroke="${color}" stroke-width="1.8"/><path d="M12.4 23.2C12.4 20.4 15 18 18 18C21 18 23.6 20.4 23.6 23.2" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.2 20.4C10.2 18.7 11.7 17.2 13.4 17.2" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/><path d="M25.8 20.4C25.8 18.7 24.3 17.2 22.6 17.2" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-
-const createMarkerElement = (color: string) => {
+const createMarkerElement = (strokeColor: string) => {
   const node = document.createElement('div');
   node.style.cssText =
-    'width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;filter:drop-shadow(0 6px 10px rgba(2,6,23,.25));';
-  node.innerHTML = markerSVG(color);
+    'width:30px;height:30px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 4px rgba(3,15,53,0.25));z-index:5;';
+  node.innerHTML = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="15" cy="15" r="14" fill="white" stroke="${strokeColor}" stroke-width="2"/>
+    <circle cx="15" cy="15" r="7" fill="${strokeColor}" fill-opacity="0.12"/>
+    <circle cx="15" cy="15" r="3" fill="${strokeColor}"/>
+  </svg>`;
   return node;
 };
-
-const FiltersRow: React.FC<{ controls: FilterControl[] }> = ({ controls }) => (
-  <div className="grid gap-3 md:grid-cols-3">
-    {controls.map((control) => (
-      <label key={control.key} className="flex flex-col gap-1 text-xs font-medium text-slate-500">
-        {control.label}
-        <select
-          value={control.value}
-          disabled={control.disabled}
-          onChange={(event) => control.onChange(event.target.value)}
-          className="h-10 rounded-xl border border-gray-300 px-3 text-sm text-slate-700 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
-        >
-          {control.options.map((option) => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
-        </select>
-      </label>
-    ))}
-  </div>
-);
-
-const MapLegend: React.FC<{ entries: [string, string][] }> = ({ entries }) => (
-  <div className="flex flex-wrap items-center gap-3">
-    {entries.map(([type, color]) => (
-      <div key={type} className="flex items-center gap-2">
-        <span className="inline-flex items-center justify-center" dangerouslySetInnerHTML={{ __html: markerSVG(color, 22) }} />
-        <span className="text-xs font-medium text-slate-600">{type}</span>
-      </div>
-    ))}
-  </div>
-);
 
 const buildPopupMarkup = (location: MapLocation) =>
   `<div class="space-y-1">${[
@@ -133,188 +62,315 @@ const buildPopupMarkup = (location: MapLocation) =>
     .filter(Boolean)
     .join('')}</div>`;
 
-type DQMapProps = { className?: string; height?: number };
-
-export const DQMap: React.FC<DQMapProps> = ({ className = '', height = 560 }) => {
+export const DQMap = forwardRef<DQMapRef, DQMapProps>(({
+  className = '',
+  mapStyle: _mapStyle,
+  regionFilter = 'All',
+  typeFilter = 'All',
+  onStateChange,
+  onMapboxAvailabilityChange,
+}, ref) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const mapNodeRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
+  const userLocationMarkerRef = useRef<L.Marker | null>(null);
+  const locationsRef = useRef<MapLocation[]>([]);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+  const [mapboxEnabled] = useState<boolean>(false);
+  const [mapReady, setMapReady] = useState<boolean>(false);
   const [locations, setLocations] = useState<MapLocation[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState<AllOption<Region>>('All');
-  const [selectedType, setSelectedType] = useState<AllOption<LocationType>>('All');
-  const [mapStyle, setMapStyle] = useState<MapStyle>('standard');
-  const [loading, setLoading] = useState(true);
-  const [mapboxEnabled, setMapboxEnabled] = useState(Boolean(mapboxgl.accessToken));
+  const [loading, setLoading] = useState<boolean>(true);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
-  const regions = getUniqueRegions(), types = getUniqueTypes();
+  const effectiveRegion = regionFilter;
+  const effectiveType = useMemo<AllOption<LocationType>>(() => {
+    if (effectiveRegion !== 'All') return 'All';
+    return typeFilter;
+  }, [effectiveRegion, typeFilter]);
 
-  const filterControls: FilterControl[] = [
-    { key: 'region', label: 'Region', value: selectedRegion, disabled: false, onChange: (value) => { setSelectedRegion(value as AllOption<Region>); setSelectedType('All'); }, options: [{ label: 'All Regions', value: 'All' }, ...regions.map((region) => ({ label: region, value: region }))] },
-    { key: 'type', label: 'Type', value: selectedType, disabled: false, onChange: (value) => { setSelectedType(value as AllOption<LocationType>); setSelectedRegion('All'); }, options: [{ label: 'All Types', value: 'All' }, ...types.map((type) => ({ label: type, value: type }))] },
-    { key: 'style', label: 'Map Style', value: mapStyle, disabled: !mapboxEnabled, onChange: (value) => setMapStyle(value as MapStyle), options: [{ label: 'Standard', value: 'standard' }, { label: 'Satellite', value: 'satellite' }, { label: 'Hybrid', value: 'hybrid' }] },
-  ];
+  const renderMarkers = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
 
-  useEffect(() => {
-    if (!mapNodeRef.current) return;
-    const hasToken = Boolean(mapboxgl.accessToken);
-    const map = new mapboxgl.Map({
-      container: mapNodeRef.current,
-      style: hasToken ? MAPBOX_STYLES.standard : OSM_STYLE,
-      center: DEFAULT_CENTER,
-      zoom: DEFAULT_ZOOM,
-      attributionControl: false,
-      cooperativeGestures: true,
-    });
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
 
-    mapRef.current = map;
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
-    map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
+    const dataset = locationsRef.current;
 
-    const resizeHandler = () => map.resize();
-    map.on('load', resizeHandler);
-    const handleStyleData = () => forceResize(map);
-    map.on('styledata', handleStyleData);
-
-    let switchedToOsm = !hasToken;
-    const switchToOsm = () => {
-      if (switchedToOsm) return;
-      switchedToOsm = true;
-      setMapboxEnabled(false);
-      map.setStyle(OSM_STYLE);
-      map.once('styledata', () => forceResize(map));
-    };
-
-    const logAndSwitch = (event: MapboxEvent) => {
-      console.error('Mapbox GL error encountered', event);
-      switchToOsm();
-    };
-
-    const fallbackTimer = hasToken ? window.setTimeout(switchToOsm, 1800) : undefined;
-    map.on('error', logAndSwitch);
-
-    return () => {
-      if (fallbackTimer) window.clearTimeout(fallbackTimer);
-      map.off('load', resizeHandler);
-      map.off('styledata', handleStyleData);
-      map.off('error', logAndSwitch);
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
-      map.remove();
-      mapRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    const map = mapRef.current; if (!map || !mapboxEnabled) return;
-
-    const targetStyle = MAPBOX_STYLES[mapStyle];
-    let errored = false;
-
-    const handleError = () => {
-      errored = true;
-      setMapboxEnabled(false);
-      map.setStyle(OSM_STYLE);
-      map.once('styledata', () => forceResize(map));
-    };
-
-    const handleStyleData = () => {
-      if (!errored) forceResize(map);
-      map.off('error', handleError);
-    };
-
-    map.once('error', handleError);
-    map.once('styledata', handleStyleData);
-    map.setStyle(targetStyle);
-  }, [mapStyle, mapboxEnabled]);
-
-  useEffect(() => {
-    const loadLocations = async () => {
-      setLoading(true);
-      try {
-        const data =
-          selectedRegion !== 'All'
-            ? await fetchLocationsByRegion(selectedRegion as Region)
-            : selectedType !== 'All'
-            ? await fetchLocationsByType(selectedType as LocationType)
-            : await fetchAllLocations();
-        setLocations(data);
-      } catch (error) {
-        console.error('Error loading locations:', error);
-        setLocations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadLocations();
-  }, [selectedRegion, selectedType]);
-
-  useEffect(() => {
-    const map = mapRef.current; if (!map || loading) return;
-
-    markersRef.current.forEach((marker) => marker.remove()); markersRef.current = [];
-
-    locations.forEach((location) => {
-      const color = MARKER_COLORS[location.type] ?? MARKER_COLORS.Default;
-      const marker = new mapboxgl.Marker({ element: createMarkerElement(color), anchor: 'bottom' })
-        .setLngLat([location.position[1], location.position[0]])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 20, closeButton: true, closeOnClick: false, maxWidth: '280px' }).setHTML(
-            buildPopupMarkup(location),
-          ),
-        )
-        .addTo(map);
+    dataset.forEach((location) => {
+      const stroke = MARKER_COLORS[location.type] ?? MARKER_COLORS.Default;
+      const icon = L.divIcon({
+        html: createMarkerElement(stroke).outerHTML,
+        className: '',
+        iconSize: [30, 30],
+        iconAnchor: [15, 28],
+      });
+      const marker = L.marker([location.position[0], location.position[1]], { icon })
+        .bindPopup(buildPopupMarkup(location));
+      marker.addTo(map);
       markersRef.current.push(marker);
     });
 
-    if (locations.length) {
-      const bounds = locations.reduce(
-        (acc, item) => acc.extend([item.position[1], item.position[0]]),
-        new mapboxgl.LngLatBounds(),
+    if (dataset.length) {
+      const bounds = L.latLngBounds(
+        dataset.map((l) => L.latLng(l.position[0], l.position[1])),
       );
-      map.fitBounds(bounds, { padding: 60, maxZoom: 11, duration: 900 });
+      map.fitBounds(bounds.pad(0.15));
     } else {
-      map.setCenter(DEFAULT_CENTER);
-      map.setZoom(DEFAULT_ZOOM);
+      map.setView([DEFAULT_CENTER[0], DEFAULT_CENTER[1]], DEFAULT_ZOOM);
     }
-  }, [locations, loading]);
+  }, []);
+
+  const ensureMarkers = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    forceResize(map);
+    renderMarkers();
+  }, [renderMarkers]);
+
+  const createUserLocationMarker = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !userLocation) return;
+
+    // Remove existing user location marker
+    if (userLocationMarkerRef.current) {
+      userLocationMarkerRef.current.remove();
+    }
+
+    // Create a custom icon for user location (blue pulsing circle)
+    const userIcon = L.divIcon({
+      html: `
+        <div style="position: relative; width: 40px; height: 40px;">
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #030F35;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          "></div>
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 2px solid #030F35;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: pulse 2s infinite;
+          "></div>
+        </div>
+        <style>
+          @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+          }
+        </style>
+      `,
+      className: '',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+    });
+
+    const marker = L.marker([userLocation[0], userLocation[1]], { icon: userIcon })
+      .bindPopup('Your Location')
+      .addTo(map);
+
+    userLocationMarkerRef.current = marker;
+  }, [userLocation]);
+
+  const locateUser = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    const map = mapRef.current;
+    if (!map) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const userPos: [number, number] = [latitude, longitude];
+        
+        setUserLocation(userPos);
+        
+        // Center map on user location with zoom
+        map.setView([latitude, longitude], 13, {
+          animate: true,
+          duration: 1.0,
+        });
+
+        // Add or update user location marker
+        createUserLocationMarker();
+      },
+      (error) => {
+        console.error('[DQMap] Geolocation error:', error);
+        let message = 'Unable to retrieve your location.';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'Location access denied. Please enable location permissions in your browser.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            message = 'Location request timed out.';
+            break;
+        }
+        alert(message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  }, [createUserLocationMarker]);
 
   useEffect(() => {
-    const resize = () => {
-      const map = mapRef.current; if (map) forceResize(map);
+    onMapboxAvailabilityChange?.(mapboxEnabled);
+  }, [mapboxEnabled, onMapboxAvailabilityChange]);
+
+  useEffect(() => {
+    onStateChange?.({
+      loading,
+      locationsCount: locations.length,
+      mapboxEnabled,
+    });
+  }, [loading, locations.length, mapboxEnabled, onStateChange]);
+
+  useEffect(() => {
+    if (!mapNodeRef.current || mapRef.current) return;
+
+    const map = L.map(mapNodeRef.current, {
+      center: [DEFAULT_CENTER[0], DEFAULT_CENTER[1]],
+      zoom: DEFAULT_ZOOM,
+      zoomControl: false,
+      attributionControl: true,
+    });
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(map);
+
+    mapRef.current = map;
+    setMapReady(true);
+    ensureMarkers();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => {
+        if (mapRef.current) forceResize(mapRef.current);
+      });
+      resizeObserverRef.current = observer;
+      if (wrapperRef.current) observer.observe(wrapperRef.current);
+    }
+
+    const handleWindowResize = () => {
+      if (mapRef.current) forceResize(mapRef.current);
+    };
+    window.addEventListener('resize', handleWindowResize);
+
+    return () => {
+      window.removeEventListener('resize', handleWindowResize);
+      resizeObserverRef.current?.disconnect();
+      resizeObserverRef.current = null;
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+      if (userLocationMarkerRef.current) {
+        userLocationMarkerRef.current.remove();
+        userLocationMarkerRef.current = null;
+      }
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [ensureMarkers]);
+
+  // Map style switching is a no-op with Leaflet; keep signals consistent
+  useEffect(() => {
+    onMapboxAvailabilityChange?.(false);
+  }, [onMapboxAvailabilityChange]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    const load = async () => {
+      try {
+        const data =
+          effectiveRegion !== 'All'
+            ? await fetchLocationsByRegion(effectiveRegion as Region)
+            : effectiveType !== 'All'
+            ? await fetchLocationsByType(effectiveType as LocationType)
+            : await fetchAllLocations();
+
+        if (!cancelled) {
+          setLocations(data);
+        }
+      } catch (error) {
+        console.error('[DQMap] Failed to load locations', error);
+        if (!cancelled) {
+          setLocations([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
     };
 
-    resize();
-    window.addEventListener('resize', resize);
-    return () => window.removeEventListener('resize', resize);
-  }, [height]);
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveRegion, effectiveType]);
+
+  useEffect(() => {
+    locationsRef.current = locations;
+    if (!loading) {
+      ensureMarkers();
+    }
+  }, [locations, loading, ensureMarkers]);
+
+  useEffect(() => {
+    if (userLocation) {
+      createUserLocationMarker();
+    }
+  }, [userLocation, createUserLocationMarker]);
+
+  // Expose locateUser function via ref
+  useImperativeHandle(ref, () => ({
+    locateUser,
+  }), [locateUser]);
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden ${className}`}>
-      <div className="flex flex-col h-full">
-        <header className="border-b border-gray-200 bg-white px-5 py-5 space-y-4">
-          <div className="space-y-3">
-            <FiltersRow controls={filterControls} />
-            <MapLegend entries={Object.entries(MARKER_COLORS).filter(([key]) => key !== 'Default')} />
-          </div>
-          {!loading && (
-            <p className="text-xs font-medium text-slate-500">
-              Showing {locations.length} location{locations.length === 1 ? '' : 's'}
-            </p>
-          )}
-        </header>
-
-        <div className="relative flex-1">
-          <div ref={mapNodeRef} className="w-full h-[560px]" style={{ height }} />
-          {loading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 backdrop-blur-sm">
-              <span className="text-sm font-semibold text-slate-600">Loading map…</span>
-            </div>
-          )}
+    <div
+      ref={wrapperRef}
+      className={`relative h-full w-full ${className}`}
+    >
+      <div ref={mapNodeRef} className="absolute inset-0 h-full w-full z-0" />
+      {(!mapReady || loading) && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+          <span className="rounded-full border border-slate-200/70 bg-white/95 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 shadow-sm">
+            Loading map…
+          </span>
         </div>
-      </div>
+      )}
     </div>
   );
-};
+});
+
+DQMap.displayName = 'DQMap';
 
 export default DQMap;
