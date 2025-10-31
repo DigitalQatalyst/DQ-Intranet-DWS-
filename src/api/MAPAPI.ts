@@ -1,180 +1,132 @@
 import type { MapLocation, Region, LocationType } from '../types/map';
 
-// Mock data for DQ offices and client HQs
-const mockMapLocations: MapLocation[] = [
-  // ========================================
-  // DQ OFFICES
-  // ========================================
+export const LOCATIONS: MapLocation[] = [
   {
-    id: 'dq-dubai-hq',
-    name: 'DQ Office — OPAL Tower',
-    position: [25.187780, 55.271940], // Business Bay, Dubai
-    description: 'DQ Digital Workspace Headquarters in the heart of Dubai Business Bay.',
-    address: 'OPAL Tower, Business Bay, Dubai, UAE',
-    contactPhone: '+971 4 XXX XXXX',
+    id: 'opal-tower-hq',
+    name: 'OPAL Tower, Business Bay (HQ)',
+    position: [25.18778, 55.27194],
+    description: 'Main headquarters located in OPAL Tower, Business Bay.',
+    address: 'Business Bay, Dubai',
     type: 'Headquarters',
     region: 'Dubai',
-    services: ['Consulting', 'Development', 'Strategy', 'Training'],
-    operatingHours: 'Sun-Thu: 9:00 AM - 6:00 PM',
   },
   {
-    id: 'dq-nairobi-office',
-    name: 'NBO – Nairobi, Kenya',
-    position: [-1.285590, 36.819940], // Nairobi, Kenya
-    description: 'DQ Regional Office serving East Africa markets.',
+    id: 'nbo-office',
+    name: 'NBO Office',
+    position: [-1.28559, 36.81994],
+    description: 'East Africa regional office supporting clients across Kenya.',
     address: 'Nairobi, Kenya',
-    contactPhone: '+254 XXX XXX XXX',
     type: 'Regional Office',
-    region: 'Nairobi',
-    services: ['Development', 'Support', 'Training'],
-    operatingHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
+    region: 'Kenya',
   },
   {
-    id: 'dq-riyadh-office',
-    name: 'DQ Office — Riyadh',
-    position: [24.689600, 46.686300], // Riyadh, Saudi Arabia
-    description: 'DQ Regional Office serving Kingdom of Saudi Arabia.',
-    address: 'King Fahd Road, Riyadh, Saudi Arabia',
-    contactPhone: '+966 XXX XXX XXX',
+    id: 'riyadh-office',
+    name: 'Riyadh Office',
+    position: [24.6896, 46.6863],
+    description: 'Regional office serving the Kingdom of Saudi Arabia.',
+    address: 'King Fahd Rd, Riyadh',
     type: 'Regional Office',
     region: 'Riyadh',
-    services: ['Consulting', 'Development', 'Integration'],
-    operatingHours: 'Sun-Thu: 8:00 AM - 5:00 PM',
   },
-
-  // ========================================
-  // CLIENTS
-  // ========================================
   {
     id: 'khalifa-fund',
-    name: 'Khalifa Fund (KF) HQ',
-    position: [24.466667, 54.366669], // Abu Dhabi
-    description: 'Supporting UAE entrepreneurship and SME development.',
+    name: 'Khalifa Fund (KF)',
+    position: [24.466667, 54.366669],
+    description: 'Partnering with KF to accelerate SME and entrepreneurship programmes.',
     address: 'Abu Dhabi, UAE',
     type: 'Client',
     region: 'Abu Dhabi',
-    services: ['Digital Banking', 'Enterprise Solutions'],
   },
   {
-    id: 'neom-hq',
-    name: 'NEOM HQ',
-    position: [27.632000, 35.300000], // NEOM Bay, KSA
-    description: 'Future-focused digital banking solutions.',
-    address: 'NEOM Bay, Saudi Arabia',
+    id: 'neom-bank',
+    name: 'NEOM Bank',
+    position: [27.632, 35.3],
+    description: 'Supporting NEOM’s next-generation financial initiatives.',
+    address: 'NEOM, Saudi Arabia',
     type: 'Client',
-    region: 'Riyadh',
-    services: ['Core Banking', 'Digital Channels'],
+    region: 'NEOM',
   },
   {
-    id: 'saib',
-    name: 'SAIB (Saudi Investment Bank) HQ',
-    position: [24.689000, 46.685000], // Riyadh
-    description: 'Leading investment bank in Saudi Arabia.',
-    address: 'King Fahd Road, Riyadh, Saudi Arabia',
-    type: 'Client',
-    region: 'Riyadh',
-    services: ['Investment Banking', 'Wealth Management'],
-  },
-  {
-    id: 'stc-hq',
-    name: 'STC HQ',
-    position: [24.722600, 46.642300], // Riyadh
-    description: 'Digital-first banking powered by STC.',
+    id: 'saib-bank',
+    name: 'SAIB Bank',
+    position: [24.689, 46.685],
+    description: 'Digital programmes delivered with Saudi Investment Bank.',
     address: 'Riyadh, Saudi Arabia',
     type: 'Client',
     region: 'Riyadh',
-    services: ['Mobile Banking', 'Digital Wallet'],
+  },
+  {
+    id: 'stc-bank',
+    name: 'STC Bank',
+    position: [24.7226, 46.6423],
+    description: 'STC-backed digital banking ecosystem rollout.',
+    address: 'Riyadh, Saudi Arabia',
+    type: 'Client',
+    region: 'Riyadh',
   },
   {
     id: 'adib',
-    name: 'ADIB HQ',
-    position: [24.495800, 54.370500], // Abu Dhabi
-    description: 'Leading Islamic bank in the UAE.',
-    address: 'Sheikh Rashid Bin Saeed Street, Abu Dhabi, UAE',
+    name: 'ADIB',
+    position: [24.4958, 54.3705],
+    description: 'Islamic banking transformation with Abu Dhabi Islamic Bank.',
+    address: 'Abu Dhabi, UAE',
     type: 'Client',
     region: 'Abu Dhabi',
-    services: ['Islamic Banking', 'Retail Banking'],
   },
-
-  // ========================================
-  // AUTHORITIES
-  // ========================================
   {
     id: 'dfsa',
-    name: 'DFSA (DIFC)',
-    position: [25.209400, 55.272100], // DIFC, Dubai
-    description: 'Dubai Financial Services Authority regulating DIFC.',
-    address: 'The Gate, DIFC, Dubai, UAE',
+    name: 'DFSA',
+    position: [25.2094, 55.2721],
+    description: 'Regulatory collaboration with Dubai Financial Services Authority.',
+    address: 'DIFC, Dubai',
     type: 'Authority',
     region: 'Dubai',
-    services: ['Regulatory', 'Compliance'],
-    operatingHours: 'Sun-Thu: 8:00 AM - 4:00 PM',
   },
   {
     id: 'dewa',
-    name: 'DEWA HQ',
-    position: [25.216500, 55.260700], // Dubai
-    description: 'Dubai Electricity and Water Authority.',
-    address: 'Al Hudaiba, Dubai, UAE',
+    name: 'DEWA',
+    position: [25.2165, 55.2607],
+    description: 'Smart-city innovation with Dubai Electricity and Water Authority.',
+    address: 'Zabeel, Dubai',
     type: 'Authority',
     region: 'Dubai',
-    services: ['Utilities', 'Smart City'],
-    operatingHours: 'Sun-Thu: 7:30 AM - 2:30 PM',
   },
 ];
 
-/**
- * Fetch all locations
- */
+const delay = () => new Promise((resolve) => setTimeout(resolve, 80));
+
 export const fetchAllLocations = async (): Promise<MapLocation[]> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  return mockMapLocations;
+  await delay();
+  return LOCATIONS;
 };
 
-/**
- * Fetch locations by region
- */
 export const fetchLocationsByRegion = async (region: Region): Promise<MapLocation[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  return mockMapLocations.filter((loc) => loc.region === region);
+  await delay();
+  return LOCATIONS.filter((loc) => loc.region === region);
 };
 
-/**
- * Fetch locations by type
- */
 export const fetchLocationsByType = async (type: LocationType): Promise<MapLocation[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  return mockMapLocations.filter((loc) => loc.type === type);
+  await delay();
+  return LOCATIONS.filter((loc) => loc.type === type);
 };
 
-/**
- * Get unique regions from dataset
- */
 export const getUniqueRegions = (): Region[] => {
-  const regions = new Set(mockMapLocations.map((loc) => loc.region));
+  const regions = new Set(LOCATIONS.map((loc) => loc.region));
   return Array.from(regions).sort();
 };
 
-/**
- * Get unique location types from dataset
- */
 export const getUniqueTypes = (): LocationType[] => {
-  const types = new Set(mockMapLocations.map((loc) => loc.type));
+  const types = new Set(LOCATIONS.map((loc) => loc.type));
   return Array.from(types).sort();
 };
 
-/**
- * Search locations by query
- */
 export const searchLocations = async (query: string): Promise<MapLocation[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  await delay();
   const lowerQuery = query.toLowerCase();
-  return mockMapLocations.filter(
+  return LOCATIONS.filter(
     (loc) =>
       loc.name.toLowerCase().includes(lowerQuery) ||
       loc.description.toLowerCase().includes(lowerQuery) ||
-      loc.address?.toLowerCase().includes(lowerQuery)
+      loc.address?.toLowerCase().includes(lowerQuery),
   );
 };
-

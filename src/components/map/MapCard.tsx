@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, LocateFixed, Maximize2, Search } from 'lucide-react';
 
-import { DQMap, MARKER_COLORS } from '../DQMap';
+import { DQMap } from '../DQMap';
+import { MARKER_COLORS } from './constants';
 import type { MapStyle } from '../../types/map';
 
 type MapCardProps = {

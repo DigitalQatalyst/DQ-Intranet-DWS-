@@ -323,7 +323,7 @@ export const HomePage: React.FC = () => {
           title: 'Communities & Surveys',
           description: "Join conversations that shape DQ's culture and share feedback that drives improvement.",
           icon: <HeartHandshake />,
-          path: '#',
+          path: '/communities',
           isActive: true
         },
         {

@@ -89,3 +89,28 @@ textarea:-webkit-autofill {
 .cta-ejp:hover .chev {
   transform: translateX(4px);
 }
+
+/* Mapbox styling tweaks */
+.mapboxgl-canvas-container {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.mapboxgl-ctrl,
+.mapboxgl-ctrl-group {
+  border-radius: 10px;
+}
+
+.mapboxgl-ctrl-group > button {
+  border-color: rgba(3, 15, 53, 0.08);
+}
+
+.mapboxgl-ctrl-bottom-right {
+  bottom: 0.75rem;
+  right: 0.75rem;
+}
+
+.mapboxgl-ctrl-bottom-left {
+  bottom: 0.75rem;
+  left: 0.75rem;
+}
