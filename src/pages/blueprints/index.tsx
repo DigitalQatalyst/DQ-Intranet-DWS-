@@ -1,11 +1,11 @@
 import { useMemo, useState, useEffect } from "react";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import { BlueprintCard } from "../../components/BlueprintCard";
 import {
   HomeIcon,
   ChevronRightIcon,
   FileText,
-  Eye,
   Download,
   X,
   Filter,
@@ -536,7 +536,7 @@ export default function BlueprintsPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="container mx-auto px-4 py-8">
           {/* Breadcrumb Navigation */}
           <nav className="flex mb-4" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-2">
@@ -675,113 +675,14 @@ export default function BlueprintsPage() {
               </div>
 
               {filteredBlueprints.length > 0 ? (
-                <div className="grid gap-4 grid-cols-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {filteredBlueprints.map((blueprint) => (
-                    <div
+                    <BlueprintCard
                       key={blueprint.id}
-                      className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md hover:border-gray-300 transition-all duration-200"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0">
-                          <div
-                            className="w-12 h-12 rounded-lg flex items-center justify-center"
-                            style={{ backgroundColor: "#1A2E6E" }}
-                          >
-                            <FileText size={24} className="text-white" />
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span
-                              className="text-xs px-2 py-1 rounded-full text-white font-medium"
-                              style={{
-                                backgroundColor:
-                                  blueprint.category === "discern" ||
-                                  blueprint.category === "develop"
-                                    ? "#1A2E6E"
-                                    : "#FF6B35",
-                              }}
-                            >
-                              {blueprint.category.toUpperCase()}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {blueprint.projectName}
-                            </span>
-                          </div>
-                          <h3
-                            className="text-lg font-semibold mb-2"
-                            style={{ color: "#030F35" }}
-                          >
-                            {blueprint.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                            {blueprint.description}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 mb-4">
-                            {blueprint.author && (
-                              <span className="flex items-center gap-1">
-                                <span
-                                  className="font-medium"
-                                  style={{ color: "rgba(26, 46, 110, 0.7)" }}
-                                >
-                                  Author:
-                                </span>
-                                {blueprint.author}
-                              </span>
-                            )}
-                            {blueprint.lastUpdated && (
-                              <span className="flex items-center gap-1">
-                                <span
-                                  className="font-medium"
-                                  style={{ color: "rgba(26, 46, 110, 0.7)" }}
-                                >
-                                  Updated:
-                                </span>
-                                {new Date(
-                                  blueprint.lastUpdated
-                                ).toLocaleDateString()}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => openModal(blueprint)}
-                              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white rounded-lg transition-colors"
-                              style={{ backgroundColor: "#FF6B35" }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor =
-                                  "#E04A2B";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor =
-                                  "#FF6B35";
-                              }}
-                              title="View Blueprint"
-                            >
-                              <Eye size={16} />
-                              View
-                            </button>
-                            <button
-                              onClick={() => handleDownload(blueprint)}
-                              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white rounded-lg transition-colors"
-                              style={{ backgroundColor: "#1A2E6E" }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor =
-                                  "#15255A";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor =
-                                  "#1A2E6E";
-                              }}
-                              title="Download Blueprint"
-                            >
-                              <Download size={16} />
-                              Download
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                      blueprint={blueprint}
+                      onView={openModal}
+                      onDownload={handleDownload}
+                    />
                   ))}
                 </div>
               ) : (

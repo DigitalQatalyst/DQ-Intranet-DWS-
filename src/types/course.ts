@@ -21,8 +21,6 @@ export interface CourseType {
   description: string;
   category: string;
   deliveryMode: string;
-  duration: string;
-  durationType: string;
   businessStage: string;
   provider: ProviderType;
   learningOutcomes: string[];
@@ -55,7 +53,6 @@ export interface FilterOptions {
 export interface CourseFilters {
   category: string;
   deliveryMode: string;
-  duration: string;
   businessStage: string;
   provider: string;
 }

@@ -34,11 +34,10 @@ export const CourseMarketplace: React.FC = () => {
   const [filteredCourses, setFilteredCourses] = useState<CourseType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<CourseFilters>({
-    category: "",
-    deliveryMode: "",
-    duration: "",
-    businessStage: "",
-    provider: "",
+    category: '',
+    deliveryMode: '',
+    businessStage: '',
+    provider: ''
   });
   const [showFilters, setShowFilters] = useState(false);
   const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
@@ -103,11 +102,10 @@ export const CourseMarketplace: React.FC = () => {
 
   const resetFilters = useCallback(() => {
     setFilters({
-      category: "",
-      deliveryMode: "",
-      duration: "",
-      businessStage: "",
-      provider: "",
+      category: '',
+      deliveryMode: '',
+      businessStage: '',
+      provider: ''
     });
     setSearchQuery("");
   }, []);
@@ -224,17 +222,17 @@ export const CourseMarketplace: React.FC = () => {
           <li aria-current="page">
             <div className="flex items-center">
               <ChevronRightIcon size={16} className="text-gray-400" />
-              <span className="ml-1 text-gray-500 md:ml-2">LMS Courses</span>
+              <span className="ml-1 text-gray-500 md:ml-2">Onboarding Flows</span>
             </div>
           </li>
         </ol>
       </nav>
 
       <h1 className="text-3xl font-bold text-gray-800 mb-2">
-        DQ LMS Course Marketplace
+        DQ Onboarding Flows
       </h1>
       <p className="text-gray-600 mb-6">
-        Discover focused, practical courses to help you work smarter at DQ.
+        Discover guided flows to get productive fast in the Digital Workspace.
       </p>
 
       <div className="mb-6">
@@ -245,7 +243,7 @@ export const CourseMarketplace: React.FC = () => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-medium text-blue-800">
-              Course Comparison ({compareCourses.length}/3)
+              Flow Comparison ({compareCourses.length}/3)
             </h3>
             <div>
               <button
@@ -320,7 +318,7 @@ export const CourseMarketplace: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="Course filters"
+            aria-label="Onboarding filters"
           >
             <div className="h-full overflow-y-auto">
               <div className="sticky top-0 bg-white z-10 p-4 border-b border-gray-200 flex justify-between items-center">
@@ -387,7 +385,7 @@ export const CourseMarketplace: React.FC = () => {
           ) : (
             <CourseGrid
               courses={filteredCourses}
-              onCourseSelect={(course) => navigate(`/courses/${course.id}`)}
+              onCourseSelect={course => navigate(`/onboarding/${course.id}`)}
               bookmarkedCourses={bookmarkedCourses}
               onToggleBookmark={(course) => toggleBookmark(course.id)}
               onAddToComparison={handleAddToComparison}

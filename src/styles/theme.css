@@ -1,0 +1,144 @@
+/* DWS Theme Colors & Tokens */
+:root {
+  /* EJP-Style Light Theme (Primary) */
+  --dws-bg: #F9FAFB;                  /* page background */
+  --dws-card: #FFFFFF;                /* cards */
+  --dws-card-border: #E3E7F8;         /* subtle card border */
+  --dws-text: #131E42;                /* titles & primary text */
+  --dws-accent: #25406F;              /* icons / small accents */
+  --dws-navy: #0B1E67;                /* EJP-like navy for buttons */
+  --dws-navy-press: #092256;          /* pressed/hover navy */
+  --dws-outline: #0B1E67;             /* outline for focused elements */
+  
+  /* Legacy gradient (for specific uses) */
+  --dws-grad-left: #002180;
+  --dws-grad-right: #FB5535;
+  
+  /* Additional Palette */
+  --dws-surface: #0F1837;
+  --dws-white: #fff;
+  
+  /* Navy Scale */
+  --dws-navy-900: #0B1536;
+  --dws-navy-800: #121C46;
+  --dws-navy-700: #1B254F;
+  
+  /* Coral/Orange Scale */
+  --dws-coral-500: #FF6B4A;
+  --dws-coral-400: #FF7D5F;
+  --dws-coral-300: #FFA089;
+  
+  /* Indigo/Blue Scale */
+  --dws-indigo-500: #2D4BFF;
+  --dws-indigo-300: #7DA0FF;
+  
+  /* Text Scale */
+  --dws-text-strong: #0E1222;
+  --dws-text-secondary: #1C2240;
+  --dws-text-dim: #5B6280;
+  --dws-text-muted: #6B7280;
+  
+  /* Lines/Borders */
+  --dws-line: rgba(28, 34, 64, 0.14);
+  --dws-line-soft: rgba(28, 34, 64, 0.08);
+  
+  /* EJP Card Shadows */
+  --dws-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
+  --dws-shadow-md: 0 6px 20px rgba(17, 24, 39, 0.06);
+  --dws-shadow-lg: 0 10px 30px rgba(7, 14, 41, 0.14);
+  
+  /* Info Box (EJP-style) */
+  --dws-info-box-bg: #F6F8FF;
+  --dws-info-box-border: #EAEFFB;
+  
+  /* Tower Chips */
+  --dws-chip-bg: #EFF4FF;
+  --dws-chip-text: #1B2E6E;
+  
+  /* Gradients */
+  --dws-grad-hero: linear-gradient(110deg, #FF6B4A 0%, #1A214B 45%, #0B1536 100%);
+  --dws-grad-btn: linear-gradient(135deg, #0B1536, #1B254F);
+  --dws-grad-btn-hover: linear-gradient(135deg, #121C46, #263268);
+  --dws-grad-primary: linear-gradient(90deg, var(--dws-grad-left) 0%, var(--dws-grad-right) 100%);
+}
+
+/* Global Container Styles */
+.dws-container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .dws-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Section Spacing */
+.dws-section {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 768px) {
+  .dws-section {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+/* Card Styles */
+.dws-card {
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(7, 14, 41, 0.14);
+}
+
+/* Button Styles (EJP Navy) */
+.dws-btn-primary {
+  background: var(--dws-navy);
+  color: var(--dws-white);
+  font-weight: 600;
+  height: 44px;
+  padding: 0 1.5rem;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
+.dws-btn-primary:hover {
+  background: var(--dws-navy-press);
+  box-shadow: 0 4px 12px rgba(11, 30, 103, 0.3);
+}
+
+.dws-btn-primary:focus-visible {
+  outline: 2px solid var(--dws-outline);
+  outline-offset: 2px;
+}
+
+.dws-btn-outline {
+  border: 1px solid var(--dws-line);
+  color: var(--dws-text);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.dws-btn-outline:hover {
+  background-color: rgba(27, 37, 79, 0.06);
+}
+
+/* Focus Styles */
+.dws-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--dws-white), 0 0 0 4px rgba(45, 75, 255, 0.4);
+}
+

@@ -1,4 +1,4 @@
-import { mockCourses } from './mockData'
+import { mockCourses, mockOnboardingFlows } from './mockData'
 import {
   mockFinancialServices,
   mockNonFinancialServices,
@@ -19,6 +19,8 @@ export const getFallbackItems = (marketplaceType: string): any[] => {
     case 'guides':
     case 'knowledge-hub':
       return mockKnowledgeHubItems
+    case 'onboarding':
+      return mockOnboardingFlows
     default:
       return []
   }

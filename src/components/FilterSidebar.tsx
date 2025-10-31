@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { ProviderType } from './CourseMarketplace';
+import { ProviderType } from '../types/course';
 interface FilterSidebarProps {
   filters: {
     category: string;
     deliveryMode: string;
-    duration: string;
     businessStage: string;
     provider: string;
   };
@@ -53,7 +52,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const [openSections, setOpenSections] = useState({
     category: true,
     deliveryMode: true,
-    duration: true,
     businessStage: true,
     provider: true
   });
@@ -65,20 +63,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
   const textSizeClass = isResponsive ? 'text-sm' : 'text-sm';
   const spacingClass = isResponsive ? 'space-y-1' : 'space-y-2';
-  // Duration options
-  const durations = [{
-    value: 'Short',
-    label: 'Short (<1 week)'
-  }, {
-    value: 'Medium',
-    label: 'Medium (1-4 weeks)'
-  }, {
-    value: 'Long',
-    label: 'Long (1+ month)'
-  }];
   return <div className="space-y-2">
       {/* Category filter */}
-      <AccordionSection title="Course Category" isOpen={openSections.category} onToggle={() => toggleSection('category')}>
+      <AccordionSection title="Onboarding Flow Category" isOpen={openSections.category} onToggle={() => toggleSection('category')}>
         <div className={spacingClass}>
           {categories.map(category => <div key={category} className="flex items-center">
               <input type="checkbox" id={`category-${category}`} checked={filters.category === category} onChange={() => onFilterChange('category', category)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
@@ -95,17 +82,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <input type="checkbox" id={`mode-${mode}`} checked={filters.deliveryMode === mode} onChange={() => onFilterChange('deliveryMode', mode)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
               <label htmlFor={`mode-${mode}`} className={`ml-2 ${textSizeClass} text-gray-700`}>
                 {mode}
-              </label>
-            </div>)}
-        </div>
-      </AccordionSection>
-      {/* Duration filter */}
-      <AccordionSection title="Duration" isOpen={openSections.duration} onToggle={() => toggleSection('duration')}>
-        <div className={spacingClass}>
-          {durations.map(duration => <div key={duration.value} className="flex items-center">
-              <input type="checkbox" id={`duration-${duration.value}`} checked={filters.duration === duration.value} onChange={() => onFilterChange('duration', duration.value)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-              <label htmlFor={`duration-${duration.value}`} className={`ml-2 ${textSizeClass} text-gray-700`}>
-                {duration.label}
               </label>
             </div>)}
         </div>

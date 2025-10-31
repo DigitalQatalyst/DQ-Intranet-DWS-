@@ -11,7 +11,15 @@ interface Marketplace {
   href: string;
 }
 
+
 const marketplaces: Marketplace[] = [
+  {
+    id: 'discover-dq',
+    name: 'Discover DQ',
+    description: 'Tour the digital workspace zones and teams across DQ.',
+    icon: SparklesIcon,
+    href: '/discover-dq',
+  },
   {
     id: 'non-financial',
     name: 'IT & Systems Support',
@@ -55,6 +63,13 @@ const marketplaces: Marketplace[] = [
     href: '/marketplace/investment',
   },
   {
+    id: 'guides',
+    name: 'Guides Marketplace',
+    description: 'Guides, playbooks, and how-to resources.',
+    icon: BookOpen,
+    href: '/marketplace/guides',
+  },
+  {
     id: 'calendar',
     name: 'Calendar & Events',
     description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
@@ -81,6 +96,13 @@ const marketplaces: Marketplace[] = [
     description: 'Shared design, deployment and marketing artefacts.',
     icon: FileText,
     href: '/marketplace/asset-library',
+  },
+  {
+    id: 'communities',
+    name: 'DQ Communities',
+    description: 'Connect, collaborate, and engage with peers in vibrant communities.',
+    icon: UsersIcon,
+    href: '/communities',
   },
 ];
 

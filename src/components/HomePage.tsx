@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
-import HeroSection from "./HeroSection";
-import ProofAndTrust from "./ProofAndTrust";
-import EnterpriseStages from "./EnterpriseStages";
-import Home from "./Home";
-import KnowledgeHub from "./KnowledgeHub";
-import CallToAction from "./CallToAction";
+import React, { useEffect, useState } from 'react';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
+import HeroSection from './HeroSection';
+import ProofAndTrust from './ProofAndTrust';
+import EnterpriseStages from './EnterpriseStages';
+import Home from './Home';
+import KnowledgeHub from './KnowledgeHub';
+import LeadApplySection from './LeadApplySection';
 
 const HomePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -48,8 +48,8 @@ const HomePage: React.FC = () => {
         <ProofAndTrust />
         <EnterpriseStages />
         <Home />
-        <KnowledgeHub graphqlEndpoint={undefined} />
-        <CallToAction />
+        <KnowledgeHub graphqlEndpoint={null} />
+        <LeadApplySection />
       </main>
       <Footer isLoggedIn={false} />
     </div>
@@ -57,3 +57,4 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+

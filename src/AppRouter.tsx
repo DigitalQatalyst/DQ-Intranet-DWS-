@@ -3,21 +3,24 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CourseType } from "./utils/mockData";
 import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
-import { App } from "./App";
+import { CommunitiesRouter } from "./communities/CommunitiesRouter";
+import { App } from './App';
+
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
 import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { DiscoverAbuDhabi } from "./pages/discoverAbuDhabi";
+import DiscoverDQ from "./pages/DiscoverDQ";
 import NotFound from "./pages/NotFound";
 import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
-import { DQEventsCalendar } from "./components/DQEventsCalendar";
+import EventsPage from "./pages/events/EventsPage";
 import KfBot from "./bot/KfBot";
+import ThankYou from "./pages/ThankYou";
 
 export function AppRouter() {
   const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
@@ -53,8 +56,7 @@ export function AppRouter() {
         <AuthProvider>
           <KfBot />
           <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/courses" element={<App />} />
+            <Route path="/*" element={<App />} />
             <Route
               path="/courses/:itemId"
               element={
@@ -63,6 +65,22 @@ export function AppRouter() {
                   bookmarkedItems={bookmarkedCourses}
                   onToggleBookmark={toggleBookmark}
                   onAddToComparison={handleAddToComparison}
+                />
+              }
+            />
+            <Route
+              path="/onboarding/:itemId"
+              element={
+                <MarketplaceDetailsPage
+                  marketplaceType="onboarding"
+                />
+              }
+            />
+            <Route
+              path="/onboarding/:itemId/details"
+              element={
+                <MarketplaceDetailsPage
+                  marketplaceType="onboarding"
                 />
               }
             />
@@ -90,8 +108,8 @@ export function AppRouter() {
               element={<BlueprintsPage />}
             />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
-            <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
-            <Route path="/events" element={<DQEventsCalendar />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/communities/*" element={<CommunitiesRouter />} />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />

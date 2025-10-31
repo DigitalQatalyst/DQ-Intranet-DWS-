@@ -134,10 +134,6 @@ export const ServiceQuickViewModal: React.FC<ServiceQuickViewModalProps> = ({
                 </span>)}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-            {service.duration && <div className="flex items-center text-gray-700">
-                <Clock className="mr-2" size={18} />
-                <span>{service.duration}</span>
-              </div>}
             {service.startDate && <div className="flex items-center text-gray-700">
                 <Calendar className="mr-2" size={18} />
                 <span>Starts {service.startDate}</span>

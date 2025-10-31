@@ -22,11 +22,10 @@ import {
   GraduationCap,
   BarChart,
   CircleDot,
-  ClipboardList,
-  ChevronRight,
-} from "lucide-react";
-import { AnimatedCounter, FadeInUpOnScroll, useInView } from "./AnimationUtils";
-import ServiceCarousel from "./marketplace/ServiceCarousel";
+  ClipboardList
+} from 'lucide-react';
+import { AnimatedCounter, FadeInUpOnScroll, useInView } from './AnimationUtils';
+import ServiceCarousel from './marketplace/ServiceCarousel';
 
 /* ----------------------------- AI Chatbot ----------------------------- */
 const AIChatbot = () => {
@@ -101,7 +100,7 @@ const defaultSectionStyle: SectionStyle = {
   hoverOverlayClass: "bg-white/10",
   iconWrapperClass: "w-10 h-10",
   disabledCardClasses:
-    "bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white/75 opacity-70 cursor-not-allowed",
+    'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
 };
 
 /* ---------------------------- Service Card --------------------------- */
@@ -124,15 +123,13 @@ const ServiceCard = ({
     "bg-dqsec-tint text-white/70 opacity-70 cursor-not-allowed border border-transparent";
 
   const baseLayoutClasses =
-    "rounded-2xl p-6 flex flex-col justify-between min-h-[260px] shadow-sm overflow-hidden transition-all duration-300 transform backdrop-blur-sm";
-  const baseButtonClasses =
-    "mt-auto h-9 px-4 rounded-md font-medium w-full transition-all duration-200 flex items-center justify-center";
-  const activeButtonClasses = `${baseButtonClasses} bg-white text-[#1A2E6E] hover:bg-white/95`;
-  const disabledButtonClasses = `${baseButtonClasses} bg-white/70 text-gray-600 cursor-not-allowed`;
+    'rounded-2xl p-6 flex flex-col justify-between min-h-[260px] shadow-sm overflow-hidden transition-all duration-300 transform backdrop-blur-sm';
+  const baseButtonClasses = 'mt-auto h-9 px-4 rounded-md font-medium w-full flex items-center justify-center';
+  const disabledButtonClasses = `${baseButtonClasses} bg-white/70 text-gray-600 cursor-not-allowed transition-all duration-200`;
 
-  const iconColorClass = isComingSoon ? "text-gray-500" : "text-[#1A2E6E]";
-  const hoverOverlayClass = sectionStyle.hoverOverlayClass ?? "bg-white/10";
-  const iconWrapperClasses = sectionStyle.iconWrapperClass ?? "w-12 h-12";
+  const iconColorClass = isComingSoon ? 'text-gray-500' : (sectionStyle.iconClass ?? 'text-[#1A2E6E]');
+  const hoverOverlayClass = sectionStyle.hoverOverlayClass ?? 'bg-white/10';
+  const iconWrapperClasses = sectionStyle.iconWrapperClass ?? 'w-12 h-12';
   const descriptionClasses = `text-sm text-gray-600 leading-snug text-balance line-clamp-2 mt-3 mb-4 ${
     isComingSoon ? "text-white/70" : sectionStyle.descriptionClass
   }`;
@@ -183,7 +180,7 @@ const ServiceCard = ({
       <p className={descriptionClasses}>{service.description}</p>
 
       <button
-        className={isComingSoon ? disabledButtonClasses : activeButtonClasses}
+        className={isComingSoon ? disabledButtonClasses : 'cta-ejp'}
         disabled={isComingSoon}
         onClick={(e) => {
           if (!isComingSoon) {
@@ -199,12 +196,7 @@ const ServiceCard = ({
         ) : (
           <>
             Explore Now
-            <ChevronRight
-              size={16}
-              className={`ml-2 transition-transform ${
-                isHovered ? "translate-x-0.5" : ""
-              }`}
-            />
+            <span className="chev">›</span>
           </>
         )}
       </button>
@@ -242,7 +234,7 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="flex items-center mb-2">
-        <div className="w-10 h-10 rounded-full bg-dq-navy/10 flex items-center justify-center mr-3 text-dq-navy">
+        <div className={`w-10 h-10 rounded-full bg-dq-navy/10 flex items-center justify-center mr-3 text-dq-navy transition-all duration-300 ${isHovered ? 'scale-110 bg-dq-navy/15' : ''}`}>
           {icon}
         </div>
         <h2 className="text-2xl font-bold text-gray-800 clamp-1">{title}</h2>
@@ -268,10 +260,9 @@ export const HomePage: React.FC = () => {
     return {
       finance: [
         {
-          id: "dq-lms-courses",
-          title: "DQ LMS Courses",
-          description:
-            "Access DQ's Learning Hub to grow skills and master courses that shape your professional journey.",
+          id: 'dq-lms-courses',
+          title: 'DQ LMS Courses',
+          description: "Access DQ's Learning Hub to grow skills and master courses that shape your professional journey",
           icon: <GraduationCap />,
           path: "/marketplace/courses",
           isActive: true,
@@ -282,27 +273,25 @@ export const HomePage: React.FC = () => {
           description:
             "Navigate clear onboarding flows to connect faster and feel confident from your first day.",
           icon: <Compass />,
-          path: "#",
-          isActive: true,
+          path: '/onboarding',
+          isActive: true
         },
         {
-          id: "dq-guideline-center",
-          title: "DQ Guideline Center",
-          description:
-            "Explore policies, workflows, and guides that simplify how DQ operates across teams.",
+          id: 'dq-guideline-center-dco',
+          title: 'DQ DCO Guidelines',
+          description: 'Discover DQ’s core workflows, policies, and daily operational standards.',
           icon: <BookIcon />,
           path: "#",
           isActive: true,
         },
         {
-          id: "dq-faqs",
-          title: "DQ FAQs",
-          description:
-            "Browse DQ's FAQ hub for quick answers and shared insights from across our teams.",
-          icon: <MessageCircle />,
-          path: "#",
-          isActive: true,
-        },
+          id: 'dq-guideline-center-dbp',
+          title: 'DQ DBP Guidelines',
+          description: 'Explore DQ’s build standards,templates, and development processes.',
+          icon: <BookIcon />,
+          path: '#',
+          isActive: true
+        }
       ],
       advisory: [
         {
@@ -391,19 +380,33 @@ export const HomePage: React.FC = () => {
       ],
       learning: [
         {
-          id: "asset-library",
-          title: "Asset Library",
-          description:
-            "Access logos, templates, and infographics to communicate and brand consistently.",
+          id: 'dq-faqs',
+          title: 'DQ FAQs',
+          description: "Browse DQ's FAQ hub for quick answers and shared insights from across our teams.",
+          icon: <MessageCircle />,
+          path: '#',
+          isActive: true
+        },
+        {
+          id: 'asset-library',
+          title: 'DQ Glossary',
+          description: 'Decode DQ terminology with clear definitions updated by teams across the organization.',
           icon: <Building />,
           path: "#",
           isActive: true,
         },
         {
-          id: "blueprint-library",
-          title: "Blueprint Library",
-          description:
-            "Explore DQ's delivery blueprints connecting design, deployment, and delivery excellence.",
+          id: 'blueprint-library',
+          title: 'DQ DBP Blueprints Library',
+          description: 'Access blueprint structures and delivery frameworks for DBP development.',
+          icon: <Compass />,
+          path: '#',
+          isActive: true
+        },
+        {
+          id: 'reference-library-products',
+          title: 'DQ Product Library',
+          description: 'Find product reference materials and documentation for ongoing builds.',
           icon: <Compass />,
           path: "/blueprints",
           isActive: true,
@@ -427,13 +430,12 @@ export const HomePage: React.FC = () => {
           isActive: true,
         },
         {
-          id: "glossary",
-          title: "Glossary",
-          description:
-            "Decode DQ terminology with clear definitions updated by teams across the organization.",
+          id: 'asset-libraey',
+          title: 'Asset Library',
+          description: 'Access logos, templates, and assets for consistent DQ communication and design.',
           icon: <BookOpen />,
-          path: "#",
-          isActive: false,
+          path: '#',
+          isActive: true
         },
         {
           id: "knowledge-base",
@@ -441,8 +443,8 @@ export const HomePage: React.FC = () => {
           description:
             "Follow step-by-step answers covering tools, governance, and support workflows across DQ.",
           icon: <BookIcon />,
-          path: "#",
-          isActive: false,
+          path: '#',
+          isActive: true
         },
         {
           id: "research-hub",
@@ -468,69 +470,69 @@ export const HomePage: React.FC = () => {
 
   /* --------- ROW COLORS + EJP BUTTON/ICON TREATMENT (UPDATED) --------- */
   const sectionStyles: Record<string, SectionStyle> = {
-    // ROW 1 — Blue gradient
-    "Learning & Enablement": {
+    // ROW 1 — Navy gradient
+    'Learning & Enablement': {
       cardClasses:
-        "bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white",
-      headingClass: "text-white",
-      descriptionClass: "text-white/90",
-      iconClass: "text-white",
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
+      headingClass: 'text-white',
+      descriptionClass: 'text-white/90',
+      iconClass: 'text-[#030F35]',
       buttonClasses:
-        "text-white bg-[rgba(255,255,255,0.14)] hover:bg-[rgba(255,255,255,0.18)] " +
-        "border border-[rgba(255,255,255,0.22)] focus:ring-[#030F35] focus:ring-offset-2 focus:ring-offset-transparent",
-      hoverOverlayClass: "bg-white/10",
-      iconWrapperClass: "w-10 h-10",
+        'text-white bg-[#030F35] hover:bg-[#13285A] ' +
+        'border border-[rgba(255,255,255,0.22)] focus:ring-[#030F35] focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200',
+      hoverOverlayClass: 'bg-white/10',
+      iconWrapperClass: 'w-10 h-10',
       disabledCardClasses:
-        "bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white/75 opacity-70 cursor-not-allowed",
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
     },
 
-    // ROW 2 — Orange gradient
-    "Services & Requests": {
+    // ROW 2 — Navy gradient (matching Learning & Enablement)
+    'Services & Requests': {
       cardClasses:
-        "bg-[linear-gradient(90deg,rgba(251,85,53,0.95)0%,rgba(251,85,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white",
-      headingClass: "text-white",
-      descriptionClass: "text-white/90",
-      iconClass: "text-white",
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
+      headingClass: 'text-white',
+      descriptionClass: 'text-white/90',
+      iconClass: 'text-[#030F35]',
       buttonClasses:
-        "text-white bg-[rgba(255,255,255,0.14)] hover:bg-[rgba(255,255,255,0.18)] " +
-        "border border-[rgba(255,255,255,0.22)] focus:ring-[#FB5535] focus:ring-offset-2 focus:ring-offset-transparent",
-      hoverOverlayClass: "bg-white/10",
-      iconWrapperClass: "w-10 h-10",
+        'text-white bg-[#030F35] hover:bg-[#13285A] ' +
+        'border border-[rgba(255,255,255,0.22)] focus:ring-[#030F35] focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200',
+      hoverOverlayClass: 'bg-white/10',
+      iconWrapperClass: 'w-10 h-10',
       disabledCardClasses:
-        "bg-[linear-gradient(90deg,rgba(251,85,53,0.95)0%,rgba(251,85,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white/75 opacity-70 cursor-not-allowed",
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
     },
 
-    // ROW 3 — Indigo gradient
-    "Collaboration & Communities": {
+    // ROW 3 — Navy gradient (matching Learning & Enablement)
+    'Collaboration & Communities': {
       cardClasses:
-        "bg-[linear-gradient(90deg,rgba(25,25,112,0.95)0%,rgba(25,25,112,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white",
-      headingClass: "text-white",
-      descriptionClass: "text-white/90",
-      iconClass: "text-white",
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
+      headingClass: 'text-white',
+      descriptionClass: 'text-white/90',
+      iconClass: 'text-[#030F35]',
       buttonClasses:
-        "text-white bg-[rgba(255,255,255,0.14)] hover:bg-[rgba(255,255,255,0.18)] " +
-        "border border-[rgba(255,255,255,0.22)] focus:ring-[#191970] focus:ring-offset-2 focus:ring-offset-transparent",
-      hoverOverlayClass: "bg-white/10",
-      iconWrapperClass: "w-10 h-10",
+        'text-white bg-[#030F35] hover:bg-[#13285A] ' +
+        'border border-[rgba(255,255,255,0.22)] focus:ring-[#030F35] focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200',
+      hoverOverlayClass: 'bg-white/10',
+      iconWrapperClass: 'w-10 h-10',
       disabledCardClasses:
-        "bg-[linear-gradient(90deg,rgba(25,25,112,0.95)0%,rgba(25,25,112,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white/75 opacity-70 cursor-not-allowed",
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
     },
 
-    // ROW 4 — Coral gradient
-    "Resources & Libraries": {
+    // ROW 4 — Navy gradient (matching Learning & Enablement)
+    'Resources & Libraries': {
       cardClasses:
-        "bg-[linear-gradient(90deg,rgba(255,56,0,0.95)0%,rgba(255,56,0,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white",
-      headingClass: "text-white",
-      descriptionClass: "text-white/90",
-      iconClass: "text-white",
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
+      headingClass: 'text-white',
+      descriptionClass: 'text-white/90',
+      iconClass: 'text-[#030F35]',
       buttonClasses:
-        "text-white bg-[rgba(255,255,255,0.14)] hover:bg-[rgba(255,255,255,0.18)] " +
-        "border border-[rgba(255,255,255,0.22)] focus:ring-[#FF3800] focus:ring-offset-2 focus:ring-offset-transparent",
-      hoverOverlayClass: "bg-white/10",
-      iconWrapperClass: "w-10 h-10",
+        'text-white bg-[#030F35] hover:bg-[#13285A] ' +
+        'border border-[rgba(255,255,255,0.22)] focus:ring-[#030F35] focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200',
+      hoverOverlayClass: 'bg-white/10',
+      iconWrapperClass: 'w-10 h-10',
       disabledCardClasses:
-        "bg-[linear-gradient(90deg,rgba(255,56,0,0.95)0%,rgba(255,56,0,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white/75 opacity-70 cursor-not-allowed",
-    },
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
+    }
   };
 
   const handleServiceClick = (path: string) => navigate(path);
@@ -644,11 +646,7 @@ export const HomePage: React.FC = () => {
           {/* Row 4 */}
           <div className="mb-10">
             <FadeInUpOnScroll>
-              <CategoryHeader
-                icon={<BookOpen size={24} />}
-                title="Resources & Libraries"
-                count={8}
-              />
+              <CategoryHeader icon={<BookOpen size={24} />} title="Resources & Libraries" count={10} />
             </FadeInUpOnScroll>
             <ServiceCarousel
               services={allServices.learning}
@@ -675,60 +673,50 @@ export const HomePage: React.FC = () => {
       {/* AI Chatbot */}
       <AIChatbot />
 
-      {/* animations */}
+      {/* animations + EJP CTA styles */}
       <style jsx>{`
         @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; } to { opacity: 1; }
         }
         @keyframes scale-in {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
         }
         @keyframes pulse {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
+          0%,100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
         }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.5s ease-out forwards;
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        .animate-fade-in    { animation: fade-in 0.3s ease-out forwards; }
+        .animate-scale-in   { animation: scale-in 0.3s ease-out forwards; }
+        .animate-pulse      { animation: pulse 2s infinite; }
+        .hover\\:scale-102:hover { transform: scale(1.02); }
+
+        /* ---------- EJP-style CTA (dark translucent -> white on hover) ---------- */
+        .cta-ejp{
+          display:inline-flex; align-items:center; justify-content:center; width:100%;
+          padding:14px 20px; border-radius:14px; font-weight:600; font-size:14.5px;
+          color:white;
+          background:rgba(255,255,255,0.14);
+          border:1px solid rgba(255,255,255,0.22);
+          box-shadow:0 2px 8px rgba(0,0,0,0.1);
+          backdrop-filter:saturate(140%) blur(4px);
+          -webkit-backdrop-filter:saturate(140%) blur(4px);
+          transition:all 0.3s ease;
         }
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out forwards;
+        .cta-ejp:hover{
+          color:#1A2E6E;
+          background:rgba(255,255,255,0.95);
+          border-color:rgba(255,255,255,0.9);
+          box-shadow:0 4px 12px rgba(0,0,0,0.15);
+          transform:translateY(-1px);
         }
-        .animate-scale-in {
-          animation: scale-in 0.3s ease-out forwards;
-        }
-        .animate-pulse {
-          animation: pulse 2s infinite;
-        }
-        .hover\\:scale-102:hover {
-          transform: scale(1.02);
-        }
+        .cta-ejp .chev { transition: transform 0.3s ease; }
+        .cta-ejp:hover .chev { transform: translateX(4px); }
       `}</style>
     </div>
   );

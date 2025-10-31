@@ -46,7 +46,7 @@ export const RelatedCourses: React.FC<RelatedCoursesProps> = ({
       {/* Quick View Modal */}
       {quickViewCourse && <CourseQuickViewModal course={quickViewCourse} onClose={() => setQuickViewCourse(null)} onViewDetails={() => {
       setQuickViewCourse(null);
-      navigate(`/courses/${quickViewCourse.id}`);
+      navigate(`/onboarding/${quickViewCourse.id}`);
     }} isBookmarked={bookmarkedCourses.includes(quickViewCourse.id)} onToggleBookmark={() => onToggleBookmark(quickViewCourse.id)} onAddToComparison={() => {}} />}
     </div>;
 };

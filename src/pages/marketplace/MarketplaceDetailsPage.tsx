@@ -9,7 +9,7 @@ import { ErrorDisplay } from '../../components/SkeletonLoader';
 import { Link } from 'react-router-dom';
 import { getFallbackItemDetails, getFallbackItems } from '../../utils/fallbackData';
 interface MarketplaceDetailsPageProps {
-  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'guides';
+  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding';
   bookmarkedItems?: string[];
   onToggleBookmark?: (itemId: string) => void;
   onAddToComparison?: (item: any) => void;
@@ -403,20 +403,20 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                     Core principles and practical exercises
                   </p>
                 </div>
-                {item.durationType === 'Medium' || item.durationType === 'Long' ? <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
-                    <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                    <h4 className="font-semibold text-gray-900">Week 3-4</h4>
-                    <p className="text-gray-700">
-                      Advanced techniques and final projects
-                    </p>
-                  </div> : null}
-                {item.durationType === 'Long' ? <div className="relative pl-8">
-                    <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                    <h4 className="font-semibold text-gray-900">Final Week</h4>
-                    <p className="text-gray-700">
-                      Project presentations and certification
-                    </p>
-                  </div> : null}
+                <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
+                  <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+                  <h4 className="font-semibold text-gray-900">Week 3-4</h4>
+                  <p className="text-gray-700">
+                    Advanced techniques and final projects
+                  </p>
+                </div>
+                <div className="relative pl-8">
+                  <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+                  <h4 className="font-semibold text-gray-900">Final Week</h4>
+                  <p className="text-gray-700">
+                    Project presentations and certification
+                  </p>
+                </div>
               </div>
               {/* Location if applicable */}
               {item.location && <div className="mt-6 pt-4 border-t border-gray-100">
@@ -1020,3 +1020,4 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     </div>;
 };
 export default MarketplaceDetailsPage;
+

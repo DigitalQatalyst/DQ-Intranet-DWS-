@@ -23,8 +23,6 @@ export interface ServiceItem {
   deliveryMode?: string;
   serviceType?: string;
   eligibility?: string;
-  duration?: string;
-  durationType?: string;
   businessStage?: string;
   provider: Provider;
   details?: string[];

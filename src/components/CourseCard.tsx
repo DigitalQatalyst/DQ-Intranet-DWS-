@@ -20,7 +20,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   const navigate = useNavigate();
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/courses/${course.id}`);
+    navigate(`/onboarding/${course.id}`);
   };
   return <div className="flex flex-col min-h-[340px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200" onClick={onQuickView}>
       {/* Card Header with fixed height for title and provider */}
@@ -76,9 +76,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           </button>
           <button onClick={e => {
           e.stopPropagation();
-          navigate(`/courses/${course.id}?enroll=true`);
+          navigate(`/onboarding/${course.id}`);
         }} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors whitespace-nowrap flex-1">
-            Enroll Now
+            Continue
           </button>
         </div>
       </div>

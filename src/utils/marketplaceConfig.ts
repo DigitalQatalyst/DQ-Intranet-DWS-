@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ReactNode } from 'react';
-import { DollarSign, Calendar, Clock, Users, MapPin, CheckCircle, BarChart, Award, FileText, Info, BookOpen, ClipboardList, Building, FileType, Bookmark, TrendingUp } from 'lucide-react';
-import { mockCourses, providers } from './mockData';
+import { DollarSign, Calendar, Clock, Users, MapPin, CheckCircle, BarChart, Award, FileText, Info, BookOpen, ClipboardList, Building, FileType, Bookmark, TrendingUp, Compass } from 'lucide-react';
+import { mockCourses, providers, mockOnboardingFlowsData } from './mockData';
 import { mockFinancialServices, mockNonFinancialServices, mockKnowledgeHubItems, mockKnowledgeHubFilterOptions } from './mockMarketplaceData';
 // Define a Tab type for consistency across marketplace pages
 export interface MarketplaceTab {
@@ -278,6 +278,176 @@ const knowledgeHubBaseConfig: MarketplaceConfig = {
 };
 
 export const marketplaceConfig: Record<string, MarketplaceConfig> = {
+  onboarding: {
+    id: 'onboarding',
+    title: 'Onboarding Flows',
+    description: 'Discover guided flows to get productive fast in the Digital Workspace.',
+    route: '/onboarding',
+    primaryCTA: 'Start Flow',
+    secondaryCTA: 'View Details',
+    itemName: 'Onboarding Flow',
+    itemNamePlural: 'Onboarding Flows',
+    attributes: [{
+      key: 'duration',
+      label: 'Time to Complete',
+      icon: React.createElement(Clock, { size: 18, className: "mr-2" })
+    }, {
+      key: 'deliveryMode',
+      label: 'Format',
+      icon: React.createElement(FileType, { size: 18, className: "mr-2" })
+    }, {
+      key: 'businessStage',
+      label: 'Role',
+      icon: React.createElement(Users, { size: 18, className: "mr-2" })
+    }, {
+      key: 'category',
+      label: 'Journey Phase',
+      icon: React.createElement(Compass, { size: 18, className: "mr-2" })
+    }],
+    detailSections: ['description', 'steps', 'resources', 'provider', 'related'],
+    tabs: [{
+      id: 'about',
+      label: 'About This Flow',
+      icon: Info,
+      iconBgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600'
+    }, {
+      id: 'steps',
+      label: 'Steps',
+      icon: ClipboardList,
+      iconBgColor: 'bg-green-50',
+      iconColor: 'text-green-600'
+    }, {
+      id: 'resources',
+      label: 'Resources',
+      icon: BookOpen,
+      iconBgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600'
+    }, {
+      id: 'provider',
+      label: 'About Provider',
+      icon: Building,
+      iconBgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600'
+    }],
+    summarySticky: true,
+    filterCategories: [{
+      id: 'journeyPhase',
+      title: 'Journey Phase',
+      options: [{
+        id: 'discover',
+        name: 'Discover'
+      }, {
+        id: 'explore',
+        name: 'Explore'
+      }, {
+        id: 'set-up',
+        name: 'Set Up'
+      }, {
+        id: 'connect',
+        name: 'Connect'
+      }, {
+        id: 'grow',
+        name: 'Grow'
+      }]
+    }, {
+      id: 'role',
+      title: 'Role',
+      options: [{
+        id: 'general',
+        name: 'General'
+      }, {
+        id: 'engineering',
+        name: 'Engineering'
+      }, {
+        id: 'product',
+        name: 'Product'
+      }, {
+        id: 'design',
+        name: 'Design'
+      }, {
+        id: 'marketing',
+        name: 'Marketing'
+      }, {
+        id: 'operations',
+        name: 'Operations'
+      }]
+    }, {
+      id: 'timeToComplete',
+      title: 'Time to Complete',
+      options: [{
+        id: 'lt-15',
+        name: '<15m'
+      }, {
+        id: '15-30',
+        name: '15–30m'
+      }, {
+        id: '30-60',
+        name: '30–60m'
+      }, {
+        id: 'gt-60',
+        name: '>60m'
+      }]
+    }, {
+      id: 'format',
+      title: 'Format',
+      options: [{
+        id: 'checklist',
+        name: 'Checklist'
+      }, {
+        id: 'interactive',
+        name: 'Interactive'
+      }, {
+        id: 'video',
+        name: 'Video'
+      }, {
+        id: 'guide',
+        name: 'Guide'
+      }]
+    }, {
+      id: 'popularity',
+      title: 'Popularity',
+      options: [{
+        id: 'most-used',
+        name: 'Most used'
+      }, {
+        id: 'new',
+        name: 'New'
+      }]
+    }],
+    mapListResponse: data => {
+      return data.map((item: any) => ({
+        ...item,
+        tags: item.tags || [item.category || item.journeyPhase, item.deliveryMode].filter(Boolean)
+      }));
+    },
+    mapDetailResponse: data => ({
+      ...data,
+      highlights: data.highlights || data.learningOutcomes || []
+    }),
+    mapFilterResponse: data => [{
+      id: 'journeyPhase',
+      title: 'Journey Phase',
+      options: data.journeyPhase || []
+    }, {
+      id: 'role',
+      title: 'Role',
+      options: data.roles || []
+    }, {
+      id: 'timeToComplete',
+      title: 'Time to Complete',
+      options: data.timeToComplete || []
+    }, {
+      id: 'format',
+      title: 'Format',
+      options: data.formats || []
+    }, {
+      id: 'popularity',
+      title: 'Popularity',
+      options: data.popularity || []
+    }],
+    mockData: mockOnboardingFlowsData
+  },
   courses: {
     id: 'courses',
     title: 'DQ LMS Course Marketplace',
@@ -514,26 +684,13 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         id: 'creditcard',
         name: 'Credit Card'
       }]
-    }, {
-      id: 'serviceType',
-      title: 'Service Type',
-      options: [{
-        id: 'financing',
-        name: 'Financing'
-      }, {
-        id: 'credit',
-        name: 'Credit'
-      }, {
-        id: 'riskmanagement',
-        name: 'Risk Management'
-      }]
     }],
     // Data mapping functions
     mapListResponse: data => {
       return data.map((item: any) => ({
         ...item,
         // Transform any fields if needed
-        tags: item.tags || [item.category, item.serviceType].filter(Boolean)
+        tags: item.tags || [item.category].filter(Boolean)
       }));
     },
     mapDetailResponse: data => {
@@ -548,10 +705,6 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         id: 'category',
         title: 'Service Category',
         options: data.categories || []
-      }, {
-        id: 'serviceType',
-        title: 'Service Type',
-        options: data.serviceTypes || []
       }];
     },
     // Mock data for fallback and schema reference
@@ -559,8 +712,8 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
   },
   'non-financial': {
     id: 'non-financial',
-    title: 'Business Services Marketplace',
-    description: 'Find professional services to support and grow your business',
+    title: 'Services & Requests',
+    description: "Welcome to Digital Qatalyst's Support Services! We’re here to ensure your success by providing dedicated assistance and efficient solutions for all your needs. This platform offers comprehensive support tools, resources, and expert guidance to help you overcome challenges and maximize productivity. Whether you require technical help or operational support we’re here to empower your journey every step of the way.",
     route: '/marketplace/non-financial',
     primaryCTA: 'Request Service',
     secondaryCTA: 'View Details',
@@ -578,10 +731,6 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       key: 'duration',
       label: 'Duration',
       icon: React.createElement(Clock, { size: 18, className: "mr-2" })
-    }, {
-      key: 'price',
-      label: 'Cost',
-      icon: React.createElement(DollarSign, { size: 18, className: "mr-2" })
     }],
     detailSections: ['description', 'deliveryDetails', 'provider', 'related'],
     tabs: [{
@@ -620,33 +769,17 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       id: 'category',
       title: 'Service Category',
       options: [{
-        id: 'consultancy',
-        name: 'Consultancy'
+        id: 'it_support',
+        name: 'IT Support'
       }, {
-        id: 'technology',
-        name: 'Technology'
+        id: 'support_charter_template',
+        name: 'Support Charter Template'
       }, {
-        id: 'research',
-        name: 'Research'
+        id: 'it_support_walkthrough',
+        name: 'IT Support Walkthrough'
       }, {
         id: 'export',
         name: 'Export'
-      }]
-    }, {
-      id: 'serviceType',
-      title: 'Service Type',
-      options: [{
-        id: 'advisory',
-        name: 'Advisory'
-      }, {
-        id: 'implementation',
-        name: 'Implementation'
-      }, {
-        id: 'information',
-        name: 'Information'
-      }, {
-        id: 'program',
-        name: 'Program'
       }]
     }, {
       id: 'deliveryMode',
@@ -667,7 +800,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       return data.map((item: any) => ({
         ...item,
         // Transform any fields if needed
-        tags: item.tags || [item.category, item.serviceType, item.deliveryMode].filter(Boolean)
+        tags: item.tags || [item.category, item.deliveryMode].filter(Boolean)
       }));
     },
     mapDetailResponse: data => {
@@ -682,10 +815,6 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         id: 'category',
         title: 'Service Category',
         options: data.categories || []
-      }, {
-        id: 'serviceType',
-        title: 'Service Type',
-        options: data.serviceTypes || []
       }, {
         id: 'deliveryMode',
         title: 'Delivery Mode',

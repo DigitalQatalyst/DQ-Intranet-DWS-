@@ -66,27 +66,54 @@
   overflow: hidden !important;
 }
 
-/* Markdown article styles (prose-like) */
-.markdown-body {
-  color: #1f2937; /* gray-800 */
-  line-height: 1.75;
+input,
+textarea {
+  color: #0B1220;
 }
-.markdown-body h2 { margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; font-size: 1.25rem; }
-.markdown-body h3 { margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 600; font-size: 1.125rem; }
-.markdown-body h4 { margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 600; font-size: 1rem; }
-.markdown-body p { margin-bottom: 0.75rem; }
-.markdown-body ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
-.markdown-body ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.5rem; }
-.markdown-body blockquote { border-left: 4px solid #d1d5db; padding-left: 1rem; color: #374151; font-style: italic; }
-.markdown-body code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
-.markdown-body table { width: 100%; border-collapse: collapse; border: 1px solid #e5e7eb; }
-.markdown-body th { border-bottom: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; color: #111827; }
-.markdown-body td { border-bottom: 1px solid #f3f4f6; padding: 0.5rem 0.75rem; vertical-align: top; }
-.markdown-body img { max-width: 100%; height: auto; border-radius: 0.5rem; }
 
-/* Print styles for Guide detail */
-@media print {
-  header, nav[aria-label="Breadcrumb"], aside, .guide-actions, .guide-actions * { display: none !important; }
-  main.guide-detail { padding: 0 !important; box-shadow: none !important; }
-  .markdown-body { color: #000; }
+input::placeholder,
+textarea::placeholder {
+  color: #9CA3AF;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: #0B1220 !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* EJP-style CTA Button for Marketplace Cards */
+.cta-ejp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: #030F35;
+  background: rgba(255, 255, 255, 0.22); /* translucent white */
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 1px 2px rgba(3, 15, 53, 0.12);
+  backdrop-filter: saturate(140%) blur(4px);
+  -webkit-backdrop-filter: saturate(140%) blur(4px);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cta-ejp:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 1) 100%);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px rgba(3, 15, 53, 0.16);
+  transform: translateY(-1px);
+}
+
+.cta-ejp .chev {
+  transition: transform 0.2s ease;
+  margin-left: 8px;
+}
+
+.cta-ejp:hover .chev {
+  transform: translateX(4px);
 }

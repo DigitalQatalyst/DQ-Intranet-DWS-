@@ -5,6 +5,7 @@ import { MarketplaceCard } from './MarketplaceCard';
 import { KnowledgeHubCard } from './KnowledgeHubCard';
 import { MarketplaceQuickViewModal } from './MarketplaceQuickViewModal';
 import { getFallbackItems } from '../../utils/fallbackData';
+import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 export interface MarketplaceItem {
   id: string;
   title: string;
@@ -43,6 +44,7 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
 }) => {
   const [quickViewItem, setQuickViewItem] = useState<MarketplaceItem | null>(null);
   const navigate = useNavigate();
+  const config = getMarketplaceConfig(marketplaceType);
   // Use fallback items if no items are provided or if items array is empty
   const displayItems = items && items.length > 0 ? items : getFallbackItems(marketplaceType);
   const totalItems = displayItems.length;
@@ -109,7 +111,7 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
       {/* Quick View Modal */}
       {quickViewItem && <MarketplaceQuickViewModal item={quickViewItem} marketplaceType={marketplaceType} onClose={() => setQuickViewItem(null)} onViewDetails={() => {
       setQuickViewItem(null);
-      navigate(`/marketplace/${marketplaceType}/${quickViewItem.id}`);
+      navigate(`${config.route}/${quickViewItem.id}`);
     }} isBookmarked={bookmarkedItems.includes(quickViewItem.id)} onToggleBookmark={() => onToggleBookmark(quickViewItem.id)} onAddToComparison={() => {
       onAddToComparison(quickViewItem);
       setQuickViewItem(null);

@@ -23,7 +23,7 @@ interface ComparisonItem {
 }
 
 export interface MarketplacePageProps {
-  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'guides';
+  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding';
   title: string;
   description: string;
   promoCards?: any[];
@@ -477,10 +477,3 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 };
 
 export default MarketplacePage;
-
-
-
-
-
-
-

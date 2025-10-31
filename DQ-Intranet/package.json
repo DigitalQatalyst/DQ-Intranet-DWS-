@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "magic-patterns-vite-template": "file:.."
+  }
+}

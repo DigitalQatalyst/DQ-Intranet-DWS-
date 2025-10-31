@@ -1,6 +1,6 @@
-import React, { Component, ReactNode } from 'react';
-import { DollarSign, Calendar, Clock, Users, MapPin, CheckCircle, BarChart, Award, FileText, Info, BookOpen, Briefcase, ClipboardList, ScrollText, Building } from 'lucide-react';
-import { mockCourses, providers } from './mockData';
+import React, { ReactNode } from 'react';
+import { DollarSign, Calendar, Clock, Users, MapPin, CheckCircle, BarChart, Award, FileText, Info, BookOpen, ClipboardList, ScrollText, Building, Compass } from 'lucide-react';
+import { mockCourses, providers, mockOnboardingFlowsData } from './mockData';
 import { mockFinancialServices, mockNonFinancialServices } from './mockMarketplaceData';
 // Define a Tab type for consistency across marketplace pages
 export interface MarketplaceTab {
@@ -94,14 +94,14 @@ export const mockNonFinancialServicesData = {
   items: mockNonFinancialServices,
   filterOptions: {
     categories: [{
-      id: 'consultancy',
-      name: 'Consultancy'
+      id: 'it_support',
+      name: 'IT Support'
     }, {
-      id: 'technology',
-      name: 'Technology'
+      id: 'support_charter_template',
+      name: 'Support Charter Template'
     }, {
-      id: 'research',
-      name: 'Research'
+      id: 'it_support_walkthrough',
+      name: 'IT Support Walkthrough'
     }, {
       id: 'export',
       name: 'Export'
@@ -180,6 +180,176 @@ export const mockCoursesData = {
 };
 // Define marketplace configurations
 export const marketplaceConfig: Record<string, MarketplaceConfig> = {
+  onboarding: {
+    id: 'onboarding',
+    title: 'Onboarding Flows',
+    description: 'Discover guided flows to get productive fast in the Digital Workspace.',
+    route: '/onboarding',
+    primaryCTA: 'Start Flow',
+    secondaryCTA: 'View Details',
+    itemName: 'Onboarding Flow',
+    itemNamePlural: 'Onboarding Flows',
+    attributes: [{
+      key: 'duration',
+      label: 'Time to Complete',
+      icon: <Clock size={18} className="mr-2" />
+    }, {
+      key: 'deliveryMode',
+      label: 'Format',
+      icon: <ScrollText size={18} className="mr-2" />
+    }, {
+      key: 'businessStage',
+      label: 'Role',
+      icon: <Users size={18} className="mr-2" />
+    }, {
+      key: 'category',
+      label: 'Journey Phase',
+      icon: <Compass size={18} className="mr-2" />
+    }],
+    detailSections: ['description', 'steps', 'resources', 'provider', 'related'],
+    tabs: [{
+      id: 'about',
+      label: 'About This Flow',
+      icon: Info,
+      iconBgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600'
+    }, {
+      id: 'steps',
+      label: 'Steps',
+      icon: ClipboardList,
+      iconBgColor: 'bg-green-50',
+      iconColor: 'text-green-600'
+    }, {
+      id: 'resources',
+      label: 'Resources',
+      icon: BookOpen,
+      iconBgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600'
+    }, {
+      id: 'provider',
+      label: 'About Provider',
+      icon: Building,
+      iconBgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600'
+    }],
+    summarySticky: true,
+    filterCategories: [{
+      id: 'journeyPhase',
+      title: 'Journey Phase',
+      options: [{
+        id: 'discover',
+        name: 'Discover'
+      }, {
+        id: 'explore',
+        name: 'Explore'
+      }, {
+        id: 'set-up',
+        name: 'Set Up'
+      }, {
+        id: 'connect',
+        name: 'Connect'
+      }, {
+        id: 'grow',
+        name: 'Grow'
+      }]
+    }, {
+      id: 'role',
+      title: 'Role',
+      options: [{
+        id: 'general',
+        name: 'General'
+      }, {
+        id: 'engineering',
+        name: 'Engineering'
+      }, {
+        id: 'product',
+        name: 'Product'
+      }, {
+        id: 'design',
+        name: 'Design'
+      }, {
+        id: 'marketing',
+        name: 'Marketing'
+      }, {
+        id: 'operations',
+        name: 'Operations'
+      }]
+    }, {
+      id: 'timeToComplete',
+      title: 'Time to Complete',
+      options: [{
+        id: 'lt-15',
+        name: '<15m'
+      }, {
+        id: '15-30',
+        name: '15–30m'
+      }, {
+        id: '30-60',
+        name: '30–60m'
+      }, {
+        id: 'gt-60',
+        name: '>60m'
+      }]
+    }, {
+      id: 'format',
+      title: 'Format',
+      options: [{
+        id: 'checklist',
+        name: 'Checklist'
+      }, {
+        id: 'interactive',
+        name: 'Interactive'
+      }, {
+        id: 'video',
+        name: 'Video'
+      }, {
+        id: 'guide',
+        name: 'Guide'
+      }]
+    }, {
+      id: 'popularity',
+      title: 'Popularity',
+      options: [{
+        id: 'most-used',
+        name: 'Most used'
+      }, {
+        id: 'new',
+        name: 'New'
+      }]
+    }],
+    mapListResponse: data => {
+      return data.map((item: any) => ({
+        ...item,
+        tags: item.tags || [item.category || item.journeyPhase, item.deliveryMode].filter(Boolean)
+      }));
+    },
+    mapDetailResponse: data => ({
+      ...data,
+      highlights: data.highlights || data.learningOutcomes || []
+    }),
+    mapFilterResponse: data => [{
+      id: 'journeyPhase',
+      title: 'Journey Phase',
+      options: data.journeyPhase || []
+    }, {
+      id: 'role',
+      title: 'Role',
+      options: data.roles || []
+    }, {
+      id: 'timeToComplete',
+      title: 'Time to Complete',
+      options: data.timeToComplete || []
+    }, {
+      id: 'format',
+      title: 'Format',
+      options: data.formats || []
+    }, {
+      id: 'popularity',
+      title: 'Popularity',
+      options: data.popularity || []
+    }],
+    mockData: mockOnboardingFlowsData
+  },
   courses: {
     id: 'courses',
     title: 'DQ LMS Course Marketplace',
@@ -416,26 +586,13 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         id: 'creditcard',
         name: 'Credit Card'
       }]
-    }, {
-      id: 'serviceType',
-      title: 'Service Type',
-      options: [{
-        id: 'financing',
-        name: 'Financing'
-      }, {
-        id: 'credit',
-        name: 'Credit'
-      }, {
-        id: 'riskmanagement',
-        name: 'Risk Management'
-      }]
     }],
     // Data mapping functions
     mapListResponse: data => {
       return data.map((item: any) => ({
         ...item,
         // Transform any fields if needed
-        tags: item.tags || [item.category, item.serviceType].filter(Boolean)
+        tags: item.tags || [item.category].filter(Boolean)
       }));
     },
     mapDetailResponse: data => {
@@ -450,10 +607,6 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         id: 'category',
         title: 'Service Category',
         options: data.categories || []
-      }, {
-        id: 'serviceType',
-        title: 'Service Type',
-        options: data.serviceTypes || []
       }];
     },
     // Mock data for fallback and schema reference
@@ -535,22 +688,6 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         name: 'Export'
       }]
     }, {
-      id: 'serviceType',
-      title: 'Service Type',
-      options: [{
-        id: 'advisory',
-        name: 'Advisory'
-      }, {
-        id: 'implementation',
-        name: 'Implementation'
-      }, {
-        id: 'information',
-        name: 'Information'
-      }, {
-        id: 'program',
-        name: 'Program'
-      }]
-    }, {
       id: 'deliveryMode',
       title: 'Delivery Mode',
       options: [{
@@ -569,7 +706,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       return data.map((item: any) => ({
         ...item,
         // Transform any fields if needed
-        tags: item.tags || [item.category, item.serviceType, item.deliveryMode].filter(Boolean)
+        tags: item.tags || [item.category, item.deliveryMode].filter(Boolean)
       }));
     },
     mapDetailResponse: data => {
@@ -584,10 +721,6 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         id: 'category',
         title: 'Service Category',
         options: data.categories || []
-      }, {
-        id: 'serviceType',
-        title: 'Service Type',
-        options: data.serviceTypes || []
       }, {
         id: 'deliveryMode',
         title: 'Delivery Mode',

@@ -1,4 +1,5 @@
 import "./index.css";
+import "./styles/theme.css";
 import { AppRouter } from "./AppRouter";
 import { createRoot } from "react-dom/client";
 import { MsalProvider } from "@azure/msal-react";

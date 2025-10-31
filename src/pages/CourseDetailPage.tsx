@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { BookmarkIcon, ScaleIcon, Clock, Calendar, DollarSign, MapPin, ArrowLeftIcon, StarIcon, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon } from 'lucide-react';
+import { BookmarkIcon, ScaleIcon, Calendar, MapPin, StarIcon, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon } from 'lucide-react';
 import { RelatedCourses } from '../components/RelatedCourses';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { graphqlClient } from '../services/graphql/client';
 import { GET_COURSE_DETAILS, GET_RELATED_COURSES } from '../services/graphql/queries';
-import { CourseType } from '../components/CourseMarketplace';
+import { CourseType } from '../types/course';
 import { ErrorDisplay } from '../components/SkeletonLoader';
 interface CourseDetailPageProps {
   bookmarkedCourses: string[];
@@ -326,7 +326,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                         </span>
                       </p>
                       <p className="text-sm text-gray-600">
-                        Duration: {course.duration}
+                        Starts: {course.startDate}
                       </p>
                     </div>
                     <div className="mt-2 md:mt-0 md:ml-auto">
@@ -351,24 +351,24 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                         Core principles and practical exercises
                       </p>
                     </div>
-                    {course.durationType === 'Medium' || course.durationType === 'Long' ? <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
-                        <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                        <h4 className="font-semibold text-gray-900">
-                          Week 3-4
-                        </h4>
-                        <p className="text-gray-700">
-                          Advanced techniques and final projects
-                        </p>
-                      </div> : null}
-                    {course.durationType === 'Long' ? <div className="relative pl-8">
-                        <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                        <h4 className="font-semibold text-gray-900">
-                          Final Week
-                        </h4>
-                        <p className="text-gray-700">
-                          Project presentations and certification
-                        </p>
-                      </div> : null}
+                    <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
+                      <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+                      <h4 className="font-semibold text-gray-900">
+                        Week 3-4
+                      </h4>
+                      <p className="text-gray-700">
+                        Advanced techniques and final projects
+                      </p>
+                    </div>
+                    <div className="relative pl-8">
+                      <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+                      <h4 className="font-semibold text-gray-900">
+                        Final Week
+                      </h4>
+                      <p className="text-gray-700">
+                        Project presentations and certification
+                      </p>
+                    </div>
                   </div>
                   {/* Location if applicable */}
                   {course.location && <div className="mt-4 pt-4 border-t border-gray-100">
@@ -432,12 +432,6 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                       <span className="text-gray-600">Price:</span>
                       <span className="font-bold text-gray-900">
                         {course.price || 'Free'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">Duration:</span>
-                      <span className="font-bold text-gray-900">
-                        {course.duration}
                       </span>
                     </div>
                     <div className="flex justify-between mb-2">
@@ -523,7 +517,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
             <div className="text-gray-900 font-bold">
               {course.price || 'Free'}
             </div>
-            <div className="text-sm text-gray-600">{course.duration}</div>
+            <div className="text-sm text-gray-600">{course.startDate}</div>
           </div>
           <button className="flex-1 px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md">
             Enroll Now

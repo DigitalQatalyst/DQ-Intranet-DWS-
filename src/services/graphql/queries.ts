@@ -1,6 +1,134 @@
 // GraphQL queries used in the application
 // Generic query structure for all marketplace types
 export const MARKETPLACE_QUERIES = {
+  onboarding: {
+    getItems: `
+      query getOnboardingFlows($journeyPhase: String, $role: String, $timeToComplete: String, $format: String, $popularity: String, $search: String) {
+        items: onboardingFlows(journeyPhase: $journeyPhase, role: $role, timeToComplete: $timeToComplete, format: $format, popularity: $popularity, search: $search) {
+          id
+          title
+          description
+          category
+          journeyPhase
+          deliveryMode
+          format
+          duration
+          durationType
+          timeToComplete
+          businessStage
+          role
+          provider {
+            name
+            logoUrl
+            description
+          }
+          learningOutcomes
+          startDate
+          price
+          location
+          tags
+          popularity
+        }
+      }
+    `,
+    getItemDetails: `
+      query getOnboardingFlowDetails($id: String!) {
+        item: onboardingFlow(id: $id) {
+          id
+          title
+          description
+          category
+          journeyPhase
+          deliveryMode
+          format
+          duration
+          durationType
+          timeToComplete
+          businessStage
+          role
+          provider {
+            name
+            logoUrl
+            description
+          }
+          learningOutcomes
+          startDate
+          price
+          location
+          tags
+          popularity
+          highlights
+          steps
+          resources
+        }
+      }
+    `,
+    getRelatedItems: `
+      query getRelatedOnboardingFlows($id: String!, $journeyPhase: String, $provider: String) {
+        relatedItems: relatedOnboardingFlows(id: $id, journeyPhase: $journeyPhase, provider: $provider) {
+          id
+          title
+          description
+          category
+          journeyPhase
+          deliveryMode
+          format
+          duration
+          durationType
+          timeToComplete
+          businessStage
+          role
+          provider {
+            name
+            logoUrl
+            description
+          }
+          learningOutcomes
+          startDate
+          price
+          location
+          tags
+          popularity
+        }
+      }
+    `,
+    getFilterOptions: `
+      query getOnboardingFilterOptions {
+        filterOptions {
+          journeyPhase {
+            id
+            name
+          }
+          roles {
+            id
+            name
+          }
+          timeToComplete {
+            id
+            name
+          }
+          formats {
+            id
+            name
+          }
+          popularity {
+            id
+            name
+          }
+        }
+      }
+    `,
+    getProviders: `
+      query getOnboardingProviders {
+        providers {
+          id
+          name
+          logoUrl
+          description
+        }
+      }
+    `
+  },
   // Courses marketplace queries
   courses: {
     getItems: `
@@ -11,8 +139,6 @@ export const MARKETPLACE_QUERIES = {
           description
           category
           deliveryMode
-          duration
-          durationType
           businessStage
           provider {
             name
@@ -35,8 +161,6 @@ export const MARKETPLACE_QUERIES = {
           description
           category
           deliveryMode
-          duration
-          durationType
           businessStage
           provider {
             name
@@ -63,8 +187,6 @@ export const MARKETPLACE_QUERIES = {
           description
           category
           deliveryMode
-          duration
-          durationType
           businessStage
           provider {
             name
@@ -124,7 +246,6 @@ export const MARKETPLACE_QUERIES = {
             description
           }
           amount
-          duration
           eligibility
           interestRate
           tags
@@ -146,7 +267,6 @@ export const MARKETPLACE_QUERIES = {
             description
           }
           amount
-          duration
           eligibility
           interestRate
           tags
@@ -172,7 +292,6 @@ export const MARKETPLACE_QUERIES = {
             description
           }
           amount
-          duration
           eligibility
           interestRate
           tags
@@ -220,7 +339,6 @@ export const MARKETPLACE_QUERIES = {
             logoUrl
             description
           }
-          duration
           price
           tags
           details
@@ -241,7 +359,6 @@ export const MARKETPLACE_QUERIES = {
             logoUrl
             description
           }
-          duration
           price
           tags
           details
@@ -267,7 +384,6 @@ export const MARKETPLACE_QUERIES = {
             logoUrl
             description
           }
-          duration
           price
           tags
         }

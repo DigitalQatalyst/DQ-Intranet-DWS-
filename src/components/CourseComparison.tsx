@@ -58,7 +58,7 @@ export const CourseComparison: React.FC<CourseComparisonProps> = ({
   return <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div ref={modalRef} className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Course Comparison</h2>
+          <h2 className="text-xl font-bold text-gray-900">Flow Comparison</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             <XIcon size={24} />
           </button>
@@ -66,7 +66,7 @@ export const CourseComparison: React.FC<CourseComparisonProps> = ({
         <div className="p-6">
           {courses.length === 0 ? <div className="text-center py-8">
               <p className="text-gray-500 mb-4">
-                No courses selected for comparison
+                No flows selected for comparison
               </p>
               <Button variant="outline" onClick={onClose}>
                 Close
@@ -77,7 +77,7 @@ export const CourseComparison: React.FC<CourseComparisonProps> = ({
                 <div className="col-span-1">
                   <div className="h-24 flex items-end">
                     <h3 className="text-lg font-semibold text-gray-700">
-                      Course Details
+                      Flow Details
                     </h3>
                   </div>
                 </div>
@@ -97,7 +97,7 @@ export const CourseComparison: React.FC<CourseComparisonProps> = ({
                   </div>)}
                 {Array(3 - courses.length).fill(0).map((_, index) => <div key={`empty-${index}`} className="col-span-1 border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
                       <span className="text-gray-400 text-sm">
-                        Add a course
+                        Add a flow
                       </span>
                     </div>)}
               </div>

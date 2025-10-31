@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { CourseType } from '../utils/mockData';
-import { XIcon, Clock, Calendar, DollarSign, MapPin, BookmarkIcon, ScaleIcon, CheckCircleIcon, HomeIcon, ChevronRightIcon } from 'lucide-react';
+import { CourseType } from '../types/course';
+import { XIcon, Calendar, DollarSign, MapPin, BookmarkIcon, ScaleIcon, CheckCircleIcon, HomeIcon, ChevronRightIcon } from 'lucide-react';
 interface CourseQuickViewModalProps {
   course: CourseType;
   onClose: () => void;
@@ -44,7 +44,7 @@ export const CourseQuickViewModal: React.FC<CourseQuickViewModalProps> = ({
       <div ref={modalRef} className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-900 truncate">
-            Course Preview
+            Flow Preview
           </h2>
           <div className="flex items-center space-x-3">
             <button onClick={onToggleBookmark} className={`p-2 rounded-full ${isBookmarked ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`} aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
@@ -71,8 +71,8 @@ export const CourseQuickViewModal: React.FC<CourseQuickViewModalProps> = ({
               <li>
                 <div className="flex items-center">
                   <ChevronRightIcon size={14} className="text-gray-400" />
-                  <a href="/courses" className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2 text-sm">
-                    Courses
+                  <a href="/onboarding" className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2 text-sm">
+                    Onboarding
                   </a>
                 </div>
               </li>
@@ -111,12 +111,6 @@ export const CourseQuickViewModal: React.FC<CourseQuickViewModalProps> = ({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
             <div className="flex items-center text-gray-700">
-              <Clock className="mr-2" size={18} />
-              <span>
-                {course.duration} ({course.durationType})
-              </span>
-            </div>
-            <div className="flex items-center text-gray-700">
               <Calendar className="mr-2" size={18} />
               <span>Starts {course.startDate}</span>
             </div>
@@ -151,7 +145,7 @@ export const CourseQuickViewModal: React.FC<CourseQuickViewModalProps> = ({
               View Full Details
             </button>
             <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-md hover:from-blue-700 hover:to-purple-700 transition-colors">
-              Enroll Now
+              Continue
             </button>
           </div>
         </div>

@@ -37,27 +37,6 @@ const FormInput = ({
     </div>;
 };
 
-// Form select component
-const FormSelect = ({
-  label,
-  options,
-  value,
-  onChange,
-  required = false
-}) => {
-  return <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
-      <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-dq-coral/40 focus:border-dq-coral/60 transition-all" value={value} onChange={onChange} required={required}>
-        <option value="">Select an option</option>
-        {options.map(option => <option key={option.value} value={option.value}>
-            {option.label}
-          </option>)}
-      </select>
-    </div>;
-};
-
 // Form textarea component
 const FormTextarea = ({
   label,
@@ -228,58 +207,21 @@ const CallToAction: React.FC = () => {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastData | null>(null);
   // Form states
-  const [partnerFormData, setPartnerFormData] = useState({
-    name: '',
-    email: '',
-    serviceCategory: '',
-    message: ''
-  });
   const [contactFormData, setContactFormData] = useState({
     name: '',
     email: '',
     message: ''
   });
-  const [partnerFormSuccess, setPartnerFormSuccess] = useState(false);
   const [contactFormSuccess, setContactFormSuccess] = useState(false);
-  // Service categories
-  const serviceCategories = [{
-    value: 'learning-paths',
-    label: 'Learning Paths'
-  }, {
-    value: 'marketplaces',
-    label: 'Marketplaces'
-  }, {
-    value: 'collaboration',
-    label: 'Collaboration Spaces'
-  }, {
-    value: 'resources',
-    label: 'Resources & Templates'
-  }, {
-    value: 'support',
-    label: 'Support & Guidance'
-  }];
-  // Handle form submissions
-  const handlePartnerSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate form submission
-    setTimeout(() => {
-      setPartnerFormSuccess(true);
-      setToast({
-        message: "Thanks! We'll be in touch about your services soon.",
-        type: 'success'
+  const handleLeadApplyCTA = () => {
+    const leadSection = document.getElementById('lead-apply');
+    if (leadSection) {
+      leadSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
       });
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setExpandedCard(null);
-        setPartnerFormSuccess(false);
-        setPartnerFormData({
-          name: '',
-          email: '',
-          serviceCategory: '',
-          message: ''
-        });
-      }, 3000);
-    }, 1000);
+    }
+    window.dispatchEvent(new Event("open-lead-form"));
   };
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -330,38 +272,24 @@ const CallToAction: React.FC = () => {
         </FadeInUpOnScroll>
         <FadeInUpOnScroll delay={0.2}>
           <p className="text-lg text-gray-200 mb-12 max-w-3xl mx-auto">
-            Get started in the Digital Workspace — your hub for requests, learning, and collaboration.
+            Get started in the Digital Workspace — lead, co-work, and grow together.
           </p>
         </FadeInUpOnScroll>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Card 1: Register Your Enterprise */}
           <CTACard icon={<Users size={28} className="text-dq-coral" />} title="Open DQ Workspace" description="Lead — access tools, services, and dashboards that help you work smarter every day." buttonText="Open Now →" buttonColor="blue" onClick={() => navigate('/register')} delay={0.3} />
-          {/* Card 2: List Your Services */}
-          <CTACard icon={<Briefcase size={28} className="text-dq-navy" />} title="Explore Learning & Marketplaces" description="Co-work — discover DQ learning paths, resources, and collaboration spaces to grow your skills and impact." buttonText="Browse Learning →" buttonColor="green" isExpanded={expandedCard === 'partner'} onExpand={() => handleExpandCard('partner')} delay={0.5} isSuccess={partnerFormSuccess}>
-            <form onSubmit={handlePartnerSubmit} className="mt-2">
-              <FormInput label="Name" placeholder="Your full name" value={partnerFormData.name} onChange={(e) => setPartnerFormData({
-              ...partnerFormData,
-              name: e.target.value
-            })} required />
-              <FormInput label="Email" type="email" placeholder="your@email.com" value={partnerFormData.email} onChange={(e) => setPartnerFormData({
-              ...partnerFormData,
-              email: e.target.value
-            })} required />
-              <FormSelect label="Focus Area" options={serviceCategories} value={partnerFormData.serviceCategory} onChange={(e) => setPartnerFormData({
-              ...partnerFormData,
-              serviceCategory: e.target.value
-            })} required />
-              <FormTextarea label="Message" placeholder="Tell us what you’d like to explore or learn..." value={partnerFormData.message} onChange={(e) => setPartnerFormData({
-              ...partnerFormData,
-              message: e.target.value
-            })} required />
-              <button type="submit" className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-white text-[#030F35] text-sm font-semibold px-4 py-2 shadow-sm transition-colors duration-200 hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#030F35]">
-                Send Request →
-              </button>
-            </form>
-          </CTACard>
+          {/* Card 2: Become a Lead */}
+          <CTACard
+            icon={<Briefcase size={28} className="text-dq-navy" />}
+            title="Become a Lead"
+            description="Co-work — take the next step in your DQ journey. Apply for a Lead role, mentor associates, and help shape how our workspace grows."
+            buttonText="Apply Now →"
+            buttonColor="green"
+            onClick={handleLeadApplyCTA}
+            delay={0.5}
+          />
           {/* Card 3: Contact Us */}
-          <CTACard icon={<Phone size={28} className="text-dq-coral" />} title="Get Support" description="Own — need help or guidance? Reach out to DQ support to stay unblocked and keep work moving forward." buttonText="Get in Touch →" buttonColor="purple" isExpanded={expandedCard === 'contact'} onExpand={() => handleExpandCard('contact')} delay={0.7} isSuccess={contactFormSuccess}>
+          <CTACard icon={<Phone size={28} className="text-dq-coral" />} title="Get Support" description="Own — need help or guidance? Reach out to DQ Support to stay unblocked and keep work moving forward." buttonText="Get in Touch →" buttonColor="purple" isExpanded={expandedCard === 'contact'} onExpand={() => handleExpandCard('contact')} delay={0.7} isSuccess={contactFormSuccess}>
             <form onSubmit={handleContactSubmit} className="mt-2">
               <FormInput label="Name" placeholder="Your full name" value={contactFormData.name} onChange={(e) => setContactFormData({
               ...contactFormData,
