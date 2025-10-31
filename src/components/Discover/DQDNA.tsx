@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { fetchDna, DqDnaNode, DqDnaCallout } from "../../services/dq";
 
 /* ===== Visual tokens ===== */
 const NAVY = "#131E42";
 const LINE = NAVY;
-const ORANGE = "#FB5535"; // accent for 4/5/6/7
+const ORANGE = "#FF6A3D";
 
 /* Hex geometry */
 const HEX_W = 180;
@@ -20,7 +21,7 @@ const PAD_BOTTOM = 26;
 const CANVAS_W = 1200;
 const CANVAS_H = 640;
 
-/* Positions (keep structure) */
+/* Honeycomb positions */
 const POS = {
   leftTop:  { x: -95,  y: -140 },
   rightTop: { x:  95,  y: -140 },
@@ -34,6 +35,7 @@ const POS = {
 type Role = keyof typeof POS;
 type Side = "left" | "right" | "bottom";
 
+/* slight per-row slope */
 const DY: Record<Role, number> = {
   leftTop:  -8,
   rightTop: -8,
@@ -51,38 +53,53 @@ interface Node {
   subtitle: string;
   fill: "navy" | "white";
   details?: string[];
-  href?: string; // for "View more details"
+  kbUrl: string;     // Knowledge marketplace
+  lmsUrl: string;    // LMS marketplace
 }
 
-/* You can feed real details/hrefs here later */
+/* ===== Data (added URLs) ===== */
 const NODES: Node[] = [
-  { id: 6, role: "leftTop",  title: "Agile Flows",  subtitle: "(Value Streams)", fill: "white",
-    details: ["Define value stream architecture", "Map upstream/downstream dependencies", "Optimize flow efficiency"],
-    href: "/discover/agile-flows"
+  {
+    id: 6, role: "leftTop",
+    title: "Agile Flows", subtitle: "(Value Streams)", fill: "white",
+    kbUrl: "/marketplace/knowledge?dna=agile-flows",
+    lmsUrl: "/lms/courses?dna=agile-flows"
   },
-  { id: 5, role: "rightTop", title: "Agile SOS",   subtitle: "(Governance)",    fill: "white",
-    details: ["Lightweight governance cadence", "Decision logs & audit trail", "Risk & policy controls"],
-    href: "/discover/agile-sos"
+  {
+    id: 5, role: "rightTop",
+    title: "Agile SOS", subtitle: "(Governance)", fill: "white",
+    kbUrl: "/marketplace/knowledge?dna=agile-sos",
+    lmsUrl: "/lms/courses?dna=agile-sos"
   },
-  { id: 7, role: "leftMid",  title: "Agile DTMF",  subtitle: "(Products)",      fill: "white",
-    details: ["Product roadmap → value links", "Release trains & increments", "Customer feedback loop"],
-    href: "/discover/agile-dtmf"
+  {
+    id: 7, role: "leftMid",
+    title: "Agile DTMF", subtitle: "(Products)", fill: "white",
+    kbUrl: "/marketplace/knowledge?dna=agile-dtmf",
+    lmsUrl: "/lms/courses?dna=agile-dtmf"
   },
-  { id: 1, role: "center",   title: "The Vision",  subtitle: "(Purpose)",       fill: "navy",
-    details: ["North-star narrative", "Measurable outcomes", "Strategic guardrails"],
-    href: "/discover/vision"
+  {
+    id: 1, role: "center",
+    title: "The Vision", subtitle: "(Purpose)", fill: "navy",
+    kbUrl: "/marketplace/knowledge?dna=vision",
+    lmsUrl: "/lms/courses?dna=vision"
   },
-  { id: 4, role: "rightMid", title: "Agile TMS",   subtitle: "(Tasks)",         fill: "white",
-    details: ["Task taxonomy & states", "SLA & WIP limits", "Automation hooks"],
-    href: "/discover/agile-tms"
+  {
+    id: 4, role: "rightMid",
+    title: "Agile TMS", subtitle: "(Tasks)", fill: "white",
+    kbUrl: "/marketplace/knowledge?dna=agile-tms",
+    lmsUrl: "/lms/courses?dna=agile-tms"
   },
-  { id: 2, role: "leftBot",  title: "The HoV",     subtitle: "(Culture)",       fill: "navy",
-    details: ["Behavioral norms", "Communication comfort", "Rituals & recognition"],
-    href: "/discover/hov"
+  {
+    id: 2, role: "leftBot",
+    title: "The HoV", subtitle: "(Culture)", fill: "navy",
+    kbUrl: "/marketplace/knowledge?dna=hov",
+    lmsUrl: "/lms/courses?dna=hov"
   },
-  { id: 3, role: "rightBot", title: "The Personas",subtitle: "(Identity)",      fill: "navy",
-    details: ["Primary personas", "Needs & pain points", "Value propositions"],
-    href: "/discover/personas"
+  {
+    id: 3, role: "rightBot",
+    title: "The Personas", subtitle: "(Identity)", fill: "navy",
+    kbUrl: "/marketplace/knowledge?dna=personas",
+    lmsUrl: "/lms/courses?dna=personas"
   },
 ];
 
@@ -96,13 +113,18 @@ const CALLOUTS: { role: Role; text: string; side: Side }[] = [
   { role: "center",   text: "Why we exist",       side: "bottom"},
 ];
 
-/* ===== Hex (flat-top) with custom stroke ===== */
-function Hex({ fill, stroke = LINE }: { fill: "navy" | "white"; stroke?: string }) {
+/* ===== Hex (flat-top) ===== */
+function Hex({ fill }: { fill: "navy" | "white" }) {
   const w = HEX_W, h = HEX_H;
   const d = `M${w/2} 4 L${w-4} ${h*0.25} L${w-4} ${h*0.75} L${w/2} ${h-4} L4 ${h*0.75} L4 ${h*0.25} Z`;
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ display: "block" }}>
-      <path d={d} fill={fill === "navy" ? NAVY : "#fff"} stroke={stroke} strokeWidth={3} />
+      <path
+        d={d}
+        fill={fill === "navy" ? NAVY : "#fff"}
+        stroke={fill === "white" ? ORANGE : LINE} // orange border for 4/5/6/7 (white hexes)
+        strokeWidth={3}
+      />
     </svg>
   );
 }
@@ -115,227 +137,59 @@ function anchor(role: Role, side: Side) {
   return { x, y: y + HEX_H/2 - 4 };
 }
 
-/* ---------- Fancy Modal Card ---------- */
-function DNAOverlay({
-  node,
-  onClose,
-}: {
-  node: Node;
-  onClose: () => void;
-}) {
-  const [entered, setEntered] = useState(false);
+/* Small UI helpers */
+const Btn: React.FC<React.PropsWithChildren<{ href: string; variant?: "primary"|"ghost" }>> = ({ href, variant="primary", children }) => (
+  <a
+    href={href}
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 8,
+      padding: "10px 14px",
+      borderRadius: 10,
+      fontWeight: 700,
+      fontSize: 14,
+      textDecoration: "none",
+      border: variant === "ghost" ? `2px solid ${NAVY}` : "none",
+      color: variant === "ghost" ? NAVY : "#fff",
+      background: variant === "ghost" ? "#fff" : NAVY,
+      boxShadow: variant === "ghost" ? "none" : "0 6px 16px rgba(19,30,66,.25)",
+      transition: "transform .15s ease, box-shadow .15s ease"
+    }}
+    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-2px)"; }}
+    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; }}
+  >
+    {children}
+    <span style={{ fontSize: 16, lineHeight: 1 }}>↗</span>
+  </a>
+);
 
-  useEffect(() => {
-    const t = setTimeout(() => setEntered(true), 10);
-    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onEsc);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("keydown", onEsc);
-    };
-  }, [onClose]);
-
-  const textOnHeader = node.fill === "navy" ? "#fff" : "#fff";
-  const headerBg =
-    node.fill === "navy"
-      ? `linear-gradient(135deg, ${NAVY} 0%, #0B1538 100%)`
-      : `linear-gradient(135deg, #0E1A46 0%, ${NAVY} 100%)`;
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(10,16,35,0.45)",
-          backdropFilter: "blur(4px)",
-          WebkitBackdropFilter: "blur(4px)",
-          zIndex: 60,
-          opacity: entered ? 1 : 0,
-          transition: "opacity 220ms ease",
-        }}
-      />
-
-      {/* Card */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="dna-title"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: "fixed",
-          left: "50%",
-          top: "50%",
-          transform: `translate(-50%, -50%) scale(${entered ? 1 : 0.96})`,
-          width: 520,
-          maxWidth: "calc(100vw - 32px)",
-          background: "#fff",
-          borderRadius: 16,
-          boxShadow:
-            "0 30px 80px rgba(3,15,53,0.35), 0 8px 24px rgba(3,15,53,0.25)",
-          overflow: "hidden",
-          zIndex: 70,
-          transition: "transform 220ms cubic-bezier(.2,.8,.2,1), opacity 220ms",
-          opacity: entered ? 1 : 0,
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            background: headerBg,
-            color: textOnHeader,
-            padding: "18px 20px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 999,
-                background: "#ffffff22",
-                border: "1px solid #ffffff33",
-                display: "grid",
-                placeItems: "center",
-                fontWeight: 800,
-              }}
-            >
-              {node.id}
-            </div>
-            <div>
-              <div id="dna-title" style={{ fontWeight: 800, fontSize: 18 }}>
-                {node.title}
-              </div>
-              <div style={{ opacity: 0.9, fontSize: 12 }}>{node.subtitle}</div>
-            </div>
-          </div>
-
-          <button
-            aria-label="Close"
-            onClick={onClose}
-            style={{
-              background: "transparent",
-              border: 0,
-              color: "#fff",
-              fontSize: 22,
-              lineHeight: 1,
-              cursor: "pointer",
-            }}
-          >
-            ×
-          </button>
-        </div>
-
-        {/* Body */}
-        <div style={{ padding: 18 }}>
-          {/* Pills row */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-            <span
-              style={{
-                fontSize: 12,
-                padding: "6px 10px",
-                borderRadius: 999,
-                background: "#EEF2FF",
-                color: NAVY,
-                border: `1px solid #E3E7F8`,
-              }}
-            >
-              DNA • {node.title}
-            </span>
-            <span
-              style={{
-                fontSize: 12,
-                padding: "6px 10px",
-                borderRadius: 999,
-                background: "#FFF7F1",
-                color: "#8A3C1E",
-                border: "1px solid #F8E1D3",
-              }}
-            >
-              {node.subtitle.replace(/[()]/g, "")}
-            </span>
-          </div>
-
-          {/* Details list */}
-          <ul style={{ margin: "0 0 12px 18px", padding: 0, color: "#0F172A" }}>
-            {(node.details ?? ["Add details here"]).map((d, i) => (
-              <li key={i} style={{ marginBottom: 6, fontSize: 14 }}>
-                {d}
-              </li>
-            ))}
-          </ul>
-
-          {/* CTA row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 12,
-              marginTop: 6,
-            }}
-          >
-            <a
-              href={node.href ?? "#"}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: NAVY,
-                color: "#fff",
-                borderRadius: 10,
-                padding: "10px 14px",
-                fontWeight: 700,
-                textDecoration: "none",
-                border: "1px solid #0E1A46",
-                boxShadow: "0 6px 14px rgba(19,30,66,0.25)",
-              }}
-            >
-              View more details →
-            </a>
-
-            <button
-              onClick={onClose}
-              style={{
-                background: "#fff",
-                color: NAVY,
-                border: `1px solid #E3E7F8`,
-                borderRadius: 10,
-                padding: "10px 12px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-/* ── Main Component ───────────────────────────────────────── */
 function DQDNA() {
   const [open, setOpen] = useState<number | null>(null);
+  const [nodesDb, setNodesDb] = useState<DqDnaNode[] | null>(null);
+  const [calloutsDb, setCalloutsDb] = useState<DqDnaCallout[] | null>(null);
 
-  const current = open ? NODES.find((x) => x.id === open) ?? null : null;
+  useEffect(() => {
+    fetchDna()
+      .then(({ nodes, callouts }) => {
+        setNodesDb(nodes);
+        setCalloutsDb(callouts);
+      })
+      .catch(() => {
+        // fallback to hardcoded
+      });
+  }, []);
 
   return (
-    <section style={{ background: "#fff", padding: "40px 0 64px" }}>
+    <section style={{ background: "#fff", padding: "48px 0 80px" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 24px" }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <h2 style={{ color: NAVY, fontWeight: 800, fontSize: 44, margin: "0 0 6px" }}>
-            DQ DNA Growth Dimensions
+        {/* Header (kept minimalist to avoid pushing DNA down) */}
+        <div style={{ textAlign: "center", marginBottom: 18 }}>
+          <h2 style={{ color: NAVY, fontWeight: 800, fontSize: 44, margin: "0 0 8px" }}>
+            Growth Dimensions
           </h2>
           <p style={{ color: "#5b667a", margin: 0 }}>
-            The framework that defines how DQ learns, grows, and delivers value across every dimension of transformation.
+            Seven connected dimensions shaping how DQ learns, collaborates, and delivers value.
           </p>
         </div>
 
@@ -349,7 +203,7 @@ function DQDNA() {
             preserveAspectRatio="xMidYMid meet"
             style={{ position: "absolute", left: 0, top: 0 }}
           >
-            {CALLOUTS.map((c, i) => {
+            {(calloutsDb ?? CALLOUTS).map((c, i) => {
               const s = anchor(c.role, c.side);
               const yAnchor = c.side === "bottom" ? s.y : s.y + DY[c.role];
 
@@ -380,13 +234,21 @@ function DQDNA() {
           </svg>
 
           {/* Hexes */}
-          {NODES.map((n) => {
+          {(nodesDb
+            ? nodesDb.map((n) => ({
+                id: n.id,
+                role: n.role as Role,
+                title: n.title,
+                subtitle: n.subtitle,
+                fill: n.fill as "navy" | "white",
+                kbUrl: n.kb_url,
+                lmsUrl: n.lms_url,
+              }))
+            : NODES
+          ).map((n) => {
             const left = CANVAS_W / 2 + POS[n.role].x;
             const top  = CANVAS_H / 2 + POS[n.role].y;
             const textColor = n.fill === "navy" ? "#fff" : NAVY;
-
-            const isOrangeBorder = n.id === 4 || n.id === 5 || n.id === 6 || n.id === 7;
-            const isWhiteBadge   = n.id === 1 || n.id === 2 || n.id === 3;
 
             return (
               <button
@@ -397,23 +259,22 @@ function DQDNA() {
                   left, top,
                   transform: "translate(-50%, -50%)",
                   background: "transparent", border: 0, padding: 0, cursor: "pointer",
-                  transition: "transform 160ms ease, filter 160ms ease",
-                  filter: open && open !== n.id ? "grayscale(0.2) opacity(0.8)" : "none",
+                  transition: "transform .15s ease, filter .15s ease"
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = "translate(-50%, -50%) scale(1.035)")}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = "translate(-50%, -50%)")}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-50%, -50%) scale(1.03)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-50%, -50%)"; }}
               >
                 <div style={{ position: "relative" }}>
-                  <Hex fill={n.fill} stroke={isOrangeBorder ? ORANGE : LINE} />
+                  <Hex fill={n.fill} />
+                  {/* number chip */}
                   <div style={{
                     position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)",
-                    width: 28, height: 28, borderRadius: 9999,
-                    background: isWhiteBadge ? "#fff" : NAVY,
-                    color: isWhiteBadge ? NAVY : "#fff",
-                    border: isWhiteBadge ? `2px solid ${NAVY}` : "none",
+                    width: 28, height: 28, borderRadius: 9999, background: NAVY, color: "#fff",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontWeight: 700, fontSize: 13
                   }}>{n.id}</div>
+
+                  {/* labels */}
                   <div style={{
                     position: "absolute", inset: 0, display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center", textAlign: "center",
@@ -428,8 +289,83 @@ function DQDNA() {
           })}
         </div>
 
-        {/* Animated pop-up */}
-        {current && <DNAOverlay node={current} onClose={() => setOpen(null)} />}
+        {/* Marketplace Modal */}
+        {open && (() => {
+          const list = nodesDb
+            ? nodesDb.map((n) => ({ id: n.id, title: n.title, subtitle: n.subtitle, kbUrl: n.kb_url, lmsUrl: n.lms_url, details: n.details || null }))
+            : NODES.map((n) => ({ id: n.id, title: n.title, subtitle: n.subtitle, kbUrl: n.kbUrl, lmsUrl: n.lmsUrl, details: n.details ?? null }));
+          const node = list.find(x => x.id === open)!;
+          return (
+            <div onClick={() => setOpen(null)} style={{
+              position: "fixed", inset: 0, zIndex: 70,
+              background: "rgba(9,12,28,0.45)", backdropFilter: "blur(4px)"
+            }}>
+              <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  position: "absolute", left: "50%", top: "50%",
+                  transform: "translate(-50%,-50%)",
+                  width: 520, maxWidth: "92vw",
+                  borderRadius: 16,
+                  padding: 20,
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.86))",
+                  border: "1px solid rgba(19,30,66,0.12)",
+                  boxShadow: "0 30px 80px rgba(0,0,0,0.25)"
+                }}
+              >
+                {/* header */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 10, background: NAVY, color: "#fff",
+                    display: "grid", placeItems: "center", fontWeight: 800
+                  }}>
+                    {node.id}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 900, color: NAVY, fontSize: 20, lineHeight: 1.1 }}>{node.title}</div>
+                    <div style={{ color: "#4B5563", fontSize: 13 }}>{node.subtitle}</div>
+                  </div>
+                  <button
+                    onClick={() => setOpen(null)}
+                    aria-label="Close"
+                    style={{
+                      marginLeft: "auto", background: "transparent", border: 0, cursor: "pointer",
+                      fontSize: 24, lineHeight: 1, color: "#1F2937"
+                    }}
+                  >×</button>
+                </div>
+
+                {/* body */}
+                <div style={{ color: "#1f2937", fontSize: 14, lineHeight: 1.55, marginBottom: 14 }}>
+                  <p style={{ margin: "6px 0 10px" }}>
+                    Explore resources and hands-on learning tracks related to <strong>{node.title}</strong>.
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {(node.details ?? [
+                      "Key concepts, frameworks, and anchor papers.",
+                      "Practical templates, checklists, and playbooks.",
+                      "Curated LMS paths to skill up quickly."
+                    ]).map((d, i) => <li key={i}>{d}</li>)}
+                  </ul>
+                </div>
+
+                {/* actions */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <Btn href={node.kbUrl}>Knowledge Hub</Btn>
+                  <Btn href={node.lmsUrl} variant="ghost">LMS Courses</Btn>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </section>
   );

@@ -26,6 +26,7 @@ export type Associate = {
   studio: Studio;
   status: Status;
   seniority: Seniority;
+  tagline?: string;
   skills?: string[];
   phone?: string;
   email?: string;
@@ -45,4 +46,3 @@ export type DirectoryFilters = {
 
 export type ViewMode = 'units' | 'associates';
 export type SortOption = 'a-z' | 'most-streams' | 'seniority' | 'recent';
-

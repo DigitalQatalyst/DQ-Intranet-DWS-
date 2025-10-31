@@ -25,9 +25,11 @@ interface PromoCardData {
   path: string;
   gradientFrom: string;
   gradientTo: string;
+  type?: string;
 }
 interface MarketplaceGridProps {
   items: MarketplaceItem[];
+  totalCount?: number;
   marketplaceType: string;
   bookmarkedItems: string[];
   onToggleBookmark: (itemId: string) => void;
@@ -36,6 +38,7 @@ interface MarketplaceGridProps {
 }
 export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
   items,
+  totalCount,
   marketplaceType,
   bookmarkedItems,
   onToggleBookmark,
@@ -45,10 +48,13 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
   const [quickViewItem, setQuickViewItem] = useState<MarketplaceItem | null>(null);
   const navigate = useNavigate();
   const config = getMarketplaceConfig(marketplaceType);
-  // Use fallback items if no items are provided or if items array is empty
-  const displayItems = items && items.length > 0 ? items : getFallbackItems(marketplaceType);
-  const totalItems = displayItems.length;
-  if (totalItems === 0) {
+  const providedItems = Array.isArray(items) ? items : [];
+  const fallbackItems = Array.isArray(items) ? [] : getFallbackItems(marketplaceType);
+  const baseItems = providedItems.length > 0 || Array.isArray(items) ? providedItems : fallbackItems;
+  const nonPromoItems = baseItems.filter(item => item?.type !== 'promo');
+  const overallCount = typeof totalCount === 'number' ? totalCount : nonPromoItems.length;
+  const visibleCount = nonPromoItems.length;
+  if (visibleCount === 0) {
     return <div className="bg-white rounded-lg shadow p-8 text-center">
         <h3 className="text-xl font-medium text-gray-900 mb-2">
           No items found
@@ -59,7 +65,7 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
       </div>;
   }
   // Insert promo cards after every 6 regular items
-  const itemsWithPromos = displayItems.reduce((acc, item, index) => {
+  const itemsWithPromos = nonPromoItems.reduce((acc, item, index) => {
     acc.push({
       type: 'item',
       data: item
@@ -81,14 +87,14 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
       <div className="flex justify-between items-center mb-4">
         {/* Responsive header - concise on mobile */}
         <h2 className="text-xl font-semibold text-gray-800 hidden sm:block">
-          Available Items ({totalItems})
+          Available Items ({visibleCount})
         </h2>
         <div className="text-sm text-gray-500 hidden sm:block">
-          Showing {totalItems} of {totalItems} items
+          Showing {visibleCount} of {overallCount} items
         </div>
         {/* Mobile-friendly header */}
         <h2 className="text-lg font-medium text-gray-800 sm:hidden">
-          {totalItems} Items Available
+          {visibleCount} Items Available
         </h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -111,7 +117,12 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
       {/* Quick View Modal */}
       {quickViewItem && <MarketplaceQuickViewModal item={quickViewItem} marketplaceType={marketplaceType} onClose={() => setQuickViewItem(null)} onViewDetails={() => {
       setQuickViewItem(null);
-      navigate(`${config.route}/${quickViewItem.id}`);
+      if (marketplaceType === 'courses') {
+        const slug = quickViewItem.slug || quickViewItem.id;
+        navigate(`/lms/${slug}`);
+      } else {
+        navigate(`${config.route}/${quickViewItem.id}`);
+      }
     }} isBookmarked={bookmarkedItems.includes(quickViewItem.id)} onToggleBookmark={() => onToggleBookmark(quickViewItem.id)} onAddToComparison={() => {
       onAddToComparison(quickViewItem);
       setQuickViewItem(null);

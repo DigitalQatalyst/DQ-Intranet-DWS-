@@ -43,7 +43,7 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
     };
   }, [onClose]);
   // Extract key highlights - use learningOutcomes or details depending on what's available
-  const keyHighlights = item.learningOutcomes || item.details || (item.eligibility ? [`Eligibility: ${item.eligibility}`] : []);
+  const keyHighlights = item.highlights || item.learningOutcomes || item.details || (item.eligibility ? [`Eligibility: ${item.eligibility}`] : []);
   // Limit to 3 highlights for consistency
   const highlightItems = keyHighlights.slice(0, 3);
   // Extract tags from item - use tags if available, otherwise use category and other relevant fields

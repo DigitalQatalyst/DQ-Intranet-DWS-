@@ -21,6 +21,7 @@
     "@fullcalendar/react": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
     "@hookform/resolvers": "^5.2.2",
+    "@supabase/supabase-js": "2.77.0",
     "date-fns": "^4.0.0",
     "formidable": "^3.5.4",
     "framer-motion": "^12.23.24",

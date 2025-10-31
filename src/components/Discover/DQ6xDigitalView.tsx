@@ -1,135 +1,338 @@
-import React from 'react';
-import { Globe, Atom } from 'lucide-react';
+import React, { useLayoutEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const DQ6xDigitalView: React.FC = () => {
+/* ========================================
+   DQ | 6x Digital Architecture
+   - Portrait left board (fixed width, tall)
+   - Vertical lanes as columns (icons on bottom baseline)
+   - Connectors to D6 tiles on the right
+   ======================================== */
+
+type Lane = { id: string; title: string; sub: string; icon: string; color: string };
+type Tile = { id: string; title: string; sub: string };
+
+const LANES: Lane[] = [
+  { id: "d1", title: "D1 – Digital Economy",               sub: "Why should organisations change?",             icon: "🌍", color: "#7c9aff" },
+  { id: "d2", title: "D2 – Digital Cognitive Organisation", sub: "Where are organisations headed?",              icon: "🧠", color: "#80e0b7" },
+  { id: "d3", title: "D3 – Digital Business Platform",      sub: "What is your value orchestration engine?",     icon: "🧩", color: "#b892ff" },
+  { id: "d4", title: "D4 – Digital Transformation",         sub: "How do we design & deploy the target?",        icon: "⚙️", color: "#81d4fa" },
+  { id: "d5", title: "D5 – Digital Worker & Workspace",     sub: "Who are orchestrators?",                       icon: "👩‍💻", color: "#ffd27f" },
+];
+
+const TILES: Tile[] = [
+  { id: "dtmp",   title: "DTMP",   sub: "Digital Transformation Management Platform" },
+  { id: "dtmaas", title: "TMaaS",  sub: "Transformation Management as a Service" },
+  { id: "dtq4t",  title: "DTO4T",  sub: "Digital Twin of Organization for Transformation" },
+  { id: "dtmb",   title: "DTMB",   sub: "Content & Creative for the DQ ecosystem" },
+  { id: "dtmi",   title: "DTMI",   sub: "AI-powered insights & perspectives" },
+  { id: "dtma",   title: "DTMA",   sub: "Academy for data-driven dashboards & skills" },
+  { id: "dcocc",  title: "DCO.CC", sub: "D6 Collab Centers (HI & AI)" },
+];
+
+const MAP: Record<string, string> = {
+  d1: "dtmp",
+  d2: "dtmaas",
+  d3: "dtq4t",
+  d4: "dtmb",
+  d5: "dcocc",
+};
+const REV = Object.fromEntries(Object.entries(MAP).map(([k, v]) => [v, k]));
+
+export default function DQ6xDigitalArchitecture() {
+  const [hoverLane, setHoverLane] = useState<string | null>(null);
+  const [hoverTile, setHoverTile] = useState<string | null>(null);
+  const [selectedTile, setSelectedTile] = useState<{ id: string; title: string; sub: string } | null>(null);
+
+  const wrapRef  = useRef<HTMLDivElement>(null);
+  const leftRef  = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+
+  const laneRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const tileRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const [paths, setPaths] = useState<
+    { key: string; d: string; from: string; to: string; x1: number; y1: number }[]
+  >([]);
+
+  useLayoutEffect(() => {
+    const recompute = () => {
+      const wrap  = wrapRef.current?.getBoundingClientRect();
+      const left  = leftRef.current?.getBoundingClientRect();
+      const right = rightRef.current?.getBoundingClientRect();
+      if (!wrap || !left || !right) return;
+
+      // Top “bus” line inside the left board (just under the header space)
+      const BUS_Y   = left.top - wrap.top + 26;
+      // Vertical spine at the left edge of the D6 board
+      const SPINE_X = right.left - wrap.left;
+      const STUB    = 18;
+
+      const next: typeof paths = [];
+
+      LANES.forEach((lane, i) => {
+        const lb = laneRefs.current[lane.id]?.getBoundingClientRect();
+        const tId = MAP[lane.id];
+        const tb  = tileRefs.current[tId]?.getBoundingClientRect();
+        if (!lb || !tb) return;
+
+        // start point: around the upper area of the lane card to match the ref image
+        const x1 = lb.right - wrap.left - 10;
+        const y1 = lb.top   - wrap.top  + 42 + i * 2; // small offset gradation like ref
+
+        // end point: mid-left of the D6 tile
+        const x2 = tb.left  - wrap.left + 10;
+        const y2 = tb.top   - wrap.top  + tb.height / 2;
+
+        const d = [
+          `M ${x1} ${y1}`,
+          `L ${x1 + STUB} ${y1}`,
+          `L ${x1 + STUB} ${BUS_Y}`,
+          `L ${SPINE_X} ${BUS_Y}`,
+          `L ${SPINE_X} ${y2}`,
+          `L ${x2} ${y2}`,
+        ].join(" ");
+        next.push({ key: `${lane.id}->${tId}`, d, from: lane.id, to: tId, x1, y1 });
+      });
+
+      setPaths(next);
+    };
+
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    [wrapRef.current, leftRef.current, rightRef.current].forEach((n) => n && ro.observe(n));
+    return () => ro.disconnect();
+  }, []);
+
+  const activeLane = hoverLane ?? (hoverTile ? REV[hoverTile] : null);
+  const activeTile = hoverTile ?? (hoverLane ? MAP[hoverLane] : null);
+
   return (
-    <section className="bg-white py-16 px-6 md:px-12">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            DQ | Products (6x Digital View)
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Discover the six digital perspectives that structure DQ's transformation architecture.
-          </p>
-        </div>
+    <section className="relative bg-white py-10 px-6 md:px-10">
+      <div className="relative mx-auto max-w-[1280px]">
+        {/* Two columns: fixed portrait left board + flexible right board */}
+        <div
+          ref={wrapRef}
+          className="grid gap-10 md:grid-cols-[460px_minmax(0,1fr)] items-start"
+          style={{ minHeight: 700 }} // ensure tall canvas so connectors have space
+        >
+          {/* LEFT: portrait board */}
+          <div
+            ref={leftRef}
+            className="relative h-[660px] rounded-2xl bg-white/70 ring-1 ring-slate-200 shadow-[0_10px_40px_rgba(2,8,23,.06)] p-5 backdrop-blur-sm overflow-hidden"
+          >
+            {/* outer dashed frames like your reference */}
+            <div className="absolute inset-3 rounded-2xl border-2 border-dashed border-rose-300/50 pointer-events-none" />
+            <div className="absolute inset-8 rounded-2xl border-2 border-dashed border-rose-300/25 pointer-events-none" />
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Side - Nested D1-D5 Boxes */}
-          <div className="relative">
-            {/* D5 - Digital Workplace Services (Outermost) */}
-            <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 bg-blue-50/30">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Globe className="w-4 h-4 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">D5 - Digital Workplace Services</h3>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">Collaborative workspace and digital tools</p>
-              
-              {/* D4 - DQ2.0 */}
-              <div className="border-2 border-dashed border-indigo-300 rounded-lg p-4 bg-indigo-50/30">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <Atom className="w-3 h-3 text-indigo-600" />
-                  </div>
-                  <h4 className="text-base font-semibold text-gray-900">D4 - DQ2.0</h4>
-                </div>
-                <p className="text-xs text-gray-600 mb-3">Next-generation digital transformation</p>
-                
-                {/* D3 - Digital Business Platform */}
-                <div className="border-2 border-dashed border-purple-300 rounded-lg p-3 bg-purple-50/30">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Globe className="w-2.5 h-2.5 text-purple-600" />
-                    </div>
-                    <h5 className="text-sm font-semibold text-gray-900">D3 - Digital Business Platform</h5>
-                  </div>
-                  <p className="text-xs text-gray-600 mb-2">Integrated platform ecosystem</p>
-                  
-                  {/* D2 - Digital Core Operations */}
-                  <div className="border-2 border-dashed border-green-300 rounded-lg p-2 bg-green-50/30">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                        <Atom className="w-2 h-2 text-green-600" />
-                      </div>
-                      <h6 className="text-xs font-semibold text-gray-900">D2 - Digital Core Operations</h6>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-1">Core operational excellence</p>
-                    
-                    {/* D1 - Digital Economy (Innermost) */}
-                    <div className="border-2 border-dashed border-orange-300 rounded-lg p-2 bg-orange-50/30">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-orange-100 rounded-full flex items-center justify-center">
-                          <Globe className="w-1.5 h-1.5 text-orange-600" />
+            {/* lanes as vertical columns, icons baseline bottom */}
+            <div className="absolute inset-0 p-6">
+              <div className="grid grid-cols-5 h-full gap-4 items-end">
+                {LANES.map((lane, idx) => {
+                  const hot = activeLane === lane.id;
+                  return (
+                    <motion.div
+                      key={lane.id}
+                      ref={(el) => (laneRefs.current[lane.id] = el)}
+                      onMouseEnter={() => setHoverLane(lane.id)}
+                      onMouseLeave={() => setHoverLane(null)}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.04, type: "spring", stiffness: 220, damping: 22 }}
+                      className={[
+                        "relative flex flex-col justify-between rounded-xl",
+                        "ring-1 ring-slate-200 bg-white shadow-sm",
+                        "px-3 pt-6 pb-8 min-h-[520px]", // tall card look
+                        hot ? "ring-2 ring-[#030F35]/40 shadow-lg" : "",
+                      ].join(" ")}
+                    >
+                      {/* lane content (vertical label like your current design) */}
+                      <div className="mx-auto select-none text-center" style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}>
+                        <div className="text-[12.5px] font-semibold text-slate-900 tracking-tight">
+                          {lane.title}
                         </div>
-                        <h6 className="text-xs font-semibold text-gray-900">D1 - Digital Economy</h6>
+                        <div className="text-[11px] text-slate-700/85 italic mt-1">
+                          {lane.sub}
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-600">Economic transformation foundation</p>
-                    </div>
-                  </div>
-                </div>
+
+                      {/* bottom icon pill on shared baseline */}
+                      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white ring-1 ring-slate-200 shadow">
+                          <span className="text-[14px]">{lane.icon}</span>
+                        </span>
+                      </div>
+
+                      {/* subtle top cap in lane color */}
+                      <div
+                        className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
+                        style={{ background: `linear-gradient(90deg, ${lane.color}, transparent)` }}
+                      />
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* Right Side - D6 Accelerator Panel */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 border border-blue-200">
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">D6 Accelerator</h3>
-              <p className="text-gray-600">Advanced digital transformation tools and platforms</p>
+          {/* RIGHT: D6 accelerator board */}
+          <div
+            ref={rightRef}
+            className="relative rounded-2xl bg-slate-50 ring-1 ring-slate-200 shadow-[0_10px_40px_rgba(2,8,23,.06)] p-6"
+          >
+            <div className="mb-5">
+              <div className="text-[16px] font-extrabold text-slate-900 tracking-tight">
+                D6 (Digital Accelerators — Tools)
+              </div>
+              <div className="text-[13px] text-slate-700 mt-0.5">› When will you get there</div>
+              <div className="mt-3 text-[12.5px] leading-6 text-slate-700">
+                Accelerator products & services must provide quick & precise pathways to DBPs realisation.
+                <ul className="list-disc ml-5 mt-1">
+                  <li>Fastest Timescales (DBP)</li>
+                  <li>Best-practices aligned (DBP &amp; DCO)</li>
+                  <li>Cost-effective implementations (DBP &amp; DCO)</li>
+                </ul>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              {/* DTMP */}
-              <div className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
-                <div className="text-sm font-semibold text-gray-900 mb-1">DTMP</div>
-                <div className="text-xs text-gray-600">Digital Twin Management Platform</div>
-              </div>
-              
-              {/* DTMaaS */}
-              <div className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
-                <div className="text-sm font-semibold text-gray-900 mb-1">DTMaaS</div>
-                <div className="text-xs text-gray-600">Digital Twin Management as a Service</div>
-              </div>
-              
-              {/* DTQ4T */}
-              <div className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
-                <div className="text-sm font-semibold text-gray-900 mb-1">DTQ4T</div>
-                <div className="text-xs text-gray-600">Digital Twin Quality for Transformation</div>
-              </div>
-              
-              {/* DTMB */}
-              <div className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
-                <div className="text-sm font-semibold text-gray-900 mb-1">DTMB</div>
-                <div className="text-xs text-gray-600">Digital Twin Management Board</div>
-              </div>
-              
-              {/* DTMI */}
-              <div className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
-                <div className="text-sm font-semibold text-gray-900 mb-1">DTMI</div>
-                <div className="text-xs text-gray-600">Digital Twin Management Intelligence</div>
-              </div>
-              
-              {/* DTMA */}
-              <div className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
-                <div className="text-sm font-semibold text-gray-900 mb-1">DTMA</div>
-                <div className="text-xs text-gray-600">Digital Twin Management Analytics</div>
-              </div>
-              
-              {/* DCO.CC */}
-              <div className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm col-span-2">
-                <div className="text-sm font-semibold text-gray-900 mb-1">DCO.CC</div>
-                <div className="text-xs text-gray-600">Digital Core Operations Command Center</div>
-              </div>
+
+            <div className="space-y-3">
+              {TILES.map((t, i) => {
+                const hot = activeTile === t.id;
+                const isGreen = t.id === "dcocc";
+                return (
+                  <motion.button
+                    type="button"
+                    key={t.id}
+                    ref={(el) => (tileRefs.current[t.id] = el)}
+                    onMouseEnter={() => setHoverTile(t.id)}
+                    onMouseLeave={() => setHoverTile(null)}
+                    onClick={() => setSelectedTile(t)}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.08 + i * 0.05, type: "spring", stiffness: 260, damping: 22 }}
+                    className={[
+                      "w-full text-left rounded-md px-4 py-3 min-h-[66px] border shadow-sm transition focus:outline-none",
+                      isGreen
+                        ? "bg-green-100/75 border-green-400 hover:border-green-500"
+                        : "bg-white border-slate-200 hover:border-slate-300",
+                      hot ? "ring-2 ring-[#030F35]/25 shadow-md" : "",
+                    ].join(" ")}
+                  >
+                    <div className="font-semibold text-slate-900">{t.title}</div>
+                    <div className="text-[13px] text-slate-600">{t.sub}</div>
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
+
+          {/* CONNECTOR LINES */}
+          <svg className="pointer-events-none absolute inset-0" width="100%" height="100%">
+            <defs>
+              <filter id="glow">
+                <feDropShadow dx="0" dy="0" stdDeviation="1.4" floodColor="#dd6666" floodOpacity="0.55" />
+              </filter>
+            </defs>
+            {paths.map((p, idx) => {
+              const active = p.from === (hoverLane ?? "") || p.to === (hoverTile ?? "");
+              const stroke = active ? "#DC4C4C" : "#E46A6A";
+              const width  = active ? 2.2 : 1.7;
+              return (
+                <g key={p.key} filter={active ? "url(#glow)" : undefined}>
+                  <circle cx={p.x1} cy={p.y1} r={3} fill={stroke} />
+                  <path
+                    d={p.d}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth={width}
+                    strokeDasharray="6 4"
+                    strokeLinecap="round"
+                    style={{
+                      strokeDashoffset: 0,
+                      animation: `drawPath 1.2s ${0.05 * idx}s ease-out both`,
+                    }}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+          <style>{`
+            @keyframes drawPath {
+              0% { opacity:.0; stroke-dashoffset: 120; }
+              60% { opacity:.9; }
+              100% { opacity:1; stroke-dashoffset: 0; }
+            }
+          `}</style>
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedTile && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-[1px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedTile(null)}
+            />
+            <motion.div
+              className="fixed inset-0 z-[61] grid place-items-center px-4"
+              role="dialog"
+              aria-modal="true"
+              initial={{ opacity: 0, scale: 0.96, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98, y: 8 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 22 }}
+            >
+              <div className="w-full max-w-lg rounded-2xl bg-white ring-1 ring-slate-200 shadow-xl">
+                <div className="p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-slate-900">{selectedTile.title}</h3>
+                      <p className="mt-1 text-[14.5px] leading-6 text-slate-700">{selectedTile.sub}</p>
+                    </div>
+                    <button
+                      onClick={() => setSelectedTile(null)}
+                      className="shrink-0 h-9 w-9 rounded-lg border border-slate-200 hover:bg-slate-50"
+                      aria-label="Close"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {/* Product Library */}
+                    <a
+                      href={`/library/${selectedTile.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg bg-[#030F35] px-4 py-2.5 text-white hover:opacity-90"
+                    >
+                      Product Library
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </a>
+
+                    {/* Knowledge Base */}
+                    <a
+                      href={`/kb/${selectedTile.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-slate-800 hover:bg-slate-50"
+                    >
+                      Knowledge Base
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </section>
   );
-};
-
-export default DQ6xDigitalView;
+}
