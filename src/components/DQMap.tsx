@@ -1,43 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import mapboxgl, { MapboxEvent, RasterLayerSpecification, RasterSourceSpecification, Style } from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import 'leaflet-defaulticon-compatibility';
 
 import type { LocationType, MapLocation, MapStyle, Region } from '../types/map';
 import { MARKER_COLORS } from './map/constants';
 import { fetchAllLocations, fetchLocationsByRegion, fetchLocationsByType } from '../api/MAPAPI';
 
-const accessToken = import.meta.env.VITE_MAPBOX_TOKEN ?? '';
-mapboxgl.accessToken = accessToken;
-
-const MAPBOX_STYLES: Record<MapStyle, string> = {
-  standard: 'mapbox://styles/mapbox/light-v11',
-  satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
-  hybrid: 'mapbox://styles/mapbox/outdoors-v12',
-};
-
-const OSM_RASTER_SOURCE: RasterSourceSpecification = {
-  type: 'raster',
-  tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-  tileSize: 256,
-  attribution: '© OpenStreetMap contributors',
-};
-
-const OSM_RASTER_LAYER: RasterLayerSpecification = {
-  id: 'osm-layer',
-  type: 'raster',
-  source: 'osm-tiles',
-};
-
-const OSM_STYLE: Style = {
-  version: 8,
-  sources: {
-    'osm-tiles': OSM_RASTER_SOURCE,
-  },
-  layers: [OSM_RASTER_LAYER],
-};
-
-const DEFAULT_CENTER: [number, number] = [54.377, 24.453];
-const DEFAULT_ZOOM = 10;
+const DEFAULT_CENTER: [number, number] = [24.453, 54.377];
+const DEFAULT_ZOOM = 6;
 
 type AllOption<T> = T | 'All';
 
@@ -56,9 +28,9 @@ type DQMapProps = {
   onMapboxAvailabilityChange?: (available: boolean) => void;
 };
 
-const forceResize = (map: mapboxgl.Map) => {
-  map.resize();
-  requestAnimationFrame(() => map.resize());
+const forceResize = (map: L.Map) => {
+  map.invalidateSize();
+  requestAnimationFrame(() => map.invalidateSize());
 };
 
 const createMarkerElement = (strokeColor: string) => {
@@ -88,7 +60,7 @@ const buildPopupMarkup = (location: MapLocation) =>
 
 export const DQMap: React.FC<DQMapProps> = ({
   className = '',
-  mapStyle,
+  mapStyle: _mapStyle,
   regionFilter = 'All',
   typeFilter = 'All',
   onStateChange,
@@ -96,13 +68,12 @@ export const DQMap: React.FC<DQMapProps> = ({
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const mapNodeRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
   const locationsRef = useRef<MapLocation[]>([]);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
-  const mapboxActiveRef = useRef<boolean>(Boolean(accessToken));
 
-  const [mapboxEnabled, setMapboxEnabled] = useState<boolean>(Boolean(accessToken));
+  const [mapboxEnabled] = useState<boolean>(false);
   const [mapReady, setMapReady] = useState<boolean>(false);
   const [locations, setLocations] = useState<MapLocation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -124,71 +95,34 @@ export const DQMap: React.FC<DQMapProps> = ({
 
     dataset.forEach((location) => {
       const stroke = MARKER_COLORS[location.type] ?? MARKER_COLORS.Default;
-      const marker = new mapboxgl.Marker({
-        element: createMarkerElement(stroke),
-        anchor: 'bottom',
-      })
-        .setLngLat([location.position[1], location.position[0]])
-        .setPopup(
-          new mapboxgl.Popup({
-            offset: 16,
-            closeButton: true,
-            closeOnClick: false,
-            maxWidth: '280px',
-          }).setHTML(buildPopupMarkup(location)),
-        )
-        .addTo(map);
-
+      const icon = L.divIcon({
+        html: createMarkerElement(stroke).outerHTML,
+        className: '',
+        iconSize: [30, 30],
+        iconAnchor: [15, 28],
+      });
+      const marker = L.marker([location.position[0], location.position[1]], { icon })
+        .bindPopup(buildPopupMarkup(location));
+      marker.addTo(map);
       markersRef.current.push(marker);
     });
 
     if (dataset.length) {
-      const bounds = dataset.reduce(
-        (acc, location) => acc.extend([location.position[1], location.position[0]]),
-        new mapboxgl.LngLatBounds(),
+      const bounds = L.latLngBounds(
+        dataset.map((l) => L.latLng(l.position[0], l.position[1])),
       );
-      map.fitBounds(bounds, { padding: 32, maxZoom: 12, duration: 600 });
+      map.fitBounds(bounds.pad(0.15));
     } else {
-      map.easeTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, duration: 600 });
+      map.setView([DEFAULT_CENTER[0], DEFAULT_CENTER[1]], DEFAULT_ZOOM);
     }
   }, []);
 
   const ensureMarkers = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
-
-    const draw = () => {
-      if (!mapRef.current) return;
-      forceResize(mapRef.current);
-      renderMarkers();
-    };
-
-    if (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) {
-      draw();
-    } else {
-      map.once('idle', draw);
-    }
+    forceResize(map);
+    renderMarkers();
   }, [renderMarkers]);
-
-  const fallbackToOsm = useCallback(() => {
-    const map = mapRef.current;
-    if (!map || !mapboxActiveRef.current) return;
-
-    mapboxActiveRef.current = false;
-    setMapboxEnabled(false);
-    setMapReady(false);
-    onMapboxAvailabilityChange?.(false);
-
-    map.setStyle(OSM_STYLE);
-    const handleReady = () => {
-      if (!mapRef.current) return;
-      setMapReady(true);
-      ensureMarkers();
-    };
-
-    map.once('styledata', handleReady);
-    map.once('idle', handleReady);
-  }, [ensureMarkers, onMapboxAvailabilityChange]);
 
   useEffect(() => {
     onMapboxAvailabilityChange?.(mapboxEnabled);
@@ -205,78 +139,22 @@ export const DQMap: React.FC<DQMapProps> = ({
   useEffect(() => {
     if (!mapNodeRef.current || mapRef.current) return;
 
-    const map = new mapboxgl.Map({
-      container: mapNodeRef.current,
-      style: mapboxActiveRef.current ? MAPBOX_STYLES.standard : OSM_STYLE,
-      center: DEFAULT_CENTER,
+    const map = L.map(mapNodeRef.current, {
+      center: [DEFAULT_CENTER[0], DEFAULT_CENTER[1]],
       zoom: DEFAULT_ZOOM,
-      cooperativeGestures: true,
-      attributionControl: false,
+      zoomControl: false,
+      attributionControl: true,
     });
 
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(map);
+
     mapRef.current = map;
-
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
-    map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
-
-    let fallbackTimeout: number | undefined;
-
-    const clearFallbackTimer = () => {
-      if (fallbackTimeout) {
-        window.clearTimeout(fallbackTimeout);
-        fallbackTimeout = undefined;
-      }
-    };
-
-    const handleLoad = () => {
-      clearFallbackTimer();
-      setMapReady(true);
-      ensureMarkers();
-    };
-
-    const handleStyleData = () => {
-      if (map.isStyleLoaded()) {
-        clearFallbackTimer();
-        setMapReady(true);
-        forceResize(map);
-      }
-    };
-
-    const handleError = (event: unknown) => {
-      const evt: any = event as any;
-      if (!evt?.error) return;
-      const status = (evt.error as { status?: number }).status;
-      const message = (evt.error as Error).message || '';
-      const lower = message.toLowerCase();
-      const shouldFallback =
-        status === 401 ||
-        status === 403 ||
-        status === 404 ||
-        message.includes('Unauthorized') ||
-        message.includes('forbidden') ||
-        message.includes('style') ||
-        lower.includes('token') ||
-        lower.includes('access') ||
-        lower.includes('authorization') ||
-        lower.includes('account');
-
-      if (shouldFallback && mapboxActiveRef.current) {
-        console.warn('[DQMap] Mapbox style error, falling back to OSM.', event);
-        clearFallbackTimer();
-        fallbackToOsm();
-      }
-    };
-
-    map.on('load', handleLoad);
-    const handleIdle = () => {
-      clearFallbackTimer();
-      setMapReady(true);
-      ensureMarkers();
-    };
-
-    map.on('styledata', handleStyleData);
-    map.once('idle', handleIdle);
-    map.on('error', handleError);
+    setMapReady(true);
+    ensureMarkers();
 
     if (typeof ResizeObserver !== 'undefined') {
       const observer = new ResizeObserver(() => {
@@ -284,7 +162,6 @@ export const DQMap: React.FC<DQMapProps> = ({
       });
       resizeObserverRef.current = observer;
       if (wrapperRef.current) observer.observe(wrapperRef.current);
-      map.on('remove', () => observer.disconnect());
     }
 
     const handleWindowResize = () => {
@@ -292,72 +169,21 @@ export const DQMap: React.FC<DQMapProps> = ({
     };
     window.addEventListener('resize', handleWindowResize);
 
-    const canvas = map.getCanvas();
-    const handleContextLost = (event: Event) => {
-      (event as any).preventDefault?.();
-      setMapReady(false);
-      requestAnimationFrame(() => {
-        if (mapRef.current) {
-          mapRef.current.resize();
-        }
-      });
-    };
-    canvas.addEventListener('webglcontextlost' as any, handleContextLost as unknown as EventListener, false);
-
-    fallbackTimeout = window.setTimeout(() => {
-      if (!mapReady && mapboxActiveRef.current) {
-        console.warn('[DQMap] Map did not become ready in time, switching to OSM fallback.');
-        fallbackToOsm();
-      }
-    }, 3500);
-
     return () => {
-      canvas.removeEventListener('webglcontextlost' as any, handleContextLost as unknown as EventListener);
       window.removeEventListener('resize', handleWindowResize);
       resizeObserverRef.current?.disconnect();
       resizeObserverRef.current = null;
-      clearFallbackTimer();
-      map.off('load', handleLoad);
-      map.off('styledata', handleStyleData);
-      map.off('idle', handleIdle);
-      map.off('error', handleError);
-      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
       map.remove();
       mapRef.current = null;
     };
-  }, [ensureMarkers, fallbackToOsm]);
+  }, [ensureMarkers]);
 
+  // Map style switching is a no-op with Leaflet; keep signals consistent
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !mapboxEnabled) return;
-
-    const targetStyle = MAPBOX_STYLES[mapStyle];
-    if (!targetStyle) return;
-
-    setMapReady(false);
-
-    const handleStyleData = () => {
-      if (!mapRef.current) return;
-      setMapReady(true);
-      ensureMarkers();
-    };
-
-    const handleError = (event: MapboxEvent) => {
-      console.error('[DQMap] Mapbox style switch failed, using OSM fallback.', event);
-      map.off('styledata', handleStyleData);
-      fallbackToOsm();
-    };
-
-    map.once('styledata', handleStyleData);
-    map.once('error', handleError);
-    map.setStyle(targetStyle);
-
-    return () => {
-      map.off('styledata', handleStyleData);
-      map.off('error', handleError);
-    };
-  }, [mapStyle, mapboxEnabled, ensureMarkers, fallbackToOsm]);
+    onMapboxAvailabilityChange?.(false);
+  }, [onMapboxAvailabilityChange]);
 
   useEffect(() => {
     let cancelled = false;
@@ -404,13 +230,12 @@ export const DQMap: React.FC<DQMapProps> = ({
   return (
     <div
       ref={wrapperRef}
-      className={`relative h-full w-full min-h-[360px] ${className}`}
-      style={{ minHeight: '360px' }}
+      className={`relative h-full w-full ${className}`}
     >
-      <div ref={mapNodeRef} className="absolute inset-0 h-full w-full" />
+      <div ref={mapNodeRef} className="absolute inset-0 h-full w-full z-0" />
       {(!mapReady || loading) && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/85 backdrop-blur-sm">
-          <span className="rounded-full border border-white/70 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 shadow-sm">
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+          <span className="rounded-full border border-slate-200/70 bg-white/95 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 shadow-sm">
             Loading map…
           </span>
         </div>

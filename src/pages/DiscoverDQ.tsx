@@ -93,8 +93,8 @@ const DiscoverDQ: React.FC = () => {
     <div className={`${styles.dwsDiscover} ${prefersReducedMotion ? styles.reducedMotion : ""}`}>
         {/* Section 1: Hero */}
         <section className="relative w-full bg-white">
-          <div className="mx-auto max-w-[1280px] px-6 py-16 lg:py-20 xl:py-24 2xl:py-28">
-            <div className="grid grid-cols-1 items-start gap-10 xl:grid-cols-[minmax(0,1fr)_560px] xl:gap-14">
+          <div className="mx-auto max-w-[1400px] px-6 py-16 lg:py-20 xl:py-24 2xl:py-28">
+            <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_680px] xl:gap-14 xl:items-start">
               <div className="max-w-[640px] space-y-6 lg:space-y-8">
                 <nav className="flex items-center gap-2 text-sm font-semibold text-gray-500" aria-label="Breadcrumb">
                   <span>Explore</span>
@@ -165,7 +165,7 @@ const DiscoverDQ: React.FC = () => {
                 </div>
               </div>
 
-              <aside className="hidden xl:block xl:w-full">
+              <aside className="hidden xl:flex xl:items-start">
                 <MapCard />
               </aside>
             </div>
