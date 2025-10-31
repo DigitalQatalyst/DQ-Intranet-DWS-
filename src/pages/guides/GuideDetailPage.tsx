@@ -452,33 +452,40 @@ const GuideDetailPage: React.FC = () => {
 
             {/* CODEx: For policy pages, long body behind a toggle; for others, show as usual */}
             {type !== 'template' && guide.body && (
-              isPolicy ? (
-                <article
-                  id="full-details"
-                  ref={articleRef}
-                  className={`bg-white rounded-lg shadow p-6 markdown-body ${showFullDetails ? '' : 'hidden'}`}
-                  dir={typeof document !== 'undefined' ? (document.documentElement.getAttribute('dir') || 'ltr') : 'ltr'}
-                >
-                  <React.Suspense fallback={<div className="animate-pulse text-gray-400">Loading content…</div>}>
-                    <Markdown body={guide.body || ''} />
-                  </React.Suspense>
-                </article>
-              ) : (
-                <article
-                  ref={articleRef}
-                  className="bg-white rounded-lg shadow p-6 markdown-body"
-                  dir={typeof document !== 'undefined' ? (document.documentElement.getAttribute('dir') || 'ltr') : 'ltr'}
-                >
-                  <React.Suspense fallback={<div className="animate-pulse text-gray-400">Loading content…</div>}>
-                    <Markdown body={guide.body || ''} />
-                  </React.Suspense>
-                </article>
-              )
+              <article
+                id={isPolicy ? 'full-details' : undefined}
+                ref={articleRef}
+                className={`bg-white rounded-lg shadow p-6 markdown-body ${isPolicy && !showFullDetails ? 'hidden' : ''}`}
+                dir={typeof document !== 'undefined' ? (document.documentElement.getAttribute('dir') || 'ltr') : 'ltr'}
+              >
+                <React.Suspense fallback={<div className="animate-pulse text-gray-400">Loading content…</div>}>
+                  <Markdown body={guide.body || ''} />
+                </React.Suspense>
+              </article>
             )}
-            {type !== 'template' && !guide.body && !isPolicy && guide.summary && (
-              <section className="bg-white rounded-lg shadow p-6" aria-label="Overview">
-                <p className="text-gray-700 leading-7">{guide.summary}</p>
-                {hasDocument && <p className="text-sm text-gray-500 mt-2">Open the document for full details.</p>}
+            {type !== 'template' && !guide.body && (
+              <section className="bg-white rounded-lg shadow p-6 space-y-4" aria-label="Overview">
+                {guide.summary && (
+                  <div className="text-gray-700 leading-7 whitespace-pre-line">{guide.summary}</div>
+                )}
+                {guide.steps && guide.steps.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Key Steps</h3>
+                    <ul className="list-disc list-inside space-y-1 text-gray-700">
+                      {guide.steps.map((step, idx) => (
+                        <li key={step.id || idx}>
+                          <span className="font-medium mr-1">{step.title || `Step ${idx + 1}`}:</span>
+                          <span className="text-gray-600">{step.content}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {hasDocument && (
+                  <p className="text-sm text-gray-500">
+                    This guide links to an external document for full details.
+                  </p>
+                )}
               </section>
             )}
 
