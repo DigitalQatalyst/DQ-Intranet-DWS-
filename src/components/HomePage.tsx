@@ -11,7 +11,7 @@ import LeadApplySection from './LeadApplySection';
 const HomePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Simulate page loading
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -29,7 +29,8 @@ const HomePage: React.FC = () => {
             Loading Digital Workspace
           </h2>
           <p className="text-blue-200 mt-2">
-            Your trusted hub for tools, requests, learning, and collaboration at DQ.
+            Your trusted hub for tools, requests, learning, and collaboration at
+            DQ.
           </p>
         </div>
       </div>
@@ -38,9 +39,9 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header 
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
-        sidebarOpen={sidebarOpen} 
+      <Header
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        sidebarOpen={sidebarOpen}
       />
       <main className="flex-grow">
         <HeroSection />
@@ -56,3 +57,4 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+

@@ -1,15 +1,20 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Vite injects these at build time. They must be defined.
+const url = import.meta.env.VITE_SUPABASE_URL as string
+const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase credentials not found. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file');
+if (!url || !anon) {
+  // Helps you catch misconfigured envs early during dev
+  // eslint-disable-next-line no-console
+  console.error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check your .env and restart the dev server.')
+  throw new Error('Supabase env vars not set')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+export const supabaseClient = createClient(url, anon, {
+  auth: { persistSession: true, autoRefreshToken: true },
+})
+
+// Backwards compatibility: also export as 'supabase'
+export const supabase = supabaseClient
+export default supabaseClient

@@ -186,6 +186,97 @@ export const mockKnowledgeHubData = {
   providers: providers
 };
 // Define marketplace configurations
+// Define Knowledge Hub (Guides) base config once, then reuse for alias
+const knowledgeHubBaseConfig: MarketplaceConfig = {
+  id: 'knowledge-hub',
+  title: 'Guides Marketplace',
+  description: 'Discover valuable resources, news, events, and tools to support your business journey in Abu Dhabi',
+  route: '/marketplace/guides',
+  primaryCTA: 'Access Now',
+  secondaryCTA: 'View Details',
+  itemName: 'Resource',
+  itemNamePlural: 'Resources',
+  attributes: [{
+    key: 'mediaType',
+    label: 'Type',
+    icon: React.createElement(FileType, { size: 18, className: "mr-2" })
+  }, {
+    key: 'domain',
+    label: 'Domain',
+    icon: React.createElement(Bookmark, { size: 18, className: "mr-2" })
+  }, {
+    key: 'businessStage',
+    label: 'Business Stage',
+    icon: React.createElement(TrendingUp, { size: 18, className: "mr-2" })
+  }, {
+    key: 'date',
+    label: 'Published',
+    icon: React.createElement(Calendar, { size: 18, className: "mr-2" })
+  }],
+  detailSections: ['description', 'content', 'provider', 'related'],
+  tabs: [{
+    id: 'about',
+    label: 'About This Resource',
+    icon: Info,
+    iconBgColor: 'bg-blue-50',
+    iconColor: 'text-blue-600'
+  }, {
+    id: 'content',
+    label: 'Content',
+    icon: FileText,
+    iconBgColor: 'bg-green-50',
+    iconColor: 'text-green-600'
+  }, {
+    id: 'provider',
+    label: 'About Provider',
+    icon: Building,
+    iconBgColor: 'bg-blue-50',
+    iconColor: 'text-blue-600'
+  }],
+  summarySticky: true,
+  filterCategories: [{
+    id: 'mediaType',
+    title: 'Media Type',
+    options: [{ id: 'news', name: 'News' }, { id: 'reports', name: 'Reports' }, { id: 'toolkits', name: 'Toolkits & Templates' }, { id: 'guides', name: 'Guides' }, { id: 'events', name: 'Events' }, { id: 'videos', name: 'Videos' }, { id: 'podcasts', name: 'Podcasts' }]
+  }, {
+    id: 'businessStage',
+    title: 'Business Stage',
+    options: [{ id: 'idea', name: 'Idea Stage' }, { id: 'startup', name: 'Startup' }, { id: 'growth', name: 'Growth' }, { id: 'scaleup', name: 'Scale-up' }, { id: 'established', name: 'Established' }]
+  }, {
+    id: 'domain',
+    title: 'Domain',
+    options: [{ id: 'finance', name: 'Finance & Funding' }, { id: 'marketing', name: 'Marketing & Sales' }, { id: 'technology', name: 'Technology & Innovation' }, { id: 'operations', name: 'Operations & Productivity' }, { id: 'legal', name: 'Legal & Compliance' }, { id: 'strategy', name: 'Strategy & Growth' }]
+  }, {
+    id: 'format',
+    title: 'Format',
+    options: [{ id: 'quickreads', name: 'Quick Reads' }, { id: 'indepth', name: 'In-Depth Reports' }, { id: 'interactive', name: 'Interactive Tools' }, { id: 'templates', name: 'Downloadable Templates' }, { id: 'recorded', name: 'Recorded Media' }, { id: 'live', name: 'Live Events' }]
+  }, {
+    id: 'popularity',
+    title: 'Popularity',
+    options: [{ id: 'latest', name: 'Latest' }, { id: 'trending', name: 'Trending' }, { id: 'downloaded', name: 'Most Downloaded' }, { id: 'editors', name: "Editor's Pick" }]
+  }],
+  // Data mapping functions
+  mapListResponse: data => {
+    return data.map((item: any) => ({
+      ...item,
+      // Transform any fields if needed
+      tags: item.tags || [item.mediaType, item.domain].filter(Boolean)
+    }));
+  },
+  mapDetailResponse: data => {
+    return {
+      ...data,
+      // Transform any fields if needed
+      highlights: data.highlights || []
+    };
+  },
+  mapFilterResponse: data => {
+    return [{ id: 'mediaType', title: 'Media Type', options: data.mediaTypes || [] }, { id: 'businessStage', title: 'Business Stage', options: data.businessStages || [] }, { id: 'domain', title: 'Domain', options: data.domains || [] }, { id: 'format', title: 'Format', options: data.formats || [] }, { id: 'popularity', title: 'Popularity', options: data.popularity || [] }];
+  },
+  // Mock data for fallback and schema reference
+  mockData: mockKnowledgeHubData
+};
+
 export const marketplaceConfig: Record<string, MarketplaceConfig> = {
   onboarding: {
     id: 'onboarding',
@@ -411,65 +502,135 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     }],
     summarySticky: true,
     filterCategories: [{
-      id: 'category',
+      id: 'department',
+      title: 'Department',
+      options: [{
+        id: 'dco',
+        name: 'DCO'
+      }, {
+        id: 'dbp',
+        name: 'DBP'
+      }]
+    }, {
+      id: 'location',
+      title: 'Location/Studio',
+      options: [{
+        id: 'Dubai',
+        name: 'Dubai'
+      }, {
+        id: 'Nairobi',
+        name: 'Nairobi'
+      }, {
+        id: 'Global',
+        name: 'Global'
+      }, {
+        id: 'Remote',
+        name: 'Remote'
+      }]
+    }, {
+      id: 'audience',
+      title: 'Audience',
+      options: [{
+        id: 'associate',
+        name: 'Associate'
+      }, {
+        id: 'lead',
+        name: 'Lead'
+      }]
+    }, {
+      id: 'level',
+      title: 'Level',
+      options: [{
+        id: 'L1',
+        name: 'L1 – Starting'
+      }, {
+        id: 'L2',
+        name: 'L2 – Following'
+      }, {
+        id: 'L3',
+        name: 'L3 – Assisting'
+      }, {
+        id: 'L4',
+        name: 'L4 – Applying'
+      }, {
+        id: 'L5',
+        name: 'L5 – Enabling'
+      }, {
+        id: 'L6',
+        name: 'L6 – Ensuring'
+      }, {
+        id: 'L7',
+        name: 'L7 – Influencing'
+      }, {
+        id: 'L8',
+        name: 'L8 – Inspiring'
+      }]
+    }, {
+      id: 'status',
+      title: 'Status',
+      options: [{
+        id: 'live',
+        name: 'Live'
+      }, {
+        id: 'coming-soon',
+        name: 'Coming Soon'
+      }]
+    }, {
+      id: 'courseCategory',
       title: 'Course Category',
       options: [{
         id: 'ghc',
         name: 'GHC'
       }, {
-        id: 'digital',
-        name: 'Digital'
+        id: '6xd',
+        name: '6xD'
       }, {
-        id: 'hov',
-        name: 'HoV'
+        id: 'dws',
+        name: 'DWS'
       }, {
-        id: 'keytools',
-        name: 'Key Tools'
+        id: 'dxp',
+        name: 'DXP'
       }, {
-        id: 'dayindq',
+        id: 'day-in-dq',
         name: 'Day in DQ'
+      }, {
+        id: 'key-tools',
+        name: 'Key Tools'
       }]
     }, {
       id: 'deliveryMode',
       title: 'Delivery Mode',
       options: [{
-        id: 'online',
-        name: 'Online'
+        id: 'video',
+        name: 'Video'
       }, {
-        id: 'inperson',
-        name: 'In-person'
+        id: 'guide',
+        name: 'Guide'
+      }, {
+        id: 'workshop',
+        name: 'Workshop'
       }, {
         id: 'hybrid',
         name: 'Hybrid'
+      }, {
+        id: 'online',
+        name: 'Online'
       }]
     }, {
       id: 'duration',
       title: 'Duration',
       options: [{
+        id: 'bite-size',
+        name: 'Bite-size'
+      }, {
         id: 'short',
-        name: 'Short (<1 week)'
+        name: 'Short'
       }, {
         id: 'medium',
-        name: 'Medium (1-4 weeks)'
+        name: 'Medium'
       }, {
         id: 'long',
-        name: 'Long (1+ month)'
-      }]
-    }, {
-      id: 'businessStage',
-      title: 'Level',
-      options: [{
-        id: 'new-joiner',
-        name: 'New Joiner'
-      }, {
-        id: 'team-lead',
-        name: 'Team Lead'
-      }, {
-        id: 'project-delivery',
-        name: 'Project/Delivery'
-      }, {
-        id: 'ops-support',
-        name: 'Ops & Support'
+        name: 'Long'
       }]
     }],
     // Data mapping functions
@@ -489,7 +650,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     },
     mapFilterResponse: data => {
       return [{
-        id: 'category',
+        id: 'courseCategory',
         title: 'Course Category',
         options: data.categories || []
       }, {
@@ -499,20 +660,11 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       }, {
         id: 'duration',
         title: 'Duration',
-        options: [{
-          id: 'short',
-          name: 'Short (<1 week)'
-        }, {
-          id: 'medium',
-          name: 'Medium (1-4 weeks)'
-        }, {
-          id: 'long',
-          name: 'Long (1+ month)'
-        }]
+        options: data.duration || []
       }, {
-        id: 'businessStage',
+        id: 'level',
         title: 'Level',
-        options: data.businessStages || []
+        options: data.levels || []
       }];
     },
     // Mock data for fallback and schema reference
@@ -733,198 +885,14 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     // Mock data for fallback and schema reference
     mockData: mockNonFinancialServicesData
   },
-  'knowledge-hub': {
-    id: 'knowledge-hub',
-    title: 'Knowledge Hub Marketplace',
-    description: 'Discover valuable resources, news, events, and tools to support your business journey in Abu Dhabi',
-    route: '/marketplace/knowledge-hub',
-    primaryCTA: 'Access Now',
-    secondaryCTA: 'View Details',
-    itemName: 'Resource',
-    itemNamePlural: 'Resources',
-    attributes: [{
-      key: 'mediaType',
-      label: 'Type',
-      icon: React.createElement(FileType, { size: 18, className: "mr-2" })
-    }, {
-      key: 'domain',
-      label: 'Domain',
-      icon: React.createElement(Bookmark, { size: 18, className: "mr-2" })
-    }, {
-      key: 'businessStage',
-      label: 'Business Stage',
-      icon: React.createElement(TrendingUp, { size: 18, className: "mr-2" })
-    }, {
-      key: 'date',
-      label: 'Published',
-      icon: React.createElement(Calendar, { size: 18, className: "mr-2" })
-    }],
-    detailSections: ['description', 'content', 'provider', 'related'],
-    tabs: [{
-      id: 'about',
-      label: 'About This Resource',
-      icon: Info,
-      iconBgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    }, {
-      id: 'content',
-      label: 'Content',
-      icon: FileText,
-      iconBgColor: 'bg-green-50',
-      iconColor: 'text-green-600'
-    }, {
-      id: 'provider',
-      label: 'About Provider',
-      icon: Building,
-      iconBgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    }],
-    summarySticky: true,
-    filterCategories: [{
-      id: 'mediaType',
-      title: 'Media Type',
-      options: [{
-        id: 'news',
-        name: 'News'
-      }, {
-        id: 'reports',
-        name: 'Reports'
-      }, {
-        id: 'toolkits',
-        name: 'Toolkits & Templates'
-      }, {
-        id: 'guides',
-        name: 'Guides'
-      }, {
-        id: 'events',
-        name: 'Events'
-      }, {
-        id: 'videos',
-        name: 'Videos'
-      }, {
-        id: 'podcasts',
-        name: 'Podcasts'
-      }]
-    }, {
-      id: 'businessStage',
-      title: 'Business Stage',
-      options: [{
-        id: 'idea',
-        name: 'Idea Stage'
-      }, {
-        id: 'startup',
-        name: 'Startup'
-      }, {
-        id: 'growth',
-        name: 'Growth'
-      }, {
-        id: 'scaleup',
-        name: 'Scale-up'
-      }, {
-        id: 'established',
-        name: 'Established'
-      }]
-    }, {
-      id: 'domain',
-      title: 'Domain',
-      options: [{
-        id: 'finance',
-        name: 'Finance & Funding'
-      }, {
-        id: 'marketing',
-        name: 'Marketing & Sales'
-      }, {
-        id: 'technology',
-        name: 'Technology & Innovation'
-      }, {
-        id: 'operations',
-        name: 'Operations & Productivity'
-      }, {
-        id: 'legal',
-        name: 'Legal & Compliance'
-      }, {
-        id: 'strategy',
-        name: 'Strategy & Growth'
-      }]
-    }, {
-      id: 'format',
-      title: 'Format',
-      options: [{
-        id: 'quickreads',
-        name: 'Quick Reads'
-      }, {
-        id: 'indepth',
-        name: 'In-Depth Reports'
-      }, {
-        id: 'interactive',
-        name: 'Interactive Tools'
-      }, {
-        id: 'templates',
-        name: 'Downloadable Templates'
-      }, {
-        id: 'recorded',
-        name: 'Recorded Media'
-      }, {
-        id: 'live',
-        name: 'Live Events'
-      }]
-    }, {
-      id: 'popularity',
-      title: 'Popularity',
-      options: [{
-        id: 'latest',
-        name: 'Latest'
-      }, {
-        id: 'trending',
-        name: 'Trending'
-      }, {
-        id: 'downloaded',
-        name: 'Most Downloaded'
-      }, {
-        id: 'editors',
-        name: "Editor's Pick"
-      }]
-    }],
-    // Data mapping functions
-    mapListResponse: data => {
-      return data.map((item: any) => ({
-        ...item,
-        // Transform any fields if needed
-        tags: item.tags || [item.mediaType, item.domain].filter(Boolean)
-      }));
-    },
-    mapDetailResponse: data => {
-      return {
-        ...data,
-        // Transform any fields if needed
-        highlights: data.highlights || []
-      };
-    },
-    mapFilterResponse: data => {
-      return [{
-        id: 'mediaType',
-        title: 'Media Type',
-        options: data.mediaTypes || []
-      }, {
-        id: 'businessStage',
-        title: 'Business Stage',
-        options: data.businessStages || []
-      }, {
-        id: 'domain',
-        title: 'Domain',
-        options: data.domains || []
-      }, {
-        id: 'format',
-        title: 'Format',
-        options: data.formats || []
-      }, {
-        id: 'popularity',
-        title: 'Popularity',
-        options: data.popularity || []
-      }];
-    },
-    // Mock data for fallback and schema reference
-    mockData: mockKnowledgeHubData
+  'knowledge-hub': knowledgeHubBaseConfig,
+  // Compatibility alias for new Guides marketplace
+  guides: {
+    ...knowledgeHubBaseConfig,
+    id: 'guides',
+    route: '/marketplace/guides',
+    title: 'Guidelines',
+    description: 'Access practical guidelines, templates, and processes to support everyday delivery and collaboration.'
   }
 };
 // Helper to get config by marketplace type

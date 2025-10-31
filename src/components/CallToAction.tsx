@@ -313,7 +313,7 @@ const CallToAction: React.FC = () => {
       {/* Toast notification */}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       {/* Add keyframes for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0% {
             transform: translateY(0) translateX(0) rotate(0);

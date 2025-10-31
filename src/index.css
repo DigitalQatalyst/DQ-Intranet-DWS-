@@ -12,6 +12,34 @@
   --dq-cta-gradient: linear-gradient(90deg, var(--dq-navy) 0%, var(--dq-coral) 100%);
 }
 
+/* Guidelines section theme */
+.guidelines-theme {
+  --guidelines-primary: var(--dq-navy);
+  --guidelines-primary-surface: color-mix(in srgb, var(--dq-navy) 18%, white);
+  --guidelines-primary-solid: color-mix(in srgb, var(--dq-navy) 92%, black 8%);
+  --guidelines-primary-solid-hover: color-mix(in srgb, var(--dq-navy) 85%, black 15%);
+  --guidelines-ring-color: color-mix(in srgb, var(--dq-navy) 40%, transparent);
+}
+
+.guidelines-theme input[type="text"]:focus,
+.guidelines-theme select:focus,
+.guidelines-theme input[type="checkbox"]:focus {
+  --tw-ring-color: var(--guidelines-primary);
+  border-color: var(--guidelines-primary);
+}
+
+.guidelines-theme input[type="checkbox"] {
+  accent-color: var(--guidelines-primary);
+}
+
+.dark .guidelines-theme {
+  --guidelines-primary: var(--dq-navy);
+  --guidelines-primary-surface: color-mix(in srgb, var(--dq-navy) 25%, white);
+  --guidelines-primary-solid: color-mix(in srgb, var(--dq-navy) 95%, black 5%);
+  --guidelines-primary-solid-hover: color-mix(in srgb, var(--dq-navy) 90%, black 10%);
+  --guidelines-ring-color: color-mix(in srgb, var(--dq-navy) 55%, transparent);
+}
+
 .no-scroll {
   overflow: hidden;
 }
@@ -23,11 +51,13 @@
   overflow: hidden;
 }
 
+/* Two-line clamp utility */
 .clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* --- Two-line clamp utility (no plugin needed) --- */
@@ -88,4 +118,29 @@ textarea:-webkit-autofill {
 
 .cta-ejp:hover .chev {
   transform: translateX(4px);
+}
+
+/* Mapbox styling tweaks */
+.mapboxgl-canvas-container {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.mapboxgl-ctrl,
+.mapboxgl-ctrl-group {
+  border-radius: 10px;
+}
+
+.mapboxgl-ctrl-group > button {
+  border-color: rgba(3, 15, 53, 0.08);
+}
+
+.mapboxgl-ctrl-bottom-right {
+  bottom: 0.75rem;
+  right: 0.75rem;
+}
+
+.mapboxgl-ctrl-bottom-left {
+  bottom: 0.75rem;
+  left: 0.75rem;
 }

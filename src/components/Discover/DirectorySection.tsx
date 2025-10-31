@@ -362,7 +362,7 @@ export const DirectorySection: React.FC<DirectorySectionProps> = ({
                     </div>
 
                     {/* Description */}
-                    <p className="text-[13.5px] md:text-[14px] text-[#4B5563] leading-relaxed mb-4 line-clamp-2 flex-1">
+                    <p className="text-[13.5px] md:text-[14px] text-[#4B5563] leading-relaxed mb-4 clamp-2 flex-1">
                       {item.description}
                     </p>
 
@@ -551,4 +551,3 @@ export const DirectorySection: React.FC<DirectorySectionProps> = ({
 };
 
 export default DirectorySection;
-

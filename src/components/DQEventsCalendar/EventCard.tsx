@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Event } from './index';
 import { CalendarIcon, MapPinIcon, ClockIcon } from 'lucide-react';
+import { EventDetailsModal } from './EventDetailsModal';
+
 type EventCardProps = {
   event: Event;
 };
+
 export function EventCard({
   event
 }: EventCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // Format date and time
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -57,13 +61,26 @@ export function EventCard({
         </p>
         {/* Buttons */}
         <div className="flex space-x-3">
-          <button className="flex-1 py-2 border border-[#1A2E6E] text-[#1A2E6E] rounded-lg hover:bg-[#1A2E6E] hover:text-white transition-colors duration-300 text-sm font-medium">
-            Learn More
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex-1 py-2 border border-[#1A2E6E] text-[#1A2E6E] rounded-lg hover:bg-[#1A2E6E] hover:text-white transition-colors duration-300 text-sm font-medium"
+          >
+            View Details
           </button>
-          <button className="flex-1 py-2 bg-[#FB5535] text-white rounded-lg hover:bg-[#FB5535]/90 transition-colors duration-300 text-sm font-medium">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex-1 py-2 bg-[#FB5535] text-white rounded-lg hover:bg-[#FB5535]/90 transition-colors duration-300 text-sm font-medium"
+          >
             Join
           </button>
         </div>
       </div>
+
+      {/* Event Details Modal */}
+      <EventDetailsModal 
+        event={event}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>;
 }

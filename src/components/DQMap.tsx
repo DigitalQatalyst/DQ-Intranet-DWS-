@@ -1,294 +1,387 @@
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import type { MapLocation, MapStyle, Region, LocationType } from '../types/map';
-import {
-  fetchAllLocations,
-  fetchLocationsByRegion,
-  fetchLocationsByType,
-  getUniqueRegions,
-  getUniqueTypes,
-} from '../api/MAPAPI';
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import 'leaflet-defaulticon-compatibility';
 
-// Set Mapbox access token
-mapboxgl.accessToken = (import.meta as any).env.VITE_MAPBOX_TOKEN || '';
+import type { LocationType, MapLocation, MapStyle, Region } from '../types/map';
+import { MARKER_COLORS } from './map/constants';
+import { fetchAllLocations, fetchLocationsByRegion, fetchLocationsByType } from '../api/MAPAPI';
 
-// Pin colors by type
-const PIN_COLORS: Record<string, string> = {
-  'Headquarters': '#111827',
-  'Regional Office': '#4F46E5',
-  'Client': '#0EA5E9',
-  'Authority': '#F59E0B',
-  'Default': '#6B7280',
+export type DQMapRef = {
+  locateUser: () => void;
 };
 
-const MAPBOX_STYLES = {
-  standard: 'mapbox://styles/mapbox/streets-v12',
-  satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
-  hybrid: 'mapbox://styles/mapbox/satellite-streets-v12',
+const DEFAULT_CENTER: [number, number] = [24.453, 54.377];
+const DEFAULT_ZOOM = 6;
+
+type AllOption<T> = T | 'All';
+
+type MapStateSnapshot = {
+  loading: boolean;
+  locationsCount: number;
+  mapboxEnabled: boolean;
 };
 
-interface DQMapProps {
+type DQMapProps = {
   className?: string;
-}
+  mapStyle: MapStyle;
+  regionFilter?: AllOption<Region>;
+  typeFilter?: AllOption<LocationType>;
+  onStateChange?: (snapshot: MapStateSnapshot) => void;
+  onMapboxAvailabilityChange?: (available: boolean) => void;
+};
 
-export const DQMap: React.FC<DQMapProps> = ({ className = '' }) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+const forceResize = (map: L.Map) => {
+  map.invalidateSize();
+  requestAnimationFrame(() => map.invalidateSize());
+};
 
+const createMarkerElement = (strokeColor: string) => {
+  const node = document.createElement('div');
+  node.style.cssText =
+    'width:30px;height:30px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 4px rgba(3,15,53,0.25));z-index:5;';
+  node.innerHTML = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="15" cy="15" r="14" fill="white" stroke="${strokeColor}" stroke-width="2"/>
+    <circle cx="15" cy="15" r="7" fill="${strokeColor}" fill-opacity="0.12"/>
+    <circle cx="15" cy="15" r="3" fill="${strokeColor}"/>
+  </svg>`;
+  return node;
+};
+
+const buildPopupMarkup = (location: MapLocation) =>
+  `<div class="space-y-1">${[
+    `<div class="font-semibold text-base text-slate-900">${location.name}</div>`,
+    `<div class="text-xs text-slate-500">${location.type} · ${location.region}</div>`,
+    location.description && `<div class="text-sm text-slate-600">${location.description}</div>`,
+    location.address && `<div class="text-xs text-slate-500">📍 ${location.address}</div>`,
+    location.contactPhone && `<div class="text-xs text-slate-500">📞 ${location.contactPhone}</div>`,
+    location.services?.length ? `<div class="text-xs text-slate-500">🔧 ${location.services.join(' • ')}</div>` : '',
+    location.operatingHours && `<div class="text-xs text-slate-500">🕐 ${location.operatingHours}</div>`,
+  ]
+    .filter(Boolean)
+    .join('')}</div>`;
+
+export const DQMap = forwardRef<DQMapRef, DQMapProps>(({
+  className = '',
+  mapStyle: _mapStyle,
+  regionFilter = 'All',
+  typeFilter = 'All',
+  onStateChange,
+  onMapboxAvailabilityChange,
+}, ref) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const mapNodeRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
+  const userLocationMarkerRef = useRef<L.Marker | null>(null);
+  const locationsRef = useRef<MapLocation[]>([]);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const onMapboxAvailabilityChangeRef = useRef(onMapboxAvailabilityChange);
+  const onStateChangeRef = useRef(onStateChange);
+
+  const [mapboxEnabled] = useState<boolean>(false);
+  const [mapReady, setMapReady] = useState<boolean>(false);
   const [locations, setLocations] = useState<MapLocation[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState<string>('All');
-  const [selectedType, setSelectedType] = useState<string>('All');
-  const [mapStyle, setMapStyle] = useState<MapStyle>('standard');
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
-  const regions = getUniqueRegions();
-  const types = getUniqueTypes();
+  const effectiveRegion = regionFilter;
+  const effectiveType = useMemo<AllOption<LocationType>>(() => {
+    if (effectiveRegion !== 'All') return 'All';
+    return typeFilter;
+  }, [effectiveRegion, typeFilter]);
 
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainer.current) return;
+  const renderMarkers = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
 
-    if (!mapboxgl.accessToken) {
-      console.error('VITE_MAPBOX_TOKEN is not set');
-      return;
-    }
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: MAPBOX_STYLES[mapStyle],
-      center: [51.5, 25.2], // Centered on Gulf region
-      zoom: 5,
-      attributionControl: false,
-    });
-
-    map.current.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
-    map.current.addControl(
-      new mapboxgl.AttributionControl({
-        compact: true,
-      }),
-      'bottom-left'
-    );
-
-    return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
-      map.current?.remove();
-    };
-  }, []);
-
-  // Update map style
-  useEffect(() => {
-    if (map.current) {
-      map.current.setStyle(MAPBOX_STYLES[mapStyle]);
-    }
-  }, [mapStyle]);
-
-  // Fetch locations based on filters
-  useEffect(() => {
-    const loadLocations = async () => {
-      setIsLoading(true);
-      try {
-        let data: MapLocation[];
-
-        if (selectedRegion !== 'All') {
-          data = await fetchLocationsByRegion(selectedRegion as Region);
-        } else if (selectedType !== 'All') {
-          data = await fetchLocationsByType(selectedType as LocationType);
-        } else {
-          data = await fetchAllLocations();
-        }
-
-        setLocations(data);
-      } catch (error) {
-        console.error('Error loading locations:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadLocations();
-  }, [selectedRegion, selectedType]);
-
-  // Update markers when locations change
-  useEffect(() => {
-    if (!map.current || isLoading) return;
-
-    // Clear existing markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // Add new markers
-    locations.forEach((location) => {
-      const color = PIN_COLORS[location.type] || PIN_COLORS['Default'];
+    const dataset = locationsRef.current;
 
-      // Create custom marker element
-      const el = document.createElement('div');
-      el.className = 'custom-marker';
-      el.style.width = '24px';
-      el.style.height = '24px';
-      el.style.borderRadius = '50%';
-      el.style.backgroundColor = color;
-      el.style.border = '2px solid white';
-      el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
-      el.style.cursor = 'pointer';
-
-      // Create popup content
-      const popupContent = document.createElement('div');
-      popupContent.className = 'p-2';
-      popupContent.innerHTML = `
-        <div class="font-semibold text-base mb-1" style="color: var(--dws-text);">${location.name}</div>
-        <div class="text-xs mb-2" style="color: var(--dws-accent);">${location.type} · ${location.region}</div>
-        <div class="text-sm mb-2" style="color: var(--dws-text-dim);">${location.description}</div>
-        ${location.address ? `<div class="text-xs mb-1" style="color: var(--dws-text-dim);">📍 ${location.address}</div>` : ''}
-        ${location.contactPhone ? `<div class="text-xs mb-1" style="color: var(--dws-text-dim);">📞 ${location.contactPhone}</div>` : ''}
-        ${location.services ? `<div class="text-xs mb-1" style="color: var(--dws-accent);">🔧 ${location.services.join(' • ')}</div>` : ''}
-        ${location.operatingHours ? `<div class="text-xs" style="color: var(--dws-text-dim);">🕐 ${location.operatingHours}</div>` : ''}
-      `;
-
-      // Create popup
-      const popup = new mapboxgl.Popup({
-        offset: 25,
-        closeButton: true,
-        closeOnClick: false,
-        maxWidth: '300px',
-      }).setDOMContent(popupContent);
-
-      // Create marker (flip to [lng, lat] for Mapbox)
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([location.position[1], location.position[0]]) // Flip: [lng, lat]
-        .setPopup(popup)
-        .addTo(map.current!);
-
+    dataset.forEach((location) => {
+      const stroke = MARKER_COLORS[location.type] ?? MARKER_COLORS.Default;
+      const icon = L.divIcon({
+        html: createMarkerElement(stroke).outerHTML,
+        className: '',
+        iconSize: [30, 30],
+        iconAnchor: [15, 28],
+      });
+      const marker = L.marker([location.position[0], location.position[1]], { icon })
+        .bindPopup(buildPopupMarkup(location));
+      marker.addTo(map);
       markersRef.current.push(marker);
     });
 
-    // Fit bounds to markers if we have locations
-    if (locations.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      locations.forEach((loc) => {
-        bounds.extend([loc.position[1], loc.position[0]]); // Flip: [lng, lat]
-      });
-      map.current?.fitBounds(bounds, { padding: 50, maxZoom: 10 });
+    if (dataset.length) {
+      const bounds = L.latLngBounds(
+        dataset.map((l) => L.latLng(l.position[0], l.position[1])),
+      );
+      map.fitBounds(bounds.pad(0.15));
+    } else {
+      map.setView([DEFAULT_CENTER[0], DEFAULT_CENTER[1]], DEFAULT_ZOOM);
     }
-  }, [locations, isLoading]);
+  }, []);
+
+  const ensureMarkers = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    forceResize(map);
+    renderMarkers();
+  }, [renderMarkers]);
+
+  const createUserLocationMarker = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !userLocation) return;
+
+    // Remove existing user location marker
+    if (userLocationMarkerRef.current) {
+      userLocationMarkerRef.current.remove();
+    }
+
+    // Create a custom icon for user location (blue pulsing circle)
+    const userIcon = L.divIcon({
+      html: `
+        <div style="position: relative; width: 40px; height: 40px;">
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #030F35;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          "></div>
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 2px solid #030F35;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: pulse 2s infinite;
+          "></div>
+        </div>
+        <style>
+          @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+          }
+        </style>
+      `,
+      className: '',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+    });
+
+    const marker = L.marker([userLocation[0], userLocation[1]], { icon: userIcon })
+      .bindPopup('Your Location')
+      .addTo(map);
+
+    userLocationMarkerRef.current = marker;
+  }, [userLocation]);
+
+  const locateUser = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    const map = mapRef.current;
+    if (!map) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const userPos: [number, number] = [latitude, longitude];
+        
+        setUserLocation(userPos);
+        
+        // Center map on user location with zoom
+        map.setView([latitude, longitude], 13, {
+          animate: true,
+          duration: 1.0,
+        });
+
+        // Add or update user location marker
+        createUserLocationMarker();
+      },
+      (error) => {
+        console.error('[DQMap] Geolocation error:', error);
+        let message = 'Unable to retrieve your location.';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'Location access denied. Please enable location permissions in your browser.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            message = 'Location request timed out.';
+            break;
+        }
+        alert(message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  }, [createUserLocationMarker]);
+
+  // Update refs when callbacks change (without triggering effects)
+  useEffect(() => {
+    onMapboxAvailabilityChangeRef.current = onMapboxAvailabilityChange;
+  }, [onMapboxAvailabilityChange]);
+
+  useEffect(() => {
+    onStateChangeRef.current = onStateChange;
+  }, [onStateChange]);
+
+  // Only notify when mapboxEnabled changes (using ref to avoid infinite loops)
+  useEffect(() => {
+    onMapboxAvailabilityChangeRef.current?.(mapboxEnabled);
+  }, [mapboxEnabled]);
+
+  // Notify when state changes (using ref to avoid infinite loops)
+  useEffect(() => {
+    onStateChangeRef.current?.({
+      loading,
+      locationsCount: locations.length,
+      mapboxEnabled,
+    });
+  }, [loading, locations.length, mapboxEnabled]);
+
+  useEffect(() => {
+    if (!mapNodeRef.current || mapRef.current) return;
+
+    const map = L.map(mapNodeRef.current, {
+      center: [DEFAULT_CENTER[0], DEFAULT_CENTER[1]],
+      zoom: DEFAULT_ZOOM,
+      zoomControl: false,
+      attributionControl: true,
+    });
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(map);
+
+    mapRef.current = map;
+    setMapReady(true);
+    ensureMarkers();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => {
+        if (mapRef.current) forceResize(mapRef.current);
+      });
+      resizeObserverRef.current = observer;
+      if (wrapperRef.current) observer.observe(wrapperRef.current);
+    }
+
+    const handleWindowResize = () => {
+      if (mapRef.current) forceResize(mapRef.current);
+    };
+    window.addEventListener('resize', handleWindowResize);
+
+    return () => {
+      window.removeEventListener('resize', handleWindowResize);
+      resizeObserverRef.current?.disconnect();
+      resizeObserverRef.current = null;
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+      if (userLocationMarkerRef.current) {
+        userLocationMarkerRef.current.remove();
+        userLocationMarkerRef.current = null;
+      }
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [ensureMarkers]);
+
+  // Map style switching is a no-op with Leaflet; keep signals consistent
+  // This is handled by the mapboxEnabled effect above, so remove this duplicate
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    const load = async () => {
+      try {
+        const data =
+          effectiveRegion !== 'All'
+            ? await fetchLocationsByRegion(effectiveRegion as Region)
+            : effectiveType !== 'All'
+            ? await fetchLocationsByType(effectiveType as LocationType)
+            : await fetchAllLocations();
+
+        if (!cancelled) {
+          setLocations(data);
+        }
+      } catch (error) {
+        console.error('[DQMap] Failed to load locations', error);
+        if (!cancelled) {
+          setLocations([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveRegion, effectiveType]);
+
+  useEffect(() => {
+    locationsRef.current = locations;
+    if (!loading) {
+      ensureMarkers();
+    }
+  }, [locations, loading, ensureMarkers]);
+
+  useEffect(() => {
+    if (userLocation) {
+      createUserLocationMarker();
+    }
+  }, [userLocation, createUserLocationMarker]);
+
+  // Expose locateUser function via ref
+  useImperativeHandle(ref, () => ({
+    locateUser,
+  }), [locateUser]);
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
-      {/* Filters Header */}
-      <div className="p-4 bg-white border-b border-gray-200 space-y-3">
-        <div className="flex flex-wrap gap-3">
-          {/* Region Filter */}
-          <div className="flex-1 min-w-[140px]">
-            <label htmlFor="region-filter" className="block text-xs font-medium mb-1" style={{ color: 'var(--dws-accent)' }}>
-              Region
-            </label>
-            <select
-              id="region-filter"
-              value={selectedRegion}
-              onChange={(e) => {
-                setSelectedRegion(e.target.value);
-                setSelectedType('All'); // Reset type when region changes
-              }}
-              className="w-full h-9 px-2 text-sm rounded-lg border focus:outline-none focus:ring-2"
-              style={{
-                borderColor: 'var(--dws-card-border)',
-                color: 'var(--dws-text)',
-              }}
-            >
-              <option value="All">All Regions</option>
-              {regions.map((region) => (
-                <option key={region} value={region}>
-                  {region}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Type Filter */}
-          <div className="flex-1 min-w-[140px]">
-            <label htmlFor="type-filter" className="block text-xs font-medium mb-1" style={{ color: 'var(--dws-accent)' }}>
-              Type
-            </label>
-            <select
-              id="type-filter"
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.target.value);
-                setSelectedRegion('All'); // Reset region when type changes
-              }}
-              className="w-full h-9 px-2 text-sm rounded-lg border focus:outline-none focus:ring-2"
-              style={{
-                borderColor: 'var(--dws-card-border)',
-                color: 'var(--dws-text)',
-              }}
-            >
-              <option value="All">All Types</option>
-              {types.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Style Switcher */}
-          <div className="flex-1 min-w-[140px]">
-            <label htmlFor="style-switcher" className="block text-xs font-medium mb-1" style={{ color: 'var(--dws-accent)' }}>
-              Map Style
-            </label>
-            <select
-              id="style-switcher"
-              value={mapStyle}
-              onChange={(e) => setMapStyle(e.target.value as MapStyle)}
-              className="w-full h-9 px-2 text-sm rounded-lg border focus:outline-none focus:ring-2"
-              style={{
-                borderColor: 'var(--dws-card-border)',
-                color: 'var(--dws-text)',
-              }}
-            >
-              <option value="standard">Standard</option>
-              <option value="satellite">Satellite</option>
-              <option value="hybrid">Hybrid</option>
-            </select>
-          </div>
+    <div
+      ref={wrapperRef}
+      className={`relative h-full w-full ${className}`}
+    >
+      <div ref={mapNodeRef} className="absolute inset-0 h-full w-full z-0" />
+      {(!mapReady || loading) && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+          <span className="rounded-full border border-slate-200/70 bg-white/95 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 shadow-sm">
+            Loading map…
+          </span>
         </div>
-
-        {/* Legend */}
-        <div className="flex flex-wrap gap-2 pt-2">
-          {Object.entries(PIN_COLORS).filter(([key]) => key !== 'Default').map(([type, color]) => (
-            <div key={type} className="flex items-center gap-1.5">
-              <div
-                className="w-3 h-3 rounded-full border-2 border-white"
-                style={{ backgroundColor: color, boxShadow: '0 1px 2px rgba(0,0,0,0.2)' }}
-              />
-              <span className="text-xs" style={{ color: 'var(--dws-text-dim)' }}>
-                {type}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Results Count */}
-        {!isLoading && (
-          <div className="text-xs" style={{ color: 'var(--dws-text-dim)' }}>
-            Showing {locations.length} location{locations.length !== 1 ? 's' : ''}
-          </div>
-        )}
-      </div>
-
-      {/* Map Container */}
-      <div ref={mapContainer} className="flex-1 relative">
-        {isLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-            <div className="text-sm font-medium" style={{ color: 'var(--dws-accent)' }}>
-              Loading map...
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
-};
+});
 
+DQMap.displayName = 'DQMap';
+
+export default DQMap;

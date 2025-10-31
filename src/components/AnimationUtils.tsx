@@ -296,7 +296,7 @@ export const AutoScrollMarquee = ({
         {children}
         {children} {/* Duplicate content for seamless looping */}
       </div>
-      <style jsx>{`
+      <style>{`
         @keyframes scroll-x {
           0% {
             transform: translateX(0);

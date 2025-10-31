@@ -18,7 +18,7 @@ export const VisionMission: React.FC = () => {
             Vision &amp; Mission
           </h2>
           <p
-            className="text-base md:text-lg max-w-[780px] mx-auto leading-relaxed"
+            className="text-base md:text-lg max-w-[780px] mx-auto leading-relaxed clamp-2"
             style={{ color: 'var(--dws-text-dim)' }}
           >
             The foundation that drives every associate's purpose, growth, and contribution to the DQ ecosystem.
@@ -34,10 +34,8 @@ export const VisionMission: React.FC = () => {
             </h3>
             
             <div className="flex-1 mb-6">
-              <p className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--dws-text)' }}>
-                We empower associates to create value through innovation and operational excellence.
-Bold ideas become dependable workflows that make collaboration effortless.
-Every workspace achieves seamless, meaningful progress.
+              <p className="text-base md:text-lg leading-relaxed clamp-2" style={{ color: 'var(--dws-text)' }}>
+                We empower associates to turn innovation into impact through seamless, dependable workflows that make collaboration effortless and progress meaningful.
               </p>
             </div>
 
@@ -60,10 +58,8 @@ Every workspace achieves seamless, meaningful progress.
             </h3>
             
             <div className="flex-1 mb-6">
-              <p className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--dws-text)' }}>
-                We connect people, processes, and platforms to enable smarter work.
-The DQ Workspace helps teams adapt quickly and operate with clarity.
-Together, we learn faster, collaborate better, and lead with purpose.
+              <p className="text-base md:text-lg leading-relaxed clamp-2" style={{ color: 'var(--dws-text)' }}>
+                We connect people, processes, and platforms to enable smarter work—helping every Qatalyst learn faster, collaborate better, and lead with purpose.
               </p>
             </div>
 
@@ -85,4 +81,3 @@ Together, we learn faster, collaborate better, and lead with purpose.
 };
 
 export default VisionMission;
-

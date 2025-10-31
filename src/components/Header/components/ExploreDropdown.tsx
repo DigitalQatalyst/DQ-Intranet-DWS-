@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDownIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, FileText, LucideProps } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { CalendarIcon, ChevronDownIcon } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, SparklesIcon, FileText, LucideProps, BookOpen } from 'lucide-react';
 
 interface Marketplace {
   id: string;
@@ -10,6 +10,7 @@ interface Marketplace {
   icon: React.ComponentType<LucideProps>;
   href: string;
 }
+
 
 const marketplaces: Marketplace[] = [
   {
@@ -63,10 +64,17 @@ const marketplaces: Marketplace[] = [
   },
   {
     id: 'calendar',
-    name: 'Training Materials',
-    description: 'Guides, playbooks, and how-to resources.',
+    name: 'Calendar & Events',
+    description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
     icon: CalendarIcon,
-    href: '/marketplace/calendar',
+    href: '/events',
+  },
+  {
+    id: 'guidelines',
+    name: 'Guidelines Marketplace',
+    description: 'Access practical guidelines, templates, and processes.',
+    icon: BookOpen,
+    href: '/marketplace/guides',
   },
   {
     id: 'opportunity',
@@ -82,6 +90,13 @@ const marketplaces: Marketplace[] = [
     icon: FileText,
     href: '/marketplace/asset-library',
   },
+  {
+    id: 'communities',
+    name: 'DQ Communities',
+    description: 'Connect, collaborate, and engage with peers in vibrant communities.',
+    icon: UsersIcon,
+    href: '/communities',
+  },
 ];
 
 interface ExploreDropdownProps {
@@ -90,6 +105,7 @@ interface ExploreDropdownProps {
 
 export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -201,6 +217,7 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
           <div className="max-h-96 overflow-y-auto">
             {marketplaces.map((marketplace, index) => {
               const Icon = marketplace.icon;
+              const isActive = marketplace.id === 'guides' && (location.pathname.startsWith('/marketplace/guides') || location.pathname.startsWith('/marketplace/knowledge-hub'));
               return (
                 <a
                   key={marketplace.id}
@@ -208,9 +225,10 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
                   href={marketplace.href}
                   className={`flex items-start px-4 py-3 text-left hover:bg-dq-coral/10 focus:bg-dq-coral/10 focus:outline-none transition-colors duration-150 ${
                     focusedIndex === index ? 'bg-dq-coral/10' : ''
-                  }`}
+                  } ${isActive ? 'border-l-4 border-dq-coral bg-dq-coral/5' : ''}`}
                   role="menuitem"
                   tabIndex={-1}
+                  aria-current={isActive ? 'page' : undefined}
                   onClick={(e) => {
                     e.preventDefault();
                     handleItemClick(marketplace.href);

@@ -3,18 +3,25 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CourseType } from "./utils/mockData";
 import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
+import { CommunitiesRouter } from "./communities/CommunitiesRouter";
 import { App } from './App';
+
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
+import LmsCourseDetailPage from "./pages/lms/LmsCourseDetailPage";
+import LmsCourseDetail from "./pages/LmsCourseDetail";
+import LmsCourses from "./pages/LmsCourses";
 import AssetLibraryPage from "./pages/assetLibrary";
+import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { DiscoverAbuDhabi } from "./pages/discoverAbuDhabi";
-import { DiscoverDQ } from "./pages/DiscoverDQ";
+import DiscoverDQ from "./pages/DiscoverDQ";
 import NotFound from "./pages/NotFound";
+import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
+import GuideEditor from "./pages/admin/guides/GuideEditor";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
-import { DQEventsCalendar } from "./components/DQEventsCalendar";
+import EventsPage from "./pages/events/EventsPage";
 import KfBot from "./bot/KfBot";
 import ThankYou from "./pages/ThankYou";
 
@@ -39,7 +46,6 @@ export function AppRouter() {
     }
   };
 
-
   const client = new ApolloClient({
     link: new HttpLink({
       uri: "https://9609a7336af8.ngrok-free.app/services-api",
@@ -53,18 +59,11 @@ export function AppRouter() {
         <AuthProvider>
           <KfBot />
           <Routes>
+            <Route path="/discover-dq" element={<DiscoverDQ />} />
             <Route path="/*" element={<App />} />
-            <Route
-              path="/courses/:itemId"
-              element={
-                <MarketplaceDetailsPage
-                  marketplaceType="courses"
-                  bookmarkedItems={bookmarkedCourses}
-                  onToggleBookmark={toggleBookmark}
-                  onAddToComparison={handleAddToComparison}
-                />
-              }
-            />
+            <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
+            <Route path="/lms" element={<LmsCourses />} />
+            <Route path="/lms/:slug" element={<LmsCourseDetail />} />
             <Route
               path="/onboarding/:itemId"
               element={
@@ -82,21 +81,35 @@ export function AppRouter() {
               }
             />
             <Route path="/marketplace/*" element={<MarketplaceRouter />} />
+            {/* Admin - Guides CRUD */}
+            <Route path="/admin/guides" element={<AdminGuidesList />} />
+            <Route path="/admin/guides/new" element={<GuideEditor />} />
+            <Route path="/admin/guides/:id" element={<GuideEditor />} />
+          {/* Canonical and compatibility routes for Guides marketplace */}
+          <Route path="/guides" element={<Navigate to="/marketplace/guides" replace />} />
+          <Route path="/knowledge-hub" element={<Navigate to="/marketplace/guides" replace />} />
             <Route
               path="/dashboard/*"
               element={
                 // <ProtectedRoute>
-                  <DashboardRouter />
+                <DashboardRouter />
                 // </ProtectedRoute>
               }
             />
             <Route path="/asset-library" element={<AssetLibraryPage />} />
+            <Route path="/blueprints" element={<BlueprintsPage />} />
+            <Route path="/blueprints/:projectId" element={<BlueprintsPage />} />
+            <Route
+              path="/blueprints/:projectId/:folderId"
+              element={<BlueprintsPage />}
+            />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
-            <Route path="/discover-abudhabi" element={<DiscoverAbuDhabi />} />
             <Route path="/discover-dq" element={<DiscoverDQ />} />
             <Route path="/thank-you" element={<ThankYou />} />
             {/* Redirect encoded leading-space path to canonical route */}
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/communities/*" element={<CommunitiesRouter />} />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />
