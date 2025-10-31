@@ -360,7 +360,7 @@ const LeadApplySection = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0% {
             transform: translateY(0) translateX(0) rotate(0);

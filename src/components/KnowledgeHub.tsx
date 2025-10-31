@@ -568,7 +568,7 @@ const KnowledgeHubContent = ({ graphqlEndpoint }) => {
         </div>
       </div>
       {/* Add keyframes for animations */}
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
