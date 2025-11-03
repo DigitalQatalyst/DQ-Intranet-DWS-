@@ -20,6 +20,7 @@ export type DnaItem = {
   href: string;
   accent?: 'blue' | 'teal' | 'purple' | 'indigo' | 'orange' | 'rose' | 'emerald';
   icon?: React.ReactNode;
+  image_url?: string;  // Unsplash image URL for DNA node
 };
 
 export const dnaItems: DnaItem[] = [
@@ -33,6 +34,7 @@ export const dnaItems: DnaItem[] = [
     href: '/strategy',
     accent: 'blue',
     icon: <Target size={22} />,
+    image_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=600&fit=crop',
   },
   {
     id: 2,
@@ -44,6 +46,7 @@ export const dnaItems: DnaItem[] = [
     href: '/culture',
     accent: 'rose',
     icon: <Heart size={22} />,
+    image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop',
   },
   {
     id: 3,
@@ -55,6 +58,7 @@ export const dnaItems: DnaItem[] = [
     href: '/personas',
     accent: 'purple',
     icon: <Users size={22} />,
+    image_url: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&h=600&fit=crop',
   },
   {
     id: 4,
@@ -66,6 +70,7 @@ export const dnaItems: DnaItem[] = [
     href: '/tasks',
     accent: 'teal',
     icon: <CheckSquare size={22} />,
+    image_url: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800&h=600&fit=crop',
   },
   {
     id: 5,
@@ -77,6 +82,7 @@ export const dnaItems: DnaItem[] = [
     href: '/governance',
     accent: 'indigo',
     icon: <Shield size={22} />,
+    image_url: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&h=600&fit=crop',
   },
   {
     id: 6,
@@ -88,6 +94,7 @@ export const dnaItems: DnaItem[] = [
     href: '/value-streams',
     accent: 'emerald',
     icon: <GitBranch size={22} />,
+    image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
   },
   {
     id: 7,
@@ -99,6 +106,7 @@ export const dnaItems: DnaItem[] = [
     href: '/products',
     accent: 'orange',
     icon: <Package size={22} />,
+    image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
   },
 ];
 

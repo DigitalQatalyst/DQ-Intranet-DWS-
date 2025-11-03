@@ -104,6 +104,10 @@ export function AppRouter() {
               element={<BlueprintsPage />}
             />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
+            <Route path="/discover-dq" element={<DiscoverDQ />} />
+            <Route path="/thank-you" element={<ThankYou />} />
+            {/* Redirect encoded leading-space path to canonical route */}
+            <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/communities/*" element={<CommunitiesRouter />} />
             <Route path="/404" element={<NotFound />} />
