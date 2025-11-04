@@ -219,7 +219,16 @@ function DQDNA() {
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 24px" }}>
         {/* Header (kept minimalist to avoid pushing DNA down) */}
         <div style={{ textAlign: "center", marginBottom: 18 }}>
-          <h2 style={{ color: NAVY, fontWeight: 800, fontSize: 44, margin: "0 0 8px" }}>
+          <h2
+            style={{
+              color: "#030F35",
+              fontWeight: 700,
+              fontSize: 44,
+              margin: "0 0 8px",
+              fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif',
+              letterSpacing: "0.04em",
+            }}
+          >
             Growth Dimensions
           </h2>
           <p className="clamp-2" style={{ color: "#5b667a", margin: 0 }}>

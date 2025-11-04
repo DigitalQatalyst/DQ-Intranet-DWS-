@@ -3,14 +3,17 @@ export type MarkerColorKey =
   | 'Regional Office'
   | 'Client'
   | 'Authority'
+  | 'Bank'
+  | 'Utility'
   | 'Default';
 
 export const MARKER_COLORS: Record<MarkerColorKey, string> = {
-  Headquarters: '#0B122B',
-  'Regional Office': '#6C63FF',
-  Client: '#3BA2FF',
-  Authority: '#F4A340',
+  Headquarters: '#2559FF',
+  'Regional Office': '#6366F1',
+  Client: '#EC4899',
+  Authority: '#F97316',
+  Bank: '#10B981',
+  Utility: '#FACC15',
   Default: '#4B5563',
 };
-
 

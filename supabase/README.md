@@ -88,3 +88,7 @@ In Supabase dashboard → Settings → API:
 - `seed.sql` - Populates initial data
 - `verify-rls.sql` - Diagnostic queries to check setup
 
+
+
+
+

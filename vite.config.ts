@@ -1,25 +1,36 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import path from "path";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
+import svgr from "vite-plugin-svgr";
 
-// https://vitejs.dev/config/
+const DEV_HOST = process.env.VITE_DEV_HOST ?? "127.0.0.1";
+const DEV_PORT = Number(process.env.VITE_DEV_PORT ?? 5173);
+const PREVIEW_PORT = Number(process.env.VITE_PREVIEW_PORT ?? DEV_PORT);
+const API_PROXY_TARGET = process.env.VITE_API_PROXY ?? "http://127.0.0.1:3002";
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths(), svgr()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {
-    port: 3004,
-    strictPort: true,
-    host: 'localhost',
+    host: DEV_HOST,
+    port: DEV_PORT,
+    open: true,
+    strictPort: false,
     proxy: {
-      '/api': 'http://localhost:5174',
+      "/api": API_PROXY_TARGET,
     },
   },
   preview: {
-    port: 3000,
-    strictPort: true,
+    host: DEV_HOST,
+    port: PREVIEW_PORT,
+    strictPort: false,
   },
-})
+  build: {
+    sourcemap: true,
+  },
+});

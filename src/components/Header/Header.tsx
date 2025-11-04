@@ -71,10 +71,8 @@ export function Header({
   return (
     <>
       <header
-        className={`flex items-center w-full transition-all duration-300 text-white ${
-          isSticky
-            ? 'fixed top-0 left-0 right-0 z-40 shadow-lg backdrop-blur-sm'
-            : 'relative'
+        className={`dq-app-header sticky top-0 z-[120] flex w-full items-center text-white transition-all duration-300 ${
+          isSticky ? 'shadow-lg backdrop-blur-sm' : ''
         }`}
         style={{
           background: isSticky
@@ -176,9 +174,6 @@ export function Header({
           </div>
         </div>
       </header>
-
-      {/* Spacer for sticky header */}
-      {isSticky && <div className="h-12"></div>}
 
       {/* Notifications */}
       {showNotificationsMenu && user && (

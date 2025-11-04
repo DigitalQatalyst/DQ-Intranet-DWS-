@@ -137,8 +137,11 @@ export default function DQ6xArchitecture() {
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-6 md:px-8 py-8">
         <div className="text-center mb-6">
-          <h2 className="text-[28px] md:text-[32px] font-bold text-slate-900">
-            DQ | 6x Digital Architecture
+          <h2
+            className="font-serif text-[28px] md:text-[32px] font-bold text-[#030F35] tracking-[0.04em]"
+            style={{ fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }}
+          >
+            DQ 6x Digital Architecture
           </h2>
           <p className="text-slate-500">
             Explore the six digital layers powering DQ’s transformation framework.
