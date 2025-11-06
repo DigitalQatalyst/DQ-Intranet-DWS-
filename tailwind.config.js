@@ -37,6 +37,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        dqNavy: "#030F35",
+        dqOrange: "#FB5535",
+        dqBlue: "#1A2E6E",
+        dqWhite: "#FFFFFF",
         primary: {
           DEFAULT: "#0030E3",
           dark: "#002080",
@@ -75,6 +79,7 @@ module.exports = {
       backgroundImage: {
         "dq-header": "linear-gradient(90deg, #030F35 0%, #FB5535 55%, #FFFFFF 100%)",
         "dq-cta": "linear-gradient(90deg, #030F35 0%, #FB5535 100%)",
+        "dq-gradient": "linear-gradient(90deg, #FB5535 0%, #1A2E6E 50%, #030F35 100%)",
       },
     },
   },

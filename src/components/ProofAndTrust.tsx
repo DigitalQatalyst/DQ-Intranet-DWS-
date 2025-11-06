@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Star, Award, TrendingUp, Users, DollarSign, Play, X, ChevronLeft, ChevronRight, Building2, Landmark, Network, Users2, Clock, BookOpen } from 'lucide-react';
-import { AnimatedCounter, FadeInUpOnScroll, StaggeredFadeIn, AutoScrollMarquee, HorizontalScrollReveal, useInView } from './AnimationUtils';
+import { Star, Award, Users, Play, X, ChevronLeft, ChevronRight, Building2, Landmark, Network, Users2, Clock, BookOpen } from 'lucide-react';
+import { AnimatedCounter, FadeInUpOnScroll, StaggeredFadeIn, HorizontalScrollReveal, useInView } from './AnimationUtils';
 
 interface Testimonial {
   id: string;
@@ -16,7 +16,7 @@ interface Testimonial {
   videoUrl: string;
   metric: string;
   metricLabel: string;
-  metricColor: 'green' | 'blue';
+  metricColor: 'green' | 'blue' | 'orange';
 }
 
 const testimonials: Testimonial[] = [{
@@ -382,7 +382,7 @@ const VideoTestimonialCarousel = () => {
 };
 
 // Partner Category Card component
-const PartnerCategoryCard = ({ category, index }) => {
+const PartnerCategoryCard = ({ category }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [ref, isInView] = useInView({ threshold: 0.1 });
@@ -421,7 +421,7 @@ const PartnerCategoryCard = ({ category, index }) => {
 };
 
 // Partner Logo
-const PartnerLogo = ({ partner, index }) => {
+const PartnerLogo = ({ partner }) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
     <div
@@ -442,7 +442,6 @@ const PartnerLogo = ({ partner, index }) => {
 // Featured Partners Carousel
 const FeaturedPartnersCarousel = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
   const allPartners = [...strategicPartners, ...partnerLogos];
 
   useEffect(() => {
@@ -477,7 +476,7 @@ const FeaturedPartnersCarousel = () => {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {[...allPartners, ...allPartners].map((partner, index) => (
-            <PartnerLogo key={`${partner.name}-${index}`} partner={partner} index={index} />
+            <PartnerLogo key={`${partner.name}-${index}`} partner={partner} />
           ))}
         </div>
 
@@ -566,7 +565,7 @@ const ProofAndTrust: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {partnerCategories.map((category, index) => (
               <FadeInUpOnScroll key={category.id} delay={index * 0.15}>
-                <PartnerCategoryCard category={category} index={index} />
+                <PartnerCategoryCard category={category} />
               </FadeInUpOnScroll>
             ))}
           </div>
