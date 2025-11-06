@@ -96,21 +96,22 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
           ) : (
             <>
               {/* Header with Title and Toggle - Baseline Aligned */}
-              <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-4 mb-8 md:mb-10">
-            <div>
-              <h2
-                id="insights-heading"
-                className="text-3xl md:text-4xl font-bold tracking-tight text-[#0E1446] leading-none"
-              >
-                DQ DNA Growth Potential
-              </h2>
-              <p className="text-neutral-600 mt-3 text-sm md:text-base">
-                Data-driven signals of how DQ teams learn, deliver, and collaborate across the seven DNA dimensions.
-              </p>
-            </div>
+              <div className="flex flex-col items-center gap-5 mb-8 md:mb-10">
+                <div className="text-center">
+                  <h2
+                    id="insights-heading"
+                    className="font-serif text-3xl md:text-4xl font-bold tracking-[0.04em] text-[#030F35] leading-none"
+                    style={{ fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }}
+                  >
+                    DQ DNA Growth Potential
+                  </h2>
+                  <p className="text-neutral-600 mt-3 text-sm md:text-base">
+                    Data-driven signals of how DQ teams learn, deliver, and collaborate across the seven DNA dimensions.
+                  </p>
+                </div>
 
                 {/* iOS-style Toggle */}
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-3">
                   <label
                     htmlFor="yoy-toggle"
                     className="text-sm font-medium text-neutral-700 cursor-pointer select-none whitespace-nowrap"

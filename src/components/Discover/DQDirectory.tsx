@@ -571,8 +571,8 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
         <div className="text-center mb-8 md:mb-10">
           <h1
             id="directory-heading"
-            className="text-[32px] md:text-[40px] font-bold tracking-tight leading-tight mb-3"
-            style={{ color: '#131E42' }}
+            className="font-serif text-[32px] md:text-[40px] font-bold tracking-[0.04em] leading-tight text-[#030F35] mb-3"
+            style={{ fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }}
           >
             {viewMode === 'units' ? 'DQ Directory' : 'DQ Directory'}
           </h1>

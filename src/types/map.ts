@@ -1,7 +1,7 @@
 // DQ Map Location Types
 
 export type LocationType = 'Headquarters' | 'Regional Office' | 'Client' | 'Authority';
-export type Region = 'Dubai' | 'Abu Dhabi' | 'Riyadh' | 'Nairobi' | 'Kenya' | 'NEOM';
+export type Region = 'Dubai' | 'Abu Dhabi' | 'Riyadh' | 'Nairobi' | 'Kenya' | 'NEOM' | 'UAE' | 'KSA';
 
 export type MapLocation = {
   id: string;
@@ -12,6 +12,7 @@ export type MapLocation = {
   contactPhone?: string;
   type: LocationType;
   region: Region;
+  sector?: string;
   services?: string[];
   operatingHours?: string;
 };

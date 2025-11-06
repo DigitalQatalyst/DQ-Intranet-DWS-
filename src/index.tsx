@@ -1,5 +1,6 @@
 import "./index.css";
 import "./styles/theme.css";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { AppRouter } from "./AppRouter";
 import { createRoot } from "react-dom/client";
 import { MsalProvider } from "@azure/msal-react";
