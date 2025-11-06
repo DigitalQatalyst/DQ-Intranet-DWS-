@@ -28,19 +28,11 @@ export default defineConfig({
     },
   },
   server: {
-<<<<<<< HEAD
     host: DEV_HOST,
     port: DEV_PORT,
     strictPort: DEV_STRICT_PORT,
     proxy: {
       '/api': API_PROXY_TARGET,
-=======
-    port: 3004,
-    strictPort: true,
-    host: 'localhost',
-    proxy: {
-      '/api': 'http://localhost:5174',
->>>>>>> origin/main
     },
   },
   preview: {
