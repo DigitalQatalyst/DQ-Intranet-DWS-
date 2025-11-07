@@ -50,15 +50,15 @@ jobs:
         run: npm install -g vercel@latest
 
       - name: 🔗 Pull Vercel environment
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_DEPLOYMENT_TOKEN }}
 
       - name: 🏗️ Build with Vercel
-        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_DEPLOYMENT_TOKEN }}
 
       - name: 🌐 Deploy to Vercel
         id: deploy
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_DEPLOYMENT_TOKEN: ${{ secrets.VERCEL_DEPLOYMENT_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           BRANCH_NAME: ${{ github.ref_name }}
@@ -70,12 +70,12 @@ jobs:
           
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             echo "🚀 Deploying PRODUCTION build..."
-            DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN)
+            DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=$VERCEL_DEPLOYMENT_TOKEN)
             echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
             echo "✅ Production deployed at: $DEPLOY_URL"
           else
             echo "🧪 Deploying PREVIEW build for branch: $BRANCH_NAME"
-            DEPLOY_URL=$(vercel deploy --prebuilt --token=$VERCEL_TOKEN)
+            DEPLOY_URL=$(vercel deploy --prebuilt --token=$VERCEL_DEPLOYMENT_TOKEN)
             echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
             echo "✅ Preview deployed at: $DEPLOY_URL"
           fi
