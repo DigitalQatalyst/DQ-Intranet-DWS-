@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { ThumbsUp, Lightbulb, Share2 } from 'lucide-react';
 import { Button } from '@/communities/components/ui/button';
@@ -85,7 +85,7 @@ export function PostReactions({
     }
   };
   return <div className="flex flex-wrap items-center gap-3">
-      <Button variant="outline" size="sm" className={`h-9 px-4 gap-2 rounded-full transition-all ${hasReactedHelpful ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700' : 'hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'}`} onClick={() => handleReaction('helpful')}>
+      <Button variant="outline" size="sm" className={`h-9 px-4 gap-2 rounded-full transition-all ${hasReactedHelpful ? 'bg-dq-navy text-white border-dq-navy hover:bg-[#13285A] hover:border-[#13285A]' : 'hover:bg-dq-navy/10 hover:text-dq-navy hover:border-dq-navy/30'}`} onClick={() => handleReaction('helpful')}>
         <ThumbsUp className={`h-4 w-4 ${hasReactedHelpful ? 'fill-white' : ''}`} />
         <span className="font-medium">{helpfulCount}</span>
         <span>Helpful</span>

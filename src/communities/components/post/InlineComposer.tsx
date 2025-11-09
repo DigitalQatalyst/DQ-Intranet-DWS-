@@ -5,7 +5,7 @@ import { Button } from '@/communities/components/ui/button';
 import { Input } from '@/communities/components/ui/input';
 import { Label } from '@/communities/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/communities/components/ui/select';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { toast } from 'sonner';
 import { Send, Maximize2, Image, BarChart3, Calendar, Clock } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
@@ -479,12 +479,12 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-          <Button type="button" variant="ghost" size="sm" onClick={handleOpenFullEditor} className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+          <Button type="button" variant="ghost" size="sm" onClick={handleOpenFullEditor} className="text-dq-navy hover:text-[#13285A] hover:bg-dq-navy/10">
             <Maximize2 className="h-4 w-4 mr-1.5" />
             Advanced options
           </Button>
 
-          <Button type="submit" disabled={submitting || !isFormValid()} className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50">
+          <Button type="submit" disabled={submitting || !isFormValid()} className="bg-dq-navy hover:bg-[#13285A] text-white disabled:opacity-50">
             {submitting ? 'Posting...' : <>
                 <Send className="h-4 w-4 mr-1.5" />
                 {getPostButtonLabel()}

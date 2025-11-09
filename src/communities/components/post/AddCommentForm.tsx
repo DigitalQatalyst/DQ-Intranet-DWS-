@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Button } from '@/communities/components/ui/button';
 import { Textarea } from '@/communities/components/ui/textarea';

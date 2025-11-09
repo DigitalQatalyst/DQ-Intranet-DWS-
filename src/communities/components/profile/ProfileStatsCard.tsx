@@ -14,8 +14,8 @@ export function ProfileStatsCard({
     label: 'Posts',
     value: stats?.posts_count ?? 0,
     icon: FileText,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50'
+    color: 'text-dq-navy',
+    bgColor: 'bg-dq-navy/10'
   }, {
     label: 'Comments',
     value: stats?.comments_count ?? 0,

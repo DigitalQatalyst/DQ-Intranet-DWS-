@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { Button } from '@/communities/components/ui/button';
 import { Input } from '@/communities/components/ui/input';
 import { X, Upload, Image as ImageIcon, Video, Loader2 } from 'lucide-react';
@@ -106,8 +106,8 @@ export function InlineMediaUpload({
   }
   return <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors bg-gray-50">
       <div className="flex flex-col items-center gap-2">
-        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-          {uploading ? <Loader2 className="h-5 w-5 text-blue-600 animate-spin" /> : <Upload className="h-5 w-5 text-blue-600" />}
+        <div className="h-10 w-10 rounded-full bg-dq-navy/15 flex items-center justify-center">
+          {uploading ? <Loader2 className="h-5 w-5 text-dq-navy animate-spin" /> : <Upload className="h-5 w-5 text-dq-navy" />}
         </div>
         
         <div>

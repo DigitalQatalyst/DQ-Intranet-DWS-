@@ -1,5 +1,5 @@
 import { AlertTriangle, CheckCircle, XCircle, Activity } from 'lucide-react';
-import { ModerationMetrics } from '@/services/ModerationAPI';
+import { ModerationMetrics } from '@/communities/services/ModerationAPI';
 interface ModerationSummaryCardProps {
   stats: ModerationMetrics | null;
 }
@@ -10,8 +10,8 @@ export function ModerationSummaryCard({
     label: 'Total Reports',
     value: stats?.totalReports ?? 0,
     icon: Activity,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50'
+    color: 'text-dq-navy',
+    bgColor: 'bg-dq-navy/10'
   }, {
     label: 'Active Reports',
     value: stats?.activeReports ?? 0,

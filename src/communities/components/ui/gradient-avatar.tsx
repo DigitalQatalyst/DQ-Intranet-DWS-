@@ -10,13 +10,13 @@ export function GradientAvatar({
 }: GradientAvatarProps) {
   // Generate consistent gradient based on seed
   const getGradient = (s: string) => {
-    const gradients = ['bg-gradient-to-br from-[hsl(224,100%,45%)] to-[hsl(266,93%,64%)]',
-    // blue to purple
-    'bg-gradient-to-br from-[hsl(175,100%,45%)] to-[hsl(224,100%,45%)]',
-    // teal to blue
-    'bg-gradient-to-br from-[hsl(266,93%,64%)] to-[hsl(175,100%,45%)]',
-    // purple to teal
-    'bg-gradient-to-br from-[hsl(224,100%,45%)] to-[hsl(175,100%,45%)]' // blue to teal
+    const gradients = ['bg-gradient-to-br from-dq-navy to-[#1A2E6E]',
+    // navy to darker navy
+    'bg-gradient-to-br from-[#1A2E6E] to-dq-navy',
+    // darker navy to navy
+    'bg-gradient-to-br from-dq-navy to-[#13285A]',
+    // navy to very dark navy
+    'bg-gradient-to-br from-[#13285A] to-dq-navy' // very dark navy to navy
     ];
     const hash = s.split('').reduce((acc, char) => {
       return char.charCodeAt(0) + ((acc << 5) - acc);

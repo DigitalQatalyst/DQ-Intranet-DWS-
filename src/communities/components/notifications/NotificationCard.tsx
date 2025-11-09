@@ -36,7 +36,7 @@ export function NotificationCard({
     switch (notification.type) {
       case 'reply':
       case 'comment':
-        return <MessageSquare className="h-4 w-4 text-blue-600" />;
+        return <MessageSquare className="h-4 w-4 text-dq-navy" />;
       case 'mention':
         return <AtSign className="h-4 w-4 text-purple-600" />;
       case 'moderation_alert':
@@ -57,7 +57,7 @@ export function NotificationCard({
       onClose();
     }
   };
-  return <div onClick={handleClick} className={`relative block border rounded-lg p-4 transition-colors hover:border-gray-300 cursor-pointer ${notification.is_read ? 'border-gray-100 bg-white' : 'border-blue-200 bg-blue-100'}`}>
+  return <div onClick={handleClick} className={`relative block border rounded-lg p-4 transition-colors hover:border-gray-300 cursor-pointer ${notification.is_read ? 'border-gray-100 bg-white' : 'border-dq-navy/30 bg-dq-navy/10'}`}>
       <div className="flex items-start gap-3">
         {notification.related_user && <Avatar className="h-10 w-10">
             <AvatarImage src={notification.related_user.avatar_url || undefined} />

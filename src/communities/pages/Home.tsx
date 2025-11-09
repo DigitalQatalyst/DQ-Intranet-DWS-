@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/communities/contexts/AuthProvider';
-import { CommunitiesLayout } from '../CommunitiesLayout';
-import { supabase } from '@/communities/integrations/supabase/client';
-import { safeFetch } from '@/communities/utils/safeFetch';
-import { Button } from '@/communities/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
-import { LoginForm } from '@/communities/components/auth/LoginForm';
+import { useAuth } from "../contexts/AuthProvider";
+import { supabase } from "@/lib/supabaseClient";
+import { safeFetch } from "../utils/safeFetch";
+import { Button } from "../components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import { LoginForm } from "../components/auth/LoginForm";
 import { useNavigate, Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Users, Sparkles, ChevronRight, MessageSquare, Clock, TrendingUp, Lightbulb, Network, Handshake } from 'lucide-react';
-import { CommunityCard } from '@/communities/components/KF eJP Library/Cards';
-import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
-import { Badge } from '@/communities/components/ui/badge';
+import { CommunityCard } from "../components/Cards/CommunityCard";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Badge } from "../components/ui/badge";
+import { MainLayout } from "../components/layout/MainLayout";
+
 interface Community {
   id: string;
   name: string;
@@ -44,7 +45,7 @@ export default function Home() {
   const [postsError, setPostsError] = useState<Error | null>(null);
   useEffect(() => {
     if (!authLoading && user) {
-      navigate('/communities/feed');
+      navigate('/feed');
     }
   }, [user, authLoading, navigate]);
   useEffect(() => {
@@ -91,21 +92,21 @@ export default function Home() {
     return activities[Math.floor(Math.random() * activities.length)];
   };
   if (authLoading) {
-    return <CommunitiesLayout>
+    return <MainLayout hidePageLayout fullWidth>
         <div className="flex min-h-screen items-center justify-center">
           <div className="animate-pulse text-muted-foreground">Loading...</div>
         </div>
-      </CommunitiesLayout>;
+      </MainLayout>;
   }
-  return <CommunitiesLayout>
+  return <MainLayout hidePageLayout fullWidth>
       <div className="flex flex-col min-h-screen">
         <div className="flex-grow">
           {/* Hero Section */}
           <section className="relative overflow-hidden min-h-[520px] md:min-h-[600px] flex items-center">
             {/* Background Image with Overlay */}
             <div className="absolute inset-0 z-0">
-              <img src="https://images.unsplash.com/photo-1512632578888-169bbbc64f33?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Abu Dhabi cityscape" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-b from-indigo-600/60 via-blue-600/50 to-transparent"></div>
+              <img src="https://images.unsplash.com/photo-1512632578888-169bbbc64f33?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Community cityscape" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-b from-dq-navy/60 via-[#1A2E6E]/50 to-transparent"></div>
             </div>
             {/* Content */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -116,14 +117,14 @@ export default function Home() {
                   </span>
                 </div>
                 <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-white max-w-4xl">
-                  Join Our Vibrant Community in Abu Dhabi
+                  Join Our Vibrant Community
                 </h1>
                 <p className="mt-3 text-white/90 text-lg max-w-2xl mx-auto leading-relaxed">
                   Explore ideas, connect with innovators, and belong to a
                   growing network of changemakers shaping the future.
                 </p>
                 <div className="mt-6 flex items-center justify-center gap-4 flex-wrap">
-                  <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
+                  <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-dq-navy hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
                     <Sparkles className="mr-2 h-5 w-5" />
                     Join the Community
                   </Button>
@@ -159,7 +160,7 @@ export default function Home() {
                     {communities.slice(0, 3).map(community => {
                   const activityLevel = getActivityLevel(community.member_count || 0);
                   const activeMembers = Math.floor((community.member_count || 0) * (0.6 + Math.random() * 0.3));
-                  const tags = ['Abu Dhabi', 'Innovation', community.name.includes('Tech') ? 'Technology' : 'Business', activityLevel === 'high' ? 'Popular' : 'Growing'];
+                  const tags = ['Innovation', community.name.includes('Tech') ? 'Technology' : 'Business', activityLevel === 'high' ? 'Popular' : 'Growing'];
                   const isPrivate = Math.random() > 0.7;
                   return <div key={community.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
                           <CommunityCard item={{
@@ -179,7 +180,7 @@ export default function Home() {
                 })}
                   </div>
                   {communities.length > 3 && <div className="mt-8 text-center">
-                      <Link to="/communities" className="inline-flex items-center text-sm font-medium text-indigo-700 hover:text-indigo-800">
+                      <Link to="/communities" className="inline-flex items-center text-sm font-medium text-dq-navy hover:text-[#13285A]">
                         View All Communities
                         <ChevronRight className="ml-1 h-4 w-4" />
                       </Link>
@@ -209,11 +210,11 @@ export default function Home() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
                     {posts.slice(0, 3).map(post => <div key={post.id} className="group transition-all duration-200 hover:drop-shadow-md" onClick={() => navigate(`/post/${post.id}`)}>
                         <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 ease-in-out overflow-hidden cursor-pointer h-full flex flex-col focus-visible:ring-2 focus-visible:ring-brand-teal outline-none">
-                          <div className="h-1.5 bg-gradient-to-r from-indigo-600 to-blue-600"></div>
+                          <div className="h-1.5 bg-gradient-to-r from-dq-navy to-[#1A2E6E]"></div>
                           <div className="p-6 flex flex-col h-full">
                             {/* Community badge */}
                             <div className="mb-4">
-                              <button className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors" onClick={e => {
+                              <button className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-dq-navy/10 text-dq-navy hover:bg-dq-navy/20 transition-colors" onClick={e => {
                           e.stopPropagation();
                           navigate(`/community/${post.community_id}`);
                         }}>
@@ -222,7 +223,7 @@ export default function Home() {
                               </button>
                             </div>
                             {/* Post title */}
-                            <h3 className="text-xl font-semibold text-gray-900 mb-3 hover:text-indigo-700 transition-colors line-clamp-2 leading-snug">
+                            <h3 className="text-xl font-semibold text-gray-900 mb-3 hover:text-dq-navy transition-colors line-clamp-2 leading-snug">
                               {post.title}
                             </h3>
                             {/* Post content */}
@@ -239,12 +240,12 @@ export default function Home() {
                               <div className="flex items-center gap-2">
                                 <Avatar className="h-8 w-8 border border-gray-200">
                                   <AvatarImage src={`https://avatar.vercel.sh/${post.author_username}`} alt={post.author_username} />
-                                  <AvatarFallback className="text-xs bg-indigo-50 text-indigo-700">
+                                  <AvatarFallback className="text-xs bg-dq-navy/10 text-dq-navy">
                                     {post.author_username?.charAt(0).toUpperCase() || 'U'}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
-                                  <button className="text-sm font-medium text-gray-900 hover:text-indigo-700 transition-colors text-left" onClick={e => {
+                                  <button className="text-sm font-medium text-gray-900 hover:text-dq-navy transition-colors text-left" onClick={e => {
                               e.stopPropagation();
                               navigate(`/profile/${post.author_id}`);
                             }}>
@@ -259,7 +260,7 @@ export default function Home() {
                                 </div>
                               </div>
                               {/* Read more link */}
-                              <Button variant="ghost" size="sm" className="text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50 p-0 h-auto">
+                              <Button variant="ghost" size="sm" className="text-dq-navy hover:text-[#13285A] hover:bg-dq-navy/10 p-0 h-auto">
                                 Read
                                 <ChevronRight className="ml-1 h-4 w-4" />
                               </Button>
@@ -269,7 +270,7 @@ export default function Home() {
                       </div>)}
                   </div>
                   <div className="mt-8 text-center">
-                    <Link to="/communities/feed" className="inline-flex items-center text-sm font-medium text-indigo-700 hover:text-indigo-800">
+                    <Link to="/feed" className="inline-flex items-center text-sm font-medium text-dq-navy hover:text-[#13285A]">
                       View All Posts
                       <ChevronRight className="ml-1 h-4 w-4" />
                     </Link>
@@ -290,7 +291,7 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
                 {/* Feature 1 */}
                 <div className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-3">
-                  <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 grid place-content-center">
+                  <div className="h-10 w-10 rounded-xl bg-dq-navy/10 text-dq-navy grid place-content-center">
                     <Users className="h-5 w-5" />
                   </div>
                   <h3 className="font-semibold text-gray-900">
@@ -303,7 +304,7 @@ export default function Home() {
                 </div>
                 {/* Feature 2 */}
                 <div className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-3">
-                  <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 grid place-content-center">
+                  <div className="h-10 w-10 rounded-xl bg-dq-navy/10 text-dq-navy grid place-content-center">
                     <MessageSquare className="h-5 w-5" />
                   </div>
                   <h3 className="font-semibold text-gray-900">
@@ -316,7 +317,7 @@ export default function Home() {
                 </div>
                 {/* Feature 3 */}
                 <div className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-3">
-                  <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 grid place-content-center">
+                  <div className="h-10 w-10 rounded-xl bg-dq-navy/10 text-dq-navy grid place-content-center">
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <h3 className="font-semibold text-gray-900">
@@ -333,7 +334,7 @@ export default function Home() {
           {/* CTA Section */}
           <section className="bg-white py-16 md:py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-8 md:p-10">
+              <div className="rounded-2xl bg-gradient-to-r from-dq-navy to-[#1A2E6E] text-white p-8 md:p-10">
                 <h2 className="text-2xl md:text-3xl font-bold text-center">
                   Ready to Join Our Community?
                 </h2>
@@ -342,7 +343,7 @@ export default function Home() {
                   ideas, and growing together on our platform.
                 </p>
                 <div className="mt-6 flex justify-center">
-                  <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
+                  <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-dq-navy hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
                     <Sparkles className="mr-2 h-5 w-5" />
                     Join Now
                   </Button>
@@ -361,5 +362,6 @@ export default function Home() {
           </DialogContent>
         </Dialog>
       </div>
-    </CommunitiesLayout>;
+    </MainLayout>;
 }
+

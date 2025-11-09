@@ -3,8 +3,21 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CourseType } from "./utils/mockData";
 import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
-import { CommunitiesRouter } from "./communities/CommunitiesRouter";
 import { App } from './App';
+import Communities from "./communities/pages/Communities";
+import Home from "./communities/pages/Home";
+import CommunityFeed from "./communities/pages/CommunityFeed";
+import Community from "./communities/pages/Community";
+import CommunityMembers from "./communities/pages/CommunityMembers";
+import CommunitySettings from "./communities/pages/CommunitySettings";
+import CommunityAnalytics from "./communities/pages/CommunityAnalytics";
+import ModerationDashboard from "./communities/pages/ModerationDashboard";
+import MessagingDashboard from "./communities/pages/MessagingDashboard";
+import ActivityCenter from "./communities/pages/ActivityCenter";
+import CreatePost from "./communities/pages/CreatePost";
+import PostDetail from "./communities/pages/PostDetail";
+import ProfileDashboard from "./communities/pages/ProfileDashboard";
+import { AuthProvider as CommunitiesAuthProvider } from "./communities/contexts/AuthProvider";
 
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
 import AssetLibraryPage from "./pages/assetLibrary";
@@ -54,8 +67,9 @@ export function AppRouter() {
     <ApolloProvider client={client}>
       <BrowserRouter>
         <AuthProvider>
-          <KfBot />
-          <Routes>
+          <CommunitiesAuthProvider>
+            <KfBot />
+            <Routes>
             <Route path="/*" element={<App />} />
             <Route
               path="/courses/:itemId"
@@ -109,11 +123,35 @@ export function AppRouter() {
             />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
             <Route path="/events" element={<EventsPage />} />
-            <Route path="/communities/*" element={<CommunitiesRouter />} />
+            {/* Community Routes */}
+            <Route path="/community" element={<Home />} />
+            <Route path="/communities" element={<Communities />} />
+            <Route path="/community/:id" element={<Community />} />
+            <Route path="/feed" element={<CommunityFeed />} />
+            <Route
+              path="/community/:id/members"
+              element={<CommunityMembers />}
+            />
+            <Route
+              path="/community/:id/settings"
+              element={<CommunitySettings />}
+            />
+            <Route path="/moderation" element={<ModerationDashboard />} />
+            <Route path="/analytics" element={<CommunityAnalytics />} />
+            <Route path="/activity" element={<ActivityCenter />} />
+            <Route path="/messages" element={<MessagingDashboard />} />
+            <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/post/edit/:id" element={<CreatePost />} />
+            <Route path="/post/:id" element={<PostDetail />} />
+            <Route
+              path="/profile/:userId?"
+              element={<ProfileDashboard />}
+            />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
+          </CommunitiesAuthProvider>
         </AuthProvider>
       </BrowserRouter>
     </ApolloProvider>

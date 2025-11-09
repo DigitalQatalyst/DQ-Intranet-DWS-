@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { LogOut, User, LogIn, Shield, BarChart3, Bell, MessageSquare } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/communities/components/ui/dialog';
 import { NotificationsDrawer } from '@/communities/components/notifications/NotificationsDrawer';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Badge } from '@/communities/components/ui/badge';
 import { BurgerMenuButton } from '@/communities/components/AppSidebar';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/communities/components/ui/sheet';
 import { Button } from '@/communities/components/ui/button';
@@ -149,7 +149,7 @@ export function NotificationsDrawer({
             <SheetTitle className="text-2xl flex items-center gap-2">
               <Bell className="h-6 w-6" />
               Notifications
-              {unreadCount > 0 && <Badge className="bg-blue-600 text-white">{unreadCount}</Badge>}
+              {unreadCount > 0 && <Badge className="bg-dq-navy text-white">{unreadCount}</Badge>}
             </SheetTitle>
             {unreadCount > 0 && <Button variant="secondary" size="sm" onClick={handleMarkAllRead} className="gap-2 px-3 py-1 text-xs">
                 <Check className="h-3 w-3" />

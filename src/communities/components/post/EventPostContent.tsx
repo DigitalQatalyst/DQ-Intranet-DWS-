@@ -57,7 +57,7 @@ export function EventPostContent({
           {/* Date & Time */}
           {startDateTime && <div className="flex items-start gap-3">
               <div className="bg-white p-2 rounded-lg border border-gray-200">
-                <Calendar className="h-5 w-5 text-blue-600" />
+                <Calendar className="h-5 w-5 text-dq-navy" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Date & Time</p>
@@ -73,7 +73,7 @@ export function EventPostContent({
           {/* Location */}
           {location && <div className="flex items-start gap-3">
               <div className="bg-white p-2 rounded-lg border border-gray-200">
-                <MapPin className="h-5 w-5 text-blue-600" />
+                <MapPin className="h-5 w-5 text-dq-navy" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Location</p>
@@ -95,7 +95,7 @@ export function EventPostContent({
             </div>
             {/* RSVP Buttons */}
             {!isEventPast && <div className="flex items-center gap-2">
-                <Button size="sm" variant={rsvpStatus === 'going' ? 'default' : 'outline'} className={rsvpStatus === 'going' ? 'bg-blue-600 hover:bg-blue-700' : ''} onClick={() => handleRsvp('going')}>
+                <Button size="sm" variant={rsvpStatus === 'going' ? 'default' : 'outline'} className={rsvpStatus === 'going' ? 'bg-dq-navy hover:bg-[#13285A]' : ''} onClick={() => handleRsvp('going')}>
                   Going
                 </Button>
                 <Button size="sm" variant={rsvpStatus === 'maybe' ? 'default' : 'outline'} className={rsvpStatus === 'maybe' ? 'bg-amber-500 hover:bg-amber-600' : ''} onClick={() => handleRsvp('maybe')}>
@@ -105,14 +105,14 @@ export function EventPostContent({
           </div>}
         {/* External Event Link */}
         {metadata?.event_url && <div className="pt-3 border-t border-gray-200">
-            <a href={metadata.event_url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-blue-600 hover:text-blue-700 hover:underline">
+            <a href={metadata.event_url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-dq-navy hover:text-[#13285A] hover:underline">
               <ExternalLink className="h-4 w-4 mr-1.5" />
               View event details
             </a>
           </div>}
       </div>
       {/* Event Description */}
-      <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600">
+      <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-dq-navy">
         {content_html ? <div dangerouslySetInnerHTML={{
         __html: content_html
       }} /> : content ? <p className="whitespace-pre-wrap leading-relaxed">{content}</p> : metadata?.description ? <p className="whitespace-pre-wrap leading-relaxed">

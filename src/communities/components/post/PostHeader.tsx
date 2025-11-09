@@ -38,7 +38,7 @@ export function PostHeader({
               {post.author_username}
             </span>}
           <span className="text-gray-400">•</span>
-          <Link to={`/community/${post.community_id}`} className="text-blue-600 hover:text-blue-700 transition-colors">
+          <Link to={`/community/${post.community_id}`} className="text-dq-navy hover:text-[#13285A] transition-colors">
             {post.community_name}
           </Link>
           <span className="text-gray-400">•</span>

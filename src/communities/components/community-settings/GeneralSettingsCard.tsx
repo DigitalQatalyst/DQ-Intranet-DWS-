@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Button } from '@/communities/components/ui/button';
 import { Input } from '@/communities/components/ui/input';

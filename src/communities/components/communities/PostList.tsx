@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/communities/components/ui/card';
 import { Button } from '@/communities/components/ui/button';

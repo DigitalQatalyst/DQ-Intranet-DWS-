@@ -34,7 +34,7 @@ export function PostCard({ post }: PostCardProps) {
   const getPostTypeBadge = (type: string) => {
     const badges = {
       event: 'bg-green-100 text-green-800',
-      poll: 'bg-blue-100 text-blue-800',
+      poll: 'bg-dq-navy/15 text-dq-navy',
       media: 'bg-purple-100 text-purple-800',
       article: 'bg-orange-100 text-orange-800',
       announcement: 'bg-red-100 text-red-800',
@@ -49,8 +49,8 @@ export function PostCard({ post }: PostCardProps) {
       <div className="p-6 pb-4">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-              <span className="text-indigo-600 font-medium text-sm">
+            <div className="w-10 h-10 bg-dq-navy/15 rounded-full flex items-center justify-center">
+              <span className="text-dq-navy font-medium text-sm">
                 {post.author_username.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -58,7 +58,7 @@ export function PostCard({ post }: PostCardProps) {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => navigate(`/communities/profile/${post.created_by}`)}
-                  className="font-medium text-gray-900 hover:text-indigo-600 transition-colors"
+                  className="font-medium text-gray-900 hover:text-dq-navy transition-colors"
                 >
                   {post.author_username}
                 </button>
@@ -71,7 +71,7 @@ export function PostCard({ post }: PostCardProps) {
               <div className="flex items-center space-x-2 mt-1">
                 <button
                   onClick={() => navigate(`/communities/community/${post.community_id}`)}
-                  className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+                  className="text-sm text-dq-navy hover:text-[#13285A] transition-colors"
                 >
                   {post.community_name}
                 </button>
@@ -120,7 +120,7 @@ export function PostCard({ post }: PostCardProps) {
           </button>
           <button
             onClick={() => navigate(`/communities/post/${post.id}`)}
-            className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors"
+            className="flex items-center space-x-2 text-gray-500 hover:text-dq-navy transition-colors"
           >
             <MessageSquare className="h-5 w-5" />
             <span className="text-sm">{post.comment_count || 0}</span>

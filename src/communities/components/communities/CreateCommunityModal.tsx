@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
 import { Button } from '@/communities/components/ui/button';

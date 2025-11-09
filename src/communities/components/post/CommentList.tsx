@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';

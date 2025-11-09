@@ -5,7 +5,7 @@ import { ScrollArea } from '@/communities/components/ui/scroll-area';
 import { Skeleton } from '@/communities/components/ui/skeleton';
 import { Badge } from '@/communities/components/ui/badge';
 import { AlertCircle, CheckCircle, EyeOff, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
-import { ModerationAPI } from '@/services/ModerationAPI';
+import { ModerationAPI } from '@/communities/services/ModerationAPI';
 import { cn } from '@/communities/lib/utils';
 type ActionFilter = 'all' | 'warn' | 'hide' | 'approve' | 'delete' | 'restore';
 interface ModerationLogCardProps {
@@ -22,7 +22,7 @@ const getActionIcon = (actionType: string) => {
     case 'approve':
       return <CheckCircle className="h-4 w-4 text-green-500" />;
     case 'restore':
-      return <RotateCcw className="h-4 w-4 text-blue-500" />;
+      return <RotateCcw className="h-4 w-4 text-dq-navy" />;
     case 'dismiss':
       return <AlertCircle className="h-4 w-4 text-gray-400" />;
     default:
@@ -39,7 +39,7 @@ const getActionColor = (actionType: string) => {
     case 'approve':
       return 'text-green-600 bg-green-50 border-green-200';
     case 'restore':
-      return 'text-blue-600 bg-blue-50 border-blue-200';
+      return 'text-dq-navy bg-dq-navy/10 border-dq-navy/30';
     case 'dismiss':
       return 'text-gray-600 bg-gray-50 border-gray-200';
     default:

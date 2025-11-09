@@ -6,7 +6,7 @@ import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } f
 import { TabsFeed } from '@/communities/components/feed/TabsFeed';
 import { FeedSidebar } from '@/communities/components/feed/FeedSidebar';
 import { InlineComposer } from '@/communities/components/post/InlineComposer';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
 import { Button } from '@/communities/components/ui/button';

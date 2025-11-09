@@ -1,4 +1,4 @@
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 export interface AnalyticsSummary {
   totalMembers: number;
   activePosts: number;

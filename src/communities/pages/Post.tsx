@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { MainLayout } from '@/communities/components/layout/MainLayout';
-import { Card, CardContent } from '@/communities/components/ui/card';
+import { MainLayout } from "../components/layout/MainLayout";
+import { Card, CardContent } from "../components/ui/card";
 export default function Post() {
   const {
     id

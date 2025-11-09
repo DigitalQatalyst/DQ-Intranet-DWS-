@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/communities/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/communities/components/ui/dropdown-menu';
 import { Shield, EyeOff, Check, Trash2, AlertTriangle } from 'lucide-react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { toast } from 'sonner';
 interface ModeratorToolbarProps {

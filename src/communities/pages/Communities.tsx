@@ -1,19 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/communities/contexts/AuthProvider';
-import { MainLayout } from '@/communities/components/layout/MainLayout';
-import { SearchBar } from '@/communities/components/communities/SearchBar';
-import { FilterSidebar, FilterConfig } from '@/communities/components/communities/FilterSidebar';
-import { CreateCommunityModal } from '@/communities/components/communities/CreateCommunityModal';
-import { supabase } from '@/communities/integrations/supabase/client';
-import { safeFetch } from '@/communities/utils/safeFetch';
-import { Button } from '@/communities/components/ui/button';
-import { Card } from '@/communities/components/ui/card';
+import { useAuth } from "../contexts/AuthProvider";
+import { MainLayout } from "../components/layout/MainLayout";
+import { SearchBar } from "../components/communities/SearchBar";
+import { FilterSidebar, FilterConfig } from "../components/communities/FilterSidebar";
+import { CreateCommunityModal } from "../components/communities/CreateCommunityModal";
+import { supabase } from "@/lib/supabaseClient";
+import { safeFetch } from "../utils/safeFetch";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
 import { PlusCircle, Filter, X, Home, ChevronRight } from 'lucide-react';
-import { CommunityCard } from '@/communities/components/Cards';
-import { Sheet, SheetContent, SheetTrigger } from '@/communities/components/ui/sheet';
-import { StickyActionButton } from '@/communities/components/Button';
+import { CommunityCard } from "../components/Cards/CommunityCard";
+import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
+import { StickyActionButton } from "../components/Button/StickyActionButton";
+
 interface Community {
   id: string;
   name: string;
@@ -21,6 +22,7 @@ interface Community {
   member_count: number;
   imageurl?: string;
   category?: string;
+  isprivate?: boolean;
 }
 export default function Communities() {
   const {
@@ -208,8 +210,8 @@ export default function Communities() {
   // Unified layout for both logged in and logged out users
   return <MainLayout title="Communities Directory" fullWidth={false}>
       <div className="space-y-6">
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+        {/* Search and Filters - Mobile/Tablet */}
+        <div className="lg:hidden bg-white rounded-lg border border-gray-200 shadow-sm p-4">
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search communities by name or description..." />
@@ -256,77 +258,141 @@ export default function Communities() {
           </div>
         </div>
 
-        {/* Active filters display */}
-        {Object.keys(filters).length > 0 && <div className="flex flex-wrap gap-2">
+        {/* Active filters display - Mobile */}
+        {Object.keys(filters).length > 0 && <div className="lg:hidden flex flex-wrap gap-2">
             {Object.entries(filters).map(([key, value]) => value && <div key={key} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-sm">
-                    <span>{value}</span>
-                    <button onClick={() => handleFilterChange(key, value)}>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>)}
+                  <span>{value}</span>
+                  <button onClick={() => handleFilterChange(key, value)}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>)}
             {Object.keys(filters).length > 0 && <button onClick={resetFilters} className="text-sm text-brand-blue hover:text-brand-darkBlue font-medium transition-colors duration-150 ease-in-out">
                 Clear All
               </button>}
           </div>}
 
-        {/* Communities Grid */}
-        <div>
-          {loading ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-              {[...Array(6)].map((_, idx) => <div key={idx} className="bg-white rounded-lg shadow-sm p-4 h-64 animate-pulse">
-                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6 mb-4"></div>
-                  <div className="flex justify-between mt-auto pt-4">
-                    <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-                    <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-                  </div>
-                </div>)}
-            </div> : error ? <div className="border border-red-200 bg-red-50 text-red-800 p-4 rounded-md">
-              {error.message}
-              <Button variant="secondary" size="sm" onClick={fetchCommunities} className="ml-4">
-                Retry
-              </Button>
-            </div> : searchQuery.trim() && filteredCommunities.length === 0 ? <div className="text-center py-8">
-              <p className="text-muted-foreground">
-                No communities match your search for "{searchQuery}"
-              </p>
-            </div> : filteredCommunities.length === 0 ? <div className="text-center py-8 space-y-4">
-              <p className="text-lg font-medium">No communities yet</p>
-              <p className="text-muted-foreground">
-                {user ? 'Be the first to create a community!' : 'Sign in to create and join communities!'}
-              </p>
-              {user && <StickyActionButton onClick={() => setCreateModalOpen(true)} buttonText="Create Your First Community" />}
-            </div> : <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
-                {filteredCommunities.map(community => {
-              const count = community.member_count || 0;
-              let activityLevel = 'low';
-              if (count > 50) activityLevel = 'high';else if (count > 10) activityLevel = 'medium';
-              const activeMembers = Math.floor(count * (0.6 + Math.random() * 0.3));
-              const categories = ['Technology', 'Business', 'Creative', 'Social', 'Education'];
-              const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-              const tags = ['Abu Dhabi', randomCategory, activityLevel === 'high' ? 'Popular' : 'Growing'];
-              const isPrivate = Math.random() > 0.7;
-              return <CommunityCard key={community.id} item={{
-                id: community.id,
-                name: community.name || 'Unnamed Community',
-                description: community.description || 'No description available',
-                memberCount: community.member_count || 0,
-                activeMembers: activeMembers,
-                category: randomCategory,
-                tags: tags,
-                imageUrl: community.imageurl || 'https://images.unsplash.com/photo-1534043464124-3be32fe000c9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-                isPrivate: isPrivate,
-                activityLevel: activityLevel as 'low' | 'medium' | 'high',
-                recentActivity: `New discussion started in ${community.name}`
-              }} isMember={userMemberships.has(community.id)} onJoin={() => handleJoinCommunity(community.id)} onViewDetails={() => handleViewCommunity(community.id)} />;
-            })}
+        {/* Desktop Layout with Sidebar */}
+        <div className="hidden lg:grid lg:grid-cols-[280px_1fr] gap-6">
+          {/* Filters Sidebar - Desktop */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-fit sticky top-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-semibold text-lg">Filters</h3>
+              {Object.keys(filters).length > 0 && <Button variant="ghost" size="sm" onClick={resetFilters} className="text-brand-blue text-sm font-medium hover:text-brand-darkBlue">
+                  Reset All
+                </Button>}
+            </div>
+            <FilterSidebar filters={filters} filterConfig={filterConfig} onFilterChange={handleFilterChange} onResetFilters={resetFilters} />
+          </div>
+
+          {/* Main Content Area - Desktop */}
+          <div className="space-y-6">
+            {/* Search Bar - Desktop */}
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search communities by name or description..." />
+                </div>
+                {/* Only show Create Community button for logged-in users */}
+                {user && <Button onClick={() => setCreateModalOpen(true)} className="bg-brand-blue hover:bg-brand-darkBlue text-white gap-2 transition-all duration-200 ease-in-out">
+                    <PlusCircle className="h-4 w-4" />
+                    Create Community
+                  </Button>}
               </div>
-              {filteredCommunities.length > 0 && <p className="text-sm text-muted-foreground text-center mt-6">
-                  Showing {filteredCommunities.length} of {communities.length} communities
-                </p>}
-            </>}
+            </div>
+
+            {/* Active filters display - Desktop */}
+            {Object.keys(filters).length > 0 && <div className="flex flex-wrap gap-2">
+                {Object.entries(filters).map(([key, value]) => value && <div key={key} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-sm">
+                      <span>{value}</span>
+                      <button onClick={() => handleFilterChange(key, value)}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>)}
+                {Object.keys(filters).length > 0 && <button onClick={resetFilters} className="text-sm text-brand-blue hover:text-brand-darkBlue font-medium transition-colors duration-150 ease-in-out">
+                    Clear All
+                  </button>}
+              </div>}
+
+            {/* Communities Grid - Responsive */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                {[...Array(6)].map((_, idx) => (
+                  <div key={idx} className="bg-white rounded-lg shadow-sm p-4 h-64 animate-pulse">
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6 mb-4"></div>
+                    <div className="flex justify-between mt-auto pt-4">
+                      <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                      <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="border border-red-200 bg-red-50 text-red-800 p-4 rounded-md">
+                {error.message}
+                <Button variant="secondary" size="sm" onClick={fetchCommunities} className="ml-4">
+                  Retry
+                </Button>
+              </div>
+            ) : searchQuery.trim() && filteredCommunities.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  No communities match your search for "{searchQuery}"
+                </p>
+              </div>
+            ) : filteredCommunities.length === 0 ? (
+              <div className="text-center py-8 space-y-4">
+                <p className="text-lg font-medium">No communities yet</p>
+                <p className="text-muted-foreground">
+                  {user ? 'Be the first to create a community!' : 'Sign in to create and join communities!'}
+                </p>
+                {user && <StickyActionButton onClick={() => setCreateModalOpen(true)} buttonText="Create Your First Community" />}
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                  {filteredCommunities.map(community => {
+                    const count = community.member_count || 0;
+                    let activityLevel = 'low';
+                    if (count > 50) activityLevel = 'high';
+                    else if (count > 10) activityLevel = 'medium';
+                    const activeMembers = Math.floor(count * (0.6 + Math.random() * 0.3));
+                    const categories = ['Technology', 'Business', 'Creative', 'Social', 'Education'];
+                    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+                    const tags = [randomCategory, activityLevel === 'high' ? 'Popular' : 'Growing'];
+                    return (
+                      <CommunityCard
+                        key={community.id}
+                        item={{
+                          id: community.id,
+                          name: community.name || 'Unnamed Community',
+                          description: community.description || 'No description available',
+                          memberCount: community.member_count || 0,
+                          activeMembers: activeMembers,
+                          category: community.category || randomCategory,
+                          tags: tags,
+                          imageUrl: community.imageurl || 'https://images.unsplash.com/photo-1534043464124-3be32fe000c9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                          isPrivate: community.isprivate || false,
+                          activityLevel: activityLevel as 'low' | 'medium' | 'high',
+                          recentActivity: `New discussion started in ${community.name}`
+                        }}
+                        isMember={userMemberships.has(community.id)}
+                        onJoin={() => handleJoinCommunity(community.id)}
+                        onViewDetails={() => handleViewCommunity(community.id)}
+                      />
+                    );
+                  })}
+                </div>
+                {filteredCommunities.length > 0 && (
+                  <p className="text-sm text-muted-foreground text-center mt-6">
+                    Showing {filteredCommunities.length} of {communities.length} communities
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         {/* Floating Create Button (mobile) - Only for logged-in users */}

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { Button } from '@/communities/components/ui/button';
 import { Input } from '@/communities/components/ui/input';
 import { Label } from '@/communities/components/ui/label';
@@ -129,10 +129,10 @@ export function MediaUploader({
   };
   return <div className="space-y-4">
       {/* Upload Area */}
-      <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400 bg-gray-50'}`} onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
+      <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${dragActive ? 'border-dq-navy bg-dq-navy/10' : 'border-gray-300 hover:border-gray-400 bg-gray-50'}`} onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
         <div className="flex flex-col items-center gap-3">
-          <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-            {uploading ? <Loader2 className="h-6 w-6 text-blue-600 animate-spin" /> : <Upload className="h-6 w-6 text-blue-600" />}
+          <div className="h-12 w-12 rounded-full bg-dq-navy/15 flex items-center justify-center">
+            {uploading ? <Loader2 className="h-6 w-6 text-dq-navy animate-spin" /> : <Upload className="h-6 w-6 text-dq-navy" />}
           </div>
           
           <div>
