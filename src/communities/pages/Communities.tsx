@@ -193,12 +193,10 @@ export default function Communities() {
     navigate(`/community/${communityId}`);
   }, [navigate]);
   const handleJoinCommunity = useCallback((communityId: string) => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    // Allow both authenticated and anonymous users to navigate to community detail page
+    // The join action will happen on the detail page
     navigate(`/community/${communityId}`);
-  }, [user, navigate]);
+  }, [navigate]);
   if (authLoading) {
     return <div className="flex min-h-screen items-center justify-center bg-[var(--gradient-subtle)]">
         <div className="animate-pulse text-muted-foreground">Loading...</div>

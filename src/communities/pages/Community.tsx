@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { supabase } from '@/communities/integrations/supabase/client';
 import { safeFetch } from '@/communities/utils/safeFetch';
+import { getAnonymousUserId } from '@/communities/utils/anonymousUser';
 import { MainLayout } from '@/communities/components/layout/MainLayout';
 import { Button } from '@/communities/components/ui/button';
 import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
@@ -75,9 +76,8 @@ export default function Community() {
     if (id) {
       fetchCommunity();
       fetchPosts();
-      if (user) {
-        checkMembership();
-      }
+      // Check membership for both authenticated and anonymous users
+      checkMembership();
     }
   }, [id, user]);
   useEffect(() => {
@@ -124,20 +124,48 @@ export default function Community() {
     setLoading(false);
   };
   const checkMembership = async () => {
-    if (!user || !id) return;
-    const query = supabase.from('memberships').select('id').eq('user_id', user.id).eq('community_id', id).maybeSingle();
+    if (!id) return;
+    
+    // Get user ID (authenticated user or anonymous user)
+    const userId = user?.id || getAnonymousUserId();
+    
+    const query = supabase.from('memberships').select('id').eq('user_id', userId).eq('community_id', id).maybeSingle();
     const [data] = await safeFetch(query);
     setIsMember(!!data);
   };
   const handleJoinLeave = async () => {
-    if (!user) {
-      toast.error('Please sign in to join communities');
+    if (!id) return;
+    
+    setJoinLoading(true);
+    
+    // Get user ID (authenticated user or anonymous user)
+    const userId = user?.id || getAnonymousUserId();
+    
+    // Validate community exists
+    const { data: communityData } = await supabase
+      .from('communities')
+      .select('id')
+      .eq('id', id)
+      .single();
+    
+    if (!communityData) {
+      toast.error('Community not found');
+      setJoinLoading(false);
       return;
     }
-    setJoinLoading(true);
-    if (isMember) {
+    
+    // Check if already a member
+    const { data: existingMembership } = await supabase
+      .from('memberships')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('community_id', id)
+      .maybeSingle();
+    
+    if (isMember || existingMembership) {
+      // Leave community
       const query = supabase.from('memberships').delete().match({
-        user_id: user.id,
+        user_id: userId,
         community_id: id
       });
       const [, error] = await safeFetch(query);
@@ -149,15 +177,25 @@ export default function Community() {
         setMemberCount(prev => Math.max(0, prev - 1));
       }
     } else {
+      // Join community
       const query = supabase.from('memberships').insert({
-        user_id: user.id,
+        user_id: userId,
         community_id: id
       });
       const [, error] = await safeFetch(query);
       if (error) {
-        toast.error('Failed to join community');
+        if (error.code === '23505') {
+          // Duplicate key error - user is already a member
+          toast.error('You are already a member of this community');
+          setIsMember(true);
+        } else if (error.code === '23503') {
+          // Foreign key violation
+          toast.error('Invalid community or user');
+        } else {
+          toast.error('Failed to join community');
+        }
       } else {
-        toast.success('Joined community!');
+        toast.success(user ? 'Joined community!' : 'Joined community as guest!');
         setIsMember(true);
         setMemberCount(prev => prev + 1);
       }
@@ -322,13 +360,24 @@ export default function Community() {
                     </div>
                     <div className="mt-6 md:mt-0 md:ml-8">
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-                        {!user ? <Button onClick={() => {}} className="bg-white text-blue-600 hover:bg-gray-100" disabled={true}>
-                            Login to Join
-                          </Button> : isMember ? <Button onClick={handleJoinLeave} variant="outline" className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50" disabled={joinLoading}>
+                        {isMember ? (
+                          <Button 
+                            onClick={handleJoinLeave} 
+                            variant="outline" 
+                            className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50" 
+                            disabled={joinLoading}
+                          >
                             {joinLoading ? 'Processing...' : 'Leave Community'}
-                          </Button> : <Button onClick={handleJoinLeave} className="bg-blue-600 text-white hover:bg-blue-700" disabled={joinLoading}>
-                            {joinLoading ? 'Processing...' : 'Join Community'}
-                          </Button>}
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={handleJoinLeave} 
+                            className="bg-blue-600 text-white hover:bg-blue-700" 
+                            disabled={joinLoading}
+                          >
+                            {joinLoading ? 'Processing...' : user ? 'Join Community' : 'Join as Guest'}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>

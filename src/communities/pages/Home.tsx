@@ -4,8 +4,7 @@ import { CommunitiesLayout } from '../CommunitiesLayout';
 import { supabase } from '@/communities/integrations/supabase/client';
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Button } from '@/communities/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
-import { LoginForm } from '@/communities/components/auth/LoginForm';
+// LoginForm and Dialog removed - anonymous users can now join communities
 import { useNavigate, Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Users, Sparkles, ChevronRight, MessageSquare, Clock, TrendingUp, Lightbulb, Network, Handshake } from 'lucide-react';
@@ -35,7 +34,7 @@ export default function Home() {
     loading: authLoading
   } = useAuth();
   const navigate = useNavigate();
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  // Login modal removed - anonymous users can now join communities
   const [communities, setCommunities] = useState<Community[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [communitiesLoading, setCommunitiesLoading] = useState(false);
@@ -123,7 +122,7 @@ export default function Home() {
                   growing network of changemakers shaping the future.
                 </p>
                 <div className="mt-6 flex items-center justify-center gap-4 flex-wrap">
-                  <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
+                  <Button onClick={() => navigate('/communities')} className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
                     <Sparkles className="mr-2 h-5 w-5" />
                     Join the Community
                   </Button>
@@ -342,7 +341,7 @@ export default function Home() {
                   ideas, and growing together on our platform.
                 </p>
                 <div className="mt-6 flex justify-center">
-                  <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
+                  <Button onClick={() => navigate('/communities')} className="bg-white text-indigo-700 hover:bg-white/90 font-medium px-6 py-2.5" size="lg">
                     <Sparkles className="mr-2 h-5 w-5" />
                     Join Now
                   </Button>
@@ -351,15 +350,7 @@ export default function Home() {
             </div>
           </section>
         </div>
-        {/* Login Modal */}
-        <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="sr-only">Sign In</DialogTitle>
-            </DialogHeader>
-            <LoginForm onSuccess={() => setLoginModalOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        {/* Login Modal removed - anonymous users can now join communities */}
       </div>
     </CommunitiesLayout>;
 }

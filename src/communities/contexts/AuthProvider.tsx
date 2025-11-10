@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/communities/integrations/supabase/client';
 import { toast } from 'sonner';
+import { clearAnonymousUserId } from '@/communities/utils/anonymousUser';
 interface User {
   id: string;
   email: string;
@@ -62,6 +63,8 @@ export function AuthProvider({
         };
         setUser(userData);
         localStorage.setItem(SESSION_KEY, JSON.stringify(userData));
+        // Clear anonymous user ID when user signs in
+        clearAnonymousUserId();
         toast.success(`Welcome back, ${userData.username || userData.email}!`);
         return true;
       }
@@ -75,6 +78,8 @@ export function AuthProvider({
   const signOut = () => {
     setUser(null);
     localStorage.removeItem(SESSION_KEY);
+    // Note: We don't clear anonymous user ID on sign out
+    // This allows users to maintain their guest memberships
     toast.success('Signed out successfully');
   };
   return <AuthContext.Provider value={{
