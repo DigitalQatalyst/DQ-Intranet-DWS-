@@ -195,7 +195,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
             to="/women-entrepreneurs"
             className="group px-8 py-3 rounded-lg border border-[#1A2E6E] bg-white text-[#1A2E6E] font-semibold shadow-lg inline-flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-[#1A2E6E] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#FB5535]"
           >
-            Explore Women Entrepreneurs Hub
+            Become a Lead
             <Users
               size={18}
               className="text-[#1A2E6E] transition-colors duration-300 group-hover:text-white"
