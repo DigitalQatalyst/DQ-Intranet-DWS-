@@ -53,19 +53,13 @@ ON public.memberships
 FOR SELECT
 USING (true);
 
--- Authenticated users can join communities
--- Note: This policy uses auth.uid() which requires Supabase Auth
--- For local auth compatibility, we also allow inserts with application-level validation
+-- Allow anonymous users to join communities (no authentication required)
+-- Note: Application should validate user_id before inserting
+-- This allows both anonymous and authenticated users to join
 CREATE POLICY "Allow authenticated insert memberships"
 ON public.memberships
 FOR INSERT
-WITH CHECK (
-    -- Allow if using Supabase Auth (auth.uid() matches user_id)
-    auth.uid()::text = user_id::text
-    OR
-    -- Allow for local auth (application-level validation required)
-    true
-);
+WITH CHECK (true);
 
 -- Allow users to delete their own memberships
 CREATE POLICY "Allow delete own memberships"
@@ -124,7 +118,7 @@ COMMENT ON POLICY "Allow public read memberships" ON public.memberships IS
     'Allows public (anon) users to read membership data - required for member counts';
 
 COMMENT ON POLICY "Allow authenticated insert memberships" ON public.memberships IS 
-    'Allows authenticated users to join communities - requires Supabase Auth (auth.uid())';
+    'Allows anonymous and authenticated users to join communities - no authentication required';
 
 COMMENT ON POLICY "Allow delete own memberships" ON public.memberships IS 
     'Allows users to leave communities by deleting their own membership';

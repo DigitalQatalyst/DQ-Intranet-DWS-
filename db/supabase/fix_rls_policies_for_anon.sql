@@ -43,13 +43,13 @@ ON public.memberships
 FOR SELECT
 USING (true);
 
--- Authenticated users can join communities
--- Note: This uses auth.uid() which works with Supabase Auth
--- For local auth, application should validate user_id matches session
+-- Allow anonymous users to join communities (no authentication required)
+-- Note: Application should validate user_id before inserting
+-- This allows both anonymous and authenticated users to join
 CREATE POLICY "Allow authenticated insert memberships"
 ON public.memberships
 FOR INSERT
-WITH CHECK (auth.uid()::text = user_id::text);
+WITH CHECK (true);
 
 -- =====================================================
 -- 4. Additional Policies for Local Auth Compatibility
@@ -109,5 +109,5 @@ COMMENT ON POLICY "Allow public read memberships" ON public.memberships IS
     'Allows anon role to read membership data - required for member counts in views';
 
 COMMENT ON POLICY "Allow authenticated insert memberships" ON public.memberships IS 
-    'Allows authenticated users to join communities - requires Supabase Auth (auth.uid())';
+    'Allows anonymous and authenticated users to join communities - no authentication required';
 

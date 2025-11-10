@@ -188,6 +188,62 @@ async function testGetCommunityMembersRPC() {
   }
 }
 
+async function testAnonymousMembershipInsert() {
+  console.log('📋 Test 6: Testing anonymous membership insert (anon role)...');
+  try {
+    // First, get a community ID and a user ID to test with
+    const { data: communities } = await supabase
+      .from('communities')
+      .select('id')
+      .limit(1)
+      .single();
+    
+    if (!communities || !communities.id) {
+      console.log('   ⚠️  No communities found to test membership insert');
+      return true; // Not a failure, just no data
+    }
+    
+    // Try to insert a membership (this should work for anonymous users)
+    // Note: Using a test UUID - in real scenario, this would be validated by application
+    const testUserId = '00000000-0000-0000-0000-000000000001';
+    const { data, error } = await supabase
+      .from('memberships')
+      .insert({
+        user_id: testUserId,
+        community_id: communities.id
+      })
+      .select();
+    
+    if (error) {
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        console.error('   ❌ Permission denied - Anonymous users cannot insert memberships');
+        console.error(`   Error: ${error.message}`);
+        return false;
+      } else if (error.code === '23505' || error.message.includes('duplicate')) {
+        console.log('   ⚠️  Membership already exists (this is expected if test was run before)');
+        return true; // Not a failure, just duplicate
+      } else {
+        console.error(`   ❌ Error: ${error.message}`);
+        return false;
+      }
+    } else {
+      console.log(`   ✅ Success! Anonymous user can insert memberships`);
+      
+      // Clean up: Delete the test membership
+      await supabase
+        .from('memberships')
+        .delete()
+        .eq('user_id', testUserId)
+        .eq('community_id', communities.id);
+      
+      return true;
+    }
+  } catch (error) {
+    console.error(`   ❌ Exception: ${error.message}`);
+    return false;
+  }
+}
+
 async function main() {
   console.log('🚀 Starting RLS Policy Verification...');
   console.log('');
@@ -198,6 +254,7 @@ async function main() {
     communitiesWithCountsView: false,
     getFeedRPC: false,
     getCommunityMembersRPC: false,
+    anonymousMembershipInsert: false,
   };
   
   // Run tests
@@ -216,6 +273,10 @@ async function main() {
   results.getCommunityMembersRPC = await testGetCommunityMembersRPC();
   console.log('');
   
+  // Test anonymous membership insert
+  results.anonymousMembershipInsert = await testAnonymousMembershipInsert();
+  console.log('');
+  
   // Summary
   console.log('📊 Test Results Summary:');
   console.log('');
@@ -224,6 +285,7 @@ async function main() {
   console.log(`   Communities With Counts View: ${results.communitiesWithCountsView ? '✅ PASS' : '❌ FAIL'}`);
   console.log(`   Get Feed RPC: ${results.getFeedRPC ? '✅ PASS' : '❌ FAIL'}`);
   console.log(`   Get Community Members RPC: ${results.getCommunityMembersRPC ? '✅ PASS' : '❌ FAIL'}`);
+  console.log(`   Anonymous Membership Insert: ${results.anonymousMembershipInsert ? '✅ PASS' : '❌ FAIL'}`);
   console.log('');
   
   const allPassed = Object.values(results).every(r => r === true);

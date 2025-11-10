@@ -81,11 +81,14 @@ ON public.memberships
 FOR SELECT
 USING (true);
 
--- Authenticated users can join communities
+-- Allow anonymous users to join communities (no authentication required)
 CREATE POLICY "Allow authenticated insert memberships"
 ON public.memberships
 FOR INSERT
-WITH CHECK (auth.uid()::text = user_id::text);
+WITH CHECK (true);
+
+-- Grant INSERT permission to anon role
+GRANT INSERT ON public.memberships TO anon;
 ```
 
 ### 3. Grant Permissions to Anon Role
@@ -99,6 +102,10 @@ GRANT SELECT ON public.memberships TO anon;
 GRANT SELECT ON public.communities_with_counts TO anon;
 GRANT SELECT ON public.posts_with_meta TO anon;
 GRANT SELECT ON public.posts_with_reactions TO anon;
+
+-- Grant INSERT permission on memberships (for anonymous joins)
+GRANT INSERT ON public.memberships TO anon;
+GRANT INSERT ON public.memberships TO authenticated;
 
 -- Grant EXECUTE permission on RPC functions
 GRANT EXECUTE ON FUNCTION public.get_feed TO anon;

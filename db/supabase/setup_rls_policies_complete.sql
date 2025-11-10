@@ -55,11 +55,12 @@ ON public.memberships
 FOR SELECT
 USING (true);
 
--- Authenticated users can join communities
+-- Allow anonymous users to join communities (no authentication required)
+-- Note: Application should validate user_id before inserting
 CREATE POLICY "Allow authenticated insert memberships"
 ON public.memberships
 FOR INSERT
-WITH CHECK (auth.uid()::text = user_id::text);
+WITH CHECK (true);
 
 -- =====================================================
 -- 4. Grant Permissions to Anon Role
@@ -68,6 +69,10 @@ WITH CHECK (auth.uid()::text = user_id::text);
 -- Grant SELECT permission on tables to anon role
 GRANT SELECT ON public.communities TO anon;
 GRANT SELECT ON public.memberships TO anon;
+
+-- Grant INSERT permission on memberships to anon role (for anonymous joins)
+GRANT INSERT ON public.memberships TO anon;
+GRANT INSERT ON public.memberships TO authenticated;
 
 -- Grant SELECT permission on views to anon role
 GRANT SELECT ON public.communities_with_counts TO anon;
@@ -228,7 +233,7 @@ COMMENT ON POLICY "Allow public read memberships" ON public.memberships IS
     'Allows anon role to read membership data - required for member counts in views';
 
 COMMENT ON POLICY "Allow authenticated insert memberships" ON public.memberships IS 
-    'Allows authenticated users to join communities - requires Supabase Auth (auth.uid())';
+    'Allows anonymous and authenticated users to join communities - no authentication required';
 
 -- =====================================================
 -- SUCCESS MESSAGE
