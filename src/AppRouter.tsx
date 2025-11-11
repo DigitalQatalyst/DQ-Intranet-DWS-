@@ -8,6 +8,7 @@ import { App } from './App';
 
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
 import LmsCourseDetailPage from "./pages/lms/LmsCourseDetailPage";
+import LmsCourseReviewsPage from "./pages/lms/LmsCourseReviewsPage";
 import LmsCourseDetail from "./pages/LmsCourseDetail";
 import LmsCourses from "./pages/LmsCourses";
 import AssetLibraryPage from "./pages/assetLibrary";
@@ -63,7 +64,8 @@ export function AppRouter() {
             <Route path="/*" element={<App />} />
             <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
             <Route path="/lms" element={<LmsCourses />} />
-            <Route path="/lms/:slug" element={<LmsCourseDetail />} />
+            <Route path="/lms/:slug/reviews" element={<LmsCourseReviewsPage />} />
+            <Route path="/lms/:slug" element={<LmsCourseDetailPage />} />
             <Route
               path="/onboarding/:itemId"
               element={

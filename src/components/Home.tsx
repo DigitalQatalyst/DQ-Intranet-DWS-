@@ -270,11 +270,11 @@ export const HomePage: React.FC = () => {
       finance: [
         {
           id: "dq-lms-courses",
-          title: "DQ LMS Courses",
+          title: "Learning Center",
           description:
             "Access DQ's Learning Hub to grow skills and master courses that shape your professional journey",
           icon: <GraduationCap />,
-          path: "/marketplace/courses",
+          path: "/lms",
           isActive: true,
         },
         {

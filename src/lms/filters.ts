@@ -12,6 +12,8 @@ export type Facets = {
   department?: string[];
   owner?: string[];
   track?: string[];
+  provider?: string[];
+  courseType?: string[];
 };
 
 const allowedLocationSet = new Set<string>(LOCATION_ALLOW);
@@ -33,7 +35,9 @@ export const parseFacets = (sp: URLSearchParams): Facets => {
     status: list('status'),
     department: list('department'),
     owner: list('owner'),
-    track: list('track')
+    track: list('track'),
+    provider: list('provider'),
+    courseType: list('courseType')
   };
 
   if (!facets.level?.length) {
@@ -64,6 +68,8 @@ export const applyFilters = <
     status?: string;
     department?: string[];
     owner?: string;
+    provider?: string;
+    courseType?: string;
   }
 >(
   items: T[],
@@ -95,6 +101,8 @@ export const applyFilters = <
         facets.department
       ) &&
       inOne(item.owner, facets.owner) &&
-      inOne(item.status, facets.status)
+      inOne(item.status, facets.status) &&
+      inOne(item.provider, facets.provider) &&
+      inOne(item.courseType, facets.courseType)
     );
   });

@@ -98,8 +98,8 @@ export function Footer({
             <AccordionSection title="For You">
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    DQ LMS Courses
+                  <a href="/lms" className="text-white/90 hover:text-white transition-colors text-sm block">
+                    Learning Center
                   </a>
                 </li>
                 <li>
@@ -219,8 +219,8 @@ export function Footer({
               <h3 className="font-semibold text-lg mb-6">For You</h3>
               <ul className="space-y-4">
                 <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    DQ LMS Courses
+                  <a href="/lms" className="text-white/90 hover:text-white transition-colors text-sm">
+                    Learning Center
                   </a>
                 </li>
                 <li>

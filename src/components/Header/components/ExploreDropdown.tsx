@@ -50,10 +50,10 @@ const marketplaces: Marketplace[] = [
   },
   {
     id: 'course',
-    name: 'DQ LMS Courses',
+    name: 'Learning Center',
     description: '7x GHC, 6x Digital, 12x HoV, 1x Day in DQ, Key Tools.',
     icon: GraduationCapIcon,
-    href: '/marketplace/courses',
+    href: '/lms',
   },
   {
     id: 'investment',

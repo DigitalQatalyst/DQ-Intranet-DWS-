@@ -25,7 +25,6 @@ export const CATEGORY_OPTS = [
   '6x Digital',
   'DWS',
   'DXP',
-  'Day in DQ',
   'Key Tools'
 ] as const;
 
