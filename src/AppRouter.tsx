@@ -25,6 +25,7 @@ import { ApolloProvider } from "@apollo/client/react";
 import EventsPage from "./pages/events/EventsPage";
 import KfBot from "./bot/KfBot";
 import ThankYou from "./pages/ThankYou";
+import WomenEntrepreneursLeadPage from "./pages/WomenEntrepreneursLeadPage";
 
 export function AppRouter() {
   const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
@@ -112,6 +113,10 @@ export function AppRouter() {
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/communities/*" element={<CommunitiesRouter />} />
+            <Route
+              path="/women-entrepreneurs"
+              element={<WomenEntrepreneursLeadPage />}
+            />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />

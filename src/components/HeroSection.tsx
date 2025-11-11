@@ -5,7 +5,6 @@ import {
   FadeInUpOnScroll,
   StaggeredFadeIn,
 } from "./AnimationUtils";
-import { scrollToReadyMove } from "../utils/scroll";
 import { Link } from "react-router-dom";
 import { useAuth } from "./Header";
 interface HeroSectionProps {
@@ -31,14 +30,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
       setPrompt("");
       // Here you would typically handle the actual AI response
     }, 1500);
-  };
-  const scrollToMarketplaces = () => {
-    const marketplacesSection = document.getElementById("marketplaces-section");
-    if (marketplacesSection) {
-      marketplacesSection.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
   };
   // Show suggestion pills with delay after focus
   useEffect(() => {
@@ -192,20 +183,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
               <span className="absolute inset-0 bg-white/20 transform scale-0 opacity-0 group-hover:scale-[2.5] group-hover:opacity-100 rounded-full transition-all duration-700 origin-center"></span>
             </span>
           </Link>
-          <a
-            href="#ready-move"
+          <Link
+            to="/women-entrepreneurs"
             className="group px-8 py-3 rounded-lg border border-[#1A2E6E] bg-white text-[#1A2E6E] font-semibold shadow-lg inline-flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-[#1A2E6E] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#FB5535]"
-            onClick={(event) => {
-              event.preventDefault();
-              scrollToReadyMove();
-            }}
           >
             Become a Lead
             <Users
               size={18}
               className="text-[#1A2E6E] transition-colors duration-300 group-hover:text-white"
             />
-          </a>
+          </Link>
         </StaggeredFadeIn>
       </div>
       {/* Scroll indicator with animation */}
