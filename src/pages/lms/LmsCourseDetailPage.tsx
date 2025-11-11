@@ -93,7 +93,7 @@ const getLessonTypeLabel = (type: string) => {
   }
 };
 
-type TabType = 'highlights' | 'outcomes' | 'details' | 'curriculum';
+type TabType = 'highlights' | 'outcomes' | 'details' | 'curriculum' | 'faq';
 
 export const LmsCourseDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -130,14 +130,15 @@ export const LmsCourseDetailPage: React.FC = () => {
         <div className="flex-grow flex items-center justify-center px-4">
           <div className="text-center max-w-md">
             <h2 className="text-2xl font-semibold text-gray-900 mb-3">
-              Course Not Found
+              Course or Track Not Found
             </h2>
             <p className="text-gray-600 mb-6">
-              We couldn't locate that LMS course. Head back to the learning center to explore the latest learning paths.
+              We couldn't locate that course or track. Head back to the learning center to explore the latest learning paths.
             </p>
             <button
               onClick={() => navigate('/lms')}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              style={{ backgroundColor: '#030F35' }}
             >
               Back to Learning Center
             </button>
@@ -158,11 +159,13 @@ export const LmsCourseDetailPage: React.FC = () => {
   const averageRating = course.rating || 0;
   const reviewCount = course.reviewCount || 0;
 
+  const isTrack = course.courseType === 'Course (Bundles)';
   const tabs = [
-    { id: 'highlights' as TabType, label: 'Course Highlights' },
+    { id: 'highlights' as TabType, label: isTrack ? 'Track Highlights' : 'Course Highlights' },
     { id: 'outcomes' as TabType, label: 'Learning Outcomes' },
-    { id: 'details' as TabType, label: 'Course Details' },
-    { id: 'curriculum' as TabType, label: 'Curriculum' },
+    { id: 'details' as TabType, label: isTrack ? 'Track Details' : 'Course Details' },
+    { id: 'curriculum' as TabType, label: isTrack ? 'Track Curriculum' : 'Course Curriculum' },
+    ...(isTrack && course.faq && course.faq.length > 0 ? [{ id: 'faq' as TabType, label: 'FAQ' }] : []),
   ];
 
   return (
@@ -302,11 +305,11 @@ export const LmsCourseDetailPage: React.FC = () => {
         <div className="container mx-auto px-4 md:px-6 max-w-7xl py-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-8">
-              {/* Course/Track Highlights Tab */}
+              {/* Track/Course Highlights Tab */}
               {activeTab === 'highlights' && (
                 <section className="space-y-6">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {course.courseType === 'Course (Bundles)' ? 'Track Highlights' : 'Course Highlights'}
+                    {isTrack ? 'Track Highlights' : 'Course Highlights'}
                   </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                     {course.highlights.map((highlight) => (
@@ -339,17 +342,17 @@ export const LmsCourseDetailPage: React.FC = () => {
               </section>
               )}
 
-              {/* Course/Track Details Tab */}
+              {/* Track/Course Details Tab */}
               {activeTab === 'details' && (
                 <section className="space-y-6">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {course.courseType === 'Course (Bundles)' ? 'Track Details' : 'Course Details'}
+                    {isTrack ? 'Track Details' : 'Course Details'}
                   </h2>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                     <p className="text-gray-700 leading-relaxed mb-6">
                       {course.summary}
                     </p>
-                    {course.courseType === 'Course (Bundles)' ? (
+                    {isTrack ? (
                       // Track Details: Show total hours, videos, articles, labs
                       (() => {
                         // Calculate track stats from curriculum
@@ -451,7 +454,9 @@ export const LmsCourseDetailPage: React.FC = () => {
               {activeTab === 'curriculum' && (
                 <section className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900">Course Curriculum</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {isTrack ? 'Track Curriculum' : 'Course Curriculum'}
+                    </h2>
                     {course.curriculum && course.curriculum.length > 0 && (
                       <span className="text-sm text-gray-600">
                         {course.curriculum.length} {course.curriculum.length === 1 ? 'item' : 'items'}
@@ -463,7 +468,6 @@ export const LmsCourseDetailPage: React.FC = () => {
                       {course.curriculum
                         .sort((a, b) => a.order - b.order)
                         .map((item) => {
-                          const isTrack = course.courseType === 'Course (Bundles)';
                           const isCourse = course.courseType === 'Course (Multi-Lessons)';
                           const isSingleLesson = course.courseType === 'Course (Single Lesson)';
 
@@ -862,8 +866,36 @@ export const LmsCourseDetailPage: React.FC = () => {
                 </section>
               )}
 
-              {/* Track Information */}
-              {course.track && (
+              {/* FAQ Tab (only for tracks) */}
+              {activeTab === 'faq' && isTrack && course.faq && course.faq.length > 0 && (
+                <section className="space-y-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <HelpCircle size={24} style={{ color: '#030F35' }} />
+                    <h2 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
+                  </div>
+                  <div className="space-y-4">
+                    {course.faq.map((item, index) => (
+                      <div
+                        key={index}
+                        className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                      >
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-start">
+                          <span className="mr-3 flex-shrink-0" style={{ color: '#030F35' }}>
+                            Q{index + 1}:
+                          </span>
+                          <span>{item.question}</span>
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed ml-8">
+                          {item.answer}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Track Information - Only show for courses that are part of a track, not for tracks themselves */}
+              {course.track && !isTrack && (
                 <section className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Part of {course.track}
@@ -884,6 +916,39 @@ export const LmsCourseDetailPage: React.FC = () => {
                         </Link>
                       ))}
                     </div>
+                  )}
+                </section>
+              )}
+
+              {/* Track Courses Information - Show for tracks to highlight courses within the track */}
+              {isTrack && course.curriculum && course.curriculum.length > 0 && (
+                <section className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Courses in this Track
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    This track contains {course.curriculum.length} {course.curriculum.length === 1 ? 'course' : 'courses'}. Complete all courses to master the full learning journey. Each course can be accessed individually, and you can view the detailed curriculum in the Curriculum tab above.
+                  </p>
+                  {course.curriculum.slice(0, 5).map((item) => (
+                    <div key={item.id} className="mb-2">
+                      {item.courseSlug ? (
+                        <Link
+                          to={`/lms/${item.courseSlug}`}
+                          className="font-medium text-sm hover:underline flex items-center gap-1"
+                          style={{ color: '#030F35' }}
+                        >
+                          {item.title}
+                          <ChevronRightIcon size={14} />
+                        </Link>
+                      ) : (
+                        <span className="text-sm text-gray-700">{item.title}</span>
+                      )}
+                    </div>
+                  ))}
+                  {course.curriculum.length > 5 && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      and {course.curriculum.length - 5} more {course.curriculum.length - 5 === 1 ? 'course' : 'courses'}
+                    </p>
                   )}
                 </section>
               )}
@@ -982,7 +1047,9 @@ export const LmsCourseDetailPage: React.FC = () => {
             <aside className="lg:col-span-4">
               <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden sticky top-24">
                 <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900">Course Summary</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {isTrack ? 'Track Summary' : 'Course Summary'}
+                  </h3>
                 </div>
                 <div className="p-4 space-y-4">
                   <div className="flex justify-between text-sm text-gray-600">

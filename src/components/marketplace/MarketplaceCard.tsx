@@ -216,7 +216,11 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
           <button onClick={handleViewDetails} className="px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors whitespace-nowrap min-w-[120px] flex-1">
             {config.secondaryCTA}
           </button>
-          <button onClick={handlePrimaryAction} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors whitespace-nowrap flex-1">
+          <button 
+            onClick={handlePrimaryAction} 
+            className="px-4 py-2 text-sm font-bold text-white rounded-md hover:opacity-90 transition-colors whitespace-nowrap flex-1"
+            style={{ backgroundColor: '#030F35' }}
+          >
             {config.primaryCTA}
           </button>
         </div>

@@ -54,6 +54,10 @@ export type LmsDetail = {
     description: string;
     link?: string;
   }>;
+  faq?: Array<{
+    question: string;
+    answer: string;
+  }>;
   // Curriculum structure based on course type:
   // Track (Bundles): Contains courses, each course has topics, topics have lessons
   // Course (Multi-Lessons): Contains topics, topics have lessons
@@ -435,6 +439,28 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       'Use standardized requests and templates',
       'Read status from dashboards and reports',
       'Troubleshoot common blockers fast'
+    ],
+    faq: [
+      {
+        question: 'What are the requirements for taking this track?',
+        answer: 'This track is designed for team members who work with Digital Workspace Services (DWS). Basic familiarity with DQ tools and workflows is recommended. You should have access to DWS systems, which will be provided if needed.'
+      },
+      {
+        question: 'How long does it take to complete the Working in DWS track?',
+        answer: 'The Working in DWS track can be completed at your own pace. Most participants finish the core content within 2-4 weeks, depending on the time dedicated. The track includes hands-on exercises and practical applications.'
+      },
+      {
+        question: 'Do I need prior experience with DWS?',
+        answer: 'No prior experience is required. The track starts with DWS basics and progressively covers more advanced topics. However, having basic familiarity with DQ workflows will help you get the most out of the track.'
+      },
+      {
+        question: 'What tools and systems are covered?',
+        answer: 'The track covers planners, dashboards, request flows, trackers, and other essential DWS tools. You will learn how to navigate these systems and use them effectively in your daily work.'
+      },
+      {
+        question: 'Is there support available if I encounter issues?',
+        answer: 'Yes, each course includes support resources and documentation. You can also reach out to the Tech (Microsoft) team or your DWS administrator for assistance with specific issues or questions.'
+      }
     ],
     testimonials: [
       {
@@ -869,6 +895,28 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       'Apply leadership principles in real scenarios',
       'Build a comprehensive leadership toolkit'
     ],
+    faq: [
+      {
+        question: 'What are the requirements for taking this track?',
+        answer: 'This track is designed for Lead-level team members. Prior experience with DQ fundamentals and basic understanding of GHC frameworks is recommended, though not required. The track is suitable for both new leaders and experienced leaders looking to enhance their skills.'
+      },
+      {
+        question: 'How long does it take to complete the Leadership Track?',
+        answer: 'The Leadership Track is designed as a comprehensive learning journey. While the duration varies based on your pace, most participants complete the track within 8-12 weeks when dedicating 5-10 hours per week to learning.'
+      },
+      {
+        question: 'Can I take individual courses from this track?',
+        answer: 'Yes, all courses within the Leadership Track can be taken individually. However, we recommend following the track sequence for the best learning experience, as each course builds upon the previous one.'
+      },
+      {
+        question: 'What happens if I get stuck on a course?',
+        answer: 'Each course includes access to support resources, discussion forums, and mentorship opportunities. You can also reach out to the course provider or your learning coordinator for assistance.'
+      },
+      {
+        question: 'Do I receive a certificate upon completion?',
+        answer: 'Yes, upon successful completion of all courses in the Leadership Track, you will receive a Leadership Track completion certificate that recognizes your achievement and skills development.'
+      }
+    ],
     // Track (Bundles) - contains courses with topics and lessons
     curriculum: [
       {
@@ -1023,6 +1071,32 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       'Set up all necessary tools and access',
       'Understand DQ culture and operating models',
       'Deliver your first task with confidence'
+    ],
+    faq: [
+      {
+        question: 'What are the requirements for taking this track?',
+        answer: 'This track is designed for all new team members joining DQ. No prior experience is required. You will need access to DQ systems and tools, which will be provided during the onboarding process.'
+      },
+      {
+        question: 'How long does the onboarding track take?',
+        answer: 'The Onboarding Track is structured as a seven-day sprint, with guided activities and tasks for each day. Most new team members complete the core onboarding within the first week, with additional resources available for ongoing reference.'
+      },
+      {
+        question: 'What tools do I need access to before starting?',
+        answer: 'You will receive access to all necessary tools and systems as part of the onboarding process. The track includes setup guides and checklists to ensure you have everything you need to get started.'
+      },
+      {
+        question: 'Can I skip certain parts of the onboarding?',
+        answer: 'While the onboarding track is designed to be comprehensive, you can work with your manager or onboarding coordinator to customize your learning path based on your role and prior experience. However, we recommend completing all core modules for the best experience.'
+      },
+      {
+        question: 'What support is available during onboarding?',
+        answer: 'You will be assigned an onboarding buddy or mentor who can help answer questions and provide guidance. Additionally, each course includes support resources, and you can reach out to the DQ HRA team for assistance at any time.'
+      },
+      {
+        question: 'What happens after I complete the onboarding track?',
+        answer: 'After completing the onboarding track, you will have access to additional learning resources and can begin exploring other courses and tracks in the Learning Center. Your manager will also help you identify your next learning steps based on your role and career goals.'
+      }
     ],
     testimonials: [
       {

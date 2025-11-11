@@ -16,6 +16,7 @@ import {
   CATEGORY_OPTS,
   DELIVERY_OPTS
 } from "../utils/lmsFilters";
+import { SFIA_LEVELS } from "../lms/config";
 import { BookOpenCheck } from "lucide-react";
 
 const toggleFilter = (
@@ -218,6 +219,11 @@ export const LmsCourses: React.FC = () => {
             ]
       },
       {
+        id: "sfiaRating",
+        title: "Rating - SFIA",
+        options: SFIA_LEVELS.map((level) => ({ id: level.code, name: level.label }))
+      },
+      {
         id: "location",
         title: "Location/Studio",
         options: LOCATION_OPTS.map((l) => ({ id: l, name: l }))
@@ -249,6 +255,7 @@ export const LmsCourses: React.FC = () => {
       category: facets.category || [],
           provider: facets.provider || [],
           courseType: facets.courseType || [],
+      sfiaRating: facets.sfiaRating || [],
       location: facets.location || [],
       audience: facets.audience || []
         };
