@@ -640,7 +640,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <li aria-current="page">
                   <div className="flex items-center">
                     <ChevronRightIcon size={16} className="text-gray-400" />
-                    <span className="ml-1 text-gray-700 md:ml-2">Guidelines</span>
+                    <span className="ml-1 text-gray-700 md:ml-2">{config.title}</span>
                   </div>
                 </li>
               </>

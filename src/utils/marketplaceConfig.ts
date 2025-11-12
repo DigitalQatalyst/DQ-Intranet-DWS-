@@ -891,8 +891,8 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     ...knowledgeHubBaseConfig,
     id: 'guides',
     route: '/marketplace/guides',
-    title: 'Guidelines',
-    description: 'Access practical guidelines, templates, and processes to support everyday delivery and collaboration.'
+    title: 'DQ Media Center',
+    description: 'Explore the latest DQ stories, highlights, and resources to keep every team informed and inspired.'
   }
 };
 // Helper to get config by marketplace type

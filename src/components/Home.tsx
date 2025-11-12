@@ -382,11 +382,11 @@ export const HomePage: React.FC = () => {
         },
         {
           id: "news-announcements",
-          title: "News & Announcements",
+          title: "DQ Media Center",
           description:
             "See daily DQ updates, success stories, and highlights that keep every team informed and inspired.",
           icon: <Newspaper />,
-          path: "/marketplace/guides",
+          path: "/marketplace/opportunities",
           isActive: true,
         },
       ],

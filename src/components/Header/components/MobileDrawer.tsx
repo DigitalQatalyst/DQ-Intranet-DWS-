@@ -59,8 +59,8 @@ const marketplaces = [{
   href: '/marketplace/opportunities'
 }, {
   id: 'guides',
-  name: 'Guidelines Marketplace',
-  description: 'Access practical guidelines, templates, and processes.',
+  name: 'DQ Media Center',
+  description: 'Stories, highlights, and resources from across DQ.',
   icon: BookOpen,
   href: '/marketplace/guides'
 }];

@@ -8,6 +8,7 @@ import { DollarSign, Briefcase, Calendar, BookOpen } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 import NewsPage from './NewsPage';
 import NewsDetailPage from './NewsDetailPage';
+import JobDetailPage from './JobDetailPage';
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
 // Promo cards for courses marketplace
 const coursePromoCards = [{
@@ -130,10 +131,9 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/news" element={<NewsPage />} />
       <Route path="/news/:id" element={<NewsDetailPage />} />
       <Route path="/opportunities" element={<NewsPage />} />
-      <Route path="/opportunities/:id" element={<NewsDetailPage />} />
+      <Route path="/opportunities/:id" element={<JobDetailPage />} />
       {/* Asset Library */}
       <Route path="/asset-library" element={<AssetLibraryPage />} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
     </Routes>;
 };
-
