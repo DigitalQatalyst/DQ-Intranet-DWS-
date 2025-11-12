@@ -4,7 +4,7 @@ import { Badge } from '@/communities/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
 import { Users, TrendingUp, Calendar, Sparkles } from 'lucide-react';
 import { Button } from '@/communities/components/ui/button';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useAuth } from '@/communities/contexts/AuthProvider';

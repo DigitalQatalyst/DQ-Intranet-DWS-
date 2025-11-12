@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { format } from 'date-fns';
 import { Skeleton } from '@/communities/components/ui/skeleton';
@@ -198,7 +198,7 @@ export function ReportsTable({
                   <div className="flex items-center gap-2">
                     {getTypeIcon(report.report_type)}
                     <span className="capitalize text-sm">{report.report_type}</span>
-                    {report.reportCount && report.reportCount > 1 && <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">
+                    {report.reportCount && report.reportCount > 1 && <Badge variant="secondary" className="ml-2 bg-dq-navy/15 text-dq-navy border-dq-navy/30 hover:bg-dq-navy/15">
                         {report.reportCount} reports
                       </Badge>}
                   </div>

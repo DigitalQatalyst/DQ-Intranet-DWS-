@@ -1,25 +1,59 @@
-import { useEffect, useState } from "react";
-import { CalendarView } from "./CalendarView";
-import { ListView } from "./ListView";
-import { FilterPanel } from "./FilterPanel";
-import { useEventsData } from "./useEventsData";
-import {
-  CalendarIcon,
-  ListIcon,
-  RefreshCw,
-  AlertCircle,
-} from "lucide-react";
-import { Header } from "../Header";
-import { Footer } from "../Footer";
+import React, { useEffect, useState } from 'react';
+import { CalendarView } from './CalendarView';
+import { ListView } from './ListView';
+import { FilterPanel } from './FilterPanel';
+import { useEventsData } from './useEventsData';
+import { CalendarIcon, ListIcon, RefreshCw, AlertCircle } from 'lucide-react';
+import { Header } from '../Header';
+import { Footer } from '../Footer';
 export type Event = {
   id: string;
   title: string;
   start: Date;
   end: Date;
-  category: "Internal" | "Client" | "Training" | "Launches";
+  category: 'Internal' | 'Client' | 'Training' | 'Launches' | 'General' | 'Community';
   description: string;
   location: string;
 };
+
+// Interface for Supabase event data
+interface SupabaseEventView {
+  id: string;
+  title: string;
+  description: string | null;
+  start_time: string;
+  end_time: string;
+  category: string;
+  location: string;
+}
+
+interface EventsTableRow {
+  id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  event_time: string | null;
+  community_id: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+interface PostEventRow {
+  id: string;
+  title: string;
+  content: string | null;
+  description?: string | null;
+  event_date: string | null;
+  event_location: string | null;
+  post_type: string;
+  community_id: string | null;
+  created_by: string | null;
+  created_at: string;
+  tags?: string[] | null;
+}
+
+type SupabaseEvent = SupabaseEventView | EventsTableRow | PostEventRow;
+
 export function DQEventsCalendar() {
   const [view, setView] = useState<"list" | "calendar">("list");
   const { events, loading, error, refetch } = useEventsData();
@@ -28,6 +62,7 @@ export function DQEventsCalendar() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   // Filter events based on search term, selected categories, and selected date
   useEffect(() => {
     let filtered = [...events];
@@ -128,7 +163,7 @@ export function DQEventsCalendar() {
               onClick={toggleFilterPanel}
               className="md:hidden flex items-center px-3 py-2 rounded-lg bg-[#030F35] bg-opacity-30 text-white"
             >
-              <FilterIcon className="w-4 h-4 mr-2" />
+              <Filter className="w-4 h-4 mr-2" />
               Filters
             </button>
           </div>

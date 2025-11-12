@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/communities/integrations/supabase/client';
-import { useAuth } from '@/communities/contexts/AuthProvider';
-import { Button } from '@/communities/components/ui/button';
-import { Input } from '@/communities/components/ui/input';
-import { Skeleton } from '@/communities/components/ui/skeleton';
-import { useToast } from '@/communities/hooks/use-toast';
-import { MemberCard } from '@/communities/components/communities/MemberCard';
-import { GradientAvatar } from '@/communities/components/ui/gradient-avatar';
-import { useCommunityRole, CommunityRole } from '@/communities/hooks/useCommunityRole';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/communities/components/ui/select';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/communities/components/ui/alert-dialog';
-import { ArrowLeft, Search, Users, UserPlus } from 'lucide-react';
-import { MainLayout } from '@/communities/components/layout/MainLayout';
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "../contexts/AuthProvider";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Skeleton } from "../components/ui/skeleton";
+import { useToast } from "../components/ui/use-toast";
+import { MemberCard } from "../components/communities/MemberCard";
+import { useCommunityRole } from "../hooks/useCommunityRole";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../components/ui/alert-dialog";
+import { ArrowLeft, Search, Users, UserPlus, Home } from 'lucide-react';
+import { MainLayout } from "../components/layout/MainLayout";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "../components/ui/breadcrumb";
 interface Member {
   id: string;
   user_id: string;
@@ -40,7 +40,6 @@ export default function CommunityMembers() {
   const {
     toast
   } = useToast();
-  const navigate = useNavigate();
   const [community, setCommunity] = useState<Community | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
@@ -60,6 +59,8 @@ export default function CommunityMembers() {
     filterMembers();
   }, [members, searchQuery, roleFilter]);
   const fetchCommunityAndMembers = async () => {
+    if (!id) return;
+
     setLoading(true);
 
     // Fetch community details
@@ -163,85 +164,116 @@ export default function CommunityMembers() {
   };
   if (loading) {
     return <MainLayout>
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <Skeleton className="h-48 w-full mb-8" />
-          <div className="space-y-4">
-            {Array.from({
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Skeleton className="h-48 w-full mb-8" />
+        <div className="space-y-4">
+          {Array.from({
             length: 6
           }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
-          </div>
         </div>
-      </MainLayout>;
+      </div>
+    </MainLayout>;
   }
   if (!community) {
     return <MainLayout>
-        <div className="max-w-7xl mx-auto px-4 py-8 text-center">
-          <p className="text-gray-500">Community not found</p>
-        </div>
-      </MainLayout>;
+      <div className="max-w-7xl mx-auto px-4 py-8 text-center">
+        <p className="text-gray-500">Community not found</p>
+      </div>
+    </MainLayout>;
   }
   return <MainLayout>
-      {/* Header Section */}
-      <div className="relative w-full bg-gradient-to-br from-[hsl(224,100%,45%)] to-[hsl(266,93%,64%)] overflow-hidden">
-        {community.imageurl && <img src={community.imageurl} alt={community.name} className="absolute inset-0 w-full h-full object-cover" />}
-        <div className="relative bg-gradient-to-t from-black/60 to-transparent">
-          <div className="max-w-7xl mx-auto px-4 py-12">
-            <Link to={`/community/${id}`} className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Community
-            </Link>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
-                  {community.name} Members
-                </h1>
-                <div className="flex items-center gap-2 text-white/90">
-                  <Users className="h-5 w-5" />
-                  <span className="text-lg">{members.length} members</span>
-                </div>
+    {/* Breadcrumbs */}
+    <div className="max-w-7xl mx-auto px-4 pt-4">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/">
+                <Home className="h-4 w-4" />
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/communities">Communities</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to={`/community/${id}`}>{community.name}</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Members</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    </div>
+    
+    {/* Header Section */}
+    <div className="relative w-full bg-gradient-to-br from-dq-navy to-[#1A2E6E] overflow-hidden mt-4">
+      {community.imageurl && <img src={community.imageurl} alt={community.name} className="absolute inset-0 w-full h-full object-cover" />}
+      <div className="relative bg-gradient-to-t from-black/60 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <Link to={`/community/${id}`} className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Community
+          </Link>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">
+                {community.name} Members
+              </h1>
+              <div className="flex items-center gap-2 text-white/90">
+                <Users className="h-5 w-5" />
+                <span className="text-lg">{members.length} members</span>
               </div>
-              {(currentUserRole === 'owner' || currentUserRole === 'moderator') && <Button onClick={() => {
+            </div>
+            {(currentUserRole === 'owner' || currentUserRole === 'moderator') && <Button onClick={() => {
               toast({
                 title: 'Coming Soon',
                 description: 'Invite functionality will be added soon'
               });
             }} className="bg-white text-gray-900 hover:bg-gray-100">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Invite Members
-                </Button>}
-            </div>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Invite Members
+            </Button>}
           </div>
         </div>
       </div>
+    </div>
 
-      {/* Search and Filter Section */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input placeholder="Search members by name or email..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
-          </div>
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter by role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Members</SelectItem>
-              <SelectItem value="admin">Admins</SelectItem>
-              <SelectItem value="moderator">Moderators</SelectItem>
-              <SelectItem value="member">Members</SelectItem>
-            </SelectContent>
-          </Select>
+    {/* Search and Filter Section */}
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input placeholder="Search members by name or email..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Filter by role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Members</SelectItem>
+            <SelectItem value="admin">Admins</SelectItem>
+            <SelectItem value="moderator">Moderators</SelectItem>
+            <SelectItem value="member">Members</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-        {/* Members List */}
-        <div className="space-y-3">
-          {filteredMembers.length === 0 ? <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">
-                {searchQuery || roleFilter !== 'all' ? 'No members found matching your filters' : 'No members in this community yet'}
-              </p>
-            </div> : filteredMembers.map(member => <MemberCard key={member.id} member={member} communityId={id!} currentUserRole={currentUserRole} isCurrentUser={user?.id === member.user_id} onPromote={userId => {
+      {/* Members List */}
+      <div className="space-y-3">
+        {filteredMembers.length === 0 ? <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">
+            {searchQuery || roleFilter !== 'all' ? 'No members found matching your filters' : 'No members in this community yet'}
+          </p>
+        </div> : filteredMembers.map(member => <MemberCard key={member.id} member={member} communityId={id!} currentUserRole={currentUserRole} isCurrentUser={user?.id === member.user_id} onPromote={userId => {
           const member = members.find(m => m.user_id === userId);
           if (member?.role === 'member') {
             handleRoleChange(userId, 'moderator');
@@ -256,26 +288,26 @@ export default function CommunityMembers() {
             handleRoleChange(userId, 'member');
           }
         }} onRemove={userId => setMemberToRemove(userId)} />)}
-        </div>
       </div>
+    </div>
 
-      {/* Remove Member Confirmation Dialog */}
-      <AlertDialog open={!!memberToRemove} onOpenChange={() => setMemberToRemove(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Member</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove this member from the community? This action cannot
-              be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemoveMember} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </MainLayout>;
+    {/* Remove Member Confirmation Dialog */}
+    <AlertDialog open={!!memberToRemove} onOpenChange={() => setMemberToRemove(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remove Member</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to remove this member from the community? This action cannot
+            be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleRemoveMember} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </MainLayout>;
 }

@@ -4,11 +4,29 @@ import AssetLibraryPage from '../assetLibrary';
 import { MarketplacePage } from '../../components/marketplace/MarketplacePage';
 import MarketplaceDetailsPage from './MarketplaceDetailsPage';
 import ActivitiesPage from './ActivitiesPage';
-import { DollarSign, Briefcase, Calendar, BookOpen } from 'lucide-react';
+import { DollarSign, Briefcase, Calendar, BookOpen, Users } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 import NewsPage from './NewsPage';
 import NewsDetailPage from './NewsDetailPage';
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
+// Promo cards for events marketplace
+const eventsPromoCards = [{
+  id: 'courses-promo',
+  title: 'Enhance your skills',
+  description: 'Discover courses to enhance your business knowledge.',
+  icon: <Calendar size={24} className="text-white" />,
+  path: '/marketplace/courses',
+  gradientFrom: 'from-green-500',
+  gradientTo: 'to-teal-400'
+}, {
+  id: 'finance-promo',
+  title: 'Explore funding options',
+  description: 'Find financial opportunities and resources to grow your business.',
+  icon: <DollarSign size={24} className="text-white" />,
+  path: '/marketplace/financial',
+  gradientFrom: 'from-blue-600',
+  gradientTo: 'to-indigo-700'
+}];
 // Promo cards for courses marketplace
 const coursePromoCards = [{
   id: 'finance-promo',
@@ -91,13 +109,15 @@ export const MarketplaceRouter: React.FC = () => {
   const nonFinancialConfig = getMarketplaceConfig('non-financial');
   const knowledgeHubConfig = getMarketplaceConfig('knowledge-hub');
   const guidesConfig = getMarketplaceConfig('guides');
+  const eventsConfig = getMarketplaceConfig('events');
   // State for bookmarked items and comparison
   const [bookmarkedItems, setBookmarkedItems] = useState<Record<string, string[]>>({
     courses: [],
     financial: [],
     'non-financial': [],
     'knowledge-hub': [],
-    guides: []
+    guides: [],
+    events: []
   });
   // Toggle bookmark for an item
   const handleToggleBookmark = (marketplaceType: string, itemId: string) => {
@@ -126,6 +146,9 @@ export const MarketplaceRouter: React.FC = () => {
       {/* Backward compatibility: Knowledge Hub routes (aliased to Guides) */}
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
       <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />
+      {/* Events Marketplace */}
+      <Route path="/events" element={<MarketplacePage marketplaceType="events" title={eventsConfig.title} description={eventsConfig.description} promoCards={eventsPromoCards} />} />
+      <Route path="/events/:itemId" element={<MarketplaceDetailsPage marketplaceType="events" bookmarkedItems={bookmarkedItems.events} onToggleBookmark={itemId => handleToggleBookmark('events', itemId)} />} />
       {/* News & Opportunities Marketplace */}
       <Route path="/news" element={<NewsPage />} />
       <Route path="/news/:id" element={<NewsDetailPage />} />

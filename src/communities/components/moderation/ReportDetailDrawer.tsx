@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { format } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/communities/components/ui/sheet';
@@ -11,7 +11,7 @@ import { Textarea } from '@/communities/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/communities/components/ui/alert-dialog';
 import { AlertCircle, CheckCircle, XCircle, Trash2, EyeOff, AlertTriangle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
-import { ModerationAPI } from '@/services/ModerationAPI';
+import { ModerationAPI } from '@/communities/services/ModerationAPI';
 interface ReportDetail {
   id: string;
   report_type: 'post' | 'comment';
@@ -227,8 +227,8 @@ export function ReportDetailDrawer({
 
             {/* Show status message if already actioned */}
             {report.status !== 'pending' && <div className="pt-4 border-t border-gray-200">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                  <p className="text-sm text-blue-800">
+                <div className="bg-dq-navy/10 border border-dq-navy/30 rounded-lg p-4 text-center">
+                  <p className="text-sm text-dq-navy">
                     This report has been <span className="font-semibold">{report.status}</span>
                   </p>
                 </div>

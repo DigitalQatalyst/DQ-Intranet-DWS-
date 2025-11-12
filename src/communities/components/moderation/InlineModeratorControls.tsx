@@ -6,7 +6,7 @@ import { Textarea } from '@/communities/components/ui/textarea';
 import { Shield, EyeOff, Check, Trash2, AlertTriangle, Copy, Eye, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { toast } from 'sonner';
-import { ModerationAPI } from '@/services/ModerationAPI';
+import { ModerationAPI } from '@/communities/services/ModerationAPI';
 import { useNavigate } from 'react-router-dom';
 interface InlineModeratorControlsProps {
   postId: string;
@@ -149,7 +149,7 @@ export function InlineModeratorControls({
                 Approve
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleQuickAction('restore')} className="gap-2">
-                <RotateCcw className="h-4 w-4 text-blue-600" />
+                <RotateCcw className="h-4 w-4 text-dq-navy" />
                 Restore
               </DropdownMenuItem>
             </>}

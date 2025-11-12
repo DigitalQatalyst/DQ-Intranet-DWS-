@@ -3,6 +3,7 @@ import {
   mockFinancialServices,
   mockNonFinancialServices,
   mockKnowledgeHubItems,
+  mockEvents,
 } from './mockMarketplaceData'
 
 /**
@@ -19,6 +20,8 @@ export const getFallbackItems = (marketplaceType: string): any[] => {
     case 'guides':
     case 'knowledge-hub':
       return mockKnowledgeHubItems
+    case 'events':
+      return mockEvents
     case 'onboarding':
       return mockOnboardingFlows
     default:

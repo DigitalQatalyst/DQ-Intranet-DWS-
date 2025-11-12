@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/communities/components/ui/button';
 import { UserPlus, UserCheck } from 'lucide-react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { useToast } from '@/communities/hooks/use-toast';
 interface FollowButtonProps {
   currentUserId: string;
@@ -68,7 +68,7 @@ export function FollowButton({
       setLoading(false);
     }
   };
-  return <Button onClick={handleToggleFollow} disabled={loading} variant={isFollowing ? 'outline' : 'default'} className="w-full gap-2 min-h-[44px] text-blue-600 bg-blue-200 hover:bg-blue-100">
+  return <Button onClick={handleToggleFollow} disabled={loading} variant={isFollowing ? 'outline' : 'default'} className="w-full gap-2 min-h-[44px] text-dq-navy bg-dq-navy/20 hover:bg-dq-navy/10">
       {isFollowing ? <>
           <UserCheck className="h-4 w-4" />
           Following

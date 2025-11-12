@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { PostCardBase } from './PostCardBase';
 import { PostCardText } from './PostCardText';

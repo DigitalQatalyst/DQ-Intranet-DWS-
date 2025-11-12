@@ -1,97 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/communities/contexts/AuthProvider';
-import { Header, AuthProvider as KFAuthProvider } from '@/communities/components/Header';
-//import { Header } from "../../components/Header";
-import { Footer } from '@/communities/components/Footer';
-import { Sidebar } from '@/communities/components/AppSidebar';
+import React, { useState } from 'react';
+import { useAuth } from '@/components/Header';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { PageLayout, PageSection, SectionContent } from '@/communities/components/PageLayout';
 interface MainLayoutProps {
   children: React.ReactNode;
   title?: string;
+  subtitle?: string;
   fullWidth?: boolean;
   hidePageLayout?: boolean;
 }
 export function MainLayout({
   children,
   title,
+  subtitle,
   fullWidth = false,
   hidePageLayout = false
 }: MainLayoutProps) {
-  const {
-    user
-  } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('dashboard');
 
-  // Map routes to sidebar sections
-  useEffect(() => {
-    const routeMap: Record<string, string> = {
-      '/': 'dashboard',
-      '/feed': 'dashboard',
-      '/communities': 'profile',
-      '/profile': 'profile',
-      '/messages': 'documents',
-      '/moderation': 'reports',
-      '/analytics': 'reports',
-      '/settings': 'settings',
-      '/activity': 'requests'
-    };
-    const section = routeMap[location.pathname] || 'dashboard';
-    setActiveSection(section);
-  }, [location.pathname]);
-
-  // Handle section changes to navigate
-  const handleSectionChange = (sectionId: string) => {
-    const sectionRoutes: Record<string, string> = {
-      'dashboard': '/',
-      'profile': '/profile',
-      'documents': '/messages',
-      'reports': '/moderation',
-      'settings': '/settings',
-      'requests': '/activity'
-    };
-    const route = sectionRoutes[sectionId];
-    if (route) {
-      navigate(route);
-    }
-
-    // Close sidebar on mobile after navigation
-    if (window.innerWidth < 1024) {
-      setSidebarOpen(false);
-    }
-  };
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  return <div className="flex flex-col min-h-screen w-full">
-      {/* EJP Gradient Header - Always visible */}
-      <KFAuthProvider>
-        <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-      </KFAuthProvider>
 
-      {/* Main content area with sidebar */}
-      <div className="flex flex-1 w-full min-h-screen">
-        {/* Sidebar - Desktop: always visible, Mobile: toggle */}
-        {user && <>
-            {/* Mobile/Tablet backdrop */}
-            {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
-            {/* <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} activeSection={activeSection} onSectionChange={handleSectionChange} companyName="Community Platform" /> */}
-          </>}
+  return (
+    <div className="flex flex-col min-h-screen w-full bg-gray-50">
+      {/* Main DWS Header */}
+      <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
 
-        {/* Content - adjusts based on sidebar presence */}
-        <div className="flex-1 flex flex-col overflow-auto w-full">
-          {hidePageLayout ? <div className={`flex-1 ${fullWidth ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'} w-full`}>
-              {children}
-            </div> : <PageLayout title={title}>
-              <PageSection>
-                <SectionContent>{children}</SectionContent>
-              </PageSection>
-            </PageLayout>}
-          <Footer isLoggedIn={!!user} />
-        </div>
-      </div>
-    </div>;
+      {/* Main content area */}
+      <main className="flex-grow">
+        {hidePageLayout ? (
+          <div className={`flex-1 ${fullWidth ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'} w-full py-6`}>
+            {children}
+          </div>
+        ) : (
+          <PageLayout title={title} headerSubtitle={subtitle}>
+            <PageSection>
+              <SectionContent>{children}</SectionContent>
+            </PageSection>
+          </PageLayout>
+        )}
+      </main>
+
+      {/* Main DWS Footer */}
+      <Footer isLoggedIn={!!user} />
+    </div>
+  );
 }

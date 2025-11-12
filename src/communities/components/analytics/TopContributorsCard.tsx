@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
 import { Badge } from '@/communities/components/ui/badge';

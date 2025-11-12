@@ -1,4 +1,4 @@
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { RealtimeChannel } from '@supabase/supabase-js';
 export interface ModerationMetrics {

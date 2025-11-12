@@ -75,14 +75,17 @@ export function PageHeader({
       </section>;
   }
   // Default variant - transparent header with consistent styling
-  return <header className="pt-6 md:pt-10 pb-4 md:pb-6 bg-transparent">
+  return <header className="py-6 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {breadcrumbs && breadcrumbs.length > 0 && <div className="mb-2">
             <Breadcrumbs items={breadcrumbs} />
           </div>}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-gray-900 my-4">
           {title}
         </h1>
+        {subtitle && <p className="text-gray-600 text-sm mt-2">
+            {subtitle}
+          </p>}
       </div>
     </header>;
 }
@@ -150,7 +153,7 @@ export function PageLayout({
   }
   // Default variant - standard contained layout
   return <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50">
-      {title && <PageHeader title={title} breadcrumbs={autoBreadcrumbs} variant="default" />}
+      {title && <PageHeader title={title} breadcrumbs={autoBreadcrumbs} variant="default" subtitle={headerSubtitle} />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mt-6 md:mt-10 space-y-4 md:space-y-6">{children}</div>
       </div>

@@ -65,10 +65,16 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
     e.stopPropagation();
     onViewDetails?.();
   };
-  return <BaseCard onClick={onQuickView} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+  return (
+    <BaseCard
+      onClick={onQuickView}
+      data-id={dataId}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Large Image Section */}
-      <div className="relative w-full h-48 overflow-hidden flex-shrink-0">
-        {item.imageUrl ? <img src={item.imageUrl} alt={`${item.name} community`} className={`w-full h-full object-cover transition-transform duration-300 ${isHovered ? 'scale-105' : 'scale-100'}`} /> : <div className="w-full h-full bg-gradient-to-br from-[hsl(224,100%,45%)] to-[hsl(266,93%,64%)] flex items-center justify-center">
+      <div className="relative w-full h-48 bg-gray-200 overflow-hidden flex-shrink-0">
+        {item.imageUrl ? <img src={item.imageUrl} alt={`${item.name} community`} className={`w-full h-full object-cover transition-transform duration-300 ${isHovered ? 'scale-105' : 'scale-100'}`} /> : <div className="w-full h-full bg-gradient-to-br from-dq-navy to-[#1A2E6E] flex items-center justify-center">
             <Users size={48} className="text-white opacity-75" />
           </div>}
         {/* Privacy Badge */}
@@ -115,26 +121,31 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
           </p>
         </div>
         {/* Recent Activity */}
-        {item.recentActivity && <div className="mb-4 p-2 bg-blue-50 rounded text-xs text-blue-700">
+        {item.recentActivity && (
+          <div className="mb-4 p-2 bg-dq-navy/10 rounded text-xs text-dq-navy whitespace-nowrap overflow-hidden text-ellipsis">
             <span className="font-medium">Recent: </span>
             {item.recentActivity}
-          </div>}
+          </div>
+        )}
         {/* Tags */}
         <div className="flex flex-wrap gap-1 mt-auto">
           {item.tags.slice(0, 3).map((tag, index) => <TagChip key={index} text={tag} variant={index === 0 ? 'primary' : 'secondary'} size="sm" />)}
         </div>
       </div>
-      <CardFooter isMember={isMember} primaryCTA={isMember ? {
-      text: 'Explore Community',
-      onClick: handleViewDetails || (() => {}),
-      variant: 'member'
-    } : {
-      text: item.isPrivate ? 'Request to Join' : 'Join Community',
-      onClick: handleJoin,
-      variant: 'primary'
-    }} secondaryCTA={!isMember && onViewDetails ? {
-      text: 'Discover Community',
-      onClick: handleViewDetails
-    } : undefined} />
-    </BaseCard>;
+      <CardFooter
+        primaryCTA={{
+          text: item.isPrivate ? "Request to Join" : "Join Community",
+          onClick: handleJoin,
+        }}
+        secondaryCTA={
+          onViewDetails
+            ? {
+                text: "Discover Community",
+                onClick: handleViewDetails,
+              }
+            : undefined
+        }
+      />
+    </BaseCard>
+  );
 };

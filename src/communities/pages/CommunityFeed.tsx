@@ -1,56 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/communities/contexts/AuthProvider';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { MainLayout } from '@/communities/components/layout/MainLayout';
-import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/KF eJP Library/PageLayout';
-import { TabsFeed } from '@/communities/components/feed/TabsFeed';
-import { FeedSidebar } from '@/communities/components/feed/FeedSidebar';
-import { InlineComposer } from '@/communities/components/post/InlineComposer';
-import { supabase } from '@/communities/integrations/supabase/client';
-import { safeFetch } from '@/communities/utils/safeFetch';
-import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
-import { Button } from '@/communities/components/ui/button';
-import { X, Search } from 'lucide-react';
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  created_by: string;
-  community_id: string;
-  community_name: string;
-  author_username: string;
-  author_avatar?: string;
-  helpful_count?: number;
-  insightful_count?: number;
-  comment_count?: number;
-  tags?: string[];
-  post_type?: 'text' | 'media' | 'poll' | 'event' | 'article' | 'announcement';
-  metadata?: any;
-  event_date?: string;
-  event_location?: string;
-}
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../contexts/AuthProvider";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { X, Search } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
+import { MainLayout } from "../components/layout/MainLayout";
+import { FeedSidebar } from "../components/feed/FeedSidebar";
+import { TabsFeed } from "../components/feed/TabsFeed";
+import { InlineComposer } from "../components/post/InlineComposer";
+import {
+  PageLayout,
+  PageSection,
+  SectionContent,
+  SectionHeader,
+} from "../components/PageLayout";
+import { Button } from "../components/ui/button";
+import { BasePost } from "../components/posts/types";
+
 export default function CommunityFeed() {
-  const {
-    user,
-    loading
-  } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [myPosts, setMyPosts] = useState<Post[]>([]);
-  const [globalPosts, setGlobalPosts] = useState<Post[]>([]);
-  const [trendingPosts, setTrendingPosts] = useState<Post[]>([]);
+  const [myPosts, setMyPosts] = useState<BasePost[]>([]);
+  const [globalPosts, setGlobalPosts] = useState<BasePost[]>([]);
+  const [trendingPosts, setTrendingPosts] = useState<BasePost[]>([]);
   const [myLoading, setMyLoading] = useState(false);
   const [globalLoading, setGlobalLoading] = useState(false);
   const [trendingLoading, setTrendingLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('my_communities');
-  const [currentSort, setCurrentSort] = useState<string>('recent');
-  const filterTag = searchParams.get('tag');
+  const [activeTab, setActiveTab] = useState<string>("my_communities");
+  const [currentSort, setCurrentSort] = useState<string>("recent");
+  const filterTag = searchParams.get("tag");
+
+  // Handle unauthenticated users
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/');
+      navigate("/community");
     }
-  }, [user, loading, navigate]);
+  }, [loading, user, navigate]);
+
   useEffect(() => {
     if (user) {
       fetchMyPosts(currentSort, 0);
@@ -58,181 +44,320 @@ export default function CommunityFeed() {
       fetchTrendingPosts(currentSort, 0);
     }
   }, [user, filterTag]);
-  const fetchMyPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+
+  const fetchMyPosts = async (
+    _sortBy: string = "recent",
+    offset: number = 0
+  ) => {
     if (!user) return;
     setMyLoading(true);
-    // Build query - moderators/admins see all posts, regular users see only active
-    let query = supabase.from('posts').select(`
+
+    const isModerator = user.role === "admin" || user.role === "moderator";
+
+    // Query posts table directly for all users
+    let query = supabase.from("posts").select(
+      `
         *,
         communities!inner(name),
         users_local!inner(username, avatar_url)
-      `);
+      `
+    );
+
     // Regular users only see active posts
-    if (user.role === 'member') {
-      query = query.eq('status', 'active');
+    if (!isModerator) {
+      query = query.eq("status", "active");
     }
-    const {
-      data,
-      error
-    } = await query.order('created_at', {
-      ascending: false
-    }).limit(10).range(offset, offset + 9);
+
+    const { data, error } = await query
+      .order("created_at", { ascending: false })
+      .limit(10)
+      .range(offset, offset + 9);
+
     if (!error && data) {
-      const formattedPosts = data.map((post: any) => ({
-        ...post,
-        community_name: post.communities?.name || 'Unknown',
-        author_username: post.users_local?.username || 'Anonymous',
-        author_avatar: post.users_local?.avatar_url,
-        helpful_count: 0,
-        insightful_count: 0,
-        comment_count: 0
+      // Fetch reaction and comment counts separately
+      const postIds = data.map((p: any) => p.id);
+
+      const { data: reactions } = await supabase
+        .from("reactions")
+        .select("post_id, reaction_type")
+        .in("post_id", postIds);
+
+      const { data: comments } = await supabase
+        .from("comments")
+        .select("post_id")
+        .in("post_id", postIds)
+        .eq("status", "active");
+
+      // Count reactions and comments
+      const reactionCounts =
+        reactions?.reduce((acc: any, r: any) => {
+          if (!acc[r.post_id]) acc[r.post_id] = { helpful: 0, insightful: 0 };
+          if (r.reaction_type === "helpful") acc[r.post_id].helpful++;
+          if (r.reaction_type === "insightful") acc[r.post_id].insightful++;
+          return acc;
+        }, {}) || {};
+
+      const commentCounts =
+        comments?.reduce((acc: any, c: any) => {
+          acc[c.post_id] = (acc[c.post_id] || 0) + 1;
+          return acc;
+        }, {}) || {};
+
+      const posts = data.map((p: any) => ({
+        ...p,
+        community_name: p.communities?.name,
+        author_username: p.users_local?.username,
+        author_avatar: p.users_local?.avatar_url,
+        helpful_count: reactionCounts[p.id]?.helpful || 0,
+        insightful_count: reactionCounts[p.id]?.insightful || 0,
+        comment_count: commentCounts[p.id] || 0,
       }));
-      let filteredData = formattedPosts;
+
+      let filteredData = posts;
       if (filterTag) {
-        filteredData = formattedPosts.filter((post: Post) => post.tags?.includes(filterTag));
+        filteredData = posts.filter((post: BasePost) =>
+          post.tags?.includes(filterTag)
+        );
       }
       setMyPosts(offset === 0 ? filteredData : [...myPosts, ...filteredData]);
     }
     setMyLoading(false);
   };
-  const fetchGlobalPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+
+  const fetchGlobalPosts = async (
+    _sortBy: string = "recent",
+    offset: number = 0
+  ) => {
     if (!user) return;
     setGlobalLoading(true);
-    // Build query - moderators/admins see all posts, regular users see only active
-    let query = supabase.from('posts').select(`
+
+    const isModerator = user.role === "admin" || user.role === "moderator";
+
+    // Query posts table directly for all users
+    let query = supabase.from("posts").select(
+      `
         *,
         communities!inner(name),
         users_local!inner(username, avatar_url)
-      `);
+      `
+    );
+
     // Regular users only see active posts
-    if (user.role === 'member') {
-      query = query.eq('status', 'active');
+    if (!isModerator) {
+      query = query.eq("status", "active");
     }
-    const {
-      data,
-      error
-    } = await query.order('created_at', {
-      ascending: false
-    }).limit(10).range(offset, offset + 9);
+
+    const { data, error } = await query
+      .order("created_at", { ascending: false })
+      .limit(10)
+      .range(offset, offset + 9);
+
     if (!error && data) {
-      const formattedPosts = data.map((post: any) => ({
-        ...post,
-        community_name: post.communities?.name || 'Unknown',
-        author_username: post.users_local?.username || 'Anonymous',
-        author_avatar: post.users_local?.avatar_url,
-        helpful_count: 0,
-        insightful_count: 0,
-        comment_count: 0
+      // Fetch reaction and comment counts separately
+      const postIds = data.map((p: any) => p.id);
+
+      const { data: reactions } = await supabase
+        .from("reactions")
+        .select("post_id, reaction_type")
+        .in("post_id", postIds);
+
+      const { data: comments } = await supabase
+        .from("comments")
+        .select("post_id")
+        .in("post_id", postIds)
+        .eq("status", "active");
+
+      // Count reactions and comments
+      const reactionCounts =
+        reactions?.reduce((acc: any, r: any) => {
+          if (!acc[r.post_id]) acc[r.post_id] = { helpful: 0, insightful: 0 };
+          if (r.reaction_type === "helpful") acc[r.post_id].helpful++;
+          if (r.reaction_type === "insightful") acc[r.post_id].insightful++;
+          return acc;
+        }, {}) || {};
+
+      const commentCounts =
+        comments?.reduce((acc: any, c: any) => {
+          acc[c.post_id] = (acc[c.post_id] || 0) + 1;
+          return acc;
+        }, {}) || {};
+
+      const posts = data.map((p: any) => ({
+        ...p,
+        community_name: p.communities?.name,
+        author_username: p.users_local?.username,
+        author_avatar: p.users_local?.avatar_url,
+        helpful_count: reactionCounts[p.id]?.helpful || 0,
+        insightful_count: reactionCounts[p.id]?.insightful || 0,
+        comment_count: commentCounts[p.id] || 0,
       }));
-      let filteredData = formattedPosts;
+
+      let filteredData = posts;
       if (filterTag) {
-        filteredData = formattedPosts.filter((post: Post) => post.tags?.includes(filterTag));
+        filteredData = posts.filter((post: BasePost) =>
+          post.tags?.includes(filterTag)
+        );
       }
-      setGlobalPosts(offset === 0 ? filteredData : [...globalPosts, ...filteredData]);
+      setGlobalPosts(
+        offset === 0 ? filteredData : [...globalPosts, ...filteredData]
+      );
     }
     setGlobalLoading(false);
   };
-  const fetchTrendingPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+
+  const fetchTrendingPosts = async (
+    sortBy: string = "recent",
+    offset: number = 0
+  ) => {
     setTrendingLoading(true);
-    const {
-      data,
-      error
-    } = await supabase.rpc('get_feed', {
-      feed_tab: 'trending',
+    const { data, error } = await supabase.rpc("get_feed", {
+      feed_tab: "trending",
       sort_by: sortBy,
-      user_id_param: user?.id || null,
+      user_id_param: user?.id || undefined,
       limit_count: 10,
-      offset_count: offset
+      offset_count: offset,
     });
     if (!error && data) {
       let filteredData = data;
       if (filterTag) {
-        filteredData = data.filter((post: Post) => post.tags?.includes(filterTag));
+        filteredData = data.filter((post: BasePost) =>
+          post.tags?.includes(filterTag)
+        );
       }
-      setTrendingPosts(offset === 0 ? filteredData : [...trendingPosts, ...filteredData]);
+      setTrendingPosts(
+        offset === 0 ? filteredData : [...trendingPosts, ...filteredData]
+      );
     }
     setTrendingLoading(false);
   };
+
   const handlePostCreated = () => {
-    fetchMyPosts('recent', 0);
-    fetchGlobalPosts('recent', 0);
-    fetchTrendingPosts('recent', 0);
+    fetchMyPosts("recent", 0);
+    fetchGlobalPosts("recent", 0);
+    fetchTrendingPosts("recent", 0);
   };
+
   const handleSortChange = (sortBy: string) => {
     setCurrentSort(sortBy);
     fetchMyPosts(sortBy, 0);
     fetchGlobalPosts(sortBy, 0);
     fetchTrendingPosts(sortBy, 0);
   };
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
   };
+
   const handleTagFilter = (tag: string) => {
-    setSearchParams({
-      tag
-    });
+    setSearchParams({ tag });
   };
+
   const clearTagFilter = () => {
     setSearchParams({});
   };
+
   const handleLoadMore = (tab: string) => {
-    const offset = tab === 'my_communities' ? myPosts.length : tab === 'global' ? globalPosts.length : trendingPosts.length;
-    if (tab === 'my_communities') fetchMyPosts('recent', offset);else if (tab === 'global') fetchGlobalPosts('recent', offset);else fetchTrendingPosts('recent', offset);
+    const offset =
+      tab === "my_communities"
+        ? myPosts.length
+        : tab === "global"
+        ? globalPosts.length
+        : trendingPosts.length;
+    if (tab === "my_communities") fetchMyPosts("recent", offset);
+    else if (tab === "global") fetchGlobalPosts("recent", offset);
+    else fetchTrendingPosts("recent", offset);
   };
+
   if (loading) {
-    return <MainLayout hidePageLayout fullWidth>
+    return (
+      <MainLayout hidePageLayout fullWidth>
         <div className="flex min-h-screen items-center justify-center">
           <div className="animate-pulse text-muted-foreground">Loading...</div>
         </div>
-      </MainLayout>;
+      </MainLayout>
+    );
   }
+
+  // Show empty state for unauthenticated users (login modal will be shown automatically)
   if (!user) {
-    return null;
+    navigate("/community");
   }
-  return <MainLayout hidePageLayout fullWidth>
-      <PageLayout title="Community Feed" breadcrumbs={[{
-      label: 'Home',
-      href: '/'
-    }, {
-      label: 'Communities',
-      href: '/communities'
-    }, {
-      label: 'Feed',
-      current: true
-    }]} headerSubtitle="See updates and posts from your joined communities">
+
+  return (
+    <MainLayout hidePageLayout fullWidth>
+      <PageLayout
+        title="Community Feed"
+        breadcrumbs={[
+          { label: "Home", href: "/community" },
+          { label: "Communities", href: "/communities" },
+          { label: "Feed", current: true },
+        ]}
+        headerSubtitle="See updates and posts from your joined communities"
+      >
         {/* Tag Filter Badge */}
-        {filterTag && <PageSection className="mb-6">
+        {filterTag && (
+          <PageSection className="mb-6">
             <SectionContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-700">Filtered by:</span>
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-brand-lightBlue text-brand-blue rounded-full text-xs font-medium">
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-dq-navy/10 text-dq-navy rounded-full text-xs font-medium">
                   #{filterTag}
-                  <button onClick={clearTagFilter} className="ml-1 hover:text-brand-darkBlue transition-colors">
+                  <button
+                    onClick={clearTagFilter}
+                    className="ml-1 hover:text-[#13285A] transition-colors"
+                  >
                     <X className="h-3 w-3" />
                   </button>
                 </span>
               </div>
-              <Button variant="ghost" size="sm" onClick={clearTagFilter} className="text-gray-600 hover:text-gray-900">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearTagFilter}
+                className="text-gray-600 hover:text-gray-900"
+              >
                 Clear filter
               </Button>
             </SectionContent>
-          </PageSection>}
+          </PageSection>
+        )}
+
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Feed Content - Takes up 2 columns on desktop */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 lg:mr-0 ml-4 mr-4">
+            <SectionHeader
+              title="Create a Post"
+              description="Share your thoughts, questions, or updates with the community"
+            />
+
             <PageSection>
-              <SectionHeader title="Create a Post" description="Share your thoughts, questions, or updates with the community" />
+              {" "}
               <SectionContent>
                 <InlineComposer onPostCreated={handlePostCreated} />
               </SectionContent>
             </PageSection>
+
             <PageSection>
-              <TabsFeed myPosts={myPosts} globalPosts={globalPosts} trendingPosts={trendingPosts} myLoading={myLoading} globalLoading={globalLoading} trendingLoading={trendingLoading} onNewPost={() => navigate('/create-post')} onSortChange={handleSortChange} onLoadMore={handleLoadMore} activeTab={activeTab} onTabChange={handleTabChange} />
+              <TabsFeed
+                myPosts={myPosts}
+                globalPosts={globalPosts}
+                trendingPosts={trendingPosts}
+                myLoading={myLoading}
+                globalLoading={globalLoading}
+                trendingLoading={trendingLoading}
+                onNewPost={() => navigate("/create-post")}
+                onSortChange={handleSortChange}
+                onLoadMore={handleLoadMore}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                onPostActionComplete={handlePostCreated}
+              />
             </PageSection>
           </div>
+
           {/* Sidebar - Shows on all screens */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 lg:ml-0 ml-4 mr-4">
             {/* Search Box */}
             <PageSection>
               <SectionContent className="p-4">
@@ -240,15 +365,20 @@ export default function CommunityFeed() {
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-4 w-4 text-gray-400" />
                   </div>
-                  <input type="text" className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-brand-blue focus:border-brand-blue sm:text-sm" placeholder="Search posts..." />
+                  <input
+                    type="text"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-dq-navy focus:border-dq-navy sm:text-sm"
+                    placeholder="Search posts..."
+                  />
                 </div>
               </SectionContent>
             </PageSection>
+
             {/* Sidebar Content */}
             <FeedSidebar onTagClick={handleTagFilter} />
           </div>
         </div>
-        <StickyActionButton onClick={() => navigate('/post/create')} buttonText="Create Post" description="Share your ideas with the community" />
       </PageLayout>
-    </MainLayout>;
+    </MainLayout>
+  );
 }

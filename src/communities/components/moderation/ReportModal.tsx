@@ -4,7 +4,7 @@ import { Button } from '@/communities/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/communities/components/ui/radio-group';
 import { Label } from '@/communities/components/ui/label';
 import { Textarea } from '@/communities/components/ui/textarea';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { toast } from 'sonner';
 import { AlertTriangle } from 'lucide-react';

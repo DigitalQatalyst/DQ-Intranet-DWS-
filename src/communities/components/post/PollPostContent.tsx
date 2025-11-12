@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { BarChart3, Check, Clock, AlertCircle } from 'lucide-react';
@@ -150,7 +150,7 @@ export function PollPostContent({
   }
   return <div className="space-y-6">
       {/* Poll Question/Context */}
-      {(content || content_html) && <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600">
+      {(content || content_html) && <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-dq-navy">
           {content_html ? <div dangerouslySetInnerHTML={{
         __html: content_html
       }} /> : <p className="whitespace-pre-wrap leading-relaxed">{content}</p>}
@@ -160,7 +160,7 @@ export function PollPostContent({
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-blue-600" />
+            <BarChart3 className="h-5 w-5 text-dq-navy" />
             <h3 className="font-medium text-gray-900">Poll Results</h3>
           </div>
           {endDate && <div className="flex items-center text-xs text-gray-500">
@@ -173,11 +173,11 @@ export function PollPostContent({
           {options.map(option => {
           const percentage = getVotePercentage(option.vote_count || 0);
           const isSelected = userVote === option.id;
-          return <div key={option.id} className={`rounded-lg border ${isSelected ? 'border-blue-300 bg-blue-50' : 'border-gray-200 bg-white hover:bg-gray-50'} p-3 transition-colors`}>
+          return <div key={option.id} className={`rounded-lg border ${isSelected ? 'border-dq-navy/30 bg-dq-navy/10' : 'border-gray-200 bg-white hover:bg-gray-50'} p-3 transition-colors`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2 flex-1">
-                    {isSelected && <Check className="h-4 w-4 text-blue-600 flex-shrink-0" />}
-                    <span className={`text-sm ${isSelected ? 'font-medium text-blue-700' : 'text-gray-700'}`}>
+                    {isSelected && <Check className="h-4 w-4 text-dq-navy flex-shrink-0" />}
+                    <span className={`text-sm ${isSelected ? 'font-medium text-dq-navy' : 'text-gray-700'}`}>
                       {option.option_text}
                     </span>
                   </div>
@@ -185,7 +185,7 @@ export function PollPostContent({
                       {percentage}%
                     </span>}
                 </div>
-                {userVote || pollEnded ? <Progress value={percentage} className={`h-2 ${isSelected ? 'bg-blue-100' : 'bg-gray-100'}`} indicatorClassName={isSelected ? 'bg-blue-600' : 'bg-gray-400'} /> : <Button variant="outline" size="sm" className="w-full mt-1 text-sm" onClick={() => handleVote(option.id)}>
+                {userVote || pollEnded ? <Progress value={percentage} className={`h-2 ${isSelected ? 'bg-dq-navy/20' : 'bg-gray-100'}`} indicatorClassName={isSelected ? 'bg-dq-navy' : 'bg-gray-400'} /> : <Button variant="outline" size="sm" className="w-full mt-1 text-sm" onClick={() => handleVote(option.id)}>
                     Vote
                   </Button>}
                 {(userVote || pollEnded) && <p className="text-xs text-gray-500 mt-1">

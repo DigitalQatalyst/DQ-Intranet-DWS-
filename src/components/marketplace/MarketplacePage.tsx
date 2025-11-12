@@ -113,7 +113,7 @@ interface ComparisonItem {
 }
 
 export interface MarketplacePageProps {
-  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding' | 'guides';
+  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding' | 'guides' | 'events';
   title: string;
   description: string;
   promoCards?: any[];
@@ -162,6 +162,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const isGuides = marketplaceType === 'guides';
   const isCourses = marketplaceType === 'courses';
   const isKnowledgeHub = marketplaceType === 'knowledge-hub';
+  const isEvents = marketplaceType === 'events';
   
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -281,6 +282,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         }
         return;
       }
+      // Initialize filter config for events from config
+      if (isEvents) {
+        if (config.filterCategories) {
+          setFilterConfig(config.filterCategories);
+        }
+        return;
+      }
       try {
         let filterOptions = await fetchMarketplaceFilters(marketplaceType);
         filterOptions = prependLearningTypeFilter(marketplaceType, filterOptions);
@@ -297,7 +305,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }
     };
     loadFilterOptions();
-  }, [marketplaceType, config, isCourses, isGuides, isKnowledgeHub, filterConfig.length, Object.keys(filters).length]);
+  }, [marketplaceType, config, isCourses, isGuides, isKnowledgeHub, isEvents]);
   
   // Fetch items based on marketplace type
   useEffect(() => {
@@ -315,6 +323,16 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
       // KNOWLEDGE HUB: use fallback data (no API)
       if (isKnowledgeHub) {
+        const fallbackItems = getFallbackItems(marketplaceType);
+        setItems(fallbackItems);
+        setFilteredItems(fallbackItems);
+        setTotalCount(fallbackItems.length);
+        setLoading(false);
+        return;
+      }
+
+      // EVENTS: use fallback data (no API)
+      if (isEvents) {
         const fallbackItems = getFallbackItems(marketplaceType);
         setItems(fallbackItems);
         setFilteredItems(fallbackItems);
@@ -528,7 +546,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
     run();
     // Keep deps lean; no need to include functions like isGuides
-  }, [marketplaceType, filters, searchQuery, queryParams, isCourses, isKnowledgeHub, currentPage, pageSize]);
+  }, [marketplaceType, filters, searchQuery, queryParams, isCourses, isKnowledgeHub, isEvents, currentPage, pageSize]);
 
   // Handle filter changes
   const handleFilterChange = useCallback((filterType: string, value: string) => {
@@ -558,7 +576,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       const newParams = new URLSearchParams();
       setSearchParams(newParams, { replace: true });
       setSearchQuery('');
-    } else if (isKnowledgeHub) {
+    } else if (isKnowledgeHub || isEvents) {
       setActiveFilters([]);
       setSearchQuery('');
     } else if (isGuides) {
@@ -573,7 +591,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       setFilters(empty);
       setSearchQuery('');
     }
-  }, [isCourses, isKnowledgeHub, isGuides, marketplaceType, filterConfig, setSearchParams]);
+  }, [isCourses, isKnowledgeHub, isEvents, isGuides, marketplaceType, filterConfig, setSearchParams]);
   
   // Knowledge Hub filter handlers
   const handleKnowledgeHubFilterChange = useCallback((filter: string) => {
@@ -589,6 +607,60 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const clearKnowledgeHubFilters = useCallback(() => {
     setActiveFilters([]);
   }, []);
+
+  // Apply filters and search to events (similar to knowledge-hub)
+  useEffect(() => {
+    if (!isEvents) return;
+    
+    let filtered = [...items];
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.title?.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query) ||
+        item.category?.toLowerCase().includes(query) ||
+        item.eventType?.toLowerCase().includes(query) ||
+        item.location?.toLowerCase().includes(query) ||
+        (item.tags && item.tags.some((tag: string) => tag.toLowerCase().includes(query)))
+      );
+    }
+    
+    // Apply active filters
+    if (activeFilters.length > 0 && filterConfig.length > 0) {
+      filtered = filtered.filter(item => {
+        return activeFilters.every(filterName => {
+          // Check if filter matches any item property
+          const category = filterConfig.find(c => 
+            c.options.some(opt => opt.name === filterName)
+          );
+          if (!category) return true;
+          
+          // Match based on category type
+          switch (category.id) {
+            case 'event-type':
+              return item.eventType === filterName || item.category === filterName;
+            case 'delivery-mode':
+              return item.location?.toLowerCase().includes(filterName.toLowerCase()) || 
+                     (filterName.toLowerCase() === 'online' && item.location?.toLowerCase().includes('online'));
+            case 'cost-type':
+              const price = item.price?.toLowerCase() || '';
+              if (filterName === 'Free') return price.includes('free') || price === '0';
+              if (filterName === 'Paid') return !price.includes('free') && price !== '0';
+              return true;
+            case 'business-stage':
+              return item.businessStage === filterName;
+            default:
+              return true;
+          }
+        });
+      });
+    }
+    
+    setFilteredItems(filtered);
+    setTotalCount(filtered.length);
+  }, [isEvents, items, searchQuery, activeFilters, filterConfig]);
   
   // UI helpers
   const toggleFilters = useCallback(() => setShowFilters(prev => !prev), []);
@@ -713,7 +785,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
               {(isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
-                 isKnowledgeHub ? activeFilters.length > 0 :
+                 isKnowledgeHub || isEvents ? activeFilters.length > 0 :
                  isGuides ? false :
                  Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''))) && (
                 <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
@@ -747,6 +819,18 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <div className="p-4">
                   {isGuides ? (
                     <GuidesFilters facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
+                  ) : isKnowledgeHub || isEvents ? (
+                    <div className="space-y-4">
+                      {filterConfig.map(category => <div key={category.id} className="border-b border-gray-100 pb-3">
+                          <h3 className="font-medium text-gray-900 mb-2">{category.title}</h3>
+                          <div className="space-y-2">
+                            {category.options.map(option => <div key={option.id} className="flex items-center">
+                                <input type="checkbox" id={`mobile-${category.id}-${option.id}`} checked={activeFilters.includes(option.name)} onChange={() => handleKnowledgeHubFilterChange(option.name)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                <label htmlFor={`mobile-${category.id}-${option.id}`} className="ml-2 text-sm text-gray-700">{option.name}</label>
+                              </div>)}
+                          </div>
+                        </div>)}
+                    </div>
                   ) : (
                     <FilterSidebar
                       filters={isCourses ? urlBasedFilters : (Object.fromEntries(Object.entries(filters).map(([k, v]) => [k, Array.isArray(v) ? v : (v ? [v] : [])])) as Record<string, string[]>)}
@@ -770,12 +854,12 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Filters</h2>
                   {(isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
-                     isKnowledgeHub ? activeFilters.length > 0 :
+                     isKnowledgeHub || isEvents ? activeFilters.length > 0 :
                      Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''))) && (
                     <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>
                   )}
                 </div>
-                {isKnowledgeHub ? (
+                {isKnowledgeHub || isEvents ? (
                   <div className="space-y-4">
                     {filterConfig.map(category => <div key={category.id} className="border-b border-gray-100 pb-3">
                         <h3 className="font-medium text-gray-900 mb-2">{category.title}</h3>
@@ -806,7 +890,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {[...Array(6)].map((_, idx) => <CourseCardSkeleton key={idx} />)}
               </div>
-            ) : error && !isGuides && !isKnowledgeHub ? (
+            ) : error && !isGuides && !isKnowledgeHub && !isEvents ? (
               <ErrorDisplay message={error} onRetry={retryFetch} />
             ) : isKnowledgeHub ? (
               <KnowledgeHubGrid

@@ -72,14 +72,14 @@ export function MediaPostContent({
           {metadata.caption}
         </p>}
       {/* Source Link */}
-      {metadata.source_url && <div className="flex items-center text-sm text-blue-600">
+      {metadata.source_url && <div className="flex items-center text-sm text-dq-navy">
           <ExternalLink className="h-4 w-4 mr-1.5" />
           <a href={metadata.source_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
             View original source
           </a>
         </div>}
       {/* Additional Content */}
-      {(content || content_html) && <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 mt-4">
+      {(content || content_html) && <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-dq-navy mt-4">
           {content_html ? <div dangerouslySetInnerHTML={{
         __html: content_html
       }} /> : <p className="whitespace-pre-wrap leading-relaxed">{content}</p>}

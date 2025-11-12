@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BookmarkIcon, ScaleIcon } from 'lucide-react';
+import { BookmarkIcon, ScaleIcon, Calendar, MapPin, Building } from 'lucide-react';
 import {
   CARD_ICON_BY_ID,
   DEFAULT_COURSE_ICON,
@@ -161,6 +161,83 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
     
     return chips;
   }, [item, marketplaceType]);
+
+  // Render event card layout for events marketplace
+  if (marketplaceType === 'events') {
+    return (
+      <div
+        className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+        onClick={onQuickView}
+      >
+        {/* Event Image with Date Badge */}
+        <div className="relative h-48 overflow-hidden bg-gray-200">
+          <img
+            src={item.imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80'}
+            alt={item.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80';
+            }}
+          />
+          {item.date && (
+            <div className="absolute top-3 right-3 bg-white px-3 py-1 rounded-md shadow-md">
+              <span className="text-xs font-semibold text-gray-700">{item.date}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Event Content */}
+        <div className="p-4 flex-grow flex flex-col">
+          {/* Event Title */}
+          <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">
+            {item.title}
+          </h3>
+
+          {/* Event Type and Location */}
+          {(item.eventType || item.type || item.category) && item.location && (
+            <p className="text-sm text-gray-600 mb-4">
+              {item.eventType || item.type || item.category} at {item.location}
+            </p>
+          )}
+
+          {/* Event Details */}
+          <div className="space-y-2 mb-4">
+            {item.date && (
+              <div className="flex items-center text-sm text-gray-500">
+                <Calendar size={14} className="mr-2 flex-shrink-0" />
+                <span>{item.date}</span>
+              </div>
+            )}
+            {(item.organizer || item.provider?.name) && (
+              <div className="flex items-center text-sm text-gray-500">
+                <Building size={14} className="mr-2 flex-shrink-0" />
+                <span>{item.organizer || item.provider?.name}</span>
+              </div>
+            )}
+            {item.location && (
+              <div className="flex items-center text-sm text-gray-500">
+                <MapPin size={14} className="mr-2 flex-shrink-0" />
+                <span>{item.location}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Register Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewDetails(e);
+            }}
+            className="w-full mt-auto px-4 py-2.5 text-sm font-semibold text-white bg-dq-navy hover:bg-[#13285A] rounded-md transition-colors"
+          >
+            {config.primaryCTA || 'Register Now'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return <div className="flex flex-col min-h-[340px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200" onClick={onQuickView}>
       {/* Card Header with fixed height for title and provider */}
       <div className="px-4 py-5 flex-grow flex flex-col">
@@ -213,10 +290,18 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
       {/* Card Footer - with two buttons */}
       <div className="mt-auto border-t border-gray-100 p-4 pt-5">
         <div className="flex justify-between gap-2">
-          <button onClick={handleViewDetails} className="px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors whitespace-nowrap min-w-[120px] flex-1">
+          <button onClick={handleViewDetails} className={`px-4 py-2 text-sm font-medium bg-white border rounded-md transition-colors whitespace-nowrap min-w-[120px] flex-1 ${
+            marketplaceType === 'events' 
+              ? 'text-dq-navy border-dq-navy hover:bg-dq-navy/10' 
+              : 'text-blue-600 border-blue-600 hover:bg-blue-50'
+          }`}>
             {config.secondaryCTA}
           </button>
-          <button onClick={handlePrimaryAction} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors whitespace-nowrap flex-1">
+          <button onClick={handlePrimaryAction} className={`px-4 py-2 text-sm font-bold text-white rounded-md transition-colors whitespace-nowrap flex-1 ${
+            marketplaceType === 'events'
+              ? 'bg-dq-navy hover:bg-[#13285A]'
+              : 'bg-blue-600 hover:bg-blue-700'
+          }`}>
             {config.primaryCTA}
           </button>
         </div>

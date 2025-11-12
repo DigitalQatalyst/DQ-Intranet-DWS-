@@ -150,10 +150,18 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
             </div>}
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
-            <button onClick={onViewDetails} className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-md border border-blue-200 hover:bg-blue-100 transition-colors">
+            <button onClick={onViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
+              marketplaceType === 'events'
+                ? 'text-dq-navy bg-dq-navy/10 border-dq-navy/30 hover:bg-dq-navy/20'
+                : 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100'
+            }`}>
               View Full Details
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-md hover:from-blue-700 hover:to-purple-700 transition-colors">
+            <button className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
+              marketplaceType === 'events'
+                ? 'bg-dq-navy hover:bg-[#13285A]'
+                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+            }`}>
               {config.primaryCTA}
             </button>
           </div>

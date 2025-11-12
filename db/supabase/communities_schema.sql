@@ -325,10 +325,11 @@ SELECT
     c.imageurl,
     c.category,
     c.created_at,
+    c.isprivate,
     COUNT(DISTINCT m.user_id) AS member_count
 FROM communities c
 LEFT JOIN memberships m ON c.id = m.community_id
-GROUP BY c.id, c.name, c.description, c.imageurl, c.category, c.created_at;
+GROUP BY c.id, c.name, c.description, c.imageurl, c.category, c.created_at, c.isprivate;
 
 -- Posts with reactions and metadata
 CREATE OR REPLACE VIEW posts_with_reactions AS

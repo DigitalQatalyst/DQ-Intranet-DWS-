@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/communities/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Users } from 'lucide-react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { Skeleton } from '@/communities/components/ui/skeleton';
 import { GradientAvatar } from '@/communities/components/ui/gradient-avatar';
 interface Community {
@@ -81,7 +81,7 @@ export function MutualCommunitiesList({
                 {community.imageurl ? <img src={community.imageurl} alt={community.name} className="h-full w-full object-cover" /> : <GradientAvatar seed={community.id} className="h-full w-full" />}
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-gray-900 text-sm truncate group-hover:text-blue-600 transition-colors">
+                <h4 className="font-semibold text-gray-900 text-sm truncate group-hover:text-dq-navy transition-colors">
                   {community.name}
                 </h4>
                 <p className="text-xs text-gray-500 truncate">

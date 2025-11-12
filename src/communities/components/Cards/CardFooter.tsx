@@ -3,43 +3,49 @@ export interface CardFooterProps {
   primaryCTA?: {
     text: string;
     onClick: (e: React.MouseEvent) => void;
-    variant?: 'primary' | 'secondary' | 'member';
+    variant?: 'primary' | 'secondary';
   };
   secondaryCTA?: {
     text: string;
     onClick: (e: React.MouseEvent) => void;
   };
   actions?: React.ReactNode;
-  isMember?: boolean;
 }
 export const CardFooter: React.FC<CardFooterProps> = ({
   primaryCTA,
   secondaryCTA,
-  actions,
-  isMember = false
+  actions
 }) => {
   if (!primaryCTA && !secondaryCTA && !actions) {
     return null;
   }
-  const getButtonStyles = (variant?: 'primary' | 'secondary' | 'member') => {
-    if (variant === 'member') {
-      // Use blue styling to match primary CTA appearance
-      return 'text-white bg-blue-600 hover:bg-blue-700';
-    }
-    if (variant === 'secondary') {
-      return 'text-blue-600 bg-white border border-blue-600 hover:bg-blue-50';
-    }
-    return 'text-white bg-blue-600 hover:bg-blue-700';
-  };
-  return <div className="mt-auto border-t border-gray-100 p-4 pt-5">
+  return (
+    <div className="mt-auto border-t border-gray-100 p-4 pt-5">
       {actions && <div className="mb-4">{actions}</div>}
-      {(primaryCTA || secondaryCTA) && <div className="flex justify-between gap-2">
-          {secondaryCTA && <button onClick={secondaryCTA.onClick} className="px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors whitespace-nowrap min-w-[120px] flex-1">
+      {(primaryCTA || secondaryCTA) && (
+        <div className="flex flex-col gap-3">
+          {secondaryCTA && (
+            <button
+              onClick={secondaryCTA.onClick}
+              className="w-full h-10 px-4 py-2 text-sm font-medium text-dq-navy bg-white border border-dq-navy rounded-md hover:bg-dq-navy/10 transition-colors whitespace-nowrap flex items-center justify-center"
+            >
               {secondaryCTA.text}
-            </button>}
-          {primaryCTA && <button onClick={primaryCTA.onClick} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 whitespace-nowrap flex-1 ${getButtonStyles(primaryCTA.variant)}`}>
+            </button>
+          )}
+          {primaryCTA && (
+            <button
+              onClick={primaryCTA.onClick}
+              className={`w-full h-10 px-4 py-2 text-sm font-bold rounded-md transition-colors whitespace-nowrap flex items-center justify-center ${
+                primaryCTA.variant === 'secondary'
+                  ? 'text-dq-navy bg-white border border-dq-navy hover:bg-dq-navy/10'
+                  : 'text-white bg-dq-navy hover:bg-[#13285A]'
+              }`}
+            >
               {primaryCTA.text}
-            </button>}
-        </div>}
-    </div>;
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };

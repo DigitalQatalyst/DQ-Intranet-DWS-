@@ -29,12 +29,23 @@ export const BaseCard: React.FC<BaseCardProps> = ({
   onMouseEnter,
   onMouseLeave
 }) => {
-  return <div className={`flex flex-col ${BASE_DESIGN_TOKENS.visual.minHeight} bg-white ${BASE_DESIGN_TOKENS.visual.borderRadius} ${BASE_DESIGN_TOKENS.visual.shadow.default} overflow-hidden ${BASE_DESIGN_TOKENS.visual.shadow.hover} ${BASE_DESIGN_TOKENS.transitions.hover} ${onClick ? 'cursor-pointer' : ''} ${className}`} onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined} onKeyDown={onClick ? e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClick();
-    }
-  } : undefined}>
+  return (
+    <div
+      className={`flex flex-col ${BASE_DESIGN_TOKENS.visual.minHeight} bg-white ${BASE_DESIGN_TOKENS.visual.borderRadius} ${BASE_DESIGN_TOKENS.visual.shadow.default} overflow-hidden ${BASE_DESIGN_TOKENS.visual.shadow.hover} ${BASE_DESIGN_TOKENS.transitions.hover} ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      data-id={dataId}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      } : undefined}
+    >
       {children}
-    </div>;
+    </div>
+  );
 };

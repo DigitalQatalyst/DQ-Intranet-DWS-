@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 export type UserRole = 'admin' | 'moderator' | 'member';
 export interface Permissions {
   canModeratePosts: boolean;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
 import { Link } from 'react-router-dom';
@@ -108,11 +108,11 @@ export function ActivityTabs({
       <Tabs defaultValue="posts" className="w-full">
         <div className="border-b border-gray-200">
           <TabsList className="w-full justify-start rounded-none border-0 bg-transparent p-0">
-            <TabsTrigger value="posts" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent px-6 py-4">
+            <TabsTrigger value="posts" className="rounded-none border-b-2 border-transparent data-[state=active]:border-dq-navy data-[state=active]:bg-transparent px-6 py-4">
               <FileText className="h-4 w-4 mr-2" />
               Posts
             </TabsTrigger>
-            <TabsTrigger value="comments" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent px-6 py-4">
+            <TabsTrigger value="comments" className="rounded-none border-b-2 border-transparent data-[state=active]:border-dq-navy data-[state=active]:bg-transparent px-6 py-4">
               <MessageSquare className="h-4 w-4 mr-2" />
               Comments
             </TabsTrigger>
@@ -147,7 +147,7 @@ export function ActivityTabs({
                     {post.content}
                   </p>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">
+                    <span className="text-xs px-2 py-0.5 bg-dq-navy/10 text-dq-navy rounded-md border border-dq-navy/30">
                       {post.community_name}
                     </span>
                   </div>

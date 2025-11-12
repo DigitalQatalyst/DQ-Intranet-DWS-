@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { Input } from '@/communities/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
 import { Badge } from '@/communities/components/ui/badge';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Switch } from '@/communities/components/ui/switch';
 import { Label } from '@/communities/components/ui/label';
@@ -64,7 +64,7 @@ export function NotificationSettings() {
     label: 'Replies',
     description: 'Get notified when someone replies to your posts',
     icon: MessageSquare,
-    color: 'text-blue-600'
+    color: 'text-dq-navy'
   }, {
     key: 'mention' as keyof NotificationSettingsData,
     label: 'Mentions',
