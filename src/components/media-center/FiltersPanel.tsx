@@ -46,7 +46,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({ facets, values, onChange, o
       )}
       {orderedFacets.map((facet) => (
         <div key={facet.key} className="border-t border-gray-100 pt-4 first:border-t-0 first:pt-0">
-          <details open>
+          <details>
             <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-gray-800">
               {facet.label}
               <ChevronDown className="h-4 w-4 text-gray-500" />

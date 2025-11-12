@@ -36,6 +36,26 @@ const PINNED_FACETS: FacetConfig[] = [
 const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
   announcements: [
     {
+      key: 'department',
+      label: 'Department',
+      options: [
+        'HRA (People)',
+        'Finance',
+        'Deals',
+        'Stories',
+        'Intelligence',
+        'Solutions',
+        'SecDevOps',
+        'Products',
+        'Delivery — Deploys',
+        'Delivery — Designs',
+        'DCO Operations',
+        'DBP Platform',
+        'DBP Delivery'
+      ]
+    },
+    { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] },
+    {
       key: 'newsType',
       label: 'News Type',
       options: ['Corporate Announcements', 'Product / Project Updates', 'Events & Campaigns', 'Digital Tech News']
@@ -49,10 +69,40 @@ const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
       key: 'focusArea',
       label: 'Topic / Focus Area',
       options: ['GHC', 'DWS', 'Culture & People']
+    },
+    {
+      key: 'audience',
+      label: 'Audience',
+      options: ['All Hands', 'Leads', 'Partners', 'Public']
+    },
+    {
+      key: 'channel',
+      label: 'Channel',
+      options: ['Email', 'Townhall', 'Portal', 'Social']
     }
   ],
   insights: [
     {
+      key: 'department',
+      label: 'Department',
+      options: [
+        'HRA (People)',
+        'Finance',
+        'Deals',
+        'Stories',
+        'Intelligence',
+        'Solutions',
+        'SecDevOps',
+        'Products',
+        'Delivery — Deploys',
+        'Delivery — Designs',
+        'DCO Operations',
+        'DBP Platform',
+        'DBP Delivery'
+      ]
+    },
+    { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] },
+    {
       key: 'newsType',
       label: 'News Type',
       options: ['Corporate Announcements', 'Product / Project Updates', 'Events & Campaigns', 'Digital Tech News']
@@ -66,9 +116,39 @@ const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
       key: 'focusArea',
       label: 'Topic / Focus Area',
       options: ['GHC', 'DWS', 'Culture & People']
+    },
+    {
+      key: 'format',
+      label: 'Format',
+      options: ['Tutorial', 'Case Study', 'Opinion', 'How-to']
+    },
+    {
+      key: 'readingTime',
+      label: 'Reading Time',
+      options: ['< 3 min', '3–5 min', '5–10 min', '> 10 min']
     }
   ],
   opportunities: [
+    {
+      key: 'department',
+      label: 'Department',
+      options: [
+        'HRA (People)',
+        'Finance',
+        'Deals',
+        'Stories',
+        'Intelligence',
+        'Solutions',
+        'SecDevOps',
+        'Products',
+        'Delivery — Deploys',
+        'Delivery — Designs',
+        'DCO Operations',
+        'DBP Platform',
+        'DBP Delivery'
+      ]
+    },
+    { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] },
     { key: 'deptType', label: 'Role Type', options: ['Tech', 'Design', 'Ops', 'Finance', 'HR'] },
     {
       key: 'sfiaLevel',
@@ -84,7 +164,9 @@ const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
         { value: 'L7', label: 'L7 · Inspire', description: 'Inspire Market' }
       ]
     },
-    { key: 'contract', label: 'Contract Type', options: ['Full-time', 'Part-time', 'Contract', 'Intern'] }
+    { key: 'contract', label: 'Contract Type', options: ['Full-time', 'Part-time', 'Contract', 'Intern'] },
+    { key: 'workMode', label: 'Work Mode', options: ['Onsite', 'Hybrid', 'Remote'] },
+    { key: 'postedWithin', label: 'Posted Within', options: ['Last 7 days', 'Last 30 days', 'Any time'] }
   ]
 };
 
@@ -93,19 +175,19 @@ const TAB_SUMMARIES: Record<
   { title: string; description: string; meta?: string }
 > = {
   announcements: {
-    title: 'Announcements & Updates',
+    title: 'News & Announcement',
     description:
       'Live corporate announcements, product / project updates, events, and comms so every studio keeps pace with what is shipping across DQ.',
     meta: 'Sourced from DQ Leadership, Operations, and Communications.'
   },
   insights: {
-    title: 'Insights & Stories',
+    title: 'Blogs',
     description:
       'Long-form blogs and thought-leadership pieces that codify craft, behaviours, and delivery lessons from across chapters.',
     meta: 'Authored by DQ Associates, Leads, and Partners.'
   },
   opportunities: {
-    title: 'Opportunities & Openings',
+    title: 'Jobs opening',
     description:
       'Internal mobility postings for current DQ teammates looking to rotate into a new role, studio, or craft without leaving the company.',
     meta: 'Use Department, Location, Role Type, and SFIA to find the right internal match.'
@@ -118,6 +200,7 @@ const NewsPage: React.FC = () => {
   const [queryText, setQueryText] = useState('');
   const [filters, setFilters] = useState<FiltersValue>({});
   const [showFilters, setShowFilters] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     setFilters({});
@@ -136,7 +219,7 @@ const NewsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const facets = useMemo(() => [...PINNED_FACETS, ...SECONDARY_FACETS[tab]], [tab]);
+  const facets = useMemo(() => [...SECONDARY_FACETS[tab]], [tab]);
 
   const hasActiveFilters = useMemo(
     () => Object.values(filters).some((values) => Array.isArray(values) && values.length > 0),
@@ -202,24 +285,24 @@ const NewsPage: React.FC = () => {
 
         <Tabs value={tab} onValueChange={(value) => setTab(value as MediaCenterTabKey)} className="w-full">
           <div className="border-b border-gray-200">
-            <TabsList className="flex h-auto justify-start gap-8 overflow-x-auto bg-transparent p-0 text-gray-700">
+            <TabsList className="flex h-auto w-full justify-start gap-0 overflow-x-auto bg-transparent p-0 text-gray-700">
               <TabsTrigger
                 value="announcements"
-                className="rounded-none border-b-2 border-transparent px-0 py-2 text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-center text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
-                Announcements & Updates
+                News & Announcement
               </TabsTrigger>
               <TabsTrigger
                 value="insights"
-                className="rounded-none border-b-2 border-transparent px-0 py-2 text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-center text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
-                Insights & Stories
+                Blogs
               </TabsTrigger>
               <TabsTrigger
                 value="opportunities"
-                className="rounded-none border-b-2 border-transparent px-0 py-2 text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-center text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
-                Opportunities & Openings
+                Jobs opening
               </TabsTrigger>
             </TabsList>
           </div>
@@ -297,21 +380,32 @@ const NewsPage: React.FC = () => {
           <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
             <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
               <div className="rounded-xl bg-white p-4 shadow">
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mb-2 flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Filters</h2>
-                  {hasActiveFilters && (
-                    <button type="button" className="text-sm font-medium text-[#1A2E6E]" onClick={clearFilters}>
-                      Reset All
+                  <div className="flex items-center gap-3">
+                    {hasActiveFilters && (
+                      <button type="button" className="text-sm font-medium text-[#1A2E6E]" onClick={clearFilters}>
+                        Reset All
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                      onClick={() => setSidebarCollapsed((v) => !v)}
+                    >
+                      {sidebarCollapsed ? 'Show' : 'Hide'}
                     </button>
-                  )}
+                  </div>
                 </div>
-                <FiltersPanel
-                  facets={facets}
-                  values={filters}
-                  onChange={setFilters}
-                  onClear={hasActiveFilters ? clearFilters : undefined}
-                  groupOrder={{ pinned: ['department', 'location'] }}
-                />
+                {!sidebarCollapsed && (
+                  <FiltersPanel
+                    facets={facets}
+                    values={filters}
+                    onChange={setFilters}
+                    onClear={hasActiveFilters ? clearFilters : undefined}
+                    groupOrder={{ pinned: ['department', 'location'] }}
+                  />
+                )}
               </div>
             </aside>
 
