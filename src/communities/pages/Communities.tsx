@@ -20,6 +20,8 @@ interface Community {
   member_count: number;
   imageurl?: string;
   category?: string;
+  department?: string;
+  location_filter?: string;
   isprivate?: boolean;
   activitylevel?: string;
 }
@@ -71,9 +73,55 @@ export default function Communities() {
         .select('activitylevel')
         .not('activitylevel', 'is', null);
 
-      const [categoriesResult, activityLevelsResult] = await Promise.all([
+      // Fetch distinct departments from backend
+      const departmentsQuery = supabase
+        .from('communities_with_counts')
+        .select('department')
+        .not('department', 'is', null);
+
+      // Fetch distinct location filters from backend
+      const locationsQuery = supabase
+        .from('communities_with_counts')
+        .select('location_filter')
+        .not('location_filter', 'is', null);
+
+      // Try to fetch from filter_options table first (dynamic approach)
+      let departmentOptions: Array<{ id: string; name: string }> = [];
+      let locationOptions: Array<{ id: string; name: string }> = [];
+      
+      try {
+        const { data: filterOptionsData, error: filterOptionsError } = await supabase
+          .rpc('get_filter_options', { p_filter_type: 'department', p_filter_category: 'communities' });
+        
+        if (!filterOptionsError && filterOptionsData) {
+          departmentOptions = filterOptionsData.map((opt: any) => ({
+            id: opt.id.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
+            name: opt.id // Use option_value (opt.id) for exact database value matching
+          }));
+        }
+      } catch (err) {
+        console.warn('Could not fetch department options from filter_options table, using database values:', err);
+      }
+
+      try {
+        const { data: locationOptionsData, error: locationOptionsError } = await supabase
+          .rpc('get_filter_options', { p_filter_type: 'location', p_filter_category: 'communities' });
+        
+        if (!locationOptionsError && locationOptionsData) {
+          locationOptions = locationOptionsData.map((opt: any) => ({
+            id: opt.id.toLowerCase().replace(/\s+/g, '-'),
+            name: opt.id // Use option_value (opt.id) for exact database value matching
+          }));
+        }
+      } catch (err) {
+        console.warn('Could not fetch location options from filter_options table, using database values:', err);
+      }
+
+      const [categoriesResult, activityLevelsResult, departmentsResult, locationsResult] = await Promise.all([
         safeFetch<Array<{ category: string }>>(categoriesQuery),
-        safeFetch<Array<{ activitylevel: string }>>(activityLevelsQuery)
+        safeFetch<Array<{ activitylevel: string }>>(activityLevelsQuery),
+        safeFetch<Array<{ department: string }>>(departmentsQuery),
+        safeFetch<Array<{ location_filter: string }>>(locationsQuery)
       ]);
 
       // Extract unique values
@@ -89,8 +137,77 @@ export default function Communities() {
         )
       ).sort();
 
+      const uniqueDepartments = Array.from(
+        new Set(
+          (departmentsResult[0] || []).map(d => d.department).filter(Boolean) as string[]
+        )
+      ).sort();
+
+      const uniqueLocations = Array.from(
+        new Set(
+          (locationsResult[0] || []).map(l => l.location_filter).filter(Boolean) as string[]
+        )
+      ).sort();
+
+      // Use filter_options table values if available, otherwise use database values from communities table
+      if (departmentOptions.length === 0 && uniqueDepartments.length > 0) {
+        departmentOptions = uniqueDepartments.map((dept) => ({
+          id: dept.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
+          name: dept
+        }));
+      }
+      // If still empty, try fetching from 'both' category as fallback
+      if (departmentOptions.length === 0) {
+        try {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .rpc('get_filter_options', { p_filter_type: 'department', p_filter_category: 'both' });
+          
+          if (!fallbackError && fallbackData && fallbackData.length > 0) {
+            departmentOptions = fallbackData.map((opt: any) => ({
+              id: opt.id.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
+              name: opt.id // Use option_value (opt.id) for exact database value matching
+            }));
+          }
+        } catch (err) {
+          console.warn('Could not fetch department options from database:', err);
+        }
+      }
+
+      if (locationOptions.length === 0 && uniqueLocations.length > 0) {
+        locationOptions = uniqueLocations.map((loc) => ({
+          id: loc.toLowerCase().replace(/\s+/g, '-'),
+          name: loc
+        }));
+      }
+      // If still empty, try fetching from 'both' category as fallback
+      if (locationOptions.length === 0) {
+        try {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .rpc('get_filter_options', { p_filter_type: 'location', p_filter_category: 'both' });
+          
+          if (!fallbackError && fallbackData && fallbackData.length > 0) {
+            locationOptions = fallbackData.map((opt: any) => ({
+              id: opt.id.toLowerCase().replace(/\s+/g, '-'),
+              name: opt.id // Use option_value (opt.id) for exact database value matching
+            }));
+          }
+        } catch (err) {
+          console.warn('Could not fetch location options from database:', err);
+        }
+      }
+
       // Build filter configuration dynamically
       const config: FilterConfig[] = [
+        {
+          id: 'department',
+          title: 'Department',
+          options: departmentOptions
+        },
+        {
+          id: 'location',
+          title: 'Location',
+          options: locationOptions
+        },
         {
           id: 'memberCount',
           title: 'Member Count',
@@ -121,18 +238,69 @@ export default function Communities() {
       setFilterConfig(config);
     } catch (err) {
       console.error('Error fetching filter options:', err);
-      // Fallback to member count only if fetch fails
-      setFilterConfig([
-        {
-          id: 'memberCount',
-          title: 'Member Count',
-          options: [
-            { id: 'small', name: '0-10 members' },
-            { id: 'medium', name: '11-50 members' },
-            { id: 'large', name: '51+ members' }
-          ]
-        }
-      ]);
+      // Fallback: Try to fetch from database one more time, then use minimal config
+      try {
+        const [deptFallback, locFallback] = await Promise.all([
+          supabase.rpc('get_filter_options', { p_filter_type: 'department', p_filter_category: 'both' }),
+          supabase.rpc('get_filter_options', { p_filter_type: 'location', p_filter_category: 'both' })
+        ]);
+
+        const fallbackDeptOptions = deptFallback.data?.map((opt: any) => ({
+          id: opt.id.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
+          name: opt.id // Use option_value (opt.id) for exact database value matching
+        })) || [];
+
+        const fallbackLocOptions = locFallback.data?.map((opt: any) => ({
+          id: opt.id.toLowerCase().replace(/\s+/g, '-'),
+          name: opt.id // Use option_value (opt.id) for exact database value matching
+        })) || [];
+
+        setFilterConfig([
+          {
+            id: 'department',
+            title: 'Department',
+            options: fallbackDeptOptions.length > 0 ? fallbackDeptOptions : []
+          },
+          {
+            id: 'location',
+            title: 'Location',
+            options: fallbackLocOptions.length > 0 ? fallbackLocOptions : []
+          },
+          {
+            id: 'memberCount',
+            title: 'Member Count',
+            options: [
+              { id: 'small', name: '0-10 members' },
+              { id: 'medium', name: '11-50 members' },
+              { id: 'large', name: '51+ members' }
+            ]
+          }
+        ]);
+      } catch (fallbackErr) {
+        console.error('Error in fallback filter fetch:', fallbackErr);
+        // Last resort: empty filters (user will see no options)
+        setFilterConfig([
+          {
+            id: 'department',
+            title: 'Department',
+            options: []
+          },
+          {
+            id: 'location',
+            title: 'Location',
+            options: []
+          },
+          {
+            id: 'memberCount',
+            title: 'Member Count',
+            options: [
+              { id: 'small', name: '0-10 members' },
+              { id: 'medium', name: '11-50 members' },
+              { id: 'large', name: '51+ members' }
+            ]
+          }
+        ]);
+      }
     }
   };
 
@@ -175,6 +343,16 @@ export default function Communities() {
       // Apply category filter (backend) - exact match
       if (filters.category) {
         query = (query as any).eq('category', filters.category);
+      }
+
+      // Apply department filter (backend) - exact match
+      if (filters.department) {
+        query = (query as any).eq('department', filters.department);
+      }
+
+      // Apply location filter (backend) - exact match
+      if (filters.location) {
+        query = (query as any).eq('location_filter', filters.location);
       }
 
       // Order by member count (descending)
@@ -247,57 +425,92 @@ export default function Communities() {
       fullWidth={false}
       hidePageLayout={true}>
       <div className="max-w-7xl mx-auto pl-0 pr-1 sm:pl-0 sm:pr-2 lg:pl-0 lg:pr-3 pt-2 pb-6">
-        {/* Breadcrumbs */}
-        <nav className="flex mb-4" aria-label="Breadcrumb">
-          <ol className="inline-flex items-center space-x-1 md:space-x-2">
-            <li className="inline-flex items-center">
-              <Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center">
-                <HomeIcon size={16} className="mr-1" />
-                <span>Home</span>
-              </Link>
-            </li>
-            <li aria-current="page">
-              <div className="flex items-center">
-                <ChevronRightIcon size={16} className="text-gray-400" />
-                <span className="ml-1 text-gray-700 md:ml-2">DQ Work Communities</span>
-              </div>
-            </li>
-          </ol>
-        </nav>
+        {/* Breadcrumbs - Dynamic based on active tab */}
+        {(() => {
+          // Determine active tab based on pathname
+          const isPulseTab = location.pathname === '/marketplace/pulse' || location.pathname.startsWith('/marketplace/pulse/');
+          const isEventsTab = location.pathname === '/marketplace/events' || location.pathname.startsWith('/marketplace/events/');
+          const isDiscussionsTab = location.pathname === '/communities' || location.pathname.startsWith('/community/');
+          
+          // Determine current page label
+          let currentPageLabel = 'Discussions';
+          if (isPulseTab) {
+            currentPageLabel = 'Pulse';
+          } else if (isEventsTab) {
+            currentPageLabel = 'Events';
+          }
+          
+          return (
+            <nav className="flex mb-4" aria-label="Breadcrumb">
+              <ol className="inline-flex items-center space-x-1 md:space-x-2">
+                <li className="inline-flex items-center">
+                  <Link 
+                    to="/" 
+                    className="text-gray-600 hover:text-gray-900 inline-flex items-center text-sm md:text-base transition-colors"
+                    aria-label="Navigate to Home"
+                  >
+                    <HomeIcon size={16} className="mr-1" aria-hidden="true" />
+                    <span>Home</span>
+                  </Link>
+                </li>
+                <li>
+                  <div className="flex items-center">
+                    <ChevronRightIcon size={16} className="text-gray-400 mx-1" aria-hidden="true" />
+                    <Link 
+                      to="/communities" 
+                      className="text-gray-600 hover:text-gray-900 text-sm md:text-base font-medium transition-colors"
+                      aria-label="Navigate to DQ Work Communities"
+                    >
+                      DQ Work Communities
+                    </Link>
+                  </div>
+                </li>
+                <li aria-current="page">
+                  <div className="flex items-center">
+                    <ChevronRightIcon size={16} className="text-gray-400 mx-1" aria-hidden="true" />
+                    <span className="text-gray-500 text-sm md:text-base font-medium">{currentPageLabel}</span>
+                  </div>
+                </li>
+              </ol>
+            </nav>
+          );
+        })()}
 
         {/* Page Header - Title and Subtitle */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 my-4">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
             DQ Work Communities
           </h1>
-          <p className="text-gray-600 text-sm mt-2">
+          <p className="text-gray-600 mb-6">
             Find and join communities to connect with other associates within the organization.
           </p>
           
           {/* Navigation Tabs */}
-          <div className="mt-6 border-b border-gray-200">
-            <nav className="flex space-x-8" aria-label="Tabs">
+          <div className="mb-6">
+            <nav className="flex" aria-label="Tabs">
               <button
                 onClick={() => {
                   // Discussion tab - stays on current page (Communities Marketplace)
                   navigate('/communities');
                 }}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-4 px-4 text-sm transition-colors border-b ${
                   location.pathname === '/communities' || location.pathname.startsWith('/community/')
-                    ? 'border-brand-blue text-brand-blue'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-gray-300 text-gray-900 font-normal'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 font-normal'
                 }`}
               >
                 Discussion
               </button>
               <button
                 onClick={() => {
-                  // Pulse tab - placeholder (no routing yet)
-                  // Could show a message or do nothing for now
+                  // Pulse tab - routes to Pulse Marketplace
+                  navigate('/marketplace/pulse');
                 }}
-                className="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm transition-colors cursor-not-allowed opacity-60"
-                disabled
-                title="Coming soon"
+                className={`py-4 px-4 text-sm transition-colors border-b ${
+                  location.pathname === '/marketplace/pulse' || location.pathname.startsWith('/marketplace/pulse/')
+                    ? 'border-gray-300 text-gray-900 font-normal'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 font-normal'
+                }`}
               >
                 Pulse
               </button>
@@ -306,10 +519,10 @@ export default function Communities() {
                   // Events tab - routes to Events Marketplace
                   navigate('/marketplace/events');
                 }}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-4 px-4 text-sm transition-colors border-b ${
                   location.pathname === '/marketplace/events' || location.pathname.startsWith('/marketplace/events/')
-                    ? 'border-brand-blue text-brand-blue'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-gray-300 text-gray-900 font-normal'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 font-normal'
                 }`}
               >
                 Events

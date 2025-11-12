@@ -23,7 +23,7 @@ import {
 } from '@/lms/config';
 import GuidesFilters, { GuidesFacets } from '../guides/GuidesFilters';
 import GuidesGrid from '../guides/GuidesGrid';
-import { supabaseClient } from '../../lib/supabaseClient';
+import { supabaseClient, supabase } from '../../lib/supabaseClient';
 import { track } from '../../utils/analytics';
 
 const LEARNING_TYPE_FILTER: FilterConfig = {
@@ -179,30 +179,16 @@ interface UpcomingEventView {
   updated_at: string;
 }
 
-// Interface for Supabase events_v2 table (actual schema)
+// Interface for Supabase events table
 interface EventsTableRow {
   id: string;
   title: string;
   description: string | null;
-  start_time: string; // TIMESTAMPTZ format
-  end_time: string; // TIMESTAMPTZ format
-  category: string;
-  location: string;
-  image_url: string | null;
-  meeting_link: string | null;
-  is_virtual: boolean;
-  is_all_day: boolean;
-  max_attendees: number | null;
-  registration_required: boolean;
-  registration_deadline: string | null;
-  organizer_id: string | null;
-  organizer_name: string | null;
-  organizer_email: string | null;
-  status: string;
-  is_featured: boolean;
-  tags: string[] | null;
+  event_date: string; // DATE format: YYYY-MM-DD
+  event_time: string | null; // TIME format: HH:MM:SS
+  community_id: string | null;
+  created_by: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 // Interface for events stored in posts table
@@ -244,18 +230,6 @@ interface MarketplaceEvent {
   details?: string[];
   tags: string[];
   imageUrl?: string;
-  isVirtual?: boolean; // Added for filtering
-  startTime?: string; // Added for duration calculation
-  endTime?: string; // Added for duration calculation
-  // Preserve original database fields for exact filtering
-  _raw?: {
-    category: string;
-    is_virtual: boolean;
-    start_time: string;
-    end_time: string;
-    location: string;
-    status: string;
-  };
 }
 
 // Transform Supabase event to marketplace event format
@@ -267,14 +241,11 @@ const transformEventToMarketplace = (event: SupabaseEvent): MarketplaceEvent => 
   let description: string;
   let imageUrl: string | null = null;
   let tags: string[] = [];
-  let organizerName: string | null = null;
-  let maxAttendees: number | null = null;
-  let isVirtual: boolean = false;
 
   // Check event type and extract data accordingly
   if ('start_time' in event && 'end_time' in event) {
-    // Event from events_v2 table or upcoming_events view (both have same structure)
-    const evt = event as UpcomingEventView | EventsTableRow;
+    // Event from upcoming_events view
+    const evt = event as UpcomingEventView;
     startDate = new Date(evt.start_time);
     endDate = new Date(evt.end_time);
     category = evt.category || "General";
@@ -282,16 +253,8 @@ const transformEventToMarketplace = (event: SupabaseEvent): MarketplaceEvent => 
     description = evt.description || "";
     imageUrl = evt.image_url;
     tags = evt.tags || [];
-    organizerName = evt.organizer_name;
-    maxAttendees = evt.max_attendees;
-    isVirtual = evt.is_virtual;
-    
-    // If virtual and has meeting link, append it to location
-    if (isVirtual && evt.meeting_link) {
-      location = location.includes('Virtual') ? location : `Virtual - ${location}`;
-    }
   } else if ('post_type' in event && event.post_type === 'event') {
-    // Event from posts table (legacy format)
+    // Event from posts table
     const evt = event as PostEventRow;
     if (evt.event_date) {
       startDate = new Date(evt.event_date);
@@ -304,13 +267,16 @@ const transformEventToMarketplace = (event: SupabaseEvent): MarketplaceEvent => 
     description = evt.content || evt.description || "";
     tags = evt.tags || [];
   } else {
-    // Fallback - should not happen with current schema
-    console.warn("Unknown event format:", event);
-    startDate = new Date();
-    endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
-    category = "General";
+    // Event from events table
+    const evt = event as EventsTableRow;
+    const eventDate = evt.event_date; // YYYY-MM-DD format
+    const eventTime = evt.event_time || "00:00:00"; // HH:MM:SS format
+    const dateTimeString = `${eventDate}T${eventTime}`;
+    startDate = new Date(dateTimeString);
+    endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Default 1 hour
+    category = evt.community_id ? "Community" : "General";
     location = "TBA";
-    description = "";
+    description = evt.description || "";
   }
 
   // Format date and time
@@ -319,57 +285,27 @@ const transformEventToMarketplace = (event: SupabaseEvent): MarketplaceEvent => 
     month: 'long', 
     day: 'numeric' 
   });
-  
-  // Format time range if we have end time
-  let timeStr: string;
-  if ('start_time' in event && 'end_time' in event) {
-    const startTime = startDate.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-    const endTime = endDate.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-    timeStr = `${startTime} - ${endTime}`;
-  } else {
-    timeStr = startDate.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  }
+  const timeStr = startDate.toLocaleTimeString('en-US', { 
+    hour: 'numeric', 
+    minute: '2-digit',
+    hour12: true 
+  });
 
-  // Determine event type from category
+  // Determine event type from category or tags
   const eventType = category || "General";
   
   // Default business stage
   const businessStage = "All Stages";
 
-  // Use organizer name if available, otherwise default
+  // Default provider
   const provider = {
-    name: organizerName || "DQ Events",
+    name: "DQ Events",
     logoUrl: "/DWS-Logo.png",
-    description: organizerName ? `${organizerName} Events` : "Digital Qatalyst Events"
+    description: "Digital Qatalyst Events"
   };
 
-  // Default price (could be enhanced to check for pricing info)
+  // Default price
   const price = "Free";
-
-  // Build capacity string if available
-  const capacity = maxAttendees ? `${maxAttendees} attendees` : undefined;
-
-  // Preserve original database fields for exact filtering
-  const rawFields = 'start_time' in event && 'end_time' in event ? {
-    category: (event as EventsTableRow | UpcomingEventView).category,
-    is_virtual: (event as EventsTableRow | UpcomingEventView).is_virtual,
-    start_time: (event as EventsTableRow | UpcomingEventView).start_time,
-    end_time: (event as EventsTableRow | UpcomingEventView).end_time,
-    location: (event as EventsTableRow | UpcomingEventView).location,
-    status: (event as EventsTableRow | UpcomingEventView).status,
-  } : undefined;
 
   return {
     id: event.id,
@@ -383,13 +319,8 @@ const transformEventToMarketplace = (event: SupabaseEvent): MarketplaceEvent => 
     time: timeStr,
     location,
     price,
-    capacity,
     tags,
     imageUrl: imageUrl || undefined,
-    isVirtual: isVirtual, // Include for filtering
-    startTime: 'start_time' in event ? event.start_time : undefined, // Include for duration calculation
-    endTime: 'start_time' in event ? ('end_time' in event ? event.end_time : undefined) : undefined, // Include for duration calculation
-    _raw: rawFields, // Preserve exact database column names for filtering
   };
 };
 
@@ -523,11 +454,71 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         }
         return;
       }
-      // Initialize filter config for events from config
+      // Initialize filter config for events - fetch Department and Location from database
       if (isEvents) {
-        if (config.filterCategories) {
-          setFilterConfig(config.filterCategories);
-        }
+        const loadEventsFilters = async () => {
+          try {
+            // Fetch Department and Location options from database
+            const [departmentResult, locationResult] = await Promise.all([
+              supabase.rpc('get_filter_options', { p_filter_type: 'department', p_filter_category: 'events' }),
+              supabase.rpc('get_filter_options', { p_filter_type: 'location', p_filter_category: 'events' })
+            ]);
+
+            // Build filter config with database values
+            const updatedFilterConfig: FilterConfig[] = [];
+            
+            // Add Department filter (first) - from database
+            // RPC returns: id = option_value (database value), name = option_label (display name)
+            // Use opt.id (option_value) for name to ensure exact database value matching
+            if (departmentResult.data && departmentResult.data.length > 0) {
+              updatedFilterConfig.push({
+                id: 'department',
+                title: 'Department',
+                options: departmentResult.data.map((opt: any) => ({
+                  id: opt.id.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
+                  name: opt.id // Use option_value (opt.id) for exact database value matching
+                }))
+              });
+            } else {
+              // Fallback: use config if database is empty
+              const deptConfig = config.filterCategories?.find(c => c.id === 'department');
+              if (deptConfig) updatedFilterConfig.push(deptConfig);
+            }
+
+            // Add Location filter (second) - from database
+            if (locationResult.data && locationResult.data.length > 0) {
+              updatedFilterConfig.push({
+                id: 'location',
+                title: 'Location',
+                options: locationResult.data.map((opt: any) => ({
+                  id: opt.id.toLowerCase().replace(/\s+/g, '-'),
+                  name: opt.id // Use option_value (opt.id) for exact database value matching
+                }))
+              });
+            } else {
+              // Fallback: use config if database is empty
+              const locConfig = config.filterCategories?.find(c => c.id === 'location');
+              if (locConfig) updatedFilterConfig.push(locConfig);
+            }
+
+            // Add other filters from config (Time Range, Event Type, Delivery Mode, Duration Band)
+            const otherFilters = config.filterCategories?.filter(c => 
+              c.id !== 'department' && c.id !== 'location'
+            ) || [];
+            updatedFilterConfig.push(...otherFilters);
+
+            setFilterConfig(updatedFilterConfig);
+            console.log('Events filter config loaded:', updatedFilterConfig.length, 'categories (Department and Location from database)');
+          } catch (error) {
+            console.error('Error loading filter options from database, using config fallback:', error);
+            // Fallback to config if database fetch fails
+            if (config.filterCategories && config.filterCategories.length > 0) {
+              setFilterConfig(config.filterCategories);
+            }
+          }
+        };
+        
+        loadEventsFilters();
         return;
       }
       try {
@@ -579,8 +570,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           let data: SupabaseEvent[] | null = null;
           let error: any = null;
 
-          // Strategy 1: Try to fetch from events_v2 table directly (primary source)
-          // The events_v2 table has start_time and end_time columns (TIMESTAMPTZ)
+          // Strategy 1: Try to fetch from events_v2 table (primary source)
           try {
             const now = new Date().toISOString();
             let eventsQuery = supabaseClient
@@ -697,109 +687,123 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   // For now, apply no additional filter (shows all future events)
                 }
               }
+
+              // Apply department filter (backend)
+              // Use exact database column name: department
+              // filtersByCategory['department'] contains option_label values which match option_value in our database
+              if (filtersByCategory['department'] && filtersByCategory['department'].length > 0) {
+                const departmentValues = filtersByCategory['department'];
+                // Use these values directly as they match the database option_value
+                eventsQuery = eventsQuery.in('department', departmentValues);
+              }
+
+              // Apply location filter (backend)
+              // Use exact database column name: location_filter
+              // filtersByCategory['location'] contains option_label values which match option_value in our database
+              if (filtersByCategory['location'] && filtersByCategory['location'].length > 0) {
+                const locationValues = filtersByCategory['location'];
+                // Use these values directly as they match the database option_value
+                eventsQuery = eventsQuery.in('location_filter', locationValues);
+              }
             }
 
             // Apply ordering
             eventsQuery = eventsQuery.order("start_time", { ascending: true });
 
-            const eventsResult = await eventsQuery;
+            const queryResult = await eventsQuery;
 
-            if (!eventsResult.error && eventsResult.data && eventsResult.data.length > 0) {
-              data = eventsResult.data;
-              console.log(`✅ Successfully fetched ${eventsResult.data.length} events from events_v2 table (with backend filters applied)`);
-            } else if (eventsResult.error) {
-              // If error, log detailed information
-              console.error("❌ Error fetching from events_v2 table:", {
-                message: eventsResult.error.message,
-                code: eventsResult.error.code,
-                details: eventsResult.error.details,
-                hint: eventsResult.error.hint
-              });
-              
-              // Check for specific error codes
-              if (eventsResult.error.code === '42501' || eventsResult.error.code === 'PGRST301') {
-                console.error("🔒 Permission denied - RLS policy may be blocking access. Check RLS policies on events_v2 table.");
-              } else if (eventsResult.error.code === 'PGRST116') {
-                console.warn("⚠️ No rows returned - this might be expected if no events match criteria");
-              }
-              
-              throw eventsResult.error;
+            if (!queryResult.error && queryResult.data) {
+              data = queryResult.data;
+              console.log("Fetched events from events_v2 table");
             } else {
-              console.warn("⚠️ events_v2 table returned no data (empty array)");
-              throw new Error("events_v2 table returned no data");
+              throw queryResult.error || new Error("Events_v2 table query failed");
             }
-          } catch (eventsError: any) {
-            // Strategy 2: Try upcoming_events view as fallback
-            console.log("events_v2 table query failed, trying upcoming_events view...");
-            
+          } catch (eventsV2Error) {
+            // events_v2 table doesn't exist or has errors, try fallback strategies
+            console.log("events_v2 table not available, trying fallback strategies...");
+            error = eventsV2Error;
+
+            // Strategy 2: Try to fetch from upcoming_events view
             try {
-              const now = new Date().toISOString();
               const viewQuery = await supabaseClient
                 .from("upcoming_events")
                 .select("*")
-                .eq("status", "published") // Only get published events
-                .gte("start_time", now) // Only get future events
                 .order("start_time", { ascending: true });
 
               if (!viewQuery.error && viewQuery.data && viewQuery.data.length > 0) {
                 data = viewQuery.data;
-                console.log(`Fetched ${viewQuery.data.length} events from upcoming_events view`);
-              } else if (viewQuery.error) {
-                throw viewQuery.error;
+                console.log("Fetched events from upcoming_events view");
               } else {
-                throw new Error("View returned no data");
+                throw new Error("View not available or empty");
               }
-            } catch (viewError: any) {
-              // Strategy 3: Try posts table as last resort
-              console.log("upcoming_events view failed, trying posts table...");
-              error = viewError;
-
-              // Strategy 3: Fetch from posts table where post_type = 'event' (last resort)
+            } catch (viewError) {
+              // View doesn't exist or error, try events table
+              console.log("upcoming_events view not available, trying events table...");
+              
+              // Strategy 3: Try events table
               try {
-                const now = new Date().toISOString();
-                const postsQuery = await supabaseClient
-                  .from("posts")
-                  .select("id, title, content, event_date, event_location, post_type, community_id, created_by, created_at, tags, status")
-                  .eq("post_type", "event")
-                  .eq("status", "active") // Required for RLS policy
-                  .not("event_date", "is", null)
-                  .gte("event_date", now) // Only get future events
-                  .order("event_date", { ascending: true });
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+                const tableQuery = await supabaseClient
+                  .from("events")
+                  .select("*")
+                  .gte("event_date", today) // Only get events from today onwards
+                  .order("event_date", { ascending: true })
+                  .order("event_time", { ascending: true });
 
-                if (!postsQuery.error && postsQuery.data && postsQuery.data.length > 0) {
-                  // Transform posts to match our event interface
-                  data = postsQuery.data.map((post: any) => ({
-                    id: post.id,
-                    title: post.title,
-                    content: post.content,
-                    description: post.content,
-                    event_date: post.event_date,
-                    event_location: post.event_location,
-                    post_type: post.post_type,
-                    community_id: post.community_id,
-                    created_by: post.created_by,
-                    created_at: post.created_at,
-                    tags: post.tags,
-                  })) as PostEventRow[];
-                  error = null;
-                  console.log(`Fetched ${postsQuery.data.length} events from posts table`);
+                if (!tableQuery.error && tableQuery.data) {
+                  data = tableQuery.data;
+                  console.log("Fetched events from events table");
                 } else {
-                  if (postsQuery.error) {
-                    console.warn("Could not fetch events from posts table:", postsQuery.error.message);
-                    throw postsQuery.error;
-                  } else {
-                    console.log("No events found in posts table");
-                    throw new Error("Posts table returned no data");
-                  }
+                  throw tableQuery.error || new Error("Events table query failed");
                 }
-              } catch (postsError: any) {
-                // Check if it's a permission error (42501) or other error
-                if (postsError?.code === '42501' || postsError?.code === 'PGRST301') {
-                  console.warn("Permission denied accessing posts table. Events from posts may not be available.");
-                  error = postsError;
-                } else {
-                  error = postsError;
-                  console.error("Error fetching events from posts table:", postsError);
+              } catch (tableError) {
+                // Events table doesn't exist or has errors, try posts table
+                console.log("events table not available, trying posts table with event type...");
+                error = tableError;
+
+                // Strategy 4: Fetch from posts table where post_type = 'event'
+                try {
+                  const now = new Date().toISOString();
+                  const postsQuery = await supabaseClient
+                    .from("posts")
+                    .select("id, title, content, event_date, event_location, post_type, community_id, created_by, created_at, tags, status")
+                    .eq("post_type", "event")
+                    .eq("status", "active") // Required for RLS policy
+                    .not("event_date", "is", null)
+                    .gte("event_date", now) // Only get future events
+                    .order("event_date", { ascending: true });
+
+                  if (!postsQuery.error && postsQuery.data) {
+                    // Transform posts to match our event interface
+                    data = postsQuery.data.map((post: any) => ({
+                      id: post.id,
+                      title: post.title,
+                      content: post.content,
+                      description: post.content,
+                      event_date: post.event_date,
+                      event_location: post.event_location,
+                      post_type: post.post_type,
+                      community_id: post.community_id,
+                      created_by: post.created_by,
+                      created_at: post.created_at,
+                      tags: post.tags,
+                    })) as PostEventRow[];
+                    error = null;
+                    console.log("Fetched events from posts table");
+                  } else {
+                    console.warn("Could not fetch events from posts table:", postsQuery.error?.message || "Unknown error");
+                    throw postsQuery.error || new Error("Posts table query failed");
+                  }
+                } catch (postsError: any) {
+                  // Check if it's a permission error (42501) or other error
+                  if (postsError?.code === '42501') {
+                    console.warn("Permission denied accessing posts table. Events from posts may not be available.");
+                    error = null;
+                    data = null;
+                  } else {
+                    error = postsError;
+                    console.error("Error fetching events from posts table:", postsError);
+                  }
                 }
               }
             }
@@ -807,18 +811,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
           // Handle errors gracefully
           if (error && (!data || data.length === 0)) {
-            if (error?.code === '42501' || error?.code === 'PGRST301') {
-              console.warn("Permission denied: Events may require authentication or proper RLS policies.", error);
-            } else if (error?.code === 'PGRST116') {
-              console.warn("No rows returned from query. This might be expected if no events match the criteria.", error);
+            if (error?.code === '42501') {
+              console.warn("Permission denied: Events may require authentication or proper RLS policies.");
             } else {
               console.error("Error fetching events:", error);
-              console.error("Error details:", {
-                message: error?.message,
-                code: error?.code,
-                details: error?.details,
-                hint: error?.hint
-              });
             }
             // Fallback to empty state or mock data
             const fallbackItems = getFallbackItems(marketplaceType);
@@ -830,7 +826,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           }
 
           if (!data || data.length === 0) {
-            console.log("No events found in Supabase - using fallback data");
+            console.log("No events found in Supabase");
             // Fallback to mock data if no events found
             const fallbackItems = getFallbackItems(marketplaceType);
             setItems(fallbackItems);
@@ -1064,6 +1060,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
     run();
     // Keep deps lean; no need to include functions like isGuides
+    // Include activeFilters and filterConfig for Events to re-fetch when filters change
   }, [marketplaceType, filters, searchQuery, queryParams, isCourses, isKnowledgeHub, isEvents, currentPage, pageSize, activeFilters, filterConfig]);
 
   // Handle filter changes
@@ -1126,126 +1123,54 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     setActiveFilters([]);
   }, []);
 
-  // Apply search filter to events (backend filters already applied, only search remains client-side)
+  // Apply filters and search to events (similar to knowledge-hub)
   useEffect(() => {
     if (!isEvents) return;
     
     let filtered = [...items];
     
-    // Apply search filter (client-side as it searches across multiple fields)
-    // Use exact database column names where possible: category, location
+    // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item => {
-        // Use exact database column names: category, location
-        const category = item._raw?.category ?? item.category ?? '';
-        const location = item._raw?.location ?? item.location ?? '';
-        
-        return item.title?.toLowerCase().includes(query) ||
-          item.description?.toLowerCase().includes(query) ||
-          category.toLowerCase().includes(query) ||
-          item.eventType?.toLowerCase().includes(query) ||
-          location.toLowerCase().includes(query) ||
-          (item.tags && item.tags.some((tag: string) => tag.toLowerCase().includes(query)));
-      });
+      filtered = filtered.filter(item => 
+        item.title?.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query) ||
+        item.category?.toLowerCase().includes(query) ||
+        item.eventType?.toLowerCase().includes(query) ||
+        item.location?.toLowerCase().includes(query) ||
+        (item.tags && item.tags.some((tag: string) => tag.toLowerCase().includes(query)))
+      );
     }
     
-    // Note: Backend filters are now applied in the Supabase query above
-    // Only complex OR conditions (like multiple delivery modes, hybrid, duration) need client-side filtering
+    // Apply active filters
     if (activeFilters.length > 0 && filterConfig.length > 0) {
-      // Group filters by category for client-side filtering
-      const filtersByCategory: Record<string, string[]> = {};
-      
-      activeFilters.forEach(filterName => {
-        const category = filterConfig.find(c => 
-          c.options.some(opt => opt.name === filterName)
-        );
-        if (category) {
-          if (!filtersByCategory[category.id]) {
-            filtersByCategory[category.id] = [];
+      filtered = filtered.filter(item => {
+        return activeFilters.every(filterName => {
+          // Check if filter matches any item property
+          const category = filterConfig.find(c => 
+            c.options.some(opt => opt.name === filterName)
+          );
+          if (!category) return true;
+          
+          // Match based on category type
+          switch (category.id) {
+            case 'event-type':
+              return item.eventType === filterName || item.category === filterName;
+            case 'delivery-mode':
+              return item.location?.toLowerCase().includes(filterName.toLowerCase()) || 
+                     (filterName.toLowerCase() === 'online' && item.location?.toLowerCase().includes('online'));
+            case 'cost-type':
+              const price = item.price?.toLowerCase() || '';
+              if (filterName === 'Free') return price.includes('free') || price === '0';
+              if (filterName === 'Paid') return !price.includes('free') && price !== '0';
+              return true;
+            case 'business-stage':
+              return item.businessStage === filterName;
+            default:
+              return true;
           }
-          filtersByCategory[category.id].push(filterName);
-        }
-      });
-
-      // Apply delivery-mode filter for multiple selections or hybrid
-      // Use exact filter names: Onsite, Online, Hybrid
-      // Use exact database column name: is_virtual
-      const deliveryModeCategory = filterConfig.find(c => c.id === 'delivery-mode');
-      if (deliveryModeCategory && filtersByCategory['delivery-mode']) {
-        const selectedDeliveryModes = filtersByCategory['delivery-mode'];
-        
-        // If multiple delivery modes selected or hybrid, apply OR logic client-side
-        if (selectedDeliveryModes.length > 1 || selectedDeliveryModes.includes('Hybrid')) {
-          filtered = filtered.filter(item => {
-            // Use exact database column name: is_virtual
-            const is_virtual = item._raw?.is_virtual ?? item.isVirtual ?? false;
-            const location = item._raw?.location ?? item.location ?? '';
-            const locationLower = location.toLowerCase();
-            
-            // Check for virtual indicators in location if is_virtual is not set
-            const isVirtual = is_virtual || 
-                            locationLower.includes('virtual') || 
-                            locationLower.includes('online') ||
-                            locationLower.includes('zoom') ||
-                            locationLower.includes('teams');
-            const isOnsite = !isVirtual && location && location !== 'TBA';
-            const isHybrid = isVirtual && isOnsite;
-            
-            // Use exact filter names (case-sensitive)
-            return selectedDeliveryModes.some(mode => {
-              if (mode === 'Online') {
-                return isVirtual || isHybrid;
-              }
-              if (mode === 'Onsite') {
-                return isOnsite || isHybrid;
-              }
-              if (mode === 'Hybrid') {
-                return isHybrid;
-              }
-              return false;
-            });
-          });
-        }
-      }
-
-      // Apply duration-band filter (client-side as it requires duration calculation)
-      // Use exact filter names: Short (≤ 1 hr), Medium (1 – 3 hrs), Long (> 3 hrs), Multi-Day
-      // Use exact database column names: start_time, end_time
-      if (filtersByCategory['duration-band'] && filtersByCategory['duration-band'].length > 0) {
-        filtered = filtered.filter(item => {
-          // Use exact database column names: start_time, end_time
-          const start_time = item._raw?.start_time ?? item.startTime;
-          const end_time = item._raw?.end_time ?? item.endTime;
-          
-          if (!start_time || !end_time) {
-            return false; // Skip items without time information
-          }
-          
-          const start = new Date(start_time);
-          const end = new Date(end_time);
-          const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-          const durationHours = durationMinutes / 60;
-          const durationDays = durationHours / 24;
-          
-          // Use exact filter names (case-sensitive)
-          return filtersByCategory['duration-band'].some(band => {
-            if (band === 'Short (≤ 1 hr)') {
-              return durationHours <= 1;
-            }
-            if (band === 'Medium (1 – 3 hrs)') {
-              return durationHours > 1 && durationHours <= 3;
-            }
-            if (band === 'Long (> 3 hrs)') {
-              return durationHours > 3 && durationDays < 1;
-            }
-            if (band === 'Multi-Day') {
-              return durationDays >= 1;
-            }
-            return false;
-          });
         });
-      }
+      });
     }
     
     setFilteredItems(filtered);
@@ -1286,31 +1211,71 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         <nav className="flex mb-4" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-2">
             <li className="inline-flex items-center">
-              <Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center">
-                <HomeIcon size={16} className="mr-1" />
+              <Link 
+                to="/" 
+                className="text-gray-600 hover:text-gray-900 inline-flex items-center text-sm md:text-base transition-colors"
+                aria-label="Navigate to Home"
+              >
+                <HomeIcon size={16} className="mr-1" aria-hidden="true" />
                 <span>Home</span>
               </Link>
             </li>
-            {isGuides ? (
+            {isEvents ? (() => {
+              // Determine active tab based on pathname for Events marketplace
+              const isPulseTab = location.pathname === '/marketplace/pulse' || location.pathname.startsWith('/marketplace/pulse/');
+              const isEventsTab = location.pathname === '/marketplace/events' || location.pathname.startsWith('/marketplace/events/');
+              const isDiscussionsTab = location.pathname === '/communities' || location.pathname.startsWith('/community/');
+              
+              // Determine current page label
+              let currentPageLabel = 'Events';
+              if (isPulseTab) {
+                currentPageLabel = 'Pulse';
+              } else if (isDiscussionsTab) {
+                currentPageLabel = 'Discussions';
+              }
+              
+              return (
+                <>
+                  <li>
+                    <div className="flex items-center">
+                      <ChevronRightIcon size={16} className="text-gray-400 mx-1" aria-hidden="true" />
+                      <Link 
+                        to="/communities" 
+                        className="text-gray-600 hover:text-gray-900 text-sm md:text-base font-medium transition-colors"
+                        aria-label="Navigate to DQ Work Communities"
+                      >
+                        DQ Work Communities
+                      </Link>
+                    </div>
+                  </li>
+                  <li aria-current="page">
+                    <div className="flex items-center">
+                      <ChevronRightIcon size={16} className="text-gray-400 mx-1" aria-hidden="true" />
+                      <span className="text-gray-500 text-sm md:text-base font-medium">{currentPageLabel}</span>
+                    </div>
+                  </li>
+                </>
+              );
+            })() : isGuides ? (
               <>
                 <li>
                   <div className="flex items-center">
-                    <ChevronRightIcon size={16} className="text-gray-400" />
-                    <span className="ml-1 text-gray-500 md:ml-2">Resources</span>
+                    <ChevronRightIcon size={16} className="text-gray-400 mx-1" aria-hidden="true" />
+                    <span className="ml-1 text-gray-500 md:ml-2 text-sm md:text-base">Resources</span>
                   </div>
                 </li>
                 <li aria-current="page">
                   <div className="flex items-center">
-                    <ChevronRightIcon size={16} className="text-gray-400" />
-                    <span className="ml-1 text-gray-700 md:ml-2">Guidelines</span>
+                    <ChevronRightIcon size={16} className="text-gray-400 mx-1" aria-hidden="true" />
+                    <span className="ml-1 text-gray-700 md:ml-2 text-sm md:text-base font-medium">Guidelines</span>
                   </div>
                 </li>
               </>
             ) : (
               <li aria-current="page">
                 <div className="flex items-center">
-                  <ChevronRightIcon size={16} className="text-gray-400" />
-                  <span className="ml-1 text-gray-500 md:ml-2">{config.itemNamePlural}</span>
+                  <ChevronRightIcon size={16} className="text-gray-400 mx-1" aria-hidden="true" />
+                  <span className="ml-1 text-gray-500 md:ml-2 text-sm md:text-base">{config.itemNamePlural}</span>
                 </div>
               </li>
             )}
@@ -1322,29 +1287,31 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
         {/* Navigation Tabs - Only for Events */}
         {isEvents && (
-          <div className="mb-6 border-b border-gray-200">
-            <nav className="flex space-x-8" aria-label="Tabs">
+          <div className="mb-6">
+            <nav className="flex" aria-label="Tabs">
               <button
                 onClick={() => {
                   // Discussion tab - routes to Communities Marketplace
                   navigate('/communities');
                 }}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-4 px-4 text-sm transition-colors border-b ${
                   location.pathname === '/communities' || location.pathname.startsWith('/community/')
-                    ? 'border-brand-blue text-brand-blue'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-gray-300 text-gray-900 font-normal'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 font-normal'
                 }`}
               >
                 Discussion
               </button>
               <button
                 onClick={() => {
-                  // Pulse tab - placeholder (no routing yet)
-                  // Could show a message or do nothing for now
+                  // Pulse tab - routes to Pulse Marketplace
+                  navigate('/marketplace/pulse');
                 }}
-                className="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm transition-colors cursor-not-allowed opacity-60"
-                disabled
-                title="Coming soon"
+                className={`py-4 px-4 text-sm transition-colors border-b ${
+                  location.pathname === '/marketplace/pulse' || location.pathname.startsWith('/marketplace/pulse/')
+                    ? 'border-gray-300 text-gray-900 font-normal'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 font-normal'
+                }`}
               >
                 Pulse
               </button>
@@ -1353,10 +1320,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   // Events tab - stays on current page (Events Marketplace)
                   navigate('/marketplace/events');
                 }}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-4 px-4 text-sm transition-colors border-b ${
                   location.pathname === '/marketplace/events' || location.pathname.startsWith('/marketplace/events/')
-                    ? 'border-brand-blue text-brand-blue'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-gray-300 text-gray-900 font-normal'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 font-normal'
                 }`}
               >
                 Events

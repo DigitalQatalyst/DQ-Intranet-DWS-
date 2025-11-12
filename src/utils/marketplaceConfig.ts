@@ -893,8 +893,8 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
   },
   events: {
     id: 'events',
-    title: 'DQ Work Events',
-    description: 'Find and join events to connect with other associates within the organization.',
+    title: 'DQ Work Communities',
+    description: 'Find and join communities to connect with other associates within the organization.',
     route: '/marketplace/events',
     primaryCTA: 'Register Now',
     secondaryCTA: 'View Details',

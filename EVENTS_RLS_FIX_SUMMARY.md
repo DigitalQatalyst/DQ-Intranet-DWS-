@@ -99,3 +99,5 @@ If you still see 401 errors:
 - Authenticated users can see all events (useful for admins/organizers)
 - The `upcoming_events` view inherits RLS from the underlying `events` table
 
+
+

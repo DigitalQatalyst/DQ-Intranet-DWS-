@@ -9,6 +9,8 @@ import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 import NewsPage from './NewsPage';
 import NewsDetailPage from './NewsDetailPage';
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
+const PulsePage = React.lazy(() => import('../pulse/PulsePage').then(m => ({ default: m.PulsePage })));
+const PulseDetailPage = React.lazy(() => import('../pulse/PulseDetailPage').then(m => ({ default: m.PulseDetailPage })));
 // Promo cards for events marketplace
 const eventsPromoCards = [{
   id: 'courses-promo',
@@ -149,6 +151,9 @@ export const MarketplaceRouter: React.FC = () => {
       {/* Events Marketplace */}
       <Route path="/events" element={<MarketplacePage marketplaceType="events" title={eventsConfig.title} description={eventsConfig.description} promoCards={eventsPromoCards} />} />
       <Route path="/events/:itemId" element={<MarketplaceDetailsPage marketplaceType="events" bookmarkedItems={bookmarkedItems.events} onToggleBookmark={itemId => handleToggleBookmark('events', itemId)} />} />
+      {/* Pulse Marketplace */}
+      <Route path="/pulse" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><PulsePage /></React.Suspense>} />
+      <Route path="/pulse/:id" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><PulseDetailPage /></React.Suspense>} />
       {/* News & Opportunities Marketplace */}
       <Route path="/news" element={<NewsPage />} />
       <Route path="/news/:id" element={<NewsDetailPage />} />

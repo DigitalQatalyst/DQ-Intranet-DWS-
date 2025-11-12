@@ -140,3 +140,5 @@ USING (status = 'published');
 ✅ Kept all query filters, ordering, and logic unchanged  
 ✅ Verified Supabase client connections point to `events_v2`  
 
+
+
