@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { JOBS, type JobItem } from '@/data/media/jobs';
 import type { FiltersValue } from './types';
 import { JobCard } from './cards/JobCard';
@@ -11,23 +11,60 @@ interface GridProps {
   };
 }
 
-const matchesSelection = (value: string | undefined, selections?: string[]) =>
-  !selections?.length || (value && selections.includes(value));
-
 export default function JobsGrid({ query }: GridProps) {
+  const [sourceItems, setSourceItems] = useState<JobItem[]>(JOBS);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mod = await import('@/lib/supabaseClient');
+        const supabase = (mod as any).supabase as any;
+        const { data, error } = await supabase
+          .from('jobs')
+          .select('id,title,department,roleType,location,type,seniority,sfiaLevel,summary,description,responsibilities,requirements,benefits,postedOn,applyUrl,image');
+        if (error) throw error;
+        if (!cancelled && Array.isArray(data)) setSourceItems(data as JobItem[]);
+      } catch {
+        if (!cancelled) setSourceItems(JOBS);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const items = useMemo(() => {
     const search = query.q?.toLowerCase() ?? '';
-    return JOBS.filter((job) => {
-      if (!search) return true;
-      return job.title.toLowerCase().includes(search) || job.summary.toLowerCase().includes(search);
-    })
-      .filter((job) => matchesSelection(job.department, query.filters?.department))
-      .filter((job) => matchesSelection(job.location, query.filters?.location))
-      .filter((job) => matchesSelection(job.type, query.filters?.contract))
-      .filter((job) => matchesSelection(job.sfiaLevel, query.filters?.sfiaLevel))
-      .filter((job) => matchesSelection(job.roleType, query.filters?.deptType))
+    return sourceItems
+      .filter((job) => {
+        if (!search) return true;
+        return job.title.toLowerCase().includes(search) || job.summary.toLowerCase().includes(search);
+      })
+      .filter((job) => {
+        const matches = (val?: string, sel?: string[]) => !sel?.length || (val && sel.includes(val));
+        const f = query.filters || {};
+        const postedWithin = f.postedWithin;
+        let withinOk = true;
+        if (postedWithin && postedWithin.length) {
+          const days = postedWithin.includes('Last 7 days') ? 7 : postedWithin.includes('Last 30 days') ? 30 : undefined;
+          if (days) {
+            const posted = new Date(job.postedOn).getTime();
+            const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+            withinOk = posted >= cutoff;
+          }
+        }
+        return (
+          matches(job.department, f.department) &&
+          matches(job.location, f.location) &&
+          matches(job.type, f.contract) &&
+          matches(job.sfiaLevel, f.sfiaLevel) &&
+          matches(job.roleType, f.deptType) &&
+          withinOk
+        );
+      })
       .sort((a, b) => (a.postedOn < b.postedOn ? 1 : -1));
-  }, [query]);
+  }, [query, sourceItems]);
 
   if (query.tab !== 'opportunities' || items.length === 0) {
     return null;

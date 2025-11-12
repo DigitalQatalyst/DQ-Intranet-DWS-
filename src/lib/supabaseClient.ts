@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Vite injects these at build time. They must be defined.
-const url = import.meta.env.VITE_SUPABASE_URL as string
-const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+const url = (import.meta.env.VITE_SUPABASE_URL || import.meta.env.REACT_APP_SUPABASE_URL) as string
+const anon = (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.REACT_APP_SUPABASE_ANON_KEY) as string
 
 if (!url || !anon) {
   // Helps you catch misconfigured envs early during dev

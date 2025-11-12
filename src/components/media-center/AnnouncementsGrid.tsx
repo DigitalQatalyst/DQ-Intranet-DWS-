@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NEWS, type NewsItem } from '@/data/media/news';
 import type { FiltersValue } from './types';
 import { NewsCard } from './cards/NewsCard';
@@ -12,14 +12,36 @@ interface GridProps {
 }
 
 const UPDATE_TYPES = ['Announcement', 'Guidelines', 'Notice'];
-
 const matchesSelection = (value: string | undefined, selections?: string[]) =>
   !selections?.length || (value && selections.includes(value));
 
 export default function AnnouncementsGrid({ query }: GridProps) {
+  const [sourceItems, setSourceItems] = useState<NewsItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mod = await import('@/lib/supabaseClient');
+        const supabase = (mod as any).supabase as any;
+        const { data, error } = await supabase
+          .from('news')
+          .select('id,title,type,date,author,byline,views,excerpt,image,department,location,domain,theme,tags,readingTime,newsType,newsSource,focusArea');
+        if (error) throw error;
+        if (!cancelled && Array.isArray(data)) setSourceItems(data as NewsItem[]);
+      } catch {
+        if (!cancelled) setSourceItems(NEWS);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const items = useMemo(() => {
     const search = query.q?.toLowerCase() ?? '';
-    return NEWS.filter((item) => UPDATE_TYPES.includes(item.type))
+    return sourceItems
+      .filter((item) => UPDATE_TYPES.includes(item.type))
       .filter((item) => {
         if (!search) return true;
         return (
@@ -42,7 +64,7 @@ export default function AnnouncementsGrid({ query }: GridProps) {
         return okDepartment && okLocation && okNewsType && okSource && okFocus;
       })
       .sort((a, b) => (a.date < b.date ? 1 : -1));
-  }, [query]);
+  }, [query, sourceItems]);
 
   if (query.tab !== 'announcements' || items.length === 0) {
     return null;

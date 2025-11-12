@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NEWS, type NewsItem } from '@/data/media/news';
 import type { FiltersValue } from './types';
 import { BlogCard } from './cards/BlogCard';
@@ -11,13 +11,34 @@ interface GridProps {
   };
 }
 
-const matchesSelection = (value: string | undefined, selections?: string[]) =>
-  !selections?.length || (value && selections.includes(value));
 
 export default function BlogsGrid({ query }: GridProps) {
+  const [sourceItems, setSourceItems] = useState<NewsItem[]>(NEWS);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mod = await import('@/lib/supabaseClient');
+        const supabase = (mod as any).supabase as any;
+        const { data, error } = await supabase
+          .from('news')
+          .select('id,title,type,date,author,byline,views,excerpt,image,department,location,domain,theme,tags,readingTime,newsType,newsSource,focusArea');
+        if (error) throw error;
+        if (!cancelled && Array.isArray(data)) setSourceItems(data as NewsItem[]);
+      } catch {
+        if (!cancelled) setSourceItems(NEWS);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const items = useMemo(() => {
     const search = query.q?.toLowerCase() ?? '';
-    return NEWS.filter((item) => item.type === 'Thought Leadership')
+    return sourceItems
+      .filter((item) => item.type === 'Thought Leadership')
       .filter((item) => {
         if (!search) return true;
         return (
@@ -33,16 +54,17 @@ export default function BlogsGrid({ query }: GridProps) {
         const newsSource = query.filters?.newsSource;
         const focusArea = query.filters?.focusArea;
 
-        const okDepartment = matchesSelection(item.department, department);
-        const okLocation = matchesSelection(item.location, location);
-        const okNewsType = matchesSelection(item.newsType, newsType);
-        const okSource = matchesSelection(item.newsSource, newsSource);
-        const okFocus = matchesSelection(item.focusArea, focusArea);
-
-        return okDepartment && okLocation && okNewsType && okSource && okFocus;
+        const matches = (val?: string, sel?: string[]) => !sel?.length || (val && sel.includes(val));
+        return (
+          matches(item.department, department) &&
+          matches(item.location, location) &&
+          matches(item.newsType, newsType) &&
+          matches(item.newsSource, newsSource) &&
+          matches(item.focusArea, focusArea)
+        );
       })
       .sort((a, b) => (a.date < b.date ? 1 : -1));
-  }, [query]);
+  }, [query, sourceItems]);
 
   if (query.tab !== 'insights' || items.length === 0) {
     return null;

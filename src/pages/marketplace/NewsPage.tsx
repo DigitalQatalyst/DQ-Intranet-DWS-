@@ -235,6 +235,19 @@ const NewsPage: React.FC = () => {
     [tab, queryText, filters]
   );
 
+  const searchPlaceholder = useMemo(() => {
+    switch (tab) {
+      case 'announcements':
+        return 'Search announcements and updates… e.g., townhall, product update';
+      case 'insights':
+        return 'Search blogs and insights… e.g., case study, delivery lessons';
+      case 'opportunities':
+        return 'Search jobs and roles… e.g., SFIA L3, frontend developer';
+      default:
+        return 'Search…';
+    }
+  }, [tab]);
+
   const toggleFilters = () => setShowFilters((prev) => !prev);
   const clearFilters = () => setFilters({});
 
@@ -288,19 +301,19 @@ const NewsPage: React.FC = () => {
             <TabsList className="flex h-auto w-full justify-start gap-0 overflow-x-auto bg-transparent p-0 text-gray-700">
               <TabsTrigger
                 value="announcements"
-                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-center text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
                 News & Announcement
               </TabsTrigger>
               <TabsTrigger
                 value="insights"
-                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-center text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
                 Blogs
               </TabsTrigger>
               <TabsTrigger
                 value="opportunities"
-                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-center text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
                 Jobs opening
               </TabsTrigger>
@@ -311,7 +324,7 @@ const NewsPage: React.FC = () => {
             <Input
               value={queryText}
               onChange={(e) => setQueryText(e.target.value)}
-              placeholder="Search stories, updates, or teams…"
+              placeholder={searchPlaceholder}
               className="h-11"
             />
             <div className="flex items-center gap-3 md:hidden">
