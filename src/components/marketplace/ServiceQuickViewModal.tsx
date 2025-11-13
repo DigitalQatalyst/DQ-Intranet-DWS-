@@ -119,7 +119,7 @@ export const ServiceQuickViewModal: React.FC<ServiceQuickViewModalProps> = ({
           <div className="flex items-center mb-4">
             <img src={service.provider.logoUrl} alt={`${service.provider.name} logo`} className="h-12 w-12 object-contain mr-4" />
             <div>
-              <span className="text-sm text-gray-500">Provided by</span>
+              <span className="text-sm text-gray-500">Department</span>
               <h3 className="text-lg font-medium text-gray-900">
                 {service.provider.name}
               </h3>
@@ -129,7 +129,7 @@ export const ServiceQuickViewModal: React.FC<ServiceQuickViewModalProps> = ({
             {service.title}
           </h1>
           <div className="flex flex-wrap gap-2 mb-4">
-            {service.tags && service.tags.map((tag, index) => <span key={index} className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${index % 3 === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : index % 3 === 1 ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}>
+            {service.tags && service.tags.map((tag, index) => <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-50 text-gray-700 border border-gray-200">
                   {tag}
                 </span>)}
           </div>
@@ -165,10 +165,10 @@ export const ServiceQuickViewModal: React.FC<ServiceQuickViewModalProps> = ({
               </ul>
             </div>}
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
-            <button onClick={onViewDetails} className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-md border border-blue-200 hover:bg-blue-100 transition-colors">
+            <button onClick={onViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${marketplaceType === 'non-financial' ? 'bg-white' : 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100'}`} style={marketplaceType === 'non-financial' ? { color: '#1A2E6E', borderColor: '#1A2E6E' } : {}} onMouseEnter={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#f0f4f8'; }} onMouseLeave={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = 'white'; }}>
               View Full Details
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-md hover:from-blue-700 hover:to-purple-700 transition-colors">
+            <button className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${marketplaceType === 'non-financial' ? '' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'}`} style={marketplaceType === 'non-financial' ? { backgroundColor: '#1A2E6E' } : {}} onMouseEnter={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#1A2E6E'; }} onMouseLeave={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#1A2E6E'; }}>
               {primaryButtonText}
             </button>
           </div>

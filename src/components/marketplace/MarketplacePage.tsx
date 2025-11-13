@@ -6,7 +6,7 @@ import { SearchBar } from '../SearchBar.js';
 import { FilterIcon, XIcon, HomeIcon, ChevronRightIcon } from 'lucide-react';
 import { ErrorDisplay, CourseCardSkeleton } from '../SkeletonLoader.js';
 import { fetchMarketplaceItems, fetchMarketplaceFilters } from '../../services/marketplace.js';
-import { getMarketplaceConfig } from '../../utils/marketplaceConfig.js';
+import { getMarketplaceConfig, getTabSpecificFilters } from '../../utils/marketplaceConfig.js';
 import { MarketplaceComparison } from './MarketplaceComparison.js';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
@@ -283,6 +283,17 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         }
         return;
       }
+      
+      // Use tab-specific filters for Services Center
+      if (isServicesCenter) {
+        const tabFilters = getTabSpecificFilters(activeServiceTab);
+        setFilterConfig(tabFilters);
+        const initial: Record<string, string> = {};
+        tabFilters.forEach(c => { initial[c.id] = ''; });
+        setFilters(initial);
+        return;
+      }
+      
       try {
         let filterOptions = await fetchMarketplaceFilters(marketplaceType);
         filterOptions = prependLearningTypeFilter(marketplaceType, filterOptions);
@@ -299,7 +310,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }
     };
     loadFilterOptions();
-  }, [marketplaceType, config, isCourses, isGuides, isKnowledgeHub, filterConfig.length, Object.keys(filters).length]);
+  }, [marketplaceType, config, isCourses, isGuides, isKnowledgeHub, isServicesCenter, activeServiceTab, filterConfig.length, Object.keys(filters).length]);
   
   // Fetch items based on marketplace type
   useEffect(() => {
@@ -514,8 +525,146 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         );
         const finalItems = itemsData?.length ? itemsData : getFallbackItems(marketplaceType);
         setItems(finalItems);
-        setFilteredItems(finalItems);
-        setTotalCount(finalItems.length);
+        
+        // Apply filters for non-financial services
+        let filtered = finalItems;
+        if (isServicesCenter) {
+          // Note: Tabs (Query, Support, Requisition, Self-Service) are for navigation/description only
+          // They don't filter items - filters handle that independently
+          
+          // Filter by deliveryMode
+          const deliveryModeFilter = filters.deliveryMode;
+          if (deliveryModeFilter) {
+            const deliveryModes = Array.isArray(deliveryModeFilter) ? deliveryModeFilter : [deliveryModeFilter];
+            if (deliveryModes.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemMode = (item.deliveryMode || '').toLowerCase().trim();
+                return deliveryModes.some(filterMode => {
+                  const normalizedFilter = filterMode.toLowerCase().trim();
+                  // Normalize variations: 'inperson', 'in person', 'in-person' all match
+                  const normalizeMode = (mode: string) => {
+                    // Remove spaces and hyphens for comparison
+                    const cleaned = mode.replace(/[\s-]/g, '');
+                    if (cleaned === 'inperson' || cleaned.includes('person')) {
+                      return 'inperson';
+                    }
+                    return cleaned;
+                  };
+                  const normalizedItemMode = normalizeMode(itemMode);
+                  const normalizedFilterMode = normalizeMode(normalizedFilter);
+                  return normalizedItemMode === normalizedFilterMode;
+                });
+              });
+            }
+          }
+          
+          // Filter by provider
+          const providerFilter = filters.provider;
+          if (providerFilter) {
+            const providers = Array.isArray(providerFilter) ? providerFilter : [providerFilter];
+            if (providers.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemProvider = (item.provider?.name || '').toLowerCase();
+                return providers.some(filterProvider => {
+                  const normalizedFilter = filterProvider.toLowerCase();
+                  // Map filter IDs to provider names
+                  const providerMap: Record<string, string[]> = {
+                    'it_support': ['it support', 'itsupport'],
+                    'hr': ['hr'],
+                    'finance': ['finance'],
+                    'admin': ['admin', 'administrative']
+                  };
+                  const possibleNames = providerMap[normalizedFilter] || [normalizedFilter];
+                  return possibleNames.some(name => itemProvider === name || itemProvider.includes(name) || name.includes(itemProvider));
+                });
+              });
+            }
+          }
+          
+          // Filter by category
+          const categoryFilter = filters.category;
+          if (categoryFilter) {
+            const categories = Array.isArray(categoryFilter) ? categoryFilter : [categoryFilter];
+            if (categories.length > 0) {
+              const normalizeCategory = (cat: string) => {
+                const map: Record<string, string> = {
+                  'technology': 'Technology',
+                  'business': 'Business',
+                  'digital_worker': 'Digital Worker'
+                };
+                return map[cat.toLowerCase()] || cat;
+              };
+              filtered = filtered.filter(item => {
+                const itemCategory = item.category || '';
+                return categories.some(filterCategory => {
+                  const normalizedFilter = normalizeCategory(filterCategory);
+                  return itemCategory === normalizedFilter || itemCategory.toLowerCase() === filterCategory.toLowerCase();
+                });
+              });
+            }
+          }
+          
+          // Filter by location
+          const locationFilter = filters.location;
+          if (locationFilter) {
+            const locations = Array.isArray(locationFilter) ? locationFilter : [locationFilter];
+            if (locations.length > 0) {
+              const normalizeLocation = (loc: string) => {
+                const map: Record<string, string> = {
+                  'dubai': 'Dubai',
+                  'nairobi': 'Nairobi',
+                  'riyadh': 'Riyadh'
+                };
+                return map[loc.toLowerCase()] || loc;
+              };
+              filtered = filtered.filter(item => {
+                const itemLocation = item.location || '';
+                return locations.some(filterLocation => {
+                  const normalizedFilter = normalizeLocation(filterLocation);
+                  // Match exact or case-insensitive partial match
+                  return itemLocation === normalizedFilter || 
+                         itemLocation.toLowerCase().includes(normalizedFilter.toLowerCase()) ||
+                         normalizedFilter.toLowerCase().includes(itemLocation.toLowerCase());
+                });
+              });
+            }
+          }
+          
+          // Apply search query
+          if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(item => {
+              const searchableText = [
+                item.title,
+                item.description,
+                item.category,
+                item.serviceType,
+                item.deliveryMode,
+                item.provider?.name,
+                ...(item.tags || [])
+              ].filter(Boolean).join(' ').toLowerCase();
+              return searchableText.includes(query);
+            });
+          }
+        } else {
+          // For other marketplaces, apply search query if provided
+          if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(item => {
+              const searchableText = [
+                item.title,
+                item.description,
+                item.category,
+                item.provider?.name,
+                ...(item.tags || [])
+              ].filter(Boolean).join(' ').toLowerCase();
+              return searchableText.includes(query);
+            });
+          }
+        }
+        
+        setFilteredItems(filtered);
+        setTotalCount(filtered.length);
       } catch (err) {
         console.error(`Error fetching ${marketplaceType} items:`, err);
         setError(`Failed to load ${marketplaceType}`);
@@ -530,7 +679,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
     run();
     // Keep deps lean; no need to include functions like isGuides
-  }, [marketplaceType, filters, searchQuery, queryParams, isCourses, isKnowledgeHub, currentPage, pageSize]);
+  }, [marketplaceType, filters, searchQuery, queryParams, isCourses, isKnowledgeHub, currentPage, pageSize, isServicesCenter, activeServiceTab]);
 
   // Handle filter changes
   const handleFilterChange = useCallback((filterType: string, value: string) => {
@@ -660,6 +809,40 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         <h1 className="text-3xl font-bold text-gray-800 mb-2">{config.title}</h1>
         <p className="text-gray-600 mb-6">{config.description}</p>
 
+        {/* Service Center Tab Description Section */}
+        {isServicesCenter && (
+          <div className="mb-6">
+            <div className="mb-4 p-4 rounded-lg shadow-sm" style={{ backgroundColor: '#FFFFFF' }}>
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Current focus</p>
+                  <p className="text-lg font-semibold text-gray-900 mb-2">
+                    {activeServiceTab === 'query' && 'Query'}
+                    {activeServiceTab === 'support' && 'Support'}
+                    {activeServiceTab === 'requisition' && 'Requisition'}
+                    {activeServiceTab === 'self-service' && 'Self-Service'}
+                  </p>
+                </div>
+                <button className="px-3 py-1.5 rounded-full text-xs font-medium text-blue-700" style={{ backgroundColor: '#DBEAFE' }}>
+                  Tab overview
+                </button>
+              </div>
+              <p className="text-gray-600 text-sm mb-1">
+                {activeServiceTab === 'query' && 'Submit questions and inquiries about our services. Get quick answers and guidance from our support team.'}
+                {activeServiceTab === 'support' && 'Access technical and operational support services. Get help with IT issues, system access, and operational requests.'}
+                {activeServiceTab === 'requisition' && 'Request resources, equipment, and services. Submit requisitions for staff, bookings, registrations, and other business needs.'}
+                {activeServiceTab === 'self-service' && 'Access self-service tools and resources. Find templates, guides, and walkthroughs to help you get things done independently.'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {activeServiceTab === 'query' && 'Managed by DQ IT Support, HR, Finance, and Admin teams.'}
+                {activeServiceTab === 'support' && 'Provided by DQ IT Support, Operations, and Technical teams.'}
+                {activeServiceTab === 'requisition' && 'Handled by DQ HR, Admin, and Operations teams.'}
+                {activeServiceTab === 'self-service' && 'Curated by DQ IT Support, HR, and Operations teams.'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Service Center Tabs */}
         {isServicesCenter && (
           <div className="mb-6 border-b border-gray-200">
@@ -677,9 +860,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                     onClick={() => setActiveServiceTab(tab.id)}
                     className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                       isActive
-                        ? 'text-blue-700 border-blue-700'
-                        : 'text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300'
+                        ? 'border-blue-700'
+                        : 'text-gray-700 border-transparent hover:text-gray-900 hover:border-gray-300'
                     }`}
+                    style={isActive ? { color: '#1A2E6E', borderColor: '#1A2E6E' } : {}}
                     aria-current={isActive ? 'page' : undefined}
                   >
                     {tab.label}

@@ -13,6 +13,7 @@ export interface ServiceCardProps {
     tags?: string[];
     category?: string;
     deliveryMode?: string;
+    featuredImageUrl?: string;
   };
   type: string;
   isBookmarked: boolean;
@@ -65,7 +66,37 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   };
   // Display tags if available, otherwise use category and deliveryMode
   const displayTags = item.tags || [item.category, item.deliveryMode].filter(Boolean);
+  
+  // Generate Unsplash image URL based on item ID for consistent images
+  const getFeaturedImageUrl = () => {
+    if (item.featuredImageUrl) {
+      return item.featuredImageUrl;
+    }
+    // Use Unsplash Source API with item ID to get consistent images
+    // Using technology/business/office related keywords
+    const keywords = ['technology', 'business', 'office', 'workspace', 'team', 'digital'];
+    const keyword = keywords[parseInt(item.id) % keywords.length] || 'technology';
+    return `https://source.unsplash.com/800x400/?${keyword},business`;
+  };
+  
   return <div className="flex flex-col min-h-[340px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200" onClick={onQuickView}>
+      {/* Featured Image */}
+      <div className="relative h-48 bg-gray-200 overflow-hidden">
+        <img 
+          src={getFeaturedImageUrl()} 
+          alt={item.title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // Fallback to a gradient if image fails to load
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            if (target.parentElement) {
+              target.parentElement.className = 'relative h-48 bg-gradient-to-br from-gray-400 to-gray-600';
+            }
+          }}
+        />
+      </div>
+      
       {/* Card Header with fixed height for title and provider */}
       <div className="px-4 py-5 flex-grow flex flex-col">
         <div className="flex items-start mb-5">
@@ -81,14 +112,14 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         </div>
         {/* Description with consistent height */}
         <div className="mb-5">
-          <p className="text-sm text-gray-600 line-clamp-3 min-h-[60px] leading-relaxed">
+          <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px] leading-relaxed">
             {item.description}
           </p>
         </div>
         {/* Tags and Actions in same row - fixed position */}
         <div className="flex justify-between items-center mt-auto">
           <div className="flex flex-wrap gap-1 max-w-[70%]">
-            {displayTags.map((tag, index) => <span key={index} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate ${index === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+            {displayTags.map((tag, index) => <span key={index} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate bg-gray-50 text-gray-700 border border-gray-200">
                 {tag}
               </span>)}
           </div>
@@ -111,10 +142,10 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       {/* Card Footer - with two buttons */}
       <div className="mt-auto border-t border-gray-100 p-4 pt-5">
         <div className="flex justify-between gap-2">
-          <button onClick={handleViewDetails} className="px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors whitespace-nowrap min-w-[120px] flex-1">
+          <button onClick={handleViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap min-w-[120px] flex-1 ${type === 'non-financial' ? 'bg-white border' : 'text-blue-600 bg-white border border-blue-600 hover:bg-blue-50'}`} style={type === 'non-financial' ? { color: '#1A2E6E', borderColor: '#1A2E6E' } : {}} onMouseEnter={(e) => { if (type === 'non-financial') e.currentTarget.style.backgroundColor = '#f0f4f8'; }} onMouseLeave={(e) => { if (type === 'non-financial') e.currentTarget.style.backgroundColor = 'white'; }}>
             View Details
           </button>
-          <button onClick={handlePrimaryAction} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors whitespace-nowrap flex-1">
+          <button onClick={handlePrimaryAction} className="px-4 py-2 text-sm font-bold text-white rounded-md transition-colors whitespace-nowrap flex-1" style={{ backgroundColor: '#1A2E6E' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1A2E6E'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1A2E6E'}>
             {getPrimaryCTAText()}
           </button>
         </div>

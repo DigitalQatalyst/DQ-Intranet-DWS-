@@ -747,7 +747,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       }]
     }, {
       id: 'provider',
-      title: 'Provided by',
+      title: 'Department',
       options: [{
         id: 'it_support',
         name: 'IT Support'
@@ -774,6 +774,19 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         id: 'digital_worker',
         name: 'Digital Worker'
       }]
+    }, {
+      id: 'location',
+      title: 'Location',
+      options: [{
+        id: 'dubai',
+        name: 'Dubai'
+      }, {
+        id: 'nairobi',
+        name: 'Nairobi'
+      }, {
+        id: 'riyadh',
+        name: 'Riyadh'
+      }]
     }],
     // Data mapping functions
     mapListResponse: data => {
@@ -797,12 +810,16 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         options: data.deliveryModes || []
       }, {
         id: 'provider',
-        title: 'Provided by',
+        title: 'Department',
         options: data.providers || []
       }, {
         id: 'category',
         title: 'Service Category',
         options: data.categories || []
+      }, {
+        id: 'location',
+        title: 'Location',
+        options: data.locations || []
       }];
     },
     // Mock data for fallback and schema reference
@@ -816,4 +833,174 @@ export const getMarketplaceConfig = (type: string): MarketplaceConfig => {
     throw new Error(`No configuration found for marketplace type: ${type}`);
   }
   return config;
+};
+
+// Tab-specific filters for Services Center
+export const getTabSpecificFilters = (tabId: string): FilterCategoryConfig[] => {
+  const baseFilters: FilterCategoryConfig[] = [
+    {
+      id: 'deliveryMode',
+      title: 'Delivery Mode',
+      options: [
+        { id: 'online', name: 'Online' },
+        { id: 'inperson', name: 'In person' },
+        { id: 'hybrid', name: 'Hybrid' }
+      ]
+    },
+    {
+      id: 'provider',
+      title: 'Department',
+      options: [
+        { id: 'it_support', name: 'IT Support' },
+        { id: 'hr', name: 'HR' },
+        { id: 'finance', name: 'Finance' },
+        { id: 'admin', name: 'Admin' }
+      ]
+    },
+    {
+      id: 'category',
+      title: 'Service Category',
+      options: [
+        { id: 'technology', name: 'Technology' },
+        { id: 'business', name: 'Business' },
+        { id: 'digital_worker', name: 'Digital Worker' }
+      ]
+    },
+    {
+      id: 'location',
+      title: 'Location',
+      options: [
+        { id: 'dubai', name: 'Dubai' },
+        { id: 'nairobi', name: 'Nairobi' },
+        { id: 'riyadh', name: 'Riyadh' }
+      ]
+    }
+  ];
+
+  // Tab-specific additional filters
+  const tabFilters: Record<string, FilterCategoryConfig[]> = {
+    'query': [
+      {
+        id: 'priority',
+        title: 'Priority',
+        options: [
+          { id: 'high', name: 'High' },
+          { id: 'medium', name: 'Medium' },
+          { id: 'low', name: 'Low' }
+        ]
+      },
+      {
+        id: 'responseTime',
+        title: 'Response Time',
+        options: [
+          { id: 'immediate', name: 'Immediate' },
+          { id: '1-2days', name: '1-2 Days' },
+          { id: '3-5days', name: '3-5 Days' }
+        ]
+      },
+      {
+        id: 'status',
+        title: 'Status',
+        options: [
+          { id: 'open', name: 'Open' },
+          { id: 'in_progress', name: 'In Progress' },
+          { id: 'resolved', name: 'Resolved' }
+        ]
+      }
+    ],
+    'support': [
+      {
+        id: 'supportType',
+        title: 'Support Type',
+        options: [
+          { id: 'technical', name: 'Technical' },
+          { id: 'account', name: 'Account' },
+          { id: 'access', name: 'Access' },
+          { id: 'system', name: 'System' }
+        ]
+      },
+      {
+        id: 'urgency',
+        title: 'Urgency',
+        options: [
+          { id: 'critical', name: 'Critical' },
+          { id: 'high', name: 'High' },
+          { id: 'medium', name: 'Medium' },
+          { id: 'low', name: 'Low' }
+        ]
+      },
+      {
+        id: 'status',
+        title: 'Status',
+        options: [
+          { id: 'open', name: 'Open' },
+          { id: 'in_progress', name: 'In Progress' },
+          { id: 'resolved', name: 'Resolved' }
+        ]
+      }
+    ],
+    'requisition': [
+      {
+        id: 'requestType',
+        title: 'Request Type',
+        options: [
+          { id: 'staff', name: 'Staff' },
+          { id: 'equipment', name: 'Equipment' },
+          { id: 'booking', name: 'Booking' },
+          { id: 'registration', name: 'Registration' }
+        ]
+      },
+      {
+        id: 'approvalStatus',
+        title: 'Approval Status',
+        options: [
+          { id: 'pending', name: 'Pending' },
+          { id: 'approved', name: 'Approved' },
+          { id: 'rejected', name: 'Rejected' }
+        ]
+      },
+      {
+        id: 'budgetRange',
+        title: 'Budget Range',
+        options: [
+          { id: 'under_1k', name: 'Under 1K' },
+          { id: '1k_10k', name: '1K - 10K' },
+          { id: '10k_plus', name: '10K+' }
+        ]
+      }
+    ],
+    'self-service': [
+      {
+        id: 'format',
+        title: 'Format',
+        options: [
+          { id: 'video', name: 'Video' },
+          { id: 'guide', name: 'Guide' },
+          { id: 'template', name: 'Template' },
+          { id: 'walkthrough', name: 'Walkthrough' }
+        ]
+      },
+      {
+        id: 'difficulty',
+        title: 'Difficulty',
+        options: [
+          { id: 'beginner', name: 'Beginner' },
+          { id: 'intermediate', name: 'Intermediate' },
+          { id: 'advanced', name: 'Advanced' }
+        ]
+      },
+      {
+        id: 'duration',
+        title: 'Duration',
+        options: [
+          { id: 'quick', name: 'Quick (< 5 min)' },
+          { id: 'medium', name: 'Medium (5-15 min)' },
+          { id: 'long', name: 'Long (> 15 min)' }
+        ]
+      }
+    ]
+  };
+
+  // Return tab-specific filters first, then base filters
+  return [...(tabFilters[tabId] || []), ...baseFilters];
 };

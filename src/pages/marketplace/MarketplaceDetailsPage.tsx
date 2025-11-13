@@ -806,7 +806,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
               </li>)}
           </ul>
         </div>
-        <button id="action-section" className="w-full px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md mb-3">
+        <button id="action-section" className="w-full px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md mb-3" style={{ backgroundColor: '#1A2E6E' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1A2E6E'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1A2E6E'}>
           {primaryAction}
         </button>
         <button onClick={handleAddToComparison} className="w-full px-4 py-2.5 text-blue-600 font-medium bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center">
@@ -862,7 +862,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
               </h1>
               {/* Tags row - Separated from ratings */}
               <div className="flex flex-wrap gap-2 mb-3">
-                {displayTags.map((tag, index) => <span key={index} className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${index === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : index === 1 ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}>
+                {displayTags.map((tag, index) => <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-50 text-gray-700 border border-gray-200">
                     {tag}
                   </span>)}
               </div>
@@ -1010,7 +1010,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   {item.duration || item.serviceType || ''}
                 </div>
               </div>
-              <button className="flex-1 px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md">
+              <button className="flex-1 px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md" style={{ backgroundColor: '#1A2E6E' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1A2E6E'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1A2E6E'}>
                 {primaryAction}
               </button>
             </div>
