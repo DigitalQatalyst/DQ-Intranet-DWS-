@@ -36,7 +36,7 @@ const toggleFilter = (
   setSp(newParams, { replace: true });
 };
 
-type TabType = 'courses' | 'reviews';
+type TabType = 'courses' | 'tracks' | 'reviews';
 
 export const LmsCourses: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -139,8 +139,21 @@ export const LmsCourses: React.FC = () => {
     return items;
   }, [allReviews, facets, searchQuery]);
 
+  // Filter courses - exclude bundles for courses tab
   const filteredItems = useMemo(() => {
     let items = applyFilters(LMS_COURSES, facets);
+    // Filter out bundles for courses tab
+    if (activeTab === 'courses') {
+      items = items.filter((item) => 
+        item.courseType !== 'Course (Bundles)'
+      );
+    }
+    // Only show bundles for tracks tab
+    if (activeTab === 'tracks') {
+      items = items.filter((item) => 
+        item.courseType === 'Course (Bundles)'
+      );
+    }
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       items = items.filter((item) => {
@@ -162,7 +175,7 @@ export const LmsCourses: React.FC = () => {
       });
     }
     return items;
-  }, [facets, searchQuery]);
+  }, [facets, searchQuery, activeTab]);
 
   // Dynamic filter config based on active tab
   const filterConfig: FilterConfig[] = useMemo(
@@ -218,8 +231,65 @@ export const LmsCourses: React.FC = () => {
             ]
           }
         ];
+      } else if (activeTab === 'tracks') {
+        // For tracks: same filters as courses but without course types
+        return [
+          {
+            id: "department",
+            title: "Department",
+            options: [
+              { id: "HRA (People)", name: "HRA (People)" },
+              { id: "Finance", name: "Finance" },
+              { id: "Deals", name: "Deals" },
+              { id: "Stories", name: "Stories" },
+              { id: "Intelligence", name: "Intelligence" },
+              { id: "Solutions", name: "Solutions" },
+              { id: "SecDevOps", name: "SecDevOps" },
+              { id: "Products", name: "Products" },
+              { id: "Delivery — Deploys", name: "Delivery — Deploys" },
+              { id: "Delivery — Designs", name: "Delivery — Designs" },
+              { id: "DCO Operations", name: "DCO Operations" },
+              { id: "DBP Platform", name: "DBP Platform" },
+              { id: "DBP Delivery", name: "DBP Delivery" }
+            ]
+          },
+          {
+            id: "category",
+            title: "Course Category",
+            options: CATEGORY_OPTS.map((c) => ({ id: c, name: c }))
+          },
+          {
+            id: "provider",
+            title: "LMS Item Provider",
+            options: [
+              { id: "DQ HRA", name: "DQ HRA" },
+              { id: "DQ DTMB", name: "DQ DTMB" },
+              { id: "DQ DTMA", name: "DQ DTMA" },
+              { id: "Tech (Microsoft)", name: "Tech (Microsoft)" },
+              { id: "Tech (Ardoq)", name: "Tech (Ardoq)" }
+            ]
+          },
+          {
+            id: "sfiaRating",
+            title: "Rating - SFIA",
+            options: SFIA_LEVELS.map((level) => ({ id: level.code, name: level.label }))
+          },
+          {
+            id: "location",
+            title: "Location/Studio",
+            options: LOCATION_OPTS.map((l) => ({ id: l, name: l }))
+          },
+          {
+            id: "audience",
+            title: "Audience",
+            options: [
+              { id: "Associate", name: "Associate" },
+              { id: "Lead", name: "Lead" }
+            ]
+          }
+        ];
       } else {
-        // For courses: show all filters except delivery mode (as per user request)
+        // For courses: show all filters except delivery mode, course types only Single Lesson and Multi-Lessons
         return [
       {
         id: "department",
@@ -261,8 +331,7 @@ export const LmsCourses: React.FC = () => {
             title: "Course Types",
             options: [
               { id: "Course (Single Lesson)", name: "Course (Single Lesson)" },
-              { id: "Course (Multi-Lessons)", name: "Course (Multi-Lessons)" },
-              { id: "Course (Bundles)", name: "Course (Bundles)" }
+              { id: "Course (Multi-Lessons)", name: "Course (Multi-Lessons)" }
             ]
       },
       {
@@ -296,6 +365,15 @@ export const LmsCourses: React.FC = () => {
           provider: facets.provider || [],
           audience: facets.audience || [],
           courseType: facets.courseType || [],
+          department: facets.department || []
+        };
+      } else if (activeTab === 'tracks') {
+        return {
+          category: facets.category || [],
+          provider: facets.provider || [],
+          sfiaRating: facets.sfiaRating || [],
+          location: facets.location || [],
+          audience: facets.audience || [],
           department: facets.department || []
         };
       } else {
@@ -373,33 +451,32 @@ export const LmsCourses: React.FC = () => {
             <div className="flex-1">
               <div className="text-xs uppercase tracking-wide text-gray-500 mb-2">CURRENT FOCUS</div>
               <h2 className="text-2xl font-bold mb-3" style={{ color: '#030F35' }}>
-                {activeTab === 'courses' ? 'Courses & Curricula' : 'Reviews & Testimonials'}
+                {activeTab === 'courses' ? 'Courses & Curricula' : activeTab === 'tracks' ? 'Learning Tracks' : 'Reviews & Testimonials'}
               </h2>
               <p className="text-gray-600 text-sm leading-relaxed mb-2">
                 {activeTab === 'courses' 
                   ? "Browse comprehensive learning tracks, individual courses, and structured curricula designed to enhance your skills across GHC, 6xD, DWS, and DXP frameworks."
+                  : activeTab === 'tracks'
+                  ? "Explore structured learning tracks that combine multiple courses into comprehensive learning journeys. Each track includes courses, topics, and lessons designed to master specific skills and competencies."
                   : "Read real experiences and insights from DQ associates who have completed courses. Learn how training has impacted their work, improved their skills, and advanced their careers."}
               </p>
               <p className="text-gray-500 text-xs mt-2">
                 {activeTab === 'courses' 
                   ? "Sourced from DQ Learning & Development, GHC, 6xD, DWS, and DXP teams."
+                  : activeTab === 'tracks'
+                  ? "Sourced from DQ Learning & Development teams and structured learning programs."
                   : "Sourced from course participants and verified learners across DQ studios."}
               </p>
             </div>
-            <button 
-              className="px-4 py-2 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap ml-4"
+            <div 
+              className="px-3 py-1.5 text-xs font-medium rounded-full ml-4"
               style={{ 
                 backgroundColor: '#F0F4FF',
-                borderColor: '#030F35',
                 color: '#030F35'
-              }}
-              onClick={() => {
-                // Scroll to tabs or show overview
-                document.querySelector('[data-tabs-section]')?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
               Tab overview
-            </button>
+            </div>
           </div>
         </div>
         
@@ -416,6 +493,17 @@ export const LmsCourses: React.FC = () => {
               style={activeTab === 'courses' ? { borderColor: '#030F35', color: '#030F35' } : {}}
             >
               Courses
+            </button>
+            <button
+              onClick={() => setActiveTab('tracks')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'tracks'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              style={activeTab === 'tracks' ? { borderColor: '#030F35', color: '#030F35' } : {}}
+            >
+              Learning Tracks
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
@@ -533,7 +621,162 @@ export const LmsCourses: React.FC = () => {
 
           {/* Main content */}
           <div className="xl:w-3/4">
-            {activeTab === 'reviews' ? (
+            {activeTab === 'tracks' ? (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold text-gray-800 hidden sm:block">
+                    Learning Tracks ({filteredItems.length})
+                  </h2>
+                  <div className="text-sm text-gray-500 hidden sm:block">
+                    Showing {filteredItems.length} tracks
+                  </div>
+                  <h2 className="text-lg font-medium text-gray-800 sm:hidden">
+                    {filteredItems.length} Learning Tracks
+                  </h2>
+                </div>
+                <div className="space-y-6">
+                  {filteredItems.map((track) => {
+                    const trackDetail = LMS_COURSE_DETAILS.find(c => c.id === track.id);
+                    if (!trackDetail || !trackDetail.curriculum) return null;
+                    
+                    return (
+                      <div
+                        key={track.id}
+                        className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="mb-6">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h3 className="text-2xl font-bold text-gray-900 mb-2">{track.title}</h3>
+                              <p className="text-gray-600 mb-4">{track.summary}</p>
+                              <div className="flex flex-wrap gap-2">
+                                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#565D6A', color: '#FFFFFF' }}>
+                                  {track.provider}
+                                </span>
+                                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#565D6A', color: '#FFFFFF' }}>
+                                  {track.courseCategory}
+                                </span>
+                                {track.rating && (
+                                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#565D6A', color: '#FFFFFF' }}>
+                                    ⭐ {track.rating} ({track.reviewCount} reviews)
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <Link
+                              to={`/lms/${track.slug}`}
+                              className="px-4 py-2 text-sm font-medium rounded-md border transition-colors whitespace-nowrap ml-4"
+                              style={{ 
+                                color: '#030F35',
+                                borderColor: '#030F35'
+                              }}
+                            >
+                              View Track
+                            </Link>
+                          </div>
+                        </div>
+                        
+                        {/* Track Structure Visualization */}
+                        <div className="border-t border-gray-200 pt-6">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4">Track Structure</h4>
+                          <div className="space-y-4">
+                            {trackDetail.curriculum.map((course, courseIndex) => (
+                              <div key={course.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-sm" style={{ backgroundColor: '#F0F4FF', color: '#030F35' }}>
+                                      {courseIndex + 1}
+                                    </div>
+                                    <div>
+                                      <h5 className="font-semibold text-gray-900">{course.title}</h5>
+                                      {course.description && (
+                                        <p className="text-sm text-gray-600">{course.description}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {course.courseSlug && (
+                                    <Link
+                                      to={`/lms/${course.courseSlug}`}
+                                      className="text-sm font-medium hover:underline"
+                                      style={{ color: '#030F35' }}
+                                    >
+                                      View Course →
+                                    </Link>
+                                  )}
+                                </div>
+                                
+                                {/* Topics within course */}
+                                {course.topics && course.topics.length > 0 && (
+                                  <div className="ml-10 space-y-3 mt-3">
+                                    {course.topics.map((topic, topicIndex) => (
+                                      <div key={topic.id} className="border-l-2 border-gray-300 pl-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-700">
+                                            {topicIndex + 1}
+                                          </div>
+                                          <h6 className="font-medium text-gray-800">{topic.title}</h6>
+                                        </div>
+                                        
+                                        {/* Lessons within topic */}
+                                        {topic.lessons && topic.lessons.length > 0 && (
+                                          <div className="ml-8 space-y-2">
+                                            {topic.lessons.map((lesson, lessonIndex) => (
+                                              <div key={lesson.id} className="flex items-center gap-2 text-sm text-gray-600">
+                                                <span className="w-4 h-4 rounded bg-gray-300 flex items-center justify-center text-xs">
+                                                  {lessonIndex + 1}
+                                                </span>
+                                                <span>{lesson.title}</span>
+                                                {lesson.duration && (
+                                                  <span className="text-xs text-gray-500">({lesson.duration})</span>
+                                                )}
+                                                <span className="px-2 py-0.5 rounded text-xs" style={{ backgroundColor: '#565D6A', color: '#FFFFFF' }}>
+                                                  {lesson.type}
+                                                </span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                
+                                {/* Direct lessons (if no topics) */}
+                                {course.lessons && course.lessons.length > 0 && !course.topics && (
+                                  <div className="ml-10 space-y-2 mt-3">
+                                    {course.lessons.map((lesson, lessonIndex) => (
+                                      <div key={lesson.id} className="flex items-center gap-2 text-sm text-gray-600">
+                                        <span className="w-4 h-4 rounded bg-gray-300 flex items-center justify-center text-xs">
+                                          {lessonIndex + 1}
+                                        </span>
+                                        <span>{lesson.title}</span>
+                                        {lesson.duration && (
+                                          <span className="text-xs text-gray-500">({lesson.duration})</span>
+                                        )}
+                                        <span className="px-2 py-0.5 rounded text-xs" style={{ backgroundColor: '#565D6A', color: '#FFFFFF' }}>
+                                          {lesson.type}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {filteredItems.length === 0 && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                      <p className="text-gray-600">
+                        No learning tracks found matching your filters.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : activeTab === 'reviews' ? (
               <>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold text-gray-800 hidden sm:block">
@@ -633,7 +876,8 @@ export const LmsCourses: React.FC = () => {
                     item={{
                       ...item,
                       provider: { name: item.provider, logoUrl: "/DWS-Logo.png" },
-                      description: item.summary
+                      description: item.summary,
+                      imageUrl: item.imageUrl
                     }}
                     marketplaceType="courses"
                     isBookmarked={false}

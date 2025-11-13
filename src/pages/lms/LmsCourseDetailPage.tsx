@@ -310,7 +310,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                 <section className="space-y-6">
                   <h2 className="text-2xl font-bold text-gray-900">
                     {isTrack ? 'Track Highlights' : 'Course Highlights'}
-                  </h2>
+                </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                     {course.highlights.map((highlight) => (
                     <div
@@ -649,7 +649,254 @@ export const LmsCourseDetailPage: React.FC = () => {
 
                           // Course (Multi-Lessons): Show topics with lessons
                           // Each curriculum item represents a topic, and each topic has nested topics with lessons
-                          if (isCourse && item.topics) {
+                          // OR curriculum item has lessons directly (legacy structure)
+                          if (isCourse) {
+                            // Handle structure with topics array
+                            if (item.topics && item.topics.length > 0) {
+                              return (
+                                <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                  {/* Topic Section Header */}
+                                  <div className="p-4 bg-gray-50 border-b border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                                    {item.description && (
+                                      <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                                    )}
+                                  </div>
+
+                                  {/* Topics within this section */}
+                                  <div className="divide-y divide-gray-200">
+                                    {item.topics
+                                      .sort((a, b) => a.order - b.order)
+                                      .map((topic) => {
+                                        const isTopicExpanded = expandedTopics.has(topic.id);
+                                        const toggleTopic = () => {
+                                          setExpandedTopics(prev => {
+                                            const next = new Set(prev);
+                                            if (next.has(topic.id)) {
+                                              next.delete(topic.id);
+                                            } else {
+                                              next.add(topic.id);
+                                            }
+                                            return next;
+                                          });
+                                        };
+
+                                        return (
+                                          <div key={topic.id}>
+                                            {/* Topic Header */}
+                                            <div
+                                              className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                              onClick={toggleTopic}
+                                            >
+                                              <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3 flex-1">
+                                                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                                    <FileText size={16} />
+                                                  </div>
+                                                  <div className="flex-1">
+                                                    <h4 className="font-medium text-gray-900">{topic.title}</h4>
+                                                    {topic.description && (
+                                                      <p className="text-xs text-gray-600 mt-1">{topic.description}</p>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                                <button className="ml-4 text-gray-400 hover:text-gray-600">
+                                                  {isTopicExpanded ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
+                                                </button>
+                                              </div>
+                                            </div>
+
+                                            {/* Lessons (Expandable) */}
+                                            {isTopicExpanded && topic.lessons && (
+                                              <div className="bg-gray-50 pl-12 pr-4 py-3 space-y-2">
+                                                {topic.lessons
+                                                  .sort((a, b) => a.order - b.order)
+                                                  .map((lesson) => {
+                                                    const LessonIcon = getLessonTypeIcon(lesson.type);
+                                                    const isLocked = lesson.isLocked;
+                                                    return (
+                                                      <div
+                                                        key={lesson.id}
+                                                        className={`p-3 rounded-lg border ${
+                                                          isLocked
+                                                            ? 'border-gray-200 opacity-60 bg-gray-50'
+                                                            : 'border-gray-200 hover:border-blue-300 hover:shadow-sm bg-white'
+                                                        }`}
+                                                      >
+                                                        <div className="flex items-start gap-3">
+                                                          <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
+                                                            isLocked
+                                                              ? 'bg-gray-100 text-gray-400'
+                                                              : 'bg-blue-50 text-blue-600'
+                                                          }`}>
+                                                            {isLocked ? (
+                                                              <Lock size={16} />
+                                                            ) : (
+                                                              <LessonIcon size={16} />
+                                                            )}
+                                                          </div>
+                                                          <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                              <span className="text-xs font-medium text-gray-500">
+                                                                Lesson {lesson.order}
+                                                              </span>
+                                                              <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                                                                {getLessonTypeLabel(lesson.type)}
+                                                              </span>
+                                                              {isLocked && (
+                                                                <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded">
+                                                                  Locked
+                                                                </span>
+                                                              )}
+                                                            </div>
+                                                            <h5 className={`text-sm font-medium mb-1 ${
+                                                              isLocked ? 'text-gray-500' : 'text-gray-900'
+                                                            }`}>
+                                                              {lesson.title}
+                                                            </h5>
+                                                            {lesson.description && (
+                                                              <p className={`text-xs mb-2 ${
+                                                                isLocked ? 'text-gray-400' : 'text-gray-600'
+                                                              }`}>
+                                                                {lesson.description}
+                                                              </p>
+                                                            )}
+                                                            {lesson.duration && (
+                                                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                                <Clock size={12} />
+                                                                <span>{lesson.duration}</span>
+                                                              </div>
+                                                            )}
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  })}
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                  </div>
+                                </div>
+                              );
+                            }
+                            
+                            // Handle legacy structure with lessons directly (treat curriculum item as a topic)
+                            if (item.lessons && item.lessons.length > 0) {
+                              const isTopicExpanded = expandedTopics.has(item.id);
+                              const toggleTopic = () => {
+                                setExpandedTopics(prev => {
+                                  const next = new Set(prev);
+                                  if (next.has(item.id)) {
+                                    next.delete(item.id);
+                                  } else {
+                                    next.add(item.id);
+                                  }
+                                  return next;
+                                });
+                              };
+
+                              return (
+                                <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                  {/* Topic Header */}
+                                  <div
+                                    className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                    onClick={toggleTopic}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-3 flex-1">
+                                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                          <FileText size={16} />
+                                        </div>
+                                        <div className="flex-1">
+                                          <h4 className="font-medium text-gray-900">{item.title}</h4>
+                                          {item.description && (
+                                            <p className="text-xs text-gray-600 mt-1">{item.description}</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <button className="ml-4 text-gray-400 hover:text-gray-600">
+                                        {isTopicExpanded ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Lessons (Expandable) */}
+                                  {isTopicExpanded && (
+                                    <div className="bg-gray-50 pl-12 pr-4 py-3 space-y-2">
+                                      {item.lessons
+                                        .sort((a, b) => a.order - b.order)
+                                        .map((lesson) => {
+                                          const LessonIcon = getLessonTypeIcon(lesson.type);
+                                          const isLocked = lesson.isLocked;
+                                          return (
+                                            <div
+                                              key={lesson.id}
+                                              className={`p-3 rounded-lg border ${
+                                                isLocked
+                                                  ? 'border-gray-200 opacity-60 bg-gray-50'
+                                                  : 'border-gray-200 hover:border-blue-300 hover:shadow-sm bg-white'
+                                              }`}
+                                            >
+                                              <div className="flex items-start gap-3">
+                                                <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
+                                                  isLocked
+                                                    ? 'bg-gray-100 text-gray-400'
+                                                    : 'bg-blue-50 text-blue-600'
+                                                }`}>
+                                                  {isLocked ? (
+                                                    <Lock size={16} />
+                                                  ) : (
+                                                    <LessonIcon size={16} />
+                                                  )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                  <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-xs font-medium text-gray-500">
+                                                      Lesson {lesson.order}
+                                                    </span>
+                                                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                                                      {getLessonTypeLabel(lesson.type)}
+                                                    </span>
+                                                    {isLocked && (
+                                                      <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded">
+                                                        Locked
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                  <h5 className={`text-sm font-medium mb-1 ${
+                                                    isLocked ? 'text-gray-500' : 'text-gray-900'
+                                                  }`}>
+                                                    {lesson.title}
+                                                  </h5>
+                                                  {lesson.description && (
+                                                    <p className={`text-xs mb-2 ${
+                                                      isLocked ? 'text-gray-400' : 'text-gray-600'
+                                                    }`}>
+                                                      {lesson.description}
+                                                    </p>
+                                                  )}
+                                                  {lesson.duration && (
+                                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                      <Clock size={12} />
+                                                      <span>{lesson.duration}</span>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            }
+                          }
+
+                          // Legacy code kept for reference but replaced above
+                          if (false && isCourse && item.topics) {
                             return (
                               <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                 {/* Topic Section Header */}

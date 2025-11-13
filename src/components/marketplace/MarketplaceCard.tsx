@@ -20,6 +20,7 @@ export interface MarketplaceItemProps {
     tags?: string[];
     category?: string;
     deliveryMode?: string;
+    imageUrl?: string;
     [key: string]: any;
   };
   marketplaceType: string;
@@ -162,6 +163,20 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
     return chips;
   }, [item, marketplaceType]);
   return <div className="flex flex-col min-h-[340px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200" onClick={onQuickView}>
+      {/* Course Image */}
+      {item.imageUrl && (
+        <div className="w-full h-40 bg-gray-200 overflow-hidden">
+          <img 
+            src={item.imageUrl} 
+            alt={item.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Hide image if it fails to load
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        </div>
+      )}
       {/* Card Header with fixed height for title and provider */}
       <div className="px-4 py-5 flex-grow flex flex-col">
         <div className="flex items-start mb-5">
@@ -190,14 +205,13 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
             const Icon = resolveChipIcon(chip.key, chip.iconValue ?? chip.label);
             return <span 
               key={`${chip.key}-${chip.label}-${index}`} 
-              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate border"
+              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate"
               style={{
-                backgroundColor: index === 0 ? '#F0F4FF' : '#F0F4FF',
-                borderColor: '#030F35',
-                color: '#030F35'
+                backgroundColor: '#565D6A',
+                color: '#FFFFFF'
               }}
             >
-                {Icon ? <Icon className="h-3.5 w-3.5 mr-1" style={{ color: '#030F35' }} /> : null}
+                {Icon ? <Icon className="h-3.5 w-3.5 mr-1" style={{ color: '#FFFFFF' }} /> : null}
                 {chip.label}
               </span>;
           })}
