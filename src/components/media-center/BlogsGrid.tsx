@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { NEWS, type NewsItem } from '@/data/media/news';
 import type { FiltersValue } from './types';
 import { BlogCard } from './cards/BlogCard';
@@ -13,27 +13,7 @@ interface GridProps {
 
 
 export default function BlogsGrid({ query }: GridProps) {
-  const [sourceItems, setSourceItems] = useState<NewsItem[]>(NEWS);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const mod = await import('@/lib/supabaseClient');
-        const supabase = (mod as any).supabase as any;
-        const { data, error } = await supabase
-          .from('news')
-          .select('id,title,type,date,author,byline,views,excerpt,image,department,location,domain,theme,tags,readingTime,newsType,newsSource,focusArea');
-        if (error) throw error;
-        if (!cancelled && Array.isArray(data)) setSourceItems(data as NewsItem[]);
-      } catch {
-        if (!cancelled) setSourceItems(NEWS);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const sourceItems: NewsItem[] = NEWS;
 
   const items = useMemo(() => {
     const search = query.q?.toLowerCase() ?? '';

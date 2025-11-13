@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { JOBS, type JobItem } from '@/data/media/jobs';
 import type { FiltersValue } from './types';
 import { JobCard } from './cards/JobCard';
@@ -12,27 +12,7 @@ interface GridProps {
 }
 
 export default function JobsGrid({ query }: GridProps) {
-  const [sourceItems, setSourceItems] = useState<JobItem[]>(JOBS);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const mod = await import('@/lib/supabaseClient');
-        const supabase = (mod as any).supabase as any;
-        const { data, error } = await supabase
-          .from('jobs')
-          .select('id,title,department,roleType,location,type,seniority,sfiaLevel,summary,description,responsibilities,requirements,benefits,postedOn,applyUrl,image');
-        if (error) throw error;
-        if (!cancelled && Array.isArray(data)) setSourceItems(data as JobItem[]);
-      } catch {
-        if (!cancelled) setSourceItems(JOBS);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const sourceItems: JobItem[] = JOBS;
 
   const items = useMemo(() => {
     const search = query.q?.toLowerCase() ?? '';

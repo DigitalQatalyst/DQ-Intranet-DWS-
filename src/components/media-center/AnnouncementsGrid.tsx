@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { NEWS, type NewsItem } from '@/data/media/news';
 import type { FiltersValue } from './types';
 import { NewsCard } from './cards/NewsCard';
@@ -16,27 +16,7 @@ const matchesSelection = (value: string | undefined, selections?: string[]) =>
   !selections?.length || (value && selections.includes(value));
 
 export default function AnnouncementsGrid({ query }: GridProps) {
-  const [sourceItems, setSourceItems] = useState<NewsItem[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const mod = await import('@/lib/supabaseClient');
-        const supabase = (mod as any).supabase as any;
-        const { data, error } = await supabase
-          .from('news')
-          .select('id,title,type,date,author,byline,views,excerpt,image,department,location,domain,theme,tags,readingTime,newsType,newsSource,focusArea');
-        if (error) throw error;
-        if (!cancelled && Array.isArray(data)) setSourceItems(data as NewsItem[]);
-      } catch {
-        if (!cancelled) setSourceItems(NEWS);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const sourceItems: NewsItem[] = NEWS;
 
   const items = useMemo(() => {
     const search = query.q?.toLowerCase() ?? '';

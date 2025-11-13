@@ -279,4 +279,54 @@ export const NEWS: NewsItem[] = [
     newsSource: 'DQ Communications',
     focusArea: 'Culture & People'
   }
+  ,
+  {
+    id: 'company-wide-lunch-break-schedule',
+    title: 'DQ CHANGES | COMPANY-WIDE LUNCH BREAK SCHEDULE',
+    type: 'Announcement',
+    date: '2024-08-20',
+    author: 'Hi GOV',
+    byline: 'Corporate Comms',
+    views: 0,
+    excerpt:
+      'Unified lunch break for all associates: 2:00 PM – 3:00 PM DXB Time. Please avoid meetings within this window (except emergencies).',
+    location: 'Dubai',
+    tags: ['policy', 'schedule', 'collaboration'],
+    readingTime: '5–10',
+    newsType: 'Corporate Announcements',
+    newsSource: 'DQ Communications',
+    focusArea: 'Culture & People'
+  },
+  {
+    id: 'grading-review-program-grp',
+    title: 'DQ ADP | GRADING REVIEW PROGRAM (GRP)',
+    type: 'Announcement',
+    date: '2024-08-20',
+    author: 'Hi GOV',
+    byline: 'Corporate Comms',
+    views: 0,
+    excerpt:
+      'Launch of the DQ Associate Grade Review Program to align associates to the SFIA-based grading scale; initial focus group led by Araba and Mercy Kyuma.',
+    tags: ['SFIA', 'grading', 'capability'],
+    readingTime: '10–20',
+    newsType: 'Corporate Announcements',
+    newsSource: 'DQ Communications',
+    focusArea: 'Culture & People'
+  },
+  {
+    id: 'dq-storybook-latest-links',
+    title: 'DQ Storybook — Latest Version and Links',
+    type: 'Announcement',
+    date: '2024-08-20',
+    author: 'DQ Communications',
+    views: 0,
+    excerpt:
+      'Explore the latest DQ Storybook and quick links to GHC elements including Vision, HoV, Persona, Agile TMS/SoS/Flows, and 6xD.',
+    domain: 'Business',
+    tags: ['story', 'GHC', 'references'],
+    readingTime: '5–10',
+    newsType: 'Corporate Announcements',
+    newsSource: 'DQ Communications',
+    focusArea: 'GHC'
+  }
 ];

@@ -298,22 +298,22 @@ const NewsPage: React.FC = () => {
 
         <Tabs value={tab} onValueChange={(value) => setTab(value as MediaCenterTabKey)} className="w-full">
           <div className="border-b border-gray-200">
-            <TabsList className="flex h-auto w-full justify-start gap-0 overflow-x-auto bg-transparent p-0 text-gray-700">
+            <TabsList className="flex h-auto w-full justify-start gap-8 overflow-x-auto bg-transparent p-0 text-gray-700">
               <TabsTrigger
                 value="announcements"
-                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="rounded-none border-b-2 border-transparent px-0 py-2 justify-start text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
                 News & Announcement
               </TabsTrigger>
               <TabsTrigger
                 value="insights"
-                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="rounded-none border-b-2 border-transparent px-0 py-2 justify-start text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
                 Blogs
               </TabsTrigger>
               <TabsTrigger
                 value="opportunities"
-                className="flex-1 basis-1/3 rounded-none border-b-2 border-transparent px-0 py-2 text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
+                className="rounded-none border-b-2 border-transparent px-0 py-2 justify-start text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
                 Jobs opening
               </TabsTrigger>

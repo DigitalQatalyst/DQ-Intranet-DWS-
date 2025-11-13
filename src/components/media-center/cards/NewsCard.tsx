@@ -64,29 +64,17 @@ export function NewsCard({ item, href }: NewsCardProps) {
           </div>
         )}
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4">
           {href ? (
             <Link
               to={href}
-              className="h-9 rounded-xl border border-gray-300 text-center text-sm font-semibold text-gray-800 leading-9 transition hover:bg-gray-50"
+              className="block h-9 rounded-xl bg-[#1A2E6E] text-center text-sm font-semibold text-white leading-9 transition hover:bg-[#132456]"
             >
-              Details
+              View Details
             </Link>
           ) : (
-            <button className="h-9 rounded-xl border border-gray-300 text-sm font-semibold text-gray-800 transition hover:bg-gray-50">
-              Details
-            </button>
-          )}
-          {href ? (
-            <Link
-              to={href}
-              className="h-9 rounded-xl bg-[#1A2E6E] text-center text-sm font-semibold text-white leading-9 transition hover:bg-[#132456]"
-            >
-              Read Update
-            </Link>
-          ) : (
-            <button className="h-9 rounded-xl bg-[#1A2E6E] text-sm font-semibold text-white transition hover:bg-[#132456]">
-              Read Update
+            <button className="h-9 w-full rounded-xl bg-[#1A2E6E] text-sm font-semibold text-white transition hover:bg-[#132456]">
+              View Details
             </button>
           )}
         </div>
