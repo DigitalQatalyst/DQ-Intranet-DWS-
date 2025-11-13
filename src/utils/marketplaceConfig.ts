@@ -476,6 +476,24 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     }],
     detailSections: ['description', 'learningOutcomes', 'schedule', 'provider', 'related'],
     tabs: [{
+      id: 'submit_request',
+      label: 'Submit Request',
+      icon: ClipboardList,
+      iconBgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600'
+    }, {
+      id: 'self_service_faq',
+      label: 'Self-Service & FAQs',
+      icon: BookOpen,
+      iconBgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600'
+    }, {
+      id: 'contact_sla',
+      label: 'Contact & SLAs',
+      icon: Info,
+      iconBgColor: 'bg-amber-50',
+      iconColor: 'text-amber-600'
+    }, {
       id: 'about',
       label: 'About This Service',
       icon: Info,
@@ -697,37 +715,36 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       icon: React.createElement(BarChart, { size: 18, className: "mr-2" })
     }],
     detailSections: ['description', 'eligibility', 'terms', 'provider', 'related'],
-    tabs: [{
-      id: 'about',
-      label: 'About This Service',
-      icon: Info,
-      iconBgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    }, {
-      id: 'eligibility_terms',
-      label: 'Eligibility & Terms',
-      icon: CheckCircle,
-      iconBgColor: 'bg-green-50',
-      iconColor: 'text-green-600'
-    }, {
-      id: 'application_process',
-      label: 'Application Process',
-      icon: ClipboardList,
-      iconBgColor: 'bg-orange-50',
-      iconColor: 'text-orange-600'
-    }, {
-      id: 'required_documents',
-      label: 'Required Documents',
-      icon: FileText,
-      iconBgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600'
-    }, {
-      id: 'provider',
-      label: 'About Provider',
-      icon: Building,
-      iconBgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    }],
+    tabs: [
+      {
+        id: 'submit_request',
+        label: 'Submit Request',
+        icon: ClipboardList,
+        iconBgColor: 'bg-blue-50',
+        iconColor: 'text-blue-600'
+      },
+      {
+        id: 'self_service_faq',
+        label: 'Self-Service & FAQs',
+        icon: BookOpen,
+        iconBgColor: 'bg-purple-50',
+        iconColor: 'text-purple-600'
+      },
+      {
+        id: 'contact_sla',
+        label: 'Contact & SLAs',
+        icon: Info,
+        iconBgColor: 'bg-amber-50',
+        iconColor: 'text-amber-600'
+      },
+      {
+        id: 'required_documents',
+        label: 'Required Documents',
+        icon: FileText,
+        iconBgColor: 'bg-amber-50',
+        iconColor: 'text-amber-600'
+      }
+    ],
     summarySticky: true,
     filterCategories: [{
       id: 'category',
@@ -794,37 +811,36 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       icon: React.createElement(Clock, { size: 18, className: "mr-2" })
     }],
     detailSections: ['description', 'deliveryDetails', 'provider', 'related'],
-    tabs: [{
-      id: 'about',
-      label: 'About This Service',
-      icon: Info,
-      iconBgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    }, {
-      id: 'eligibility_terms',
-      label: 'Eligibility & Terms',
-      icon: CheckCircle,
-      iconBgColor: 'bg-green-50',
-      iconColor: 'text-green-600'
-    }, {
-      id: 'application_process',
-      label: 'Application Process',
-      icon: ClipboardList,
-      iconBgColor: 'bg-orange-50',
-      iconColor: 'text-orange-600'
-    }, {
-      id: 'required_documents',
-      label: 'Required Documents',
-      icon: FileText,
-      iconBgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600'
-    }, {
-      id: 'provider',
-      label: 'About Provider',
-      icon: Building,
-      iconBgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    }],
+    tabs: [
+      {
+        id: 'submit_request',
+        label: 'Submit Request',
+        icon: ClipboardList,
+        iconBgColor: 'bg-blue-50',
+        iconColor: 'text-blue-600'
+      },
+      {
+        id: 'self_service_faq',
+        label: 'Self-Service & FAQs',
+        icon: BookOpen,
+        iconBgColor: 'bg-purple-50',
+        iconColor: 'text-purple-600'
+      },
+      {
+        id: 'contact_sla',
+        label: 'Contact & SLAs',
+        icon: Info,
+        iconBgColor: 'bg-amber-50',
+        iconColor: 'text-amber-600'
+      },
+      {
+        id: 'required_documents',
+        label: 'Required Documents',
+        icon: FileText,
+        iconBgColor: 'bg-amber-50',
+        iconColor: 'text-amber-600'
+      }
+    ],
     summarySticky: true,
     filterCategories: [{
       id: 'deliveryMode',

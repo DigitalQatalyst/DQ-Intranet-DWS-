@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
 import { BookmarkIcon, ScaleIcon } from 'lucide-react';
 import {
-  CARD_ICON_BY_ID,
-  DEFAULT_COURSE_ICON,
   resolveChipIcon
 } from '../../utils/lmsIcons';
 import { LOCATION_ALLOW } from '@/lms/config';
 import { useNavigate } from 'react-router-dom';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
+import { resolveServiceImage } from '../../utils/serviceCardImages';
 export interface MarketplaceItemProps {
   item: {
     id: string;
@@ -71,7 +70,6 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
     navigate(`${getItemRoute()}?action=true`);
   };
   // Display tags if available, otherwise use category and deliveryMode
-  const IconComponent = CARD_ICON_BY_ID[item.id] || DEFAULT_COURSE_ICON;
   const chipData = useMemo(() => {
     if (marketplaceType !== 'courses') {
       const typeLabel =
@@ -98,7 +96,7 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
             ]
           : [typeLabel, ...baseTags];
       }
-      return baseTags.map((label, index) => ({ key: `generic-${index}`, label }));
+      return baseTags.map((label, index) => ({ key: `generic-${index}`, label, iconValue: label }));
     }
     const chips: Array<{ key: string; label: string; iconValue?: string }> = [];
     
@@ -162,23 +160,17 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
     return chips;
   }, [item, marketplaceType]);
   
-  // Generate Unsplash image URL based on item ID for consistent images
-  const getFeaturedImageUrl = () => {
-    if (item.featuredImageUrl) {
-      return item.featuredImageUrl;
-    }
-    // Use Unsplash Source API with item ID to get consistent images
-    // Using technology/business/office related keywords
-    const keywords = ['technology', 'business', 'office', 'workspace', 'team', 'digital'];
-    const keyword = keywords[parseInt(item.id) % keywords.length] || 'technology';
-    return `https://source.unsplash.com/800x400/?${keyword},business`;
-  };
+  // Prefer explicit featuredImageUrl, else mapped image by id/title, else default
+  const imageSrc =
+    item.featuredImageUrl ||
+    resolveServiceImage(item.id, item.title) ||
+    '/images/services/DTMP.jpg';
   
   return <div className="flex flex-col min-h-[340px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200" onClick={onQuickView}>
       {/* Featured Image */}
       <div className="relative h-48 bg-gray-200 overflow-hidden">
         <img 
-          src={getFeaturedImageUrl()} 
+          src={imageSrc}
           alt={item.title}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -193,23 +185,20 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
       </div>
       
       {/* Card Header with fixed height for title and provider */}
-      <div className="px-4 py-5 flex-grow flex flex-col">
-        <div className="flex items-start mb-5">
-          <div className="flex-grow min-h-[72px] flex flex-col justify-center">
-            <div className="flex items-center gap-2 min-h-[48px]">
-              <IconComponent className="h-5 w-5 shrink-0" aria-hidden="true" />
-              <h3 className="font-bold text-gray-900 line-clamp-2 leading-snug">
-                {item.title}
-              </h3>
-            </div>
-            <p className="text-sm text-gray-500 min-h-[20px] mt-1">
+      <div className="px-4 pt-3 pb-2 flex-grow flex flex-col">
+        <div className="flex items-start mb-1">
+          <div className="flex-grow flex flex-col">
+            <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight" style={{ margin: 0, lineHeight: 1.15 }}>
+              {item.title}
+            </h3>
+            <p className="text-sm text-gray-500 mt-0.5" style={{ marginTop: 2, marginBottom: 0 }}>
               {item.provider.name}
             </p>
           </div>
         </div>
         {/* Description with consistent height */}
-        <div className="mb-5">
-          <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px] leading-relaxed">
+        <div className="mb-2" style={{ marginTop: 4 }}>
+          <p className="text-sm text-gray-600 line-clamp-2 leading-snug" style={{ margin: 0 }}>
             {item.description}
           </p>
         </div>

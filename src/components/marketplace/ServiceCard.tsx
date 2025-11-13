@@ -1,4 +1,5 @@
 import React from 'react';
+import { resolveServiceImage } from '../../utils/serviceCardImages';
 import { BookmarkIcon, ScaleIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 export interface ServiceCardProps {
@@ -67,23 +68,17 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   // Display tags if available, otherwise use category and deliveryMode
   const displayTags = item.tags || [item.category, item.deliveryMode].filter(Boolean);
   
-  // Generate Unsplash image URL based on item ID for consistent images
-  const getFeaturedImageUrl = () => {
-    if (item.featuredImageUrl) {
-      return item.featuredImageUrl;
-    }
-    // Use Unsplash Source API with item ID to get consistent images
-    // Using technology/business/office related keywords
-    const keywords = ['technology', 'business', 'office', 'workspace', 'team', 'digital'];
-    const keyword = keywords[parseInt(item.id) % keywords.length] || 'technology';
-    return `https://source.unsplash.com/800x400/?${keyword},business`;
-  };
+  // Prefer explicit featuredImageUrl, else mapped image by id/title, else default
+  const imageSrc =
+    item.featuredImageUrl ||
+    resolveServiceImage(item.id, item.title) ||
+    '/images/services/DTMP.jpg';
   
   return <div className="flex flex-col min-h-[340px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200" onClick={onQuickView}>
       {/* Featured Image */}
       <div className="relative h-48 bg-gray-200 overflow-hidden">
         <img 
-          src={getFeaturedImageUrl()} 
+          src={imageSrc}
           alt={item.title}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -98,21 +93,21 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       </div>
       
       {/* Card Header with fixed height for title and provider */}
-      <div className="px-4 py-5 flex-grow flex flex-col">
-        <div className="flex items-start mb-5">
+      <div className="px-4 pt-3 pb-2 flex-grow flex flex-col">
+        <div className="flex items-start mb-1">
           <img src={item.provider.logoUrl} alt={`${item.provider.name} logo`} className="h-12 w-12 object-contain rounded-md flex-shrink-0 mr-3" />
-          <div className="flex-grow min-h-[72px] flex flex-col justify-center">
-            <h3 className="font-bold text-gray-900 line-clamp-2 min-h-[48px] leading-snug">
+          <div className="flex-grow flex flex-col">
+            <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight" style={{ margin: 0, lineHeight: 1.15 }}>
               {item.title}
             </h3>
-            <p className="text-sm text-gray-500 min-h-[20px] mt-1">
+            <p className="text-sm text-gray-500 mt-0.5" style={{ marginTop: 2, marginBottom: 0 }}>
               {item.provider.name}
             </p>
           </div>
         </div>
         {/* Description with consistent height */}
-        <div className="mb-5">
-          <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px] leading-relaxed">
+        <div className="mb-2" style={{ marginTop: 4 }}>
+          <p className="text-sm text-gray-600 line-clamp-2 leading-snug" style={{ margin: 0 }}>
             {item.description}
           </p>
         </div>
@@ -140,7 +135,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         </div>
       </div>
       {/* Card Footer - with two buttons */}
-      <div className="mt-auto border-t border-gray-100 p-4 pt-5">
+      <div className="mt-auto border-t border-gray-100 px-4 py-2.5">
         <div className="flex justify-between gap-2">
           <button onClick={handleViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap min-w-[120px] flex-1 ${type === 'non-financial' ? 'bg-white border' : 'text-blue-600 bg-white border border-blue-600 hover:bg-blue-50'}`} style={type === 'non-financial' ? { color: '#1A2E6E', borderColor: '#1A2E6E' } : {}} onMouseEnter={(e) => { if (type === 'non-financial') e.currentTarget.style.backgroundColor = '#f0f4f8'; }} onMouseLeave={(e) => { if (type === 'non-financial') e.currentTarget.style.backgroundColor = 'white'; }}>
             View Details

@@ -166,7 +166,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           setItem(finalItemData);
           setIsBookmarked(bookmarkedItems.includes(finalItemData.id));
           // Fetch related items
-          let relatedItemsData = [];
+          let relatedItemsData: any[] = [];
           try {
             relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, finalItemData.category || '', finalItemData.provider?.name || '');
           } catch (relatedError) {
@@ -314,6 +314,137 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     if (!tab) return null;
     // Return specific tab content based on tab ID
     switch (tabId) {
+      case 'submit_request':
+        return <div className="space-y-6">
+            <div className="prose max-w-none">
+              <h3 className="text-xl font-bold text-gray-900">Submit Request</h3>
+              <p className="text-gray-700">
+                <span className="font-semibold">Purpose:</span> Guide users on how to create a new IT support ticket.
+              </p>
+              <p className="text-gray-700">
+                This tab is where you log new support requests. Click the “Submit Request” button to open the support form. Note: currently this form opens in a new window (hosted externally); we plan to embed it directly on this page in the future for convenience.
+              </p>
+              <h4 className="text-lg font-semibold text-gray-900 mt-4">Steps to submit a ticket</h4>
+              <ol className="list-decimal pl-5 space-y-2 text-gray-700">
+                <li>
+                  <span className="font-medium">Open the request form:</span> Click the Submit Request button to launch the support form.
+                </li>
+                <li>
+                  <span className="font-medium">Select a category:</span> Choose the most relevant category for your issue (e.g. Hardware, Software, Network) so that your request reaches the right IT team.
+                </li>
+                <li>
+                  <span className="font-medium">Describe the issue:</span> Enter a clear summary and detailed description. Include error messages, impacted accounts, steps taken, and attach screenshots/log files if possible. This helps us diagnose the issue quickly.
+                </li>
+                <li>
+                  <span className="font-medium">Set urgency:</span> Indicate the priority/urgency level (e.g. High/Urgent for critical outages; Normal for routine problems).
+                </li>
+                <li>
+                  <span className="font-medium">Submit the form:</span> Review your entries and click Submit. You’ll receive an email confirmation with a ticket number.
+                </li>
+              </ol>
+              <p className="text-gray-700">
+                After submission, the IT team will acknowledge receipt and follow up with any questions or updates. Providing clear, detailed information (including screenshots and category selection) will speed up resolution.
+              </p>
+            </div>
+            <div>
+              <button
+                id="action-section"
+                className="px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md"
+                style={{ backgroundColor: '#1A2E6E' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1A2E6E')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1A2E6E')}
+                onClick={() => {
+                  const url = (item && (item.requestUrl || item.formUrl)) || '#';
+                  window.open(url, '_blank', 'noopener');
+                }}
+              >
+                Submit Request
+              </button>
+            </div>
+          </div>;
+      case 'self_service_faq':
+        return <div className="space-y-6">
+            <div className="prose max-w-none">
+              <h3 className="text-xl font-bold text-gray-900">Self-Service & FAQs</h3>
+              <p className="text-gray-700">
+                <span className="font-semibold">Purpose:</span> Offer troubleshooting tips, common fixes, and resources so you can often resolve issues without submitting a ticket.
+              </p>
+              <p className="text-gray-700">
+                Before submitting a ticket, you may find answers to common problems through our self-help resources. In the meantime, here are quick tips for frequent issues:
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                <li>
+                  <span className="font-medium">Account and Password Issues:</span> Confirm you’re using the correct DQ credentials. If you’re locked out or forgot your password, use the password reset tool (or contact IT for a reset). Verify that your DQ account is active.
+                </li>
+                <li>
+                  <span className="font-medium">Network & Connectivity:</span> Check cables and Wi‑Fi, restart your device, and ensure VPN is connected for off‑site access. If others also can’t connect, it may be a broader outage.
+                </li>
+                <li>
+                  <span className="font-medium">Software Errors or Crashes:</span> Restart the app and your computer, ensure updates are installed, and try reinstalling or using a different device if needed.
+                </li>
+                <li>
+                  <span className="font-medium">Hardware & Peripherals:</span> Confirm power and connections; check drivers. For printers/scanners, check paper/ink and network settings.
+                </li>
+                <li>
+                  <span className="font-medium">Microsoft Teams and Email:</span> Sign out/in, try the web version, check Office 365 service status, and ensure your DQ license is active and you’re on the corporate network or VPN.
+                </li>
+                <li>
+                  <span className="font-medium">General Tips:</span> A simple restart often resolves minor glitches. Consider whether a recent update/installation changed behavior.
+                </li>
+              </ul>
+              <p className="text-gray-700">
+                If these steps don’t resolve your issue, please use the Submit Request tab to contact IT. Provide details of what you’ve already tried when submitting a ticket.
+              </p>
+            </div>
+          </div>;
+      case 'contact_sla':
+        return <div className="space-y-6">
+            <div className="prose max-w-none">
+              <h3 className="text-xl font-bold text-gray-900">Contact & SLAs</h3>
+              <p className="text-gray-700">
+                <span className="font-semibold">Purpose:</span> Provide support contact methods, hours of operation, and expected response times (SLAs).
+              </p>
+              <h4 className="text-lg font-semibold text-gray-900 mt-4">Support Hours</h4>
+              <p className="text-gray-700">
+                Monday–Friday, 9:00 AM to 5:00 PM (DQ business days). Outside these hours, responses may be delayed unless the issue is critical.
+              </p>
+              <h4 className="text-lg font-semibold text-gray-900 mt-4">How to Contact</h4>
+              <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                <li>
+                  <span className="font-medium">Ticket/Email (Preferred):</span> Submit a request via the form or email it-support@dq.com for non‑urgent issues.
+                </li>
+                <li>
+                  <span className="font-medium">Phone/Chat (Urgent):</span> For emergencies (e.g., a system-wide outage), call (123) 456‑7890 or message the IT Support group in Microsoft Teams.
+                </li>
+              </ul>
+              <h4 className="text-lg font-semibold text-gray-900 mt-4">Service Levels (SLAs)</h4>
+              <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                <li>
+                  <span className="font-medium">Acknowledgment:</span> Ticket acknowledgment typically within minutes.
+                </li>
+                <li>
+                  <span className="font-medium">First Response:</span> For routine issues, initial response within about one business day (often within an hour for standard problems).
+                </li>
+                <li>
+                  <span className="font-medium">Resolution Time:</span> Varies based on complexity; we will keep you updated and resolve high‑priority issues as quickly as possible.
+                </li>
+                <li>
+                  <span className="font-medium">Escalation:</span> Tickets requiring specialist or higher‑level support are escalated appropriately; we’ll communicate any escalation or need for additional information.
+                </li>
+              </ul>
+              <h4 className="text-lg font-semibold text-gray-900 mt-4">Scope & Eligibility</h4>
+              <p className="text-gray-700">
+                Support covers DQ‑managed systems for DQ associates. Personal devices or external services are not supported. Please use your DQ login or email when contacting support.
+              </p>
+            </div>
+          </div>;
+      case 'required_documents':
+        return <div className="space-y-6">
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Required Documents</h3>
+              <p className="text-gray-700">No required documents.</p>
+            </div>
+          </div>;
       case 'about':
         return <div className="space-y-6">
             <p className="text-gray-600 text-lg mb-6">
