@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { MarketplacePage } from '../../components/marketplace/MarketplacePage';
 import MarketplaceDetailsPage from './MarketplaceDetailsPage';
 import ActivitiesPage from './ActivitiesPage';
@@ -19,7 +19,7 @@ const coursePromoCards = [{
   title: 'Need expert advice?',
   description: 'Connect with industry experts and get personalized guidance.',
   icon: <Briefcase size={24} className="text-white" />,
-  path: '/marketplace/non-financial',
+  path: '/it-systems-support',
   gradientFrom: 'from-purple-600',
   gradientTo: 'to-pink-500'
 }];
@@ -37,7 +37,7 @@ const financialPromoCards = [{
   title: 'Need expert advice?',
   description: 'Connect with industry experts and get personalized guidance.',
   icon: <Briefcase size={24} className="text-white" />,
-  path: '/marketplace/non-financial',
+  path: '/it-systems-support',
   gradientFrom: 'from-purple-600',
   gradientTo: 'to-pink-500'
 }];
@@ -109,8 +109,8 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/financial" element={<MarketplacePage marketplaceType="financial" title={financialConfig.title} description={financialConfig.description} promoCards={financialPromoCards} />} />
       <Route path="/financial/:itemId" element={<MarketplaceDetailsPage marketplaceType="financial" bookmarkedItems={bookmarkedItems.financial} onToggleBookmark={itemId => handleToggleBookmark('financial', itemId)} />} />
       {/* Non-Financial Services Marketplace */}
-      <Route path="/non-financial" element={<MarketplacePage marketplaceType="non-financial" title={nonFinancialConfig.title} description={nonFinancialConfig.description} promoCards={nonFinancialPromoCards} />} />
-      <Route path="/non-financial/:itemId" element={<MarketplaceDetailsPage marketplaceType="non-financial" bookmarkedItems={bookmarkedItems['non-financial']} onToggleBookmark={itemId => handleToggleBookmark('non-financial', itemId)} />} />
+      <Route path="/non-financial" element={<Navigate to="/it-systems-support" replace />} />
+      <Route path="/non-financial/:itemId" element={<Navigate to="/it-systems-support" replace />} />
       {/* Knowledge Hub Marketplace */}
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
       <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />

@@ -70,6 +70,12 @@ export const ServiceQuickViewModal: React.FC<ServiceQuickViewModalProps> = ({
         return 'Marketplace';
     }
   };
+  const getBreadcrumbLink = () => {
+    if (marketplaceType === 'non-financial') {
+      return '/it-systems-support';
+    }
+    return `/marketplace/${marketplaceType}`;
+  };
   return <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div ref={modalRef} className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
@@ -101,7 +107,7 @@ export const ServiceQuickViewModal: React.FC<ServiceQuickViewModalProps> = ({
               <li>
                 <div className="flex items-center">
                   <ChevronRightIcon size={14} className="text-gray-400" />
-                  <a href={`/marketplace/${marketplaceType}`} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2 text-sm">
+                  <a href={getBreadcrumbLink()} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2 text-sm">
                     {getBreadcrumbTitle()}
                   </a>
                 </div>

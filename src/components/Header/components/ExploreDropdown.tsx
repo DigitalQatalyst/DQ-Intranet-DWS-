@@ -24,28 +24,28 @@ const marketplaces: Marketplace[] = [
     name: 'IT & Systems Support',
     description: 'Helpdesk, access requests, device & app support.',
     icon: BuildingIcon,
-    href: '/marketplace/non-financial',
+    href: '/it-systems-support',
   },
   {
     id: 'finance',
     name: 'HR & Finance Services',
     description: 'Leave, payroll, benefits, and reimbursements.',
     icon: CreditCardIcon,
-    href: '/marketplace/financial',
+    href: '/hr-finance-services',
   },
   {
     id: 'media',
     name: 'Facilities & Logistics',
     description: 'Office access, seating, travel, and logistics.',
     icon: NewspaperIcon,
-    href: '/marketplace/media',
+    href: '/facilities-logistics',
   },
   {
     id: 'community',
     name: 'Associates Directory',
     description: 'Find people, teams, and contacts across DQ.',
     icon: UsersIcon,
-    href: '/marketplace/community',
+    href: '/associates-directory',
   },
   {
     id: 'course',
@@ -59,28 +59,28 @@ const marketplaces: Marketplace[] = [
     name: 'Certifications & Onboarding',
     description: 'Mandatory training and new associate onboarding.',
     icon: TrendingUpIcon,
-    href: '/marketplace/investment',
+    href: '/certifications-onboarding',
   },
   {
     id: 'calendar',
     name: 'Training Materials',
     description: 'Guides, playbooks, and how-to resources.',
     icon: CalendarIcon,
-    href: '/marketplace/calendar',
+    href: '/training-materials',
   },
   {
     id: 'opportunity',
     name: 'News & Announcements',
     description: 'Company updates and internal notices.',
     icon: SparklesIcon,
-    href: '/marketplace/opportunities',
+    href: '/news-announcements',
   },
   {
     id: 'asset-library',
     name: 'Asset Library',
     description: 'Shared design, deployment and marketing artefacts.',
     icon: FileText,
-    href: '/marketplace/asset-library',
+    href: '/asset-library',
   },
 ];
 
@@ -168,7 +168,7 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
     <div className="relative" ref={dropdownRef}>
       <button
         ref={buttonRef}
-        className={`flex items-center text-white hover:text-dq-coral transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 rounded-md px-2 py-1 ${
+        className={`flex items-center text-white hover:text-[#FF874F] hover:bg-white/10 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 rounded-md px-2 py-1 ${
           isCompact ? 'text-sm' : ''
         }`}
         onClick={() => setIsOpen(!isOpen)}

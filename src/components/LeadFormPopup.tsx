@@ -170,7 +170,7 @@ export default function LeadFormPopup() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="lead-form-title"
-        className="relative z-[101] w-full max-w-[720px] rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 p-6 md:p-8 opacity-0 scale-95 translate-y-2 transition-all duration-200 ease-out"
+        className="relative z-[101] w-full max-w-[720px] rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 p-6 md:p-8 opacity-0 scale-95 translate-y-2 transition-all duration-200 ease-out max-h-[90vh] overflow-y-auto"
         data-open={popupState}
         style={{
           opacity: popupState === "open" ? 1 : 0,

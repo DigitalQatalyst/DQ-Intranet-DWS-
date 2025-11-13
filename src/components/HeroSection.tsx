@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Send, ChevronDown, ArrowRight, Users } from 'lucide-react';
 import { AnimatedText, FadeInUpOnScroll, StaggeredFadeIn } from './AnimationUtils';
 import { scrollToReadyMove } from '../utils/scroll';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './Header';
 interface HeroSectionProps {
   'data-id'?: string;
@@ -17,18 +17,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     ? onboardingPath
     : `/signin?redirect=${encodeURIComponent(onboardingPath)}`;
   const [prompt, setPrompt] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const handleSubmitPrompt = () => {
-    if (!prompt.trim()) return;
-    setIsProcessing(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      setPrompt('');
-      // Here you would typically handle the actual AI response
-    }, 1500);
+  const navigate = useNavigate();
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
+    navigate(`/search?query=${encodeURIComponent(trimmed)}`);
+    setPrompt('');
   };
   const scrollToMarketplaces = () => {
     const marketplacesSection = document.getElementById('marketplaces-section');
@@ -63,7 +60,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     }}></div>
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight overflow-hidden">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-snug md:leading-[1.1] lg:leading-[1.1]">
             
               <AnimatedText
                 text="Your Digital Workspace"
@@ -81,20 +78,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         <FadeInUpOnScroll delay={1.2} className="w-full max-w-3xl mb-10">
           <div className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 ${isSearchFocused ? 'shadow-xl transform scale-105' : ''}`}>
             <div className="p-2 md:p-3">
-              <div className="flex items-center">
+              <form className="flex items-center" onSubmit={handleSubmit}>
                 {/* Input field */}
                 <div className="flex-grow relative">
-                  <input type="text" placeholder="Find tools, policies, or service requests…" className={`w-full py-3 px-4 outline-none text-gray-700 rounded-lg bg-gray-50 transition-all duration-300 ${isSearchFocused ? 'bg-white' : ''}`} value={prompt} onChange={e => setPrompt(e.target.value)} onFocus={() => setIsSearchFocused(true)} onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)} onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    handleSubmitPrompt();
-                  }
-                }} />
+                  <input type="text" placeholder="Find tools, policies, or service requests…" className={`w-full py-3 px-4 outline-none text-gray-700 rounded-lg bg-gray-50 transition-all duration-300 ${isSearchFocused ? 'bg-white' : ''}`} value={prompt} onChange={e => setPrompt(e.target.value)} onFocus={() => setIsSearchFocused(true)} onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)} />
                 </div>
                 {/* Submit button */}
-                <button onClick={handleSubmitPrompt} disabled={isProcessing || !prompt.trim()} className={`ml-2 p-3 rounded-lg flex items-center justify-center transition-all ${isProcessing || !prompt.trim() ? 'bg-gray-200 cursor-not-allowed text-gray-400' : 'bg-[image:var(--dq-cta-gradient)] hover:brightness-105 text-white'}`}>
-                  <Send size={20} className={isProcessing ? 'animate-pulse' : ''} />
+                <button type="submit" aria-label="Search" disabled={!prompt.trim()} className={`ml-2 p-3 rounded-lg flex items-center justify-center transition-all ${!prompt.trim() ? 'bg-gray-200 cursor-not-allowed text-gray-400' : 'bg-[image:var(--dq-cta-gradient)] hover:brightness-105 text-white'}`}>
+                  <Send size={20} />
                 </button>
-              </div>
+              </form>
             </div>
             {/* Example prompts with staggered animation */}
             <div className={`bg-gray-50 px-4 py-3 border-t border-gray-100 transition-all duration-500 ease-in-out ${showSuggestions ? 'opacity-100 max-h-24' : 'opacity-0 max-h-0 overflow-hidden'}`}>

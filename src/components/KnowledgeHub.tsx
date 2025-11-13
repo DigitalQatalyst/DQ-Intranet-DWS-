@@ -12,6 +12,8 @@ interface NewsItem {
   category: string;
   imageUrl: string;
   source?: string;
+  slug?: string;
+  detailPath?: string;
 }
 
 interface Event {
@@ -31,6 +33,7 @@ interface Resource {
   description: string;
   icon: React.ReactNode;
   downloadUrl?: string;
+  link?: string;
   fileSize?: string;
   downloadCount?: number;
   lastUpdated?: string;
@@ -316,17 +319,7 @@ const KnowledgeHubContent = ({
   
   // Add this function to handle event registration
   const handleEventRegister = (event: Event) => {
-    // Here you can implement what happens when someone registers for an event
-    // For example, open a registration modal, navigate to a registration page, etc.
-    console.log('Registering for event:', event.title);
-    
-    // Example: Open a registration URL if available
-    // if (event.registrationUrl) {
-    //   window.open(event.registrationUrl, '_blank');
-    // }
-    
-    // Or show a confirmation message
-    alert(`Registration for "${event.title}" will be available soon!`);
+    navigate(`/event-coming-soon?title=${encodeURIComponent(event.title)}`);
   };
 
   // Add function to handle resource downloads
@@ -357,17 +350,18 @@ const KnowledgeHubContent = ({
 
   // Add function to handle resource access
   const handleResourceAccess = (resource: Resource) => {
-    console.log('Accessing resource:', resource.title);
-    
-    if (resource.isExternal) {
-      // For external resources, open in new tab
-      if (resource.downloadUrl) {
-        window.open(resource.downloadUrl, '_blank');
-      }
-    } else {
-      // For internal resources, navigate to detail page
-      navigate(`/resources/${resource.id}`);
+    if (resource.link && resource.link !== '#') {
+      window.open(resource.link, '_blank', 'noopener,noreferrer');
+      return;
     }
+    if (resource.isExternal && resource.downloadUrl && resource.downloadUrl !== '#') {
+      window.open(resource.downloadUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    navigate(`/resource-coming-soon?title=${encodeURIComponent(resource.title)}`);
+  };
+  const handleNewsReadMore = (news: NewsItem) => {
+    navigate(`/insight-coming-soon?title=${encodeURIComponent(news.title)}`);
   };
   
   return <div className="bg-gray-50 py-16">
@@ -400,7 +394,7 @@ const KnowledgeHubContent = ({
               tags: [item.category],
               date: item.date,
               source: item.source
-            }} onQuickView={() => navigate(`/news/${item.id}`)} />
+            }} onQuickView={() => navigate(`/news/${item.id}`)} onReadMore={() => handleNewsReadMore(item)} />
                 </div>)}
             </div>}
           {/* Events Tab */}

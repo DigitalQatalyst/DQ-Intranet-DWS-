@@ -13,25 +13,25 @@ const marketplaces = [{
   name: 'IT & Systems Support',
   description: 'Helpdesk, access requests, device & app support.',
   icon: BuildingIcon,
-  href: '/marketplace/non-financial'
+  href: '/it-systems-support'
 }, {
   id: 'finance',
   name: 'HR & Finance Services',
   description: 'Leave, payroll, benefits, and reimbursements.',
   icon: CreditCardIcon,
-  href: '/marketplace/finance'
+  href: '/hr-finance-services'
 }, {
   id: 'media',
   name: 'Facilities & Logistics',
   description: 'Office access, seating, travel, and logistics.',
   icon: NewspaperIcon,
-  href: '/marketplace/media'
+  href: '/facilities-logistics'
 }, {
   id: 'community',
   name: 'Associates Directory',
   description: 'Find people, teams, and contacts across DQ.',
   icon: UsersIcon,
-  href: '/marketplace/community'
+  href: '/associates-directory'
 }, {
   id: 'course',
   name: 'DQ LMS Courses',
@@ -43,19 +43,19 @@ const marketplaces = [{
   name: 'Certifications & Onboarding',
   description: 'Mandatory training and new associate onboarding.',
   icon: TrendingUpIcon,
-  href: '/marketplace/investment'
+  href: '/certifications-onboarding'
 }, {
   id: 'calendar',
   name: 'Training Materials',
   description: 'Guides, playbooks, and how-to resources.',
   icon: CalendarIcon,
-  href: '/marketplace/calendar'
+  href: '/training-materials'
 }, {
   id: 'opportunity',
   name: 'News & Announcements',
   description: 'Company updates and internal notices.',
   icon: SparklesIcon,
-  href: '/marketplace/opportunities'
+  href: '/news-announcements'
 }];
 export function MobileDrawer({
   isCompact = false,

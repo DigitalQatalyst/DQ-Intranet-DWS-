@@ -22,8 +22,7 @@ import {
   GraduationCap,
   BarChart,
   CircleDot,
-  ClipboardList,
-  ChevronRight
+  ClipboardList
 } from 'lucide-react';
 import { AnimatedCounter, FadeInUpOnScroll, useInView } from './AnimationUtils';
 import ServiceCarousel from './marketplace/ServiceCarousel';
@@ -212,11 +211,10 @@ interface CategoryHeaderProps {
 }
 
 const CategoryHeader: React.FC<CategoryHeaderProps> = ({ icon, title, count = null }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const [ref] = useInView({ threshold: 0.1 });
 
   return (
-    <div className="mb-6" ref={ref} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+    <div className="mb-6" ref={ref}>
       <div className="flex items-center mb-2">
         <div className="w-10 h-10 rounded-full bg-dq-navy/10 flex items-center justify-center mr-3 text-dq-navy">
           {icon}
@@ -261,7 +259,7 @@ export const HomePage: React.FC = () => {
         },
         {
           id: 'dq-guideline-center-dco',
-          title: 'DQ Guideline Centre (DCO Working)',
+          title: 'DQ DCO Guideline ',
           description: 'Explore how DQ operates — policies, workflows, and guidelines that drive daily operations.',
           icon: <BookIcon />,
           path: '#',
@@ -269,7 +267,7 @@ export const HomePage: React.FC = () => {
         },
         {
           id: 'dq-guideline-center-dbp',
-          title: 'DQ Guideline Centre (DBP Build)',
+          title: 'DQ DBP Guideline ',
           description: 'Explore how DQ develops — standards, templates, and processes for DBP development.',
           icon: <BookIcon />,
           path: '#',
@@ -471,10 +469,10 @@ export const HomePage: React.FC = () => {
         'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
     },
 
-    // ROW 3 — Indigo gradient
+    // ROW 3 — Navy gradient
     'Collaboration & Communities': {
       cardClasses:
-        'bg-[linear-gradient(90deg,rgba(25,25,112,0.95)0%,rgba(25,25,112,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.95)0%,rgba(3,15,53,0.80)100%)] border border-[rgba(255,255,255,0.18)] text-white',
       headingClass: 'text-white',
       descriptionClass: 'text-white/90',
       iconClass: 'text-[#030F35]',
@@ -484,7 +482,7 @@ export const HomePage: React.FC = () => {
       hoverOverlayClass: 'bg-white/10',
       iconWrapperClass: 'w-10 h-10',
       disabledCardClasses:
-        'bg-[linear-gradient(90deg,rgba(25,25,112,0.65)0%,rgba(25,25,112,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
+        'bg-[linear-gradient(90deg,rgba(3,15,53,0.65)0%,rgba(3,15,53,0.55)100%)] border border-[rgba(255,255,255,0.12)] text-white/50 cursor-not-allowed'
     },
 
     // ROW 4 — Navy gradient (matching Learning & Enablement)

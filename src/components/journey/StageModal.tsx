@@ -3,6 +3,7 @@ import type { MouseEvent as ReactMouseEvent } from "react";
 import { ArrowRight, LayoutGrid, List as ListIcon, X } from "lucide-react";
 import type { DwsStage, StageService, StageServiceType } from "../../data/dwsStages";
 import { stageFilters } from "../../data/dwsStages";
+import { useNavigate } from "react-router-dom";
 
 type StageFilter = (typeof stageFilters)[number];
 type ViewMode = "grid" | "list";
@@ -28,6 +29,7 @@ const StageModal = ({ stage, isOpen, onClose }: StageModalProps) => {
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   const [activeFilter, setActiveFilter] = useState<StageFilter>("All");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isOpen) {
@@ -114,6 +116,10 @@ const StageModal = ({ stage, isOpen, onClose }: StageModalProps) => {
     }
   };
 
+  const handleExploreService = (serviceName: string) => {
+    navigate(`/service-coming-soon?service=${encodeURIComponent(serviceName)}`);
+  };
+
   const renderServiceCard = (service: StageService) => (
   <div
     key={service.id}
@@ -130,12 +136,13 @@ const StageModal = ({ stage, isOpen, onClose }: StageModalProps) => {
         <span>{service.provider}</span>
         <ArrowRight className="h-4 w-4 text-[#FB5535]" aria-hidden="true" />
       </div>
-      <a
-        href={service.href}
+      <button
+        type="button"
+        onClick={() => handleExploreService(service.name)}
         className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#030F35] px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-[#030F35]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#030F35]"
       >
         Explore Service
-      </a>
+      </button>
     </div>
   );
 
@@ -158,12 +165,13 @@ const StageModal = ({ stage, isOpen, onClose }: StageModalProps) => {
         <p className="mt-2 text-sm leading-relaxed text-slate-600">{service.description}</p>
       </div>
       <div className="shrink-0">
-        <a
-          href={service.href}
+        <button
+          type="button"
+          onClick={() => handleExploreService(service.name)}
           className="inline-flex items-center justify-center rounded-lg bg-[#030F35] px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-[#030F35]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#030F35]"
         >
           Open
-        </a>
+        </button>
       </div>
     </div>
   );
