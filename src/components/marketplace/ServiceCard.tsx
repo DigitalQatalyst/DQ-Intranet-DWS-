@@ -95,7 +95,6 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       {/* Card Header with fixed height for title and provider */}
       <div className="px-4 pt-3 pb-2 flex-grow flex flex-col">
         <div className="flex items-start mb-1">
-          <img src={item.provider.logoUrl} alt={`${item.provider.name} logo`} className="h-12 w-12 object-contain rounded-md flex-shrink-0 mr-3" />
           <div className="flex-grow flex flex-col">
             <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight" style={{ margin: 0, lineHeight: 1.15 }}>
               {item.title}

@@ -912,7 +912,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             <div className="flex flex-col items-start max-w-3xl py-8">
               {/* Provider */}
               <div className="flex items-center mb-3">
-                <img src={provider.logoUrl} alt={`${provider.name} logo`} className="h-10 w-10 object-contain mr-3 rounded-md" />
+                {/* Provider logo - commented out, uncomment to restore */}
+                {/* <img src={provider.logoUrl} alt={`${provider.name} logo`} className="h-10 w-10 object-contain mr-3 rounded-md" /> */}
                 <span className="text-gray-600 font-medium">
                   {provider.name}
                 </span>
