@@ -209,21 +209,26 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
         postData.event_date = eventDateTime;
         postData.event_location = eventLocation.trim() || null;
       }
+      // Use community_posts table instead of posts
       const {
         data: post,
         error: postError
-      } = await supabase.from('posts').insert(postData).select().single();
+      } = await supabase.from('community_posts').insert(postData).select().single();
       if (postError) throw postError;
 
-      // Create related records
+      // Create related records for media posts
       if (postType === 'media' && mediaFile) {
-        await supabase.from('media_files').insert({
+        // Use community_assets table for media files
+        await supabase.from('community_assets').insert({
           post_id: post.id,
           user_id: user.id,
-          file_url: mediaFile.url,
-          file_type: mediaFile.type,
-          caption: mediaFile.caption || null,
-          display_order: 0
+          community_id: targetCommunityId,
+          asset_type: mediaFile.type.startsWith('image/') ? 'image' : 
+                     mediaFile.type.startsWith('video/') ? 'video' : 'document',
+          storage_path: mediaFile.url, // Will be updated when proper storage is implemented
+          file_name: mediaFile.caption || 'uploaded-file',
+          url: mediaFile.url,
+          mime_type: mediaFile.type
         });
       }
       if (postType === 'poll') {

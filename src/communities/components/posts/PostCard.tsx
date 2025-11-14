@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Heart, MessageSquare, Share2, Calendar, MapPin } from 'lucide-react';
+import { CommunityReactions } from '@/communities/components/post/CommunityReactions';
+import { CommunityComments } from '@/communities/components/post/CommunityComments';
+import { useAuth } from '@/communities/contexts/AuthProvider';
 
 interface Post {
   id: string;
@@ -26,10 +29,13 @@ interface Post {
 interface PostCardProps {
   post: Post;
   onActionComplete?: () => void;
+  isMember?: boolean;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onActionComplete, isMember = false }: PostCardProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showComments, setShowComments] = useState(false);
 
   const getPostTypeBadge = (type: string) => {
     const badges = {
@@ -113,24 +119,41 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Post Actions */}
       <div className="px-6 py-4 border-t border-gray-100">
-        <div className="flex items-center space-x-6">
-          <button className="flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors">
-            <Heart className="h-5 w-5" />
-            <span className="text-sm">{post.helpful_count || 0}</span>
-          </button>
-          <button
-            onClick={() => navigate(`/communities/post/${post.id}`)}
-            className="flex items-center space-x-2 text-gray-500 hover:text-dq-navy transition-colors"
-          >
-            <MessageSquare className="h-5 w-5" />
-            <span className="text-sm">{post.comment_count || 0}</span>
-          </button>
-          <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors">
-            <Share2 className="h-5 w-5" />
-            <span className="text-sm">Share</span>
-          </button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            <CommunityReactions
+              postId={post.id}
+              onReactionChange={onActionComplete}
+            />
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="flex items-center space-x-2 text-gray-500 hover:text-dq-navy transition-colors"
+            >
+              <MessageSquare className="h-5 w-5" />
+              <span className="text-sm">{post.comment_count || 0}</span>
+            </button>
+            <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors">
+              <Share2 className="h-5 w-5" />
+              <span className="text-sm">Share</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Comments Section */}
+      {showComments && (
+        <div className="px-6 pb-4">
+          <CommunityComments
+            postId={post.id}
+            communityId={post.community_id}
+            isMember={isMember || false}
+            onCommentAdded={() => {
+              onActionComplete?.();
+              setShowComments(true);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

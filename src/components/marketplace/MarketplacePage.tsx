@@ -153,7 +153,7 @@ const parseFilterValues = (params: URLSearchParams, key: string): string[] =>
     .map((value) => value.trim())
     .filter(Boolean);
 
-// Interface for Supabase event data from upcoming_events view
+// Interface for Supabase event data from upcoming_events view or events_v2 table
 interface UpcomingEventView {
   id: string;
   title: string;
@@ -162,6 +162,8 @@ interface UpcomingEventView {
   end_time: string;
   category: string;
   location: string;
+  location_filter?: string | null; // For filtering (from events_v2 table)
+  department?: string | null; // Department field for filtering (from events_v2 table)
   image_url: string | null;
   meeting_link: string | null;
   is_virtual: boolean;
@@ -230,6 +232,7 @@ interface MarketplaceEvent {
   details?: string[];
   tags: string[];
   imageUrl?: string;
+  department?: string; // Preserve department field for filtering
 }
 
 // Transform Supabase event to marketplace event format
@@ -241,10 +244,11 @@ const transformEventToMarketplace = (event: SupabaseEvent): MarketplaceEvent => 
   let description: string;
   let imageUrl: string | null = null;
   let tags: string[] = [];
+  let department: string | undefined = undefined;
 
   // Check event type and extract data accordingly
   if ('start_time' in event && 'end_time' in event) {
-    // Event from upcoming_events view
+    // Event from upcoming_events view or events_v2 table
     const evt = event as UpcomingEventView;
     startDate = new Date(evt.start_time);
     endDate = new Date(evt.end_time);
@@ -253,6 +257,10 @@ const transformEventToMarketplace = (event: SupabaseEvent): MarketplaceEvent => 
     description = evt.description || "";
     imageUrl = evt.image_url;
     tags = evt.tags || [];
+    // Extract department field if available (from events_v2 table)
+    if ('department' in evt && evt.department) {
+      department = evt.department as string;
+    }
   } else if ('post_type' in event && event.post_type === 'event') {
     // Event from posts table
     const evt = event as PostEventRow;
@@ -321,6 +329,7 @@ const transformEventToMarketplace = (event: SupabaseEvent): MarketplaceEvent => 
     price,
     tags,
     imageUrl: imageUrl || undefined,
+    department, // Preserve department field for filtering
   };
 };
 
@@ -692,10 +701,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
               // Apply department filter (backend)
               // Use exact database column name: department
-              // filtersByCategory['department'] contains option_label values which match option_value in our database
+              // filtersByCategory['department'] contains option.name values which should match database department values
               if (filtersByCategory['department'] && filtersByCategory['department'].length > 0) {
                 const departmentValues = filtersByCategory['department'];
-                // Use these values directly as they match the database option_value
+                // Use these values directly - they should match the database department column values
+                // If loaded from database RPC, opt.id (option_value) is used as option.name
+                // If loaded from config fallback, option.name might need normalization
+                console.log('Applying department filter with values:', departmentValues);
                 eventsQuery = eventsQuery.in('department', departmentValues);
               }
 
@@ -1161,6 +1173,15 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             case 'delivery-mode':
               return item.location?.toLowerCase().includes(filterName.toLowerCase()) || 
                      (filterName.toLowerCase() === 'online' && item.location?.toLowerCase().includes('online'));
+            case 'department':
+              // Department filtering is handled by backend query, but include client-side fallback
+              // Check if item has department property that matches the filter
+              return item.department === filterName || 
+                     (item.department && item.department.toLowerCase() === filterName.toLowerCase());
+            case 'location':
+              // Location filtering is handled by backend query, but include client-side fallback
+              return item.location === filterName || 
+                     (item.location && item.location.toLowerCase() === filterName.toLowerCase());
             case 'cost-type':
               const price = item.price?.toLowerCase() || '';
               if (filterName === 'Free') return price.includes('free') || price === '0';
@@ -1290,8 +1311,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         {/* Current Focus Section and Navigation Tabs - Only for Events */}
         {isEvents && (
           <>
-            {/* Current Focus Section - Commented out */}
-            {/* <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
+            {/* Current Focus Section */}
+            <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="text-xs uppercase text-gray-500 font-medium mb-2">CURRENT FOCUS</div>
@@ -1304,7 +1325,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   Tab overview
                 </button>
               </div>
-            </div> */}
+            </div>
 
             {/* Navigation Tabs */}
             <div className="mb-6">

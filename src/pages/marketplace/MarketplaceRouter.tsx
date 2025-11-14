@@ -13,14 +13,6 @@ const PulsePage = React.lazy(() => import('../pulse/PulsePage').then(m => ({ def
 const PulseDetailPage = React.lazy(() => import('../pulse/PulseDetailPage').then(m => ({ default: m.PulseDetailPage })));
 // Promo cards for events marketplace
 const eventsPromoCards = [{
-  id: 'courses-promo',
-  title: 'Enhance your skills',
-  description: 'Discover courses to enhance your business knowledge.',
-  icon: <Calendar size={24} className="text-white" />,
-  path: '/marketplace/courses',
-  gradientFrom: 'from-green-500',
-  gradientTo: 'to-teal-400'
-}, {
   id: 'finance-promo',
   title: 'Explore funding options',
   description: 'Find financial opportunities and resources to grow your business.',
@@ -149,7 +141,7 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
       <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />
       {/* Events Marketplace */}
-      <Route path="/events" element={<MarketplacePage marketplaceType="events" title={eventsConfig.title} description={eventsConfig.description} promoCards={eventsPromoCards} />} />
+      <Route path="/events" element={<MarketplacePage marketplaceType="events" title={eventsConfig.title} description={eventsConfig.description} promoCards={[]} />} />
       <Route path="/events/:itemId" element={<MarketplaceDetailsPage marketplaceType="events" bookmarkedItems={bookmarkedItems.events} onToggleBookmark={itemId => handleToggleBookmark('events', itemId)} />} />
       {/* Pulse Marketplace */}
       <Route path="/pulse" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><PulsePage /></React.Suspense>} />

@@ -11,6 +11,8 @@ import { Users, UserPlus, UserMinus, AlertCircle, Plus, Settings, Home, ChevronR
 import { toast } from 'sonner';
 import { MemberList } from '@/communities/components/communities/MemberList';
 import { InlineComposer } from '@/communities/components/post/InlineComposer';
+import { CommunityInfoPanel } from '@/communities/components/communities/CommunityInfoPanel';
+import { ActivityFeed } from '@/communities/components/communities/ActivityFeed';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
 import { Label } from '@/communities/components/ui/label';
 import { Input } from '@/communities/components/ui/input';
@@ -257,10 +259,18 @@ export default function Community() {
     // Get user ID (authenticated user or anonymous user)
     const userId = user?.id || getAnonymousUserId();
     
-    const query = supabase.from('memberships').select('id').eq('user_id', userId).eq('community_id', id).maybeSingle();
+    // Check community_members table first, fallback to memberships for compatibility
+    const query = supabase.from('community_members').select('id').eq('user_id', userId).eq('community_id', id).maybeSingle();
     const [data] = await safeFetch(query);
-
-    setIsMember(!!data);
+    
+    // If not found in community_members, check memberships table
+    if (!data) {
+      const query2 = supabase.from('memberships').select('id').eq('user_id', userId).eq('community_id', id).maybeSingle();
+      const [data2] = await safeFetch(query2);
+      setIsMember(!!data2);
+    } else {
+      setIsMember(!!data);
+    }
   };
   const handleJoinLeave = async () => {
     if (!id) return;
@@ -283,22 +293,27 @@ export default function Community() {
       return;
     }
     
-    // Check if already a member
+    // Check if already a member (check both tables for compatibility)
     const { data: existingMembership } = await supabase
-      .from('memberships')
+      .from('community_members')
       .select('id')
       .eq('user_id', userId)
       .eq('community_id', id)
       .maybeSingle();
     
     if (isMember || existingMembership) {
-      // Leave community
-      const query = supabase.from('memberships').delete().match({
+      // Leave community - delete from both tables for compatibility
+      const query1 = supabase.from('community_members').delete().match({
         user_id: userId,
         community_id: id
       });
-      const [, error] = await safeFetch(query);
-      if (error) {
+      const query2 = supabase.from('memberships').delete().match({
+        user_id: userId,
+        community_id: id
+      });
+      const [, error1] = await safeFetch(query1);
+      const [, error2] = await safeFetch(query2);
+      if (error1 && error2) {
         toast.error('Failed to leave community');
       } else {
         toast.success('Left community');
@@ -306,18 +321,25 @@ export default function Community() {
         setMemberCount(prev => Math.max(0, prev - 1));
       }
     } else {
-      // Join community
-      const query = supabase.from('memberships').insert({
+      // Join community - insert into both tables for compatibility
+      const memberData = {
+        user_id: userId,
+        community_id: id,
+        role: 'member'
+      };
+      const query1 = supabase.from('community_members').insert(memberData);
+      const query2 = supabase.from('memberships').insert({
         user_id: userId,
         community_id: id
       });
-      const [, error] = await safeFetch(query);
-      if (error) {
-        if (error.code === '23505') {
+      const [, error1] = await safeFetch(query1);
+      const [, error2] = await safeFetch(query2);
+      if (error1 && error2) {
+        if (error1.code === '23505' || error2.code === '23505') {
           // Duplicate key error - user is already a member
           toast.error('You are already a member of this community');
           setIsMember(true);
-        } else if (error.code === '23503') {
+        } else if (error1.code === '23503' || error2.code === '23503') {
           // Foreign key violation
           toast.error('Invalid community or user');
         } else {
@@ -338,19 +360,19 @@ export default function Community() {
     setPostsLoading(true);
     setPostsError(null);
 
-    // For moderators/admins, query posts table directly to see all statuses
+    // For moderators/admins, query community_posts table directly to see all statuses
     // For regular users, use the view which only shows active posts
     const isModerator =
       user && (user.role === "admin" || user.role === "moderator");
 
-    // Query posts table directly for all users
+    // Query community_posts table directly for all users
     let query = supabase
-      .from("posts")
+      .from("community_posts")
       .select(
         `
         *,
         communities!inner(name),
-        users_local!inner(username, avatar_url)
+        users_local!community_posts_user_id_fkey(username, avatar_url)
       `
       )
       .eq("community_id", id);
@@ -376,12 +398,12 @@ export default function Community() {
       const postIds = data.map((p: any) => p.id);
 
       const { data: reactions } = await supabase
-        .from("reactions")
+        .from("community_reactions")
         .select("post_id, reaction_type")
         .in("post_id", postIds);
 
       const { data: comments } = await supabase
-        .from("comments")
+        .from("community_comments")
         .select("post_id")
         .in("post_id", postIds)
         .eq("status", "active");
@@ -389,7 +411,8 @@ export default function Community() {
       // Count reactions and comments
       const reactionCounts =
         reactions?.reduce((acc: any, r: any) => {
-          if (!acc[r.post_id]) acc[r.post_id] = { helpful: 0, insightful: 0 };
+          if (!acc[r.post_id]) acc[r.post_id] = { like: 0, helpful: 0, insightful: 0 };
+          if (r.reaction_type === "like") acc[r.post_id].like++;
           if (r.reaction_type === "helpful") acc[r.post_id].helpful++;
           if (r.reaction_type === "insightful") acc[r.post_id].insightful++;
           return acc;
@@ -658,12 +681,28 @@ export default function Community() {
           </PageSection>
           {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Posts Feed */}
+            {/* Posts Feed / Activity Feed */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Community Info Panel - Mobile/Tablet */}
+              <div className="lg:hidden">
+                {community && (
+                  <CommunityInfoPanel
+                    community={community}
+                    memberCount={memberCount}
+                    isMember={isMember}
+                    isOwner={isOwner}
+                    isAdmin={isAdmin}
+                    onJoinLeave={handleJoinLeave}
+                    joinLoading={joinLoading}
+                    user={user}
+                  />
+                )}
+              </div>
+
               <PageSection>
                 <SectionHeader
-                  title="Community Posts"
-                  description="Latest discussions and updates"
+                  title="Activity Feed"
+                  description="Posts, comments, polls, surveys, and events"
                 />
                 {/* Inline Composer - Only for members */}
                 {user && isMember && (
@@ -674,7 +713,7 @@ export default function Community() {
                     />
                   </SectionContent>
                 )}
-                {/* Posts List */}
+                {/* Activity Feed */}
                 <SectionContent className={user && isMember ? "pt-4" : ""}>
                   {postsLoading ? (
                     <div className="space-y-4">
@@ -735,6 +774,7 @@ export default function Community() {
                           key={post.id}
                           post={post}
                           onActionComplete={handlePostCreated}
+                          isMember={isMember}
                         />
                       ))}
                     </div>
@@ -743,11 +783,25 @@ export default function Community() {
               </PageSection>
             </div>
             {/* Sidebar Column */}
-            {/* Main content container with vertical spacing */}
             <div className="space-y-6 mb-10">
+              {/* Community Info Panel - Desktop */}
+              <div className="hidden lg:block">
+                {community && (
+                  <CommunityInfoPanel
+                    community={community}
+                    memberCount={memberCount}
+                    isMember={isMember}
+                    isOwner={isOwner}
+                    isAdmin={isAdmin}
+                    onJoinLeave={handleJoinLeave}
+                    joinLoading={joinLoading}
+                    user={user}
+                  />
+                )}
+              </div>
+
               {/* Member List Section */}
               <PageSection>
-                {/* Section header with title and 'View All' button */}
                 <SectionHeader
                   title="Community Members"
                   actions={
@@ -761,59 +815,8 @@ export default function Community() {
                     </Button>
                   }
                 />
-                {/* Member list with pagination */}
                 <SectionContent className="p-0">
-                  {/* Display first 5 members, hides the section header */}
                   <MemberList communityId={id!} limit={5} hideHeader={true} />
-                </SectionContent>
-              </PageSection>
-              {/* Community Information Section */}
-              <PageSection>
-                <SectionHeader title="About this Community" />
-                <SectionContent>
-                  <div className="space-y-4">
-                    {/* Community Category */}
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Category
-                      </p>
-                      <p className="text-sm text-gray-700 font-medium">
-                        {community.category}
-                      </p>
-                    </div>
-                    {/* Community Creation Date */}
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Created
-                      </p>
-                      <p className="text-sm text-gray-700 font-medium">
-                        {format(new Date(community.created_at), "MMMM d, yyyy")}
-                      </p>
-                    </div>
-                    {/* Member Count */}
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Members
-                      </p>
-                      <p className="text-sm text-gray-700 font-medium">
-                        {memberCount} members
-                      </p>
-                    </div>
-                    {/* Admin/owner only settings button */}
-                    {(isOwner || isAdmin) && (
-                      <div className="pt-4 border-t border-gray-200">
-                        <Button
-                          as={Link}
-                          to={`/community/${id}/settings`}
-                          variant="outline"
-                          className="w-full justify-center"
-                        >
-                          <Settings className="h-4 w-4 mr-2" />
-                          Manage Community
-                        </Button>
-                      </div>
-                    )}
-                  </div>
                 </SectionContent>
               </PageSection>
             </div>

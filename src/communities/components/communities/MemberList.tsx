@@ -33,7 +33,26 @@ export function MemberList({
   const fetchMembers = async () => {
     setLoading(true);
     setError(null);
-    const query = supabase.from('memberships').select(`
+    
+    // Try community_members table first, fallback to memberships for compatibility
+    let query = supabase.from('community_members').select(`
+        id,
+        user_id,
+        joined_at,
+        users_local!community_members_user_id_fkey (
+          id,
+          username,
+          avatar_url
+        )
+      `).eq('community_id', communityId).order('joined_at', {
+      ascending: false
+    }).limit(limit);
+    
+    let [data, err] = await safeFetch(query);
+    
+    // Fallback to memberships table if community_members doesn't exist or fails
+    if (err && (err.message?.includes('does not exist') || err.message?.includes('permission denied'))) {
+      query = supabase.from('memberships').select(`
         id,
         user_id,
         joined_at,
@@ -43,9 +62,11 @@ export function MemberList({
           avatar_url
         )
       `).eq('community_id', communityId).order('joined_at', {
-      ascending: false
-    }).limit(limit);
-    const [data, err] = await safeFetch(query);
+        ascending: false
+      }).limit(limit);
+      [data, err] = await safeFetch(query);
+    }
+    
     if (err) {
       setError('Failed to load members');
       setLoading(false);
