@@ -1023,7 +1023,8 @@ export const getTabSpecificFilters = (tabId?: string): FilterCategoryConfig[] =>
       title: 'Device Ownership',
       options: [
         { id: 'company_device', name: 'Company Device' },
-        { id: 'personal_device', name: 'Personal Device (BYOD)' }
+        { id: 'personal_device', name: 'Personal Device (BYOD)' },
+        { id: 'fyod', name: 'FYOD' }
       ]
     }
   ];
