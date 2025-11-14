@@ -996,10 +996,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         {isServicesCenter && (
           <div className="mb-6">
             <div className="mb-4 p-4 rounded-lg shadow-sm" style={{ backgroundColor: '#FFFFFF' }}>
-              <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Current focus</p>
-                  <p className="text-lg font-semibold text-gray-900 mb-2">
+                  <p className="text-lg font-semibold text-gray-900 mb-1">
                     {activeServiceTab === 'technology' && 'Technology'}
                     {activeServiceTab === 'business' && 'Business'}
                     {activeServiceTab === 'digital_worker' && 'Digital Worker'}
@@ -1161,7 +1161,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             {isGuides ? (
               <GuidesFilters facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
             ) : (
-              <div className="bg-white rounded-lg shadow p-4 sticky top-24">
+              <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto filter-sidebar-scroll">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Filters</h2>
                   {(isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
