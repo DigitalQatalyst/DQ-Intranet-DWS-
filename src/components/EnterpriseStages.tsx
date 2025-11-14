@@ -227,7 +227,10 @@ const EnterpriseStages: React.FC = () => {
           className="scrollbar-hide flex gap-6 overflow-x-auto pb-6 md:grid md:grid-cols-2 md:overflow-x-visible lg:grid-cols-3"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {pages[page].map((stage) => {
+          {(page === 1 && pages[1].length === 2
+            ? [...pages[1]].reverse() // Swap order: Inspire (order 8) first, then Influence (order 7)
+            : pages[page]
+          ).map((stage) => {
             const stageIndex = stage.order - 1;
             const icon = iconMap[stage.id] ?? (
               <Sparkles size={24} className="transition-colors duration-300" />

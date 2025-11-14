@@ -214,14 +214,7 @@ const CallToAction: React.FC = () => {
   });
   const [contactFormSuccess, setContactFormSuccess] = useState(false);
   const handleLeadApplyCTA = () => {
-    const leadSection = document.getElementById('lead-apply');
-    if (leadSection) {
-      leadSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-    window.dispatchEvent(new Event("open-lead-form"));
+    navigate('/discover/lead');
   };
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();

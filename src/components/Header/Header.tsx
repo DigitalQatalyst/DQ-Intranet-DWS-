@@ -126,6 +126,7 @@ export function Header({
                 {/* Desktop CTAs */}
                 <div className="hidden lg:flex items-center space-x-3">
                   <button
+                    onClick={() => navigate('/discover/lead')}
                     className={`px-4 py-2 text-white border border-white/40 rounded-md hover:bg-white/10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
                       isSticky ? 'text-sm px-3 py-1.5' : ''
                     }`}

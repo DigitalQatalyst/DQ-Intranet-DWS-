@@ -48,7 +48,7 @@ const LeadApplySection = () => {
         description:
           "Co-work — take the next step in your DQ journey, mentor peers, and help shape how we grow.",
         cta: "Apply Now →",
-        onClick: () => window.dispatchEvent(new Event("open-lead-popup")),
+        onClick: () => navigate('/discover/lead'),
       },
     ],
     [navigate]

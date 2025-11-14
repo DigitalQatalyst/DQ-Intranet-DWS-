@@ -16,6 +16,7 @@ import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DiscoverDQ from "./pages/DiscoverDQ";
+import DiscoverLeadPage from "./pages/DiscoverLeadPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import NotFound from "./pages/NotFound";
 import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
@@ -62,6 +63,7 @@ export function AppRouter() {
           <KfBot />
           <Routes>
             <Route path="/discover-dq" element={<DiscoverDQ />} />
+            <Route path="/discover/lead" element={<DiscoverLeadPage />} />
             <Route path="/coming-soon" element={<ComingSoonPage />} />
             <Route path="/*" element={<App />} />
             <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
