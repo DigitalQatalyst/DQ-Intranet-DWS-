@@ -751,7 +751,7 @@ export const mockNonFinancialServices = [
       'Use this form to submit any support requests to the BSS Factory at DQ. Be sure to include detailed information about your request for the DBP Admin (Booking). The more information you provide, the faster our support team can assist you.',
     category: 'Business',
     serviceType: 'Requisition',
-    deliveryMode: 'In person',
+    deliveryMode: 'Online',
     businessStage: 'All Stages',
     services: ['Administration', 'Procurement'],
     documentType: ['Forms', 'Policies'],
@@ -770,7 +770,7 @@ export const mockNonFinancialServices = [
       'Understand booking procedures',
       'Track booking request status',
     ],
-    tags: ['Admin', 'In person', 'Business'],
+    tags: ['Admin', 'Online', 'Business'],
     featuredImageUrl: '/images/services/bookings.jpg',
   },
   {
