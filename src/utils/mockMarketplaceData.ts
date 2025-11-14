@@ -659,9 +659,12 @@ export const mockNonFinancialServices = [
     description:
       "Please use this form to submit any support requests related to Technology at DQ. Be sure to include details about the problem you're experiencing, along with any error messages you see. The more information you provide, the faster our support team can assist you.",
     category: 'Technology',
-    serviceType: 'Self-Service',
+    serviceType: 'Query',
     deliveryMode: 'Hybrid',
     businessStage: 'All Stages',
+    userCategory: ['Employee', 'Contractor', 'Manager'],
+    technicalCategory: ['Hardware', 'Software', 'Network'],
+    deviceOwnership: ['Company Device', 'Personal Device (BYOD)'],
     provider: {
       name: 'IT Support',
       logoUrl: '/DWS-Logo.png',
@@ -690,6 +693,9 @@ export const mockNonFinancialServices = [
     serviceType: 'Self-Service',
     deliveryMode: 'Hybrid',
     businessStage: 'All Stages',
+    userCategory: ['Employee', 'Manager'],
+    technicalCategory: ['Software'],
+    deviceOwnership: ['Company Device'],
     provider: {
       name: 'IT Support',
       logoUrl: '/DWS-Logo.png',
@@ -717,6 +723,9 @@ export const mockNonFinancialServices = [
     serviceType: 'Self-Service',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
+    userCategory: ['Employee', 'Contractor', 'Intern'],
+    technicalCategory: ['Software', 'Hardware'],
+    deviceOwnership: ['Company Device', 'Personal Device (BYOD)'],
     provider: {
       name: 'IT Support',
       logoUrl: '/DWS-Logo.png',
@@ -744,6 +753,8 @@ export const mockNonFinancialServices = [
     serviceType: 'Requisition',
     deliveryMode: 'In person',
     businessStage: 'All Stages',
+    services: ['Administration', 'Procurement'],
+    documentType: ['Forms', 'Policies'],
     provider: {
       name: 'Admin',
       logoUrl: '/DWS-Logo.png',
@@ -771,6 +782,8 @@ export const mockNonFinancialServices = [
     serviceType: 'Requisition',
     deliveryMode: 'Hybrid',
     businessStage: 'All Stages',
+    services: ['Human Resources', 'Payroll'],
+    documentType: ['Forms', 'Guidelines'],
     provider: {
       name: 'HR',
       logoUrl: '/DWS-Logo.png',
@@ -798,6 +811,8 @@ export const mockNonFinancialServices = [
     serviceType: 'Requisition',
     deliveryMode: 'In person',
     businessStage: 'All Stages',
+    services: ['Human Resources', 'Legal', 'Administration'],
+    documentType: ['Forms', 'Policies', 'Reports'],
     provider: {
       name: 'HR',
       logoUrl: '/DWS-Logo.png',
@@ -825,6 +840,10 @@ export const mockNonFinancialServices = [
     serviceType: 'Support',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
+    dwServiceType: ['Automation Request', 'AI Agent Request'],
+    usageGuidelines: ['Policies', 'Best Practices'],
+    aiTools: ['AI IDEs', 'Chatbots'],
+    integrations: ['REST APIs', 'GraphQL APIs'],
     provider: {
       name: 'finance',
       logoUrl: '/DWS-Logo.png',
@@ -841,7 +860,7 @@ export const mockNonFinancialServices = [
       'Configure reporting systems',
     ],
     tags: ['finance', 'Online', 'Digital Worker'],
-    featuredImageUrl: '/images/services/dtmp-base-setup.jpg',
+    featuredImageUrl: '/images/services/DTMP.jpg',
   },
   {
     id: '8',
@@ -852,6 +871,10 @@ export const mockNonFinancialServices = [
     serviceType: 'Support',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
+    dwServiceType: ['AI Tool Access'],
+    usageGuidelines: ['Policies'],
+    aiTools: ['NLP (Text processing)', 'Generative AI Content'],
+    integrations: ['REST APIs', 'SDKs'],
     provider: {
       name: 'finance',
       logoUrl: '/DWS-Logo.png',
@@ -876,9 +899,13 @@ export const mockNonFinancialServices = [
     description:
       'Please use this form to submit any support requests to the BSS Factory at DQ. Be sure to include detailed information about your request for the DT2.0 Report (Design). The more information you provide, the faster our support team can assist you.',
     category: 'Digital Worker',
-    serviceType: 'Support',
+    serviceType: 'Query',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
+    dwServiceType: ['AI Agent Request', 'AI Tool Access'],
+    usageGuidelines: ['Best Practices'],
+    aiTools: ['Chatbots', 'Voice/Speech Generators', 'Generative AI Content'],
+    integrations: ['GraphQL APIs', 'Plugins'],
     provider: {
       name: 'finance',
       logoUrl: '/DWS-Logo.png',

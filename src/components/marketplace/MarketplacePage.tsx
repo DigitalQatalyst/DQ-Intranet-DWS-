@@ -167,14 +167,14 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const config = getMarketplaceConfig(marketplaceType);
-  const [activeServiceTab, setActiveServiceTab] = useState<string>('query');
+  const [activeServiceTab, setActiveServiceTab] = useState<string>('technology');
 
   // Items & filters state
   const [items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filters, setFilters] = useState<Record<string, string | string[]>>({});
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
 
   // Guides facets + URL state
@@ -288,7 +288,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       if (isServicesCenter) {
         const tabFilters = getTabSpecificFilters(activeServiceTab);
         setFilterConfig(tabFilters);
-        const initial: Record<string, string> = {};
+        const initial: Record<string, string | string[]> = {};
         tabFilters.forEach(c => { initial[c.id] = ''; });
         setFilters(initial);
         return;
@@ -298,13 +298,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         let filterOptions = await fetchMarketplaceFilters(marketplaceType);
         filterOptions = prependLearningTypeFilter(marketplaceType, filterOptions);
         setFilterConfig(filterOptions);
-        const initial: Record<string, string> = {};
+        const initial: Record<string, string | string[]> = {};
         filterOptions.forEach(c => { initial[c.id] = ''; });
         setFilters(initial);
       } catch (err) {
         console.error('Error fetching filter options:', err);
         setFilterConfig(config.filterCategories);
-        const initial: Record<string, string> = {};
+        const initial: Record<string, string | string[]> = {};
         config.filterCategories.forEach(c => { initial[c.id] = ''; });
         setFilters(initial);
       }
@@ -529,8 +529,194 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         // Apply filters for non-financial services
         let filtered = finalItems;
         if (isServicesCenter) {
-          // Note: Tabs (Query, Support, Requisition, Self-Service) are for navigation/description only
-          // They don't filter items - filters handle that independently
+          // Filter by active tab (category)
+          const tabCategoryMap: Record<string, string> = {
+            'technology': 'Technology',
+            'business': 'Business',
+            'digital_worker': 'Digital Worker'
+          };
+          
+          const activeTabCategory = tabCategoryMap[activeServiceTab];
+          if (activeTabCategory) {
+            filtered = filtered.filter(item => {
+              const itemCategory = item.category || '';
+              return itemCategory === activeTabCategory;
+            });
+          }
+          
+          // Filter by serviceType
+          const serviceTypeFilter = filters.serviceType;
+          if (serviceTypeFilter) {
+            const serviceTypes = Array.isArray(serviceTypeFilter) ? serviceTypeFilter : [serviceTypeFilter];
+            if (serviceTypes.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemServiceType = (item.serviceType || '').toLowerCase().trim();
+                return serviceTypes.some(filterType => {
+                  const normalizedFilter = filterType.toLowerCase().trim();
+                  // Normalize variations: 'self-service', 'self service', 'selfservice' all match
+                  const normalizeType = (type: string) => {
+                    return type.replace(/[\s-]/g, '').toLowerCase();
+                  };
+                  const normalizedItemType = normalizeType(itemServiceType);
+                  const normalizedFilterType = normalizeType(normalizedFilter);
+                  return normalizedItemType === normalizedFilterType;
+                });
+              });
+            }
+          }
+          
+          // Filter by userCategory (Technology-specific)
+          const userCategoryFilter = filters.userCategory;
+          if (userCategoryFilter) {
+            const userCategories = Array.isArray(userCategoryFilter) ? userCategoryFilter : [userCategoryFilter];
+            if (userCategories.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemUserCategories = item.userCategory || [];
+                const itemUserCategoriesArray = Array.isArray(itemUserCategories) ? itemUserCategories : [itemUserCategories];
+                return userCategories.some(filterCategory => 
+                  itemUserCategoriesArray.some(itemCat => 
+                    itemCat.toLowerCase() === filterCategory.toLowerCase()
+                  )
+                );
+              });
+            }
+          }
+          
+          // Filter by technicalCategory (Technology-specific)
+          const technicalCategoryFilter = filters.technicalCategory;
+          if (technicalCategoryFilter) {
+            const technicalCategories = Array.isArray(technicalCategoryFilter) ? technicalCategoryFilter : [technicalCategoryFilter];
+            if (technicalCategories.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemTechnicalCategories = item.technicalCategory || [];
+                const itemTechnicalCategoriesArray = Array.isArray(itemTechnicalCategories) ? itemTechnicalCategories : [itemTechnicalCategories];
+                return technicalCategories.some(filterCategory => 
+                  itemTechnicalCategoriesArray.some(itemCat => 
+                    itemCat.toLowerCase() === filterCategory.toLowerCase()
+                  )
+                );
+              });
+            }
+          }
+          
+          // Filter by deviceOwnership (Technology-specific)
+          const deviceOwnershipFilter = filters.deviceOwnership;
+          if (deviceOwnershipFilter) {
+            const deviceOwnerships = Array.isArray(deviceOwnershipFilter) ? deviceOwnershipFilter : [deviceOwnershipFilter];
+            if (deviceOwnerships.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemDeviceOwnerships = item.deviceOwnership || [];
+                const itemDeviceOwnershipsArray = Array.isArray(itemDeviceOwnerships) ? itemDeviceOwnerships : [itemDeviceOwnerships];
+                return deviceOwnerships.some(filterOwnership => 
+                  itemDeviceOwnershipsArray.some(itemOwn => 
+                    itemOwn.toLowerCase().replace(/[\s-]/g, '') === filterOwnership.toLowerCase().replace(/[\s-]/g, '')
+                  )
+                );
+              });
+            }
+          }
+          
+          // Filter by services (Business-specific)
+          const servicesFilter = filters.services;
+          if (servicesFilter) {
+            const services = Array.isArray(servicesFilter) ? servicesFilter : [servicesFilter];
+            if (services.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemServices = item.services || [];
+                const itemServicesArray = Array.isArray(itemServices) ? itemServices : [itemServices];
+                return services.some(filterService => 
+                  itemServicesArray.some(itemSvc => 
+                    itemSvc.toLowerCase().replace(/[\s_]/g, '') === filterService.toLowerCase().replace(/[\s_]/g, '')
+                  )
+                );
+              });
+            }
+          }
+          
+          // Filter by documentType (Business-specific)
+          const documentTypeFilter = filters.documentType;
+          if (documentTypeFilter) {
+            const documentTypes = Array.isArray(documentTypeFilter) ? documentTypeFilter : [documentTypeFilter];
+            if (documentTypes.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemDocumentTypes = item.documentType || [];
+                const itemDocumentTypesArray = Array.isArray(itemDocumentTypes) ? itemDocumentTypes : [itemDocumentTypes];
+                return documentTypes.some(filterDocType => 
+                  itemDocumentTypesArray.some(itemDocType => 
+                    itemDocType.toLowerCase() === filterDocType.toLowerCase()
+                  )
+                );
+              });
+            }
+          }
+          
+          // Filter by dwServiceType (Digital Worker-specific)
+          const dwServiceTypeFilter = filters.dwServiceType;
+          if (dwServiceTypeFilter) {
+            const dwServiceTypes = Array.isArray(dwServiceTypeFilter) ? dwServiceTypeFilter : [dwServiceTypeFilter];
+            if (dwServiceTypes.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemDwServiceTypes = item.dwServiceType || [];
+                const itemDwServiceTypesArray = Array.isArray(itemDwServiceTypes) ? itemDwServiceTypes : [itemDwServiceTypes];
+                return dwServiceTypes.some(filterType => 
+                  itemDwServiceTypesArray.some(itemType => 
+                    itemType.toLowerCase().replace(/[\s_]/g, '') === filterType.toLowerCase().replace(/[\s_]/g, '')
+                  )
+                );
+              });
+            }
+          }
+          
+          // Filter by usageGuidelines (Digital Worker-specific)
+          const usageGuidelinesFilter = filters.usageGuidelines;
+          if (usageGuidelinesFilter) {
+            const usageGuidelines = Array.isArray(usageGuidelinesFilter) ? usageGuidelinesFilter : [usageGuidelinesFilter];
+            if (usageGuidelines.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemGuidelines = item.usageGuidelines || [];
+                const itemGuidelinesArray = Array.isArray(itemGuidelines) ? itemGuidelines : [itemGuidelines];
+                return usageGuidelines.some(filterGuideline => 
+                  itemGuidelinesArray.some(itemGuide => 
+                    itemGuide.toLowerCase().replace(/[\s_]/g, '') === filterGuideline.toLowerCase().replace(/[\s_]/g, '')
+                  )
+                );
+              });
+            }
+          }
+          
+          // Filter by aiTools (Digital Worker-specific)
+          const aiToolsFilter = filters.aiTools;
+          if (aiToolsFilter) {
+            const aiTools = Array.isArray(aiToolsFilter) ? aiToolsFilter : [aiToolsFilter];
+            if (aiTools.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemAiTools = item.aiTools || [];
+                const itemAiToolsArray = Array.isArray(itemAiTools) ? itemAiTools : [itemAiTools];
+                return aiTools.some(filterTool => 
+                  itemAiToolsArray.some(itemTool => 
+                    itemTool.toLowerCase().replace(/[\s_\-()\/]/g, '') === filterTool.toLowerCase().replace(/[\s_\-()\/]/g, '')
+                  )
+                );
+              });
+            }
+          }
+          
+          // Filter by integrations (Digital Worker-specific)
+          const integrationsFilter = filters.integrations;
+          if (integrationsFilter) {
+            const integrations = Array.isArray(integrationsFilter) ? integrationsFilter : [integrationsFilter];
+            if (integrations.length > 0) {
+              filtered = filtered.filter(item => {
+                const itemIntegrations = item.integrations || [];
+                const itemIntegrationsArray = Array.isArray(itemIntegrations) ? itemIntegrations : [itemIntegrations];
+                return integrations.some(filterIntegration => 
+                  itemIntegrationsArray.some(itemInteg => 
+                    itemInteg.toLowerCase().replace(/[\s_]/g, '') === filterIntegration.toLowerCase().replace(/[\s_]/g, '')
+                  )
+                );
+              });
+            }
+          }
           
           // Filter by deliveryMode
           const deliveryModeFilter = filters.deliveryMode;
@@ -576,29 +762,6 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   };
                   const possibleNames = providerMap[normalizedFilter] || [normalizedFilter];
                   return possibleNames.some(name => itemProvider === name || itemProvider.includes(name) || name.includes(itemProvider));
-                });
-              });
-            }
-          }
-          
-          // Filter by category
-          const categoryFilter = filters.category;
-          if (categoryFilter) {
-            const categories = Array.isArray(categoryFilter) ? categoryFilter : [categoryFilter];
-            if (categories.length > 0) {
-              const normalizeCategory = (cat: string) => {
-                const map: Record<string, string> = {
-                  'technology': 'Technology',
-                  'business': 'Business',
-                  'digital_worker': 'Digital Worker'
-                };
-                return map[cat.toLowerCase()] || cat;
-              };
-              filtered = filtered.filter(item => {
-                const itemCategory = item.category || '';
-                return categories.some(filterCategory => {
-                  const normalizedFilter = normalizeCategory(filterCategory);
-                  return itemCategory === normalizedFilter || itemCategory.toLowerCase() === filterCategory.toLowerCase();
                 });
               });
             }
@@ -670,8 +833,28 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         setError(`Failed to load ${marketplaceType}`);
         const fallbackItems = getFallbackItems(marketplaceType);
         setItems(fallbackItems);
-        setFilteredItems(fallbackItems);
-        setTotalCount(fallbackItems.length);
+        
+        // Apply filters to fallback items for Services Center
+        let filteredFallback = fallbackItems;
+        if (isServicesCenter) {
+          // Filter by active tab (category)
+          const tabCategoryMap: Record<string, string> = {
+            'technology': 'Technology',
+            'business': 'Business',
+            'digital_worker': 'Digital Worker'
+          };
+          
+          const activeTabCategory = tabCategoryMap[activeServiceTab];
+          if (activeTabCategory) {
+            filteredFallback = filteredFallback.filter(item => {
+              const itemCategory = item.category || '';
+              return itemCategory === activeTabCategory;
+            });
+          }
+        }
+        
+        setFilteredItems(filteredFallback);
+        setTotalCount(filteredFallback.length);
       } finally {
         setLoading(false);
       }
@@ -719,7 +902,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       setQueryParams(newParams);
       setSearchQuery('');
     } else {
-      const empty: Record<string, string> = {};
+      const empty: Record<string, string | string[]> = {};
       filterConfig.forEach(c => { empty[c.id] = ''; });
       setFilters(empty);
       setSearchQuery('');
@@ -817,10 +1000,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <div className="flex-1">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Current focus</p>
                   <p className="text-lg font-semibold text-gray-900 mb-2">
-                    {activeServiceTab === 'query' && 'Query'}
-                    {activeServiceTab === 'support' && 'Support'}
-                    {activeServiceTab === 'requisition' && 'Requisition'}
-                    {activeServiceTab === 'self-service' && 'Self-Service'}
+                    {activeServiceTab === 'technology' && 'Technology'}
+                    {activeServiceTab === 'business' && 'Business'}
+                    {activeServiceTab === 'digital_worker' && 'Digital Worker'}
                   </p>
                 </div>
                 <button className="px-3 py-1.5 rounded-full text-xs font-medium text-blue-700" style={{ backgroundColor: '#DBEAFE' }}>
@@ -828,16 +1010,14 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 </button>
               </div>
               <p className="text-gray-600 text-sm mb-1">
-                {activeServiceTab === 'query' && 'Submit questions and inquiries about our services. Get quick answers and guidance from our support team.'}
-                {activeServiceTab === 'support' && 'Access technical and operational support services. Get help with IT issues, system access, and operational requests.'}
-                {activeServiceTab === 'requisition' && 'Request resources, equipment, and services. Submit requisitions for staff, bookings, registrations, and other business needs.'}
-                {activeServiceTab === 'self-service' && 'Access self-service tools and resources. Find templates, guides, and walkthroughs to help you get things done independently.'}
+                {activeServiceTab === 'technology' && 'Access technology-related services including IT support, software requests, system access, and technical assistance.'}
+                {activeServiceTab === 'business' && 'Explore business services such as HR support, finance services, administrative requests, and operational assistance.'}
+                {activeServiceTab === 'digital_worker' && 'Discover digital worker services including automation solutions, AI agents requests, AI tools and usage guidelines'}
               </p>
               <p className="text-xs text-gray-500">
-                {activeServiceTab === 'query' && 'Managed by DQ IT Support, HR, Finance, and Admin teams.'}
-                {activeServiceTab === 'support' && 'Provided by DQ IT Support, Operations, and Technical teams.'}
-                {activeServiceTab === 'requisition' && 'Handled by DQ HR, Admin, and Operations teams.'}
-                {activeServiceTab === 'self-service' && 'Curated by DQ IT Support, HR, and Operations teams.'}
+                {activeServiceTab === 'technology' && 'Managed by DQ IT Support and Technical teams.'}
+                {activeServiceTab === 'business' && 'Provided by DQ HR, Finance, and Administrative teams.'}
+                {activeServiceTab === 'digital_worker' && 'Handled by DQ Automation Teams.'}
               </p>
             </div>
           </div>
@@ -848,10 +1028,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           <div className="mb-6 border-b border-gray-200">
             <nav className="flex space-x-8" aria-label="Service tabs">
               {[
-                { id: 'query', label: 'Query' },
-                { id: 'support', label: 'Support' },
-                { id: 'requisition', label: 'Requisition' },
-                { id: 'self-service', label: 'Self-Service' }
+                { id: 'technology', label: 'Technology' },
+                { id: 'business', label: 'Business' },
+                { id: 'digital_worker', label: 'Digital Worker' }
               ].map((tab) => {
                 const isActive = activeServiceTab === tab.id;
                 return (

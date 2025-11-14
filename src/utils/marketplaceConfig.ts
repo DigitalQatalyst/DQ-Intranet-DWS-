@@ -955,8 +955,18 @@ export const getMarketplaceConfig = (type: string): MarketplaceConfig => {
 };
 
 // Tab-specific filters for Services Center
-export const getTabSpecificFilters = (tabId: string): FilterCategoryConfig[] => {
+export const getTabSpecificFilters = (tabId?: string): FilterCategoryConfig[] => {
   const baseFilters: FilterCategoryConfig[] = [
+    {
+      id: 'serviceType',
+      title: 'Service Type',
+      options: [
+        { id: 'query', name: 'Query' },
+        { id: 'support', name: 'Support' },
+        { id: 'requisition', name: 'Requisition' },
+        { id: 'self-service', name: 'Self-Service' }
+      ]
+    },
     {
       id: 'deliveryMode',
       title: 'Delivery Mode',
@@ -977,15 +987,6 @@ export const getTabSpecificFilters = (tabId: string): FilterCategoryConfig[] => 
       ]
     },
     {
-      id: 'category',
-      title: 'Service Category',
-      options: [
-        { id: 'technology', name: 'Technology' },
-        { id: 'business', name: 'Business' },
-        { id: 'digital_worker', name: 'Digital Worker' }
-      ]
-    },
-    {
       id: 'location',
       title: 'Location',
       options: [
@@ -996,7 +997,123 @@ export const getTabSpecificFilters = (tabId: string): FilterCategoryConfig[] => 
     }
   ];
 
-  // Tab-specific additional filters
+  // Tab-specific filters for Technology category
+  const technologySpecificFilters: FilterCategoryConfig[] = [
+    {
+      id: 'userCategory',
+      title: 'User Category',
+      options: [
+        { id: 'employee', name: 'Employee' },
+        { id: 'contractor', name: 'Contractor' },
+        { id: 'intern', name: 'Intern' },
+        { id: 'manager', name: 'Manager' }
+      ]
+    },
+    {
+      id: 'technicalCategory',
+      title: 'Technical Category',
+      options: [
+        { id: 'hardware', name: 'Hardware' },
+        { id: 'software', name: 'Software' },
+        { id: 'network', name: 'Network' }
+      ]
+    },
+    {
+      id: 'deviceOwnership',
+      title: 'Device Ownership',
+      options: [
+        { id: 'company_device', name: 'Company Device' },
+        { id: 'personal_device', name: 'Personal Device (BYOD)' }
+      ]
+    }
+  ];
+
+  // Tab-specific filters for Business category
+  const businessSpecificFilters: FilterCategoryConfig[] = [
+    {
+      id: 'services',
+      title: 'Services',
+      options: [
+        { id: 'human_resources', name: 'Human Resources' },
+        { id: 'finance', name: 'Finance' },
+        { id: 'procurement', name: 'Procurement' },
+        { id: 'administration', name: 'Administration' },
+        { id: 'legal', name: 'Legal' },
+        { id: 'payroll', name: 'Payroll' }
+      ]
+    },
+    {
+      id: 'documentType',
+      title: 'Document Type',
+      options: [
+        { id: 'policies', name: 'Policies' },
+        { id: 'guidelines', name: 'Guidelines' },
+        { id: 'reports', name: 'Reports' },
+        { id: 'forms', name: 'Forms' }
+      ]
+    }
+  ];
+
+  // Tab-specific filters for Digital Worker category
+  const digitalWorkerSpecificFilters: FilterCategoryConfig[] = [
+    {
+      id: 'dwServiceType',
+      title: 'Service Type',
+      options: [
+        { id: 'automation_request', name: 'Automation Request' },
+        { id: 'ai_agent_request', name: 'AI Agent Request' },
+        { id: 'ai_tool_access', name: 'AI Tool Access' }
+      ]
+    },
+    {
+      id: 'usageGuidelines',
+      title: 'Usage Guidelines',
+      options: [
+        { id: 'policies', name: 'Policies' },
+        { id: 'best_practices', name: 'Best Practices' }
+      ]
+    },
+    {
+      id: 'aiTools',
+      title: 'AI Tools',
+      options: [
+        { id: 'ai_ides', name: 'AI IDEs' },
+        { id: 'chatbots', name: 'Chatbots' },
+        { id: 'nlp', name: 'NLP (Text processing)' },
+        { id: 'voice_speech', name: 'Voice/Speech Generators' },
+        { id: 'generative_ai', name: 'Generative AI Content' }
+      ]
+    },
+    {
+      id: 'integrations',
+      title: 'Integrations',
+      options: [
+        { id: 'graphql_apis', name: 'GraphQL APIs' },
+        { id: 'rest_apis', name: 'REST APIs' },
+        { id: 'sdks', name: 'SDKs' },
+        { id: 'plugins', name: 'Plugins' }
+      ]
+    }
+  ];
+
+  // Return tab-specific filters based on the tab
+  if (tabId === 'technology') {
+    return [...baseFilters, ...technologySpecificFilters];
+  }
+  
+  if (tabId === 'business') {
+    return [...baseFilters, ...businessSpecificFilters];
+  }
+  
+  if (tabId === 'digital_worker') {
+    return [...baseFilters, ...digitalWorkerSpecificFilters];
+  }
+  
+  return baseFilters;
+};
+
+// Removed old tab-specific filters as they're no longer needed with category-based tabs
+/*
   const tabFilters: Record<string, FilterCategoryConfig[]> = {
     'query': [
       {
@@ -1119,7 +1236,4 @@ export const getTabSpecificFilters = (tabId: string): FilterCategoryConfig[] => 
       }
     ]
   };
-
-  // Return tab-specific filters first, then base filters
-  return [...(tabFilters[tabId] || []), ...baseFilters];
-};
+*/
