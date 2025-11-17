@@ -58,6 +58,7 @@ export type LmsDetail = {
     question: string;
     answer: string;
   }>;
+  imageUrl?: string; // Added image URL field
   // Curriculum structure based on course type:
   // Track (Bundles): Contains courses, each course has topics, topics have lessons
   // Course (Multi-Lessons): Contains topics, topics have lessons
@@ -168,6 +169,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         link: '/references/dq-mission'
       }
     ],
+    imageUrl: 'https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Professional orientation
     // Single lesson - just show lessons directly (no topics)
     curriculum: [
       {
@@ -235,6 +237,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         rating: 5
       }
     ],
+    imageUrl: 'https://images.pexels.com/photos/732103/pexels-photo-732103.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Abstract business/collaboration
     // Course (Multi-Lessons) - has topics with lessons
     curriculum: [
       {
@@ -408,7 +411,8 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         text: 'Excellent course on transformation frameworks. The practical examples and artefact guidance are very helpful.',
         rating: 4
       }
-    ]
+    ],
+    imageUrl: 'https://images.pexels.com/photos/3184306/pexels-photo-3184306.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Digital transformation/data flow
   },
   {
     id: 'dws-tools',
@@ -476,6 +480,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         rating: 4
       }
     ],
+    imageUrl: 'https://images.pexels.com/photos/669619/pexels-photo-669619.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Digital workspace/dashboard
     // Track (Bundles) - contains courses that can be clicked, each course has topics with lessons
     curriculum: [
       {
@@ -587,7 +592,8 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         text: 'Great introduction to DXP content architecture. The composable content concepts are well explained.',
         rating: 5
       }
-    ]
+    ],
+    imageUrl: 'https://images.pexels.com/photos/5474291/pexels-photo-5474291.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Content modeling/digital design
   },
   {
     id: 'git-vercel',
@@ -631,7 +637,8 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         text: 'Excellent guide to DQ\'s Git workflow. The branch strategy and PR process are clearly explained.',
         rating: 4
       }
-    ]
+    ],
+    imageUrl: 'https://images.pexels.com/photos/1775985/pexels-photo-1775985.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Code/deployment pipeline
   },
   {
     id: 'cursor-ai',
@@ -681,7 +688,8 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         text: 'Great course on AI-assisted development. The documentation generation features are a game-changer.',
         rating: 4
       }
-    ]
+    ],
+    imageUrl: 'https://images.pexels.com/photos/196656/pexels-photo-196656.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // AI / code integration
   },
   {
     id: 'first-7-days',
@@ -727,6 +735,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         rating: 5
       }
     ],
+    imageUrl: 'https://images.pexels.com/photos/3153198/pexels-photo-3153198.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Onboarding checklist/welcome
     // Course (Multi-Lessons) - has topics with lessons
     curriculum: [
       {
@@ -746,7 +755,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
               {
                 id: 'lesson-day-1',
                 title: 'Day 1: Welcome and Orientation',
-                description: 'Introduction to DQ, meet your team, and set up your workspace',
+                description: 'Introduction to DQ and team setup',
                 duration: '2 hours',
                 type: 'workshop',
                 order: 1,
@@ -864,7 +873,8 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         text: 'This course on governance has streamlined our review processes. The lightweight approach keeps us moving fast while maintaining quality.',
         rating: 4
       }
-    ]
+    ],
+    imageUrl: 'https://images.pexels.com/photos/3184454/pexels-photo-3184454.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Governance/Policy visual
   },
   {
     id: 'leadership-track',
@@ -917,6 +927,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         answer: 'Yes, upon successful completion of all courses in the Leadership Track, you will receive a Leadership Track completion certificate that recognizes your achievement and skills development.'
       }
     ],
+    imageUrl: 'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Leadership meeting/vision
     // Track (Bundles) - contains courses with topics and lessons
     curriculum: [
       {
@@ -1100,6 +1111,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
         rating: 5
       }
     ],
+    imageUrl: 'https://images.pexels.com/photos/3153198/pexels-photo-3153198.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Onboarding checklist/welcome
     // Track (Bundles) - contains courses with topics and lessons
     curriculum: [
       {
@@ -1201,6 +1213,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       'Use visual tools for clear project oversight',
       'Collaborate securely using guest access and comments'
   ],
+  imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Microsoft_Planner_2019.png', // Microsoft Planner logo/screenshot
   curriculum: [
       {
           id: 'course-planner-get-started-track',
@@ -1248,6 +1261,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
   summary: 'A quick introduction to accessing Microsoft Planner on different platforms to begin task management.',
   highlights: ['Access Planner via web browser', 'Integrate Planner directly into Teams'],
   outcomes: ['Locate and launch Planner successfully on any device', 'Understand the basic interface for both platforms'],
+  imageUrl: 'https://images.pexels.com/photos/5668856/pexels-photo-5668856.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Getting started/teams interface
   curriculum: [
       {
           id: 'module-planner-access',
@@ -1287,6 +1301,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
   summary: 'Detailed instructions on creating, configuring, and populating your plan with tasks, assignments, and key metadata.',
   highlights: ['Create new plans and manage plan settings', 'Assign priority and due dates to tasks', 'Use advanced features like labels and checklists'],
   outcomes: ['Structure a complex project plan effectively', 'Manage plan access and compare subscription features', 'Use task metadata to ensure clear execution'],
+  imageUrl: 'https://images.pexels.com/photos/3183198/pexels-photo-3183198.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Project planning/Kanban
   curriculum: [
       {
           id: 'module-planner-plans',
@@ -1349,6 +1364,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
   summary: 'Techniques for tracking team progress, visualizing workload, and maintaining smooth communication within your plans.',
   highlights: ['Visualize project status using Charts view', 'Manage notifications to stay informed without distraction', 'Enable and secure guest access for external collaborators'],
   outcomes: ['Accurately report on task completion and timelines', 'Use calendar view for scheduling visibility', 'Facilitate clear and immediate collaboration via task comments'],
+  imageUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Tracking progress/charts
   curriculum: [
       {
           id: 'module-planner-progress',
@@ -1379,7 +1395,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       }
   ]
   },
-  // --- END OF NEW MS PLANNER LEARNING TRACK COURSES ---
+  // --- END OF MS PLANNER LEARNING TRACK COURSES ---
   // --- START OF NEW MICROSOFT TEAMS LEARNING TRACK COURSES ---
   
   // 1. The main MS Learning Track (Bundle)
@@ -1411,6 +1427,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
           'Manage team membership and channel structure correctly',
           'Configure personal settings for optimal DWS workflow'
       ],
+      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Microsoft_Teams_logo.svg/800px-Microsoft_Teams_logo.svg.png', // Microsoft Teams Logo
       curriculum: [
           {
               id: 'course-teams-meetings-track',
@@ -1482,6 +1499,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       summary: 'A deep dive into joining, scheduling, and running effective meetings, including advanced features like immersive experiences, live events, and premium options.',
       highlights: ['Master meeting controls, sharing, and multitasking', 'Schedule and manage live events, webinars, and town halls', 'Utilize recording, transcription, and language interpretation options'],
       outcomes: ['Run professional and engaging virtual events', 'Troubleshoot common audio/video issues', 'Leverage Teams Premium features for security and intelligence'],
+      imageUrl: 'https://images.pexels.com/photos/7161048/pexels-photo-7161048.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Virtual meeting
       curriculum: [
           {
               id: 'module-meetings',
@@ -1754,6 +1772,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       summary: 'Learn the essentials of effective one-on-one and group messaging, formatting, file sharing, and chat management features in Teams.',
       highlights: ['Format messages using markdown and code blocks', 'Manage chat requests, hide, pin, and mute conversations', 'Collaborate with external users securely'],
       outcomes: ['Communicate clearly and professionally in chat', 'Use advanced features like scheduled messages and video clips', 'Keep your chat list organized and focused'],
+      imageUrl: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Chat/Messaging visual
       curriculum: [
           {
               id: 'module-chat',
@@ -1871,6 +1890,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       summary: 'Master your personal Teams configuration for maximum focus and productivity by managing notifications, status, and accessibility features.',
       highlights: ['Fine-tune mobile and desktop notifications', 'Customize profile and general app settings', 'Set and manage your status effectively'],
       outcomes: ['Reduce digital distraction', 'Optimize Teams for personal workflow', 'Use Teams with screen readers and keyboard shortcuts'],
+      imageUrl: 'https://images.pexels.com/photos/10368545/pexels-photo-10368545.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Notifications on phone/desktop
       curriculum: [
           {
               id: 'module-notification-settings',
@@ -1965,6 +1985,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       summary: 'A deep dive into creating, managing, and collaborating within Teams, channels, and shared channels.',
       highlights: ['Team creation from scratch or template', 'Manage team membership, roles, and permissions', 'Channel types: Standard, Private, and Shared'],
       outcomes: ['Structure collaboration spaces effectively', 'Govern team access and maintain cleanliness (archive/delete)', 'Use shared channels for external collaboration'],
+      imageUrl: 'https://images.pexels.com/photos/5668858/pexels-photo-5668858.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Teams/Channels structure
       curriculum: [
           {
               id: 'module-teams-management',
@@ -2120,6 +2141,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       summary: 'Everything about initiating, managing, and optimizing calls, including advanced features like intelligent speakers and Teams Rooms.',
       highlights: ['Standard and advanced calling features (transfer, merge, hold)', 'Teams Phone Mobile and data optimization', 'Configuration of Microsoft Teams Rooms and devices'],
       outcomes: ['Handle complex call scenarios efficiently', 'Set up and troubleshoot Teams Rooms', 'Utilize devices for high-quality audio/video broadcasting'],
+      imageUrl: 'https://images.pexels.com/photos/7161073/pexels-photo-7161073.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // Calling screen/device focus
       curriculum: [
           {
               id: 'module-calls-devices',
@@ -2234,6 +2256,7 @@ const details: Omit<LmsDetail, 'locations'> & { locations: string[] }[] = [
       summary: 'Learn how to manage, collaborate on, and share files effectively within Microsoft Teams and its connected cloud storage.',
       highlights: ['File management: move, copy, delete, recover', 'Collaborate on Office files in real-time', 'Sharing files and managing file storage options'],
       outcomes: ['Maintain a clean and organized file system in Teams', 'Use collaboration features to co-author documents', 'Integrate third-party cloud services for file access'],
+      imageUrl: 'https://images.pexels.com/photos/313690/pexels-photo-313690.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2', // File management/folders
       curriculum: [
           {
               id: 'module-file-management',
@@ -2316,5 +2339,6 @@ export const LMS_COURSES: LmsCard[] = LMS_COURSE_DETAILS.map(detail => ({
   summary: detail.summary,
   department: detail.department,
   courseType: detail.courseType || 'Course (Single Lesson)',
-  track: detail.track
+  track: detail.track,
+  imageUrl: detail.imageUrl // Ensure image URL is carried over
 }));

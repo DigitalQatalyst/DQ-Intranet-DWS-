@@ -660,9 +660,22 @@ export const LmsCourses: React.FC = () => {
                       <Link
                         key={track.id}
                         to={`/lms/${track.slug}`}
-                        className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col"
+                        className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col"
                       >
-                        <div className="flex-1">
+                        {/* Track Image */}
+                        {(track.imageUrl || trackDetail.imageUrl) && (
+                          <div className="w-full h-48 bg-gray-200 overflow-hidden">
+                            <img
+                              src={track.imageUrl || trackDetail.imageUrl}
+                              alt={track.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1 p-6">
                           <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{track.title}</h3>
                           <p className="text-sm text-gray-600 mb-4 line-clamp-3">{track.summary}</p>
                           
@@ -707,13 +720,13 @@ export const LmsCourses: React.FC = () => {
                               )}
                             </div>
                           </div>
-                        </div>
-                        
-                        {/* View Button */}
-                        <div className="mt-6 pt-4 border-t border-gray-100">
-                          <div className="flex items-center justify-between text-sm font-medium" style={{ color: '#030F35' }}>
-                            <span>View Track Details</span>
-                            <span>→</span>
+                          
+                          {/* View Button */}
+                          <div className="mt-6 pt-4 border-t border-gray-100">
+                            <div className="flex items-center justify-between text-sm font-medium" style={{ color: '#030F35' }}>
+                              <span>View Track Details</span>
+                              <span>→</span>
+                            </div>
                           </div>
                         </div>
                       </Link>
