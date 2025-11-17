@@ -1032,7 +1032,6 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {relatedItems.map(relatedItem => <div key={relatedItem.id} className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/marketplace/${marketplaceType}/${relatedItem.id}`)}>
                       <div className="flex items-center mb-3">
-                        <img src={relatedItem.provider.logoUrl} alt={relatedItem.provider.name} className="h-8 w-8 object-contain mr-2 rounded" />
                         <span className="text-sm text-gray-600">
                           {relatedItem.provider.name}
                         </span>
