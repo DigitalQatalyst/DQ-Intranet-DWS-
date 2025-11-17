@@ -42,7 +42,6 @@ export const LmsCourses: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [desktopFiltersVisible, setDesktopFiltersVisible] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('courses');
 
@@ -416,10 +415,6 @@ export const LmsCourses: React.FC = () => {
     setShowFilters((prev) => !prev);
   }, []);
 
-  const toggleDesktopFilters = useCallback(() => {
-    setDesktopFiltersVisible((prev) => !prev);
-  }, []);
-
   const handleViewDetails = useCallback((item: typeof LMS_COURSES[number]) => {
     // Navigation handled by Link in card
   }, []);
@@ -536,27 +531,17 @@ export const LmsCourses: React.FC = () => {
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
 
-        {/* Desktop filter toggle */}
+        {/* Desktop filter reset */}
         <div className="hidden xl:flex justify-end mb-4">
-          <div className="flex items-center gap-3">
+          {hasActiveFilters && (
             <button
-              onClick={toggleDesktopFilters}
-              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:text-gray-900"
-              aria-expanded={desktopFiltersVisible}
+              onClick={resetFilters}
+              className="text-sm font-medium px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 hover:text-gray-900 shadow-sm"
+              style={{ color: '#030F35', borderColor: '#E5E7EB' }}
             >
-              <FilterIcon size={18} />
-              {desktopFiltersVisible ? "Hide Filters" : "Show Filters"}
+              Reset All
             </button>
-            {hasActiveFilters && (
-              <button
-                onClick={resetFilters}
-                className="text-sm font-medium"
-                style={{ color: '#030F35' }}
-              >
-                Reset All
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
         <div className="flex flex-col xl:flex-row gap-6">
@@ -627,34 +612,32 @@ export const LmsCourses: React.FC = () => {
           </div>
 
           {/* Filter sidebar - desktop */}
-          {desktopFiltersVisible && (
-            <div className="hidden xl:block xl:w-1/4">
-              <div className="bg-white rounded-lg shadow p-4 sticky top-24">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold">Filters</h2>
-                  {hasActiveFilters && (
-                    <button
-                      onClick={resetFilters}
-                      className="text-sm font-medium"
-                      style={{ color: '#030F35' }}
-                    >
-                      Reset All
-                    </button>
-                  )}
-                </div>
-                <FilterSidebar
-                  filters={urlBasedFilters}
-                  filterConfig={filterConfig}
-                  onFilterChange={handleFilterChange}
-                  onResetFilters={resetFilters}
-                  isResponsive={false}
-                />
+          <div className="hidden xl:block xl:w-1/4">
+            <div className="bg-white rounded-lg shadow p-4 sticky top-24">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Filters</h2>
+                {hasActiveFilters && (
+                  <button
+                    onClick={resetFilters}
+                    className="text-sm font-medium"
+                    style={{ color: '#030F35' }}
+                  >
+                    Reset All
+                  </button>
+                )}
               </div>
+              <FilterSidebar
+                filters={urlBasedFilters}
+                filterConfig={filterConfig}
+                onFilterChange={handleFilterChange}
+                onResetFilters={resetFilters}
+                isResponsive={false}
+              />
             </div>
-          )}
+          </div>
 
           {/* Main content */}
-          <div className={desktopFiltersVisible ? "xl:w-3/4" : "xl:w-full"}>
+          <div className="xl:w-3/4">
             {activeTab === 'tracks' ? (
               <>
                 <div className="flex justify-between items-center mb-4">
@@ -694,7 +677,7 @@ export const LmsCourses: React.FC = () => {
                       <Link
                         key={track.id}
                         to={`/lms/${track.slug}`}
-                        className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col"
+                        className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col h-full"
                       >
                         {/* Track Image */}
                         {(track.imageUrl || trackDetail.imageUrl) && (
@@ -709,7 +692,7 @@ export const LmsCourses: React.FC = () => {
                             />
                           </div>
                         )}
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-6 flex flex-col">
                           <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{track.title}</h3>
                           <p className="text-sm text-gray-600 mb-4 line-clamp-3">{track.summary}</p>
                           
@@ -756,7 +739,7 @@ export const LmsCourses: React.FC = () => {
                           </div>
                           
                           {/* View Button */}
-                          <div className="mt-6 pt-4 border-t border-gray-100">
+                          <div className="mt-auto pt-4 border-t border-gray-100">
                             <div className="flex items-center justify-between text-sm font-medium" style={{ color: '#030F35' }}>
                               <span>View Track Details</span>
                               <span>→</span>
