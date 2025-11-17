@@ -63,13 +63,13 @@ export function EventCard({
         <div className="flex space-x-3">
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 py-2 border border-[#1A2E6E] text-[#1A2E6E] rounded-lg hover:bg-[#1A2E6E] hover:text-white transition-colors duration-300 text-sm font-medium"
+            className="flex-1 py-2 border border-[#030F35] text-[#030F35] rounded-lg hover:bg-[#030F35] hover:text-white transition-colors duration-300 text-sm font-medium"
           >
             View Details
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 py-2 bg-[#FB5535] text-white rounded-lg hover:bg-[#FB5535]/90 transition-colors duration-300 text-sm font-medium"
+            className="flex-1 py-2 bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] text-white rounded-lg hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A] transition-all duration-300 text-sm font-medium shadow-md"
           >
             Join
           </button>

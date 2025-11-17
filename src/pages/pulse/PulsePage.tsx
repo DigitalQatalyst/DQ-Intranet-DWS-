@@ -8,19 +8,23 @@ import { Footer } from "../../components/Footer";
 import { supabase } from "../../lib/supabaseClient";
 import { FilterConfig } from "../../components/marketplace/FilterSidebar";
 
-// Mock data interface matching the provided JSON structure
-interface MockPulseData {
+// Interface for database Pulse item
+interface PulseItemFromDB {
+  id: string;
   title: string;
-  launch_date: string;
-  deadline: string;
-  department: string;
-  location: string;
-  survey_type: string;
-  description: string;
-  progress: string;
-  participants_count: number;
-  image: string;
-  action_button: string;
+  description: string | null;
+  type: 'poll' | 'survey' | 'feedback';
+  department: string | null;
+  location_filter: string | null;
+  published_at: string | null;
+  closes_at: string | null;
+  created_at: string;
+  image_url: string | null;
+  response_count: number;
+  total_responses: number;
+  tags: string[] | null;
+  survey_type: string | null;
+  feedback_type: string | null;
 }
 
 // Interface for transformed Pulse item for display
@@ -31,82 +35,18 @@ interface TransformedPulseItem {
   department: string;
   location: string;
   surveyType: string;
+  type: 'poll' | 'survey' | 'feedback';
   launchDate: string;
   deadline: string;
   progress: string;
   participantsCount: number;
   imageUrl: string;
   actionButton: string;
+  publishedAt: string;
+  closesAt: string | null;
+  createdAt: string;
+  isActive: boolean;
 }
-
-// Mock data - using correct Department and Location filter values
-const MOCK_PULSE_DATA: MockPulseData[] = [
-  {
-    "title": "Employee Satisfaction Survey",
-    "launch_date": "2025-11-14",
-    "deadline": "2025-11-21",
-    "department": "HRA (People)",
-    "location": "Remote",
-    "survey_type": "Employee Feedback",
-    "description": "We'd love to hear your thoughts on your workplace experience. Help us improve by sharing your feedback in this quick survey.",
-    "progress": "50%",
-    "participants_count": 320,
-    "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
-    "action_button": "Take Survey"
-  },
-  {
-    "title": "Product Feedback Poll",
-    "launch_date": "2025-11-15",
-    "deadline": "2025-11-20",
-    "department": "Products",
-    "location": "Dubai",
-    "survey_type": "Product Review",
-    "description": "Your feedback helps us shape the next version of our product. Please take a few moments to share your thoughts!",
-    "progress": "35%",
-    "participants_count": 215,
-    "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
-    "action_button": "Take Poll"
-  },
-  {
-    "title": "Event Feedback: Digital Qatalyst Town Hall",
-    "launch_date": "2025-11-16",
-    "deadline": "2025-11-19",
-    "department": "Stories",
-    "location": "Nairobi",
-    "survey_type": "Event Feedback",
-    "description": "We'd love to hear your thoughts on the Digital Qatalyst Town Hall. Your feedback helps us improve future events!",
-    "progress": "80%",
-    "participants_count": 450,
-    "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
-    "action_button": "Give Feedback"
-  },
-  {
-    "title": "Customer Satisfaction Survey",
-    "launch_date": "2025-11-18",
-    "deadline": "2025-11-30",
-    "department": "Solutions",
-    "location": "Riyadh",
-    "survey_type": "Customer Feedback",
-    "description": "Help us improve your customer experience! Share your thoughts and help us serve you better.",
-    "progress": "10%",
-    "participants_count": 100,
-    "image": "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
-    "action_button": "Take Survey"
-  },
-  {
-    "title": "Marketing Campaign Feedback",
-    "launch_date": "2025-11-19",
-    "deadline": "2025-11-25",
-    "department": "Intelligence",
-    "location": "Remote",
-    "survey_type": "Marketing Feedback",
-    "description": "We'd like your input on our latest marketing campaign. Let us know how we can improve!",
-    "progress": "60%",
-    "participants_count": 180,
-    "image": "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
-    "action_button": "Provide Feedback"
-  }
-];
 
 export const PulsePage: React.FC = () => {
   const navigate = useNavigate();
@@ -121,6 +61,7 @@ export const PulsePage: React.FC = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [engagementSort, setEngagementSort] = useState<string>(''); // For Engagement Level filter
 
   // Mobile filter state
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -148,14 +89,54 @@ export const PulsePage: React.FC = () => {
     const locationOptions = [
       'Dubai',
       'Nairobi',
-      'Riyadh',
-      'Remote'
+      'Riyadh'
     ];
 
-    // Extract unique survey types from mock data
-    const uniqueSurveyTypes = Array.from(new Set(MOCK_PULSE_DATA.map(item => item.survey_type))).sort();
+    // Type options (poll, survey, feedback)
+    const typeOptions = ['Poll', 'Survey', 'Feedback'];
+
+    // Status options
+    const statusOptions = ['Active', 'Closed'];
+
+    // Timeframe options
+    const timeframeOptions = ['Today', 'This Week', 'This Month'];
+
+    // Engagement Level options
+    const engagementOptions = ['Most Responded', 'Most Recent', 'Trending Topics'];
 
     const config: FilterConfig[] = [
+      {
+        id: 'type',
+        title: 'Type',
+        options: typeOptions.map(type => ({
+          id: type.toLowerCase().replace(/\s+/g, '-'),
+          name: type
+        }))
+      },
+      {
+        id: 'status',
+        title: 'Status',
+        options: statusOptions.map(status => ({
+          id: status.toLowerCase().replace(/\s+/g, '-'),
+          name: status
+        }))
+      },
+      {
+        id: 'timeframe',
+        title: 'Timeframe',
+        options: timeframeOptions.map(timeframe => ({
+          id: timeframe.toLowerCase().replace(/\s+/g, '-'),
+          name: timeframe
+        }))
+      },
+      {
+        id: 'engagement',
+        title: 'Engagement Level',
+        options: engagementOptions.map(engagement => ({
+          id: engagement.toLowerCase().replace(/\s+/g, '-'),
+          name: engagement
+        }))
+      },
       {
         id: 'department',
         title: 'Department',
@@ -171,14 +152,6 @@ export const PulsePage: React.FC = () => {
           id: loc.toLowerCase().replace(/\s+/g, '-'),
           name: loc
         }))
-      },
-      {
-        id: 'survey_type',
-        title: 'Survey Type',
-        options: uniqueSurveyTypes.map(type => ({
-          id: type.toLowerCase().replace(/\s+/g, '-'),
-          name: type
-        }))
       }
     ];
 
@@ -192,38 +165,101 @@ export const PulsePage: React.FC = () => {
     setOpenSections(initialSections);
   }, []);
 
-  // Load Pulse items from mock data
+  // Load Pulse items from Supabase
   useEffect(() => {
-    setLoading(true);
-    setError(null);
+    const fetchPulseItems = async () => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      // Transform mock data to component format
-      const transformedItems: TransformedPulseItem[] = MOCK_PULSE_DATA.map((item, index) => ({
-        id: `pulse-${index + 1}`,
-        title: item.title,
-        description: item.description,
-        department: item.department,
-        location: item.location,
-        surveyType: item.survey_type,
-        launchDate: item.launch_date,
-        deadline: item.deadline,
-        progress: item.progress,
-        participantsCount: item.participants_count,
-        imageUrl: item.image,
-        actionButton: item.action_button
-      }));
+      try {
+        // Fetch published pulse items from database
+        const { data, error: queryError } = await supabase
+          .from("pulse_items_with_stats")
+          .select("*")
+          .eq("status", "published")
+          .order("published_at", { ascending: false });
 
-      setItems(transformedItems);
-      setFilteredItems(transformedItems);
-    } catch (err: any) {
-      console.error('Error loading pulse items:', err);
-      setError(err.message || 'Failed to load pulse items');
-      setItems([]);
-      setFilteredItems([]);
-    } finally {
-      setLoading(false);
-    }
+        if (queryError) {
+          throw queryError;
+        }
+
+        if (!data || data.length === 0) {
+          setItems([]);
+          setFilteredItems([]);
+          setLoading(false);
+          return;
+        }
+
+        // Transform database items to component format
+        const transformedItems: TransformedPulseItem[] = data.map((item: PulseItemFromDB) => {
+          // Calculate progress percentage (using response_count from view or total_responses as fallback)
+          const responseCount = item.response_count || item.total_responses || 0;
+          // Calculate progress based on response count
+          // Since we don't have a target, we'll use a simple scale: 0-100 responses maps to 0-100%
+          // This gives a visual indicator of engagement level
+          const progressPercentage = Math.min(100, responseCount);
+
+          // Determine display type label
+          const getTypeLabel = () => {
+            if (item.type === 'poll') return 'Poll';
+            if (item.type === 'survey') return 'Survey';
+            if (item.type === 'feedback') {
+              // Use feedback_type if available, otherwise just "Feedback"
+              if (item.feedback_type) {
+                return item.feedback_type.charAt(0).toUpperCase() + item.feedback_type.slice(1) + ' Feedback';
+              }
+              return 'Feedback';
+            }
+            return item.type.charAt(0).toUpperCase() + item.type.slice(1);
+          };
+
+          // Determine action button text based on type
+          const getActionButton = () => {
+            if (item.type === 'poll') return 'Take Poll';
+            if (item.type === 'survey') return 'Take Survey';
+            if (item.type === 'feedback') return 'Give Feedback';
+            return 'Participate';
+          };
+
+          // Determine if item is active (not closed)
+          const now = new Date();
+          const closesAt = item.closes_at ? new Date(item.closes_at) : null;
+          const isActive = !closesAt || closesAt > now;
+
+          return {
+            id: item.id,
+            title: item.title,
+            description: item.description || '',
+            department: item.department || 'N/A',
+            location: item.location_filter || 'N/A',
+            surveyType: getTypeLabel(),
+            type: item.type,
+            launchDate: item.published_at || item.created_at || new Date().toISOString(),
+            deadline: item.closes_at || '',
+            progress: `${progressPercentage}%`,
+            participantsCount: responseCount,
+            imageUrl: item.image_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+            actionButton: getActionButton(),
+            publishedAt: item.published_at || item.created_at || new Date().toISOString(),
+            closesAt: item.closes_at,
+            createdAt: item.created_at,
+            isActive
+          };
+        });
+
+        setItems(transformedItems);
+        setFilteredItems(transformedItems);
+      } catch (err: any) {
+        console.error('Error loading pulse items:', err);
+        setError(err.message || 'Failed to load pulse items');
+        setItems([]);
+        setFilteredItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPulseItems();
   }, []);
 
   // Apply search and filter (client-side)
@@ -261,6 +297,64 @@ export const PulsePage: React.FC = () => {
         }
       });
 
+      // Apply type filter
+      if (filtersByCategory['type'] && filtersByCategory['type'].length > 0) {
+        filtered = filtered.filter(item => {
+          return filtersByCategory['type'].some(filterType => {
+            const itemType = item.type;
+            const filterTypeLower = filterType.toLowerCase();
+            // Map filter names to database types
+            if (filterTypeLower === 'poll') return itemType === 'poll';
+            if (filterTypeLower === 'survey') return itemType === 'survey';
+            if (filterTypeLower === 'feedback') return itemType === 'feedback';
+            return false;
+          });
+        });
+      }
+
+      // Apply status filter
+      if (filtersByCategory['status'] && filtersByCategory['status'].length > 0) {
+        filtered = filtered.filter(item => {
+          return filtersByCategory['status'].some(statusFilter => {
+            const statusLower = statusFilter.toLowerCase();
+            if (statusLower === 'active') return item.isActive;
+            if (statusLower === 'closed') return !item.isActive;
+            return false;
+          });
+        });
+      }
+
+      // Apply timeframe filter
+      if (filtersByCategory['timeframe'] && filtersByCategory['timeframe'].length > 0) {
+        const now = new Date();
+        filtered = filtered.filter(item => {
+          const publishedDate = new Date(item.publishedAt);
+          
+          return filtersByCategory['timeframe'].some(timeframe => {
+            const timeframeLower = timeframe.toLowerCase();
+            
+            if (timeframeLower === 'today') {
+              const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              return publishedDate >= todayStart;
+            }
+            
+            if (timeframeLower === 'this-week') {
+              const weekStart = new Date(now);
+              weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
+              weekStart.setHours(0, 0, 0, 0);
+              return publishedDate >= weekStart;
+            }
+            
+            if (timeframeLower === 'this-month') {
+              const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+              return publishedDate >= monthStart;
+            }
+            
+            return false;
+          });
+        });
+      }
+
       // Apply department filter
       if (filtersByCategory['department'] && filtersByCategory['department'].length > 0) {
         filtered = filtered.filter(item => 
@@ -275,24 +369,70 @@ export const PulsePage: React.FC = () => {
         );
       }
 
-      // Apply survey type filter
-      if (filtersByCategory['survey_type'] && filtersByCategory['survey_type'].length > 0) {
-        filtered = filtered.filter(item => 
-          filtersByCategory['survey_type'].includes(item.surveyType)
-        );
+      // Apply engagement level filter (this is actually a sort, handled separately)
+      if (filtersByCategory['engagement'] && filtersByCategory['engagement'].length > 0) {
+        const engagementFilter = filtersByCategory['engagement'][0];
+        setEngagementSort(engagementFilter);
+      } else {
+        setEngagementSort('');
+      }
+    } else {
+      setEngagementSort('');
+    }
+
+    // Apply engagement level sorting
+    if (engagementSort) {
+      if (engagementSort === 'Most Responded') {
+        filtered.sort((a, b) => b.participantsCount - a.participantsCount);
+      } else if (engagementSort === 'Most Recent') {
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.publishedAt).getTime();
+          const dateB = new Date(b.publishedAt).getTime();
+          return dateB - dateA;
+        });
+      } else if (engagementSort === 'Trending Topics') {
+        // Trending: combination of recent + high response count
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.publishedAt).getTime();
+          const dateB = new Date(b.publishedAt).getTime();
+          const daysSinceA = (Date.now() - dateA) / (1000 * 60 * 60 * 24);
+          const daysSinceB = (Date.now() - dateB) / (1000 * 60 * 60 * 24);
+          
+          // Trending score: responses / days since published (higher is better)
+          const scoreA = daysSinceA > 0 ? a.participantsCount / daysSinceA : a.participantsCount;
+          const scoreB = daysSinceB > 0 ? b.participantsCount / daysSinceB : b.participantsCount;
+          
+          return scoreB - scoreA;
+        });
       }
     }
 
     setFilteredItems(filtered);
-  }, [searchQuery, items, activeFilters, filterConfig]);
+  }, [searchQuery, items, activeFilters, filterConfig, engagementSort]);
 
   // Handle filter changes
   const handleFilterChange = useCallback((filter: string) => {
     setActiveFilters(prev => {
+      // Check if this is an engagement level filter
+      const engagementOptions = ['Most Responded', 'Most Recent', 'Trending Topics'];
+      const isEngagementFilter = engagementOptions.includes(filter);
+      
+      if (isEngagementFilter) {
+        // For engagement level, only allow one selection at a time
+        if (prev.includes(filter)) {
+          // Remove if already selected
+          return prev.filter(f => !engagementOptions.includes(f));
+        } else {
+          // Remove other engagement options and add the new one
+          return [...prev.filter(f => !engagementOptions.includes(f)), filter];
+        }
+      } else {
+        // For other filters, allow multiple selections
       if (prev.includes(filter)) {
         return prev.filter(f => f !== filter);
       } else {
         return [...prev, filter];
+        }
       }
     });
   }, []);
@@ -313,18 +453,13 @@ export const PulsePage: React.FC = () => {
 
   // Format date for display
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 
       year: 'numeric' 
     });
-  };
-
-  // Parse progress percentage
-  const parseProgress = (progress: string): number => {
-    const match = progress.match(/(\d+)%/);
-    return match ? parseInt(match[1], 10) : 0;
   };
 
   return (
@@ -371,7 +506,7 @@ export const PulsePage: React.FC = () => {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <div className="text-xs uppercase text-gray-500 font-medium mb-2">CURRENT FOCUS</div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">Pulse</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-1">Pulse</h2>
               <p className="text-gray-700 leading-relaxed mb-2">
                 Share your thoughts and feedback through surveys, polls, and quick feedback sessions. Pulse is your platform for participating in organizational insights and shaping the future of DQ through direct engagement.
               </p>
@@ -632,8 +767,8 @@ export const PulsePage: React.FC = () => {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className="bg-blue-600 h-2 rounded-full transition-all"
-                            style={{ width: item.progress }}
+                            className="h-2 rounded-full transition-all"
+                            style={{ width: item.progress, backgroundColor: '#FB5535' }}
                           />
                         </div>
                       </div>

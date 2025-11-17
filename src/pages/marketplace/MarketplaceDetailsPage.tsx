@@ -8,6 +8,10 @@ import { fetchMarketplaceItemDetails, fetchRelatedMarketplaceItems } from '../..
 import { ErrorDisplay } from '../../components/SkeletonLoader';
 import { Link } from 'react-router-dom';
 import { getFallbackItemDetails, getFallbackItems } from '../../utils/fallbackData';
+import { supabaseClient } from '../../lib/supabaseClient';
+import { toast } from 'sonner';
+import { EventRegistrationForm } from '../../components/events/EventRegistrationForm';
+import { EventRegistrationConfirmation } from '../../components/events/EventRegistrationConfirmation';
 interface MarketplaceDetailsPageProps {
   marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding' | 'events';
   bookmarkedItems?: string[];
@@ -28,9 +32,11 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const shouldTakeAction = searchParams.get('action') === 'true';
+  const shouldOpenRegistration = searchParams.get('register') === 'true';
   const config = getMarketplaceConfig(marketplaceType);
   const [item, setItem] = useState<any | null>(null);
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
+  const [relatedEventsLoading, setRelatedEventsLoading] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -42,6 +48,13 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const [showStickyBottomCTA, setShowStickyBottomCTA] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(80);
   const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(null);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [showRegistrationConfirmation, setShowRegistrationConfirmation] = useState(false);
+  const [registrationData, setRegistrationData] = useState<{
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+  } | null>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -160,56 +173,128 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           console.error(`Error fetching ${marketplaceType} item details:`, fetchError);
           // We'll handle this below by using fallback data
         }
-        // If item data is available, use it, otherwise use fallback data
-        const finalItemData = itemData || getFallbackItemDetails(marketplaceType, itemId || 'fallback-1');
-        if (finalItemData) {
-          setItem(finalItemData);
-          setIsBookmarked(bookmarkedItems.includes(finalItemData.id));
-          // Fetch related items
-          let relatedItemsData = [];
-          try {
-            relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, finalItemData.category || '', finalItemData.provider?.name || '');
-          } catch (relatedError) {
-            console.error('Error fetching related items:', relatedError);
-            // Use fallback related items on error
+        // For events, only use database data - don't fall back to mock data
+        if (marketplaceType === 'events') {
+          if (!itemData) {
+            setError('Event not found. Please check the event ID and try again.');
+            setLoading(false);
+            return;
           }
-          // Use fetched related items if available, otherwise use fallback
-          setRelatedItems(relatedItemsData && relatedItemsData.length > 0 ? relatedItemsData : getFallbackItems(marketplaceType));
-          // If the action parameter is true, scroll to the action section
-          if (shouldTakeAction) {
-            setTimeout(() => {
-              const actionSection = document.getElementById('action-section');
-              if (actionSection) {
-                actionSection.scrollIntoView({
-                  behavior: 'smooth'
-                });
+          setItem(itemData);
+          setIsBookmarked(bookmarkedItems.includes(itemData.id));
+          
+          // Fetch related events from database (only for events marketplace)
+          if (marketplaceType === 'events' && itemData.category) {
+            setRelatedEventsLoading(true);
+            try {
+              const { data: relatedEventsData, error: relatedError } = await supabaseClient
+                .from('events_v2')
+                .select('id, title, description, start_time, end_time, category, location, image_url, tags')
+                .eq('status', 'published')
+                .eq('category', itemData.category) // Filter by same category
+                .neq('id', itemId) // Exclude current event
+                .gte('start_time', new Date().toISOString()) // Only future events
+                .order('start_time', { ascending: true })
+                .limit(5); // Limit to 5 events
+              
+              if (!relatedError && relatedEventsData) {
+                const transformedRelated = relatedEventsData.map((event: any) => ({
+                  id: event.id,
+                  event_title: event.title,
+                  title: event.title,
+                  event_description: event.description,
+                  description: event.description,
+                  tags: event.tags || []
+                }));
+                setRelatedItems(transformedRelated);
+              } else {
+                setRelatedItems([]);
               }
-            }, 100);
+            } catch (relatedError) {
+              console.error('Error fetching related events:', relatedError);
+              setRelatedItems([]);
+            } finally {
+              setRelatedEventsLoading(false);
+            }
+          } else {
+            // For non-events or events without category, fetch related items normally
+            let relatedItemsData = [];
+            try {
+              relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, itemData.id, itemData.category || '', itemData.provider?.name || '');
+            } catch (relatedError) {
+              console.error('Error fetching related items:', relatedError);
+            }
+            setRelatedItems(relatedItemsData && relatedItemsData.length > 0 ? relatedItemsData : []);
           }
         } else {
-          // Item not found - use generic fallback
-          const genericFallback = getFallbackItemDetails(marketplaceType, 'generic-fallback');
-          setItem(genericFallback);
-          setError(null); // Clear any error since we're showing fallback data
-          // Set a redirect timer with a longer delay (5 seconds)
-          const timer = setTimeout(() => {
-            navigate(config.route);
-          }, 5000);
-          setRedirectTimer(timer);
+          // For other marketplace types, use fallback data if needed
+          const finalItemData = itemData || getFallbackItemDetails(marketplaceType, itemId || 'fallback-1');
+          if (finalItemData) {
+            setItem(finalItemData);
+            setIsBookmarked(bookmarkedItems.includes(finalItemData.id));
+            // Fetch related items
+            let relatedItemsData = [];
+            try {
+              relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, finalItemData.category || '', finalItemData.provider?.name || '');
+            } catch (relatedError) {
+              console.error('Error fetching related items:', relatedError);
+              // Use fallback related items on error
+            }
+            // Use fetched related items if available, otherwise use fallback
+            setRelatedItems(relatedItemsData && relatedItemsData.length > 0 ? relatedItemsData : getFallbackItems(marketplaceType));
+          } else {
+            // Item not found - use generic fallback
+            const genericFallback = getFallbackItemDetails(marketplaceType, 'generic-fallback');
+            setItem(genericFallback);
+            setError(null); // Clear any error since we're showing fallback data
+            // Set a redirect timer with a longer delay (5 seconds)
+            const timer = setTimeout(() => {
+              navigate(config.route);
+            }, 5000);
+            setRedirectTimer(timer);
+          }
+        }
+        
+        // If the action parameter is true, scroll to the action section
+        if (shouldTakeAction) {
+          setTimeout(() => {
+            const actionSection = document.getElementById('action-section');
+            if (actionSection) {
+              actionSection.scrollIntoView({
+                behavior: 'smooth'
+              });
+            }
+          }, 100);
         }
       } catch (err) {
         console.error(`Error in marketplace details page:`, err);
-        // Use fallback data even on general errors
-        const fallbackItem = getFallbackItemDetails(marketplaceType, 'generic-fallback');
-        setItem(fallbackItem);
-        setRelatedItems(getFallbackItems(marketplaceType));
-        setError(null); // Clear error since we're showing fallback data
+        // For events, show error instead of fallback
+        if (marketplaceType === 'events') {
+          setError(`Failed to load event details: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        } else {
+          // Use fallback data even on general errors for other types
+          const fallbackItem = getFallbackItemDetails(marketplaceType, 'generic-fallback');
+          setItem(fallbackItem);
+          setRelatedItems(getFallbackItems(marketplaceType));
+          setError(null); // Clear error since we're showing fallback data
+        }
       } finally {
         setLoading(false);
       }
     };
     fetchItemDetails();
   }, [itemId, marketplaceType, bookmarkedItems, shouldTakeAction, navigate, config]);
+
+  // Auto-open registration form when register query parameter is present
+  useEffect(() => {
+    if (shouldOpenRegistration && marketplaceType === 'events' && item && itemId && !showRegistrationForm && !showRegistrationConfirmation) {
+      // Small delay to ensure page is fully loaded
+      setTimeout(() => {
+        setShowRegistrationForm(true);
+      }, 300);
+    }
+  }, [shouldOpenRegistration, marketplaceType, item, itemId, showRegistrationForm, showRegistrationConfirmation]);
+
   const handleToggleBookmark = () => {
     if (item) {
       onToggleBookmark(item.id);
@@ -221,6 +306,81 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
       onAddToComparison(item);
     }
   };
+
+  // Handle event registration for events marketplace
+  const handleEventRegistration = () => {
+    if (marketplaceType !== 'events' || !item || !itemId) {
+      return;
+    }
+    // Open registration form
+    setShowRegistrationForm(true);
+  };
+
+  // Handle registration form success
+  const handleRegistrationSuccess = (data: {
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+  }) => {
+    setRegistrationData(data);
+    setShowRegistrationForm(false);
+    setShowRegistrationConfirmation(true);
+  };
+
+  // Handle registration form close
+  const handleRegistrationFormClose = () => {
+    setShowRegistrationForm(false);
+  };
+
+  // Handle confirmation close
+  const handleConfirmationClose = () => {
+    setShowRegistrationConfirmation(false);
+    setRegistrationData(null);
+  };
+
+  // Legacy function (keeping for compatibility)
+  const handleEventRegistrationLegacy = async () => {
+    if (marketplaceType !== 'events' || !item || !itemId) {
+      return;
+    }
+
+    try {
+      // Get current user from Supabase
+      const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+      
+      if (authError || !user) {
+        toast.error('Please sign in to register for events');
+        // Optionally redirect to sign in page
+        // navigate('/sign-in');
+        return;
+      }
+
+      // Save registration to event_registrations table
+      const { error: registrationError } = await supabaseClient
+        .from('event_registrations')
+        .insert({
+          user_id: user.id,
+          event_id: itemId,
+          status: 'registered'
+        });
+
+      if (registrationError) {
+        // Check if user is already registered
+        if (registrationError.code === '23505') { // Unique constraint violation
+          toast.info('You are already registered for this event');
+          return;
+        }
+        throw new Error(`Registration failed: ${registrationError.message}`);
+      }
+
+      // Registration successful
+      toast.success('Successfully registered for the event!');
+    } catch (error) {
+      console.error('Error registering for event:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to register for event');
+    }
+  };
+
   const retryFetch = () => {
     setError(null);
     // Re-fetch by triggering the useEffect
@@ -384,18 +544,12 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                       </p>
                       {item.register_button && <div className="mt-3">
                           {typeof item.register_button === 'string' && item.register_button.startsWith('http') ? (
-                            <a href={item.register_button} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] text-white rounded-md hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A] transition-all shadow-md">
+                            <a href={item.register_button} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 bg-[#030F35] text-white rounded-md hover:bg-[#13285A] active:bg-[#0A1F2E] transition-all shadow-md">
                               Register Now
                               <ExternalLinkIcon size={16} className="ml-2" />
                             </a>
                           ) : (
-                            <button onClick={() => {
-                              // Handle registration button click - could open a modal or navigate
-                              const actionSection = document.getElementById('action-section');
-                              if (actionSection) {
-                                actionSection.scrollIntoView({ behavior: 'smooth' });
-                              }
-                            }} className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] text-white rounded-md hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A] transition-all shadow-md">
+                            <button onClick={handleEventRegistration} className="inline-flex items-center px-4 py-2 bg-[#030F35] text-white rounded-md hover:bg-[#13285A] active:bg-[#0A1F2E] transition-all shadow-md">
                               {item.register_button || 'Register Now'}
                             </button>
                           )}
@@ -1094,7 +1248,15 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
               </li>)}
           </ul>
         </div>
-        <button id="action-section" className="w-full px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A] transition-colors shadow-md mb-3">
+        <button 
+          id="action-section" 
+          onClick={marketplaceType === 'events' ? handleEventRegistration : undefined}
+          className={`w-full px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md mb-3 ${
+            marketplaceType === 'events' 
+              ? 'bg-[#030F35] hover:bg-[#13285A] active:bg-[#0A1F2E]' 
+              : 'bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A]'
+          }`}
+        >
           {primaryAction}
         </button>
         <button onClick={handleAddToComparison} className="w-full px-4 py-2.5 text-[#030F35] font-medium bg-white border border-[#030F35]/30 rounded-md hover:bg-[#030F35]/10 transition-colors flex items-center justify-center">
@@ -1136,6 +1298,16 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 </li>
               </ol>
             </nav>
+            {/* Event Image - for events only */}
+            {marketplaceType === 'events' && item.imageUrl && (
+              <div className="w-full mb-6 rounded-lg overflow-hidden">
+                <img 
+                  src={item.imageUrl} 
+                  alt={itemTitle} 
+                  className="w-full h-64 md:h-80 object-cover"
+                />
+              </div>
+            )}
             <div className="flex flex-col items-start max-w-3xl py-8">
               {/* Provider */}
               <div className="flex items-center mb-3">
@@ -1273,28 +1445,54 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 <ChevronRightIcon size={16} className="ml-1" />
               </a>
             </div>
-            {/* For events, check if item.related_events exists, otherwise use relatedItems */}
-            {(marketplaceType === 'events' && item.related_events && item.related_events.length > 0) ? <div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {item.related_events.map((relatedEvent: any, index: number) => <div key={relatedEvent.id || index} className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow border border-[#030F35]/10" onClick={() => {
-                      if (relatedEvent.id) {
-                        navigate(`/marketplace/${marketplaceType}/${relatedEvent.id}`);
-                      }
-                    }}>
-                      <h3 className="font-semibold text-[#030F35] mb-2">
-                        {relatedEvent.event_title || relatedEvent.title || 'Related Event'}
-                      </h3>
-                      <p className="text-sm text-[#030F35]/70 line-clamp-2 mb-3">
-                        {relatedEvent.event_description || relatedEvent.description || ''}
-                      </p>
-                      {relatedEvent.tags && relatedEvent.tags.length > 0 && <div className="flex flex-wrap gap-1">
-                          {relatedEvent.tags.slice(0, 2).map((tag: string, idx: number) => <span key={idx} className="px-2 py-0.5 bg-[#030F35]/10 text-[#030F35] text-xs rounded-full">
-                                {tag}
-                              </span>)}
-                        </div>}
-                    </div>)}
+            {/* For events, fetch and display related events dynamically */}
+            {marketplaceType === 'events' ? (
+              relatedEventsLoading ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#030F35]"></div>
+                  <p className="mt-4 text-[#030F35]/70">Loading related events...</p>
                 </div>
-              </div> : relatedItems.length > 0 ? <div>
+              ) : relatedItems.length > 0 ? (
+                <div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {relatedItems.map((relatedEvent: any, index: number) => (
+                      <div 
+                        key={relatedEvent.id || index} 
+                        className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow border border-[#030F35]/10" 
+                        onClick={() => {
+                          if (relatedEvent.id) {
+                            navigate(`/marketplace/${marketplaceType}/${relatedEvent.id}`);
+                          }
+                        }}
+                      >
+                        <h3 className="font-semibold text-[#030F35] mb-2">
+                          {relatedEvent.event_title || relatedEvent.title || 'Related Event'}
+                        </h3>
+                        <p className="text-sm text-[#030F35]/70 line-clamp-2 mb-3">
+                          {relatedEvent.event_description || relatedEvent.description || ''}
+                        </p>
+                        {relatedEvent.tags && relatedEvent.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {relatedEvent.tags.slice(0, 2).map((tag: string, idx: number) => (
+                              <span key={idx} className="px-2 py-0.5 bg-[#030F35]/10 text-[#030F35] text-xs rounded-full">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-[#030F35]/20">
+                  <p className="text-[#030F35]/70">
+                    No related events found in the same category.
+                  </p>
+                </div>
+              )
+            ) : relatedItems.length > 0 ? (
+              <div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {relatedItems.map(relatedItem => <div key={relatedItem.id} className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow border border-[#030F35]/10" onClick={() => navigate(`/marketplace/${marketplaceType}/${relatedItem.id}`)}>
                       <div className="flex items-center mb-3">
@@ -1316,11 +1514,14 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                       </div>
                     </div>)}
                 </div>
-              </div> : <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-[#030F35]/20">
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-[#030F35]/20">
                 <p className="text-[#030F35]/60">
                   No related {config.itemNamePlural.toLowerCase()} found
                 </p>
-              </div>}
+              </div>
+            )}
           </div>
         </section>
         {/* Sticky mobile CTA */}
@@ -1334,13 +1535,39 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   {item.duration || item.serviceType || ''}
                 </div>
               </div>
-              <button className="flex-1 px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A] transition-colors shadow-md">
+              <button 
+                onClick={marketplaceType === 'events' ? handleEventRegistration : undefined}
+                className="flex-1 px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A] transition-colors shadow-md"
+              >
                 {primaryAction}
               </button>
             </div>
           </div>}
       </main>
       <Footer isLoggedIn={false} />
+
+      {/* Event Registration Form */}
+      {showRegistrationForm && marketplaceType === 'events' && itemId && item && (
+        <EventRegistrationForm
+          eventId={itemId}
+          eventTitle={item.title || 'Event'}
+          onClose={handleRegistrationFormClose}
+          onSuccess={handleRegistrationSuccess}
+        />
+      )}
+
+      {/* Event Registration Confirmation */}
+      {showRegistrationConfirmation && marketplaceType === 'events' && itemId && item && registrationData && (
+        <EventRegistrationConfirmation
+          eventId={itemId}
+          eventTitle={item.title || 'Event'}
+          eventDate={item.date || item.start_time}
+          eventTime={item.time || item.start_time}
+          eventLocation={item.location}
+          registrationData={registrationData}
+          onClose={handleConfirmationClose}
+        />
+      )}
     </div>;
 };
 export default MarketplaceDetailsPage;

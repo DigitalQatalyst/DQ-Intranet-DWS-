@@ -823,29 +823,29 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             }
           }
 
-          // Handle errors gracefully
+          // Handle errors gracefully - for events, don't use fallback data
           if (error && (!data || data.length === 0)) {
             if (error?.code === '42501') {
               console.warn("Permission denied: Events may require authentication or proper RLS policies.");
+              setError("Permission denied: Events may require authentication or proper RLS policies.");
             } else {
               console.error("Error fetching events:", error);
+              setError(`Failed to load events: ${error?.message || 'Unknown error'}`);
             }
-            // Fallback to empty state or mock data
-            const fallbackItems = getFallbackItems(marketplaceType);
-            setItems(fallbackItems);
-            setFilteredItems(fallbackItems);
-            setTotalCount(fallbackItems.length);
+            // Show empty state instead of fallback data
+            setItems([]);
+            setFilteredItems([]);
+            setTotalCount(0);
             setLoading(false);
             return;
           }
 
           if (!data || data.length === 0) {
             console.log("No events found in Supabase");
-            // Fallback to mock data if no events found
-            const fallbackItems = getFallbackItems(marketplaceType);
-            setItems(fallbackItems);
-            setFilteredItems(fallbackItems);
-            setTotalCount(fallbackItems.length);
+            // Show empty state - no fallback to mock data
+            setItems([]);
+            setFilteredItems([]);
+            setTotalCount(0);
             setLoading(false);
             return;
           }
@@ -858,11 +858,11 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           setTotalCount(marketplaceEvents.length);
         } catch (err) {
           console.error("Error in fetchEvents:", err);
-          // Fallback to mock data on error
-          const fallbackItems = getFallbackItems(marketplaceType);
-          setItems(fallbackItems);
-          setFilteredItems(fallbackItems);
-          setTotalCount(fallbackItems.length);
+          // For events, show error instead of fallback data
+          setError(`Failed to load events: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          setItems([]);
+          setFilteredItems([]);
+          setTotalCount(0);
         } finally {
           setLoading(false);
         }
@@ -1316,7 +1316,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="text-xs uppercase text-gray-500 font-medium mb-2">CURRENT FOCUS</div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">Events</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">Events</h2>
                   <p className="text-gray-700 leading-relaxed mb-2">
                     Stay up to date with upcoming events, workshops, and team gatherings. Explore activities within DQ that encourage collaboration, growth, and innovation.
                   </p>

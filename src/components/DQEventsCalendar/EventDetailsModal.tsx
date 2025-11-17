@@ -1,5 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Event } from './index';
+import { supabaseClient } from '../../lib/supabaseClient';
 import { 
   X, 
   Calendar, 
@@ -7,9 +9,12 @@ import {
   MapPin, 
   Users, 
   ExternalLink,
-  Download,
   Share2,
-  ChevronDown
+  ChevronDown,
+  UserPlus,
+  Loader2,
+  AlertCircle,
+  User
 } from 'lucide-react';
 
 interface EventDetailsModalProps {
@@ -18,10 +23,109 @@ interface EventDetailsModalProps {
   onClose: () => void;
 }
 
+interface EventDetails {
+  id: string;
+  title: string;
+  description: string | null;
+  start_time: string;
+  end_time: string;
+  category: string;
+  location: string;
+  location_filter: string | null;
+  organizer_name: string | null;
+  organizer_email: string | null;
+  meeting_link: string | null;
+  is_virtual: boolean;
+  is_all_day: boolean;
+  max_attendees: number | null;
+  registration_required: boolean;
+  registration_deadline: string | null;
+  image_url: string | null;
+  tags: string[] | null;
+  department: string | null;
+  metadata: any | null;
+}
+
 export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalProps) {
+  const navigate = useNavigate();
   const modalRef = useRef<HTMLDivElement>(null);
   const [showCalendarOptions, setShowCalendarOptions] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch event details from Supabase when modal opens
+  useEffect(() => {
+    const fetchEventDetails = async () => {
+      // Reset state when modal closes
+      if (!isOpen) {
+        setEventDetails(null);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      // Validate event and event ID
+      if (!event || !event.id) {
+        console.warn('EventDetailsModal: No event or event.id provided', { event });
+        setError('Error occurred fetching event details. Please try again later.');
+        setEventDetails(null);
+        setLoading(false);
+        return;
+      }
+
+      console.log('EventDetailsModal: Starting fetch for event ID:', event.id, 'Event object:', event);
+      setLoading(true);
+      setError(null);
+      setEventDetails(null); // Clear any previous data
+
+      try {
+        console.log('EventDetailsModal: Querying Supabase events_v2 table for event ID:', event.id);
+        const query = supabaseClient
+          .from('events_v2')
+          .select('*')
+          .eq('id', event.id as any)
+          .eq('status', 'published' as any)
+          .single();
+        
+        console.log('EventDetailsModal: Query object:', query);
+        
+        const { data, error: fetchError } = await query;
+
+        console.log('EventDetailsModal: Supabase response received:', { 
+          hasData: !!data, 
+          dataKeys: data ? Object.keys(data) : null,
+          error: fetchError,
+          errorCode: fetchError?.code,
+          errorMessage: fetchError?.message
+        });
+
+        if (fetchError) {
+          console.error('EventDetailsModal: Supabase error:', fetchError);
+          throw fetchError;
+        }
+
+        if (!data) {
+          console.warn('EventDetailsModal: No data returned for event ID:', event.id);
+          throw new Error('Event not found');
+        }
+
+        console.log('EventDetailsModal: Successfully fetched event details:', data);
+        setEventDetails(data as unknown as EventDetails);
+        setError(null); // Clear any previous errors
+      } catch (err: any) {
+        console.error('EventDetailsModal: Error fetching event details:', err);
+        setError('Error occurred fetching event details. Please try again later.');
+        // Do not set fallback data - only show error message
+        setEventDetails(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEventDetails();
+  }, [isOpen, event?.id]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,8 +160,12 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
 
   if (!isOpen || !event) return null;
 
+  // Only use fetched event details from backend - no fallback data
+  const displayEvent = eventDetails;
+
   // Format date and time
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -66,13 +174,34 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
     }).format(date);
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
       hour: 'numeric',
       minute: 'numeric',
       hour12: true
     }).format(date);
   };
+
+  // Extract speakers from metadata if available
+  const getSpeakers = (): string[] => {
+    if (!displayEvent || !displayEvent.metadata) return [];
+    
+    // Check for speakers in various possible formats
+    if (displayEvent.metadata.speakers && Array.isArray(displayEvent.metadata.speakers)) {
+      return displayEvent.metadata.speakers.map((s: any) => 
+        typeof s === 'string' ? s : (s.name || s.speakerName || s.full_name || '')
+      ).filter(Boolean);
+    }
+    
+    if (displayEvent.metadata.speaker) {
+      return [displayEvent.metadata.speaker];
+    }
+    
+    return [];
+  };
+
+  const speakers = displayEvent ? getSpeakers() : [];
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -90,8 +219,10 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
   };
 
   const getCalendarUrls = () => {
-    const startDate = new Date(event.start);
-    const endDate = new Date(event.end);
+    if (!displayEvent) return null;
+    
+    const startDate = new Date(displayEvent.start_time);
+    const endDate = new Date(displayEvent.end_time);
     
     // Format dates for calendar URLs (YYYYMMDDTHHMMSSZ format)
     const formatDateForCalendar = (date: Date) => {
@@ -110,9 +241,9 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
     
     // Create event details
     const eventDetails = {
-      title: encodeURIComponent(event.title),
-      description: encodeURIComponent(event.description),
-      location: encodeURIComponent(event.location),
+      title: encodeURIComponent(displayEvent.title),
+      description: encodeURIComponent(displayEvent.description || ''),
+      location: encodeURIComponent(displayEvent.location_filter || displayEvent.location || ''),
       startDate: startDateFormatted,
       endDate: endDateFormatted,
       startDateOutlook,
@@ -129,7 +260,10 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
   };
 
   const handleAddToCalendar = (calendarType: 'teams' | 'teamsCalendar' | 'outlook' | 'outlookDesktop' | 'google' = 'teams') => {
+    if (!displayEvent) return;
+    
     const urls = getCalendarUrls();
+    if (!urls) return;
     
     // For Teams app and Outlook desktop, try the app protocol first, then fallback to web
     if (calendarType === 'teamsCalendar') {
@@ -157,20 +291,31 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
     setTimeout(() => setShowSuccessMessage(false), 3000);
     
     // Optional: Analytics
-    console.log(`Opening ${calendarType} calendar for event:`, event.title);
+    console.log(`Opening ${calendarType} calendar for event:`, displayEvent.title);
   };
 
   const handleShareEvent = () => {
+    if (!displayEvent) return;
+    
     // Handle share event logic here
     if (navigator.share) {
       navigator.share({
-        title: event.title,
-        text: event.description,
+        title: displayEvent.title,
+        text: displayEvent.description || '',
         url: window.location.href
       });
     } else {
       // Fallback to copying to clipboard
       navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
+  const handleRegister = () => {
+    // Navigate to event details page where registration form is available
+    // Add query parameter to auto-open registration form
+    if (displayEvent?.id) {
+      onClose(); // Close the modal first
+      navigate(`/marketplace/events/${displayEvent.id}?register=true`);
     }
   };
 
@@ -191,88 +336,266 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
           </button>
           
           <div className="pr-12">
-            <div className="mb-3">
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(event.category)}`}>
-                {event.category}
-              </span>
-            </div>
-            <h2 className="text-2xl font-bold mb-2">{event.title}</h2>
+            {displayEvent && (
+              <>
+                <div className="mb-3">
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(displayEvent.category)}`}>
+                    {displayEvent.category}
+                  </span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">{displayEvent.title}</h2>
+              </>
+            )}
+            {!displayEvent && !loading && (
+              <h2 className="text-2xl font-bold mb-2">Event Details</h2>
+            )}
           </div>
         </div>
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          {/* Event Details */}
-          <div className="space-y-4 mb-6">
-            {/* Date */}
-            <div className="flex items-center text-gray-700">
-              <Calendar className="w-5 h-5 mr-3 text-[#1A2E6E]" />
-              <span className="font-medium">{formatDate(event.start)}</span>
+          {/* Loading State */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-[#1A2E6E] animate-spin mb-4" />
+              <p className="text-gray-600">Loading event details...</p>
             </div>
+          )}
 
-            {/* Time */}
-            <div className="flex items-center text-gray-700">
-              <Clock className="w-5 h-5 mr-3 text-[#1A2E6E]" />
-              <span>{formatTime(event.start)} - {formatTime(event.end)}</span>
-            </div>
-
-            {/* Location */}
-            <div className="flex items-center text-gray-700">
-              <MapPin className="w-5 h-5 mr-3 text-[#1A2E6E]" />
-              <span>{event.location}</span>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-[#030F35] mb-3">About this event</h3>
-            <p className="text-gray-600 leading-relaxed">{event.description}</p>
-          </div>
-
-          {/* Additional Details */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-[#030F35] mb-3">Event Details</h3>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-              <div className="flex items-center text-sm text-gray-600">
-                <Users className="w-4 h-4 mr-2" />
-                <span>Open to all DQ team members</span>
+          {/* Error State */}
+          {error && !eventDetails && !loading && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="text-red-800 font-semibold mb-1">Unable to Load Event Details</h3>
+                  <p className="text-red-700 text-sm mb-2">{error}</p>
+                  {event?.id && (
+                    <p className="text-red-600 text-xs mt-2">
+                      Attempted to fetch event ID: <code className="bg-red-100 px-1 rounded">{event.id}</code>
+                    </p>
+                  )}
+                  <p className="text-red-600 text-xs mt-1">
+                    Please check your browser console for more details or try refreshing the page.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                <span>Teams meeting link will be generated automatically</span>
+            </div>
+          )}
+
+          {/* Event Details - Only show if we have data from backend */}
+          {!loading && eventDetails && displayEvent && (
+            <>
+              {/* Event Details */}
+              <div className="space-y-4 mb-6">
+                {/* Date */}
+                <div className="flex items-center text-gray-700">
+                  <Calendar className="w-5 h-5 mr-3 text-[#1A2E6E]" />
+                  <span className="font-medium">{formatDate(displayEvent.start_time)}</span>
+                </div>
+
+                {/* Time */}
+                {!displayEvent.is_all_day && (
+                  <div className="flex items-center text-gray-700">
+                    <Clock className="w-5 h-5 mr-3 text-[#1A2E6E]" />
+                    <span>{formatTime(displayEvent.start_time)} - {formatTime(displayEvent.end_time)}</span>
+                  </div>
+                )}
+                {displayEvent.is_all_day && (
+                  <div className="flex items-center text-gray-700">
+                    <Clock className="w-5 h-5 mr-3 text-[#1A2E6E]" />
+                    <span>All Day Event</span>
+                  </div>
+                )}
+
+                {/* Location */}
+                <div className="flex items-center text-gray-700">
+                  <MapPin className="w-5 h-5 mr-3 text-[#1A2E6E]" />
+                  <span>
+                    {displayEvent.location_filter || displayEvent.location || 'Location TBA'}
+                    {displayEvent.location_filter && displayEvent.location && displayEvent.location !== displayEvent.location_filter && (
+                      <span className="text-gray-500 text-sm ml-2">({displayEvent.location})</span>
+                    )}
+                  </span>
+                </div>
+
+                {/* Virtual/Meeting Link */}
+                {displayEvent.is_virtual && displayEvent.meeting_link && (
+                  <div className="flex items-center text-gray-700">
+                    <ExternalLink className="w-5 h-5 mr-3 text-[#1A2E6E]" />
+                    <a 
+                      href={displayEvent.meeting_link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Join Online Meeting
+                    </a>
+                  </div>
+                )}
+
+                {/* Organizer */}
+                {displayEvent.organizer_name && (
+                  <div className="flex items-center text-gray-700">
+                    <User className="w-5 h-5 mr-3 text-[#1A2E6E]" />
+                    <div>
+                      <span className="font-medium">Organized by: </span>
+                      <span>{displayEvent.organizer_name}</span>
+                      {displayEvent.organizer_email && (
+                        <a 
+                          href={`mailto:${displayEvent.organizer_email}`}
+                          className="text-blue-600 hover:text-blue-800 ml-1"
+                        >
+                          ({displayEvent.organizer_email})
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Department */}
+                {displayEvent.department && (
+                  <div className="flex items-center text-gray-700">
+                    <Users className="w-5 h-5 mr-3 text-[#1A2E6E]" />
+                    <span>{displayEvent.department}</span>
+                  </div>
+                )}
               </div>
-              {event.category === 'Training' && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  <span>Training materials will be shared before the session</span>
+
+              {/* Description */}
+              {displayEvent.description && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-[#030F35] mb-3">About this event</h3>
+                  <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{displayEvent.description}</p>
                 </div>
               )}
-              {event.category === 'Client' && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <Users className="w-4 h-4 mr-2" />
-                  <span>Client attendees will receive separate invitations</span>
+
+              {/* Speakers */}
+              {speakers.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-[#030F35] mb-3">Speakers</h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <ul className="space-y-2">
+                      {speakers.map((speaker, index) => (
+                        <li key={index} className="flex items-center text-gray-700">
+                          <User className="w-4 h-4 mr-2 text-[#1A2E6E]" />
+                          <span>{speaker}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               )}
-            </div>
-          </div>
+
+              {/* Additional Details */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-[#030F35] mb-3">Event Details</h3>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  {displayEvent.max_attendees && (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Users className="w-4 h-4 mr-2" />
+                      <span>Capacity: {displayEvent.max_attendees} attendees</span>
+                    </div>
+                  )}
+                  
+                  {displayEvent.registration_required ? (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Users className="w-4 h-4 mr-2" />
+                      <span>Registration required</span>
+                      {displayEvent.registration_deadline && (
+                        <span className="ml-2 text-xs text-gray-500">
+                          (Deadline: {new Date(displayEvent.registration_deadline).toLocaleDateString()})
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Users className="w-4 h-4 mr-2" />
+                      <span>Open to all DQ team members</span>
+                    </div>
+                  )}
+
+                  {displayEvent.is_virtual && (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      <span>Virtual event - Join online</span>
+                    </div>
+                  )}
+
+                  {displayEvent.category === 'Training' && (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      <span>Training materials will be shared before the session</span>
+                    </div>
+                  )}
+
+                  {displayEvent.category === 'Client' && (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Users className="w-4 h-4 mr-2" />
+                      <span>Client attendees will receive separate invitations</span>
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  {displayEvent.tags && displayEvent.tags.length > 0 && (
+                    <div className="flex items-center flex-wrap gap-2 text-sm text-gray-600">
+                      <span className="font-medium">Tags:</span>
+                      {displayEvent.tags.map((tag, index) => (
+                        <span 
+                          key={index}
+                          className="px-2 py-1 bg-white rounded-full text-xs border border-gray-200"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Footer Actions */}
         <div className="border-t border-gray-200 p-6 bg-gray-50">
           <div className="flex flex-col sm:flex-row gap-3">
+            {/* Register Button */}
+            <button
+              onClick={handleRegister}
+              disabled={!displayEvent}
+              className={`flex-1 py-3 px-4 rounded-lg transition-all duration-300 font-medium flex items-center justify-center shadow-md ${
+                displayEvent
+                  ? 'bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] text-white hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A]'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Register Now
+            </button>
+            
             {/* Add to Calendar Dropdown */}
             <div className="flex-1 relative">
               <div className="flex">
                 <button
                   onClick={() => handleAddToCalendar('teamsCalendar')}
-                  className="flex-1 bg-[#FB5535] text-white py-3 px-4 rounded-l-lg hover:bg-[#FB5535]/90 transition-colors duration-300 font-medium flex items-center justify-center"
+                  disabled={!displayEvent}
+                  className={`flex-1 py-3 px-4 rounded-l-lg transition-colors duration-300 font-medium flex items-center justify-center ${
+                    displayEvent
+                      ? 'bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] text-white hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A]'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
                   Add to Teams Calendar
                 </button>
                 <button
                   onClick={() => setShowCalendarOptions(!showCalendarOptions)}
-                  className="bg-[#FB5535] text-white py-3 px-2 rounded-r-lg hover:bg-[#FB5535]/90 transition-colors duration-300 border-l border-[#FB5535]/20"
+                  disabled={!displayEvent}
+                  className={`py-3 px-2 rounded-r-lg transition-colors duration-300 border-l ${
+                    displayEvent
+                      ? 'bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] text-white hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A] border-[#1A2E6E]/20'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400'
+                  }`}
                 >
                   <ChevronDown className={`w-4 h-4 transition-transform ${showCalendarOptions ? 'rotate-180' : ''}`} />
                 </button>
@@ -337,7 +660,12 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
             
             <button
               onClick={handleShareEvent}
-              className="flex-1 border border-[#1A2E6E] text-[#1A2E6E] py-3 px-4 rounded-lg hover:bg-[#1A2E6E] hover:text-white transition-colors duration-300 font-medium flex items-center justify-center"
+              disabled={!displayEvent}
+              className={`flex-1 py-3 px-4 rounded-lg transition-colors duration-300 font-medium flex items-center justify-center ${
+                displayEvent
+                  ? 'border border-[#1A2E6E] text-[#1A2E6E] hover:bg-[#1A2E6E] hover:text-white'
+                  : 'border border-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
               <Share2 className="w-4 h-4 mr-2" />
               Share Event

@@ -171,10 +171,12 @@ export default function Communities() {
         });
         
         if (!locationOptionsError && locationOptionsData && locationOptionsData.length > 0) {
-          locationOptions = locationOptionsData.map((opt: any) => ({
-            id: opt.id.toLowerCase().replace(/\s+/g, '-'),
-            name: opt.id // Use option_value (opt.id) for exact database value matching
-          }));
+          locationOptions = locationOptionsData
+            .map((opt: any) => ({
+              id: opt.id.toLowerCase().replace(/\s+/g, '-'),
+              name: opt.id // Use option_value (opt.id) for exact database value matching
+            }))
+            .filter((opt: any) => opt.name.toLowerCase() !== 'remote');
           console.log('Location options loaded from DB:', locationOptions.length, 'options');
         } else {
           console.warn('Location filter RPC returned no data or had error:', locationOptionsError);
@@ -248,10 +250,12 @@ export default function Communities() {
       }
 
       if (locationOptions.length === 0 && uniqueLocations.length > 0) {
-        locationOptions = uniqueLocations.map((loc) => ({
-          id: loc.toLowerCase().replace(/\s+/g, '-'),
-          name: loc
-        }));
+        locationOptions = uniqueLocations
+          .filter((loc) => loc.toLowerCase() !== 'remote')
+          .map((loc) => ({
+            id: loc.toLowerCase().replace(/\s+/g, '-'),
+            name: loc
+          }));
       }
       // If still empty, try fetching from 'both' category as fallback
       if (locationOptions.length === 0) {
@@ -267,10 +271,12 @@ export default function Communities() {
           });
           
           if (!fallbackError && fallbackData && fallbackData.length > 0) {
-            locationOptions = fallbackData.map((opt: any) => ({
-              id: opt.id.toLowerCase().replace(/\s+/g, '-'),
-              name: opt.id // Use option_value (opt.id) for exact database value matching
-            }));
+            locationOptions = fallbackData
+              .map((opt: any) => ({
+                id: opt.id.toLowerCase().replace(/\s+/g, '-'),
+                name: opt.id // Use option_value (opt.id) for exact database value matching
+              }))
+              .filter((opt: any) => opt.name.toLowerCase() !== 'remote');
             console.log('Location options loaded from fallback DB:', locationOptions.length, 'options');
           }
         } catch (err) {
@@ -374,10 +380,12 @@ export default function Communities() {
           name: opt.id // Use option_value (opt.id) for exact database value matching
         })) || [];
 
-        const fallbackLocOptions = locFallback.data?.map((opt: any) => ({
-          id: opt.id.toLowerCase().replace(/\s+/g, '-'),
-          name: opt.id // Use option_value (opt.id) for exact database value matching
-        })) || [];
+        const fallbackLocOptions = (locFallback.data || [])
+          .map((opt: any) => ({
+            id: opt.id.toLowerCase().replace(/\s+/g, '-'),
+            name: opt.id // Use option_value (opt.id) for exact database value matching
+          }))
+          .filter((opt: any) => opt.name.toLowerCase() !== 'remote');
 
         // Hardcoded fallback options
         const hardcodedDeptOptions = [
@@ -513,8 +521,14 @@ export default function Communities() {
     try {
       console.log('Fetching communities with filters:', { searchQuery, filters });
       
-      // Try communities_with_counts view first
-      let query = supabase.from('communities_with_counts').select('*');
+      // If department or location filters are applied, query base table directly
+      // since communities_with_counts view may not include these columns
+      const hasDepartmentOrLocationFilter = !!(filters.department || filters.location);
+      
+      // Try communities_with_counts view first (unless we need department/location filters)
+      let query = hasDepartmentOrLocationFilter 
+        ? supabase.from('communities').select('*, memberships(count)')
+        : supabase.from('communities_with_counts').select('*');
 
       // Apply search filter (backend) - search in name or description
       if (searchQuery.trim()) {
@@ -541,24 +555,65 @@ export default function Communities() {
       }
 
       // Apply category filter (backend) - exact match
+      // Note: Category is separate from Department and Location filters
       if (filters.category) {
         query = (query as any).eq('category', filters.category);
       }
 
-      // Apply department filter (backend) - exact match
+      // Apply department filter (backend) - use department field, NOT category
+      // Ensure we're filtering by the actual department column, not category
       if (filters.department) {
+        // Use the exact department value from the filter
         query = (query as any).eq('department', filters.department);
       }
 
-      // Apply location filter (backend) - exact match
+      // Apply location filter (backend) - use location_filter field, NOT category
+      // Ensure we're filtering by the actual location_filter column, not category
       if (filters.location) {
+        // Use the exact location_filter value from the filter
         query = (query as any).eq('location_filter', filters.location);
       }
 
       // Order by member count (descending)
-      query = query.order('member_count', { ascending: false });
+      if (hasDepartmentOrLocationFilter) {
+        // For base table query, we'll sort client-side after getting member counts
+        query = query.order('created_at', { ascending: false });
+      } else {
+        query = query.order('member_count', { ascending: false });
+      }
 
       let [data, error] = await safeFetch<Community[]>(query);
+      
+      // If querying base table (for department/location filters), transform data
+      if (hasDepartmentOrLocationFilter && data && !error) {
+        const transformedData = data.map((community: any) => ({
+          ...community,
+          member_count: Array.isArray(community.memberships) 
+            ? community.memberships[0]?.count || 0 
+            : (typeof community.member_count === 'number' ? community.member_count : 0),
+          activitylevel: community.activitylevel || null
+        }));
+
+        // Apply member count filter client-side if needed
+        let filteredData = transformedData;
+        if (filters.memberCount) {
+          filteredData = transformedData.filter(community => {
+            const count = community.member_count || 0;
+            if (filters.memberCount === '0-10 members') return count < 11;
+            if (filters.memberCount === '11-50 members') return count >= 11 && count <= 50;
+            if (filters.memberCount === '51+ members') return count > 50;
+            return true;
+          });
+        }
+
+        // Sort by member count
+        filteredData.sort((a, b) => (b.member_count || 0) - (a.member_count || 0));
+
+        console.log('Successfully fetched communities from base table with department/location filters:', filteredData.length);
+        setFilteredCommunities(filteredData as Community[]);
+        setLoading(false);
+        return;
+      }
       
       // If permission denied or view doesn't exist, fallback to base communities table
       if (error && (error.message?.includes('permission denied') || error.message?.includes('does not exist'))) {
@@ -584,17 +639,22 @@ export default function Communities() {
         }
 
         // Apply category filter
+        // Note: Category is separate from Department and Location filters
         if (filters.category) {
           query = (query as any).eq('category', filters.category);
         }
 
-        // Apply department filter
+        // Apply department filter - use department field, NOT category
+        // Ensure we're filtering by the actual department column, not category
         if (filters.department) {
+          // Use the exact department value from the filter
           query = (query as any).eq('department', filters.department);
         }
 
-        // Apply location filter
+        // Apply location filter - use location_filter field, NOT category
+        // Ensure we're filtering by the actual location_filter column, not category
         if (filters.location) {
+          // Use the exact location_filter value from the filter
           query = (query as any).eq('location_filter', filters.location);
         }
 
@@ -790,7 +850,7 @@ export default function Communities() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="text-xs uppercase text-gray-500 font-medium mb-2">CURRENT FOCUS</div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-3">{focusTitle}</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-1">{focusTitle}</h2>
                     <p className="text-gray-700 leading-relaxed mb-2">{focusText}</p>
                   </div>
                   <button className="px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-100 transition-colors whitespace-nowrap">

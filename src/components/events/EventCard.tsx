@@ -92,7 +92,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
             e.stopPropagation();
             setIsModalOpen(true);
           }}
-          className="w-full px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] hover:from-[#13285A] hover:via-[#1A2E6E] hover:to-[#13285A] rounded-md transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-[#030F35]/20"
         >
           View Details
         </button>
