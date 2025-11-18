@@ -1030,7 +1030,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             </div>
             {relatedItems.length > 0 ? <div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {relatedItems.map(relatedItem => <div key={relatedItem.id} className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/marketplace/${marketplaceType}/${relatedItem.id}`)}>
+                  {relatedItems.map(relatedItem => <Link key={relatedItem.id} to={`/marketplace/${marketplaceType}/${relatedItem.id}`} className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow block">
                       <div className="flex items-center mb-3">
                         <span className="text-sm text-gray-600">
                           {relatedItem.provider.name}
@@ -1047,7 +1047,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                               {tag}
                             </span>)}
                       </div>
-                    </div>)}
+                    </Link>)}
                 </div>
               </div> : <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-gray-200">
                 <p className="text-gray-500">
