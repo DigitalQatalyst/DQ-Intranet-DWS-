@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HomeIcon, ChevronRightIcon, FilterIcon, MapPin } from 'lucide-react';
 import { SimpleTabs, SimpleTab } from '@/components/SimpleTabs';
-import WorkDirectoryOverview from '@/components/work-directory/WorkDirectoryOverview';
+import WorkDirectoryOverview from '../components/work-directory/WorkDirectoryOverview';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { FilterSidebar, FilterConfig } from '../components/marketplace/FilterSidebar';
@@ -17,24 +17,6 @@ const tabs: Array<{ id: TabKey; label: string }> = [
   { id: 'positions', label: 'Positions' },
   { id: 'associates', label: 'Associates' },
 ];
-const OVERVIEW_CONTENT: Record<TabKey, { title: string; description: string }> = {
-  units: {
-    title: 'Units Directory',
-    description:
-      'A structured catalogue of DQ sectors and work units, including mandates, priorities, and performance focus.',
-  },
-  positions: {
-    title: 'Positions Directory',
-    description:
-      'A role-level directory showing position title, role summary, key responsibilities, and seniority.',
-  },
-  associates: {
-    title: 'Associates Directory',
-    description:
-      'A searchable associate profile hub containing skills, contact details, and role information.',
-  },
-};
-
 const DEPARTMENT_OPTIONS = [
   'HRA (People)',
   'Finance',
@@ -52,6 +34,31 @@ const DEPARTMENT_OPTIONS = [
 ];
 
 const LOCATION_OPTIONS = ['Dubai', 'Nairobi', 'Riyadh', 'Remote'];
+
+const globalFilterConfig: FilterConfig[] = [
+  { id: 'department', title: 'Department', options: DEPARTMENT_OPTIONS.map((d) => ({ id: d, name: d })) },
+  { id: 'location', title: 'Location', options: LOCATION_OPTIONS.map((l) => ({ id: l, name: l })) },
+];
+
+const POSITION_CATEGORY_OPTIONS: FilterConfig['options'] = [
+  { id: 'Leadership', name: 'Leadership' },
+  { id: 'Delivery', name: 'Delivery' },
+  { id: 'Enablement', name: 'Enablement' },
+  { id: 'Platform', name: 'Platform' },
+];
+
+const POSITION_LEVEL_OPTIONS: FilterConfig['options'] = [
+  { id: 'Lead', name: 'Lead' },
+  { id: 'Manager', name: 'Manager' },
+  { id: 'Specialist', name: 'Specialist' },
+  { id: 'Associate', name: 'Associate' },
+];
+
+const POSITION_STATUS_OPTIONS: FilterConfig['options'] = [
+  { id: 'Filled', name: 'Filled' },
+  { id: 'Vacant', name: 'Vacant' },
+  { id: 'Coming soon', name: 'Coming soon' },
+];
 
 const toOptions = (values: Array<string | undefined | null>): FilterConfig['options'] => {
   const unique = Array.from(new Set(values.filter(Boolean) as string[]));
@@ -124,11 +131,6 @@ const DQWorkDirectoryPage: React.FC = () => {
   const { positions: allPositions, loading: positionsLoading, error: positionsError } = useWorkPositions();
   const { associates: allAssociates, loading: associatesLoading, error: associatesError } = useAssociates();
 
-  const globalFilterConfig: FilterConfig[] = [
-    { id: 'department', title: 'Department', options: DEPARTMENT_OPTIONS.map((d) => ({ id: d, name: d })) },
-    { id: 'location', title: 'Location', options: LOCATION_OPTIONS.map((l) => ({ id: l, name: l })) },
-  ];
-
   const unitFilterConfig = useMemo<FilterConfig[]>(
     () => [
       ...globalFilterConfig,
@@ -139,22 +141,16 @@ const DQWorkDirectoryPage: React.FC = () => {
   );
 
   const positionFilterConfig = useMemo<FilterConfig[]>(
-    () => [
-      ...globalFilterConfig,
-      { id: 'roleFamily', title: 'Role Family', options: toOptions(allPositions.map((p) => p.roleFamily)) },
-      {
-        id: 'level',
-        title: 'Rating – SFIA',
-        options: SFIA_LEVEL_OPTIONS,
-      },
-      {
-        id: 'contractType',
-        title: 'Contract Type',
-        options: toOptions(allPositions.map((p) => p.contractType)),
-      },
-      { id: 'status', title: 'Status', options: toOptions(allPositions.map((p) => p.status)) },
-    ],
-    [allPositions]
+    () => {
+      const unitOptions = allUnits.map((u) => ({ id: u.slug, name: u.unitName }));
+      return [
+        { id: 'unitSlug', title: 'Unit', options: unitOptions },
+        { id: 'category', title: 'Category', options: POSITION_CATEGORY_OPTIONS },
+        { id: 'level', title: 'Level', options: POSITION_LEVEL_OPTIONS },
+        { id: 'status', title: 'Status', options: POSITION_STATUS_OPTIONS },
+      ];
+    },
+    [allUnits]
   );
 
   const associateFilterConfig = useMemo<FilterConfig[]>(
@@ -293,19 +289,23 @@ const DQWorkDirectoryPage: React.FC = () => {
   }, [query, unitFilters, sort, allUnits]);
   const visibleUnits = filteredUnits.slice(0, visibleCounts.units);
 
+  const unitSlugToName = useMemo(
+    () => Object.fromEntries(allUnits.map((unit) => [unit.slug, unit.unitName])),
+    [allUnits]
+  );
+
   const filteredPositions = useMemo(() => {
     const base = allPositions
       .filter((position) => {
         if (!query) return true;
         const haystack = [
-          position.positionName,
-          position.roleFamily,
-          position.description,
-          position.unit,
-          position.sfiaRating,
-          position.location,
+          position.title,
+          position.summary,
+          position.category,
+          position.level,
           position.status,
-          ...position.responsibilities,
+          unitSlugToName[position.unitSlug] || position.unitSlug,
+          ...(position.responsibilities || []),
         ]
           .filter(Boolean)
           .join(' ')
@@ -313,33 +313,20 @@ const DQWorkDirectoryPage: React.FC = () => {
         return haystack.includes(query);
       })
       .filter((position) => {
-        const { department = [], location = [], roleFamily = [], level = [], status = [], contractType = [] } =
-          positionFilters;
-        const positionDepartment = mapDepartment(position.department || position.unit);
-        const positionLocation = locationLabel(position.location);
-        const matchesDepartment = department.length === 0 || department.includes(positionDepartment);
-        const matchesLocation = location.length === 0 || location.includes(positionLocation);
-        const matchesRole = roleFamily.length === 0 || roleFamily.includes(position.roleFamily);
-        const matchesRating = level.length === 0 || level.includes(position.sfiaRating);
+        const { unitSlug = [], category = [], level = [], status = [] } = positionFilters;
+        const matchesUnit = unitSlug.length === 0 || unitSlug.includes(position.unitSlug);
+        const matchesCategory = category.length === 0 || category.includes(position.category);
+        const matchesLevel = level.length === 0 || level.includes(position.level);
         const matchesStatus = status.length === 0 || status.includes(position.status);
-        const matchesContract = contractType.length === 0 || contractType.includes(position.contractType);
-        return (
-          matchesDepartment &&
-          matchesRole &&
-          matchesRating &&
-          matchesLocation &&
-          matchesStatus &&
-          matchesContract
-        );
+        return matchesUnit && matchesCategory && matchesLevel && matchesStatus;
       })
       .map((position) => ({
         ...position,
-        departmentLabel: mapDepartment(position.department || position.unit),
-        locationLabel: locationLabel(position.location),
+        unitName: unitSlugToName[position.unitSlug] || position.unitSlug,
       }));
 
     if (sort === 'az') {
-      return applySort(base, (a, b) => a.positionName.localeCompare(b.positionName));
+      return applySort(base, (a, b) => a.title.localeCompare(b.title));
     }
     // Note: 'recent' sort removed as updated_at is not in schema
     // Default to relevance (no sort) when 'recent' is selected
@@ -457,7 +444,7 @@ const DQWorkDirectoryPage: React.FC = () => {
         </div>
       )}
       <div className="flex items-start gap-3 mb-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#FB5535] via-[#1A2E6E] to-[#030F35] text-xs font-semibold text-white overflow-hidden relative">
+        <div className={`flex ${variant === 'associate' ? 'h-12 w-12' : 'h-10 w-10'} items-center justify-center rounded-full overflow-hidden relative ${variant === 'associate' ? 'bg-gradient-to-br from-dqBlue to-dqOrange text-white font-bold' : 'bg-gradient-to-br from-[#FB5535] via-[#1A2E6E] to-[#030F35] text-xs font-semibold text-white'}`}>
           {/* Always render initials as fallback */}
           {variant !== 'unit' || !IconComponent ? (
             <span className={variant === 'associate' && avatarUrl ? 'opacity-0' : ''}>
@@ -469,7 +456,7 @@ const DQWorkDirectoryPage: React.FC = () => {
             <img
               src={avatarUrl}
               alt={avatarText}
-              className="h-10 w-10 rounded-full object-cover absolute inset-0"
+              className="h-12 w-12 rounded-full object-cover absolute inset-0"
               loading="lazy"
               onError={(e) => {
                 // Hide image on error to reveal initials fallback
@@ -514,17 +501,15 @@ const DQWorkDirectoryPage: React.FC = () => {
   };
   type MappedWorkPosition = {
     id: string;
-    positionName: string;
-    roleFamily: string;
-    department: string;
-    unit: string;
-    sfiaRating: string;
-    contractType: string;
-    status: string;
-    location: string;
-    description: string;
+    title: string;
+    category: string;
+    level: string;
+    unitSlug: string;
+    unitName: string;
+    summary: string;
     responsibilities: string[];
-    imageUrl: string | null;
+    reportsTo: string;
+    status: string;
   };
   type MappedAssociate = {
     id: string;
@@ -537,6 +522,7 @@ const DQWorkDirectoryPage: React.FC = () => {
     status: string;
     level?: string; // Optional fallback for sfiaRating
     email: string;
+    phone?: string | null;
     teamsLink: string;
     keySkills: string[];
     bio: string;
@@ -579,39 +565,39 @@ const DQWorkDirectoryPage: React.FC = () => {
   };
 
   const PositionCard: React.FC<{ position: MappedWorkPosition }> = ({ position }) => {
-    const meta = `${position.roleFamily} · ${position.department} | ${position.unit}`;
-    const subtitle = `${locationLabel(position.location)} · ${position.sfiaRating} · ${position.contractType} · ${position.status}`;
-    const tags = position.responsibilities.slice(0, 5);
+    const meta = `${position.unitName} · ${position.status || 'Status pending'}`;
+    const responsibilities = position.responsibilities.slice(0, 3);
     return (
-      <CardShell variant="position" badge="Position" meta={meta} avatarText={position.positionName.slice(0, 2).toUpperCase()}>
-        {position.imageUrl && (
-          <img
-            src={position.imageUrl}
-            alt={position.positionName}
-            className="h-24 w-full object-cover rounded-t-xl mb-3"
-            loading="lazy"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
-            }}
-          />
-        )}
-        <h3 className="text-lg font-semibold text-gray-900">{position.positionName}</h3>
-        <p className="text-sm text-gray-600 line-clamp-1">{subtitle}</p>
-        <p className="text-sm text-gray-700 mt-1 line-clamp-3">{position.description}</p>
-        <div className="flex flex-wrap gap-2 mt-3">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700"
-            >
-              {tag}
+      <CardShell variant="position" badge="Position" meta={meta} avatarText={position.title.slice(0, 2).toUpperCase()}>
+        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{position.title}</h3>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {position.category && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+              {position.category}
             </span>
-          ))}
+          )}
+          {position.level && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
+              {position.level}
+            </span>
+          )}
         </div>
-        <div className="mt-auto pt-4 flex justify-end">
-          <button className="px-4 py-2 text-sm font-semibold text-white bg-[#030F35] hover:bg-[#021028] rounded-md transition-colors">
-            View role details
-          </button>
+        <p className="text-sm text-gray-700 mt-2 line-clamp-3">{position.summary}</p>
+        {responsibilities.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Key responsibilities</p>
+            <ul className="mt-1 space-y-1 text-sm text-gray-600">
+              {responsibilities.map((item) => (
+                <li key={item} className="flex gap-2">
+                  <span className="mt-[6px] h-[6px] w-[6px] rounded-full bg-indigo-500 flex-shrink-0" />
+                  <span className="line-clamp-2">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="mt-auto pt-4 text-sm text-gray-600">
+          <span className="font-semibold text-gray-800">Reports to:</span> {position.reportsTo || '—'}
         </div>
       </CardShell>
     );
@@ -654,20 +640,17 @@ const DQWorkDirectoryPage: React.FC = () => {
             </span>
           ))}
         </div>
-        <div className="mt-auto pt-4 flex gap-2">
-          <a
-            href={associate.teamsLink || '#'}
-            className="flex-1 px-4 py-2 text-sm font-semibold text-white text-center bg-[#030F35] hover:bg-[#021028] rounded-md transition-colors"
-          >
-            Open Teams
-          </a>
-          <button
-            className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-            type="button"
-            onClick={() => navigator?.clipboard?.writeText(associate.email)}
-          >
-            Copy email
-          </button>
+        <div className="mt-auto pt-4 text-sm text-gray-700 space-y-1">
+          <div>
+            <span className="font-semibold text-gray-800">Email:</span>{' '}
+            <a href={`mailto:${associate.email}`} className="text-indigo-700 hover:underline">
+              {associate.email}
+            </a>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-800">Phone:</span>{' '}
+            <span>{associate.phone || '—'}</span>
+          </div>
         </div>
       </CardShell>
     );
@@ -708,6 +691,10 @@ const DQWorkDirectoryPage: React.FC = () => {
               contact them.
             </p>
           </div>
+        </div>
+
+        <div className="mt-4">
+          <WorkDirectoryOverview activeTab={activeTab} />
         </div>
 
         <div id="directory-tabs" className="mb-6">

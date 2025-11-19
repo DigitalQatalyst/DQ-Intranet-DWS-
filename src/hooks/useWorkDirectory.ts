@@ -20,10 +20,18 @@ function deriveDepartmentFromUnitName(unitName: string): string {
   return unitName;
 }
 
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+
 // Mapper functions to convert snake_case DB fields to camelCase for UI
 function mapWorkUnit(dbUnit: WorkUnit) {
+  const fallbackSlug = slugify(dbUnit.unit_name);
   return {
     id: dbUnit.id,
+    slug: dbUnit.slug || fallbackSlug,
     sector: dbUnit.sector,
     unitName: dbUnit.unit_name,
     unitType: dbUnit.unit_type,
@@ -38,17 +46,16 @@ function mapWorkUnit(dbUnit: WorkUnit) {
 function mapWorkPosition(dbPosition: WorkPosition) {
   return {
     id: dbPosition.id,
-    positionName: dbPosition.position_name,
-    roleFamily: dbPosition.role_family,
-    department: dbPosition.department,
-    unit: dbPosition.unit,
-    sfiaRating: dbPosition.sfia_rating,
-    contractType: dbPosition.contract_type,
-    status: dbPosition.status,
-    location: dbPosition.location,
-    description: dbPosition.description,
+    unitSlug: dbPosition.unit_slug || "",
+    title: dbPosition.title,
+    category: dbPosition.category || "",
+    level: dbPosition.level || "",
+    summary: dbPosition.summary || "",
     responsibilities: dbPosition.responsibilities || [],
-    imageUrl: dbPosition.image_url ?? null,
+    reportsTo: dbPosition.reports_to || "",
+    status: dbPosition.status || "",
+    createdAt: dbPosition.created_at,
+    updatedAt: dbPosition.updated_at,
   };
 }
 
@@ -63,6 +70,7 @@ function mapAssociate(dbAssociate: Associate) {
     sfiaRating: dbAssociate.sfia_rating,
     status: dbAssociate.status,
     email: dbAssociate.email,
+    phone: dbAssociate.phone ?? null,
     teamsLink: dbAssociate.teams_link,
     keySkills: dbAssociate.key_skills || [],
     bio: dbAssociate.bio,
@@ -140,9 +148,9 @@ export function useWorkPositions() {
       setLoading(true);
       setError(null);
       const { data, error: fetchError } = await supabase
-        .from("work_positions")
+        .from("work_directory_positions")
         .select("*")
-        .order("position_name", { ascending: true });
+        .order("title", { ascending: true });
 
       if (fetchError) {
         console.error("Error fetching work positions:", fetchError);
@@ -159,4 +167,3 @@ export function useWorkPositions() {
 
   return { positions, loading, error };
 }
-
