@@ -23,7 +23,8 @@ import {
 } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
-import { LMS_COURSE_DETAILS } from '../../data/lmsCourseDetails';
+import { useLmsCourse, useLmsCourseDetails } from '../../hooks/useLmsCourses';
+import type { LmsDetail } from '../../data/lmsCourseDetails';
 import {
   CARD_ICON_BY_ID,
   DEFAULT_COURSE_ICON,
@@ -31,19 +32,22 @@ import {
 } from '../../utils/lmsIcons';
 import { LEVELS, LOCATION_ALLOW } from '@/lms/config';
 
-const formatChips = (course: (typeof LMS_COURSE_DETAILS)[number]) => {
+const formatChips = (course: LmsDetail) => {
+  try {
   const levelLabel = LEVELS.find(level => level.code === course.levelCode)?.label;
   const chips: Array<{ key: string; label: string; iconValue?: string }> = [
-    { key: 'courseCategory', label: course.courseCategory, iconValue: course.courseCategory },
-    { key: 'deliveryMode', label: course.deliveryMode, iconValue: course.deliveryMode },
+      { key: 'courseCategory', label: course.courseCategory || 'Uncategorized', iconValue: course.courseCategory },
+      { key: 'deliveryMode', label: course.deliveryMode || 'Online', iconValue: course.deliveryMode },
   ];
-  const location = course.locations.find(
+    const locations = course.locations || [];
+    const location = locations.find(
     loc => loc !== 'Global' && (LOCATION_ALLOW as readonly string[]).includes(loc)
   );
   if (location) {
     chips.push({ key: 'location', label: location, iconValue: location });
   }
-  const isLeadOnly = course.audience.length === 1 && course.audience[0] === 'Lead';
+    const audience = course.audience || [];
+    const isLeadOnly = audience.length === 1 && audience[0] === 'Lead';
   if (isLeadOnly) {
     chips.push({ key: 'audience', label: 'Lead-only', iconValue: 'Lead' });
   }
@@ -51,9 +55,19 @@ const formatChips = (course: (typeof LMS_COURSE_DETAILS)[number]) => {
     chips.push({ key: 'courseType', label: course.courseType, iconValue: course.courseType });
   }
   return chips;
+  } catch (error) {
+    console.error('[LMS] Error formatting chips:', error, course);
+    return [
+      { key: 'courseCategory', label: course.courseCategory || 'Uncategorized', iconValue: course.courseCategory },
+      { key: 'deliveryMode', label: course.deliveryMode || 'Online', iconValue: course.deliveryMode },
+    ];
+  }
 };
 
-const formatList = (values: string[]) => values.join(', ');
+const formatList = (values: string[] | null | undefined): string => {
+  if (!values || !Array.isArray(values)) return '';
+  return values.join(', ');
+};
 
 const getLessonTypeIcon = (type: string) => {
   switch (type) {
@@ -103,26 +117,110 @@ export const LmsCourseDetailPage: React.FC = () => {
   // State for expanded sections in curriculum
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
+  const [renderError, setRenderError] = useState<Error | null>(null);
 
-  const course = useMemo(
-    () => LMS_COURSE_DETAILS.find(detail => detail.slug === slug),
-    [slug]
-  );
+  // Fetch course data from Supabase - MUST be called before any conditional returns
+  const { data: course, isLoading: courseLoading, error: courseError } = useLmsCourse(slug || '');
+  const { data: allCourses = [] } = useLmsCourseDetails();
 
+  // Log course data for debugging
+  React.useEffect(() => {
+    if (course) {
+      console.log('[LMS Detail Page] Course loaded:', {
+        id: course.id,
+        slug: course.slug,
+        title: course.title,
+        hasHighlights: !!course.highlights,
+        hasOutcomes: !!course.outcomes,
+        hasCurriculum: !!course.curriculum,
+        highlightsCount: course.highlights?.length || 0,
+        outcomesCount: course.outcomes?.length || 0,
+        curriculumCount: course.curriculum?.length || 0,
+      });
+      console.log('[LMS Detail Page] Full course object:', JSON.stringify(course, null, 2));
+    } else {
+      console.log('[LMS Detail Page] No course data found');
+    }
+  }, [course]);
+  
+  // Log any errors
+  React.useEffect(() => {
+    if (courseError) {
+      console.error('[LMS Detail Page] Course error:', courseError);
+    }
+  }, [courseError]);
+
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   const relatedCourses = useMemo(() => {
     if (!course) return [];
     // If course is part of a track, show other courses in the same track
     if (course.track) {
-      return LMS_COURSE_DETAILS.filter(
+      return allCourses.filter(
         detail => detail.track === course.track && detail.id !== course.id
       );
     }
     // Otherwise show courses in the same category
-    return LMS_COURSE_DETAILS.filter(
+    return allCourses.filter(
       detail => detail.courseCategory === course.courseCategory && detail.id !== course.id
     );
+  }, [course, allCourses]);
+
+  // Process course data with defensive checks - hooks must be called unconditionally
+  const chipData = useMemo(() => {
+    if (!course) return [];
+    try {
+      return formatChips(course);
+    } catch (error) {
+      console.error('[LMS Detail Page] Error formatting chips:', error);
+      return [];
+    }
   }, [course]);
 
+  // NOW we can have conditional returns - all hooks have been called above
+  // Show loading state
+  if (courseLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+        <div className="flex-grow flex items-center justify-center px-4">
+          <div className="text-center max-w-md">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading course details...</p>
+          </div>
+        </div>
+        <Footer isLoggedIn={false} />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (courseError) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+        <div className="flex-grow flex items-center justify-center px-4">
+          <div className="text-center max-w-md">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+              Error Loading Course
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {courseError.message || 'An error occurred while loading the course details.'}
+            </p>
+            <button
+              onClick={() => navigate('/lms')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              style={{ backgroundColor: '#030F35' }}
+            >
+              Back to Learning Center
+            </button>
+          </div>
+        </div>
+        <Footer isLoggedIn={false} />
+      </div>
+    );
+  }
+
+  // Show not found state
   if (!course) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
@@ -149,23 +247,28 @@ export const LmsCourseDetailPage: React.FC = () => {
     );
   }
 
-  const HeroIcon = CARD_ICON_BY_ID[course.id] || DEFAULT_COURSE_ICON;
-  const chipData = useMemo(() => formatChips(course), [course]);
-  const statusLabel = course.status === 'live' ? 'Live' : 'Coming Soon';
-  const statusClass = course.status === 'live' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200';
-  const locationsLabel = formatList(course.locations);
-  const audienceLabel = formatList(course.audience);
-  const departmentLabel = formatList(course.department);
-  const averageRating = course.rating || 0;
-  const reviewCount = course.reviewCount || 0;
+  // Ensure arrays exist with defaults - these are not hooks, just computed values
+  const highlights = course?.highlights || [];
+  const outcomes = course?.outcomes || [];
+  const curriculum = course?.curriculum || [];
+  
+  // Compute other values safely
+  const HeroIcon = course ? (CARD_ICON_BY_ID[course.id] || DEFAULT_COURSE_ICON) : DEFAULT_COURSE_ICON;
+  const statusLabel = course?.status === 'live' ? 'Live' : 'Coming Soon';
+  const statusClass = course?.status === 'live' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200';
+  const locationsLabel = formatList(course?.locations);
+  const audienceLabel = formatList(course?.audience);
+  const departmentLabel = formatList(course?.department);
+  const averageRating = course?.rating || 0;
+  const reviewCount = course?.reviewCount || 0;
 
-  const isTrack = course.courseType === 'Course (Bundles)';
+  const isTrack = course?.courseType === 'Course (Bundles)';
   const tabs = [
     { id: 'highlights' as TabType, label: isTrack ? 'Track Highlights' : 'Course Highlights' },
     { id: 'outcomes' as TabType, label: 'Learning Outcomes' },
     { id: 'details' as TabType, label: isTrack ? 'Track Details' : 'Course Details' },
     { id: 'curriculum' as TabType, label: isTrack ? 'Track Curriculum' : 'Course Curriculum' },
-    ...(isTrack && course.faq && course.faq.length > 0 ? [{ id: 'faq' as TabType, label: 'FAQ' }] : []),
+    ...(isTrack && course?.faq && Array.isArray(course.faq) && course.faq.length > 0 ? [{ id: 'faq' as TabType, label: 'FAQ' }] : []),
   ];
 
   return (
@@ -252,13 +355,8 @@ export const LmsCourseDetailPage: React.FC = () => {
                     return (
                       <span
                         key={`${chip.key}-${chip.label}-${index}`}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${
-                      index === 0
-                        ? 'bg-blue-50 text-blue-700 border-blue-100'
-                        : index === 1
-                        ? 'bg-green-50 text-green-700 border-green-100'
-                        : 'bg-purple-50 text-purple-700 border-purple-100'
-                        }`}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border bg-blue-50 border-blue-200"
+                        style={{ color: '#030F35' }}
                       >
                       {Icon ? <Icon className="h-4 w-4 mr-1.5" /> : null}
                       {chip.label}
@@ -308,11 +406,8 @@ export const LmsCourseDetailPage: React.FC = () => {
               {/* Track/Course Highlights Tab */}
               {activeTab === 'highlights' && (
                 <section className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {isTrack ? 'Track Highlights' : 'Course Highlights'}
-                </h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                    {course.highlights.map((highlight) => (
+                    {highlights.map((highlight) => (
                     <div
                       key={highlight}
                       className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-200"
@@ -328,10 +423,9 @@ export const LmsCourseDetailPage: React.FC = () => {
               {/* Learning Outcomes Tab */}
               {activeTab === 'outcomes' && (
                 <section className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Learning Outcomes</h2>
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                   <ol className="space-y-4">
-                    {course.outcomes.map((outcome, index) => (
+                    {outcomes.map((outcome, index) => (
                       <li key={outcome} className="flex items-start gap-3">
                         <span className="font-semibold" style={{ color: '#030F35' }}>{index + 1}.</span>
                         <p className="text-gray-700 leading-relaxed">{outcome}</p>
@@ -345,9 +439,6 @@ export const LmsCourseDetailPage: React.FC = () => {
               {/* Track/Course Details Tab */}
               {activeTab === 'details' && (
                 <section className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {isTrack ? 'Track Details' : 'Course Details'}
-                  </h2>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                     <p className="text-gray-700 leading-relaxed mb-6">
                       {course.summary}
@@ -361,8 +452,8 @@ export const LmsCourseDetailPage: React.FC = () => {
                         let articleCount = 0;
                         let labCount = 0;
                         
-                        if (course.curriculum) {
-                          course.curriculum.forEach((item) => {
+                        if (curriculum && curriculum.length > 0) {
+                          curriculum.forEach((item) => {
                             if (item.topics) {
                               item.topics.forEach((topic) => {
                                 if (topic.lessons) {
@@ -453,19 +544,16 @@ export const LmsCourseDetailPage: React.FC = () => {
               {/* Curriculum Tab */}
               {activeTab === 'curriculum' && (
                 <section className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      {isTrack ? 'Track Curriculum' : 'Course Curriculum'}
-                    </h2>
-                    {course.curriculum && course.curriculum.length > 0 && (
+                  {curriculum && curriculum.length > 0 && (
+                    <div className="flex items-center justify-end mb-4">
                       <span className="text-sm text-gray-600">
-                        {course.curriculum.length} {course.curriculum.length === 1 ? 'item' : 'items'}
+                        {curriculum.length} {curriculum.length === 1 ? 'item' : 'items'}
                       </span>
-                    )}
-                  </div>
-                  {course.curriculum && course.curriculum.length > 0 ? (
+                    </div>
+                  )}
+                  {curriculum && curriculum.length > 0 ? (
                     <div className="space-y-4">
-                      {course.curriculum
+                      {curriculum
                         .sort((a, b) => a.order - b.order)
                         .map((item) => {
                           const isCourse = course.courseType === 'Course (Multi-Lessons)';
@@ -1215,9 +1303,9 @@ export const LmsCourseDetailPage: React.FC = () => {
                     Courses in this Track
                   </h3>
                   <p className="text-gray-700 mb-4">
-                    This track contains {course.curriculum.length} {course.curriculum.length === 1 ? 'course' : 'courses'}. Complete all courses to master the full learning journey. Each course can be accessed individually, and you can view the detailed curriculum in the Curriculum tab above.
+                    This track contains {curriculum.length} {curriculum.length === 1 ? 'course' : 'courses'}. Complete all courses to master the full learning journey. Each course can be accessed individually, and you can view the detailed curriculum in the Curriculum tab above.
                   </p>
-                  {course.curriculum.slice(0, 5).map((item) => (
+                  {curriculum.slice(0, 5).map((item) => (
                     <div key={item.id} className="mb-2">
                       {item.courseSlug ? (
                         <Link
@@ -1233,9 +1321,9 @@ export const LmsCourseDetailPage: React.FC = () => {
                       )}
                     </div>
                   ))}
-                  {course.curriculum.length > 5 && (
+                  {curriculum.length > 5 && (
                     <p className="text-sm text-gray-600 mt-2">
-                      and {course.curriculum.length - 5} more {course.curriculum.length - 5 === 1 ? 'course' : 'courses'}
+                      and {curriculum.length - 5} more {curriculum.length - 5 === 1 ? 'course' : 'courses'}
                     </p>
                   )}
                 </section>

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
@@ -6,8 +6,7 @@ import { FilterIcon, XIcon, HomeIcon, ChevronRightIcon, Star } from "lucide-reac
 import { SearchBar } from "../components/SearchBar";
 import { FilterSidebar, FilterConfig } from "../components/marketplace/FilterSidebar";
 import { MarketplaceCard } from "../components/marketplace/MarketplaceCard";
-import { LMS_COURSES } from "../data/lmsCourses";
-import { LMS_COURSE_DETAILS } from "../data/lmsCourseDetails";
+import { useLmsCourses, useLmsCourseDetails } from "../hooks/useLmsCourses";
 import { ICON_BY_ID } from "../utils/lmsIcons";
 import {
   parseFacets,
@@ -44,6 +43,15 @@ export const LmsCourses: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('courses');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12; // Show 12 items per page
+  
+  // Track previous filter state to detect actual changes
+  const prevFilterKeyRef = React.useRef<string>('');
+
+  // Fetch courses from Supabase - MUST be called before any conditional returns
+  const { data: LMS_COURSES = [], isLoading: coursesLoading, error: coursesError } = useLmsCourses();
+  const { data: LMS_COURSE_DETAILS = [], isLoading: detailsLoading } = useLmsCourseDetails();
 
   const facets = parseFacets(searchParams);
   
@@ -83,7 +91,7 @@ export const LmsCourses: React.FC = () => {
     });
     
     return reviews;
-  }, []);
+  }, [LMS_COURSE_DETAILS]);
 
   // Filter reviews based on search and filters
   const filteredReviews = useMemo(() => {
@@ -139,6 +147,11 @@ export const LmsCourses: React.FC = () => {
     return items;
   }, [allReviews, facets, searchQuery]);
 
+  // Calculate total courses (excluding learning tracks/bundles)
+  const totalCourses = useMemo(() => {
+    return LMS_COURSES.filter((item) => item.courseType !== 'Course (Bundles)').length;
+  }, [LMS_COURSES]);
+
   // Filter courses - exclude bundles for courses tab
   const filteredItems = useMemo(() => {
     let items = applyFilters(LMS_COURSES, facets);
@@ -175,7 +188,23 @@ export const LmsCourses: React.FC = () => {
       });
     }
     return items;
-  }, [facets, searchQuery, activeTab]);
+  }, [LMS_COURSES, facets, searchQuery, activeTab]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters or tab changes
+  // Create a stable key from search params and search query to detect actual changes
+  useEffect(() => {
+    const filterKey = `${searchParams.toString()}-${searchQuery}-${activeTab}`;
+    if (prevFilterKeyRef.current && prevFilterKeyRef.current !== filterKey) {
+      setCurrentPage(1);
+    }
+    prevFilterKeyRef.current = filterKey;
+  }, [searchParams, searchQuery, activeTab]);
 
   // Dynamic filter config based on active tab
   const filterConfig: FilterConfig[] = useMemo(
@@ -419,6 +448,43 @@ export const LmsCourses: React.FC = () => {
     // Navigation handled by Link in card
   }, []);
 
+  // Handle loading state
+  if (coursesLoading || detailsLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
+        <div className="container mx-auto px-4 py-8 flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading courses...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (coursesError) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
+        <div className="container mx-auto px-4 py-8 flex-grow flex items-center justify-center">
+          <div className="text-center text-red-600">
+            <p className="text-lg font-semibold mb-2">Error loading courses</p>
+            <p className="text-sm">{coursesError.message}</p>
+            <p className="text-xs mt-4 text-gray-500">Check the browser console for details</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header
@@ -653,7 +719,7 @@ export const LmsCourses: React.FC = () => {
                 </div>
                 {/* Compact Grid Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {filteredItems.map((track) => {
+                  {paginatedItems.map((track) => {
                     const trackDetail = LMS_COURSE_DETAILS.find(c => c.id === track.id);
                     if (!trackDetail || !trackDetail.curriculum) return null;
                     
@@ -757,6 +823,74 @@ export const LmsCourses: React.FC = () => {
                     </div>
                   )}
                 </div>
+                
+                {/* Pagination for tracks */}
+                {activeTab === 'tracks' && totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                      style={{ 
+                        color: currentPage === 1 ? '#9CA3AF' : '#030F35',
+                        borderColor: currentPage === 1 ? '#D1D5DB' : '#030F35'
+                      }}
+                    >
+                      Previous
+                    </button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                        if (
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+                        ) {
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                currentPage === page
+                                  ? 'text-white'
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                              style={
+                                currentPage === page
+                                  ? { backgroundColor: '#030F35' }
+                                  : {}
+                              }
+                            >
+                              {page}
+                            </button>
+                          );
+                        } else if (
+                          page === currentPage - 2 ||
+                          page === currentPage + 2
+                        ) {
+                          return (
+                            <span key={page} className="px-2 text-gray-500">
+                              ...
+                            </span>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                    
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                      style={{ 
+                        color: currentPage === totalPages ? '#9CA3AF' : '#030F35',
+                        borderColor: currentPage === totalPages ? '#D1D5DB' : '#030F35'
+                      }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </>
             ) : activeTab === 'reviews' ? (
               <>
@@ -843,14 +977,14 @@ export const LmsCourses: React.FC = () => {
                 Available Courses ({filteredItems.length})
               </h2>
               <div className="text-sm text-gray-500 hidden sm:block">
-                Showing {filteredItems.length} of {LMS_COURSES.length} courses
+                Showing {paginatedItems.length} of {filteredItems.length} {filteredItems.length === 1 ? 'course' : 'courses'}
               </div>
               <h2 className="text-lg font-medium text-gray-800 sm:hidden">
                 {filteredItems.length} Courses Available
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-              {filteredItems.map((item) => {
+              {paginatedItems.map((item) => {
                 const Icon = ICON_BY_ID[item.id] || BookOpenCheck;
                 return (
                   <MarketplaceCard
@@ -870,6 +1004,74 @@ export const LmsCourses: React.FC = () => {
                 );
               })}
             </div>
+            
+            {/* Pagination for courses */}
+            {activeTab === 'courses' && totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  style={{ 
+                    color: currentPage === 1 ? '#9CA3AF' : '#030F35',
+                    borderColor: currentPage === 1 ? '#D1D5DB' : '#030F35'
+                  }}
+                >
+                  Previous
+                </button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-2 text-sm font-medium rounded-md ${
+                            currentPage === page
+                              ? 'text-white'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                          style={
+                            currentPage === page
+                              ? { backgroundColor: '#030F35' }
+                              : {}
+                          }
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      page === currentPage - 2 ||
+                      page === currentPage + 2
+                    ) {
+                      return (
+                        <span key={page} className="px-2 text-gray-500">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  style={{ 
+                    color: currentPage === totalPages ? '#9CA3AF' : '#030F35',
+                    borderColor: currentPage === totalPages ? '#D1D5DB' : '#030F35'
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            )}
               </>
             )}
           </div>
