@@ -22,6 +22,66 @@ export type NewsItem = {
 
 export const NEWS: NewsItem[] = [
   {
+    id: 'dq-townhall-meeting-agenda',
+    title: 'DQ Townhall Meeting Agenda',
+    type: 'Announcement',
+    date: '2025-11-21',
+    author: 'DQ Communications',
+    byline: 'DQ Operations',
+    views: 0,
+    excerpt:
+      'Join us for the upcoming DQ Townhall meeting featuring working room guidelines, Scrum Master framework discussions, and important organizational updates.',
+    image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Operations',
+    location: 'Dubai',
+    domain: 'Operations',
+    tags: ['townhall', 'meeting', 'agenda', 'framework'],
+    readingTime: '5–10',
+    newsType: 'Corporate Announcements',
+    newsSource: 'DQ Operations',
+    focusArea: 'Culture & People',
+    content: `# DQ Townhall Meeting Agenda
+
+## Welcome & Introduction
+
+Join us for an informative and engaging DQ Townhall meeting where we'll discuss important updates, share insights, and align on our organizational goals and practices.
+
+## Working Room Guidelines
+
+**Presenter: Sreya L.**
+
+This session will cover essential guidelines for working rooms and collaborative spaces. Topics include:
+- Best practices for room usage and booking
+- Maintenance and cleanliness standards
+- Collaboration etiquette and respect for shared spaces
+- Optimizing workspace utilization for maximum productivity
+
+## Scrum Master Framework
+
+**Presenter: Sreya L.**
+
+An in-depth exploration of the Scrum Master framework and its implementation within DQ:
+- Core principles and values of Scrum
+- Roles and responsibilities within the framework
+- Sprint planning and execution best practices
+- Continuous improvement and retrospective processes
+- How Scrum enhances team collaboration and delivery
+
+## Meeting Objectives
+
+This townhall aims to:
+- Align all associates on working room protocols
+- Deepen understanding of Agile and Scrum methodologies
+- Foster a culture of collaboration and continuous improvement
+- Provide a platform for questions and discussion
+
+## Important Notes
+
+- Please arrive on time to ensure we can cover all agenda items
+- Questions and discussions are encouraged during designated Q&A segments
+- Meeting materials and recordings will be shared following the session`
+  },
+  {
     id: 'dq-leave-process-guideline',
     title: 'DQ Leave Process Guidelines',
     type: 'Guidelines',
