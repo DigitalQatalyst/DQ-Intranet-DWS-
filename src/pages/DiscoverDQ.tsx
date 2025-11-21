@@ -4,11 +4,11 @@ import clsx from "clsx";
 import { XIcon } from "lucide-react";
 import { Header } from "../components/Header/Header";
 import { Footer } from "../components/Footer/Footer";
-import VisionMission from "../components/Discover/VisionMission";
-import DQDNA from "../components/Discover/DQDNA";
-import DQSixDigitalJourney from "../components/Discover/DQSixDigitalJourney";
-import WorkspaceInsights from "../components/Discover/WorkspaceInsights";
-import DQDirectory from "../components/Discover/DQDirectory";
+import Discover_VisionMissionSection from "../components/Discover/Discover_VisionMissionSection";
+import Discover_DNASection from "../components/Discover/Discover_DNASection";
+import Discover_SixDigitalSection from "../components/Discover/Discover_SixDigitalSection";
+import Discover_InsightsSection from "../components/Discover/Discover_InsightsSection";
+import Discover_DirectorySection from "../components/Discover/Discover_DirectorySection";
 import MapCard from "../components/map/MapCard";
 import {
   DQ_LOCATIONS,
@@ -16,7 +16,7 @@ import {
   type LocationCategory,
   type LocationItem,
 } from "../api/MAPAPI";
-import HeroDiscoverDQ from "../components/Discover/HeroDiscoverDQ";
+import Discover_HeroSection from "../components/Discover/Discover_HeroSection";
 import styles from "./DiscoverDQ.module.css";
 
 const insightsData = [
@@ -120,7 +120,7 @@ const DiscoverDQ: React.FC = () => {
         className={`${styles.dwsDiscover} ${prefersReducedMotion ? styles.reducedMotion : ""} relative z-0 bg-transparent`}
       >
         {/* Hero */}
-        <HeroDiscoverDQ />
+        <Discover_HeroSection />
 
         {/* Map Section */}
         <section id="growth-areas" className="bg-[#F6FAFB] py-20 scroll-mt-[72px]">
@@ -175,22 +175,22 @@ const DiscoverDQ: React.FC = () => {
         </section>
 
         {/* Vision & Mission */}
-        <VisionMission />
+        <Discover_VisionMissionSection />
 
         {/* DQ DNA */}
-        <DQDNA
+        <Discover_DNASection
           onExploreLearningCenter={handleExploreLearningCenter}
           onExploreKnowledgeCenter={handleExploreKnowledgeCenter}
         />
 
         {/* Growth Potential */}
-        <WorkspaceInsights data={insightsData} />
+        <Discover_InsightsSection data={insightsData} />
 
         {/* Six Digital Architecture */}
-        <DQSixDigitalJourney />
+        <Discover_SixDigitalSection />
 
         {/* Directory */}
-        <DQDirectory />
+        <Discover_DirectorySection />
 
         {supportOpen && (
           <div className={styles.modalOverlay} role="dialog" aria-modal="true">

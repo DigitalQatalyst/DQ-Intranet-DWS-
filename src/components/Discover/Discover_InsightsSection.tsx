@@ -19,7 +19,7 @@ export interface InsightDataPoint {
   previousValue?: number;
 }
 
-interface WorkspaceInsightsProps {
+interface Discover_InsightsSectionProps {
   data: InsightDataPoint[];
   yoyData?: InsightDataPoint[];
   loading?: boolean;
@@ -38,7 +38,7 @@ const shortenLabel = (label: string, isMobile: boolean): string => {
   return shortMap[label] || label;
 };
 
-export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({ 
+export const Discover_InsightsSection: React.FC<Discover_InsightsSectionProps> = ({ 
   data, 
   yoyData,
   loading = false 
@@ -299,4 +299,5 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
   );
 };
 
-export default WorkspaceInsights;
+export default Discover_InsightsSection;
+

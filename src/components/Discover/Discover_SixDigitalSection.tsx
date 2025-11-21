@@ -146,7 +146,7 @@ const sixDigitalSteps: SixDigitalStep[] = [
   },
 ];
 
-const DQSixDigitalJourney: React.FC = () => {
+const Discover_SixDigitalSection: React.FC = () => {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeDimension, setActiveDimension] = useState<SixDigitalStep | null>(null);
@@ -285,4 +285,5 @@ const DQSixDigitalJourney: React.FC = () => {
   );
 };
 
-export default DQSixDigitalJourney;
+export default Discover_SixDigitalSection;
+

@@ -156,12 +156,12 @@ function anchor(role: Role, side: Side) {
   return { x, y: y + HEX_H/2 - 4 };
 }
 
-interface DQDNAProps {
+interface Discover_DNASectionProps {
   onExploreLearningCenter?: () => void;
   onExploreKnowledgeCenter?: () => void;
 }
 
-function DQDNA({ onExploreLearningCenter, onExploreKnowledgeCenter }: DQDNAProps) {
+function Discover_DNASection({ onExploreLearningCenter, onExploreKnowledgeCenter }: Discover_DNASectionProps) {
   const [open, setOpen] = useState<number | null>(null);
   const [nodesDb, setNodesDb] = useState<DqDnaNode[] | null>(null);
   const [calloutsDb, setCalloutsDb] = useState<DqDnaCallout[] | null>(null);
@@ -189,7 +189,7 @@ function DQDNA({ onExploreLearningCenter, onExploreKnowledgeCenter }: DQDNAProps
     : NODES;
 
   return (
-    <section style={{ background: "#fff", padding: "48px 0 80px" }}>
+    <section id="dna" style={{ background: "#fff", padding: "48px 0 80px" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 24px" }}>
         {/* Header (kept minimalist to avoid pushing DNA down) */}
         <div style={{ textAlign: "center", marginBottom: 18 }}>
@@ -381,5 +381,6 @@ function DQDNA({ onExploreLearningCenter, onExploreKnowledgeCenter }: DQDNAProps
 }
 
 /* Support both import styles */
-export default DQDNA;
-export { DQDNA };
+export default Discover_DNASection;
+export { Discover_DNASection };
+

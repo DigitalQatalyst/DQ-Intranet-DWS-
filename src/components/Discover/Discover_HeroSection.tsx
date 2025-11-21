@@ -8,7 +8,7 @@ const stats = [
   { value: '90%', label: 'Collaboration Satisfaction' },
 ];
 
-export const HeroDiscoverDQ: React.FC = () => {
+export const Discover_HeroSection: React.FC = () => {
   const navigate = useNavigate();
   return (
     <section className="relative isolate grid h-[clamp(560px,70vh,740px)] min-h-[560px] place-items-center overflow-hidden bg-[#030F35] text-white font-sans">
@@ -97,4 +97,5 @@ export const HeroDiscoverDQ: React.FC = () => {
   );
 };
 
-export default HeroDiscoverDQ;
+export default Discover_HeroSection;
+

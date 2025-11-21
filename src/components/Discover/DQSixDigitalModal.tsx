@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight, X } from "lucide-react";
-import type { SixDigitalId } from "./DQSixDigitalJourney";
+import type { SixDigitalId } from "./Discover_SixDigitalSection";
 
 interface SixDigitalService {
   id: string;
