@@ -23,14 +23,14 @@ export type NewsItem = {
 export const NEWS: NewsItem[] = [
   {
     id: 'dq-leave-process-guideline',
-    title: 'DQ Leave Process Guideline',
+    title: 'DQ Leave Process Guidelines',
     type: 'Guidelines',
     date: '2025-11-18',
     author: 'DQ Communications',
     byline: 'HRA (People)',
     views: 0,
     excerpt:
-      'Complete guide to the leave approval process, including required steps, notifications, and consequences for non-compliance.',
+      'Complete guide to the leave approval process, including required steps, notification procedures, and consequences for non-compliance.',
     image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80',
     department: 'HRA (People)',
     location: 'Dubai',
@@ -44,22 +44,22 @@ export const NEWS: NewsItem[] = [
 
 ## Leave Process
 
-### Step 1: Approval from HRA & Management
-Capture approval from HRA & Management, clearly indicating:
+### Step 1: Obtain Approval from HRA & Management
+Obtain approval from HRA & Management, clearly indicating:
 - **Reason for leave**: Specify the purpose of your leave
 - **Leave period**: Include start and end dates
-- **Associate(s) taking over critical tasks**: Identify who will cover your responsibilities
+- **Associates covering critical tasks**: Identify who will cover your responsibilities during your absence
 
 ### Step 2: Submit an Approval Request
 Log into the system and submit your leave request through the designated platform.
 
-### Step 3: Notify on the HR Channel
+### Step 3: Notify via the HR Channel
 Share a brief notification in the designated HR channel to inform relevant parties of your leave request.
 
-### Step 4: Confirm if Approval has been granted
+### Step 4: Confirm Approval Status
 **Important**: Wait for confirmation that your leave has been approved before proceeding with any leave arrangements.
 
-### Step 5: Notify on the Leaves Channel
+### Step 5: Notify via the Leaves Channel
 Once approved, post an update in the Leaves channel for broader visibility across the organization.
 
 ## Leave Non-Compliance Consequences
@@ -68,12 +68,12 @@ Once approved, post an update in the Leaves channel for broader visibility acros
 Any leave taken without prior approval or proper handover is documented as a violation.
 
 ### Warnings System
-- **1st instance**: Formal warning issued
-- **2nd instance**: Formal warning issued
-- **3rd instance**: Final warning and escalation to HR & Management
+- **First instance**: Formal warning issued
+- **Second instance**: Formal warning issued
+- **Third instance**: Final warning and escalation to HR & Management
 
 ### Termination
-Three violations may lead to termination of employment.
+Three violations may result in termination of employment.
 
 ## Important Reminder
 **Approval Requirement**: All leave must be approved by HRA and Management to ensure fairness and compliance with company policies.`
@@ -699,7 +699,7 @@ The **Work From Home (WFH) Guidelines** provide a clear framework for how remote
   },
   {
     id: 'dq-dress-code-guideline',
-    title: 'DQ Dress Code Guideline',
+    title: 'DQ Dress Code Guidelines',
     type: 'Guidelines',
     date: '2025-11-18',
     author: 'DQ Communications',
@@ -729,32 +729,32 @@ These dress code guidelines ensure associates align with DQ's culture of profess
 
 - **Professional Appearance** – Associates dress in a professional, decent, and clean manner; clothing should enhance DQ's image.
 - **Cultural Sensitivity** – Outfits should be respectful of cultural and religious norms.
-- **Personal Grooming** – Hair, nails, and hygiene are kept to a high standard. Fragrances, jewellery, and accessories should not distract from the professional setting.
+- **Personal Grooming** – Hair, nails, and hygiene are maintained to a high standard. Fragrances, jewelry, and accessories should not distract from the professional setting.
 
 ## Dress Code Details
 
 ### Monday to Thursday – Business Casual
 
 - **Men**
-  - Well-fitted button-down shirt or polo.
-  - Tailored trousers, khakis, or chinos.
-  - Closed-toe shoes such as loafers or formal shoes.
+  - Well-fitted button-down shirt or polo
+  - Tailored trousers, khakis, or chinos
+  - Closed-toe shoes such as loafers or formal shoes
 
 - **Women**
-  - Blouse or sweater with tailored pants or skirt.
-  - Knee-length professional skirt or dress.
-  - Closed-toe shoes (flats or heels).
+  - Blouse or sweater with tailored pants or skirt
+  - Knee-length professional skirt or dress
+  - Closed-toe shoes (flats or heels)
 
 ### Friday – Casual
 
 - **Men**
-  - Polo shirts or casual button-down shirts.
-  - Clean, well-fitted jeans.
-  - Casual shoes, sneakers, or loafers.
+  - Polo shirts or casual button-down shirts
+  - Clean, well-fitted jeans
+  - Casual shoes, sneakers, or loafers
 
 - **Women**
-  - Casual blouses or t‑shirts with jeans or casual skirt/dress.
-  - Comfortable, casual closed shoes or sneakers.
+  - Casual blouses or t‑shirts with jeans or casual skirt/dress
+  - Comfortable, casual closed shoes or sneakers
 
 ## Preparation Before Implementation
 
@@ -791,10 +791,10 @@ Associates and leaders are jointly responsible for ensuring the guideline is und
 
 The following are **strictly prohibited** during working days:
 
-- Ripped jeans.
-- Graphic t‑shirts or overly casual tops.
-- Beachwear, sweatpants, gym wear, or shorts.
-- Flip flops, sandals, or other overly casual footwear.
+- Ripped jeans
+- Graphic t‑shirts or overly casual tops
+- Beachwear, sweatpants, gym wear, or shorts
+- Flip-flops, sandals, or other overly casual footwear
 
 ## Post-Implementation Review
 

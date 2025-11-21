@@ -38,20 +38,20 @@ export const JOBS: JobItem[] = [
     type: 'Full-time',
     seniority: 'Lead',
     sfiaLevel: 'L5',
-    summary: "Lead DQ's performance function from onboarding through probation and beyond, driving measurable improvement across the organisation.",
+    summary: "Lead DQ's performance function from onboarding through probation and beyond, driving measurable improvement across the organization.",
     description:
-      "Lead DQ's performance function from onboarding through probation and beyond, driving measurable improvement across the organisation.",
+      "Lead DQ's performance function from onboarding through probation and beyond, driving measurable improvement across the organization.",
     responsibilities: [
-      'Manage onboarding, probation, and performance processes',
+      'Manage onboarding, probation, and performance evaluation processes',
       'Assess associates against SFIA guidelines',
-      'Own ATP scanning and ADP programs',
-      'Deliver insights and drive organisation-wide performance improvement'
+      'Own and manage ATP scanning and ADP programs',
+      'Deliver actionable insights and drive organization-wide performance improvement'
     ],
     requirements: [
-      '5+ years in performance management or HR transformation',
-      'Team leadership and talent development experience',
+      '5+ years of experience in performance management or HR transformation',
+      'Proven experience in team leadership and talent development',
       'Strong skills in frameworks, analytics, and data-driven insights',
-      'Excellent communication and stakeholder influence'
+      'Excellent communication and stakeholder management skills'
     ],
     benefits: [
       'High-impact role shaping performance culture',

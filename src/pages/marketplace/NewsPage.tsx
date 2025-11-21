@@ -259,7 +259,7 @@ const TAB_SUMMARIES: Record<
   { title: string; description: string; meta?: string }
 > = {
   announcements: {
-    title: 'News & Announcement',
+    title: 'News & Announcements',
     description:
       'Live corporate announcements, product / project updates, events, and comms so every studio keeps pace with what is shipping across DQ.',
     meta: 'Sourced from DQ Leadership, Operations, and Communications.'
@@ -373,7 +373,7 @@ const NewsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleViewNewItem}
-                  className="inline-flex min-w-[120px] items-center justify-center rounded-xl bg-[#1A2E6E] px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-white transition-colors duration-200 hover:bg-[#132456] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1A2E6E]"
+                  className="inline-flex min-w-[120px] items-center justify-center rounded-xl bg-[#030f35] px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-white transition-colors duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#030f35]"
                 >
                   View now
                 </button>
@@ -439,7 +439,7 @@ const NewsPage: React.FC = () => {
                 value="announcements"
                 className="rounded-none border-b-2 border-transparent px-0 py-2 justify-start text-left text-gray-700 transition-colors duration-200 data-[state=active]:border-[#1A2E6E] data-[state=active]:font-medium data-[state=active]:text-[#1A2E6E]"
               >
-                News & Announcement
+                News & Announcements
               </TabsTrigger>
               <TabsTrigger
                 value="insights"

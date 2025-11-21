@@ -126,40 +126,36 @@ const formatContent = (content: string, index: number) => {
   const trimmed = content.trim();
   if (!trimmed) return null;
 
-  // Parse H1 headings (# Heading)
-  if (trimmed.match(/^#\s+(.+)$/)) {
-    const match = trimmed.match(/^#\s+(.+)$/);
-    const text = match ? match[1].trim() : trimmed;
-    const boldText = parseBold(text);
-    return (
-      <h1 key={index} className="text-3xl font-bold mb-6 text-gray-900">
-        {boldText}
-      </h1>
-    );
-  }
-
-  // Parse H2 headings (## Heading)
-  if (trimmed.match(/^##\s+(.+)$/)) {
-    const match = trimmed.match(/^##\s+(.+)$/);
-    const text = match ? match[1].trim() : trimmed;
-    const boldText = parseBold(text);
-    return (
-      <h2 key={index} className="text-2xl font-bold mb-5 text-gray-900 mt-6">
-        {boldText}
-      </h2>
-    );
-  }
-
-  // Parse H3 headings (### Heading)
-  if (trimmed.match(/^###\s+(.+)$/)) {
-    const match = trimmed.match(/^###\s+(.+)$/);
-    const text = match ? match[1].trim() : trimmed;
-    const boldText = parseBold(text);
-    return (
-      <h3 key={index} className="text-xl font-bold mb-4 text-gray-900 mt-5">
-        {boldText}
-      </h3>
-    );
+  // Parse H1 headings (# Heading) - strip hashtags
+  if (trimmed.match(/^#+\s+(.+)$/)) {
+    const match = trimmed.match(/^#+\s+(.+)$/);
+    if (match && match[1]) {
+      let text = match[1].trim();
+      // Remove any remaining markdown hashtags from the text
+      text = text.replace(/^#+\s*/, '');
+      const boldText = parseBold(text);
+      // Check if it's H1, H2, or H3 based on number of # at start
+      const hashCount = (trimmed.match(/^#+/)?.[0] || '').length;
+      if (hashCount === 1) {
+        return (
+          <h1 key={index} className="text-3xl font-bold mb-6 text-gray-900">
+            {boldText}
+          </h1>
+        );
+      } else if (hashCount === 2) {
+        return (
+          <h2 key={index} className="text-2xl font-bold mb-5 text-gray-900 mt-6">
+            {boldText}
+          </h2>
+        );
+      } else {
+        return (
+          <h3 key={index} className="text-xl font-bold mb-4 text-gray-900 mt-5">
+            {boldText}
+          </h3>
+        );
+      }
+    }
   }
 
   // Parse lists (- item, * item, or 1. item, or numbered with ➜)
@@ -211,8 +207,9 @@ const formatContent = (content: string, index: number) => {
     }
   }
 
-  // Regular paragraphs
-  const boldText = parseBold(trimmed);
+  // Regular paragraphs - strip any markdown hashtags that might appear
+  let cleanedText = trimmed.replace(/^#+\s*/, '').trim();
+  const boldText = parseBold(cleanedText);
   return (
     <p key={index} className="text-gray-700 text-base leading-relaxed mb-4">
       {boldText}
@@ -330,10 +327,9 @@ const NewsDetailPage: React.FC = () => {
                       const trimmed = paragraph.trim();
                       if (!trimmed) return;
 
-                      const isHeading = trimmed.match(/^##\s+(.+)$/); // H2 headings create new sections
-                      const isH1 = trimmed.match(/^#\s+(.+)$/); // H1 headings also create new sections
+                      const isHeading = trimmed.match(/^#+\s+(.+)$/); // Any markdown heading (# ## ###) creates new sections
 
-                      if (isHeading || isH1) {
+                      if (isHeading) {
                         // Start new section with this heading
                         if (currentSection !== null && currentSection.items.length > 0) {
                           sections.push(currentSection);

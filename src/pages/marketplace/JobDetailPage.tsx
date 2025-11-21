@@ -59,7 +59,7 @@ const JobDetailPage: React.FC = () => {
           </p>
           <button
             onClick={() => navigate('/marketplace/opportunities')}
-            className="rounded-lg bg-[#1A2E6E] px-6 py-3 text-sm font-semibold text-white"
+                className="rounded-lg bg-[#030f35] px-6 py-3 text-sm font-semibold text-white"
           >
             Back to Opportunities
           </button>
@@ -113,7 +113,7 @@ const JobDetailPage: React.FC = () => {
               </button>
               <Link
                 to={`/marketplace/opportunities/${job.id}/apply`}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#1A2E6E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#132456]"
+                className="inline-flex items-center gap-1 rounded-lg bg-[#030f35] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
               >
                 Apply Now
                 <ArrowUpRight size={16} />
@@ -161,14 +161,16 @@ const JobDetailPage: React.FC = () => {
                 <article className="mt-10 space-y-8">
                   <section>
                     <h2 className="mb-2 text-lg font-semibold text-gray-900">About the role</h2>
-                    <p className="text-sm text-gray-700 leading-relaxed">{job.description}</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {job.description.replace(/^#+\s*/gm, '')}
+                    </p>
                   </section>
 
                   <section>
                     <h3 className="mb-2 text-base font-semibold text-gray-900">Responsibilities</h3>
                     <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
                       {job.responsibilities.map((item) => (
-                        <li key={item}>{item}</li>
+                        <li key={item}>{item.replace(/^#+\s*/, '')}</li>
                       ))}
                     </ul>
                   </section>
@@ -177,7 +179,7 @@ const JobDetailPage: React.FC = () => {
                     <h3 className="mb-2 text-base font-semibold text-gray-900">Requirements</h3>
                     <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
                       {job.requirements.map((item) => (
-                        <li key={item}>{item}</li>
+                        <li key={item}>{item.replace(/^#+\s*/, '')}</li>
                       ))}
                     </ul>
                   </section>
@@ -186,7 +188,7 @@ const JobDetailPage: React.FC = () => {
                     <h3 className="mb-2 text-base font-semibold text-gray-900">What you get</h3>
                     <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
                       {job.benefits.map((item) => (
-                        <li key={item}>{item}</li>
+                        <li key={item}>{item.replace(/^#+\s*/, '')}</li>
                       ))}
                     </ul>
                   </section>
@@ -204,7 +206,7 @@ const JobDetailPage: React.FC = () => {
                       href={job.applyUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#1A2E6E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#132456]"
+                      className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#030f35] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
                     >
                       Apply on DQ Careers
                     </a>
