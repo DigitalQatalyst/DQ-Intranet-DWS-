@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { BookmarkIcon, ScaleIcon, Clock, Calendar, DollarSign, MapPin, ArrowLeftIcon, StarIcon, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, BuildingIcon, ChevronLeft, ChevronRight, MoreHorizontal, XIcon, Target, Award, TrendingUp, BookOpen } from 'lucide-react';
+import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, XIcon } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
@@ -19,8 +19,8 @@ interface MarketplaceDetailsPageProps {
 const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   marketplaceType,
   bookmarkedItems = [],
-  onToggleBookmark = () => {},
-  onAddToComparison = () => {}
+  onToggleBookmark: _onToggleBookmark = () => {},
+  onAddToComparison: _onAddToComparison = () => {}
 }) => {
   const {
     itemId
@@ -33,7 +33,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const config = getMarketplaceConfig(marketplaceType);
   const [item, setItem] = useState<any | null>(null);
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [_isBookmarked, _setIsBookmarked] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -151,8 +151,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     }
   }, [customTabs]);
   // Generate a random rating between 4.0 and 5.0 for display purposes
-  const rating = (4 + Math.random()).toFixed(1);
-  const reviewCount = Math.floor(Math.random() * 50) + 10;
+  // const rating = (4 + Math.random()).toFixed(1);
+  // const reviewCount = Math.floor(Math.random() * 50) + 10;
   useEffect(() => {
     const fetchItemDetails = async () => {
       if (!itemId) return;
@@ -176,7 +176,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
         const finalItemData = itemData || getFallbackItemDetails(marketplaceType, itemId || 'fallback-1');
         if (finalItemData) {
           setItem(finalItemData);
-          setIsBookmarked(bookmarkedItems.includes(finalItemData.id));
+          // setIsBookmarked(bookmarkedItems.includes(finalItemData.id));
           // Fetch related items
           let relatedItemsData: any[] = [];
           try {
@@ -222,17 +222,17 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     };
     fetchItemDetails();
   }, [itemId, marketplaceType, bookmarkedItems, shouldTakeAction, navigate, config]);
-  const handleToggleBookmark = () => {
-    if (item) {
-      onToggleBookmark(item.id);
-      setIsBookmarked(!isBookmarked);
-    }
-  };
-  const handleAddToComparison = () => {
-    if (item) {
-      onAddToComparison(item);
-    }
-  };
+  // const handleToggleBookmark = () => {
+  //   if (item) {
+  //     onToggleBookmark(item.id);
+  //     setIsBookmarked(!isBookmarked);
+  //   }
+  // };
+  // const handleAddToComparison = () => {
+  //   if (item) {
+  //     onAddToComparison(item);
+  //   }
+  // };
   const retryFetch = () => {
     setError(null);
     // Re-fetch by triggering the useEffect
@@ -310,7 +310,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const itemDescription = item.description;
   const provider = item.provider;
   const primaryAction = config.primaryCTA;
-  const secondaryAction = config.secondaryCTA;
+  // const secondaryAction = config.secondaryCTA;
   // Extract tags based on marketplace type
   const displayTags = item.tags || [item.category, marketplaceType === 'courses' ? item.deliveryMode : item.serviceType, item.businessStage].filter(Boolean);
   // Extract details for the sidebar
@@ -937,9 +937,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 </li>
               </ol>
             </nav>
-            <div className="flex flex-col items-start max-w-3xl py-8">
+            <div className="flex flex-col items-start max-w-3xl py-4">
               {/* Provider */}
-              <div className="flex items-center mb-3">
+              <div className="flex items-center mb-2">
                 {/* Provider logo - commented out, uncomment to restore */}
                 {/* <img src={provider.logoUrl} alt={`${provider.name} logo`} className="h-10 w-10 object-contain mr-3 rounded-md" /> */}
                 <span className="text-gray-600 font-medium">
@@ -947,17 +947,17 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 </span>
               </div>
               {/* Title */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
+              <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight">
                 {itemTitle}
               </h1>
               {/* Tags row - Separated from ratings */}
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-2 mb-2">
                 {displayTags.map((tag, index) => <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-50 text-gray-700 border border-gray-200">
                     {tag}
                   </span>)}
               </div>
               {/* Ratings and bookmark row - Now in a single row with proper alignment */}
-              <div className="flex items-center justify-between w-full mb-4">
+              {/* <div className="flex items-center justify-between w-full mb-4">
                 <div className="flex items-center">
                   {marketplaceType === 'courses' && <div className="flex items-center">
                       <div className="flex items-center">
@@ -975,9 +975,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 <button onClick={handleToggleBookmark} className={`p-1.5 rounded-full ${isBookmarked ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'} ml-2`} aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'} title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
                   <BookmarkIcon size={18} className={isBookmarked ? 'fill-yellow-600' : ''} />
                 </button>
-              </div>
+              </div> */}
               {/* Description */}
-              <p className="text-gray-700 mb-6 max-w-2xl">{itemDescription}</p>
+              <p className="text-gray-700 mb-4 max-w-2xl">{itemDescription}</p>
             </div>
           </div>
         </div>

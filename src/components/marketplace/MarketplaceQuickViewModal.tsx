@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { XIcon, BookmarkIcon, CheckCircleIcon, HomeIcon, ChevronRightIcon } from 'lucide-react';
+import { XIcon, CheckCircleIcon, HomeIcon, ChevronRightIcon } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 interface MarketplaceQuickViewModalProps {
   item: any;
@@ -15,8 +15,8 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
   marketplaceType,
   onClose,
   onViewDetails,
-  isBookmarked,
-  onToggleBookmark
+  isBookmarked: _isBookmarked,
+  onToggleBookmark: _onToggleBookmark
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const config = getMarketplaceConfig(marketplaceType);
@@ -50,12 +50,12 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
       <div ref={modalRef} className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-900 truncate">
-            {config.itemName} Preview
+            {item.title}
           </h2>
           <div className="flex items-center space-x-3">
-            <button onClick={onToggleBookmark} className={`p-2 rounded-full ${isBookmarked ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`} aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
+            {/* <button onClick={onToggleBookmark} className={`p-2 rounded-full ${isBookmarked ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`} aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
               <BookmarkIcon size={18} className={isBookmarked ? 'fill-yellow-600' : ''} />
-            </button>
+            </button> */}
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
               <XIcon size={24} />
             </button>
@@ -90,7 +90,7 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
             </ol>
           </nav>
           {/* Provider Section - Logo removed */}
-          <div className="flex items-center mb-4">
+          <div className="flex items-center mb-2">
             <div>
               <span className="text-sm text-gray-500">Department</span>
               <h3 className="text-lg font-medium text-gray-900">
@@ -98,18 +98,14 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
               </h3>
             </div>
           </div>
-          {/* Title */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">
-            {item.title}
-          </h1>
           {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-3">
             {displayTags.map((tag: string, index: number) => <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-50 text-gray-700 border border-gray-200">
                 {tag}
               </span>)}
           </div>
           {/* Key Attributes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {config.attributes.slice(0, 4).map((attr, index) => {
             if (item[attr.key]) {
               return <div key={index} className="flex items-center text-gray-700">
