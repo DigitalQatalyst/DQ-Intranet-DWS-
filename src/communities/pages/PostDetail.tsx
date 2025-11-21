@@ -77,32 +77,16 @@ export default function PostDetail() {
   const fetchPost = async () => {
     setLoading(true);
     setError(null);
-    // Query community_posts table directly to get all fields including content_html, post_type, etc.
+    
+    // Query posts_v2 table (simplified schema - only basic fields)
     const query = supabase
-      .from("community_posts")
-      .select(
-        `
-        id,
-        title,
-        content,
-        content_html,
-        created_at,
-        created_by,
-        community_id,
-        tags,
-        post_type,
-        metadata,
-        event_date,
-        event_location,
-        communities!inner(name),
-        users_local!community_posts_created_by_fkey(username, avatar_url)
-      `
-      )
+      .from("posts_v2")
+      .select("*")
       .eq("id", id)
       .maybeSingle();
+    
     const [data, err] = await safeFetch(query);
     if (err) {
-      console.error("Error loading post:", err);
       setError("Failed to load post");
       setLoading(false);
       return;
@@ -112,51 +96,63 @@ export default function PostDetail() {
       setLoading(false);
       return;
     }
-    // Get reaction counts separately
-    const [reactionsData, reactionsError] = await safeFetch(
-      supabase.from("community_reactions").select("reaction_type").eq("post_id", id)
+    
+    // Fetch user details separately
+    const [userData] = await safeFetch(
+      supabase
+        .from("users_local")
+        .select("id, username, avatar_url")
+        .eq("id", data.user_id)
+        .maybeSingle()
     );
-    if (reactionsError) {
-      console.error("Error loading reactions:", reactionsError);
-    }
+    
+    // Fetch community details separately
+    const [communityData] = await safeFetch(
+      supabase
+        .from("communities")
+        .select("id, name")
+        .eq("id", data.community_id)
+        .maybeSingle()
+    );
+    
+    // Get reaction counts separately
+    const [reactionsData] = await safeFetch(
+      supabase.from("reactions").select("reaction_type").eq("post_id", id)
+    );
+    
     // Get comment count
     const [commentsData] = await safeFetch(
       supabase
         .from("comments")
-        .select("id", {
-          count: "exact",
-        })
+        .select("id")
         .eq("post_id", id)
     );
+    
     const helpfulCount =
-      reactionsData?.filter((r: any) => r.reaction_type === "helpful").length ||
-      0;
+      reactionsData?.filter((r: any) => r.reaction_type === "helpful").length || 0;
     const insightfulCount =
-      reactionsData?.filter((r: any) => r.reaction_type === "insightful")
-        .length || 0;
-
-    console.log("commentsData", commentsData);
+      reactionsData?.filter((r: any) => r.reaction_type === "insightful").length || 0;
     const commentCount = commentsData?.length || 0;
-    console.log("commentCount", commentCount);
+    
     setPost({
       id: data.id,
       title: data.title,
       content: data.content,
-      content_html: data.content_html,
+      content_html: data.content_html || null, // May not exist in posts_v2
       created_at: data.created_at,
-      created_by: data.created_by,
-      author_username: data.users_local?.username || "Unknown",
-      author_avatar: data.users_local?.avatar_url || null,
+      created_by: data.user_id,
+      author_username: userData?.username || "Unknown",
+      author_avatar: userData?.avatar_url || null,
       community_id: data.community_id || "",
-      community_name: data.communities?.name || "Unknown",
-      tags: data.tags || [],
+      community_name: communityData?.name || "Unknown",
+      tags: [], // posts_v2 doesn't have tags column
       helpful_count: helpfulCount,
       insightful_count: insightfulCount,
       comment_count: commentCount,
-      post_type: data.post_type || "text",
-      metadata: data.metadata || {},
-      event_date: data.event_date,
-      event_location: data.event_location,
+      post_type: "text", // Default to text since posts_v2 doesn't have post_type
+      metadata: {},
+      event_date: null,
+      event_location: null,
     });
     setLoading(false);
   };

@@ -57,7 +57,7 @@ export function PostCard({
   const handleReaction = async (type: 'helpful' | 'insightful') => {
     if (!user) {
       toast.error('Please sign in to react');
-      navigate('/');
+      // Don't navigate, just show error - user can sign in from current page
       return;
     }
     

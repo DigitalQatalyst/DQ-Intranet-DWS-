@@ -5,7 +5,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   type,
   ...props
 }, ref) => {
-  return <input type={type} className={cn("flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-gray-700 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:border-brand-teal disabled:cursor-not-allowed disabled:opacity-50", className)} ref={ref} {...props} />;
+  return <input type={type} className={cn("flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-gray-700 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dq-navy focus-visible:border-dq-navy disabled:cursor-not-allowed disabled:opacity-50", className)} ref={ref} {...props} />;
 });
 Input.displayName = "Input";
 export { Input };

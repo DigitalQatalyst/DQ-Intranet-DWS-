@@ -7,7 +7,7 @@ import { FilterSidebar, FilterConfig } from "../components/communities/FilterSid
 import { CreateCommunityModal } from "../components/communities/CreateCommunityModal";
 import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from "../utils/safeFetch";
-import { getAnonymousUserId } from "../utils/anonymousUser";
+import { joinCommunity } from "@/communities/services/membershipService";
 import { toast } from "sonner";
 import { Button } from "../components/ui/button";
 import { PlusCircle, Filter, X, HomeIcon, ChevronRightIcon } from 'lucide-react';
@@ -522,6 +522,7 @@ export default function Communities() {
     
     try {
       console.log('Fetching communities with filters:', { searchQuery, filters });
+      console.log('User authenticated:', !!user);
       
       // If department or location filters are applied, query base table directly
       // since communities_with_counts view may not include these columns
@@ -584,7 +585,33 @@ export default function Communities() {
         query = query.order('member_count', { ascending: false });
       }
 
-      let [data, error] = await safeFetch<Community[]>(query);
+      // Execute query with timeout protection
+      console.log('Executing query...');
+      const startTime = Date.now();
+      
+      // Create timeout promise
+      const timeoutPromise = new Promise<[null, any]>((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout after 10 seconds')), 10000)
+      );
+      
+      // Race between query and timeout
+      let [data, error] = await Promise.race([
+        safeFetch<Community[]>(query).then(result => {
+          console.log(`Query completed in ${Date.now() - startTime}ms`);
+          return result;
+        }),
+        timeoutPromise
+      ]) as [Community[] | null, any];
+      
+      if (error && error.message === 'Request timeout after 10 seconds') {
+        console.error('Query timed out - check network connection and RLS policies');
+        setError(new Error('Request timed out. The server may be slow or RLS policies may be blocking access.'));
+        setFilteredCommunities([]);
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Query result:', { hasData: !!data, dataLength: data?.length || 0, hasError: !!error });
       
       // If querying base table (for department/location filters), transform data
       if (hasDepartmentOrLocationFilter && data && !error) {
@@ -660,8 +687,27 @@ export default function Communities() {
           query = (query as any).eq('location_filter', filters.location);
         }
 
-        // Fetch data
-        [data, error] = await safeFetch<any[]>(query);
+        // Fetch data with timeout
+        const fallbackStartTime = Date.now();
+        const fallbackTimeoutPromise = new Promise<[null, any]>((_, reject) => 
+          setTimeout(() => reject(new Error('Fallback request timeout after 10 seconds')), 10000)
+        );
+        
+        [data, error] = await Promise.race([
+          safeFetch<any[]>(query).then(result => {
+            console.log(`Fallback query completed in ${Date.now() - fallbackStartTime}ms`);
+            return result;
+          }),
+          fallbackTimeoutPromise
+        ]) as [any[] | null, any];
+        
+        if (error && error.message === 'Fallback request timeout after 10 seconds') {
+          console.error('Fallback query also timed out');
+          setError(new Error('Request timed out. Please check RLS policies and network connection.'));
+          setFilteredCommunities([]);
+          setLoading(false);
+          return;
+        }
         
         // Transform data to match expected format
         if (data && !error) {
@@ -752,55 +798,45 @@ export default function Communities() {
     navigate(`/community/${communityId}`);
   }, [navigate]);
   const handleJoinCommunity = useCallback(async (communityId: string) => {
-    // Get user ID (authenticated user or anonymous user)
-    const userId = user?.id || getAnonymousUserId();
+    console.log('🔵 handleJoinCommunity called', { communityId, hasUser: !!user });
     
-    // Check if already a member
-    const { data: existingMembership } = await supabase
-      .from('community_members')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('community_id', communityId)
-      .maybeSingle();
-    
-    if (existingMembership) {
-      // Already a member, just navigate to the community page
-      navigate(`/community/${communityId}`);
+    // Check if user is authenticated
+    if (!user) {
+      console.warn('⚠️ User not authenticated, redirecting to sign in');
+      toast.error('Please sign in to join communities');
+      // You might want to redirect to sign in page or show sign in modal
       return;
     }
     
-    // Join community - insert into both tables for compatibility
-    const memberData = {
-      user_id: userId,
-      community_id: communityId,
-      role: 'member'
-    };
-    const query1 = supabase.from('community_members').insert(memberData);
-    const query2 = supabase.from('memberships').insert({
-      user_id: userId,
-      community_id: communityId
-    });
-    const [, error1] = await safeFetch(query1);
-    const [, error2] = await safeFetch(query2);
-    
-    if (error1 && error2) {
-      if (error1.code === '23505' || error2.code === '23505') {
-        // Duplicate key error - user is already a member
-        toast.error('You are already a member of this community');
-      } else if (error1.code === '23503' || error2.code === '23503') {
-        // Foreign key violation
-        toast.error('Invalid community or user');
-      } else {
-        toast.error('Failed to join community');
+    try {
+      // Use centralized membership service (optimized - single table operation)
+      const success = await joinCommunity(communityId, user, {
+        refreshData: async () => {
+          // Update local membership state
+          setUserMemberships(prev => new Set(prev).add(communityId));
+        },
+        onSuccess: () => {
+          console.log('✅ Successfully joined community');
+          toast.success('Successfully joined community!');
+          // Navigate to community detail page after successful join
+          navigate(`/community/${communityId}`);
+        },
+        onError: (error) => {
+          console.error('❌ Error joining community:', error);
+          // Still navigate even on error (user may already be a member)
+          navigate(`/community/${communityId}`);
+        },
+      });
+      
+      console.log('🔵 Join result:', success);
+      
+      // Navigate if not already handled by callbacks
+      if (success) {
+        navigate(`/community/${communityId}`);
       }
-      // Still navigate to the community page even if there's an error
-      navigate(`/community/${communityId}`);
-    } else {
-      toast.success(user ? 'Joined community!' : 'Joined community as guest!');
-      // Update local membership state
-      setUserMemberships(prev => new Set(prev).add(communityId));
-      // Navigate to community detail page after successful join
-      navigate(`/community/${communityId}`);
+    } catch (error) {
+      console.error('❌ Exception in handleJoinCommunity:', error);
+      toast.error('Failed to join community. Please try again.');
     }
   }, [navigate, user]);
   if (authLoading) {
@@ -1126,7 +1162,10 @@ export default function Communities() {
                           recentActivity: `New discussion started in ${community.name}`
                         }}
                         isMember={userMemberships.has(community.id)}
-                        onJoin={() => handleJoinCommunity(community.id)}
+                        onJoin={() => {
+                          console.log('🔵 Communities page: onJoin called for community', community.id);
+                          handleJoinCommunity(community.id);
+                        }}
                         onViewDetails={() => handleViewCommunity(community.id)}
                       />
                     );
@@ -1219,7 +1258,10 @@ export default function Communities() {
                         recentActivity: `New discussion started in ${community.name}`
                       }}
                       isMember={userMemberships.has(community.id)}
-                      onJoin={() => handleJoinCommunity(community.id)}
+                      onJoin={() => {
+                        console.log('🔵 Communities page: onJoin called for community', community.id);
+                        handleJoinCommunity(community.id);
+                      }}
                       onViewDetails={() => handleViewCommunity(community.id)}
                     />
                   );

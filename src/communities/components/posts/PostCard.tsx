@@ -124,6 +124,7 @@ export function PostCard({ post, onActionComplete, isMember = false }: PostCardP
             <CommunityReactions
               postId={post.id}
               communityId={post.community_id}
+              isMember={isMember || false}
               onReactionChange={onActionComplete}
             />
             <button

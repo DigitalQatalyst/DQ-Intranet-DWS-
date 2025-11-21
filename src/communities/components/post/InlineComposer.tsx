@@ -14,8 +14,9 @@ import { RichTextEditor } from './RichTextEditor';
 import { InlineMediaUpload } from './InlineMediaUpload';
 import { PollOptionsInput } from './PollOptionsInput';
 import { LinkPreview } from './LinkPreview';
+import { SignInModal } from '@/communities/components/auth/SignInModal';
 import { useCommunityMembership } from '@/communities/hooks/useCommunityMembership';
-import { getAnonymousUserId } from '@/communities/utils/anonymousUser';
+import { getCurrentUserId } from '@/communities/utils/userUtils';
 interface InlineComposerProps {
   communityId?: string;
   isMember?: boolean;
@@ -38,12 +39,15 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
   onPostCreated
 }) => {
   const {
-    user
+    user,
+    isAuthenticated
   } = useAuth();
   const navigate = useNavigate();
-  const { isMember: isMemberFromHook } = useCommunityMembership(communityId);
+  const { isMember: isMemberFromHook, loading: membershipLoading } = useCommunityMembership(communityId);
   // Use prop if provided, otherwise fall back to hook
   const isMember = isMemberProp !== undefined ? isMemberProp : isMemberFromHook;
+  
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const [postType, setPostType] = useState<PostType>('text');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -69,7 +73,7 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
   const [showLinkPreview, setShowLinkPreview] = useState(true);
   useEffect(() => {
     if (!communityId) {
-      // Fetch communities for both authenticated and anonymous users
+      // Fetch communities for authenticated users
       fetchCommunities();
     }
   }, [communityId]);
@@ -134,24 +138,27 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
     }
   }, [content, postType]);
   const fetchCommunities = async () => {
-    // Get user ID (authenticated user or anonymous user)
-    const userId = user?.id || getAnonymousUserId();
+    if (!isAuthenticated || !user) {
+      setCommunities([]);
+      return;
+    }
     
-    // Check both membership tables
-    const query1 = supabase
+    // Get authenticated user ID
+    const userId = getCurrentUserId(user);
+    if (!userId) {
+      setCommunities([]);
+      return;
+    }
+    
+    // Check memberships table only (optimized - single table query)
+    const query = supabase
       .from('memberships')
       .select('community_id, communities(id, name)')
       .eq('user_id', userId);
-    const [data1] = await safeFetch(query1);
+    const [data] = await safeFetch(query);
     
-    const query2 = supabase
-      .from('community_members')
-      .select('community_id, communities(id, name)')
-      .eq('user_id', userId);
-    const [data2] = await safeFetch(query2);
-    
-    // Combine and deduplicate communities
-    const allMemberships = [...(data1 || []), ...(data2 || [])];
+    // Use memberships data directly
+    const allMemberships = data || [];
     const communityMap = new Map();
     allMemberships.forEach((m: any) => {
       if (m.communities) {
@@ -162,14 +169,40 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
   };
   const handleQuickSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const targetCommunityId = communityId || selectedCommunityId;
-    if (!targetCommunityId) {
-      toast.error('Please select a community');
+    e.stopPropagation();
+    
+    if (!isAuthenticated || !user) {
+      setShowSignInModal(true);
       return;
     }
-    
-    // No membership check required - anyone can create posts
-    const userId = user?.id || getAnonymousUserId();
+      
+      const targetCommunityId = communityId || selectedCommunityId;
+      if (!targetCommunityId) {
+        toast.error('Please select a community');
+        return;
+      }
+      
+      // Get auth user ID directly from Supabase session
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id || user?.id || null;
+      
+      if (!userId) {
+        toast.error('Unable to identify user. Please sign in again.');
+        setShowSignInModal(true);
+        return;
+      }
+
+    // Check if user is a member of the community
+    if (!isMember) {
+      toast.error('You must join the community before creating posts', {
+        duration: 5000
+      });
+      // Navigate to community page to join (using React Router instead of window.location)
+      setTimeout(() => {
+        navigate(`/community/${targetCommunityId}`);
+      }, 2000);
+      return;
+    }
 
     // Type-specific validation
     if (!title.trim()) {
@@ -185,7 +218,8 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
       return;
     }
     if (postType === 'poll') {
-      if (!pollQuestion.trim()) {
+      // For polls, title is the poll question
+      if (!title.trim() && !pollQuestion.trim()) {
         toast.error('Poll question is required');
         return;
       }
@@ -208,86 +242,51 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
     }
     setSubmitting(true);
     try {
-      // Parse hashtags and mentions
-      const hashtagRegex = /#(\w+)/g;
-      const tags = [...(content.match(hashtagRegex) || [])].map(tag => tag.slice(1));
-
-      // Get user ID (authenticated user or anonymous user)
-      const userId = user?.id || getAnonymousUserId();
+      // Prepare simplified post data for posts_v2
+      // For text posts, use content; for others, use title as content
+      const postContent = postType === 'text' ? content.trim() : title.trim();
       
-      // Prepare post data
-      const postData: any = {
-        title: title.trim(),
+      const postDataV2 = {
         community_id: targetCommunityId,
-        user_id: userId, // Set user_id (trigger will sync to created_by)
-        created_by: userId, // Also set created_by explicitly for compatibility
-        post_type: postType,
-        status: 'active',
-        tags: tags.length > 0 ? tags : null
+        user_id: userId,
+        title: title.trim(),
+        content: postContent
       };
-
-      // Type-specific data
-      if (postType === 'text') {
-        postData.content = content.trim();
-        postData.content_html = contentHtml;
-      } else if (postType === 'poll') {
-        postData.content = title.trim(); // Use title for poll question
-      } else if (postType === 'event') {
-        const eventDateTime = eventTime ? `${eventDate}T${eventTime}` : eventDate;
-        postData.event_date = eventDateTime;
-        postData.event_location = eventLocation.trim() || null;
-      }
-      // Use community_posts table instead of posts
+      
       const {
         data: post,
         error: postError
-      } = await supabase.from('community_posts').insert(postData).select().single();
-      if (postError) throw postError;
-
-      // Create related records for media posts
-      if (postType === 'media' && mediaFile) {
-        // Use community_assets table for media files
-        await supabase.from('community_assets').insert({
-          post_id: post.id,
-          user_id: userId,
-          community_id: targetCommunityId,
-          asset_type: mediaFile.type.startsWith('image/') ? 'image' : 
-                     mediaFile.type.startsWith('video/') ? 'video' : 'document',
-          storage_path: mediaFile.url, // Will be updated when proper storage is implemented
-          file_name: mediaFile.caption || 'uploaded-file',
-          url: mediaFile.url,
-          mime_type: mediaFile.type
+      } = await supabase.from('posts_v2').insert(postDataV2).select().single();
+      
+      if (postError) {
+        console.error('❌ Post insert error:', postError);
+        console.error('❌ Error details:', {
+          message: postError.message,
+          details: postError.details,
+          hint: postError.hint,
+          code: postError.code
         });
+        throw postError;
       }
-      if (postType === 'poll') {
-        const validOptions = pollOptions.filter(opt => opt.trim());
-        const endsAt = new Date();
-        endsAt.setDate(endsAt.getDate() + 7); // 7 days default
-
-        const {
-          error: pollError
-        } = await supabase.from('poll_options').insert(validOptions.map((option, index) => ({
-          post_id: post.id,
-          option_text: option.trim(),
-          vote_count: 0
-        })));
-        if (pollError) {
-          console.error('Poll options error:', pollError);
-          throw new Error('Failed to create poll options');
-        }
-      }
+      
+      console.log('✅ Post created successfully:', post);
 
       // Clear form
-      toast.success('Posted!');
       clearForm();
 
       // Clear draft
       const draftKey = `inline-draft-${communityId || 'global'}-${postType}`;
       localStorage.removeItem(draftKey);
+      
+      // Show success and trigger refresh
+      toast.success('Post created successfully!');
       onPostCreated?.();
     } catch (error: any) {
       console.error('Error creating post:', error);
-      toast.error('Failed to create post');
+      const errorMessage = error.message || error.details || 'Unknown error occurred';
+      toast.error(`Failed to create post: ${errorMessage}`, {
+        duration: 5000
+      });
     } finally {
       setSubmitting(false);
     }
@@ -349,17 +348,21 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
       e.preventDefault();
       handleQuickSubmit(e as any);
     }
-  }, [handleQuickSubmit]);
+  }, [isAuthenticated, user, isMember, communityId, selectedCommunityId, title, content, postType]);
   const isFormValid = () => {
     const targetCommunityId = communityId || selectedCommunityId;
-    if (!targetCommunityId || !title.trim()) return false;
+    if (!targetCommunityId || !title.trim()) {
+      return false;
+    }
     switch (postType) {
       case 'text':
         return content.trim().length > 0;
       case 'media':
         return mediaFile !== null;
       case 'poll':
-        return pollQuestion.trim().length > 0 && pollOptions.filter(opt => opt.trim()).length >= 2;
+        const pollQuestionValid = title.trim().length > 0 || pollQuestion.trim().length > 0;
+        const pollOptionsValid = pollOptions.filter(opt => opt.trim()).length >= 2;
+        return pollQuestionValid && pollOptionsValid;
       case 'event':
         return eventDate !== '';
       default:
@@ -378,9 +381,34 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
         return 'Post';
     }
   };
-  // Show composer to everyone - no membership required
+  // Show composer only to authenticated users
   
-  return <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+  if (!isAuthenticated) {
+    return (
+      <>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 text-center">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Sign In to Create Posts</h3>
+          <p className="text-sm text-gray-600 mb-4">Please sign in to create posts in communities</p>
+          <Button onClick={() => setShowSignInModal(true)}>
+            Sign In
+          </Button>
+        </div>
+        <SignInModal
+          open={showSignInModal}
+          onOpenChange={setShowSignInModal}
+          onSuccess={() => {
+            setShowSignInModal(false);
+          }}
+          title="Sign In to Create Posts"
+          description="You need to be signed in to create posts in communities."
+        />
+      </>
+    );
+  }
+  
+  return (
+    <>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="h-10 w-10 rounded-full bg-dq-navy flex items-center justify-center text-white font-semibold">
           {user?.email?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || 'U'}
@@ -388,7 +416,16 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
         <h3 className="text-lg font-semibold text-gray-900">Create a Post</h3>
       </div>
 
-      <form onSubmit={handleQuickSubmit} onKeyDown={handleKeyDown} className="space-y-4">
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleQuickSubmit(e);
+        }} 
+        onKeyDown={handleKeyDown} 
+        className="space-y-4"
+        noValidate
+      >
         {/* Post Type Selector */}
         <Tabs value={postType} onValueChange={value => handleTypeChange(value as PostType)}>
           <TabsList className="grid grid-cols-4 w-full">
@@ -459,7 +496,7 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
               <Label className="text-sm font-medium text-gray-700 mb-1 block">
                 Upload File <span className="text-red-500">*</span>
               </Label>
-              <InlineMediaUpload file={mediaFile} onFileChange={setMediaFile} userId={user?.id || getAnonymousUserId()} />
+              <InlineMediaUpload file={mediaFile} onFileChange={setMediaFile} userId={getCurrentUserId(user)} />
               <p className="text-xs text-gray-500 mt-1">
                 Use full editor for multiple uploads
               </p>
@@ -516,7 +553,11 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
             Advanced options
           </Button>
 
-          <Button type="submit" disabled={submitting || !isFormValid()} className="bg-dq-navy hover:bg-[#13285A] text-white disabled:opacity-50">
+          <Button 
+            type="submit" 
+            disabled={submitting || !isFormValid()} 
+            className="bg-dq-navy hover:bg-[#13285A] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {submitting ? 'Posting...' : <>
                 <Send className="h-4 w-4 mr-1.5" />
                 {getPostButtonLabel()}
@@ -524,5 +565,7 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
           </Button>
         </div>
       </form>
-    </div>;
+    </div>
+    </>
+  );
 };

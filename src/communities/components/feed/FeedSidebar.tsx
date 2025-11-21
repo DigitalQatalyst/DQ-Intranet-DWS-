@@ -100,20 +100,18 @@ export function FeedSidebar({
       navigate(`/sign-in?redirect=/community/${communityId}`);
       return;
     }
-    const isMember = memberships.some(m => m.community_id === communityId && m.joined);
-    if (isMember) return;
-    const {
-      error
-    } = await supabase.from('memberships').insert({
-      community_id: communityId,
-      user_id: user.id
+    
+    // Use centralized membership service (optimized - single table operation)
+    const { joinCommunity } = await import('@/communities/services/membershipService');
+    const success = await joinCommunity(communityId, user, {
+      refreshData: async () => {
+        // Update local memberships state
+        setMemberships([...memberships, {
+          community_id: communityId,
+          joined: true
+        }]);
+      },
     });
-    if (!error) {
-      setMemberships([...memberships, {
-        community_id: communityId,
-        joined: true
-      }]);
-    }
   };
   const isJoined = (communityId: string) => {
     return memberships.some(m => m.community_id === communityId && m.joined);

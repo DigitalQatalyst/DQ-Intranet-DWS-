@@ -93,7 +93,7 @@ export function SignInModal({
             <Button
               type="submit"
               disabled={submitting || !email.trim() || !password.trim()}
-              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+              className="bg-dq-navy hover:bg-[#13285A] text-white transition-colors"
             >
               {submitting ? (
                 <>

@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { supabase } from '@/lib/supabaseClient';
 import { safeFetch } from '@/communities/utils/safeFetch';
-import { getAnonymousUserId } from '@/communities/utils/anonymousUser';
+import { joinCommunity, leaveCommunity } from '@/communities/services/membershipService';
+import { useCommunityMembership } from '@/communities/hooks/useCommunityMembership';
 import { MainLayout } from '@/communities/components/layout/MainLayout';
 import { Button } from '@/communities/components/ui/button';
-import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
-import { Users, UserPlus, UserMinus, AlertCircle, Plus, Settings, Home, ChevronRight, Upload, X, Pencil, Calendar } from 'lucide-react';
+import { Users, AlertCircle, Plus, Settings, Home, ChevronRight, X, Pencil, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { MemberList } from '@/communities/components/communities/MemberList';
 import { InlineComposer } from '@/communities/components/post/InlineComposer';
 import { CommunityInfoPanel } from '@/communities/components/communities/CommunityInfoPanel';
-import { ActivityFeed } from '@/communities/components/communities/ActivityFeed';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
+import { CreatePostModal } from '@/communities/components/post/CreatePostModal';
+import { SignInModal } from '@/communities/components/auth/SignInModal';
 import { Label } from '@/communities/components/ui/label';
 import { Input } from '@/communities/components/ui/input';
 import { format } from 'date-fns';
@@ -25,8 +26,6 @@ import {
   PageSection,
   SectionHeader,
   SectionContent,
-  Breadcrumbs,
-  BreadcrumbItem,
 } from "../components/PageLayout/index";
 
 interface Community {
@@ -65,7 +64,6 @@ export default function Community() {
     id: string;
   }>();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [community, setCommunity] = useState<Community | null>(null);
   const [memberCount, setMemberCount] = useState(0);
   const [isMember, setIsMember] = useState(false);
@@ -81,21 +79,15 @@ export default function Community() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [postsError, setPostsError] = useState<string | null>(null);
+  const [createPostModalOpen, setCreatePostModalOpen] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
   useEffect(() => {
     if (id) {
       fetchCommunity();
       fetchPosts();
-      // Check membership for both authenticated and anonymous users
-      checkMembership();
+      // Membership check is now handled by useCommunityMembership hook above
     }
   }, [id, user]);
-
-  // Refresh membership status when component mounts or when coming from join action
-  useEffect(() => {
-    if (id) {
-      checkMembership();
-    }
-  }, [id]);
   useEffect(() => {
     if (id) {
       fetchPosts();
@@ -253,121 +245,58 @@ export default function Community() {
       setLoading(false);
     }
   };
-  const checkMembership = async () => {
-    if (!id) return;
-    
-    // Get user ID (authenticated user or anonymous user)
-    const userId = user?.id || getAnonymousUserId();
-    
-    // Check community_members table first, fallback to memberships for compatibility
-    const query = supabase.from('community_members').select('id').eq('user_id', userId).eq('community_id', id).maybeSingle();
-    const [data] = await safeFetch(query);
-    
-    // If not found in community_members, check memberships table
-    if (!data) {
-      const query2 = supabase.from('memberships').select('id').eq('user_id', userId).eq('community_id', id).maybeSingle();
-      const [data2] = await safeFetch(query2);
-      setIsMember(!!data2);
-    } else {
-      setIsMember(!!data);
-    }
-  };
+  // Use the optimized membership hook (single table check)
+  const { isMember: hookIsMember } = useCommunityMembership(id);
+  
+  // Sync hook state with local state
+  useEffect(() => {
+    setIsMember(hookIsMember);
+  }, [hookIsMember]);
   const handleJoinLeave = async () => {
     if (!id) return;
     
-    setJoinLoading(true);
-    
-    // Get user ID (authenticated user or anonymous user)
-    const userId = user?.id || getAnonymousUserId();
-    
-    // Validate community exists
-    const { data: communityData } = await supabase
-      .from('communities')
-      .select('id')
-      .eq('id', id)
-      .single();
-    
-    if (!communityData) {
-      toast.error('Community not found');
-      setJoinLoading(false);
+    // Check if user is authenticated
+    if (!user) {
+      setShowSignInModal(true);
       return;
     }
     
-    // Check if already a member (check both tables for compatibility)
-    const membershipQuery1 = supabase
-      .from('community_members')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('community_id', id)
-      .maybeSingle();
-    const [existingMembership1] = await safeFetch(membershipQuery1);
+    setJoinLoading(true);
     
-    let alreadyMember = !!existingMembership1;
-    if (!alreadyMember) {
-      const membershipQuery2 = supabase
-        .from('memberships')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('community_id', id)
-        .maybeSingle();
-      const [existingMembership2] = await safeFetch(membershipQuery2);
-      alreadyMember = !!existingMembership2;
-    }
-    
-    if (isMember || alreadyMember) {
-      // Leave community - delete from both tables for compatibility
-      const query1 = supabase.from('community_members').delete().match({
-        user_id: userId,
-        community_id: id
-      });
-      const query2 = supabase.from('memberships').delete().match({
-        user_id: userId,
-        community_id: id
-      });
-      const [, error1] = await safeFetch(query1);
-      const [, error2] = await safeFetch(query2);
-      if (error1 && error2) {
-        toast.error('Failed to leave community');
-      } else {
-        toast.success('Left community');
-        setIsMember(false);
-        setMemberCount(prev => Math.max(0, prev - 1));
-      }
-    } else {
-      // Join community - insert into both tables for compatibility
-      const memberData = {
-        user_id: userId,
-        community_id: id,
-        role: 'member'
-      };
-      const query1 = supabase.from('community_members').insert(memberData);
-      const query2 = supabase.from('memberships').insert({
-        user_id: userId,
-        community_id: id
-      });
-      const [, error1] = await safeFetch(query1);
-      const [, error2] = await safeFetch(query2);
-      if (error1 && error2) {
-        if (error1.code === '23505' || error2.code === '23505') {
-          // Duplicate key error - user is already a member
-          toast.error('You are already a member of this community');
-          setIsMember(true);
-        } else if (error1.code === '23503' || error2.code === '23503') {
-          // Foreign key violation
-          toast.error('Invalid community or user');
-        } else {
-          toast.error('Failed to join community');
+    try {
+      if (isMember) {
+        // Leave community (optimized - single table operation)
+        const success = await leaveCommunity(id, user, {
+          refreshData: async () => {
+            // Optimistic state update (hook will also update automatically)
+            setIsMember(false);
+            setMemberCount(prev => Math.max(0, prev - 1));
+            // Hook will update membership status automatically via useEffect
+          },
+        });
+        if (success) {
+          // Posts will refresh automatically if needed
         }
       } else {
-        toast.success(user ? 'Joined community!' : 'Joined community as guest!');
-        // Re-check membership immediately to ensure state is synced
-        await checkMembership();
-        setMemberCount(prev => prev + 1);
-        // Refresh posts to show member-only content
-        fetchPosts();
+        // Join community (optimized - single table operation, optimistic update)
+        const success = await joinCommunity(id, user, {
+          validateCommunity: true, // Validate community exists (detail page only)
+          refreshData: async () => {
+            // Optimistic state update (hook will also update automatically)
+            setIsMember(true);
+            setMemberCount(prev => prev + 1);
+            // Refresh posts to show member-only content
+            await fetchPosts();
+            // Hook will update membership status automatically via useEffect
+          },
+        });
+        if (success) {
+          // State already updated by refreshData callback
+        }
       }
+    } finally {
+      setJoinLoading(false);
     }
-    setJoinLoading(false);
   };
   const fetchPosts = async () => {
     if (!id) return;
@@ -375,25 +304,14 @@ export default function Community() {
     setPostsError(null);
 
     try {
-      // For moderators/admins, query community_posts table directly to see all statuses
-      // For regular users, only show active posts
-      const isModerator =
-        user && (user.role === "admin" || user.role === "moderator");
-
-      // Query community_posts table - fetch posts first, then user details separately
-      // This avoids join ordering issues that cause 400 errors
+      // Query posts_v2 table - fetch posts first, then user details separately
       let query = supabase
-        .from("community_posts")
+        .from("posts_v2")
         .select("*")
         .eq("community_id", id)
         .order("created_at", {
           ascending: false,
         });
-
-      // Regular users only see active posts
-      if (!isModerator) {
-        query = query.eq("status", "active");
-      }
 
       const [data, err] = await safeFetch(query);
       
@@ -405,10 +323,10 @@ export default function Community() {
       }
 
       if (data && data.length > 0) {
-        // Get unique user IDs from posts (check both user_id and created_by columns)
+        // Get unique user IDs from posts
         const userIds = [...new Set(
           data
-            .map((p: any) => p.user_id || p.created_by)
+            .map((p: any) => p.user_id)
             .filter(Boolean)
         )];
         
@@ -430,48 +348,22 @@ export default function Community() {
           }
         }
 
-        // Fetch reaction and comment counts separately for all users
-        const postIds = data.map((p: any) => p.id);
-
-        const { data: reactions } = await supabase
-          .from("community_reactions")
-          .select("post_id, reaction_type")
-          .in("post_id", postIds);
-
-        const { data: comments } = await supabase
-          .from("community_comments")
-          .select("post_id")
-          .in("post_id", postIds)
-          .eq("status", "active");
-
-        // Count reactions and comments
-        const reactionCounts =
-          reactions?.reduce((acc: any, r: any) => {
-            if (!acc[r.post_id]) acc[r.post_id] = { like: 0, helpful: 0, insightful: 0 };
-            if (r.reaction_type === "like") acc[r.post_id].like++;
-            if (r.reaction_type === "helpful") acc[r.post_id].helpful++;
-            if (r.reaction_type === "insightful") acc[r.post_id].insightful++;
-            return acc;
-          }, {}) || {};
-
-        const commentCounts =
-          comments?.reduce((acc: any, c: any) => {
-            acc[c.post_id] = (acc[c.post_id] || 0) + 1;
-            return acc;
-          }, {}) || {};
-
-        // Map posts similar to how members are mapped in MemberList
+        // Map posts to match expected format
         const posts = data.map((p: any) => {
-          const userId = p.user_id || p.created_by;
-          const userInfo = userDetails[userId] || { username: 'Unknown', avatar_url: null };
+          const userInfo = userDetails[p.user_id] || { username: 'Unknown', avatar_url: null };
           return {
-            ...p,
+            id: p.id,
+            title: p.title,
+            content: p.content,
+            created_at: p.created_at,
+            created_by: p.user_id,
+            community_id: p.community_id,
             community_name: community?.name || '',
             author_username: userInfo.username,
             author_avatar: userInfo.avatar_url,
-            helpful_count: reactionCounts[p.id]?.helpful || 0,
-            insightful_count: reactionCounts[p.id]?.insightful || 0,
-            comment_count: commentCounts[p.id] || 0,
+            helpful_count: 0,
+            insightful_count: 0,
+            comment_count: 0,
           };
         });
 
@@ -490,6 +382,8 @@ export default function Community() {
     }
   };
   const handlePostCreated = () => {
+    // Refresh posts immediately
+    fetchPosts();
     setRefreshKey((prev) => prev + 1);
   };
   const handleUpdateImage = async () => {
@@ -705,7 +599,7 @@ export default function Community() {
                     </div>
                     <div className="mt-6 md:mt-0 md:ml-8">
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-                        {isMember ? (
+                        {user && isMember ? (
                           <Button 
                             onClick={handleJoinLeave} 
                             variant="outline" 
@@ -720,7 +614,7 @@ export default function Community() {
                             className="bg-dq-navy text-white hover:bg-[#13285A]" 
                             disabled={joinLoading}
                           >
-                            {joinLoading ? 'Processing...' : user ? (community?.isprivate ? 'Request to Join' : 'Join Community') : 'Join as Guest'}
+                            {joinLoading ? 'Processing...' : 'Join Community'}
                           </Button>
                         )}
                       </div>
@@ -800,9 +694,7 @@ export default function Community() {
                           Be the first to start a conversation in this community
                         </p>
                         <Button
-                          onClick={() =>
-                            navigate(`/create-post?communityId=${id}`)
-                          }
+                          onClick={() => setCreatePostModalOpen(true)}
                           className="bg-dq-navy text-white hover:bg-[#13285A]"
                         >
                           <Plus className="h-4 w-4 mr-2" />
@@ -867,12 +759,22 @@ export default function Community() {
         </PageLayout>
         {/* Floating Create Post Button - Available to everyone */}
         <Button
-          onClick={() => navigate(`/create-post?communityId=${id}`)}
+          onClick={() => setCreatePostModalOpen(true)}
           className="fixed bottom-5 right-5 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all bg-dq-navy hover:bg-[#13285A] text-white"
           size="icon"
         >
           <Plus className="h-6 w-6" />
         </Button>
+        
+        {/* Create Post Modal */}
+        {id && (
+          <CreatePostModal
+            open={createPostModalOpen}
+            onOpenChange={setCreatePostModalOpen}
+            communityId={id}
+            onPostCreated={handlePostCreated}
+          />
+        )}
         {/* Image Update Dialog */}
         <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
           <DialogContent className="sm:max-w-md">
@@ -929,6 +831,18 @@ export default function Community() {
             </div>
           </DialogContent>
         </Dialog>
+        
+        {/* Sign In Modal */}
+        <SignInModal
+          open={showSignInModal}
+          onOpenChange={setShowSignInModal}
+          onSuccess={() => {
+            setShowSignInModal(false);
+            // After successful sign in, user state will update and button will work
+          }}
+          title="Sign In to Join Community"
+          description="Please sign in to join this community and participate in discussions."
+        />
       </div>
     </MainLayout>
   );

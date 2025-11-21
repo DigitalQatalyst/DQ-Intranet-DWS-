@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { supabase } from "@/lib/supabaseClient";
-import { safeFetch } from '@/communities/utils/safeFetch';
-import { getAnonymousUserId } from '@/communities/utils/anonymousUser';
+import { joinCommunity, leaveCommunity } from '@/communities/services/membershipService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/communities/components/ui/card';
 import { Button } from '@/communities/components/ui/button';
 import { Badge } from '@/communities/components/ui/badge';
@@ -34,54 +32,25 @@ export function CommunityCard({
     e.stopPropagation();
     setLoading(true);
     
-    // Get user ID (authenticated user or anonymous user)
-    const userId = user?.id || getAnonymousUserId();
-    
-    if (isJoined) {
-      // Leave community - delete from both tables for compatibility
-      const query1 = supabase.from('memberships').delete().match({
-        user_id: userId,
-        community_id: community.id
-      });
-      const query2 = supabase.from('community_members').delete().match({
-        user_id: userId,
-        community_id: community.id
-      });
-      const [, error1] = await safeFetch(query1);
-      const [, error2] = await safeFetch(query2);
-      if (error1 && error2) {
-        toast.error('Failed to leave community');
+    try {
+      if (isJoined) {
+        // Leave community (optimized - single table operation)
+        await leaveCommunity(community.id, user, {
+          onSuccess: () => {
+            onJoinLeave();
+          },
+        });
       } else {
-        toast.success('Left community');
-        onJoinLeave();
+        // Join community (optimized - single table operation)
+        await joinCommunity(community.id, user, {
+          onSuccess: () => {
+            onJoinLeave();
+          },
+        });
       }
-    } else {
-      // Join community - insert into both tables for compatibility
-      const memberData = {
-        user_id: userId,
-        community_id: community.id,
-        role: 'member'
-      };
-      const query1 = supabase.from('community_members').insert(memberData);
-      const query2 = supabase.from('memberships').insert({
-        user_id: userId,
-        community_id: community.id
-      });
-      const [, error1] = await safeFetch(query1);
-      const [, error2] = await safeFetch(query2);
-      if (error1 && error2) {
-        if (error1.code === '23505' || error2.code === '23505') {
-          // Duplicate key error - user is already a member
-          toast.error('You are already a member of this community');
-        } else {
-          toast.error('Failed to join community');
-        }
-      } else {
-        toast.success(user ? 'Joined community!' : 'Joined community as guest!');
-        onJoinLeave();
-      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   const JoinButton = () => {
     if (isJoined) {

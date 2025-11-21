@@ -4,7 +4,7 @@ import { CommunitiesLayout } from '../CommunitiesLayout';
 import { supabase } from '@/lib/supabaseClient';
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Button } from '@/communities/components/ui/button';
-// LoginForm and Dialog removed - anonymous users can now join communities
+// Authentication is required for all community interactions
 import { useNavigate, Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Users, Sparkles, ChevronRight, MessageSquare, Clock, TrendingUp, Lightbulb, Network, Handshake } from 'lucide-react';
@@ -36,7 +36,7 @@ export default function Home() {
     loading: authLoading
   } = useAuth();
   const navigate = useNavigate();
-  // Login modal removed - anonymous users can now join communities
+  // Authentication is required for all community interactions
   const [communities, setCommunities] = useState<Community[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [communitiesLoading, setCommunitiesLoading] = useState(false);
@@ -352,7 +352,7 @@ export default function Home() {
             </div>
           </section>
         </div>
-        {/* Login Modal removed - anonymous users can now join communities */}
+        {/* Authentication is required for all community interactions */}
       </div>
     </MainLayout>;
 }

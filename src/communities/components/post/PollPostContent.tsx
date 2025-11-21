@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { getAnonymousUserId } from '@/communities/utils/anonymousUser';
+import { SignInModal } from '@/communities/components/auth/SignInModal';
 import { BarChart3, Check, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/communities/components/ui/button';
 import { Progress } from '@/communities/components/ui/progress';
 import { addDays, format, isPast } from 'date-fns';
+import { toast } from 'sonner';
 interface PollOption {
   id: string;
   option_text: string;
@@ -32,7 +33,8 @@ export function PollPostContent({
   content_html
 }: PollPostContentProps) {
   const {
-    user
+    user,
+    isAuthenticated
   } = useAuth();
   const [options, setOptions] = useState<PollOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,7 @@ export function PollPostContent({
   const [error, setError] = useState<string | null>(null);
   const [pollEnded, setPollEnded] = useState(false);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const pollDurationDays = metadata?.poll_duration_days || 7;
   useEffect(() => {
     fetchPollOptions();
@@ -87,15 +90,19 @@ export function PollPostContent({
     setLoading(false);
   };
   const checkUserVote = async () => {
-    const userId = user?.id || getAnonymousUserId();
+    if (!isAuthenticated || !user) return;
     const {
       data
-    } = await supabase.from('poll_votes').select('option_id').eq('post_id', postId).eq('user_id', userId).single();
+    } = await supabase.from('poll_votes').select('option_id').eq('post_id', postId).eq('user_id', user.id).single();
     if (data) {
       setUserVote(data.option_id);
     }
   };
   const handleVote = async (optionId: string) => {
+    if (!isAuthenticated || !user) {
+      setShowSignInModal(true);
+      return;
+    }
     if (!isMember) {
       setError('You must be a member of this community to vote');
       return;
@@ -109,7 +116,7 @@ export function PollPostContent({
       return;
     }
     
-    const userId = user?.id || getAnonymousUserId();
+    const userId = user.id;
     // Insert vote record
     const {
       error: voteError
@@ -192,8 +199,10 @@ export function PollPostContent({
                       {percentage}%
                     </span>}
                 </div>
-                {userVote || pollEnded ? <Progress value={percentage} className={`h-2 ${isSelected ? 'bg-dq-navy/20' : 'bg-gray-100'}`} indicatorClassName={isSelected ? 'bg-dq-navy' : 'bg-gray-400'} /> : <Button variant="outline" size="sm" className="w-full mt-1 text-sm" onClick={() => handleVote(option.id)}>
+                {userVote || pollEnded ? <Progress value={percentage} className={`h-2 ${isSelected ? 'bg-dq-navy/20' : 'bg-gray-100'}`} indicatorClassName={isSelected ? 'bg-dq-navy' : 'bg-gray-400'} /> : isAuthenticated ? <Button variant="outline" size="sm" className="w-full mt-1 text-sm" onClick={() => handleVote(option.id)}>
                     Vote
+                  </Button> : <Button variant="outline" size="sm" className="w-full mt-1 text-sm opacity-50 cursor-not-allowed" disabled>
+                    Sign in to vote
                   </Button>}
                 {(userVote || pollEnded) && <p className="text-xs text-gray-500 mt-1">
                     {option.vote_count || 0}{' '}
@@ -222,5 +231,14 @@ export function PollPostContent({
             This poll has ended. No new votes can be submitted.
           </p>
         </div>}
+      <SignInModal
+        open={showSignInModal}
+        onOpenChange={setShowSignInModal}
+        onSuccess={() => {
+          setShowSignInModal(false);
+        }}
+        title="Sign In to Vote"
+        description="You need to be signed in to vote in polls."
+      />
     </div>;
 }

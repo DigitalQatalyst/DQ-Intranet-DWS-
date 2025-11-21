@@ -59,7 +59,13 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const handleJoin = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onJoin();
+    e.preventDefault();
+    console.log('🔵 CommunityCard: Join button clicked', { communityId: item.id, hasOnJoin: !!onJoin });
+    if (onJoin) {
+      onJoin();
+    } else {
+      console.error('❌ CommunityCard: onJoin handler is not provided!');
+    }
   };
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -85,14 +85,12 @@ export default function CreatePost() {
     Record<string, string>
   >({});
   useEffect(() => {
-    console.log("user", user);
     if (!user) {
       navigate("/community");
       return;
     }
     fetchCommunities();
     loadDraftFromParams();
-    console.log("user", user);
 
     // Edit mode
     if (id) {
@@ -130,7 +128,7 @@ export default function CreatePost() {
         }
         localStorage.removeItem("post-draft");
       } catch (e) {
-        console.error("Failed to load draft:", e);
+        // Failed to load draft, continue with empty form
       }
     }
 
@@ -141,15 +139,14 @@ export default function CreatePost() {
   };
   const fetchCommunities = async () => {
     if (!user) return;
+    // Fetch all communities from communities table
     const query = supabase
-      .from("memberships")
-      .select("community_id, communities(id, name)")
-      .eq("user_id", user.id);
+      .from("communities")
+      .select("id, name")
+      .order("name", { ascending: true });
     const [data, error] = await safeFetch(query);
-    console.log("myCommunities", data);
     if (!error && data) {
-      const communityList = data.map((m: any) => m.communities).filter(Boolean);
-      setCommunities(communityList);
+      setCommunities(data);
     }
   };
   const saveToLocalStorage = useCallback(() => {
@@ -216,7 +213,7 @@ export default function CreatePost() {
   };
   const fetchPost = async () => {
     if (!id) return;
-    const query = supabase.from("community_posts").select("*").eq("id", id).single();
+    const query = supabase.from("posts_v2").select("*").eq("id", id).single();
     const [data, error] = await safeFetch(query);
     if (!error && data) {
       setTitle(data.title || "");
@@ -323,8 +320,8 @@ export default function CreatePost() {
     try {
       await savePost("active");
       clearDraft(); // Clear localStorage draft on publish
+      // Navigation is handled in savePost function
     } catch (error) {
-      console.error("Error publishing post:", error);
       toast.error("Failed to publish post. Please try again.");
     } finally {
       setIsPublishing(false);
@@ -368,41 +365,38 @@ export default function CreatePost() {
     if (isEditMode && id) {
       // First, verify the post exists and the user has permission to edit it
       const [existingPost, fetchError] = await safeFetch(
-        supabase.from("community_posts").select("id").eq("id", id).single()
+        supabase.from("posts_v2").select("id").eq("id", id).single()
       );
 
       if (fetchError || !existingPost) {
-        console.error("Error fetching post:", fetchError);
         toast.error("Failed to update post: Post not found or access denied");
         setLoading(false);
         return;
       }
 
       // If post exists, perform the update
+      const postDataV2 = {
+        title: title.trim(),
+        content: postType === "poll" ? pollQuestion.trim() : content.trim()
+      };
       query = supabase
-        .from("community_posts")
-        .update(postData)
+        .from("posts_v2")
+        .update(postDataV2)
         .eq("id", id)
         .select()
         .single();
     } else {
-      query = supabase.from("community_posts").insert([postData]).select().single();
+      // Use posts_v2 for new posts
+      const postDataV2 = {
+        community_id: communityId,
+        user_id: user.id,
+        title: title.trim(),
+        content: postType === "poll" ? pollQuestion.trim() : content.trim()
+      };
+      query = supabase.from("posts_v2").insert([postDataV2]).select().single();
     }
 
     const [data, error] = await safeFetch(query);
-    
-    // Log the query result for debugging
-    if (error) {
-      console.error("Post save error - Full details:", {
-        error,
-        postData,
-        user: user?.id,
-        communityId,
-        postType
-      });
-    } else if (data) {
-      console.log("Post saved successfully:", data.id);
-    }
 
     // If media post, save uploaded files to community_assets table
     if (!error && data && postType === "media" && uploadedFiles.length > 0) {
@@ -423,13 +417,6 @@ export default function CreatePost() {
         supabase.from("community_assets").insert(mediaFilesData)
       );
       if (mediaError) {
-        console.error("Media files error:", mediaError);
-        console.error("Media error details:", {
-          message: mediaError.message,
-          details: mediaError.details,
-          hint: mediaError.hint,
-          code: mediaError.code
-        });
         toast.error("Post created but failed to save media files: " + (mediaError.message || 'Unknown error'));
       }
     }
@@ -447,21 +434,12 @@ export default function CreatePost() {
           supabase.from("poll_options").insert(optionsData)
         );
         if (pollError) {
-          console.error("Poll options error:", pollError);
           toast.error("Post created but failed to add poll options");
         }
       }
     }
-    setLoading(false);
+      setLoading(false);
     if (error) {
-      console.error("Save error:", error);
-      console.error("Error details:", {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      });
-
       // Show detailed error message
       let errorMessage = isEditMode
         ? "Failed to update post"
@@ -483,7 +461,7 @@ export default function CreatePost() {
       toast.success("Your post has been published!");
       clearDraft();
 
-      // Navigate back to community or post detail
+      // Navigate back to community or post detail (use React Router navigate, not window.location)
       if (data) {
         navigate(`/post/${data.id}`);
       } else if (communityId) {
@@ -590,7 +568,7 @@ export default function CreatePost() {
                     </Label>
                     <Select value={communityId} onValueChange={setCommunityId}>
                       <SelectTrigger
-                        className={`border rounded-md px-3 py-2 text-sm text-gray-700 focus:ring-2 ring-brand-teal focus:border-transparent transition-all duration-200 ${
+                        className={`border rounded-md px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-dq-navy focus:border-dq-navy transition-all duration-200 ${
                           validationErrors.community
                             ? "border-red-500"
                             : "border-gray-300"
@@ -636,7 +614,7 @@ export default function CreatePost() {
                       }}
                       placeholder="Give your post a compelling title..."
                       maxLength={200}
-                      className={`border rounded-md px-3 py-2 text-sm text-gray-700 focus:ring-2 ring-brand-teal focus:border-transparent transition-all duration-200 ${
+                      className={`border rounded-md px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-dq-navy focus:border-dq-navy transition-all duration-200 ${
                         validationErrors.title
                           ? "border-red-500"
                           : "border-gray-300"
@@ -670,7 +648,7 @@ export default function CreatePost() {
                           }
                         }}
                         placeholder="Add a tag..."
-                        className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:ring-2 ring-brand-teal focus:border-transparent transition-all duration-200"
+                        className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-dq-navy focus:border-dq-navy transition-all duration-200"
                       />
                       <Button
                         type="button"
@@ -686,7 +664,7 @@ export default function CreatePost() {
                         {tags.map((tag, index) => (
                           <Badge
                             key={index}
-                            className="bg-brand-light-blue text-brand-blue rounded-full px-3 py-1 text-xs font-medium hover:bg-opacity-80 transition-all duration-200"
+                            className="bg-dq-navy/10 text-dq-navy rounded-full px-3 py-1 text-xs font-medium hover:bg-dq-navy/20 transition-all duration-200"
                           >
                             #{tag}
                             <button
@@ -1167,23 +1145,15 @@ export default function CreatePost() {
 
             <Button
               type="button"
-              onClick={handlePublish}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handlePublish();
+              }}
               disabled={
                 isPublishing || !title.trim() || !content.trim() || !communityId
               }
-              className="w-full sm:w-auto font-semibold rounded-md px-5 py-2.5 shadow-sm hover:shadow-md hover:-translate-y-px transition-all duration-200"
-              style={{
-                backgroundColor: isPublishing ? "#9CA3AF" : "#0030E3",
-                color: "white",
-              }}
-              onMouseEnter={(e) => {
-                if (!isPublishing)
-                  e.currentTarget.style.backgroundColor = "#002180";
-              }}
-              onMouseLeave={(e) => {
-                if (!isPublishing)
-                  e.currentTarget.style.backgroundColor = "#0030E3";
-              }}
+              className="w-full sm:w-auto font-semibold rounded-md px-5 py-2.5 shadow-sm hover:shadow-md hover:-translate-y-px transition-all duration-200 bg-dq-navy hover:bg-[#13285A] text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send className="h-4 w-4 mr-2" />
               {isPublishing

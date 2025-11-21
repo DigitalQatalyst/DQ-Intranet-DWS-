@@ -14,6 +14,7 @@
     "db:seed": "node scripts/seed-guides.js",
     "test": "vitest run",
     "db:seed-guides": "node scripts/seed-guides.js",
+    "create-test-user": "node scripts/create-test-user.js",
     "postinstall": "npm rebuild rollup"
   },
   "dependencies": {

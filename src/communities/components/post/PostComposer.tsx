@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
 import { RichTextEditor } from './RichTextEditor';
 import { TagAutocomplete } from './TagAutocomplete';
+import { SignInModal } from '@/communities/components/auth/SignInModal';
 import { Loader2, X, Plus, FileText, Image as ImageIcon, BarChart3, Calendar, MapPin, Link as LinkIcon, Tag as TagIcon } from 'lucide-react';
 import { toast } from 'sonner';
 interface Community {
@@ -31,11 +32,13 @@ export function PostComposer({
   communityId: initialCommunityId
 }: PostComposerProps) {
   const {
-    user
+    user,
+    isAuthenticated
   } = useAuth();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   // Form state
   const [postType, setPostType] = useState<PostType>('text');
@@ -65,13 +68,19 @@ export function PostComposer({
   const titleCharCount = title.length;
   const contentCharCount = content.length;
   useEffect(() => {
-    if (open && user) {
-      fetchUserCommunities();
-      if (initialCommunityId) {
-        setCommunityId(initialCommunityId);
+    if (open) {
+      if (!isAuthenticated) {
+        setShowSignInModal(true);
+        return;
+      }
+      if (user) {
+        fetchUserCommunities();
+        if (initialCommunityId) {
+          setCommunityId(initialCommunityId);
+        }
       }
     }
-  }, [open, user, initialCommunityId]);
+  }, [open, user, isAuthenticated, initialCommunityId]);
 
   // Reset form when closed
   useEffect(() => {
@@ -196,7 +205,11 @@ export function PostComposer({
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !validateForm()) return;
+    if (!isAuthenticated || !user) {
+      setShowSignInModal(true);
+      return;
+    }
+    if (!validateForm()) return;
     setSubmitting(true);
     try {
       // Prepare metadata based on post type
@@ -274,14 +287,53 @@ export function PostComposer({
     setSubmitting(false);
   };
   const isFormValid = title.trim() && content.trim() && communityId && !submitting;
-  return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Create New Post</DialogTitle>
-          <DialogDescription>
-            Share your thoughts, media, polls, or events with your community
-          </DialogDescription>
-        </DialogHeader>
+  
+  // If not authenticated, show sign-in prompt
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Sign In Required</DialogTitle>
+              <DialogDescription>
+                Please sign in to create posts in communities
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setShowSignInModal(true)}>
+                Sign In
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <SignInModal
+          open={showSignInModal}
+          onOpenChange={setShowSignInModal}
+          onSuccess={() => {
+            setShowSignInModal(false);
+            // Keep dialog open after sign in
+          }}
+          title="Sign In to Create Posts"
+          description="You need to be signed in to create posts in communities."
+        />
+      </>
+    );
+  }
+  
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Create New Post</DialogTitle>
+            <DialogDescription>
+              Share your thoughts, media, polls, or events with your community
+            </DialogDescription>
+          </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Post Type Tabs */}
@@ -443,5 +495,7 @@ export function PostComposer({
           </div>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+    </>
+  );
 }

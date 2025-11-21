@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Calendar, MapPin, Building, UserPlus, UserMinus } from 'lucide-react';
+import { Users, Calendar, Building, UserPlus, UserMinus } from 'lucide-react';
 import { Button } from '@/communities/components/ui/button';
 import { format } from 'date-fns';
 
@@ -37,7 +37,7 @@ export const CommunityInfoPanel: React.FC<CommunityInfoPanelProps> = ({
   return (
     <div className="bg-white rounded-lg border border-[#030F35]/20 shadow-sm overflow-hidden">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-[#FB5535]/10 via-[#1A2E6E]/10 to-[#030F35]/10 border-b border-[#030F35]/20 p-6">
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200 p-6">
         <h1 className="text-2xl font-bold text-[#030F35] mb-2">{community.name}</h1>
         {community.description && (
           <p className="text-[#030F35]/80 text-sm leading-relaxed">{community.description}</p>
@@ -96,22 +96,9 @@ export const CommunityInfoPanel: React.FC<CommunityInfoPanelProps> = ({
           </div>
         )}
 
-        {/* Location */}
-        {community.location_filter && (
-          <div className="flex items-center gap-3 text-[#030F35]/80">
-            <div className="p-2 bg-[#030F35]/5 rounded-lg">
-              <MapPin className="h-5 w-5 text-[#FB5535]" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-[#030F35]/60">Location</p>
-              <p className="text-sm font-medium text-[#030F35]">{community.location_filter}</p>
-            </div>
-          </div>
-        )}
-
         {/* Join/Leave Button */}
         <div className="pt-4 border-t border-[#030F35]/20">
-          {isMember ? (
+          {user && isMember ? (
             <Button
               onClick={onJoinLeave}
               disabled={joinLoading}
@@ -125,7 +112,7 @@ export const CommunityInfoPanel: React.FC<CommunityInfoPanelProps> = ({
             <Button
               onClick={onJoinLeave}
               disabled={joinLoading}
-              className="w-full bg-gradient-to-r from-[#030F35] via-[#1A2E6E] to-[#030F35] text-white hover:opacity-90 transition-opacity"
+              className="w-full bg-dq-navy text-white hover:bg-[#13285A] transition-colors"
             >
               <UserPlus className="h-4 w-4 mr-2" />
               {joinLoading ? 'Processing...' : 'Join Community'}

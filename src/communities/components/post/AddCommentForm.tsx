@@ -4,9 +4,9 @@ import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Button } from '@/communities/components/ui/button';
 import { Textarea } from '@/communities/components/ui/textarea';
+import { SignInModal } from '@/communities/components/auth/SignInModal';
 import { Loader2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
-import { getAnonymousUserId } from '@/communities/utils/anonymousUser';
 interface AddCommentFormProps {
   postId: string;
   communityId?: string;
@@ -20,13 +20,21 @@ export function AddCommentForm({
   onCommentAdded
 }: AddCommentFormProps) {
   const {
-    user
+    user,
+    isAuthenticated
   } = useAuth();
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
+    
+    if (!isAuthenticated || !user) {
+      setShowSignInModal(true);
+      return;
+    }
     
     if (!isMember) {
       toast.error('You must be a member of this community to comment');
@@ -34,11 +42,21 @@ export function AddCommentForm({
     }
     
     setSubmitting(true);
-    const userId = user?.id || getAnonymousUserId();
+    // Get auth user ID directly from Supabase session
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id || user?.id;
+    
+    if (!userId) {
+      toast.error('Unable to identify user. Please sign in again.');
+      setSubmitting(false);
+      return;
+    }
+    
     const query = supabase.from('comments').insert({
       post_id: postId,
       content: content.trim(),
-      created_by: userId
+      created_by: userId,
+      status: 'active'
     });
     const [, error] = await safeFetch(query);
     if (error) {
@@ -58,18 +76,46 @@ export function AddCommentForm({
     setSubmitting(false);
   };
   
-  if (!isMember) {
-    return <>
-        <div className="text-center">
+  if (!isAuthenticated) {
+    return (
+      <>
+        <div className="text-center py-6">
           <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-bold text-foreground mb-2">
-            Join the conversation
+            Sign In to Comment
           </h3>
           <p className="text-sm text-muted-foreground mb-6">
-            Join this community to share your thoughts and connect with others
+            Please sign in to join the conversation
           </p>
+          <Button onClick={() => setShowSignInModal(true)}>
+            Sign In
+          </Button>
         </div>
-      </>;
+        <SignInModal
+          open={showSignInModal}
+          onOpenChange={setShowSignInModal}
+          onSuccess={() => {
+            setShowSignInModal(false);
+          }}
+          title="Sign In to Comment"
+          description="You need to be signed in to comment on posts."
+        />
+      </>
+    );
+  }
+  
+  if (!isMember) {
+    return (
+      <div className="text-center py-6">
+        <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-lg font-bold text-foreground mb-2">
+          Join the conversation
+        </h3>
+        <p className="text-sm text-muted-foreground mb-6">
+          Join this community to share your thoughts and connect with others
+        </p>
+      </div>
+    );
   }
   return <form onSubmit={handleSubmit} className="space-y-4">
       <div>
