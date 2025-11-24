@@ -16,7 +16,7 @@ export function CourseCard({
   isBookmarked,
   onToggleBookmark,
   onAddToComparison
-}) => {
+}: CourseCardProps) {
   const navigate = useNavigate();
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -71,7 +71,7 @@ export function KnowledgeHubCard({
   onToggleBookmark,
   onAddToComparison,
   onQuickView,
-}) => {
+}: KnowledgeHubCardProps) {
   const navigate = useNavigate()
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)

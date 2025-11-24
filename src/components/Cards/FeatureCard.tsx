@@ -21,7 +21,7 @@ export function FeatureCard({
   onClick,
   onQuickView,
   'data-id': dataId
-}) => {
+}: FeatureCardProps) {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onClick();

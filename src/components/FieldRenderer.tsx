@@ -36,7 +36,7 @@ export function FieldRenderer({
     touchedFields,
     onChange,
     validateField,
-}) => {
+}: FieldRendererProps) {
     /**
      * Renders a tooltip for a field
      *

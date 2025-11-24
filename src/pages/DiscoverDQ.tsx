@@ -3,19 +3,19 @@ import clsx from "clsx";
 import { XIcon } from "lucide-react";
 import { Header } from "../components/Header/Header";
 import { Footer } from "../components/Footer/Footer";
-import VisionMission from "../components/Discover/VisionMission";
-import DQDNA from "../components/Discover/DQDNA";
-import WorkspaceInsights from "../components/Discover/WorkspaceInsights";
-import DQDirectory from "../components/Discover/DQDirectory";
-import D6CardsSection from "../components/Discover/D6CardsSection";
-import MapCard from "../components/map/MapCard";
+import { VisionMission } from "../components/Discover/VisionMission";
+import { DQDNA } from "../components/Discover/DQDNA";
+import { WorkspaceInsights } from "../components/Discover/WorkspaceInsights";
+import { DQDirectory } from "../components/Discover/DQDirectory";
+import { D6CardsSection } from "../components/Discover/D6CardsSection";
+import { MapCard } from "../components/map/MapCard";
 import {
   DQ_LOCATIONS,
   LOCATION_FILTERS,
   type LocationCategory,
   type LocationItem,
 } from "../api/MAPAPI";
-import HeroDiscoverDQ from "../components/Discover/HeroDiscoverDQ";
+import { HeroDiscoverDQ } from "../components/Discover/HeroDiscoverDQ";
 import styles from "./DiscoverDQ.module.css";
 
 const insightsData = [

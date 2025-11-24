@@ -116,7 +116,7 @@ export function MediaCard({
   secondaryCta,
   onClick,
   'data-id': dataId,
-}) => {
+}: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(true)

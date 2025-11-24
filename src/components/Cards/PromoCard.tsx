@@ -21,7 +21,7 @@ export function PromoCard({
   onExplore,
   onQuickView,
   'data-id': dataId
-}) => {
+}: PromoCardProps) {
   const handleExplore = (e: React.MouseEvent) => {
     e.stopPropagation();
     onExplore();

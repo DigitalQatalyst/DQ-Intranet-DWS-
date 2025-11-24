@@ -11,7 +11,7 @@ import { MarketplaceComparison } from './MarketplaceComparison.js';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { getFallbackItems } from '../../utils/fallbackData';
-import KnowledgeHubGrid from './KnowledgeHubGrid';
+import { KnowledgeHubGrid } from './KnowledgeHubGrid';
 import { LMS_COURSES } from '@/data/lmsCourseDetails';
 import { parseFacets, applyFilters } from '@/lms/filters';
 import {
@@ -21,8 +21,8 @@ import {
   DELIVERY_OPTS,
   DURATION_OPTS
 } from '@/lms/config';
-import GuidesFilters, { GuidesFacets } from '../guides/GuidesFilters';
-import GuidesGrid from '../guides/GuidesGrid';
+import { GuidesFilters, GuidesFacets } from '../guides/GuidesFilters';
+import { GuidesGrid } from '../guides/GuidesGrid';
 import { supabaseClient } from '../../lib/supabaseClient';
 import { track } from '../../utils/analytics';
 
@@ -158,7 +158,7 @@ export function MarketplacePage({
   title: _title,
   description: _description,
   promoCards = []
-}) => {
+}: MarketplacePageProps) {
   const isGuides = marketplaceType === 'guides';
   const isCourses = marketplaceType === 'courses';
   const isKnowledgeHub = marketplaceType === 'knowledge-hub';

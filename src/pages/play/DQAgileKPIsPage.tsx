@@ -1,5 +1,5 @@
 import React from 'react';
-import AgileKPISection from '../../components/AgileKPISection';
+import { AgileKPISection } from '../../components/AgileKPISection';
 
 const DQAgileKPIsPage: React.FC = () => {
   return (

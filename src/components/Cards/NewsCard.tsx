@@ -22,7 +22,7 @@ export function NewsCard({
   onReadMore,
   onQuickView,
   'data-id': dataId
-}) => {
+}: NewsCardProps) {
   const handleReadMore = (e: React.MouseEvent) => {
     e.stopPropagation();
     onReadMore();

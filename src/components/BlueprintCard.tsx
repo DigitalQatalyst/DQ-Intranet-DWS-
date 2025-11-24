@@ -23,7 +23,7 @@ export function BlueprintCard({
   blueprint,
   onView,
   onDownload,
-}) => {
+}: BlueprintCardProps) {
   return (
     <div className="flex flex-col min-h-[340px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
       {/* Card Header with fixed height for title and project */}

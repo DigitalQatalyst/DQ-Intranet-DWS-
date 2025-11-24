@@ -8,6 +8,11 @@ import { msalInstance } from "./services/auth/msal";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 
+// Import test function for debugging (only in dev)
+if (import.meta.env.DEV) {
+  import("./utils/testSupabaseConnection");
+}
+
 const client = new ApolloClient({
   link: new HttpLink({
     uri: "https://9609a7336af8.ngrok-free.app/services-api",

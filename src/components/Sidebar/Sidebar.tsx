@@ -78,7 +78,7 @@ export function Sidebar({
   onAddNewEnterprise,
   isLoggedIn = true,
   "data-id": dataId,
-}) => {
+}: SidebarProps) {
   const [tooltipItem, setTooltipItem] = useState<string | null>(null);
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
   const [formsDropdownOpen, setFormsDropdownOpen] = useState(false);

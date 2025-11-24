@@ -12,7 +12,7 @@ export function MarketplaceComparison({
   onClose,
   onRemoveItem,
   marketplaceType
-}) => {
+}: MarketplaceComparisonProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const config = getMarketplaceConfig(marketplaceType);
   useEffect(() => {

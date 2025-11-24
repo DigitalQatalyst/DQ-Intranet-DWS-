@@ -29,7 +29,7 @@ export function ServiceCard({
   onToggleBookmark,
   onQuickView,
   'data-id': dataId
-}) => {
+}: ServiceCardProps) {
   const handleApply = (e: React.MouseEvent) => {
     e.stopPropagation();
     onApply();

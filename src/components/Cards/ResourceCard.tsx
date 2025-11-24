@@ -49,7 +49,7 @@ export function ResourceCard({
   onDownload,
   onQuickView,
   'data-id': dataId
-}) => {
+}: ResourceCardProps) {
   const handleAccessResource = (e: React.MouseEvent) => {
     e.stopPropagation();
     onAccessResource();

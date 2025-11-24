@@ -19,7 +19,7 @@ export function TagChip({
   text,
   variant = 'primary',
   size = 'sm'
-}) => {
+}: TagChipProps) {
   return <span className={`inline-flex items-center rounded-full font-medium truncate ${tagVariants[variant]} ${tagSizes[size]}`}>
       {text}
     </span>;

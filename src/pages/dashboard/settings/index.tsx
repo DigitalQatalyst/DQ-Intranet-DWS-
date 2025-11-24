@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { Footer } from '../../../components/Footer';
 import { AuthProvider, Header } from '../../../components/Header';
 import { PageLayout, PageSection, SectionHeader, SectionContent } from '../../../components/PageLayout';
-import IntegrationsBillingTab from '../../../components/settings/IntegrationsBillingTab';
-import PreferencesNotificationsTab from '../../../components/settings/PreferencesNotificationsTab';
-import SecurityComplianceTab from '../../../components/settings/SecurityComplianceTab';
-import UserRolesTab from '../../../components/settings/UserRolesTab';
+import { IntegrationsBillingTab } from '../../../components/settings/IntegrationsBillingTab';
+import { PreferencesNotificationsTab } from '../../../components/settings/PreferencesNotificationsTab';
+import { SecurityComplianceTab } from '../../../components/settings/SecurityComplianceTab';
+import { UserRolesTab } from '../../../components/settings/UserRolesTab';
 
 export default function SettingsPage() {
     const [sidebarOpen, setSidebarOpen] = useState(false);

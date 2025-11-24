@@ -55,7 +55,7 @@ export function AgileKPISection({
   kpis = defaultKpis,
   className = '',
   'data-id': dataId
-}) => {
+}: AgileKPISectionProps) {
   return (
     <section className={`py-12 md:py-16 bg-white ${className}`} data-id={dataId}>
       <div className="container mx-auto px-4">

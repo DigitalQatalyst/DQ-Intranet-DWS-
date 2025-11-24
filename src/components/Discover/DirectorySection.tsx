@@ -85,7 +85,7 @@ export function DirectorySection({
   subtitle = 'Connect with DQ associates and teams driving workspace impact.',
   note,
   showRegionLegend = false,
-}) => {
+}: DirectorySectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);

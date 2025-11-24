@@ -21,7 +21,7 @@ export function ServiceHighlightCard({
   onClick,
   onQuickView,
   'data-id': dataId
-}) => {
+}: ServiceHighlightCardProps) {
   const handleClick = (e: React.MouseEvent) => {
     if (!item.isComingSoon) {
       e.stopPropagation();

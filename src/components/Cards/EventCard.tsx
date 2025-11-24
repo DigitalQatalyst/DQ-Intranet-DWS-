@@ -28,7 +28,7 @@ export function EventCard({
   onViewDetails,
   onQuickView,
   'data-id': dataId
-}) => {
+}: EventCardProps) {
   const handleRegister = (e: React.MouseEvent) => {
     e.stopPropagation();
     onRegister();

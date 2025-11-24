@@ -15,7 +15,7 @@ export function CardFooter({
   primaryCTA,
   secondaryCTA,
   actions
-}) => {
+}: CardFooterProps) {
   if (!primaryCTA && !secondaryCTA && !actions) {
     return null;
   }

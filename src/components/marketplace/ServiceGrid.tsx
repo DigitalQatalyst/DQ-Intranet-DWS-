@@ -22,7 +22,7 @@ export function ServiceGrid({
   onAddToComparison,
   marketplaceType,
   primaryButtonText = 'Enroll Now'
-}) => {
+}: ServiceGridProps) {
   const [quickViewService, setQuickViewService] = useState<ServiceItem | null>(null);
   const navigate = useNavigate();
   // Promo cards to be inserted after every 6 regular cards

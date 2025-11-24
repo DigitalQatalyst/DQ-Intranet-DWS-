@@ -20,7 +20,7 @@ export function PromoCard({
   gradientFrom = 'from-purple-600',
   gradientTo = 'to-blue-600',
   ctaLabel = 'Explore Now'
-}) => {
+}: PromoCardProps) {
   const navigate = useNavigate();
   return <div className={`flex flex-col h-full rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer bg-gradient-to-br ${gradientFrom} ${gradientTo} text-white`} onClick={() => navigate(path)}>
       <div className="p-6 flex flex-col h-full">

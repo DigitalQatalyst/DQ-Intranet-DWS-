@@ -11,8 +11,14 @@ interface AssociateProfileModalProps {
   fallbackLocation?: string;
   fallbackEmail?: string;
   fallbackPhone?: string | null;
-  fallbackYearsExperience?: number | null;
   fallbackProfileImageUrl?: string | null;
+  fallbackSummary?: string | null;
+  fallbackBio?: string | null;
+  fallbackKeySkills?: string[];
+  fallbackSfiaRating?: string;
+  fallbackStatus?: string;
+  fallbackUnit?: string;
+  fallbackDepartment?: string;
 }
 
 interface SectionProps {
@@ -78,21 +84,29 @@ export function AssociateProfileModal({
   fallbackLocation,
   fallbackEmail,
   fallbackPhone,
-  fallbackYearsExperience,
   fallbackProfileImageUrl,
-}) => {
+  fallbackSummary,
+  fallbackBio,
+  fallbackKeySkills,
+  fallbackSfiaRating,
+  fallbackStatus,
+  fallbackUnit,
+  fallbackDepartment,
+}: AssociateProfileModalProps) {
   if (!open) return null;
   const name = profile?.full_name || fallbackName || 'Profile';
   const role = profile?.role_title || fallbackRole || '—';
   const location = profile?.location || fallbackLocation || '—';
-  const sfia = profile?.sfia_level || '—';
-  const status = profile?.status || '—';
+  const sfia = profile?.sfia_level || fallbackSfiaRating || '—';
+  const status = profile?.status || fallbackStatus || '—';
   const email = profile?.email || fallbackEmail || '—';
   const phone = profile?.phone || fallbackPhone || '—';
-  const unit = profile?.unit || '—';
-  const department = profile?.department || '—';
+  const unit = profile?.unit || fallbackUnit || '—';
+  const department = profile?.department || fallbackDepartment || '—';
   const imageUrl = profile?.profile_image_url || fallbackProfileImageUrl || '';
-  const experienceYears = profile?.years_experience ?? fallbackYearsExperience ?? null;
+  const summary = profile?.summary || fallbackSummary || null;
+  const bio = profile?.bio || fallbackBio || null;
+  const keySkills = profile?.core_skills || fallbackKeySkills || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -142,25 +156,16 @@ export function AssociateProfileModal({
                     <div>{phone}</div>
                   </div>
                 </div>
-                <Section title="Core skills" hidden={!profile?.core_skills || profile.core_skills.length === 0}>
-                  <PillList values={profile?.core_skills || []} />
-                </Section>
-                <Section title="Key attributes" hidden={!profile?.key_attributes || profile.key_attributes.length === 0}>
-                  <PillList values={profile?.key_attributes || []} />
-                </Section>
-                <Section
-                  title="Tools & systems"
-                  hidden={!profile?.tools_and_systems || profile.tools_and_systems.length === 0}
-                >
-                  <PillList values={profile?.tools_and_systems || []} />
+                <Section title="Skills" hidden={keySkills.length === 0}>
+                  <PillList values={keySkills} />
                 </Section>
               </div>
 
               {/* Right column */}
               <div className="md:col-span-2 space-y-6">
-                <Section title="Bio" hidden={!profile?.bio && !fallbackName}>
+                <Section title="Bio" hidden={!summary && !bio && !fallbackName}>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    {profile?.bio || 'Full profile coming soon for this associate.'}
+                    {summary || bio || 'Full profile coming soon for this associate.'}
                   </p>
                 </Section>
 
@@ -171,9 +176,12 @@ export function AssociateProfileModal({
                       { label: 'Department', value: department },
                       { label: 'SFIA Rating', value: sfia },
                       { label: 'Status', value: status },
-                      { label: 'Experience (yrs)', value: experienceYears != null ? String(experienceYears) : '—' },
                     ]}
                   />
+                </Section>
+                
+                <Section title="Skills" hidden={keySkills.length === 0}>
+                  <PillList values={keySkills} />
                 </Section>
 
                 <Section title="Qualifications" hidden={!profile?.qualifications || profile.qualifications.length === 0}>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { HomePage } from '@/components/HomePage';
-import LeadFormPopup from '@/components/LeadFormPopup';
+import { LeadFormPopup } from '@/components/LeadFormPopup';
 import SignInPage from '@/pages/SignInPage';
 import CreateAccountPage from '@/pages/CreateAccountPage';
 import WorkspaceLanding from '@/pages/WorkspaceLanding';

@@ -33,7 +33,7 @@ export function ErrorDisplay({
   message,
   onRetry,
   additionalMessage
-}) => {
+}: ErrorDisplayProps) {
   return <div className="bg-white rounded-lg shadow p-6 text-center">
       <div className="flex flex-col items-center">
         <div className="bg-red-50 p-3 rounded-full mb-4">

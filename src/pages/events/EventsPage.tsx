@@ -5,10 +5,11 @@ import { FilterIcon, XIcon, HomeIcon, ChevronRightIcon } from "lucide-react";
 import { CourseCardSkeleton } from "../../components/SkeletonLoader";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
-import EventsFilters, {
+import {
+  EventsFilters,
   EventsFacets,
 } from "../../components/events/EventsFilters";
-import EventsGrid from "../../components/events/EventsGrid";
+import { EventsGrid } from "../../components/events/EventsGrid";
 import { supabaseClient } from "../../lib/supabaseClient";
 
 // Interface for Supabase event data from upcoming_events view

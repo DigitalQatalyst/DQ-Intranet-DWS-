@@ -14,7 +14,7 @@ export function CardHeader({
   imageAlt = '',
   icon,
   children
-}) => {
+}: CardHeaderProps) {
   return <div className="px-4 py-5 flex-grow flex flex-col">
       <div className="flex items-start mb-5">
         {(imageUrl || icon) && <div className="h-12 w-12 flex-shrink-0 mr-3 flex items-center justify-center">

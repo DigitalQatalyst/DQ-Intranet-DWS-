@@ -14,6 +14,20 @@ export type DirectoryCardData = {
   onClick: () => void;
 };
 
+export interface DirectoryCardProps {
+  logoUrl?: string;
+  title: string;
+  tag: string;
+  description: string;
+  towers?: string[];
+  roleInfo?: {
+    role: string;
+    unit: string;
+    email?: string;
+  };
+  onClick: () => void;
+}
+
 /**
  * EJP-style unified directory card for Units and Associates
  * Clean, professional layout with consistent spacing and navy-blue theme
@@ -26,7 +40,7 @@ export function DirectoryCard({
   towers,
   roleInfo,
   onClick,
-}) => {
+}: DirectoryCardProps) {
   const initial = title?.[0]?.toUpperCase() ?? 'D';
   const hasTowers = towers && towers.length > 0;
   const hasRoleInfo = roleInfo !== undefined;

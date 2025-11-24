@@ -19,7 +19,7 @@ export function MarketplaceQuickViewModal({
   isBookmarked,
   onToggleBookmark,
   onAddToComparison
-}) => {
+}: MarketplaceQuickViewModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const config = getMarketplaceConfig(marketplaceType);
   useEffect(() => {
@@ -48,7 +48,8 @@ export function MarketplaceQuickViewModal({
   const highlightItems = keyHighlights.slice(0, 3);
   // Extract tags from item - use tags if available, otherwise use category and other relevant fields
   const displayTags = item.tags || [item.category, item.deliveryMode, item.businessStage, item.serviceType].filter(Boolean).slice(0, 3);
-  return <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div ref={modalRef} className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-900 truncate">

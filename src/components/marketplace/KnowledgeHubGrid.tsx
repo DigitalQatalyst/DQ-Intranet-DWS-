@@ -20,7 +20,7 @@ export function KnowledgeHubGrid({
   activeFilters = [],
   onFilterChange,
   onClearFilters,
-}) => {
+}: KnowledgeHubGridProps) {
   // Use our custom hook for fetching and filtering media items
   const { items, isLoading, error, hasMore, loadMore } = useMediaSearch({
     q: searchQuery,

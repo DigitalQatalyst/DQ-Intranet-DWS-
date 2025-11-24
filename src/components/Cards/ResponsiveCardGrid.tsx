@@ -9,7 +9,7 @@ export function ResponsiveCardGrid({
   children,
   className = '',
   'data-id': dataId
-}) => {
+}: ResponsiveCardGridProps) {
   // Use an auto-fit grid so cards are centered and extra empty columns don't appear
   // by default we create columns that are at least 280px and grow to fill available space
   const autoFitClass = 'grid-cols-[repeat(auto-fit,minmax(280px,1fr))]';

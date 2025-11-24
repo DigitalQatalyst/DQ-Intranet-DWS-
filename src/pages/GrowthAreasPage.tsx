@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Header } from "../components/Header/Header";
 import { Footer } from "../components/Footer/Footer";
-import DNAHexagonDiagram from "../components/GrowthAreas/DNAHexagonDiagram";
+import { DNAHexagonDiagram } from "../components/GrowthAreas/DNAHexagonDiagram";
 
 const GrowthChart = lazy(() => import("./GrowthAreasChart"));
 

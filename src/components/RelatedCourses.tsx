@@ -19,7 +19,7 @@ export function RelatedCourses({
   bookmarkedCourses,
   onToggleBookmark,
   loading = false
-}) => {
+}: RelatedCoursesProps) {
   const [quickViewCourse, setQuickViewCourse] = useState<CourseType | null>(null);
   const navigate = useNavigate();
   if (loading) {

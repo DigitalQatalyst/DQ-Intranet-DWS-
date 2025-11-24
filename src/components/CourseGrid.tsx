@@ -18,7 +18,7 @@ export function CourseGrid({
   bookmarkedCourses,
   onToggleBookmark,
   onAddToComparison
-}) => {
+}: CourseGridProps) {
   const [quickViewCourse, setQuickViewCourse] = useState<CourseType | null>(null);
   const navigate = useNavigate();
   // Promo cards to be inserted after every 6 regular cards

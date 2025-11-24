@@ -430,7 +430,7 @@ function ProfileModal({ open, onClose, person }: ProfileModalProps) {
 
 export function DQDirectory({
   subtitle = 'Connect with DQ sectors, teams, and associates driving collaboration, delivery, and innovation across the Digital Workspace.',
-}) => {
+}: DQDirectoryProps) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // State

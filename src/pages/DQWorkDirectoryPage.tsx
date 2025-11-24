@@ -2,15 +2,15 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HomeIcon, ChevronRightIcon, FilterIcon, MapPin } from 'lucide-react';
 import { SimpleTabs, SimpleTab } from '@/components/SimpleTabs';
-import WorkDirectoryOverview from '../components/work-directory/WorkDirectoryOverview';
+import { WorkDirectoryOverview } from '../components/work-directory/WorkDirectoryOverview';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { FilterSidebar, FilterConfig } from '../components/marketplace/FilterSidebar';
 import { SearchBar } from '../components/SearchBar';
-import { getPerformanceStatusClasses, getPriorityLevelClasses } from '@/components/work-directory/unitStyles';
+import { getPerformanceStatusClasses } from '@/components/work-directory/unitStyles';
 import { useAssociates, useWorkUnits, useWorkPositions } from '@/hooks/useWorkDirectory';
 import { AssociateCard, type Associate } from '../components/associates/AssociateCard';
-import AssociateProfileModal from '@/components/associates/AssociateProfileModal';
+import { AssociateProfileModal } from '@/components/associates/AssociateProfileModal';
 import { supabase } from '@/lib/supabaseClient';
 import type { EmployeeProfile } from '@/data/workDirectoryTypes';
 
@@ -292,7 +292,7 @@ const DQWorkDirectoryPage: React.FC = () => {
           position?.sfiaLevel,
           position?.sfiaRating,
           ...(Array.isArray(position?.responsibilities) ? position.responsibilities : []),
-          ...(Array.isArray(position?.expectations) ? position.expectations : []),
+          ...(position?.expectations ? [position.expectations] : []),
         ]
           .filter(Boolean)
           .join(' ')
@@ -504,10 +504,11 @@ const DQWorkDirectoryPage: React.FC = () => {
     location?: string | null;
     sfiaLevel?: string | null;
     summary?: string | null;
+    description?: string | null;
     responsibilities: string[];
-    expectations: string[];
-    reportsTo?: string | null;
+    expectations: string | null;
     status?: string | null;
+    imageUrl?: string | null;
   };
   type MappedAssociate = {
     id: string;
@@ -521,9 +522,9 @@ const DQWorkDirectoryPage: React.FC = () => {
     level?: string; // Optional fallback for sfiaRating
     email: string;
     phone?: string | null;
-    teamsLink: string;
     keySkills: string[];
     bio: string;
+    summary: string | null;
     avatarUrl: string | null;
   };
 
@@ -539,12 +540,9 @@ const DQWorkDirectoryPage: React.FC = () => {
     status: mapped.status,
     email: mapped.email,
     phone: mapped.phone ?? null,
-    years_experience: mapped.yearsExperience ?? null,
-    teams_link: mapped.teamsLink,
     avatar_url: mapped.avatarUrl,
-    profile_image_url: mapped.avatarUrl || null,
     key_skills: mapped.keySkills,
-    summary: null, // Not available in current data, will use bio truncation
+    summary: mapped.summary ?? null,
     bio: mapped.bio,
   });
 
@@ -598,7 +596,6 @@ const DQWorkDirectoryPage: React.FC = () => {
   const UnitCard: React.FC<{ unit: MappedWorkUnit }> = ({ unit }) => {
     const focusTags = unit.focusTags?.slice(0, 3) ?? [];
     const extraTags = (unit.focusTags?.length || 0) - focusTags.length;
-    const priorityClasses = getPriorityLevelClasses(unit.priorityLevel);
     const performanceClasses = getPerformanceStatusClasses(unit.performanceStatus);
     return (
       <div className="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col h-full">
@@ -616,28 +613,25 @@ const DQWorkDirectoryPage: React.FC = () => {
             <MapPin size={14} className="text-gray-500" />
             {locationLabel(unit.location)}
           </span>
-          {unit.priorityLevel && (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${priorityClasses}`}>
-              {unit.priorityLevel}
-            </span>
-          )}
           {unit.performanceStatus && (
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${performanceClasses}`}>
               {unit.performanceStatus}
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-700 mt-3 line-clamp-3">{unit.mandate}</p>
-        {focusTags.length > 0 && (
+        <p className="text-sm text-gray-700 mt-3 line-clamp-3">{unit.mandate || "Not yet added."}</p>
+        {unit.focusTags && unit.focusTags.length > 0 ? (
           <div className="flex flex-wrap gap-2 mt-4">
-            {focusTags.map((tag) => (
+            {unit.focusTags.slice(0, 3).map((tag) => (
               <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                 {tag}
               </span>
             ))}
-            {extraTags > 0 && <span className="text-xs text-gray-500">+{extraTags} more</span>}
+            {unit.focusTags.length > 3 && (
+              <span className="text-xs text-gray-500">+{unit.focusTags.length - 3} more</span>
+            )}
           </div>
-        )}
+        ) : null}
         <div className="mt-auto pt-4">
           <Link
             to={`/work-directory/units/${unit.slug}`}
@@ -665,11 +659,17 @@ const DQWorkDirectoryPage: React.FC = () => {
     const unit = position?.unit || null;
     const location = position?.location || null;
     const sfiaLevel = position?.sfiaLevel || position?.sfiaRating || null;
-    const reportsTo = position?.reportsTo || 'TBC';
-    const summary = position?.summary || position?.description || 'No description available yet';
+    const description = position?.description || null;
+    const expectations = position?.expectations || null;
     const responsibilities = Array.isArray(position?.responsibilities) 
-      ? position.responsibilities.slice(0, 3) 
+      ? position.responsibilities 
       : [];
+    
+    // Create 3-bullet preview: description, expectations, responsibilities[0]
+    const previewItems: string[] = [];
+    if (description) previewItems.push(description);
+    if (expectations) previewItems.push(expectations);
+    if (responsibilities.length > 0) previewItems.push(responsibilities[0]);
 
     // Debug logging in dev
     if (import.meta.env.DEV && !slug) {
@@ -715,13 +715,10 @@ const DQWorkDirectoryPage: React.FC = () => {
           )}
         </div>
         <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{positionName}</h3>
-        <p className="text-sm text-gray-500 mt-1">Reports to: {reportsTo}</p>
-        <p className="text-sm text-gray-700 mt-2 line-clamp-3">{summary}</p>
-        {responsibilities.length > 0 && (
+        {previewItems.length > 0 && (
           <div className="mt-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Key responsibilities</p>
-            <ul className="mt-1 space-y-1 text-sm text-gray-600">
-              {responsibilities.map((item, idx) => (
+            <ul className="space-y-2 text-sm text-gray-700">
+              {previewItems.slice(0, 3).map((item, idx) => (
                 <li key={idx} className="flex gap-2">
                   <span className="mt-[6px] h-[6px] w-[6px] rounded-full bg-indigo-500 flex-shrink-0" />
                   <span className="line-clamp-2">{item}</span>
@@ -967,8 +964,14 @@ const DQWorkDirectoryPage: React.FC = () => {
         fallbackLocation={selectedAssociate?.location}
         fallbackEmail={selectedAssociate?.email}
         fallbackPhone={selectedAssociate?.phone ?? null}
-        fallbackYearsExperience={selectedAssociate?.years_experience ?? null}
-        fallbackProfileImageUrl={selectedAssociate?.profile_image_url ?? null}
+        fallbackProfileImageUrl={selectedAssociate?.avatar_url ?? null}
+        fallbackSummary={selectedAssociate?.summary ?? null}
+        fallbackBio={selectedAssociate?.bio ?? null}
+        fallbackKeySkills={selectedAssociate?.key_skills ?? []}
+        fallbackSfiaRating={selectedAssociate?.sfia_rating ?? null}
+        fallbackStatus={selectedAssociate?.status ?? null}
+        fallbackUnit={selectedAssociate?.unit ?? null}
+        fallbackDepartment={selectedAssociate?.department ?? null}
       />
     </div>
   );

@@ -77,7 +77,7 @@ export function UnifiedCard({
   onToggleBookmark,
   className = '',
   'data-id': dataId
-}) => {
+}: UnifiedCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   // Generate card classes based on variant
   const getCardClasses = () => {

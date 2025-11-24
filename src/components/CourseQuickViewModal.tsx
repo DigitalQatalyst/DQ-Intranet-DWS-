@@ -16,7 +16,7 @@ export function CourseQuickViewModal({
   isBookmarked,
   onToggleBookmark,
   onAddToComparison
-}) => {
+}: CourseQuickViewModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {

@@ -50,7 +50,7 @@ export function FilterSidebar({
   deliveryModes = [],
   businessStages = [],
   providers = []
-}) => {
+}: FilterSidebarProps) {
   const [openSections, setOpenSections] = useState({
     category: true,
     deliveryMode: true,

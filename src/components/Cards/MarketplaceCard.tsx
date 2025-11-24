@@ -32,7 +32,7 @@ export function MarketplaceCard({
   onQuickView,
   onViewDetails,
   "data-id": dataId,
-}) => {
+}: MarketplaceCardProps) {
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
     onViewDetails();

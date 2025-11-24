@@ -3,10 +3,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Footer } from '../../../components/Footer';
 import { AuthProvider, Header } from '../../../components/Header';
 import { PageLayout, PageSection, SectionHeader, PrimaryButton, SectionContent } from '../../../components/PageLayout';
-import ContactSupportTab from '../../../components/support/ContactSupportTab';
-import DocumentationTab from '../../../components/support/DocumentationTab';
-import FAQsTab from '../../../components/support/FAQsTab';
-import TicketHistoryTab from '../../../components/support/TicketHistoryTab';
+import { ContactSupportTab } from '../../../components/support/ContactSupportTab';
+import { DocumentationTab } from '../../../components/support/DocumentationTab';
+import { FAQsTab } from '../../../components/support/FAQsTab';
+import { TicketHistoryTab } from '../../../components/support/TicketHistoryTab';
 
 export default function SupportPage() {
     const [sidebarOpen, setSidebarOpen] = useState(false);

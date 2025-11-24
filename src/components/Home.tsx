@@ -31,7 +31,7 @@ import {
   FadeInUpOnScroll,
   useInView,
 } from './AnimationUtils';
-import ServiceCarousel from './marketplace/ServiceCarousel';
+import { ServiceCarousel } from './marketplace/ServiceCarousel';
 
 /* ----------------------------- AI Chatbot ----------------------------- */
 const AIChatbot = () => {
@@ -231,7 +231,7 @@ function CategoryHeader({
   icon,
   title,
   count = null,
-}) => {
+}: CategoryHeaderProps) {
   const [ref] = useInView({ threshold: 0.1 });
   const [isHovered, setIsHovered] = React.useState(false);
 

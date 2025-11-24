@@ -48,7 +48,7 @@ export function FilterSidebar({
   onResetFilters,
   isResponsive = false,
   defaultOpen = true
-}) => {
+}: FilterSidebarProps) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(Object.fromEntries(filterConfig.map(config => [config.id, defaultOpen])));
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({

@@ -27,7 +27,7 @@ export function ServiceCard({
   onToggleBookmark,
   onAddToComparison,
   onQuickView
-}) => {
+}: ServiceCardProps) {
   const navigate = useNavigate();
   // Generate route based on marketplace type
   const getItemRoute = () => {

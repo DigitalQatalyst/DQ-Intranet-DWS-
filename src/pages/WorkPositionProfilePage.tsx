@@ -175,10 +175,12 @@ const WorkPositionProfilePage: React.FC = () => {
               )}
             </section>
 
-            {position?.expectations && position.expectations.length > 0 && (
+            {position?.expectations && (
               <section className="rounded-2xl border border-slate-100 bg-white shadow-sm p-6 space-y-3">
-                <h2 className="text-xl font-semibold text-slate-900">Expectations &amp; behaviours</h2>
-                {renderList(position.expectations, "")}
+                <h2 className="text-xl font-semibold text-slate-900">Expectations</h2>
+                <p className="text-slate-700 leading-relaxed">
+                  {position.expectations}
+                </p>
               </section>
             )}
 

@@ -29,7 +29,7 @@ export function SearchBar({
   setSearchQuery,
   placeholder = "Search onboarding flows by title, skill, or tool…",
   ariaLabel = "Search"
-}) => {
+}: SearchBarProps) {
   return <div className="relative">
       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
         <SearchIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />

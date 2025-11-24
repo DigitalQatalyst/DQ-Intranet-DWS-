@@ -28,7 +28,7 @@ export function ReportCard({
   onDownload,
   onQuickView,
   'data-id': dataId
-}) => {
+}: ReportCardProps) {
   const handleViewReport = (e: React.MouseEvent) => {
     e.stopPropagation();
     onViewReport();

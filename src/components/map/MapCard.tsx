@@ -2,7 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 
 import type { LocationItem } from '@/api/MAPAPI';
-import DQMap from '@/components/DQMap';
+import { DQMap } from '@/components/DQMap';
 
 export type MapCardProps = {
   locations: LocationItem[];
@@ -18,7 +18,7 @@ export function MapCard({
   onSelect,
   onClearFilters,
   className = "",
-}) => {
+}: MapCardProps) {
   return (
     <div
       className={clsx(

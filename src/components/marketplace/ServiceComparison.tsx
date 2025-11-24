@@ -18,7 +18,7 @@ export function ServiceComparison({
   onRemoveService,
   comparisonCategories,
   marketplaceType
-}) => {
+}: ServiceComparisonProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {

@@ -96,7 +96,7 @@ export function DQSectors({
   title = 'DQ Directory | Sectors & Units',
   subtitle = 'Connect with DQ sectors, teams, and units driving collaboration, delivery, and innovation across the Digital Workspace.',
   note,
-}) => {
+}: DQSectorsProps) {
   const navigate = useNavigate();
 
   const getChipStyle = (colorKey: CategoryColorKey) => {

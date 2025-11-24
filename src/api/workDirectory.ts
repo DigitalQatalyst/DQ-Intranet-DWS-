@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { WorkPositionRow, WorkPosition } from "@/data/workDirectoryTypes";
 
 export const WORK_POSITION_COLUMNS =
-  "id, slug, position_name, role_family, department, unit, unit_slug, location, sfia_rating, sfia_level, contract_type, summary, description, responsibilities, expectations, image_url, status, reports_to, created_at, updated_at";
+  "id, slug, position_name, role_family, department, unit, unit_slug, location, sfia_rating, sfia_level, contract_type, summary, description, responsibilities, expectations, image_url, status, created_at, updated_at";
 
 export const mapWorkPositionRow = (row: WorkPositionRow): WorkPosition => {
   // Debug logging in development only
@@ -11,8 +11,6 @@ export const mapWorkPositionRow = (row: WorkPositionRow): WorkPosition => {
     if (!row?.id) missingFields.push('id');
     if (!row?.slug) missingFields.push('slug');
     if (!row?.position_name) missingFields.push('position_name');
-    if (!row?.image_url) missingFields.push('image_url');
-    if (!row?.description && !row?.summary) missingFields.push('description/summary');
     
     if (missingFields.length > 0) {
       console.warn(`[WorkPosition] Missing fields for position ${row?.id || 'unknown'}:`, missingFields);
@@ -34,10 +32,9 @@ export const mapWorkPositionRow = (row: WorkPositionRow): WorkPosition => {
     summary: row?.summary ?? null,
     description: row?.description ?? null,
     responsibilities: Array.isArray(row?.responsibilities) ? row.responsibilities : [],
-    expectations: Array.isArray(row?.expectations) ? row.expectations : [],
+    expectations: typeof row?.expectations === 'string' ? row.expectations : (row?.expectations ?? null), // Handle as string
     imageUrl: row?.image_url ?? null,
     status: row?.status ?? null,
-    reportsTo: row?.reports_to ?? null,
     createdAt: row?.created_at,
     updatedAt: row?.updated_at,
   };
@@ -59,7 +56,14 @@ export async function getWorkPositionBySlug(slug: string): Promise<WorkPosition 
       .single();
 
     if (error) {
-      console.error("Failed to fetch work position by slug", slug, error);
+      console.error("❌ Failed to fetch work position by slug:", slug);
+      console.error("📋 Error details:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      console.error("🔍 Full error:", JSON.stringify(error, null, 2));
       return null;
     }
 
@@ -72,7 +76,10 @@ export async function getWorkPositionBySlug(slug: string): Promise<WorkPosition 
 
     return mapWorkPositionRow(data as WorkPositionRow);
   } catch (err) {
-    console.error("Unexpected error fetching work position by slug", slug, err);
+    console.error("❌ Unexpected error fetching work position by slug:", slug);
+    console.error("🔍 Error:", err);
+    console.error("🔍 Error type:", err instanceof Error ? err.constructor.name : typeof err);
+    console.error("🔍 Error message:", err instanceof Error ? err.message : String(err));
     return null;
   }
 }

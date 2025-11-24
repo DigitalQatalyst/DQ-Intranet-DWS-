@@ -458,7 +458,7 @@ function CustomSelect({
   placeholder = "Select an option",
   error = false,
   success = false,
-}) => {
+}: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
@@ -2025,7 +2025,7 @@ export function ServiceRequestForm({
   onSave,
   initialData = {},
   "data-id": dataId,
-}) => {
+}: ServiceRequestFormProps) {
   const schema = useMemo(
     () => validateSchema(providedSchema),
     [providedSchema]

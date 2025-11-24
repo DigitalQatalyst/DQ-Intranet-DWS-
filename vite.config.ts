@@ -33,6 +33,17 @@ export default defineConfig({
     strictPort: DEV_STRICT_PORT,
     proxy: {
       '/api': API_PROXY_TARGET,
+      // Proxy Supabase requests to avoid CORS issues
+      '/supabase': {
+        target: process.env.VITE_SUPABASE_URL || 'https://jmhtrffmxjxhoxpesubv.supabase.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/supabase/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('Supabase proxy error', err);
+          });
+        },
+      },
     },
   },
   preview: {

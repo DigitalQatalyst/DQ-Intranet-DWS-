@@ -20,7 +20,7 @@ export function ServiceQuickViewModal({
   onAddToComparison,
   marketplaceType,
   primaryButtonText = 'Enroll Now'
-}) => {
+}: ServiceQuickViewModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {

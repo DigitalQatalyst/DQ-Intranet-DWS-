@@ -42,7 +42,7 @@ export function WorkspaceInsights({
   data, 
   yoyData,
   loading = false 
-}) => {
+}: WorkspaceInsightsProps) {
   const [showComparison, setShowComparison] = useState(false);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);

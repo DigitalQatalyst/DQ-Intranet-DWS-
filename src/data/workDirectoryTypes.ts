@@ -1,18 +1,22 @@
 // TypeScript types matching Supabase schema rows
 export type WorkUnitRow = {
   id: string;
-  slug: string;
   sector: string;
   unit_name: string;
   unit_type: string;
   mandate: string;
   location: string;
-  focus_tags: string[] | null;
-  priority_level?: string | null;
+  banner_image_url?: string | null;
   priority_scope?: string | null;
   performance_status?: string | null;
+  focus_tags: string[] | null;
+  slug: string;
   wi_areas?: string[] | null;
-  banner_image_url?: string | null;
+  priorities?: string | null;
+  performance_summary?: string | null;
+  priorities_list?: string[] | null;
+  current_focus?: string | null;
+  performance_notes?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -26,12 +30,16 @@ export interface WorkUnit {
   mandate: string;
   location: string;
   focusTags: string[];
-  priorityLevel?: string | null;
   priorityScope?: string | null;
   performanceStatus?: string | null;
-  wiAreas?: string[];
+  wiAreas: string[];
   department?: string;
   bannerImageUrl?: string | null;
+  priorities?: string | null;
+  performanceSummary?: string | null;
+  prioritiesList?: string[] | null;
+  currentFocus?: string | null;
+  performanceNotes?: string | null;
 }
 
 export type WorkPositionRow = {
@@ -49,10 +57,9 @@ export type WorkPositionRow = {
   summary: string | null;
   description: string | null;
   responsibilities: string[] | null;
-  expectations: string[] | null;
+  expectations: string | null; // Changed from string[] to string (text field)
   image_url: string | null;
   status?: string | null;
-  reports_to?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -72,10 +79,9 @@ export interface WorkPosition {
   summary?: string | null;
   description?: string | null;
   responsibilities: string[];
-  expectations: string[];
+  expectations: string | null; // Changed from string[] to string (text field)
   imageUrl?: string | null;
   status?: string | null;
-  reportsTo?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -90,13 +96,13 @@ export type Associate = {
   sfia_rating: string; // text
   status: string; // text
   email: string; // text
-  phone?: string | null; // text
-  years_experience?: number | null;
-  teams_link: string; // text
-  profile_image_url?: string | null; // text
   key_skills: string[]; // jsonb
   bio: string; // text
   avatar_url?: string | null; // text
+  phone?: string | null; // text
+  summary?: string | null; // text
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type EmployeeProfile = {
