@@ -1,0 +1,42 @@
+# File Persistence & Placement
+
+Never write Markdown or temp files into /src, /api, /tests, /database.
+
+All temporary, AI-generated, or WIP documents go to /workspace only.
+
+/workspace is excluded from version control.
+
+/docs contains only validated, final, permanent documentation.
+
+Final docs must be moved from /workspace → /docs only after implementation is complete.
+
+Only three files allowed in /docs root:
+
+README.md, SETUP.md, CHANGELOG.md.
+
+All additional documentation must reside under one of the approved subfolders:
+
+/docs/architecture/
+
+/docs/iam/
+
+/docs/database/
+
+/docs/guides/
+
+/docs/configuration/
+
+/docs/archive/
+
+Never create new docs inside /docs root.
+
+Cursor enforcement:
+
+If generating any .md file that is not final → save to /workspace.
+
+If updating an existing doc → modify in place under /docs.
+
+If creating new final doc → place in the correct /docs/* subdirectory.
+
+Never leave .tmp.md lingering
+

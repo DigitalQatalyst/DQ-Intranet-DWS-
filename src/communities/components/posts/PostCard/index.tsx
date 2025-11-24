@@ -41,12 +41,18 @@ export function PostCard({
   }, [user, post.id]);
   const checkUserReactions = async () => {
     if (!user) return;
+    
+    // Get auth user ID directly from Supabase session
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id || user?.id;
+    
+    if (!userId) return;
+    
     const {
       data,
       error
-    } = await supabase.from('community_reactions').select('reaction_type').eq('post_id', post.id).eq('user_id', user.id);
+    } = await supabase.from('reactions').select('reaction_type').eq('post_id', post.id).eq('user_id', userId);
     if (error) {
-      console.error('Error checking reactions:', error);
       return;
     }
     if (data) {
@@ -57,7 +63,15 @@ export function PostCard({
   const handleReaction = async (type: 'helpful' | 'insightful') => {
     if (!user) {
       toast.error('Please sign in to react');
-      // Don't navigate, just show error - user can sign in from current page
+      return;
+    }
+    
+    // Get auth user ID directly from Supabase session
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id || user?.id;
+    
+    if (!userId) {
+      toast.error('Unable to identify user. Please sign in again.');
       return;
     }
     
@@ -66,20 +80,13 @@ export function PostCard({
     try {
       if (hasReacted) {
         const { error } = await supabase
-          .from('community_reactions')
+          .from('reactions')
           .delete()
           .eq('post_id', post.id)
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .eq('reaction_type', type);
         
         if (error) {
-          console.error('Error removing reaction:', error);
-          console.error('Error details:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          });
           toast.error('Failed to remove reaction: ' + (error.message || 'Unknown error'));
           return;
         }
@@ -94,21 +101,14 @@ export function PostCard({
         }
       } else {
         const { error } = await supabase
-          .from('community_reactions')
+          .from('reactions')
           .insert({
             post_id: post.id,
-            user_id: user.id,
+            user_id: userId,
             reaction_type: type
           });
         
         if (error) {
-          console.error('Error adding reaction:', error);
-          console.error('Error details:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          });
           toast.error('Failed to add reaction: ' + (error.message || 'Unknown error'));
           return;
         }
@@ -123,7 +123,6 @@ export function PostCard({
         }
       }
     } catch (err) {
-      console.error('Unexpected error in handleReaction:', err);
       toast.error('An unexpected error occurred. Please try again.');
     }
   };

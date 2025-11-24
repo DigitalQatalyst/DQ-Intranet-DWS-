@@ -48,7 +48,7 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
     setLoading(true);
     try {
       const query = supabase
-        .from('community_reactions')
+        .from('reactions')
         .select('reaction_type, user_id')
         .eq(postId ? 'post_id' : 'comment_id', postId || commentId);
 
@@ -69,11 +69,15 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
         const userReactionSet = new Set<ReactionType>();
 
         if (isAuthenticated && user) {
+          // Get auth user ID directly from Supabase session
+          const { data: { session } } = await supabase.auth.getSession();
+          const userId = session?.user?.id || user?.id;
+          
           data.forEach((reaction: any) => {
             if (reaction.reaction_type in counts) {
               counts[reaction.reaction_type as ReactionType]++;
             }
-            if (reaction.user_id === user.id) {
+            if (userId && reaction.user_id === userId) {
               userReactionSet.add(reaction.reaction_type as ReactionType);
             }
           });
@@ -90,7 +94,7 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
         setUserReactions(userReactionSet);
       }
     } catch (err) {
-      console.error('Error:', err);
+      // Silently handle errors
     } finally {
       setLoading(false);
     }
@@ -110,7 +114,14 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
       return;
     }
 
-    const userId = user.id;
+    // Get auth user ID directly from Supabase session
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id || user?.id;
+    
+    if (!userId) {
+      toast.error('Unable to identify user. Please sign in again.');
+      return;
+    }
 
     const hasReacted = userReactions.has(type);
 
@@ -118,7 +129,7 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
       if (hasReacted) {
         // Remove reaction
         const query = supabase
-          .from('community_reactions')
+          .from('reactions')
           .delete()
           .eq('user_id', userId)
           .eq(postId ? 'post_id' : 'comment_id', postId || commentId)
@@ -151,10 +162,8 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
         }
 
         const query = supabase
-          .from('community_reactions')
-          .insert(reactionData)
-          .select()
-          .single();
+          .from('reactions')
+          .insert(reactionData);
 
         const [, error] = await safeFetch(query);
 
@@ -164,7 +173,8 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
             fetchReactions();
             return;
           }
-          throw error;
+          toast.error('Failed to add reaction: ' + (error.message || 'Unknown error'));
+          return;
         }
 
         setReactions(prev => ({
@@ -176,8 +186,7 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
 
       onReactionChange?.();
     } catch (err: any) {
-      console.error('Error toggling reaction:', err);
-      toast.error('Failed to update reaction');
+      toast.error('Failed to update reaction: ' + (err.message || 'Unknown error'));
     }
   };
 
