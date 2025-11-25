@@ -35,10 +35,7 @@ import { LEVELS, LOCATION_ALLOW } from '@/lms/config';
 const formatChips = (course: LmsDetail) => {
   try {
   const levelLabel = LEVELS.find(level => level.code === course.levelCode)?.label;
-  const chips: Array<{ key: string; label: string; iconValue?: string }> = [
-      { key: 'courseCategory', label: course.courseCategory || 'Uncategorized', iconValue: course.courseCategory },
-      { key: 'deliveryMode', label: course.deliveryMode || 'Online', iconValue: course.deliveryMode },
-  ];
+  const chips: Array<{ key: string; label: string; iconValue?: string }> = [];
     const locations = course.locations || [];
     const location = locations.find(
     loc => loc !== 'Global' && (LOCATION_ALLOW as readonly string[]).includes(loc)
@@ -57,10 +54,7 @@ const formatChips = (course: LmsDetail) => {
   return chips;
   } catch (error) {
     console.error('[LMS] Error formatting chips:', error, course);
-    return [
-      { key: 'courseCategory', label: course.courseCategory || 'Uncategorized', iconValue: course.courseCategory },
-      { key: 'deliveryMode', label: course.deliveryMode || 'Online', iconValue: course.deliveryMode },
-    ];
+    return [];
   }
 };
 
@@ -120,8 +114,36 @@ export const LmsCourseDetailPage: React.FC = () => {
   const [renderError, setRenderError] = useState<Error | null>(null);
 
   // Fetch course data from Supabase - MUST be called before any conditional returns
-  const { data: course, isLoading: courseLoading, error: courseError } = useLmsCourse(slug || '');
+  const { data: course, isLoading: courseLoading, isFetching: courseFetching, error: courseError } = useLmsCourse(slug || '');
   const { data: allCourses = [] } = useLmsCourseDetails();
+
+  // Track previous slug to detect navigation
+  const prevSlugRef = React.useRef<string | undefined>(slug);
+  const [isNavigating, setIsNavigating] = React.useState(false);
+  
+  // Reset component state when slug changes (navigation to different course)
+  React.useEffect(() => {
+    if (prevSlugRef.current !== slug && prevSlugRef.current !== undefined) {
+      setIsNavigating(true);
+      setExpandedCourses(new Set());
+      setExpandedTopics(new Set());
+      setActiveTab('highlights');
+      setRenderError(null);
+      prevSlugRef.current = slug;
+    } else if (prevSlugRef.current === undefined) {
+      prevSlugRef.current = slug;
+    }
+  }, [slug]);
+  
+  // Reset navigating state when course data is loaded and matches current slug
+  React.useEffect(() => {
+    if (course && !courseFetching) {
+      // Only reset if the course slug matches the current route slug
+      if (course.slug === slug || course.slug.toLowerCase() === slug?.toLowerCase()) {
+        setIsNavigating(false);
+      }
+    }
+  }, [course, courseFetching, slug]);
 
   // Log course data for debugging
   React.useEffect(() => {
@@ -151,6 +173,50 @@ export const LmsCourseDetailPage: React.FC = () => {
   }, [courseError]);
 
   // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  // Ensure arrays exist with defaults - these are not hooks, just computed values
+  const highlights = course?.highlights || [];
+  const outcomes = course?.outcomes || [];
+  const curriculum = course?.curriculum || [];
+  
+  // Calculate all topics across all curriculum items for sequential module numbering
+  const allTopics = useMemo(() => {
+    const topics: Array<{ topic: any; curriculumItemId: string }> = [];
+    curriculum
+      .sort((a, b) => a.order - b.order)
+      .forEach((item) => {
+        if (item.topics && item.topics.length > 0) {
+          item.topics
+            .sort((a, b) => a.order - b.order)
+            .forEach((topic) => {
+              topics.push({ topic, curriculumItemId: item.id });
+            });
+        }
+      });
+    return topics;
+  }, [curriculum]);
+  
+  // Calculate course stats for sidebar
+  const courseStats = useMemo(() => {
+    let totalLessons = 0;
+    let totalModules = 0;
+    
+    curriculum.forEach((item) => {
+      if (item.topics && Array.isArray(item.topics)) {
+        totalModules += item.topics.length;
+        item.topics.forEach((topic) => {
+          if (topic.lessons && Array.isArray(topic.lessons)) {
+            totalLessons += topic.lessons.length;
+          }
+        });
+      } else if (item.lessons && Array.isArray(item.lessons)) {
+        totalModules += 1;
+        totalLessons += item.lessons.length;
+      }
+    });
+    
+    return { totalLessons, totalModules };
+  }, [curriculum]);
+
   const relatedCourses = useMemo(() => {
     if (!course) return [];
     // If course is part of a track, show other courses in the same track
@@ -177,8 +243,8 @@ export const LmsCourseDetailPage: React.FC = () => {
   }, [course]);
 
   // NOW we can have conditional returns - all hooks have been called above
-  // Show loading state
-  if (courseLoading) {
+  // Show loading state - check both isLoading and isNavigating to handle route changes
+  if (courseLoading || (isNavigating && !course)) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
@@ -220,8 +286,8 @@ export const LmsCourseDetailPage: React.FC = () => {
     );
   }
 
-  // Show not found state
-  if (!course) {
+  // Show not found state - also check if course slug doesn't match current slug
+  if (!course || (course.slug !== slug && course.slug.toLowerCase() !== slug?.toLowerCase())) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
@@ -246,11 +312,6 @@ export const LmsCourseDetailPage: React.FC = () => {
       </div>
     );
   }
-
-  // Ensure arrays exist with defaults - these are not hooks, just computed values
-  const highlights = course?.highlights || [];
-  const outcomes = course?.outcomes || [];
-  const curriculum = course?.curriculum || [];
   
   // Compute other values safely
   const HeroIcon = course ? (CARD_ICON_BY_ID[course.id] || DEFAULT_COURSE_ICON) : DEFAULT_COURSE_ICON;
@@ -636,8 +697,10 @@ export const LmsCourseDetailPage: React.FC = () => {
                                         };
 
                                         const lessonCount = topic.lessons?.length || 0;
-                                        const moduleNumber = index + 1;
-                                        
+                                        // Find the sequential module number across all topics
+                                        const topicIndex = allTopics.findIndex(t => t.topic.id === topic.id);
+                                        const moduleNumber = topicIndex >= 0 ? topicIndex + 1 : index + 1;
+
                                         return (
                                           <div key={topic.id} className="border-b border-gray-200 last:border-b-0">
                                             {/* Topic Header */}
@@ -652,7 +715,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                                                   </div>
                                                   <div className="flex-1">
                                                     <div className="flex items-center gap-2">
-                                                      <h4 className="font-medium text-gray-900">{topic.title}</h4>
+                                                    <h4 className="font-medium text-gray-900">{topic.title}</h4>
                                                       <span className="text-xs text-gray-500">
                                                         Module {moduleNumber}. {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
                                                       </span>
@@ -798,12 +861,12 @@ export const LmsCourseDetailPage: React.FC = () => {
                                 <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                   {/* Topic Section Header - Only show if title doesn't match topic titles */}
                                   {shouldShowSectionHeader && (
-                                    <div className="p-4 bg-gray-50 border-b border-gray-200">
-                                      <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-                                      {item.description && (
-                                        <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                                      )}
-                                    </div>
+                                  <div className="p-4 bg-gray-50 border-b border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                                    {item.description && (
+                                      <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                                    )}
+                                  </div>
                                   )}
 
                                   {/* Topics within this section */}
@@ -825,8 +888,10 @@ export const LmsCourseDetailPage: React.FC = () => {
                                         };
 
                                         const lessonCount = topic.lessons?.length || 0;
-                                        const moduleNumber = index + 1;
-                                        
+                                        // Find the sequential module number across all topics
+                                        const topicIndex = allTopics.findIndex(t => t.topic.id === topic.id);
+                                        const moduleNumber = topicIndex >= 0 ? topicIndex + 1 : index + 1;
+
                                         return (
                                           <div key={topic.id}>
                                             {/* Topic Header */}
@@ -841,7 +906,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                                                   </div>
                                                   <div className="flex-1">
                                                     <div className="flex items-center gap-2">
-                                                      <h4 className="font-medium text-gray-900">{topic.title}</h4>
+                                                    <h4 className="font-medium text-gray-900">{topic.title}</h4>
                                                       <span className="text-xs text-gray-500">
                                                         Module {moduleNumber}. {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
                                                       </span>
@@ -950,7 +1015,7 @@ export const LmsCourseDetailPage: React.FC = () => {
 
                               const lessonCount = item.lessons?.length || 0;
                               const moduleNumber = curriculumIndex + 1;
-                              
+
                               return (
                                 <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                   {/* Topic Header */}
@@ -965,7 +1030,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                                         </div>
                                         <div className="flex-1">
                                           <div className="flex items-center gap-2">
-                                            <h4 className="font-medium text-gray-900">{item.title}</h4>
+                                          <h4 className="font-medium text-gray-900">{item.title}</h4>
                                             <span className="text-xs text-gray-500">
                                               Module {moduleNumber}. {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
                                             </span>
@@ -1459,32 +1524,34 @@ export const LmsCourseDetailPage: React.FC = () => {
                 </div>
                 <div className="p-4 space-y-4">
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>Starts</span>
-                    <span className="font-medium text-gray-900">Available Now</span>
+                    <span>Duration</span>
+                    <span className="font-medium text-gray-900">{course.duration || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>Provider</span>
-                    <span className="font-medium text-gray-900 text-right">{course.provider}</span>
+                    <span>Lessons</span>
+                    <span className="font-medium text-gray-900">
+                      {courseStats.totalLessons} {courseStats.totalLessons === 1 ? 'lesson' : 'lessons'}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>Audience</span>
-                    <span className="font-medium text-gray-900 text-right">{audienceLabel}</span>
+                    <span>Level</span>
+                    <span className="font-medium text-gray-900 text-right">
+                      {LEVELS.find(level => level.code === course.levelCode)?.label || course.levelCode}
+                    </span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Status</span>
-                    <span className="font-medium text-gray-900 text-right">{statusLabel}</span>
-                  </div>
-                  {course.courseType && (
+                  {courseStats.totalModules > 0 && (
                     <div className="flex justify-between text-sm text-gray-600">
-                      <span>Course Type</span>
-                      <span className="font-medium text-gray-900 text-right">{course.courseType}</span>
+                      <span>Modules</span>
+                      <span className="font-medium text-gray-900">
+                        {courseStats.totalModules} {courseStats.totalModules === 1 ? 'module' : 'modules'}
+                      </span>
                     </div>
                   )}
                   <button 
                     className="w-full px-4 py-3 text-white font-semibold rounded-md transition-colors shadow-md hover:opacity-90" 
                     style={{ backgroundColor: '#030F35' }}
                   >
-                    Enroll Now
+                    Start Lesson
                   </button>
                   <button 
                     className="w-full px-4 py-2.5 font-medium bg-white border rounded-md hover:bg-gray-50 transition-colors flex items-center justify-center" 

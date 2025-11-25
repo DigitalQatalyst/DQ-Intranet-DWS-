@@ -986,6 +986,7 @@ export const LmsCourses: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {paginatedItems.map((item) => {
                 const Icon = ICON_BY_ID[item.id] || BookOpenCheck;
+                const courseDetail = LMS_COURSE_DETAILS.find(c => c.id === item.id);
                 return (
                   <MarketplaceCard
                     key={item.id}
@@ -993,7 +994,8 @@ export const LmsCourses: React.FC = () => {
                       ...item,
                       provider: { name: item.provider, logoUrl: "/DWS-Logo.png" },
                       description: item.summary,
-                      imageUrl: item.imageUrl
+                      imageUrl: item.imageUrl,
+                      curriculum: courseDetail?.curriculum
                     }}
                     marketplaceType="courses"
                     isBookmarked={false}

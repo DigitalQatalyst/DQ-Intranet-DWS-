@@ -70,6 +70,8 @@ export function useLmsCourse(slug: string) {
     },
     enabled: !!slug,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: true, // Always refetch when component mounts with new slug
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 }
 
