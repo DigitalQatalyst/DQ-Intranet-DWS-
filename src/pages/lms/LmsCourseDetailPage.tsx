@@ -555,7 +555,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                     <div className="space-y-4">
                       {curriculum
                         .sort((a, b) => a.order - b.order)
-                        .map((item) => {
+                        .map((item, curriculumIndex) => {
                           const isCourse = course.courseType === 'Course (Multi-Lessons)';
                           const isSingleLesson = course.courseType === 'Course (Single Lesson)';
 
@@ -621,7 +621,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                                   <div className="border-t border-gray-200 bg-gray-50">
                                     {item.topics
                                       .sort((a, b) => a.order - b.order)
-                                      .map((topic) => {
+                                      .map((topic, index) => {
                                         const isTopicExpanded = expandedTopics.has(topic.id);
                                         const toggleTopic = () => {
                                           setExpandedTopics(prev => {
@@ -635,6 +635,9 @@ export const LmsCourseDetailPage: React.FC = () => {
                                           });
                                         };
 
+                                        const lessonCount = topic.lessons?.length || 0;
+                                        const moduleNumber = index + 1;
+                                        
                                         return (
                                           <div key={topic.id} className="border-b border-gray-200 last:border-b-0">
                                             {/* Topic Header */}
@@ -648,7 +651,12 @@ export const LmsCourseDetailPage: React.FC = () => {
                                                     <FileText size={16} />
                                                   </div>
                                                   <div className="flex-1">
-                                                    <h4 className="font-medium text-gray-900">{topic.title}</h4>
+                                                    <div className="flex items-center gap-2">
+                                                      <h4 className="font-medium text-gray-900">{topic.title}</h4>
+                                                      <span className="text-xs text-gray-500">
+                                                        Module {moduleNumber}. {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
+                                                      </span>
+                                                    </div>
                                                     {topic.description && (
                                                       <p className="text-xs text-gray-600 mt-1">{topic.description}</p>
                                                     )}
@@ -782,21 +790,27 @@ export const LmsCourseDetailPage: React.FC = () => {
                           if (isCourse) {
                             // Handle structure with topics array
                             if (item.topics && item.topics.length > 0) {
+                              // Check if section header title matches any topic title (to avoid duplicates)
+                              const hasMatchingTopicTitle = item.topics.some(topic => topic.title === item.title);
+                              const shouldShowSectionHeader = !hasMatchingTopicTitle && (item.topics.length > 1 || item.description);
+                              
                               return (
                                 <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                  {/* Topic Section Header */}
-                                  <div className="p-4 bg-gray-50 border-b border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-                                    {item.description && (
-                                      <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                                    )}
-                                  </div>
+                                  {/* Topic Section Header - Only show if title doesn't match topic titles */}
+                                  {shouldShowSectionHeader && (
+                                    <div className="p-4 bg-gray-50 border-b border-gray-200">
+                                      <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                                      {item.description && (
+                                        <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                                      )}
+                                    </div>
+                                  )}
 
                                   {/* Topics within this section */}
-                                  <div className="divide-y divide-gray-200">
+                                  <div className={shouldShowSectionHeader ? "divide-y divide-gray-200" : ""}>
                                     {item.topics
                                       .sort((a, b) => a.order - b.order)
-                                      .map((topic) => {
+                                      .map((topic, index) => {
                                         const isTopicExpanded = expandedTopics.has(topic.id);
                                         const toggleTopic = () => {
                                           setExpandedTopics(prev => {
@@ -810,6 +824,9 @@ export const LmsCourseDetailPage: React.FC = () => {
                                           });
                                         };
 
+                                        const lessonCount = topic.lessons?.length || 0;
+                                        const moduleNumber = index + 1;
+                                        
                                         return (
                                           <div key={topic.id}>
                                             {/* Topic Header */}
@@ -823,7 +840,12 @@ export const LmsCourseDetailPage: React.FC = () => {
                                                     <FileText size={16} />
                                                   </div>
                                                   <div className="flex-1">
-                                                    <h4 className="font-medium text-gray-900">{topic.title}</h4>
+                                                    <div className="flex items-center gap-2">
+                                                      <h4 className="font-medium text-gray-900">{topic.title}</h4>
+                                                      <span className="text-xs text-gray-500">
+                                                        Module {moduleNumber}. {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
+                                                      </span>
+                                                    </div>
                                                     {topic.description && (
                                                       <p className="text-xs text-gray-600 mt-1">{topic.description}</p>
                                                     )}
@@ -926,6 +948,9 @@ export const LmsCourseDetailPage: React.FC = () => {
                                 });
                               };
 
+                              const lessonCount = item.lessons?.length || 0;
+                              const moduleNumber = curriculumIndex + 1;
+                              
                               return (
                                 <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                   {/* Topic Header */}
@@ -939,7 +964,12 @@ export const LmsCourseDetailPage: React.FC = () => {
                                           <FileText size={16} />
                                         </div>
                                         <div className="flex-1">
-                                          <h4 className="font-medium text-gray-900">{item.title}</h4>
+                                          <div className="flex items-center gap-2">
+                                            <h4 className="font-medium text-gray-900">{item.title}</h4>
+                                            <span className="text-xs text-gray-500">
+                                              Module {moduleNumber}. {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
+                                            </span>
+                                          </div>
                                           {item.description && (
                                             <p className="text-xs text-gray-600 mt-1">{item.description}</p>
                                           )}
