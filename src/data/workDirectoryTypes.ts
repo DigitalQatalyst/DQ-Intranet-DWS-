@@ -142,3 +142,12 @@ export type EmployeeProfile = {
   phone: string | null;
   profile_image_url: string | null;
 };
+
+export interface WorkAssociate {
+  id: string;
+  name: string;
+  currentRole: string | null;
+  unit: string | null;
+  department: string | null;
+  summary: string | null;
+}

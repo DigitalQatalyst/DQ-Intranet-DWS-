@@ -1,4 +1,5 @@
 import React from 'react';
+import { TagChip } from '../Cards/TagChip';
 
 export type DirectoryCardData = {
   logoUrl?: string;
@@ -44,6 +45,7 @@ export function DirectoryCard({
   const initial = title?.[0]?.toUpperCase() ?? 'D';
   const hasTowers = towers && towers.length > 0;
   const hasRoleInfo = roleInfo !== undefined;
+  const tagItems = [tag, ...(towers || [])].filter(Boolean);
 
   return (
     <article
@@ -64,7 +66,7 @@ export function DirectoryCard({
         e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.05)';
       }}
     >
-      {/* Header: Logo/Avatar + Title + Tag */}
+      {/* Header: Logo/Avatar + Title */}
       <div className="flex items-start gap-3 mb-3">
         {/* Circular Logo/Avatar (48x48px for Associates) */}
         <div
@@ -89,7 +91,7 @@ export function DirectoryCard({
           )}
         </div>
 
-        {/* Title + Tag */}
+        {/* Title */}
         <div className="min-w-0 flex-1">
           <h3
             className="font-bold leading-tight mb-1.5"
@@ -101,22 +103,12 @@ export function DirectoryCard({
           >
             {title}
           </h3>
-          <span
-            className="inline-block px-2.5 py-1 rounded-full font-medium"
-            style={{
-              backgroundColor: '#EEF2FF',
-              color: '#002180',
-              fontSize: '11.5px',
-            }}
-          >
-            {tag}
-          </span>
         </div>
       </div>
 
       {/* Description (exactly 2 lines) */}
       <p
-        className="text-sm leading-relaxed clamp-2 mb-4 flex-grow"
+        className="text-sm leading-relaxed clamp-2 mb-3 flex-grow"
         style={{
           color: '#3C4659',
           fontSize: '14px',
@@ -125,6 +117,15 @@ export function DirectoryCard({
       >
         {description}
       </p>
+
+      {/* Tags below description */}
+      {tagItems.length > 0 && (
+        <div className="mt-3 mb-4 flex flex-wrap gap-2">
+          {tagItems.map((item, index) => (
+            <TagChip key={`${item}-${index}`} text={item} variant={index === 0 ? 'primary' : 'secondary'} size="sm" />
+          ))}
+        </div>
+      )}
 
       {/* Tower Box (for Units) OR Role Info Box (for Associates) */}
       {(hasTowers || hasRoleInfo) && (

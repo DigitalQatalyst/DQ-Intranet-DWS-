@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import type { Associate, WorkUnitRow, WorkUnit, WorkPosition, WorkPositionRow } from "@/data/workDirectoryTypes";
+import type { Associate, WorkUnitRow, WorkUnit, WorkPosition, WorkPositionRow, WorkAssociate } from "@/data/workDirectoryTypes";
 import { WORK_POSITION_COLUMNS, mapWorkPositionRow } from "@/api/workDirectory";
 
 // Helper to check if Supabase is configured
@@ -67,7 +67,7 @@ const slugify = (value: string) =>
     .replace(/(^-|-$)+/g, "");
 
 const UNIT_COLUMNS =
-  "id, sector, unit_name, unit_type, mandate, location, banner_image_url, priority_scope, priority_level, performance_status, performance_score, focus_tags, slug, wi_areas, priorities, performance_summary, priorities_list, current_focus, performance_notes, created_at, updated_at";
+  "id, sector, unit_name, unit_type, mandate, location, banner_image_url, priority_scope, priority_level, performance_status, performance_score, performance_updated_at, focus_tags, slug, wi_areas, priorities, performance_summary, priorities_list, current_focus, performance_notes, created_at, updated_at";
 
 const jsonToStringArray = (value: unknown): string[] => {
   if (!value) return [];
@@ -101,6 +101,7 @@ function mapWorkUnit(dbUnit: WorkUnitRow): WorkUnit {
     priorityLevel: dbUnit.priority_level ?? null,
     performanceStatus: dbUnit.performance_status ?? null,
     performanceScore: dbUnit.performance_score ?? null,
+    performanceUpdatedAt: dbUnit.performance_updated_at ?? null,
     wiAreas,
     bannerImageUrl: dbUnit.banner_image_url ?? null,
     department: deriveDepartmentFromUnitName(dbUnit.unit_name),
@@ -111,6 +112,49 @@ function mapWorkUnit(dbUnit: WorkUnitRow): WorkUnit {
     performanceNotes: dbUnit.performance_notes ?? null,
     updatedAt: dbUnit.updated_at ?? null,
   };
+}
+
+type UpdateUnitPerformancePayload = {
+  performanceScore: number | null;
+  performanceStatus: string | null;
+  performanceSummary: string | null;
+  performanceNotes: string | null;
+};
+
+type WorkAssociateRow = {
+  id: string;
+  name: string;
+  current_role: string | null;
+  unit: string | null;
+  department: string | null;
+  summary: string | null;
+};
+
+export async function updateUnitPerformance(unitId: string, payload: UpdateUnitPerformancePayload) {
+  if (!checkSupabaseConfig()) {
+    throw new Error("Supabase not configured. Check .env.local and restart dev server.");
+  }
+
+  if (!supabase) {
+    throw new Error("Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local");
+  }
+
+  const { data, error } = await supabase
+    .from("work_units")
+    .update({
+      performance_score: payload.performanceScore ?? null,
+      performance_status: payload.performanceStatus ?? null,
+      performance_summary: payload.performanceSummary ?? null,
+      performance_notes: payload.performanceNotes ?? null,
+      performance_updated_at: new Date().toISOString(),
+    })
+    .eq("id", unitId)
+    .select()
+    .single();
+
+  console.log("updateUnitPerformance result", { data, error });
+
+  return { data, error };
 }
 
 function mapAssociate(dbAssociate: Associate) {
@@ -134,6 +178,45 @@ function mapAssociate(dbAssociate: Associate) {
 
 const WORK_ASSOCIATE_COLUMNS =
   "id, name, current_role, department, unit, location, sfia_rating, status, email, key_skills, bio, avatar_url, phone, summary, created_at, updated_at";
+
+const mapWorkAssociateRow = (row: WorkAssociateRow): WorkAssociate => ({
+  id: row.id,
+  name: row.name,
+  currentRole: row.current_role ?? null,
+  unit: row.unit ?? null,
+  department: row.department ?? null,
+  summary: row.summary ?? null,
+});
+
+export async function fetchAssociatesForUnit(unitName: string): Promise<WorkAssociate[]> {
+  if (!unitName) return [];
+
+  try {
+    if (!checkSupabaseConfig()) {
+      return [];
+    }
+
+    if (!supabase) {
+      throw new Error("Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local");
+    }
+
+    const { data, error } = await supabase
+      .from("work_associates")
+      .select("id, name, current_role, unit, department, summary")
+      .eq("unit", unitName)
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("❌ Supabase error fetching associates for unit:", unitName, error);
+      return [];
+    }
+
+    return (data || []).map((row) => mapWorkAssociateRow(row as WorkAssociateRow));
+  } catch (err) {
+    console.error("❌ Network/Connection error fetching associates for unit:", unitName, err);
+    return [];
+  }
+}
 
 export function useAssociates() {
   const [associates, setAssociates] = useState<ReturnType<typeof mapAssociate>[]>([]);
@@ -316,7 +399,7 @@ export function useWorkUnits() {
     fetchUnits();
   }, []);
 
-  return { units, loading, error };
+  return { units, loading, error, updateUnitPerformance };
 }
 
 export function useWorkPositions() {
@@ -437,4 +520,72 @@ export function useWorkPositions() {
   }, []);
 
   return { positions, loading, error };
+}
+
+export function useUnitProfile(unitSlug?: string) {
+  const [unit, setUnit] = useState<WorkUnit | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [relatedAssociates, setRelatedAssociates] = useState<WorkAssociate[]>([]);
+  const [associatesLoading, setAssociatesLoading] = useState(false);
+
+  const fetchUnitData = useCallback(async (slug?: string) => {
+    if (!slug) {
+      setUnit(null);
+      setRelatedAssociates([]);
+      setLoading(false);
+      setAssociatesLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setAssociatesLoading(true);
+    setError(null);
+
+    try {
+      if (!checkSupabaseConfig()) {
+        setError("Supabase not configured. Check .env.local and restart dev server.");
+        setLoading(false);
+        setAssociatesLoading(false);
+        return;
+      }
+
+      if (!supabase) {
+        throw new Error("Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local");
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from("work_units")
+        .select(UNIT_COLUMNS)
+        .eq("slug", slug)
+        .single();
+
+      if (fetchError) {
+        setError(fetchError.message);
+        setUnit(null);
+        setRelatedAssociates([]);
+      } else if (data) {
+        const mappedUnit = mapWorkUnit(data as WorkUnitRow);
+        setUnit(mappedUnit);
+        const associates = await fetchAssociatesForUnit(mappedUnit.unitName);
+        setRelatedAssociates(associates);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      setUnit(null);
+      setRelatedAssociates([]);
+    } finally {
+      setLoading(false);
+      setAssociatesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnitData(unitSlug);
+  }, [unitSlug, fetchUnitData]);
+
+  const refresh = useCallback(() => fetchUnitData(unitSlug), [unitSlug, fetchUnitData]);
+
+  return { unit, loading, error, relatedAssociates, associatesLoading, refresh };
 }

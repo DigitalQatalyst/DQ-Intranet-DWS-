@@ -718,18 +718,6 @@ const DQWorkDirectoryPage: React.FC = () => {
           )}
         </div>
         <p className="text-sm text-gray-700 mt-3 line-clamp-3">{unit.mandate || "Not yet added."}</p>
-        {unit.focusTags && unit.focusTags.length > 0 ? (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {unit.focusTags.slice(0, 3).map((tag) => (
-              <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
-                {tag}
-              </span>
-            ))}
-            {unit.focusTags.length > 3 && (
-              <span className="text-xs text-gray-500">+{unit.focusTags.length - 3} more</span>
-            )}
-          </div>
-        ) : null}
         {unit.performanceStatus && (
           <div className="mt-3">
             <span
@@ -744,6 +732,18 @@ const DQWorkDirectoryPage: React.FC = () => {
             </span>
           </div>
         )}
+        {unit.focusTags && unit.focusTags.length > 0 ? (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {unit.focusTags.slice(0, 3).map((tag) => (
+              <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                {tag}
+              </span>
+            ))}
+            {unit.focusTags.length > 3 && (
+              <span className="text-xs text-gray-500">+{unit.focusTags.length - 3} more</span>
+            )}
+          </div>
+        ) : null}
         <div className="mt-auto pt-4">
           <Link
             to={`/work-directory/units/${unit.slug}`}
@@ -804,7 +804,20 @@ const DQWorkDirectoryPage: React.FC = () => {
           </div>
         )}
         
-        <div className="flex flex-wrap items-center gap-2 mb-3 text-xs font-medium text-slate-600">
+        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{positionName}</h3>
+        {previewItems.length > 0 && (
+          <div className="mt-3">
+            <ul className="space-y-2 text-sm text-gray-700">
+              {previewItems.slice(0, 3).map((item, idx) => (
+                <li key={idx} className="flex gap-2">
+                  <span className="mt-[6px] h-[6px] w-[6px] rounded-full bg-indigo-500 flex-shrink-0" />
+                  <span className="line-clamp-2">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-slate-600">
           {roleFamily && (
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700">
               {roleFamily}
@@ -826,19 +839,6 @@ const DQWorkDirectoryPage: React.FC = () => {
             </span>
           )}
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{positionName}</h3>
-        {previewItems.length > 0 && (
-          <div className="mt-3">
-            <ul className="space-y-2 text-sm text-gray-700">
-              {previewItems.slice(0, 3).map((item, idx) => (
-                <li key={idx} className="flex gap-2">
-                  <span className="mt-[6px] h-[6px] w-[6px] rounded-full bg-indigo-500 flex-shrink-0" />
-                  <span className="line-clamp-2">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
         <div className="mt-auto pt-4">
           {slug ? (
             <Link

@@ -33,34 +33,32 @@ export const mapWorkUnitRow = (row: WorkUnitRow): WorkUnit => ({
 });
 
 export async function updateUnitPerformance(
-  unitId: string,
-  payload: {
-    performanceScore: number | null;
-    performanceStatus: string | null;
-    performanceSummary: string | null;
-    performanceNotes: string | null;
+  id: string,
+  updates: {
+    performance_score?: number | null;
+    performance_status?: string | null;
+    performance_summary?: string | null;
+    performance_notes?: string | null;
   }
 ) {
-  const { performanceScore, performanceStatus, performanceSummary, performanceNotes } = payload;
-
   const { data, error } = await supabase
     .from("work_units")
     .update({
-      performance_score: performanceScore,
-      performance_status: performanceStatus,
-      performance_summary: performanceSummary,
-      performance_notes: performanceNotes,
+      performance_score: updates.performance_score,
+      performance_status: updates.performance_status,
+      performance_summary: updates.performance_summary,
+      performance_notes: updates.performance_notes,
       performance_updated_at: new Date().toISOString(),
     })
-    .eq("id", unitId)
-    .select()
+    .eq("id", id)
     .single();
 
   if (error) {
+    console.error("Error updating unit performance:", error);
     throw error;
   }
 
-  return data as WorkUnitRow;
+  return data as WorkUnitRow | null;
 }
 
 export const mapWorkPositionRow = (row: WorkPositionRow): WorkPosition => {
