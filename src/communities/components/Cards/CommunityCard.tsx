@@ -149,7 +149,9 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
       </div>
       <CardFooter
         primaryCTA={{
-          text: item.isPrivate ? "Request to Join" : "Join Community",
+          text: isMember 
+            ? "Leave Community" 
+            : (item.isPrivate ? "Request to Join" : "Join Community"),
           onClick: handleJoin,
         }}
         secondaryCTA={

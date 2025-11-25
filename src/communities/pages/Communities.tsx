@@ -7,7 +7,7 @@ import { FilterSidebar, FilterConfig } from "../components/communities/FilterSid
 import { CreateCommunityModal } from "../components/communities/CreateCommunityModal";
 import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from "../utils/safeFetch";
-import { joinCommunity } from "@/communities/services/membershipService";
+import { joinCommunity, leaveCommunity } from "@/communities/services/membershipService";
 import { toast } from "sonner";
 import { Button } from "../components/ui/button";
 import { PlusCircle, Filter, X, HomeIcon, ChevronRightIcon } from 'lucide-react';
@@ -733,8 +733,8 @@ export default function Communities() {
   const handleViewCommunity = useCallback((communityId: string) => {
     navigate(`/community/${communityId}`);
   }, [navigate]);
-  const handleJoinCommunity = useCallback(async (communityId: string) => {
-    console.log('🔵 handleJoinCommunity called', { communityId, hasUser: !!user });
+  const handleJoinLeave = useCallback(async (communityId: string, isCurrentlyMember: boolean) => {
+    console.log('🔵 handleJoinLeave called', { communityId, isCurrentlyMember, hasUser: !!user });
     
     // Check if user is authenticated
     if (!user) {
@@ -746,29 +746,56 @@ export default function Communities() {
     }
     
     try {
-      // Use centralized membership service (optimized - single table operation)
-      const success = await joinCommunity(communityId, user, {
-        refreshData: async () => {
-          // Update local membership state
-          setUserMemberships(prev => new Set(prev).add(communityId));
-        },
-        onSuccess: () => {
-          console.log('✅ Successfully joined community');
-          toast.success('Successfully joined community!');
-          // Membership state is already updated via refreshData callback
-        },
-        onError: (error) => {
-          console.error('❌ Error joining community:', error);
-          toast.error('Failed to join community. Please try again.');
-        },
-      });
-      
-      console.log('🔵 Join result:', success);
+      if (isCurrentlyMember) {
+        // Leave community
+        const success = await leaveCommunity(communityId, user, {
+          refreshData: async () => {
+            // Update local membership state
+            setUserMemberships(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(communityId);
+              return newSet;
+            });
+          },
+          onSuccess: () => {
+            console.log('✅ Successfully left community');
+            // Toast is handled by the service
+          },
+          onError: (error) => {
+            console.error('❌ Error leaving community:', error);
+            toast.error('Failed to leave community. Please try again.');
+          },
+        });
+        console.log('🔵 Leave result:', success);
+      } else {
+        // Join community
+        const success = await joinCommunity(communityId, user, {
+          refreshData: async () => {
+            // Update local membership state
+            setUserMemberships(prev => new Set(prev).add(communityId));
+          },
+          onSuccess: () => {
+            console.log('✅ Successfully joined community');
+            // Toast is handled by the service
+          },
+          onError: (error) => {
+            console.error('❌ Error joining community:', error);
+            toast.error('Failed to join community. Please try again.');
+          },
+        });
+        console.log('🔵 Join result:', success);
+      }
     } catch (error) {
-      console.error('❌ Exception in handleJoinCommunity:', error);
-      toast.error('Failed to join community. Please try again.');
+      console.error('❌ Exception in handleJoinLeave:', error);
+      toast.error(`Failed to ${isCurrentlyMember ? 'leave' : 'join'} community. Please try again.`);
     }
   }, [user, navigate]);
+
+  // Keep handleJoinCommunity for backward compatibility (sign-in retry flow)
+  const handleJoinCommunity = useCallback(async (communityId: string) => {
+    const isMember = userMemberships.has(communityId);
+    await handleJoinLeave(communityId, isMember);
+  }, [userMemberships, handleJoinLeave]);
   
   // Retry joining after successful sign-in
   const handleSignInSuccess = useCallback(async () => {
@@ -1138,7 +1165,7 @@ export default function Communities() {
                         isMember={userMemberships.has(community.id)}
                         onJoin={() => {
                           console.log('🔵 Communities page: onJoin called for community', community.id);
-                          handleJoinCommunity(community.id);
+                          handleJoinLeave(community.id, userMemberships.has(community.id));
                         }}
                         onViewDetails={() => handleViewCommunity(community.id)}
                       />
@@ -1234,7 +1261,7 @@ export default function Communities() {
                       isMember={userMemberships.has(community.id)}
                       onJoin={() => {
                         console.log('🔵 Communities page: onJoin called for community', community.id);
-                        handleJoinCommunity(community.id);
+                        handleJoinLeave(community.id, userMemberships.has(community.id));
                       }}
                       onViewDetails={() => handleViewCommunity(community.id)}
                     />
