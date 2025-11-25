@@ -204,3 +204,4 @@ supabase
 ## Conclusion
 
 **The Communities Marketplace uses `memberships` table** as the primary source for querying and displaying community members, joined with `users_local` to get user details. The `community_members` table exists but is not used for the marketplace member list display.
+

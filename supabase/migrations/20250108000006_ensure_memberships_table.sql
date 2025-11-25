@@ -65,3 +65,4 @@ GRANT INSERT, DELETE ON memberships TO authenticated;
 
 COMMENT ON TABLE memberships IS 'Table storing community memberships with user_id referencing auth.users(id) and community_id referencing communities(id)';
 
+

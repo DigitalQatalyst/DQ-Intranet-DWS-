@@ -190,3 +190,4 @@ LIMIT 5;
 4. **Check RLS policies** and disable if needed for development
 5. **Test the queries** manually in Supabase SQL Editor
 
+

@@ -138,3 +138,4 @@ After running the migration, refresh your app. You should see:
 
 If it's still loading, check the browser console for the specific error message.
 
+

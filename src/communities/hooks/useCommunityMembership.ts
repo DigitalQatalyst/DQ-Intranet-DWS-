@@ -26,6 +26,13 @@ export function useCommunityMembership(communityId: string | undefined) {
       return;
     }
 
+    // If user is not authenticated, they cannot be a member
+    if (!userId) {
+      setIsMember(false);
+      setLoading(false);
+      return;
+    }
+
     // Check membership using memberships table only (optimized - single query)
     const membershipStatus = await checkIsMember(userId, communityId);
     setIsMember(membershipStatus);

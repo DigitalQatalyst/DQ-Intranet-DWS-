@@ -76,3 +76,4 @@ ALTER TABLE community_comments DISABLE ROW LEVEL SECURITY;
 ALTER TABLE community_reactions DISABLE ROW LEVEL SECURITY;
 
 
+

@@ -138,7 +138,9 @@ export const PostCardBase: React.FC<PostCardBaseProps> = ({
       <CardFooter className="px-4 py-3 border-t border-gray-100 bg-white">
         <div className="flex items-center gap-2 w-full flex-wrap">
           <Button variant="ghost" size="sm" className={`h-auto py-1.5 px-3 text-xs gap-1.5 transition-all duration-200 rounded-md ${hasReactedHelpful ? 'bg-primary text-white hover:bg-primary/90' : 'hover:bg-gray-100 text-gray-600'}`} onClick={e => {
+          console.log('🔵 PostCardBase Helpful button clicked');
           e.stopPropagation();
+          e.preventDefault();
           onReaction('helpful');
         }}>
             <ThumbsUp className={`h-3.5 w-3.5 ${hasReactedHelpful ? 'fill-current' : ''}`} />
@@ -146,7 +148,9 @@ export const PostCardBase: React.FC<PostCardBaseProps> = ({
             <span>Helpful</span>
           </Button>
           <Button variant="ghost" size="sm" className={`h-auto py-1.5 px-3 text-xs gap-1.5 transition-all duration-200 rounded-md ${hasReactedInsightful ? 'bg-teal-500 text-white hover:bg-teal-600' : 'hover:bg-gray-100 text-gray-600'}`} onClick={e => {
+          console.log('🔵 PostCardBase Insightful button clicked');
           e.stopPropagation();
+          e.preventDefault();
           onReaction('insightful');
         }}>
             <Lightbulb className={`h-3.5 w-3.5 ${hasReactedInsightful ? 'fill-current' : ''}`} />
@@ -154,7 +158,9 @@ export const PostCardBase: React.FC<PostCardBaseProps> = ({
             <span>Insightful</span>
           </Button>
           <Button variant="ghost" size="sm" className="h-auto py-1.5 px-3 text-xs gap-1.5 hover:bg-gray-100 text-gray-600 transition-all duration-200 rounded-md" onClick={e => {
+          console.log('🔵 PostCardBase Comments button clicked');
           e.stopPropagation();
+          e.preventDefault();
           navigate(`/post/${post.id}`);
         }}>
             <MessageSquare className="h-3.5 w-3.5" />

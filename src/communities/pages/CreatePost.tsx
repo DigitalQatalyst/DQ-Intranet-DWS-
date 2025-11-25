@@ -34,7 +34,7 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { MainLayout } from "../components/layout/MainLayout";
-type PostType = "text" | "media" | "poll" | "event";
+type PostType = "text" | "media" | "poll";
 interface Community {
   id: string;
   name: string;
@@ -68,13 +68,6 @@ export default function CreatePost() {
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
   const [pollDuration, setPollDuration] = useState("7");
-
-  // Event specific
-  const [eventDate, setEventDate] = useState("");
-  const [eventTime, setEventTime] = useState("");
-  const [eventLocation, setEventLocation] = useState("");
-  const [eventBanner, setEventBanner] = useState<UploadedFile[]>([]);
-  const [enableRSVP, setEnableRSVP] = useState(true);
   const [showPreview, setShowPreview] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -161,11 +154,6 @@ export default function CreatePost() {
       pollQuestion,
       pollOptions,
       pollDuration,
-      eventDate,
-      eventTime,
-      eventLocation,
-      eventBanner,
-      enableRSVP,
       timestamp: new Date().toISOString(),
     };
     localStorage.setItem("post-draft", JSON.stringify(draftData));
@@ -181,11 +169,6 @@ export default function CreatePost() {
     pollQuestion,
     pollOptions,
     pollDuration,
-    eventDate,
-    eventTime,
-    eventLocation,
-    eventBanner,
-    enableRSVP,
   ]);
   const loadFromLocalStorage = () => {
     const draft = localStorage.getItem("post-draft");
@@ -201,11 +184,6 @@ export default function CreatePost() {
       setPollQuestion(data.pollQuestion || "");
       setPollOptions(data.pollOptions || ["", ""]);
       setPollDuration(data.pollDuration || "7");
-      setEventDate(data.eventDate || "");
-      setEventTime(data.eventTime || "");
-      setEventLocation(data.eventLocation || "");
-      setEventBanner(data.eventBanner || []);
-      setEnableRSVP(data.enableRSVP !== undefined ? data.enableRSVP : true);
     }
   };
   const clearDraft = () => {
@@ -228,16 +206,6 @@ export default function CreatePost() {
       setPollQuestion(data.title || "");
       setPollDuration(metadata.poll_duration_days?.toString() || "7");
 
-      // Event fields
-      if (data.event_date) {
-        const eventDateTime = new Date(data.event_date);
-        setEventDate(format(eventDateTime, "yyyy-MM-dd"));
-        setEventTime(format(eventDateTime, "HH:mm"));
-      }
-      setEventLocation(data.event_location || "");
-      setEnableRSVP(
-        metadata.enable_rsvp !== undefined ? metadata.enable_rsvp : true
-      );
     } else {
       toast.error("Failed to load post");
       navigate("/feed");
@@ -288,17 +256,6 @@ export default function CreatePost() {
         errors.pollOptions = "At least 2 poll options are required";
       }
     }
-    if (postType === "event") {
-      if (!eventDate) {
-        errors.eventDate = "Event date is required";
-      }
-      if (!eventTime) {
-        errors.eventTime = "Event time is required";
-      }
-      if (!content.trim()) {
-        errors.content = "Event description is required";
-      }
-    }
     setValidationErrors(errors);
     if (Object.keys(errors).length > 0) {
       toast.error("Please fill in all required fields");
@@ -333,9 +290,6 @@ export default function CreatePost() {
 
     // Build metadata based on post type
     const metadata: any = {};
-    if (postType === "event") {
-      metadata.enable_rsvp = enableRSVP;
-    }
     if (postType === "poll") {
       metadata.poll_duration_days = parseInt(pollDuration);
       metadata.poll_question = pollQuestion;
@@ -353,14 +307,6 @@ export default function CreatePost() {
       metadata: Object.keys(metadata).length > 0 ? metadata : null,
     };
 
-    // Event-specific fields (use dedicated columns and combine date+time)
-    if (postType === "event") {
-      if (eventDate && eventTime) {
-        const dateTimeString = `${eventDate}T${eventTime}:00`;
-        postData.event_date = dateTimeString;
-      }
-      if (eventLocation) postData.event_location = eventLocation;
-    }
     let query;
     if (isEditMode && id) {
       // First, verify the post exists and the user has permission to edit it
@@ -406,9 +352,9 @@ export default function CreatePost() {
         user_id: user.id,
         asset_type: file.type.startsWith('image/') ? 'image' : 
                    file.type.startsWith('video/') ? 'video' : 'document',
-        storage_path: file.url,
+        storage_path: file.id, // Use file.id which contains the storage path
         file_name: file.caption || 'uploaded-file',
-        url: file.url,
+        url: file.url, // Public URL for display
         mime_type: file.type,
         file_size: file.size,
         caption: file.caption || null,
@@ -518,7 +464,6 @@ export default function CreatePost() {
                         <SelectItem value="text">💬 Discussion</SelectItem>
                         <SelectItem value="media">🎨 Media</SelectItem>
                         <SelectItem value="poll">📊 Poll</SelectItem>
-                        <SelectItem value="event">📅 Event</SelectItem>
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-gray-500 mt-1">
@@ -528,7 +473,6 @@ export default function CreatePost() {
                         "Share images, videos, or visual content"}
                       {postType === "poll" &&
                         "Ask the community for their opinion"}
-                      {postType === "event" && "Create a community event"}
                     </p>
                   </div>
 
@@ -888,100 +832,6 @@ export default function CreatePost() {
                 </div>
               )}
 
-              {postType === "event" && (
-                <div className="bg-white border border-gray-200 rounded-md shadow-sm p-4 space-y-4 animate-in fade-in duration-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Event Details
-                  </h2>
-
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label
-                          htmlFor="eventDate"
-                          className="text-sm font-medium text-gray-700 mb-1 block flex items-center gap-2"
-                        >
-                          <Calendar className="h-4 w-4" />
-                          Date <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="eventDate"
-                          type="date"
-                          value={eventDate}
-                          onChange={(e) => {
-                            setEventDate(e.target.value);
-                            if (validationErrors.eventDate) {
-                              const newErrors = {
-                                ...validationErrors,
-                              };
-                              delete newErrors.eventDate;
-                              setValidationErrors(newErrors);
-                            }
-                          }}
-                          className={
-                            validationErrors.eventDate ? "border-red-500" : ""
-                          }
-                        />
-                        {validationErrors.eventDate && (
-                          <p className="text-xs text-red-600 mt-1">
-                            {validationErrors.eventDate}
-                          </p>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label
-                          htmlFor="eventTime"
-                          className="text-sm font-medium text-gray-700 mb-1 block flex items-center gap-2"
-                        >
-                          <Clock className="h-4 w-4" />
-                          Time <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="eventTime"
-                          type="time"
-                          value={eventTime}
-                          onChange={(e) => {
-                            setEventTime(e.target.value);
-                            if (validationErrors.eventTime) {
-                              const newErrors = {
-                                ...validationErrors,
-                              };
-                              delete newErrors.eventTime;
-                              setValidationErrors(newErrors);
-                            }
-                          }}
-                          className={
-                            validationErrors.eventTime ? "border-red-500" : ""
-                          }
-                        />
-                        {validationErrors.eventTime && (
-                          <p className="text-xs text-red-600 mt-1">
-                            {validationErrors.eventTime}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label
-                        htmlFor="eventLocation"
-                        className="text-sm font-medium text-gray-700 mb-1 block flex items-center gap-2"
-                      >
-                        <MapPin className="h-4 w-4" />
-                        Location (Optional)
-                      </Label>
-                      <Input
-                        id="eventLocation"
-                        value={eventLocation}
-                        onChange={(e) => setEventLocation(e.target.value)}
-                        placeholder="Virtual or physical location"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* RIGHT COLUMN - Preview & Tips */}
@@ -1079,39 +929,19 @@ export default function CreatePost() {
                       </div>
                     )}
 
-                    {postType === "event" && eventDate && (
-                      <div className="bg-white border border-gray-200 rounded-lg p-3 text-sm mt-4">
-                        <p className="font-medium text-gray-900">
-                          {format(
-                            new Date(eventDate),
-                            "EEEE, MMMM d, yyyy • h:mm a"
-                          )}
-                        </p>
-                        {eventLocation && (
-                          <p className="text-gray-700 mt-1 flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {eventLocation}
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
 
               {/* Quick Tips Card */}
               <div
-                className="rounded-md p-4"
-                style={{
-                  backgroundColor: "#E6FFFB",
-                  borderLeft: "3px solid #00E5D1",
-                }}
+                className="rounded-md p-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white"
               >
-                <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
                   <Lightbulb className="h-4 w-4" />
                   Quick Tips
                 </h3>
-                <ul className="space-y-1.5 text-xs text-gray-700">
+                <ul className="space-y-1.5 text-xs text-white/90">
                   <li>• Use a clear, descriptive title</li>
                   <li>• Add relevant tags to help others find your post</li>
                   <li>• Format your content using the editor toolbar</li>

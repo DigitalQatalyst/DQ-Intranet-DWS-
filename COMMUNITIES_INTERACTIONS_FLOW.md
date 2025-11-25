@@ -360,3 +360,4 @@ To verify all interactions work:
 
 **When you click any button (Post, Comment, React), the data IS immediately saved to the respective database tables.**
 
+

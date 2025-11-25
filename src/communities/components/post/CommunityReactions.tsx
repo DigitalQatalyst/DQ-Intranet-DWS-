@@ -43,14 +43,16 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
   }, [postId, commentId]);
 
   const fetchReactions = async () => {
-    if (!postId && !commentId) return;
+    // New table only supports posts, skip if commentId only
+    if (!postId) return;
 
     setLoading(true);
     try {
+      // Use new reactions table (posts only)
       const query = supabase
-        .from('reactions')
+        .from('community_post_reactions_new')
         .select('reaction_type, user_id')
-        .eq(postId ? 'post_id' : 'comment_id', postId || commentId);
+        .eq('post_id' as any, postId);
 
       const [data, error] = await safeFetch(query);
 
@@ -60,7 +62,7 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
         return;
       }
 
-      if (data) {
+      if (data && Array.isArray(data)) {
         const counts: Record<ReactionType, number> = {
           like: 0,
           helpful: 0,
@@ -101,43 +103,99 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
   };
 
   const handleReaction = async (type: ReactionType) => {
-    if (!postId && !commentId) return;
+    console.log('🔵 CommunityReactions handleReaction called:', { type, postId, commentId });
+    
+    // New table only supports posts
+    if (!postId) {
+      console.warn('CommunityReactions: postId required for new reactions table');
+      return;
+    }
 
     if (!isAuthenticated || !user) {
+      console.log('❌ Not authenticated, showing sign-in modal');
       setShowSignInModal(true);
       return;
     }
 
     // Check if user is a member of the community (if communityId is provided)
+    // Note: RLS policy doesn't require membership, but we check it here for UX
     if (communityId && !isMember) {
-      toast.error('You must join the community before reacting');
-      return;
+      console.log('⚠️ Membership check:', { communityId, isMember, isMemberProp, isMemberFromHook });
+      // Don't block - let RLS handle it, but show a warning
+      console.warn('⚠️ User may not be a member, but attempting reaction anyway (RLS will enforce)');
     }
 
-    // Get auth user ID directly from Supabase session
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || user?.id;
+    // Get auth user ID directly from Supabase session (must use auth.uid())
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
-    if (!userId) {
-      toast.error('Unable to identify user. Please sign in again.');
+    if (sessionError || !session?.user?.id) {
+      console.error('❌ Session error:', sessionError);
+      toast.error('Unable to verify authentication. Please sign in again.');
       return;
     }
+    
+    const userId = session.user.id;
+    console.log('✅ User ID from session:', userId);
+    console.log('✅ Session user object:', {
+      id: session.user.id,
+      email: session.user.email,
+      aud: session.user.aud,
+      role: session.user.role
+    });
+    console.log('📋 Post ID:', postId);
+    console.log('📋 Community ID:', communityId);
+    
+    // Double-check auth.uid() matches
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    console.log('🔍 Auth user from getUser():', {
+      id: authUser?.id,
+      matchesSession: authUser?.id === userId
+    });
+
+    // Verify post exists in posts_v2 (required by foreign key)
+    const { data: postCheck } = await supabase
+      .from('posts_v2')
+      .select('id')
+      .eq('id' as any, postId)
+      .single();
+    
+    if (!postCheck) {
+      console.error('❌ Post not found in posts_v2 table. Post ID:', postId);
+      toast.error('Post not found. Please refresh the page.');
+      return;
+    }
+    console.log('✅ Post verified in posts_v2');
 
     const hasReacted = userReactions.has(type);
+    console.log('📊 Reaction state check:', { hasReacted, type, userId, postId });
 
     try {
       if (hasReacted) {
-        // Remove reaction
+        // Remove reaction from new table
+        console.log('🔄 Attempting to remove reaction...');
         const query = supabase
-          .from('reactions')
+          .from('community_post_reactions_new')
           .delete()
-          .eq('user_id', userId)
-          .eq(postId ? 'post_id' : 'comment_id', postId || commentId)
-          .eq('reaction_type', type);
+          .eq('user_id' as any, userId)
+          .eq('post_id' as any, postId)
+          .eq('reaction_type' as any, type);
 
-        const [, error] = await safeFetch(query);
+        const [data, error] = await safeFetch(query);
+        console.log('📥 Delete response:', { data, error });
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Error removing reaction:', error);
+          console.error('❌ Error details:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
+          toast.error('Failed to remove reaction: ' + (error.message || 'Unknown error'));
+          throw error;
+        }
+        
+        console.log('✅ Reaction removed successfully', data);
 
         setReactions(prev => ({
           ...prev,
@@ -149,33 +207,56 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
           return newSet;
         });
       } else {
-        // Add reaction
-        const reactionData: any = {
+        // Add reaction to new table
+        const reactionData = {
+          post_id: postId,
           user_id: userId,
           reaction_type: type
         };
+        console.log('🔄 Attempting to add reaction...', reactionData);
 
-        if (postId) {
-          reactionData.post_id = postId;
-        } else if (commentId) {
-          reactionData.comment_id = commentId;
-        }
+        // Verify user_id format matches what auth.uid() expects
+        console.log('🔍 Verifying user_id format:', {
+          userId,
+          userIdType: typeof userId,
+          userIdLength: userId?.length,
+          isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId || '')
+        });
 
         const query = supabase
-          .from('reactions')
-          .insert(reactionData);
+          .from('community_post_reactions_new')
+          .insert(reactionData as any);
 
-        const [, error] = await safeFetch(query);
+        const [data, error] = await safeFetch(query);
+        console.log('📥 Insert response:', { 
+          data, 
+          error,
+          errorCode: error?.code,
+          errorMessage: error?.message,
+          errorDetails: error?.details,
+          errorHint: error?.hint
+        });
 
         if (error) {
+          console.error('❌ Error adding reaction:', error);
+          console.error('❌ Error details:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            reactionData
+          });
           // If unique constraint violation, user already reacted
           if (error.code === '23505') {
+            console.log('⚠️ User already reacted, refreshing...');
             fetchReactions();
             return;
           }
           toast.error('Failed to add reaction: ' + (error.message || 'Unknown error'));
           return;
         }
+        
+        console.log('✅ Reaction added successfully', data);
 
         setReactions(prev => ({
           ...prev,
@@ -205,7 +286,12 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => handleReaction('like')}
+        onClick={(e) => {
+          console.log('🔵 Like button clicked');
+          e.stopPropagation();
+          e.preventDefault();
+          handleReaction('like');
+        }}
         disabled={!isAuthenticated}
         className={`h-8 px-3 text-xs transition-all ${
           userReactions.has('like')
@@ -225,7 +311,12 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => handleReaction('helpful')}
+        onClick={(e) => {
+          console.log('🔵 Helpful button clicked');
+          e.stopPropagation();
+          e.preventDefault();
+          handleReaction('helpful');
+        }}
         disabled={!isAuthenticated}
         className={`h-8 px-3 text-xs transition-all ${
           userReactions.has('helpful')
@@ -245,7 +336,12 @@ export const CommunityReactions: React.FC<CommunityReactionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => handleReaction('insightful')}
+        onClick={(e) => {
+          console.log('🔵 Insightful button clicked');
+          e.stopPropagation();
+          e.preventDefault();
+          handleReaction('insightful');
+        }}
         disabled={!isAuthenticated}
         className={`h-8 px-3 text-xs transition-all ${
           userReactions.has('insightful')

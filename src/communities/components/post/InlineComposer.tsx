@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { toast } from 'sonner';
-import { Send, Maximize2, Image, BarChart3, Calendar, Clock } from 'lucide-react';
+import { Send, Maximize2, Image, BarChart3, Clock } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
 import { RichTextEditor } from './RichTextEditor';
 import { InlineMediaUpload } from './InlineMediaUpload';
@@ -22,7 +22,7 @@ interface InlineComposerProps {
   isMember?: boolean;
   onPostCreated?: () => void;
 }
-type PostType = 'text' | 'media' | 'poll' | 'event';
+type PostType = 'text' | 'media' | 'poll';
 interface Community {
   id: string;
   name: string;
@@ -63,10 +63,6 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState(['', '']);
 
-  // Event post state
-  const [eventDate, setEventDate] = useState('');
-  const [eventTime, setEventTime] = useState('');
-  const [eventLocation, setEventLocation] = useState('');
 
   // Link preview state
   const [detectedLink, setDetectedLink] = useState<string | null>(null);
@@ -90,16 +86,13 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
           contentHtml,
           pollQuestion,
           pollOptions,
-          eventDate,
-          eventTime,
-          eventLocation,
           timestamp: Date.now()
         };
         localStorage.setItem(draftKey, JSON.stringify(draft));
       }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [title, content, contentHtml, pollQuestion, pollOptions, eventDate, eventTime, eventLocation, postType, communityId]);
+  }, [title, content, contentHtml, pollQuestion, pollOptions, postType, communityId]);
 
   // Load draft on mount
   useEffect(() => {
@@ -115,9 +108,6 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
           setContentHtml(draft.contentHtml || '');
           setPollQuestion(draft.pollQuestion || '');
           setPollOptions(draft.pollOptions || ['', '']);
-          setEventDate(draft.eventDate || '');
-          setEventTime(draft.eventTime || '');
-          setEventLocation(draft.eventLocation || '');
         }
       } catch (e) {
         console.error('Failed to load draft:', e);
@@ -209,10 +199,7 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
       toast.error('Title is required');
       return;
     }
-    if (postType === 'text' && !content.trim()) {
-      toast.error('Content is required');
-      return;
-    }
+    // Content is optional for text posts - will default to title if empty
     if (postType === 'media' && !mediaFile) {
       toast.error('Please upload a file');
       return;
@@ -229,22 +216,14 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
         return;
       }
     }
-    if (postType === 'event') {
-      if (!eventDate) {
-        toast.error('Event date is required');
-        return;
-      }
-      const eventDateTime = new Date(eventDate);
-      if (eventDateTime < new Date()) {
-        toast.error('Event date cannot be in the past');
-        return;
-      }
-    }
     setSubmitting(true);
     try {
       // Prepare simplified post data for posts_v2
-      // For text posts, use content; for others, use title as content
-      const postContent = postType === 'text' ? content.trim() : title.trim();
+      // For text posts, use content if available, otherwise use title
+      // This allows users to post with just a title
+      const postContent = postType === 'text' 
+        ? (content.trim() || title.trim()) 
+        : title.trim();
       
       const postDataV2 = {
         community_id: targetCommunityId,
@@ -297,9 +276,6 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
     setContentHtml('');
     setPollQuestion('');
     setPollOptions(['', '']);
-    setEventDate('');
-    setEventTime('');
-    setEventLocation('');
     setMediaFile(null);
     setDetectedLink(null);
     if (!communityId) setSelectedCommunityId('');
@@ -314,9 +290,6 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
       communityId: targetCommunityId,
       pollQuestion,
       pollOptions,
-      eventDate,
-      eventTime,
-      eventLocation,
       timestamp: Date.now()
     };
     localStorage.setItem('post-draft', JSON.stringify(draft));
@@ -337,11 +310,6 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
       setPollQuestion('');
       setPollOptions(['', '']);
     }
-    if (newType !== 'event') {
-      setEventDate('');
-      setEventTime('');
-      setEventLocation('');
-    }
   };
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -351,20 +319,21 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
   }, [isAuthenticated, user, isMember, communityId, selectedCommunityId, title, content, postType]);
   const isFormValid = () => {
     const targetCommunityId = communityId || selectedCommunityId;
+    // Require community and title for all post types
     if (!targetCommunityId || !title.trim()) {
       return false;
     }
     switch (postType) {
       case 'text':
-        return content.trim().length > 0;
+        // Allow text posts with just a title (content is optional for quick posts)
+        // Content will default to title if empty during submission
+        return true;
       case 'media':
         return mediaFile !== null;
       case 'poll':
         const pollQuestionValid = title.trim().length > 0 || pollQuestion.trim().length > 0;
         const pollOptionsValid = pollOptions.filter(opt => opt.trim()).length >= 2;
         return pollQuestionValid && pollOptionsValid;
-      case 'event':
-        return eventDate !== '';
       default:
         return false;
     }
@@ -375,8 +344,6 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
         return 'Post Media';
       case 'poll':
         return 'Post Poll';
-      case 'event':
-        return 'Post Event';
       default:
         return 'Post';
     }
@@ -428,7 +395,7 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
       >
         {/* Post Type Selector */}
         <Tabs value={postType} onValueChange={value => handleTypeChange(value as PostType)}>
-          <TabsList className="grid grid-cols-4 w-full">
+          <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="text" className="flex items-center gap-1.5">
               <span className="text-sm">Text</span>
             </TabsTrigger>
@@ -439,10 +406,6 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
             <TabsTrigger value="poll" className="flex items-center gap-1.5">
               <BarChart3 className="h-3.5 w-3.5" />
               <span className="text-sm">Poll</span>
-            </TabsTrigger>
-            <TabsTrigger value="event" className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" />
-              <span className="text-sm">Event</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -467,9 +430,9 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
         {/* Title Input - All Types */}
         <div>
           <Label htmlFor="title" className="text-sm font-medium text-gray-700 mb-1 block">
-            {postType === 'poll' ? 'Poll Question' : postType === 'event' ? 'Event Title' : 'Title'} <span className="text-red-500">*</span>
+            {postType === 'poll' ? 'Poll Question' : 'Title'} <span className="text-red-500">*</span>
           </Label>
-          <Input id="title" placeholder={postType === 'poll' ? 'Ask a question...' : postType === 'event' ? 'Event name...' : 'Post title...'} value={title} onChange={e => setTitle(e.target.value)} maxLength={150} className="text-base" />
+          <Input id="title" placeholder={postType === 'poll' ? 'Ask a question...' : 'Post title...'} value={title} onChange={e => setTitle(e.target.value)} maxLength={150} className="text-base" />
         </div>
 
         {/* TYPE-SPECIFIC FIELDS */}
@@ -517,34 +480,6 @@ export const InlineComposer: React.FC<InlineComposerProps> = ({
             </div>
           </>}
 
-        {/* EVENT POST */}
-        {postType === 'event' && <>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="event-date" className="text-sm font-medium text-gray-700 mb-1 block">
-                  Date <span className="text-red-500">*</span>
-                </Label>
-                <Input id="event-date" type="date" value={eventDate} onChange={e => setEventDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
-              </div>
-              <div>
-                <Label htmlFor="event-time" className="text-sm font-medium text-gray-700 mb-1 block">
-                  Time
-                </Label>
-                <Input id="event-time" type="time" value={eventTime} onChange={e => setEventTime(e.target.value)} />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="event-location" className="text-sm font-medium text-gray-700 mb-1 block">
-                Location
-              </Label>
-              <Input id="event-location" placeholder="Where will it happen?" value={eventLocation} onChange={e => setEventLocation(e.target.value)} maxLength={200} />
-            </div>
-
-            <p className="text-xs text-gray-500">
-              Use full editor for description, banner image, and RSVP options
-            </p>
-          </>}
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">

@@ -15,7 +15,12 @@ import { getCurrentUserId } from './userUtils';
  * @param communityId - Community ID to check
  * @returns Promise<boolean> - True if user is a member
  */
-export async function checkIsMember(userId: string, communityId: string): Promise<boolean> {
+export async function checkIsMember(userId: string | null, communityId: string): Promise<boolean> {
+  // If user is not authenticated, they cannot be a member
+  if (!userId) {
+    return false;
+  }
+
   const query = supabase
     .from('memberships')
     .select('id')

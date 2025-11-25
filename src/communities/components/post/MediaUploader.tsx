@@ -81,11 +81,22 @@ export function MediaUploader({
       return true;
     });
     if (validFiles.length === 0) return;
+    
     setUploading(true);
-    const uploadPromises = validFiles.map(file => uploadFile(file));
-    const uploadedFiles = (await Promise.all(uploadPromises)).filter(Boolean) as UploadedFile[];
-    onFilesChange([...files, ...uploadedFiles]);
-    setUploading(false);
+    try {
+      const uploadPromises = validFiles.map(file => uploadFile(file));
+      const uploadedFiles = (await Promise.all(uploadPromises)).filter(Boolean) as UploadedFile[];
+      
+      if (uploadedFiles.length > 0) {
+        onFilesChange([...files, ...uploadedFiles]);
+        toast.success(`Successfully uploaded ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''}`);
+      }
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload files. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();

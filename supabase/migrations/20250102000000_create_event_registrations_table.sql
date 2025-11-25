@@ -68,3 +68,5 @@ CREATE POLICY "Public can view registration counts"
     ON event_registrations
     FOR SELECT
     USING (true);
+
+

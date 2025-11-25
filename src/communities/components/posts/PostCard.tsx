@@ -5,6 +5,7 @@ import { Heart, MessageSquare, Share2, Calendar, MapPin } from 'lucide-react';
 import { CommunityReactions } from '@/communities/components/post/CommunityReactions';
 import { CommunityComments } from '@/communities/components/post/CommunityComments';
 import { useAuth } from '@/communities/contexts/AuthProvider';
+import { toast } from 'sonner';
 
 interface Post {
   id: string;
@@ -47,6 +48,36 @@ export function PostCard({ post, onActionComplete, isMember = false }: PostCardP
       text: 'bg-gray-100 text-gray-800'
     };
     return badges[type as keyof typeof badges] || badges.text;
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const url = `${window.location.origin}/post/${post.id}`;
+      if (navigator.share) {
+        await navigator.share({
+          title: post.title,
+          text: post.content.substring(0, 200),
+          url: url
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success('Post link copied to clipboard');
+      }
+    } catch (error: any) {
+      // User cancelled share or error occurred
+      if (error.name !== 'AbortError') {
+        console.error('Error sharing:', error);
+        // Fallback to clipboard
+        try {
+          const url = `${window.location.origin}/post/${post.id}`;
+          await navigator.clipboard.writeText(url);
+          toast.success('Post link copied to clipboard');
+        } catch (clipboardError) {
+          toast.error('Failed to share post');
+        }
+      }
+    }
   };
 
   return (
@@ -128,13 +159,24 @@ export function PostCard({ post, onActionComplete, isMember = false }: PostCardP
               onReactionChange={onActionComplete}
             />
             <button
-              onClick={() => setShowComments(!showComments)}
+              onClick={(e) => {
+                console.log('🔵 PostCard Comments button clicked');
+                e.stopPropagation();
+                e.preventDefault();
+                setShowComments(!showComments);
+              }}
               className="flex items-center space-x-2 text-gray-500 hover:text-dq-navy transition-colors"
             >
               <MessageSquare className="h-5 w-5" />
               <span className="text-sm">{post.comment_count || 0}</span>
             </button>
-            <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors">
+            <button 
+              onClick={(e) => {
+                console.log('🔵 PostCard Share button clicked');
+                handleShare(e);
+              }}
+              className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors"
+            >
               <Share2 className="h-5 w-5" />
               <span className="text-sm">Share</span>
             </button>

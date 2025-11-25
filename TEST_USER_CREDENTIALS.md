@@ -50,3 +50,4 @@ After running the script, you can:
 - The script uses the Supabase Admin API (requires service role key)
 - The user is automatically email-confirmed, so no email verification is needed
 
+

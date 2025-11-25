@@ -42,38 +42,62 @@ export function AddCommentForm({
     }
     
     setSubmitting(true);
-    // Get auth user ID directly from Supabase session
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || user?.id;
     
-    if (!userId) {
-      toast.error('Unable to identify user. Please sign in again.');
-      setSubmitting(false);
-      return;
-    }
-    
-    const query = supabase.from('comments').insert({
-      post_id: postId,
-      content: content.trim(),
-      created_by: userId,
-      status: 'active'
-    });
-    const [, error] = await safeFetch(query);
-    if (error) {
-      toast.error('Failed to add comment');
-    } else {
-      toast.success('Comment added!');
-      setContent('');
-      onCommentAdded();
-      // Scroll to bottom after a short delay to allow new comment to render
-      setTimeout(() => {
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: 'smooth'
+    try {
+      // Get auth user ID directly from Supabase session (must use auth.uid())
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user?.id) {
+        console.error('❌ Session error:', sessionError);
+        toast.error('Unable to verify authentication. Please sign in again.');
+        setSubmitting(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      console.log('✅ User ID from session:', userId);
+      console.log('✅ Submitting comment:', { postId, userId, contentLength: content.trim().length });
+      
+      // Insert into new comments table using user_id (must match auth.uid())
+      const commentData = {
+        post_id: postId,
+        content: content.trim(),
+        user_id: userId,
+        status: 'active'
+      };
+      
+      const query = supabase.from('community_post_comments_new').insert(commentData as any);
+      const [, error] = await safeFetch(query);
+      
+      if (error) {
+        console.error('❌ Error adding comment:', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          commentData
         });
-      }, 100);
+        toast.error('Failed to add comment: ' + (error.message || 'Unknown error'));
+      } else {
+        console.log('✅ Comment added successfully');
+        toast.success('Comment added!');
+        setContent('');
+        onCommentAdded();
+        // Scroll to bottom after a short delay to allow new comment to render
+        setTimeout(() => {
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+    } catch (err) {
+      console.error('❌ Unexpected error in handleSubmit:', err);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
   
   if (!isAuthenticated) {
@@ -122,7 +146,13 @@ export function AddCommentForm({
         <Textarea id="comment" value={content} onChange={e => setContent(e.target.value)} placeholder="Share your thoughts..." className="w-full min-h-[120px]" disabled={submitting} required />
       </div>
       <div className="flex justify-end">
-        <Button type="submit" disabled={submitting || !content.trim()}>
+        <Button 
+          type="submit" 
+          disabled={submitting || !content.trim()}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           {submitting ? <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Posting...

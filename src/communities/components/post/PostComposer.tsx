@@ -229,18 +229,28 @@ export function PostComposer({
         if (rsvpLimit) metadata.rsvp_limit = parseInt(rsvpLimit);
       }
 
-      // Insert the post
-      const query = supabase.from('community_posts').insert({
-        title,
-        content,
-        content_html: contentHtml,
-        post_type: postType,
-        metadata,
-        tags,
+      // Get auth user ID directly from Supabase session (must match auth.uid() for RLS)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user?.id) {
+        console.error('❌ Session error:', sessionError);
+        toast.error('Unable to verify authentication. Please sign in again.');
+        setSubmitting(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      
+      // Insert the post into posts_v2 (simplified schema)
+      // Note: posts_v2 only has: id, community_id, user_id, title, content, created_at, updated_at
+      // Additional metadata (post_type, tags, etc.) can be stored in content or handled separately
+      const postContent = contentHtml || content; // Use HTML if available, otherwise plain text
+      
+      const query = supabase.from('posts_v2').insert({
+        title: title.trim(),
+        content: postContent.trim(),
         community_id: communityId,
-        user_id: user.id, // Set user_id (trigger will sync to created_by)
-        created_by: user.id, // Also set created_by explicitly for compatibility
-        status: 'active'
+        user_id: userId // Must match auth.uid() for RLS
       }).select().single();
       const [postData, postError] = await safeFetch(query);
       if (postError || !postData) {

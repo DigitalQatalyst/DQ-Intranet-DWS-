@@ -14,6 +14,7 @@ import { PlusCircle, Filter, X, HomeIcon, ChevronRightIcon } from 'lucide-react'
 import { CommunityCard } from "../components/Cards/CommunityCard";
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
 import { StickyActionButton } from "../components/Button/StickyActionButton";
+import { SignInModal } from "../components/auth/SignInModal";
 
 interface Community {
   id: string;
@@ -46,6 +47,8 @@ export default function Communities() {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [pendingJoinCommunityId, setPendingJoinCommunityId] = useState<string | null>(null);
   
   // Dynamic filter options from backend
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
@@ -133,58 +136,34 @@ export default function Communities() {
         .select('location_filter')
         .not('location_filter', 'is', null);
 
-      // Try to fetch from filter_options table first (dynamic approach)
+      // Try to fetch from filter_options table first (dynamic approach) - parallel fetch
       let departmentOptions: Array<{ id: string; name: string }> = [];
       let locationOptions: Array<{ id: string; name: string }> = [];
       
       try {
-        const { data: filterOptionsData, error: filterOptionsError } = await supabase
-          .rpc('get_filter_options', { p_filter_type: 'department', p_filter_category: 'communities' });
+        // Fetch both filter options in parallel
+        const [deptResult, locResult] = await Promise.all([
+          supabase.rpc('get_filter_options', { p_filter_type: 'department', p_filter_category: 'communities' }),
+          supabase.rpc('get_filter_options', { p_filter_type: 'location', p_filter_category: 'communities' })
+        ]);
         
-        console.log('Department filter RPC call result:', { 
-          hasData: !!filterOptionsData, 
-          dataLength: filterOptionsData?.length || 0,
-          error: filterOptionsError,
-          data: filterOptionsData 
-        });
-        
-        if (!filterOptionsError && filterOptionsData && filterOptionsData.length > 0) {
-          departmentOptions = filterOptionsData.map((opt: any) => ({
+        if (!deptResult.error && deptResult.data && deptResult.data.length > 0) {
+          departmentOptions = deptResult.data.map((opt: any) => ({
             id: opt.id.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
-            name: opt.id // Use option_value (opt.id) for exact database value matching
+            name: opt.id
           }));
-          console.log('Department options loaded from DB:', departmentOptions.length, 'options');
-        } else {
-          console.warn('Department filter RPC returned no data or had error:', filterOptionsError);
         }
-      } catch (err) {
-        console.warn('Could not fetch department options from filter_options table, using database values:', err);
-      }
-
-      try {
-        const { data: locationOptionsData, error: locationOptionsError } = await supabase
-          .rpc('get_filter_options', { p_filter_type: 'location', p_filter_category: 'communities' });
         
-        console.log('Location filter RPC call result:', { 
-          hasData: !!locationOptionsData, 
-          dataLength: locationOptionsData?.length || 0,
-          error: locationOptionsError,
-          data: locationOptionsData 
-        });
-        
-        if (!locationOptionsError && locationOptionsData && locationOptionsData.length > 0) {
-          locationOptions = locationOptionsData
+        if (!locResult.error && locResult.data && locResult.data.length > 0) {
+          locationOptions = locResult.data
             .map((opt: any) => ({
               id: opt.id.toLowerCase().replace(/\s+/g, '-'),
-              name: opt.id // Use option_value (opt.id) for exact database value matching
+              name: opt.id
             }))
             .filter((opt: any) => opt.name.toLowerCase() !== 'remote');
-          console.log('Location options loaded from DB:', locationOptions.length, 'options');
-        } else {
-          console.warn('Location filter RPC returned no data or had error:', locationOptionsError);
         }
       } catch (err) {
-        console.warn('Could not fetch location options from filter_options table, using database values:', err);
+        console.warn('Could not fetch filter options from RPC, will use database values:', err);
       }
 
       const [categoriesResult, activityLevelsResult, departmentsResult, locationsResult] = await Promise.all([
@@ -226,29 +205,12 @@ export default function Communities() {
           name: dept
         }));
       }
-      // If still empty, try fetching from 'both' category as fallback
-      if (departmentOptions.length === 0) {
-        try {
-          console.log('Trying fallback: fetching department from "both" category');
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .rpc('get_filter_options', { p_filter_type: 'department', p_filter_category: 'both' });
-          
-          console.log('Department fallback RPC result:', { 
-            hasData: !!fallbackData, 
-            dataLength: fallbackData?.length || 0,
-            error: fallbackError 
-          });
-          
-          if (!fallbackError && fallbackData && fallbackData.length > 0) {
-            departmentOptions = fallbackData.map((opt: any) => ({
-              id: opt.id.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
-              name: opt.id // Use option_value (opt.id) for exact database value matching
-            }));
-            console.log('Department options loaded from fallback DB:', departmentOptions.length, 'options');
-          }
-        } catch (err) {
-          console.warn('Could not fetch department options from database:', err);
-        }
+      // If still empty, use database values from communities table
+      if (departmentOptions.length === 0 && uniqueDepartments.length > 0) {
+        departmentOptions = uniqueDepartments.map((dept) => ({
+          id: dept.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
+          name: dept
+        }));
       }
 
       if (locationOptions.length === 0 && uniqueLocations.length > 0) {
@@ -258,32 +220,6 @@ export default function Communities() {
             id: loc.toLowerCase().replace(/\s+/g, '-'),
             name: loc
           }));
-      }
-      // If still empty, try fetching from 'both' category as fallback
-      if (locationOptions.length === 0) {
-        try {
-          console.log('Trying fallback: fetching location from "both" category');
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .rpc('get_filter_options', { p_filter_type: 'location', p_filter_category: 'both' });
-          
-          console.log('Location fallback RPC result:', { 
-            hasData: !!fallbackData, 
-            dataLength: fallbackData?.length || 0,
-            error: fallbackError 
-          });
-          
-          if (!fallbackError && fallbackData && fallbackData.length > 0) {
-            locationOptions = fallbackData
-              .map((opt: any) => ({
-                id: opt.id.toLowerCase().replace(/\s+/g, '-'),
-                name: opt.id // Use option_value (opt.id) for exact database value matching
-              }))
-              .filter((opt: any) => opt.name.toLowerCase() !== 'remote');
-            console.log('Location options loaded from fallback DB:', locationOptions.length, 'options');
-          }
-        } catch (err) {
-          console.warn('Could not fetch location options from database:', err);
-        }
       }
 
       // Hardcoded fallback Department options if database fetch fails
@@ -802,9 +738,10 @@ export default function Communities() {
     
     // Check if user is authenticated
     if (!user) {
-      console.warn('⚠️ User not authenticated, redirecting to sign in');
+      console.warn('⚠️ User not authenticated, showing sign in modal');
       toast.error('Please sign in to join communities');
-      // You might want to redirect to sign in page or show sign in modal
+      setPendingJoinCommunityId(communityId);
+      setShowSignInModal(true);
       return;
     }
     
@@ -818,27 +755,64 @@ export default function Communities() {
         onSuccess: () => {
           console.log('✅ Successfully joined community');
           toast.success('Successfully joined community!');
-          // Navigate to community detail page after successful join
-          navigate(`/community/${communityId}`);
+          // Membership state is already updated via refreshData callback
         },
         onError: (error) => {
           console.error('❌ Error joining community:', error);
-          // Still navigate even on error (user may already be a member)
-          navigate(`/community/${communityId}`);
+          toast.error('Failed to join community. Please try again.');
         },
       });
       
       console.log('🔵 Join result:', success);
-      
-      // Navigate if not already handled by callbacks
-      if (success) {
-        navigate(`/community/${communityId}`);
-      }
     } catch (error) {
       console.error('❌ Exception in handleJoinCommunity:', error);
       toast.error('Failed to join community. Please try again.');
     }
-  }, [navigate, user]);
+  }, [user, navigate]);
+  
+  // Retry joining after successful sign-in
+  const handleSignInSuccess = useCallback(async () => {
+    setShowSignInModal(false);
+    if (pendingJoinCommunityId) {
+      const communityId = pendingJoinCommunityId;
+      setPendingJoinCommunityId(null);
+      
+      // Wait for user state to update
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Get user directly from session instead of relying on auth context
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      
+      if (!userId) {
+        toast.error('Unable to verify authentication. Please try again.');
+        return;
+      }
+      
+      // Join directly using the session user
+      try {
+        const success = await joinCommunity(communityId, { id: userId } as any, {
+          refreshData: async () => {
+            // Update local membership state
+            setUserMemberships(prev => new Set(prev).add(communityId));
+          },
+          onSuccess: () => {
+            console.log('✅ Successfully joined community');
+            toast.success('Successfully joined community!');
+          },
+          onError: (error) => {
+            console.error('❌ Error joining community:', error);
+            toast.error('Failed to join community. Please try again.');
+          },
+        });
+        
+        console.log('🔵 Join result:', success);
+      } catch (error) {
+        console.error('❌ Exception joining community:', error);
+        toast.error('Failed to join community. Please try again.');
+      }
+    }
+  }, [pendingJoinCommunityId]);
   if (authLoading) {
     return <div className="flex min-h-screen items-center justify-center bg-[var(--gradient-subtle)]">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
@@ -1276,6 +1250,15 @@ export default function Communities() {
             </>
           )}
         </div>
+
+        {/* Sign In Modal */}
+        <SignInModal
+          open={showSignInModal}
+          onOpenChange={setShowSignInModal}
+          title="Sign In to Join Community"
+          description="Please sign in to join this community and start participating."
+          onSuccess={handleSignInSuccess}
+        />
 
         {/* Floating Create Button (mobile) - Only for logged-in users */}
         {user && <div className="sm:hidden">

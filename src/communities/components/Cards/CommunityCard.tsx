@@ -60,9 +60,18 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
   const handleJoin = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('🔵 CommunityCard: Join button clicked', { communityId: item.id, hasOnJoin: !!onJoin });
+    console.log('🔵 CommunityCard: Join button clicked', { 
+      communityId: item.id, 
+      hasOnJoin: !!onJoin,
+      eventType: e.type,
+      target: e.target
+    });
     if (onJoin) {
-      onJoin();
+      try {
+        onJoin();
+      } catch (error) {
+        console.error('❌ CommunityCard: Error calling onJoin handler:', error);
+      }
     } else {
       console.error('❌ CommunityCard: onJoin handler is not provided!');
     }

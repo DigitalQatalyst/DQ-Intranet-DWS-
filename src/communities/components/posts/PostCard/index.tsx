@@ -12,6 +12,7 @@ import { BasePost } from '../types';
 import { usePermissions } from '@/communities/hooks/usePermissions';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { safeFetch } from '@/communities/utils/safeFetch';
 interface PostCardProps {
   post: BasePost;
   onActionComplete?: () => void;
@@ -48,48 +49,67 @@ export function PostCard({
     
     if (!userId) return;
     
-    const {
-      data,
-      error
-    } = await supabase.from('reactions').select('reaction_type').eq('post_id', post.id).eq('user_id', userId);
+    // Use new reactions table
+    const query = supabase
+      .from('community_post_reactions_new')
+      .select('reaction_type')
+      .eq('post_id' as any, post.id)
+      .eq('user_id' as any, userId);
+    
+    const [data, error] = await safeFetch(query);
+    
     if (error) {
+      console.error('Error checking user reactions:', error);
       return;
     }
-    if (data) {
+    
+    if (data && Array.isArray(data)) {
       setHasReactedHelpful(data.some(r => r.reaction_type === 'helpful'));
       setHasReactedInsightful(data.some(r => r.reaction_type === 'insightful'));
     }
   };
   const handleReaction = async (type: 'helpful' | 'insightful') => {
+    console.log('🔵 handleReaction called:', { type, postId: post.id });
+    
     if (!user) {
       toast.error('Please sign in to react');
       return;
     }
     
     // Get auth user ID directly from Supabase session
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || user?.id;
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
-    if (!userId) {
-      toast.error('Unable to identify user. Please sign in again.');
+    if (sessionError || !session?.user?.id) {
+      console.error('❌ Session error:', sessionError);
+      toast.error('Unable to verify authentication. Please sign in again.');
       return;
     }
     
+    const userId = session.user.id;
+    console.log('✅ User ID from session:', userId);
+    
     const hasReacted = type === 'helpful' ? hasReactedHelpful : hasReactedInsightful;
+    console.log('📊 Reaction state:', { hasReacted, type });
     
     try {
       if (hasReacted) {
-        const { error } = await supabase
-          .from('reactions')
+        // Remove reaction from new table
+        const query = supabase
+          .from('community_post_reactions_new')
           .delete()
-          .eq('post_id', post.id)
-          .eq('user_id', userId)
-          .eq('reaction_type', type);
+          .eq('post_id' as any, post.id)
+          .eq('user_id' as any, userId)
+          .eq('reaction_type' as any, type);
+        
+        const [, error] = await safeFetch(query);
         
         if (error) {
+          console.error('❌ Error removing reaction:', error);
           toast.error('Failed to remove reaction: ' + (error.message || 'Unknown error'));
           return;
         }
+        
+        console.log('✅ Reaction removed successfully');
         
         // Update local state optimistically
         if (type === 'helpful') {
@@ -100,18 +120,32 @@ export function PostCard({
           setHasReactedInsightful(false);
         }
       } else {
-        const { error } = await supabase
-          .from('reactions')
-          .insert({
-            post_id: post.id,
-            user_id: userId,
-            reaction_type: type
-          });
+        // Add reaction to new table
+        const reactionData = {
+          post_id: post.id,
+          user_id: userId,
+          reaction_type: type
+        };
+        
+        const query = supabase
+          .from('community_post_reactions_new')
+          .insert(reactionData as any);
+        
+        const [, error] = await safeFetch(query);
         
         if (error) {
+          console.error('❌ Error adding reaction:', error);
+          // If unique constraint violation, user already reacted
+          if (error.code === '23505') {
+            console.log('⚠️ User already reacted, refreshing...');
+            checkUserReactions();
+            return;
+          }
           toast.error('Failed to add reaction: ' + (error.message || 'Unknown error'));
           return;
         }
+        
+        console.log('✅ Reaction added successfully');
         
         // Update local state optimistically
         if (type === 'helpful') {
@@ -122,7 +156,11 @@ export function PostCard({
           setHasReactedInsightful(true);
         }
       }
-    } catch (err) {
+      
+      // Refresh reaction counts
+      await checkUserReactions();
+    } catch (err: any) {
+      console.error('❌ Unexpected error in handleReaction:', err);
       toast.error('An unexpected error occurred. Please try again.');
     }
   };

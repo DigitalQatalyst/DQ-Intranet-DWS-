@@ -129,3 +129,4 @@ npm run create-test-user
 
 If it still fails, use Option 4 (SQL Editor) to manually create the profile - the user is already created in auth, so you just need the profile entry.
 
+

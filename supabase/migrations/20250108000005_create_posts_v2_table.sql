@@ -94,3 +94,4 @@ GRANT INSERT, UPDATE, DELETE ON posts_v2 TO authenticated;
 
 COMMENT ON TABLE posts_v2 IS 'Simplified posts table for community posts with id, community_id, user_id, title, content, and timestamps';
 
+

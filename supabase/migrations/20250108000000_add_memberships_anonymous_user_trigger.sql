@@ -25,3 +25,4 @@ CREATE TRIGGER handle_anonymous_user_memberships
 -- - community_assets (user_id, created_by)
 -- - memberships (user_id) ← NEW
 
+

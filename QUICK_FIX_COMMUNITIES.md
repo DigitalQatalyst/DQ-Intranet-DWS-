@@ -83,3 +83,4 @@ SELECT * FROM communities LIMIT 5;
 
 4. **Check Network tab** in browser DevTools to see the actual API response
 
+

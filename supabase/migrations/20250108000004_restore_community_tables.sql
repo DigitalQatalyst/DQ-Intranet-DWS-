@@ -401,3 +401,4 @@ COMMENT ON TABLE community_comments IS 'Table storing comments on posts with sup
 COMMENT ON TABLE community_reactions IS 'Table storing reactions (like, love, etc.) on posts or comments';
 COMMENT ON TABLE community_assets IS 'Table storing media assets (images, videos, documents) associated with posts, comments, or communities';
 
+

@@ -36,34 +36,49 @@ export function CommentList({
   const fetchComments = async () => {
     setLoading(true);
     setError(null);
-    const query = supabase.from('comments').select(`
-        id,
-        content,
-        status,
-        created_at,
-        created_by,
-        users_local!comments_created_by_fkey (
-          username,
-          avatar_url
-        )
-      `).eq('post_id', postId).order('created_at', {
-      ascending: true
-    });
+    // Fetch comments from new table
+    const query = supabase
+      .from('community_post_comments_new')
+      .select('id, content, status, created_at, user_id')
+      .eq('post_id' as any, postId)
+      .order('created_at', { ascending: true });
+    
     const [data, err] = await safeFetch(query);
     if (err) {
       setError('Failed to load comments');
       setLoading(false);
       return;
     }
-    if (data) {
-      const formattedComments: Comment[] = data.map((comment: any) => ({
-        id: comment.id,
-        content: comment.content,
-        status: comment.status || 'active',
-        created_at: comment.created_at,
-        author_username: comment.users_local?.username || 'Unknown',
-        author_avatar: comment.users_local?.avatar_url || null
-      }));
+    if (data && Array.isArray(data)) {
+      // Fetch user details for each comment
+      const userIds = [...new Set(data.map((c: any) => c.user_id))];
+      const userDetailsMap = new Map();
+      
+      // Fetch user details from users_local table
+      for (const userId of userIds) {
+        const [userData] = await safeFetch(
+          supabase
+            .from('users_local')
+            .select('id, username, avatar_url')
+            .eq('id', userId)
+            .maybeSingle()
+        );
+        if (userData) {
+          userDetailsMap.set(userId, userData);
+        }
+      }
+      
+      const formattedComments: Comment[] = data.map((comment: any) => {
+        const userDetails = userDetailsMap.get(comment.user_id);
+        return {
+          id: comment.id,
+          content: comment.content,
+          status: comment.status || 'active',
+          created_at: comment.created_at,
+          author_username: userDetails?.username || 'Unknown',
+          author_avatar: userDetails?.avatar_url || null
+        };
+      });
       setComments(formattedComments);
     }
     setLoading(false);

@@ -182,3 +182,4 @@ This update completely removes anonymous user support from the Communities Marke
 - Frontend components show sign-in modals for unauthenticated users
 - User profiles are loaded from `users_local` table or fallback to `auth.users`
 
+

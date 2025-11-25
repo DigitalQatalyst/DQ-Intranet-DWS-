@@ -157,3 +157,4 @@ This update enforces Supabase authentication for all community interactions (pos
 - All interaction UI elements are conditionally rendered based on `isAuthenticated`
 - Database-level enforcement via RLS provides security even if frontend checks are bypassed
 
+

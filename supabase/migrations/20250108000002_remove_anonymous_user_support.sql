@@ -97,3 +97,4 @@ CREATE POLICY "Authenticated users can leave communities"
 --   - avatar_url (TEXT, nullable)
 --   - created_at (TIMESTAMPTZ)
 
+

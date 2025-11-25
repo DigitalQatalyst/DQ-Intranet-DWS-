@@ -1,31 +1,31 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { supabase } from '@/lib/supabaseClient';
 import { safeFetch } from '@/communities/utils/safeFetch';
-import { joinCommunity, leaveCommunity } from '@/communities/services/membershipService';
-import { useCommunityMembership } from '@/communities/hooks/useCommunityMembership';
 import { MainLayout } from '@/communities/components/layout/MainLayout';
 import { Button } from '@/communities/components/ui/button';
-import { Users, AlertCircle, Plus, Settings, Home, ChevronRight, X, Pencil, Calendar } from 'lucide-react';
+import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
+import { Users, UserPlus, UserMinus, AlertCircle, Plus, Settings, Home, ChevronRight, Upload, X, Pencil, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { MemberList } from '@/communities/components/communities/MemberList';
 import { InlineComposer } from '@/communities/components/post/InlineComposer';
-import { CommunityInfoPanel } from '@/communities/components/communities/CommunityInfoPanel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
-import { CreatePostModal } from '@/communities/components/post/CreatePostModal';
-import { SignInModal } from '@/communities/components/auth/SignInModal';
 import { Label } from '@/communities/components/ui/label';
 import { Input } from '@/communities/components/ui/input';
 import { format } from 'date-fns';
 import { PostCard } from '@/communities/components/posts/PostCard';
 import { Skeleton } from '@/communities/components/ui/skeleton';
+import { FeedSidebar } from '@/communities/components/feed/FeedSidebar';
+import { SignInModal } from '@/communities/components/auth/SignInModal';
 // Import PageLayout components
 import {
   PageLayout,
   PageSection,
   SectionHeader,
   SectionContent,
+  Breadcrumbs,
+  BreadcrumbItem,
 } from "../components/PageLayout/index";
 
 interface Community {
@@ -35,8 +35,6 @@ interface Community {
   created_at: string;
   imageurl?: string | null;
   category?: string | null;
-  department?: string | null;
-  location_filter?: string | null;
   isprivate?: boolean;
 }
 interface Post {
@@ -64,6 +62,7 @@ export default function Community() {
     id: string;
   }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [community, setCommunity] = useState<Community | null>(null);
   const [memberCount, setMemberCount] = useState(0);
   const [isMember, setIsMember] = useState(false);
@@ -79,23 +78,25 @@ export default function Community() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [postsError, setPostsError] = useState<string | null>(null);
-  const [createPostModalOpen, setCreatePostModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [showSignInModal, setShowSignInModal] = useState(false);
   useEffect(() => {
     if (id) {
       fetchCommunity();
-      fetchPosts();
-      // Membership check is now handled by useCommunityMembership hook above
+      // fetchPosts and checkMembership will be called after community is loaded
+      // to avoid unnecessary queries for non-existent communities
     }
-  }, [id, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]); // Only depend on id, not user - user changes handled inside fetchCommunity
   useEffect(() => {
     if (id) {
       fetchPosts();
     }
   }, [refreshKey]);
+
   const fetchCommunity = async () => {
     if (!id) {
-      setError("Community ID is missing");
+      setError("Community ID is required");
       setLoading(false);
       return;
     }
@@ -104,199 +105,223 @@ export default function Community() {
     setError(null);
     
     try {
-      console.log('Fetching community:', id);
+
+    // First, try to fetch from the view
+    let data: any = null;
+    let err: any = null;
+    
+    const viewQuery = supabase
+      .from("communities_with_counts")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    
+    [data, err] = await safeFetch(viewQuery);
+
+    // If view query fails, fallback to direct communities table query
+    if (err || !data) {
+      console.log("View query failed, trying direct communities table query...", err);
       
-      // Try communities_with_counts view first
-      let query = supabase
-        .from("communities_with_counts")
+      const directQuery = supabase
+        .from("communities")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       
-      let [data, err] = await safeFetch(query);
+      const [directData, directErr] = await safeFetch(directQuery);
       
-      // If permission denied or view doesn't exist, fallback to base communities table
-      if (err && (err.message?.includes('permission denied') || err.message?.includes('does not exist'))) {
-        console.warn('View not accessible, falling back to base communities table:', err.message);
+      if (directErr || !directData) {
+        // Check if it's a "not found" error
+        const isNotFound = 
+          directErr?.code === "PGRST116" || 
+          directErr?.code === "PGRST301" ||
+          directErr?.status === 401 ||
+          directErr?.status === 404 ||
+          directErr?.message?.includes("No rows") ||
+          directErr?.message?.includes("not found") ||
+          directErr?.message?.includes("Unauthorized");
         
-        // Fallback: Query base communities table with member count
-        query = supabase
-          .from("communities")
-          .select(`
-            *,
-            memberships(count)
-          `)
-          .eq("id", id)
-          .single();
-        
-        [data, err] = await safeFetch(query);
-        
-        // Transform data to match expected format
-        if (data && !err) {
-          const transformedData = {
-            ...data,
-            member_count: Array.isArray(data.memberships) 
-              ? data.memberships[0]?.count || 0 
-              : (typeof data.member_count === 'number' ? data.member_count : 0)
-          };
-          
-          setCommunity({
-            id: transformedData.id,
-            name: transformedData.name,
-            description: transformedData.description,
-            created_at: transformedData.created_at,
-            imageurl: transformedData.imageurl || null,
-            category: transformedData.category || "Community",
-            department: transformedData.department || null,
-            location_filter: transformedData.location_filter || null,
-            isprivate: transformedData.isprivate || false,
-          });
-          setMemberCount(transformedData.member_count || 0);
-          
-          // Fetch the community's creator to check ownership
-          if (user) {
-            const ownerQuery = supabase
-              .from("communities")
-              .select("created_by")
-              .eq("id", id)
-              .maybeSingle();
-            const [ownerData] = await safeFetch(ownerQuery);
-            const isUserOwner = ownerData?.created_by === user.id;
-            setIsOwner(isUserOwner);
-            // Check if user is admin
-            if (!isUserOwner && user.role === "admin") {
-              setIsAdmin(true);
-            } else if (!isUserOwner) {
-              const roleQuery = supabase
-                .from("community_roles")
-                .select("role")
-                .eq("community_id", id)
-                .eq("user_id", user.id)
-                .maybeSingle();
-              const [roleData] = await safeFetch(roleQuery);
-              setIsAdmin(roleData?.role === "admin");
-            }
-          }
-          
-          setLoading(false);
-          return;
+        if (isNotFound) {
+          setError("Community not found");
+        } else {
+          console.error("Error fetching community from direct table:", directErr);
+          setError("Failed to load community");
         }
-      }
-      
-      if (err) {
-        console.error('Error fetching community:', err);
-        console.error('Error details:', {
-          message: err.message,
-          code: err.code,
-          details: err.details,
-          hint: err.hint
-        });
-        setError(`Failed to load community: ${err.message || 'Unknown error'}`);
         setLoading(false);
         return;
       }
       
-      if (data) {
-        setCommunity({
-          id: data.id,
-          name: data.name,
-          description: data.description,
-          created_at: data.created_at,
-          imageurl: data.imageurl || null,
-          category: data.category || "Community",
-          department: data.department || null,
-          location_filter: data.location_filter || null,
-          isprivate: data.isprivate || false,
-        });
-        setMemberCount(data.member_count || 0);
+      // Use direct query data and fetch member count separately
+      data = directData;
+      
+      // Fetch member count separately
+      try {
+        const { count } = await supabase
+          .from("memberships")
+          .select("*", { count: "exact", head: true })
+          .eq("community_id" as any, id);
         
-        // Fetch the community's creator to check ownership
-        if (user) {
-          const ownerQuery = supabase
-            .from("communities")
-            .select("created_by")
-            .eq("id", id)
-            .maybeSingle();
-          const [ownerData] = await safeFetch(ownerQuery);
-          const isUserOwner = ownerData?.created_by === user.id;
-          setIsOwner(isUserOwner);
-          // Check if user is admin
-          if (!isUserOwner && user.role === "admin") {
-            setIsAdmin(true);
-          } else if (!isUserOwner) {
-            const roleQuery = supabase
-              .from("community_roles")
-              .select("role")
-              .eq("community_id", id)
-              .eq("user_id", user.id)
-              .maybeSingle();
-            const [roleData] = await safeFetch(roleQuery);
-            setIsAdmin(roleData?.role === "admin");
-          }
-        }
-      } else {
-        setError("Community not found");
+        data.member_count = count || 0;
+      } catch (countError) {
+        console.warn("Error fetching member count:", countError);
+        data.member_count = 0;
       }
-    } catch (exception) {
-      console.error('Exception fetching community:', exception);
-      const errorMessage = exception instanceof Error ? exception.message : 'Unknown error occurred';
-      setError(`Failed to load community: ${errorMessage}`);
+    }
+
+    // Set community data
+    if (data) {
+      setCommunity({
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        created_at: data.created_at,
+        imageurl: data.imageurl || null,
+        category: data.category || "Community",
+        isprivate: data.isprivate || false,
+      });
+      setMemberCount(data.member_count || 0);
+      
+      // Fetch the community's creator to check ownership
+      if (user) {
+        const ownerQuery = supabase
+          .from("communities")
+          .select("created_by")
+          .eq("id", id)
+          .maybeSingle();
+        const [ownerData] = await safeFetch(ownerQuery);
+        const isUserOwner = ownerData?.created_by === user.id;
+        setIsOwner(isUserOwner);
+        // Check if user is admin
+        if (!isUserOwner && user.role === "admin") {
+          setIsAdmin(true);
+        } else if (!isUserOwner) {
+          const roleQuery = supabase
+            .from("community_roles")
+            .select("role")
+            .eq("community_id", id)
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const [roleData] = await safeFetch(roleQuery);
+          setIsAdmin(roleData?.role === "admin");
+        }
+      }
+      // Only fetch posts and check membership after community is successfully loaded
+      // Don't await these - let them run in background to avoid blocking
+      fetchPosts().catch(err => console.error("Error fetching posts:", err));
+      checkMembership().catch(err => console.error("Error checking membership:", err));
+    } else {
+      setError("Community not found");
+    }
+    } catch (err) {
+      console.error("Unexpected error in fetchCommunity:", err);
+      setError("Failed to load community");
     } finally {
       setLoading(false);
     }
   };
-  // Use the optimized membership hook (single table check)
-  const { isMember: hookIsMember } = useCommunityMembership(id);
-  
-  // Sync hook state with local state
-  useEffect(() => {
-    setIsMember(hookIsMember);
-  }, [hookIsMember]);
+  const checkMembership = async () => {
+    if (!id || !user) {
+      setIsMember(false);
+      return;
+    }
+    
+    // Get authenticated user ID from Supabase session
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id || user?.id;
+    
+    if (!userId) {
+      setIsMember(false);
+      return;
+    }
+    
+    const query = supabase.from('memberships').select('id').eq('user_id', userId).eq('community_id', id).maybeSingle();
+    const [data] = await safeFetch(query);
+
+    setIsMember(!!data);
+  };
   const handleJoinLeave = async () => {
     if (!id) return;
     
-    // Check if user is authenticated
+    // Check if user is authenticated before joining
     if (!user) {
+      toast.error('Please sign in to join communities');
       setShowSignInModal(true);
       return;
     }
     
     setJoinLoading(true);
     
-    try {
-      if (isMember) {
-        // Leave community (optimized - single table operation)
-        const success = await leaveCommunity(id, user, {
-          refreshData: async () => {
-            // Optimistic state update (hook will also update automatically)
-            setIsMember(false);
-            setMemberCount(prev => Math.max(0, prev - 1));
-            // Hook will update membership status automatically via useEffect
-          },
-        });
-        if (success) {
-          // Posts will refresh automatically if needed
+    // Get authenticated user ID
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id || user?.id;
+    
+    if (!userId) {
+      toast.error('Unable to verify authentication. Please sign in again.');
+      setJoinLoading(false);
+      setShowSignInModal(true);
+      return;
+    }
+    
+    // Validate community exists
+    const { data: communityData } = await supabase
+      .from('communities')
+      .select('id')
+      .eq('id', id)
+      .single();
+    
+    if (!communityData) {
+      toast.error('Community not found');
+      setJoinLoading(false);
+      return;
+    }
+    
+    // Check if already a member
+    const { data: existingMembership } = await supabase
+      .from('memberships')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('community_id', id)
+      .maybeSingle();
+    
+    if (isMember || existingMembership) {
+      // Leave community
+      const query = supabase.from('memberships').delete().match({
+        user_id: userId,
+        community_id: id
+      });
+      const [, error] = await safeFetch(query);
+      if (error) {
+        toast.error('Failed to leave community');
+      } else {
+        toast.success('Left community');
+        setIsMember(false);
+        setMemberCount(prev => Math.max(0, prev - 1));
+      }
+    } else {
+      // Join community
+      const query = supabase.from('memberships').insert({
+        user_id: userId,
+        community_id: id
+      });
+      const [, error] = await safeFetch(query);
+      if (error) {
+        if (error.code === '23505') {
+          // Duplicate key error - user is already a member
+          toast.error('You are already a member of this community');
+          setIsMember(true);
+        } else if (error.code === '23503') {
+          // Foreign key violation
+          toast.error('Invalid community or user');
+        } else {
+          toast.error('Failed to join community');
         }
       } else {
-        // Join community (optimized - single table operation, optimistic update)
-        const success = await joinCommunity(id, user, {
-          validateCommunity: true, // Validate community exists (detail page only)
-          refreshData: async () => {
-            // Optimistic state update (hook will also update automatically)
-            setIsMember(true);
-            setMemberCount(prev => prev + 1);
-            // Refresh posts to show member-only content
-            await fetchPosts();
-            // Hook will update membership status automatically via useEffect
-          },
-        });
-        if (success) {
-          // State already updated by refreshData callback
-        }
+        toast.success('Joined community!');
+        setIsMember(true);
+        setMemberCount(prev => prev + 1);
       }
-    } finally {
-      setJoinLoading(false);
     }
+    setJoinLoading(false);
   };
   const fetchPosts = async () => {
     if (!id) return;
@@ -304,7 +329,7 @@ export default function Community() {
     setPostsError(null);
 
     try {
-      // Query posts_v2 table - fetch posts first, then user details separately
+      // Query posts_v2 table (simplified schema)
       let query = supabase
         .from("posts_v2")
         .select("*")
@@ -316,75 +341,115 @@ export default function Community() {
       const [data, err] = await safeFetch(query);
       
       if (err) {
-        console.error('Error fetching posts:', err);
+        console.error("Error fetching posts from posts_v2:", err);
         setPostsError("Failed to load posts");
         setPostsLoading(false);
         return;
       }
 
-      if (data && data.length > 0) {
-        // Get unique user IDs from posts
-        const userIds = [...new Set(
-          data
-            .map((p: any) => p.user_id)
-            .filter(Boolean)
-        )];
-        
-        // Fetch user details for all authors
-        let userDetails: Record<string, { username: string; avatar_url: string | null }> = {};
-        if (userIds.length > 0) {
-          const { data: users } = await supabase
-            .from("users_local")
-            .select("id, username, avatar_url")
-            .in("id", userIds);
-          
-          if (users) {
-            users.forEach((user: any) => {
-              userDetails[user.id] = {
-                username: user.username || 'Unknown',
-                avatar_url: user.avatar_url || null
-              };
-            });
-          }
-        }
-
-        // Map posts to match expected format
-        const posts = data.map((p: any) => {
-          const userInfo = userDetails[p.user_id] || { username: 'Unknown', avatar_url: null };
-          return {
-            id: p.id,
-            title: p.title,
-            content: p.content,
-            created_at: p.created_at,
-            created_by: p.user_id,
-            community_id: p.community_id,
-            community_name: community?.name || '',
-            author_username: userInfo.username,
-            author_avatar: userInfo.avatar_url,
-            helpful_count: 0,
-            insightful_count: 0,
-            comment_count: 0,
-          };
-        });
-
-        setPosts(posts);
-      } else {
-        // No posts found - set empty array
+      if (!data || data.length === 0) {
         setPosts([]);
+        setPostsLoading(false);
+        return;
       }
-    } catch (exception) {
-      console.error('Exception fetching posts:', exception);
-      const errorMessage = exception instanceof Error ? exception.message : 'Unknown error occurred';
-      setPostsError(`Failed to load posts: ${errorMessage}`);
-      setPosts([]);
+
+      // Fetch community and user data for each post
+      const postsWithMetadata = await Promise.all(
+        data.map(async (post: any) => {
+          // Fetch community name
+          const [communityData] = await safeFetch(
+            supabase
+              .from("communities")
+              .select("name")
+              .eq("id", post.community_id)
+              .maybeSingle()
+          );
+          
+          // Fetch user data from users_local (user_id in posts_v2 may map to users_local.id)
+          let userData = null;
+          if (post.user_id) {
+            const [userResult] = await safeFetch(
+              supabase
+                .from("users_local")
+                .select("username, avatar_url")
+                .eq("id", post.user_id)
+                .maybeSingle()
+            );
+            userData = userResult;
+          }
+          
+          return {
+            ...post,
+            created_by: post.user_id, // Map user_id to created_by for compatibility
+            communities: communityData ? { name: communityData.name } : null,
+            users_local: userData || null,
+            community_name: communityData?.name || "Unknown Community",
+            author_username: userData?.username || "Unknown User",
+            author_avatar: userData?.avatar_url || null,
+            // Add default values for fields not in posts_v2
+            status: "active", // posts_v2 doesn't have status, default to active
+            post_type: "text", // Default post type
+            tags: [], // posts_v2 doesn't have tags
+            content_html: null, // posts_v2 doesn't have content_html
+            metadata: {},
+            event_date: null,
+            event_location: null,
+          };
+        })
+      );
+      
+      // Fetch reaction and comment counts from the new tables for posts_v2
+      const postIds = postsWithMetadata.map((p: any) => p.id);
+
+      // Fetch from community_post_reactions_new (for posts_v2)
+      const { data: reactions } = await supabase
+        .from("community_post_reactions_new")
+        .select("post_id, reaction_type")
+        .in("post_id", postIds);
+
+      // Fetch from community_post_comments_new (for posts_v2)
+      const { data: comments } = await supabase
+        .from("community_post_comments_new")
+        .select("post_id")
+        .in("post_id", postIds);
+
+      // Count reactions and comments
+      const reactionCounts =
+        reactions?.reduce((acc: any, r: any) => {
+          if (!acc[r.post_id]) acc[r.post_id] = { helpful: 0, insightful: 0 };
+          if (r.reaction_type === "helpful") acc[r.post_id].helpful++;
+          if (r.reaction_type === "insightful") acc[r.post_id].insightful++;
+          return acc;
+        }, {}) || {};
+
+      const commentCounts =
+        comments?.reduce((acc: any, c: any) => {
+          acc[c.post_id] = (acc[c.post_id] || 0) + 1;
+          return acc;
+        }, {}) || {};
+
+      const posts = postsWithMetadata.map((p: any) => ({
+        ...p,
+        helpful_count: reactionCounts[p.id]?.helpful || 0,
+        insightful_count: reactionCounts[p.id]?.insightful || 0,
+        comment_count: commentCounts[p.id] || 0,
+      }));
+
+      setPosts(posts);
+    } catch (error) {
+      console.error("Unexpected error in fetchPosts:", error);
+      setPostsError("Failed to load posts");
     } finally {
       setPostsLoading(false);
     }
   };
   const handlePostCreated = () => {
-    // Refresh posts immediately
-    fetchPosts();
     setRefreshKey((prev) => prev + 1);
+  };
+
+  const handleTagFilter = (tag: string) => {
+    // Navigate to feed with tag filter
+    navigate(`/feed?tag=${tag}`);
   };
   const handleUpdateImage = async () => {
     if (!id || !user) return;
@@ -426,7 +491,7 @@ export default function Community() {
           icon: Home,
         },
         {
-          label: "DQ Work Communities",
+          label: "Communities",
           href: "/communities",
         },
         {
@@ -488,33 +553,35 @@ export default function Community() {
     <MainLayout hidePageLayout>
       <div className="">
         {/* Breadcrumbs */}
-        <div className="max-w-7xl mx-auto  my-4 ">
-          <nav className="flex" aria-label="Breadcrumb">
+        <div className="max-w-7xl mx-auto pl-0 pr-1 sm:pl-0 sm:pr-2 lg:pl-0 lg:pr-3 mt-2 mb-1">
+          <nav className="flex mb-4 min-h-[24px]" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-2">
               <li className="inline-flex items-center">
                 <Link
-                  to="/community"
-                  className="text-gray-600 hover:text-gray-900 inline-flex items-center text-sm"
+                  to="/"
+                  className="text-gray-600 hover:text-gray-900 inline-flex items-center text-sm md:text-base transition-colors"
+                  aria-label="Navigate to Home"
                 >
-                  <Home size={16} className="mr-1" />
+                  <Home size={16} className="mr-1" aria-hidden="true" />
                   <span>Home</span>
                 </Link>
               </li>
               <li>
                 <div className="flex items-center">
-                  <ChevronRight size={16} className="text-gray-400" />
+                  <ChevronRight size={16} className="text-gray-400 mx-1 flex-shrink-0" aria-hidden="true" />
                   <Link
                     to="/communities"
-                    className="ml-1 text-sm text-gray-600 hover:text-gray-900 md:ml-2"
+                    className="text-gray-600 hover:text-gray-900 text-sm md:text-base font-medium transition-colors"
+                    aria-label="Navigate to DQ Work Communities"
                   >
                     DQ Work Communities
                   </Link>
                 </div>
               </li>
               <li aria-current="page">
-                <div className="flex items-center">
-                  <ChevronRight size={16} className="text-gray-400" />
-                  <span className="ml-1 text-sm text-gray-500 md:ml-2">
+                <div className="flex items-center min-w-[80px]">
+                  <ChevronRight size={16} className="text-gray-400 mx-1 flex-shrink-0" aria-hidden="true" />
+                  <span className="text-gray-500 text-sm md:text-base font-medium whitespace-nowrap">
                     {community.name}
                   </span>
                 </div>
@@ -523,9 +590,11 @@ export default function Community() {
           </nav>
         </div>
 
-        <PageLayout>
+        <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+          <div className="max-w-7xl mx-auto pl-0 pr-1 sm:pl-0 sm:pr-2 lg:pl-0 lg:pr-3">
+            <PageLayout>
           {/* Hero Section */}
-          <PageSection className="p-0 overflow-hidden mb-6">
+          <PageSection className="p-0 overflow-hidden mb-2">
             <div className="relative">
               {/* Dynamic Image with Fallback */}
               <div className="relative lg:h-[280px] h-[320px] overflow-hidden ">
@@ -597,9 +666,9 @@ export default function Community() {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-6 md:mt-0 md:ml-8">
+                    <div className="mt-10 md:mt-0 md:ml-12">
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-                        {user && isMember ? (
+                        {isMember ? (
                           <Button 
                             onClick={handleJoinLeave} 
                             variant="outline" 
@@ -614,7 +683,7 @@ export default function Community() {
                             className="bg-dq-navy text-white hover:bg-[#13285A]" 
                             disabled={joinLoading}
                           >
-                            {joinLoading ? 'Processing...' : 'Join Community'}
+                            {joinLoading ? 'Processing...' : user ? (community?.isprivate ? 'Request to Join' : 'Join Community') : 'Join'}
                           </Button>
                         )}
                       </div>
@@ -625,40 +694,26 @@ export default function Community() {
               </div>
           </PageSection>
           {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Posts Feed / Activity Feed */}
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8">
+            {/* Posts Feed */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Community Info Panel - Mobile/Tablet */}
-              <div className="lg:hidden">
-                {community && (
-                  <CommunityInfoPanel
-                    community={community}
-                    memberCount={memberCount}
-                    isMember={isMember}
-                    isOwner={isOwner}
-                    isAdmin={isAdmin}
-                    onJoinLeave={handleJoinLeave}
-                    joinLoading={joinLoading}
-                    user={user}
-                  />
-                )}
-              </div>
-
               <PageSection>
                 <SectionHeader
-                  title="Activity Feed"
-                  description="Posts, comments, polls, surveys, and events"
+                  title="Community Posts"
+                  description="Latest discussions and updates"
                 />
-                {/* Inline Composer - Available to everyone */}
-                <SectionContent className="pb-0 border-b border-gray-200">
-                  <InlineComposer
-                    communityId={id}
-                    isMember={isMember}
-                    onPostCreated={handlePostCreated}
-                  />
-                </SectionContent>
-                {/* Activity Feed */}
-                <SectionContent className="pt-4">
+                {/* Inline Composer - Only for members */}
+                {user && isMember && (
+                  <SectionContent className="pb-0 border-b border-gray-200">
+                    <InlineComposer
+                      communityId={id}
+                      onPostCreated={handlePostCreated}
+                    />
+                  </SectionContent>
+                )}
+                {/* Posts List */}
+                <SectionContent className={user && isMember ? "pt-4" : ""}>
                   {postsLoading ? (
                     <div className="space-y-4">
                       {[1, 2, 3].map((i) => (
@@ -693,50 +748,132 @@ export default function Community() {
                         <p className="text-gray-500 mb-4">
                           Be the first to start a conversation in this community
                         </p>
-                        <Button
-                          onClick={() => setCreatePostModalOpen(true)}
-                          className="bg-dq-navy text-white hover:bg-[#13285A]"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create Post
-                        </Button>
+                        {user && isMember && (
+                          <Button
+                            onClick={() =>
+                              navigate(`/create-post?communityId=${id}`)
+                            }
+                            className="bg-dq-navy text-white hover:bg-[#13285A]"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Create Post
+                          </Button>
+                        )}
+                        {!user && (
+                          <p className="text-gray-400 text-sm">
+                            Join this community to start posting
+                          </p>
+                        )}
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {posts.map((post) => (
-                        <PostCard
-                          key={post.id}
-                          post={post}
-                          onActionComplete={handlePostCreated}
-                          isMember={isMember}
-                        />
-                      ))}
+                      {(() => {
+                        // Filter posts based on search query
+                        const searchTerm = searchQuery.trim().toLowerCase();
+                        const filteredPosts = searchTerm
+                          ? posts.filter((post) => {
+                              // Safely check title and content
+                              const titleMatch = post.title
+                                ?.toLowerCase()
+                                .includes(searchTerm) || false;
+                              const contentMatch = post.content
+                                ?.toLowerCase()
+                                .includes(searchTerm) || false;
+                              return titleMatch || contentMatch;
+                            })
+                          : posts;
+
+                        if (searchTerm && filteredPosts.length === 0) {
+                          return (
+                            <div className="bg-gray-50 rounded-lg p-8 text-center">
+                              <div className="flex flex-col items-center justify-center">
+                                <div className="bg-gray-100 p-3 rounded-full mb-4">
+                                  <AlertCircle className="h-6 w-6 text-gray-400" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                  No posts found
+                                </h3>
+                                <p className="text-gray-500">
+                                  No posts match your search for "{searchQuery}"
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return filteredPosts.map((post) => (
+                          <PostCard
+                            key={post.id}
+                            post={post}
+                            onActionComplete={handlePostCreated}
+                          />
+                        ));
+                      })()}
                     </div>
                   )}
                 </SectionContent>
               </PageSection>
             </div>
             {/* Sidebar Column */}
+            {/* Main content container with vertical spacing */}
             <div className="space-y-6 mb-10">
-              {/* Community Info Panel - Desktop */}
-              <div className="hidden lg:block">
-                {community && (
-                  <CommunityInfoPanel
-                    community={community}
-                    memberCount={memberCount}
-                    isMember={isMember}
-                    isOwner={isOwner}
-                    isAdmin={isAdmin}
-                    onJoinLeave={handleJoinLeave}
-                    joinLoading={joinLoading}
-                    user={user}
-                  />
-                )}
-              </div>
+              {/* Community Information Section */}
+              <PageSection>
+                <SectionHeader title="About this Community" />
+                <SectionContent>
+                  <div className="space-y-4">
+                    {/* Community Category */}
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                        Category
+                      </p>
+                      <p className="text-sm text-gray-700 font-medium">
+                        {community.category}
+                      </p>
+                    </div>
+                    {/* Community Creation Date */}
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                        Created
+                      </p>
+                      <p className="text-sm text-gray-700 font-medium">
+                        {format(new Date(community.created_at), "MMMM d, yyyy")}
+                      </p>
+                    </div>
+                    {/* Member Count */}
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                        Members
+                      </p>
+                      <p className="text-sm text-gray-700 font-medium">
+                        {memberCount} members
+                      </p>
+                    </div>
+                    {/* Admin/owner only settings button */}
+                    {(isOwner || isAdmin) && (
+                      <div className="pt-4 border-t border-gray-200">
+                        <Button
+                          as={Link}
+                          to={`/community/${id}/settings`}
+                          variant="outline"
+                          className="w-full justify-center"
+                        >
+                          <Settings className="h-4 w-4 mr-2" />
+                          Manage Community
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </SectionContent>
+              </PageSection>
+
+              {/* Feed Sidebar - Trending Topics and Top Communities */}
+              <FeedSidebar onTagClick={handleTagFilter} />
 
               {/* Member List Section */}
               <PageSection>
+                {/* Section header with title and 'View All' button */}
                 <SectionHeader
                   title="Community Members"
                   actions={
@@ -750,31 +887,98 @@ export default function Community() {
                     </Button>
                   }
                 />
+                {/* Member list with pagination */}
                 <SectionContent className="p-0">
+                  {/* Display first 5 members, hides the section header */}
                   <MemberList communityId={id!} limit={5} hideHeader={true} />
                 </SectionContent>
               </PageSection>
             </div>
           </div>
-        </PageLayout>
-        {/* Floating Create Post Button - Available to everyone */}
-        <Button
-          onClick={() => setCreatePostModalOpen(true)}
-          className="fixed bottom-5 right-5 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all bg-dq-navy hover:bg-[#13285A] text-white"
-          size="icon"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-        
-        {/* Create Post Modal */}
-        {id && (
-          <CreatePostModal
-            open={createPostModalOpen}
-            onOpenChange={setCreatePostModalOpen}
-            communityId={id}
-            onPostCreated={handlePostCreated}
-          />
+          </div>
+            </PageLayout>
+          </div>
+        </div>
+        {/* Floating Create Post Button */}
+        {user && isMember && (
+          <Button
+            onClick={() => navigate(`/create-post?communityId=${id}`)}
+            className="fixed bottom-5 right-5 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all bg-dq-navy hover:bg-[#13285A] text-white"
+            size="icon"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
         )}
+        {/* Sign In Modal */}
+        <SignInModal
+          open={showSignInModal}
+          onOpenChange={setShowSignInModal}
+          title="Sign In to Join Community"
+          description="Please sign in to join this community and start participating."
+          onSuccess={async () => {
+            setShowSignInModal(false);
+            // Wait for user state to update, then join directly using session
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            if (!id) return;
+            
+            // Get user directly from session instead of relying on auth context
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id;
+            
+            if (!userId) {
+              toast.error('Unable to verify authentication. Please try again.');
+              return;
+            }
+            
+            // Join directly without checking auth context user
+            setJoinLoading(true);
+            
+            try {
+              // Check if already a member
+              const { data: existingMembership } = await supabase
+                .from('memberships')
+                .select('id')
+                .eq('user_id', userId)
+                .eq('community_id', id)
+                .maybeSingle();
+              
+              if (existingMembership) {
+                toast.info('You are already a member of this community');
+                setIsMember(true);
+                setJoinLoading(false);
+                return;
+              }
+              
+              // Join community
+              const query = supabase.from('memberships').insert({
+                user_id: userId,
+                community_id: id
+              });
+              const [, error] = await safeFetch(query);
+              
+              if (error) {
+                if (error.code === '23505') {
+                  toast.info('You are already a member of this community');
+                  setIsMember(true);
+                } else {
+                  toast.error('Failed to join community');
+                }
+              } else {
+                toast.success('Joined community!');
+                setIsMember(true);
+                setMemberCount(prev => prev + 1);
+                handlePostCreated();
+              }
+            } catch (error) {
+              console.error('Error joining community:', error);
+              toast.error('Failed to join community');
+            } finally {
+              setJoinLoading(false);
+            }
+          }}
+        />
+
         {/* Image Update Dialog */}
         <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
           <DialogContent className="sm:max-w-md">
@@ -831,18 +1035,6 @@ export default function Community() {
             </div>
           </DialogContent>
         </Dialog>
-        
-        {/* Sign In Modal */}
-        <SignInModal
-          open={showSignInModal}
-          onOpenChange={setShowSignInModal}
-          onSuccess={() => {
-            setShowSignInModal(false);
-            // After successful sign in, user state will update and button will work
-          }}
-          title="Sign In to Join Community"
-          description="Please sign in to join this community and participate in discussions."
-        />
       </div>
     </MainLayout>
   );

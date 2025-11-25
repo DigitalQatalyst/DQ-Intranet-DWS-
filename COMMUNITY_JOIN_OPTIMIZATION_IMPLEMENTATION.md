@@ -257,3 +257,4 @@
 - **Fewer sync issues** (single table)
 - **Easier maintenance** (single source of truth)
 - **Better consistency** (standardized behavior)
+

@@ -181,95 +181,19 @@ export const EventsPage: React.FC = () => {
         let data: SupabaseEvent[] | null = null;
         let error: any = null;
 
-        // Strategy 1: Try to fetch from upcoming_events view first (if it exists)
-        try {
-          const viewQuery = await supabaseClient
-            .from("upcoming_events")
-            .select("*")
-            .order("start_time", { ascending: true });
+        // Fetch from events_v2 table (primary source)
+        const now = new Date().toISOString();
+        const tableQuery = await supabaseClient
+          .from("events_v2")
+          .select("*")
+          .eq("status", "published") // Only get published events
+          .gte("start_time", now) // Only get future events
+          .order("start_time", { ascending: true });
 
-          if (!viewQuery.error && viewQuery.data && viewQuery.data.length > 0) {
-            // View exists and returned data
-            data = viewQuery.data;
-            console.log("Fetched events from upcoming_events view");
-          } else {
-            throw new Error("View not available or empty");
-          }
-        } catch (viewError) {
-          // View doesn't exist or error, try events_v2 table
-          console.log("upcoming_events view not available, trying events_v2 table...");
-          
-          // Strategy 2: Try events_v2 table
-          try {
-            const now = new Date().toISOString();
-            const tableQuery = await supabaseClient
-              .from("events_v2")
-              .select("*")
-              .eq("status", "published") // Only get published events
-              .gte("start_time", now) // Only get future events
-              .order("start_time", { ascending: true });
-
-            if (!tableQuery.error && tableQuery.data) {
-              data = tableQuery.data;
-              console.log("Fetched events from events_v2 table");
-            } else {
-              throw tableQuery.error || new Error("events_v2 table query failed");
-            }
-          } catch (tableError) {
-            // events_v2 table doesn't exist or has errors, try posts table
-            console.log("events_v2 table not available, trying posts table with event type...");
-            error = tableError;
-
-            // Strategy 3: Fetch from posts table where post_type = 'event'
-            // Query with status filter to work with RLS policy
-            try {
-              const now = new Date().toISOString();
-              // Try a simple query first without joins to avoid RLS issues
-              const postsQuery = await supabaseClient
-                .from("posts")
-                .select("id, title, content, event_date, event_location, post_type, community_id, created_by, created_at, tags, status")
-                .eq("post_type", "event")
-                .eq("status", "active") // Required for RLS policy
-                .not("event_date", "is", null)
-                .gte("event_date", now) // Only get future events
-                .order("event_date", { ascending: true });
-
-              if (!postsQuery.error && postsQuery.data) {
-                // Transform posts to match our event interface
-                data = postsQuery.data.map((post: any) => ({
-                  id: post.id,
-                  title: post.title,
-                  content: post.content,
-                  description: post.content,
-                  event_date: post.event_date,
-                  event_location: post.event_location,
-                  post_type: post.post_type,
-                  community_id: post.community_id,
-                  created_by: post.created_by,
-                  created_at: post.created_at,
-                  tags: post.tags,
-                })) as PostEventRow[];
-                error = null;
-                console.log("Fetched events from posts table");
-              } else {
-                // If posts query fails due to permissions, log it but don't throw
-                // This allows the code to continue and show empty state gracefully
-                console.warn("Could not fetch events from posts table:", postsQuery.error?.message || "Unknown error");
-                throw postsQuery.error || new Error("Posts table query failed");
-              }
-            } catch (postsError: any) {
-              // Check if it's a permission error (42501) or other error
-              if (postsError?.code === '42501') {
-                console.warn("Permission denied accessing posts table. Events from posts may not be available.");
-                // Don't set error if it's just a permission issue - allow empty state
-                error = null;
-                data = null;
-              } else {
-                error = postsError;
-                console.error("Error fetching events from posts table:", postsError);
-              }
-            }
-          }
+        if (!tableQuery.error && tableQuery.data) {
+          data = tableQuery.data;
+        } else {
+          error = tableQuery.error || new Error("events_v2 table query failed");
         }
 
         // Handle errors gracefully

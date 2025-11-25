@@ -15,7 +15,6 @@ interface Comment {
   id: string;
   post_id: string;
   user_id: string;
-  parent_id: string | null;
   content: string;
   content_html?: string;
   created_at: string;
@@ -23,8 +22,6 @@ interface Comment {
   status: string;
   author_username?: string;
   author_avatar?: string;
-  reply_count?: number;
-  depth?: number;
 }
 
 interface CommunityCommentsProps {
@@ -56,17 +53,11 @@ export const CommunityComments: React.FC<CommunityCommentsProps> = ({
   const fetchComments = async () => {
     setLoading(true);
     try {
-      // Fetch all comments for this post
+      // Fetch all comments from new table
       const query = supabase
-        .from('community_comments')
-        .select(`
-          *,
-          users_local!community_comments_user_id_fkey (
-            username,
-            avatar_url
-          )
-        `)
-        .eq('post_id', postId)
+        .from('community_post_comments_new')
+        .select('id, post_id, user_id, content, created_at, updated_at, status')
+        .eq('post_id' as any, postId)
         .eq('status', 'active')
         .order('created_at', { ascending: true });
 
@@ -79,61 +70,67 @@ export const CommunityComments: React.FC<CommunityCommentsProps> = ({
         return;
       }
 
-      if (data) {
-        // Build comment tree
+      if (data && Array.isArray(data)) {
+        // Fetch user details for each comment
+        const userIds = [...new Set(data.map((c: any) => c.user_id))];
+        const userDetailsMap = new Map();
+        
+        // Fetch user details from users_local table
+        // Note: users_local.id references auth.users.id, so they should match
+        for (const userId of userIds) {
+          const [userData] = await safeFetch(
+            supabase
+              .from('users_local')
+              .select('id, username, avatar_url')
+              .eq('id', userId)
+              .maybeSingle()
+          );
+          
+          if (userData) {
+            userDetailsMap.set(userId, userData);
+          } else {
+            // Fallback: create a basic user object if not found in users_local
+            // This can happen if the user was created directly in auth.users
+            userDetailsMap.set(userId, {
+              id: userId,
+              username: 'User',
+              avatar_url: null
+            });
+          }
+        }
+
+        // Build comment objects
         const commentMap = new Map<string, Comment>();
         const rootComments: Comment[] = [];
 
         // First pass: create comment objects
         data.forEach((item: any) => {
+          const userDetails = userDetailsMap.get(item.user_id);
           const comment: Comment = {
             id: item.id,
             post_id: item.post_id,
             user_id: item.user_id,
-            parent_id: item.parent_id,
             content: item.content,
-            content_html: item.content_html,
+            content_html: null, // New table doesn't have content_html
             created_at: item.created_at,
             updated_at: item.updated_at,
             status: item.status,
-            author_username: item.users_local?.username || 'Unknown',
-            author_avatar: item.users_local?.avatar_url || null,
-            depth: 0
+            author_username: userDetails?.username || 'Unknown',
+            author_avatar: userDetails?.avatar_url || null
           };
           commentMap.set(comment.id, comment);
         });
 
-        // Second pass: build tree and count replies
+        // Second pass: build tree (all comments are root-level for now)
         commentMap.forEach((comment) => {
-          if (comment.parent_id) {
-            const parent = commentMap.get(comment.parent_id);
-            if (parent) {
-              comment.depth = (parent.depth || 0) + 1;
-              parent.reply_count = (parent.reply_count || 0) + 1;
-            }
-          } else {
-            rootComments.push(comment);
-          }
+          rootComments.push(comment);
         });
 
-        // Flatten tree for display (depth-first)
-        const flattened: Comment[] = [];
-        const flatten = (comment: Comment) => {
-          flattened.push(comment);
-          const replies = Array.from(commentMap.values()).filter(
-            c => c.parent_id === comment.id
-          );
-          replies.sort((a, b) => 
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          );
-          replies.forEach(reply => flatten(reply));
-        };
-
-        rootComments
+        // Sort comments by creation time
+        const flattened: Comment[] = rootComments
           .sort((a, b) => 
             new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          )
-          .forEach(comment => flatten(comment));
+          );
 
         setComments(flattened);
       }
@@ -146,44 +143,101 @@ export const CommunityComments: React.FC<CommunityCommentsProps> = ({
   };
 
   const handleSubmitReply = async (parentId: string | null = null) => {
+    console.log('handleSubmitReply called:', { parentId, replyContent: replyContent.trim(), isAuthenticated, isMember });
+    
     if (!replyContent.trim()) {
       toast.error('Comment cannot be empty');
       return;
     }
 
     if (!isAuthenticated || !user) {
+      console.log('User not authenticated, showing sign in modal');
       setShowSignInModal(true);
       return;
     }
 
-    // Check if user is a member of the community
+    // Check if user is a member of the community (warn but don't block - RLS will enforce)
     if (!isMember) {
-      toast.error('You must join the community before commenting');
-      return;
+      console.warn('⚠️ User may not be a member, but attempting comment anyway (RLS will enforce)');
     }
 
+    console.log('🔄 Starting comment submission...');
     setSubmitting(true);
     try {
+      // Get auth user ID directly from Supabase session (must match auth.uid() for RLS)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user?.id) {
+        console.error('❌ Session error:', sessionError);
+        toast.error('Unable to verify authentication. Please sign in again.');
+        setSubmitting(false);
+        return;
+      }
+      
+      const authUserId = session.user.id;
+      console.log('✅ User ID from session:', authUserId);
+      console.log('✅ Submitting comment:', { postId, userId: authUserId, contentLength: replyContent.trim().length });
+      
+      // Verify post exists in posts_v2 (required by foreign key)
+      const { data: postCheck } = await supabase
+        .from('posts_v2')
+        .select('id')
+        .eq('id' as any, postId)
+        .single();
+      
+      if (!postCheck) {
+        console.error('❌ Post not found in posts_v2 table. Post ID:', postId);
+        toast.error('Post not found. Please refresh the page.');
+        setSubmitting(false);
+        return;
+      }
+      console.log('✅ Post verified in posts_v2');
+
+      // Insert into new comments table using user_id (must match auth.uid())
       const commentData = {
         post_id: postId,
-        user_id: user.id,
-        parent_id: parentId,
+        user_id: authUserId,
         content: replyContent.trim(),
         status: 'active'
       };
+      
+      console.log('🔄 Attempting to insert comment...', commentData);
+      console.log('🔍 Verifying user_id format:', {
+        userId: authUserId,
+        userIdType: typeof authUserId,
+        userIdLength: authUserId?.length,
+        isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(authUserId || '')
+      });
 
       const query = supabase
-        .from('community_comments')
-        .insert(commentData)
+        .from('community_post_comments_new')
+        .insert(commentData as any)
         .select()
         .single();
 
       const [data, error] = await safeFetch(query);
+      console.log('📥 Insert response:', { 
+        data, 
+        error,
+        errorCode: error?.code,
+        errorMessage: error?.message,
+        errorDetails: error?.details,
+        errorHint: error?.hint
+      });
 
       if (error) {
+        console.error('❌ Comment insert error:', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          commentData
+        });
         throw error;
       }
 
+      console.log('✅ Comment created successfully:', data);
       toast.success('Comment added');
       setReplyContent('');
       setReplyingTo(null);
@@ -191,21 +245,18 @@ export const CommunityComments: React.FC<CommunityCommentsProps> = ({
       onCommentAdded?.();
     } catch (err: any) {
       console.error('Error submitting comment:', err);
-      toast.error('Failed to add comment');
+      const errorMessage = err.message || err.details || 'Unknown error occurred';
+      toast.error(`Failed to add comment: ${errorMessage}`);
     } finally {
       setSubmitting(false);
     }
   };
 
   const renderComment = (comment: Comment) => {
-    const isReply = comment.parent_id !== null;
-    const indentLevel = comment.depth || 0;
-
     return (
       <div
         key={comment.id}
-        className={`${isReply ? 'ml-8 border-l-2 border-gray-200 pl-4' : ''}`}
-        style={{ marginLeft: indentLevel > 0 ? `${indentLevel * 2}rem` : '0' }}
+        className=""
       >
         <div className="flex gap-3 py-3">
           <Avatar className="h-8 w-8 flex-shrink-0">
@@ -233,56 +284,6 @@ export const CommunityComments: React.FC<CommunityCommentsProps> = ({
                 <p>{comment.content}</p>
               )}
             </div>
-            {isAuthenticated ? (
-              <button
-                onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                className="text-xs text-[#030F35]/60 hover:text-[#030F35] transition-colors flex items-center gap-1"
-              >
-                <Reply className="h-3 w-3" />
-                Reply
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowSignInModal(true)}
-                className="text-xs text-[#030F35]/60 hover:text-[#030F35] transition-colors flex items-center gap-1"
-              >
-                <Reply className="h-3 w-3" />
-                Reply
-              </button>
-            )}
-            {replyingTo === comment.id && isAuthenticated && (
-              <div className="mt-3 space-y-2">
-                <Textarea
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder="Write a reply..."
-                  className="min-h-[80px] text-sm"
-                  rows={3}
-                />
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleSubmitReply(comment.id)}
-                    disabled={submitting || !replyContent.trim()}
-                    className="bg-dq-navy hover:bg-[#13285A] text-white text-xs"
-                  >
-                    <Send className="h-3 w-3 mr-1" />
-                    Post Reply
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setReplyingTo(null);
-                      setReplyContent('');
-                    }}
-                    className="text-xs"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

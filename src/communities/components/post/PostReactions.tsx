@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { getCurrentUserId } from '@/communities/utils/userUtils';
@@ -35,7 +35,7 @@ export function PostReactions({
   useEffect(() => {
     checkUserReactions();
     fetchReactionCounts();
-  }, [postId]);
+  }, [postId, isAuthenticated, user]);
   
   useEffect(() => {
     // Update counts when props change
@@ -45,18 +45,20 @@ export function PostReactions({
   
   const fetchReactionCounts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('reactions')
+      const query = supabase
+        .from('community_post_reactions_new')
         .select('reaction_type')
-        .eq('post_id', postId);
+        .eq('post_id' as any, postId);
+      
+      const [data, error] = await safeFetch(query);
       
       if (error) {
         return;
       }
       
-      if (data) {
-        const helpful = data.filter(r => r.reaction_type === 'helpful').length;
-        const insightful = data.filter(r => r.reaction_type === 'insightful').length;
+      if (data && Array.isArray(data)) {
+        const helpful = data.filter((r: any) => r.reaction_type === 'helpful').length;
+        const insightful = data.filter((r: any) => r.reaction_type === 'insightful').length;
         setHelpfulCount(helpful);
         setInsightfulCount(insightful);
       }
@@ -66,28 +68,39 @@ export function PostReactions({
   };
   
   const checkUserReactions = async () => {
-    if (!isAuthenticated || !user) return;
-    const userId = getCurrentUserId(user);
-    if (!userId) return;
-    
-    const query = supabase
-      .from('reactions')
-      .select('reaction_type')
-      .eq('post_id', postId)
-      .eq('user_id', userId);
-    const [data, error] = await safeFetch(query);
-    if (error) {
+    if (!isAuthenticated || !user) {
+      // Reset reactions when not authenticated
+      setHasReactedHelpful(false);
+      setHasReactedInsightful(false);
       return;
     }
-    if (data) {
-      setHasReactedHelpful(data.some(r => r.reaction_type === 'helpful'));
-      setHasReactedInsightful(data.some(r => r.reaction_type === 'insightful'));
+    const userId = getCurrentUserId(user);
+    if (!userId) {
+      setHasReactedHelpful(false);
+      setHasReactedInsightful(false);
+      return;
+    }
+    
+    const query = supabase
+      .from('community_post_reactions_new')
+      .select('reaction_type')
+      .eq('post_id' as any, postId)
+      .eq('user_id' as any, userId);
+    const [data, error] = await safeFetch(query);
+    if (error) {
+      console.error('Error checking user reactions:', error);
+      return;
+    }
+    if (data && Array.isArray(data)) {
+      setHasReactedHelpful(data.some((r: any) => r.reaction_type === 'helpful'));
+      setHasReactedInsightful(data.some((r: any) => r.reaction_type === 'insightful'));
     }
   };
   const handleReaction = async (type: 'helpful' | 'insightful') => {
     if (isReacting) return; // Prevent double-clicks
     
     if (!isAuthenticated || !user) {
+      console.log('❌ Not authenticated, showing sign-in modal');
       setShowSignInModal(true);
       return;
     }
@@ -95,13 +108,21 @@ export function PostReactions({
     setIsReacting(true);
     
     try {
+      // Get user ID directly from Supabase session (must match auth.uid() for RLS)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user?.id) {
+        console.error('❌ Session error:', sessionError);
+        toast.error('Unable to verify authentication. Please sign in again.');
+        setIsReacting(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      console.log('✅ User ID from session:', userId);
+      
       // Check membership if communityId is provided
       if (communityId) {
-        const userId = getCurrentUserId(user);
-        if (!userId) {
-          setIsReacting(false);
-          return;
-        }
         // Use optimized membership check (single table query)
         const { checkIsMember } = await import('@/communities/utils/membershipUtils');
         const isCommunityMember = await checkIsMember(userId, communityId);
@@ -113,29 +134,33 @@ export function PostReactions({
         }
       }
       
-      const userId = getCurrentUserId(user);
-      if (!userId) {
-        toast.error('Please sign in to react');
-        setIsReacting(false);
-        return;
-      }
-      
       const hasReacted = type === 'helpful' ? hasReactedHelpful : hasReactedInsightful;
       
       if (hasReacted) {
-        // Remove reaction
-        const { error } = await supabase
-          .from('reactions')
+        // Remove reaction from new table
+        const query = supabase
+          .from('community_post_reactions_new')
           .delete()
-          .eq('post_id', postId)
-          .eq('user_id', userId)
-          .eq('reaction_type', type);
+          .eq('post_id' as any, postId)
+          .eq('user_id' as any, userId)
+          .eq('reaction_type' as any, type);
+        
+        const [, error] = await safeFetch(query);
         
         if (error) {
+          console.error('❌ Error removing reaction:', error);
+          console.error('❌ Error details:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
           toast.error('Failed to remove reaction: ' + (error.message || 'Unknown error'));
           setIsReacting(false);
           return;
         }
+        
+        console.log('✅ Reaction removed successfully');
         
         // Update local state optimistically
         if (type === 'helpful') {
@@ -149,20 +174,34 @@ export function PostReactions({
         // Refresh counts from database to ensure accuracy
         await fetchReactionCounts();
       } else {
-        // Add reaction
-        const { error } = await supabase
-          .from('reactions')
-          .insert({
-            post_id: postId,
-            user_id: userId,
-            reaction_type: type
-          });
+        // Add reaction to new table
+        const reactionData = {
+          post_id: postId,
+          user_id: userId,
+          reaction_type: type
+        };
+        
+        const query = supabase
+          .from('community_post_reactions_new')
+          .insert(reactionData as any);
+        
+        const [, error] = await safeFetch(query);
         
         if (error) {
+          console.error('❌ Error adding reaction:', error);
+          console.error('❌ Error details:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            reactionData
+          });
           toast.error('Failed to add reaction: ' + (error.message || 'Unknown error'));
           setIsReacting(false);
           return;
         }
+        
+        console.log('✅ Reaction added successfully');
         
         // Update local state optimistically
         if (type === 'helpful') {
@@ -207,7 +246,10 @@ export function PostReactions({
           size="sm" 
           disabled={isReacting || !isAuthenticated}
           className={`h-9 px-4 gap-2 rounded-full transition-all ${hasReactedHelpful ? 'bg-dq-navy text-white border-dq-navy hover:bg-[#13285A] hover:border-[#13285A]' : 'hover:bg-dq-navy/10 hover:text-dq-navy hover:border-dq-navy/30'} ${isReacting || !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`} 
-          onClick={() => handleReaction('helpful')}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleReaction('helpful');
+          }}
         >
           <ThumbsUp className={`h-4 w-4 ${hasReactedHelpful ? 'fill-white' : ''}`} />
           <span className="font-medium">{helpfulCount}</span>
@@ -218,13 +260,24 @@ export function PostReactions({
           size="sm" 
           disabled={isReacting || !isAuthenticated}
           className={`h-9 px-4 gap-2 rounded-full transition-all ${hasReactedInsightful ? 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600 hover:border-amber-600' : 'hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200'} ${isReacting || !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`} 
-          onClick={() => handleReaction('insightful')}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleReaction('insightful');
+          }}
         >
           <Lightbulb className={`h-4 w-4 ${hasReactedInsightful ? 'fill-white' : ''}`} />
           <span className="font-medium">{insightfulCount}</span>
           <span>Insightful</span>
         </Button>
-        <Button variant="outline" size="sm" className="h-9 px-4 gap-2 rounded-full ml-auto hover:bg-gray-50" onClick={handleShare}>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-9 px-4 gap-2 rounded-full ml-auto hover:bg-gray-50" 
+          onClick={(e) => {
+            e.stopPropagation();
+            handleShare();
+          }}
+        >
           <Share2 className="h-4 w-4" />
           <span>Share</span>
         </Button>

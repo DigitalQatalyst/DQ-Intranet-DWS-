@@ -164,3 +164,4 @@ CREATE INDEX IF NOT EXISTS idx_pulse_feedback_responses_event_session
 ON pulse_feedback_responses(event_id, session_id) 
 WHERE session_id IS NOT NULL;
 
+

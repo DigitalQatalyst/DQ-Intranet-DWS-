@@ -34,7 +34,11 @@ export const CardFooter: React.FC<CardFooterProps> = ({
           )}
           {primaryCTA && (
             <button
-              onClick={primaryCTA.onClick}
+              type="button"
+              onClick={(e) => {
+                console.log('🔵 CardFooter: Primary CTA button clicked', { text: primaryCTA.text });
+                primaryCTA.onClick(e);
+              }}
               className={`w-full h-10 px-4 py-2 text-sm font-bold rounded-md transition-colors whitespace-nowrap flex items-center justify-center ${
                 primaryCTA.variant === 'secondary'
                   ? 'text-dq-navy bg-white border border-dq-navy hover:bg-dq-navy/10'

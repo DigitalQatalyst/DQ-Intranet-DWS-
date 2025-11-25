@@ -598,44 +598,14 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           let data: SupabaseEvent[] | null = null;
           let error: any = null;
 
-          // Strategy 1: Try to fetch from events_v2 table (primary source)
-          try {
-            const now = new Date().toISOString();
-            console.log("Fetching events with filters:", {
-              status: "published",
-              start_time_gte: now,
-              current_time: new Date().toISOString()
-            });
-            
-            // First, let's check total count and status breakdown to debug
-            const { count: totalCount } = await supabaseClient
-              .from("events_v2")
-              .select("*", { count: 'exact', head: true });
-            console.log("Total events in events_v2 table:", totalCount);
-            
-            // Check events by status
-            const { data: statusBreakdown } = await supabaseClient
-              .from("events_v2")
-              .select("status, start_time")
-              .limit(100);
-            if (statusBreakdown) {
-              const statusCounts = statusBreakdown.reduce((acc: any, e: any) => {
-                acc[e.status] = (acc[e.status] || 0) + 1;
-                return acc;
-              }, {});
-              const futureCount = statusBreakdown.filter((e: any) => new Date(e.start_time) >= new Date()).length;
-              console.log("Events by status:", statusCounts);
-              console.log("Future events (start_time >= now):", futureCount);
-              console.log("Published + future events:", statusBreakdown.filter((e: any) => 
-                e.status === 'published' && new Date(e.start_time) >= new Date()
-              ).length);
-            }
-            
-            let eventsQuery = supabaseClient
-              .from("events_v2")
-              .select("*")
-              .eq("status", "published") // Only get published events
-              .gte("start_time", now); // Only get future events
+          // Fetch from events_v2 table (primary source)
+          const now = new Date().toISOString();
+          
+          let eventsQuery = supabaseClient
+            .from("events_v2")
+            .select("*")
+            .eq("status", "published") // Only get published events
+            .gte("start_time", now); // Only get future events
 
             // Apply search query if provided
             if (searchQuery && searchQuery.trim()) {
@@ -786,110 +756,12 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             // Note: If you have more than 1000 events, you'll need pagination
             eventsQuery = eventsQuery.limit(1000);
 
-            const queryResult = await eventsQuery;
+          const queryResult = await eventsQuery;
 
-            if (!queryResult.error && queryResult.data) {
-              data = queryResult.data;
-              console.log("Fetched events from events_v2 table:", data.length, "events");
-              console.log("Event details:", data.map((e: any) => ({ 
-                id: e.id, 
-                title: e.title, 
-                status: e.status, 
-                start_time: e.start_time,
-                is_future: new Date(e.start_time) >= new Date()
-              })));
-            } else {
-              throw queryResult.error || new Error("Events_v2 table query failed");
-            }
-          } catch (eventsV2Error) {
-            // events_v2 table doesn't exist or has errors, try fallback strategies
-            console.log("events_v2 table not available, trying fallback strategies...");
-            error = eventsV2Error;
-
-            // Strategy 2: Try to fetch from upcoming_events view
-            try {
-              const viewQuery = await supabaseClient
-                .from("upcoming_events")
-                .select("*")
-                .order("start_time", { ascending: true });
-
-              if (!viewQuery.error && viewQuery.data && viewQuery.data.length > 0) {
-                data = viewQuery.data;
-                console.log("Fetched events from upcoming_events view");
-              } else {
-                throw new Error("View not available or empty");
-              }
-            } catch (viewError) {
-              // View doesn't exist or error, try events table
-              console.log("upcoming_events view not available, trying events table...");
-              
-              // Strategy 3: Try events table
-              try {
-                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-                const tableQuery = await supabaseClient
-                  .from("events")
-                  .select("*")
-                  .gte("event_date", today) // Only get events from today onwards
-                  .order("event_date", { ascending: true })
-                  .order("event_time", { ascending: true });
-
-                if (!tableQuery.error && tableQuery.data) {
-                  data = tableQuery.data;
-                  console.log("Fetched events from events table");
-                } else {
-                  throw tableQuery.error || new Error("Events table query failed");
-                }
-              } catch (tableError) {
-                // Events table doesn't exist or has errors, try posts table
-                console.log("events table not available, trying posts table with event type...");
-                error = tableError;
-
-                // Strategy 4: Fetch from posts table where post_type = 'event'
-                try {
-                  const now = new Date().toISOString();
-                  const postsQuery = await supabaseClient
-                    .from("posts")
-                    .select("id, title, content, event_date, event_location, post_type, community_id, created_by, created_at, tags, status")
-                    .eq("post_type", "event")
-                    .eq("status", "active") // Required for RLS policy
-                    .not("event_date", "is", null)
-                    .gte("event_date", now) // Only get future events
-                    .order("event_date", { ascending: true });
-
-                  if (!postsQuery.error && postsQuery.data) {
-                    // Transform posts to match our event interface
-                    data = postsQuery.data.map((post: any) => ({
-                      id: post.id,
-                      title: post.title,
-                      content: post.content,
-                      description: post.content,
-                      event_date: post.event_date,
-                      event_location: post.event_location,
-                      post_type: post.post_type,
-                      community_id: post.community_id,
-                      created_by: post.created_by,
-                      created_at: post.created_at,
-                      tags: post.tags,
-                    })) as PostEventRow[];
-                    error = null;
-                    console.log("Fetched events from posts table");
-                  } else {
-                    console.warn("Could not fetch events from posts table:", postsQuery.error?.message || "Unknown error");
-                    throw postsQuery.error || new Error("Posts table query failed");
-                  }
-                } catch (postsError: any) {
-                  // Check if it's a permission error (42501) or other error
-                  if (postsError?.code === '42501') {
-                    console.warn("Permission denied accessing posts table. Events from posts may not be available.");
-                    error = null;
-                    data = null;
-                  } else {
-                    error = postsError;
-                    console.error("Error fetching events from posts table:", postsError);
-                  }
-                }
-              }
-            }
+          if (!queryResult.error && queryResult.data) {
+            data = queryResult.data;
+          } else {
+            error = queryResult.error || new Error("Events_v2 table query failed");
           }
 
           // Handle errors gracefully - for events, don't use fallback data

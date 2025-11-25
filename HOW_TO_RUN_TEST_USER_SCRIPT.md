@@ -247,3 +247,4 @@ If you're still having issues:
 3. Make sure you're using the `service_role` key (not `anon`)
 4. Check that your Supabase project is active and not paused
 
+

@@ -596,3 +596,4 @@ Member        |
 3. **Authentication Migration:** Anonymous memberships don't automatically transfer to authenticated accounts
 4. **Dual Table Sync:** Both tables must be kept in sync (current implementation does this)
 5. **RLS Policy Security:** Public insert policy allows anyone to insert (application-level validation needed)
+

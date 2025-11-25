@@ -191,3 +191,4 @@ OR role = 'guest';
 - `src/communities/services/membershipService.ts` - Membership operations
 - `supabase/migrations/20250108000002_remove_anonymous_user_support.sql` - Migration removing anonymous support
 
+

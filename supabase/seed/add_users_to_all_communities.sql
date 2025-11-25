@@ -22,3 +22,4 @@ CROSS JOIN (
 ON CONFLICT (community_id, user_id) DO NOTHING;
 
 
+

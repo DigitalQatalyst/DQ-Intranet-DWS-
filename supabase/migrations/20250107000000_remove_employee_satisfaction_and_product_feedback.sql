@@ -38,3 +38,4 @@ BEGIN
   RAISE NOTICE 'Successfully removed Employee Satisfaction Survey and Product Feedback Poll from Pulse marketplace';
 END $$;
 
+

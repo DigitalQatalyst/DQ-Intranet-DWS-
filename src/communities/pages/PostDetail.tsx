@@ -115,15 +115,15 @@ export default function PostDetail() {
         .maybeSingle()
     );
     
-    // Get reaction counts separately
+    // Get reaction counts from new table
     const [reactionsData] = await safeFetch(
-      supabase.from("reactions").select("reaction_type").eq("post_id", id)
+      supabase.from("community_post_reactions_new").select("reaction_type").eq("post_id", id)
     );
     
-    // Get comment count
+    // Get comment count from new table
     const [commentsData] = await safeFetch(
       supabase
-        .from("comments")
+        .from("community_post_comments_new")
         .select("id")
         .eq("post_id", id)
     );

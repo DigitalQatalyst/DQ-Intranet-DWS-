@@ -330,3 +330,4 @@ After implementation:
 - [ ] RLS policies allow anonymous inserts
 - [ ] Partial unique indexes prevent duplicate authenticated responses
 
+

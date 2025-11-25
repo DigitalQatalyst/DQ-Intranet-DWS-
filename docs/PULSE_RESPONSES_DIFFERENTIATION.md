@@ -335,3 +335,4 @@ GROUP BY pi.type;
 
 **Best Practice:** Start with **Approach 1 + 2** (JOIN + Views), then add **Approach 4** (computed column) if performance becomes an issue.
 
+

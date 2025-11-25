@@ -433,3 +433,4 @@ community_reactions               │
 5. All operations use `auth.users.id` (via `auth.uid()` in RLS)
 6. RLS policies enforce `auth.uid() IS NOT NULL` for all operations
 
+

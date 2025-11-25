@@ -204,3 +204,4 @@ CREATE POLICY "Authenticated users can delete their own assets"
 -- The memberships table RLS policies should allow anonymous inserts if desired.
 -- This migration only enforces authentication for interactions (posts, comments, reactions).
 
+

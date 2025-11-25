@@ -72,3 +72,4 @@ export function showMembershipSuccess(
     toast.success('Left community');
   }
 }
+

@@ -53,3 +53,4 @@ GRANT INSERT, SELECT ON pulse_feedback_responses TO anon;
 COMMENT ON COLUMN pulse_feedback_responses.session_id IS 'Session identifier for anonymous duplicate prevention. NULL for legacy authenticated responses.';
 COMMENT ON COLUMN pulse_feedback_responses.user_id IS 'Always NULL for anonymous responses. Legacy field for backward compatibility.';
 
+
