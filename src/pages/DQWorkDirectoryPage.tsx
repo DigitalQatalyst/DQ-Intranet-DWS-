@@ -5,7 +5,7 @@ import { SimpleTabs, SimpleTab } from '@/components/SimpleTabs';
 import { WorkDirectoryOverview } from '../components/work-directory/WorkDirectoryOverview';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import { FilterSidebar, FilterConfig } from '../components/marketplace/FilterSidebar';
+import { FilterSidebar, FilterConfig, FilterGroup } from '../components/marketplace/FilterSidebar';
 import { SearchBar } from '../components/SearchBar';
 import { getPerformanceStatusClasses } from '@/components/work-directory/unitStyles';
 import { useAssociates, useWorkUnits, useWorkPositions } from '@/hooks/useWorkDirectory';
@@ -21,26 +21,11 @@ const tabs: Array<{ id: TabKey; label: string }> = [
   { id: 'positions', label: 'Positions' },
   { id: 'associates', label: 'Associates' },
 ];
-const DEPARTMENT_OPTIONS = [
-  'HRA (People)',
-  'Finance',
-  'Deals',
-  'Stories',
-  'Intelligence',
-  'Solutions',
-  'SecDevOps',
-  'Products',
-  'Delivery — Deploys',
-  'Delivery — Designs',
-  'DCO Operations',
-  'DBP Platform',
-  'DBP Delivery',
-];
 
 const LOCATION_OPTIONS = ['Dubai', 'Nairobi', 'Riyadh', 'Remote'];
 
 const globalFilterConfig: FilterConfig[] = [
-  { id: 'department', title: 'Department', options: DEPARTMENT_OPTIONS.map((d) => ({ id: d, name: d })) },
+  { id: 'department', title: 'Department', options: ['HRA (People)', 'Finance', 'Deals', 'Stories', 'Intelligence', 'Solutions', 'SecDevOps', 'Products', 'Delivery — Deploys', 'Delivery — Designs', 'DCO Operations', 'DBP Platform', 'DBP Delivery', 'CoE Office'].map((d) => ({ id: d, name: d })) },
   { id: 'location', title: 'Location', options: LOCATION_OPTIONS.map((l) => ({ id: l, name: l })) },
 ];
 
@@ -97,6 +82,91 @@ const mapDepartment = (value?: string) => {
   return value;
 };
 
+const getUnitDepartmentLabel = (unit: { department?: string; unitName?: string; sector?: string }) => {
+  const raw = unit.department || unit.unitName || unit.sector || '';
+  if (raw.toLowerCase().includes('coe | lead')) {
+    return 'CoE | Lead';
+  }
+  return mapDepartment(raw);
+};
+
+const DEPARTMENT_GROUPS_SPEC: Array<{ title: string; values: string[] }> = [
+  {
+    title: 'Sectors',
+    values: ['DCO Operations', 'DBP Platform', 'DBP Delivery', 'CoE Office', 'CEO Office'],
+  },
+  {
+    title: 'Factories',
+    values: [
+      'HRA (People)',
+      'Finance',
+      'Deals',
+      'Stories',
+      'Intelligence',
+      'Products',
+      'Solutions',
+      'SecDevOps',
+    ],
+  },
+  {
+    title: 'Units',
+    values: ['DQ Delivery — Deploys', 'DQ Delivery — Designs', 'CoE | Lead'],
+  },
+];
+
+const FOCUS_TAG_GROUPS_SPEC: Array<{ title: string; values: string[] }> = [
+  {
+    title: 'CoE & Governance',
+    values: ['CoE', 'Enablement', 'Governance'],
+  },
+  {
+    title: 'Delivery & Experience',
+    values: ['Delivery — Deploys', 'Delivery — Designs', 'Go-lives', 'Roll-outs', 'UX/UI'],
+  },
+  {
+    title: 'Factories & Products',
+    values: [
+      'People',
+      'HR Ops',
+      'Records',
+      'Billing',
+      'Stories',
+      'Content',
+      'Brand',
+      'Intelligence',
+      'Analytics',
+      'Insights',
+      'Products',
+      'Roadmap',
+      'Releases',
+      'Solutions',
+      'Architecture',
+      'Designs',
+      'SecDevOps',
+      'Pipelines',
+      'Security',
+    ],
+  },
+  {
+    title: 'Platform & Ops',
+    values: ['Platform', 'Tools', 'Studio Ops'],
+  },
+];
+
+const UNIT_TYPE_ORDER = ['Sector', 'Factory', 'Unit'];
+
+const buildGroupedOptions = (spec: Array<{ title: string; values: string[] }>, available: Set<string>): FilterGroup[] =>
+  spec
+    .map((group) => ({
+      title: group.title,
+      options: group.values
+        .filter((value) => available.has(value))
+        .map((value) => ({ id: value, name: value })),
+    }))
+    .filter((group) => group.options.length > 0);
+
+const flattenGroups = (groups: FilterGroup[]) => groups.flatMap((group) => group.options);
+
 const DQWorkDirectoryPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('units');
@@ -119,14 +189,40 @@ const DQWorkDirectoryPage: React.FC = () => {
   const { positions: allPositions, loading: positionsLoading, error: positionsError } = useWorkPositions();
   const { associates: allAssociates, loading: associatesLoading, error: associatesError } = useAssociates();
 
-  const unitFilterConfig = useMemo<FilterConfig[]>(
-    () => [
-      ...globalFilterConfig,
-      { id: 'unitType', title: 'Unit Type', options: toOptions(allUnits.map((u) => u.unitType)) },
-      { id: 'focusTags', title: 'Focus Tags', options: toOptionsFromArrays(allUnits.map((u) => u.focusTags)) },
-    ],
-    [allUnits]
-  );
+  const unitFilterConfig = useMemo<FilterConfig[]>(() => {
+    const availableDepartments = new Set(
+      allUnits
+        .map((u) => getUnitDepartmentLabel(u))
+        .filter(Boolean) as string[]
+    );
+    const departmentGroups = buildGroupedOptions(DEPARTMENT_GROUPS_SPEC, availableDepartments);
+
+    const locationOptions = toOptions(allUnits.map((u) => locationLabel(u.location)));
+
+    const unitTypeValues = Array.from(new Set(allUnits.map((u) => u.unitType).filter(Boolean) as string[]));
+    const unitTypeOptions = unitTypeValues
+      .sort((a, b) => {
+        const aIdx = UNIT_TYPE_ORDER.indexOf(a);
+        const bIdx = UNIT_TYPE_ORDER.indexOf(b);
+        if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+        if (aIdx !== -1) return -1;
+        if (bIdx !== -1) return 1;
+        return a.localeCompare(b);
+      })
+      .map((value) => ({ id: value, name: value }));
+
+    const availableFocusTags = new Set(
+      allUnits.flatMap((u) => (Array.isArray(u.focusTags) ? u.focusTags : [])).filter(Boolean) as string[]
+    );
+    const focusTagGroups = buildGroupedOptions(FOCUS_TAG_GROUPS_SPEC, availableFocusTags);
+
+    return [
+      { id: 'department', title: 'Department', options: flattenGroups(departmentGroups), groups: departmentGroups },
+      { id: 'location', title: 'Location', options: locationOptions },
+      { id: 'unitType', title: 'Unit Type', options: unitTypeOptions },
+      { id: 'focusTags', title: 'Focus Tags', options: flattenGroups(focusTagGroups), groups: focusTagGroups },
+    ];
+  }, [allUnits]);
 
   const positionFilterConfig = useMemo<FilterConfig[]>(
     () => {
@@ -249,9 +345,10 @@ const DQWorkDirectoryPage: React.FC = () => {
           department = [],
           location = [],
         } = unitFilters;
+        const departmentLabel = getUnitDepartmentLabel(unit);
         const unitLocation = locationLabel(unit.location);
         const matchesUnitType = unitType.length === 0 || unitType.includes(unit.unitType);
-        const matchesDepartment = department.length === 0 || department.includes(unit.department);
+        const matchesDepartment = department.length === 0 || department.includes(departmentLabel);
         const matchesLocation = location.length === 0 || location.includes(unitLocation);
         const matchesFocus =
           focusTags.length === 0 || unit.focusTags.some((tag) => focusTags.includes(tag));
@@ -264,7 +361,7 @@ const DQWorkDirectoryPage: React.FC = () => {
       })
       .map((unit) => ({
         ...unit,
-        departmentLabel: unit.department,
+        departmentLabel: getUnitDepartmentLabel(unit),
         locationLabel: locationLabel(unit.location),
       }));
 
@@ -490,6 +587,7 @@ const DQWorkDirectoryPage: React.FC = () => {
     priorityLevel?: string | null;
     priorityScope?: string | null;
     performanceStatus?: string | null;
+    performanceScore?: number | null;
     wiAreas?: string[];
     bannerImageUrl: string | null;
     department: string;
@@ -632,6 +730,20 @@ const DQWorkDirectoryPage: React.FC = () => {
             )}
           </div>
         ) : null}
+        {unit.performanceStatus && (
+          <div className="mt-3">
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${performanceClasses}`}
+            >
+              {unit.performanceStatus}
+              {unit.performanceScore != null && (
+                <span className="ml-1 font-normal text-slate-700">
+                  · {unit.performanceScore}/100
+                </span>
+              )}
+            </span>
+          </div>
+        )}
         <div className="mt-auto pt-4">
           <Link
             to={`/work-directory/units/${unit.slug}`}

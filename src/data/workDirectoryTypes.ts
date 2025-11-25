@@ -17,6 +17,9 @@ export type WorkUnitRow = {
   priorities_list?: string[] | null;
   current_focus?: string | null;
   performance_notes?: string | null;
+  priority_level?: string | null;
+  performance_score?: number | null;
+  performance_updated_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -40,7 +43,19 @@ export interface WorkUnit {
   prioritiesList?: string[] | null;
   currentFocus?: string | null;
   performanceNotes?: string | null;
+  priorityLevel?: string | null;
+  priorityScopeRaw?: string | null;
+  updatedAt?: string | null;
+  performanceScore?: number | null;
+  performanceUpdatedAt?: string | null;
 }
+
+export type UnitFilters = {
+  department: string[];
+  unitType: string[];
+  location: string[];
+  focusTags: string[];
+};
 
 export type WorkPositionRow = {
   id: string;

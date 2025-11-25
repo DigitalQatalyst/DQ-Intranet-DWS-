@@ -1,8 +1,67 @@
 import { supabase } from "@/lib/supabaseClient";
-import type { WorkPositionRow, WorkPosition } from "@/data/workDirectoryTypes";
+import type { WorkPositionRow, WorkPosition, WorkUnitRow, WorkUnit } from "@/data/workDirectoryTypes";
 
 export const WORK_POSITION_COLUMNS =
   "id, slug, position_name, role_family, department, unit, unit_slug, location, sfia_rating, sfia_level, contract_type, summary, description, responsibilities, expectations, image_url, status, created_at, updated_at";
+
+export const WORK_UNIT_COLUMNS =
+  "id, slug, sector, unit_name, unit_type, mandate, location, focus_tags, wi_areas, priority_level, priority_scope, current_focus, priorities, priorities_list, performance_status, performance_score, performance_summary, performance_notes, performance_updated_at, banner_image_url, created_at, updated_at";
+
+export const mapWorkUnitRow = (row: WorkUnitRow): WorkUnit => ({
+  id: row?.id || "",
+  slug: row?.slug || "",
+  sector: row?.sector || "",
+  unitName: row?.unit_name || "",
+  unitType: row?.unit_type || "",
+  mandate: row?.mandate || "",
+  location: row?.location || "",
+  focusTags: Array.isArray(row?.focus_tags) ? row.focus_tags : [],
+  wiAreas: Array.isArray(row?.wi_areas) ? row.wi_areas : [],
+  priorityLevel: row?.priority_level ?? null,
+  priorityScope: row?.priority_scope ?? null,
+  priorityScopeRaw: row?.priority_scope ?? null,
+  currentFocus: row?.current_focus ?? null,
+  priorities: row?.priorities ?? null,
+  prioritiesList: Array.isArray(row?.priorities_list) ? row.priorities_list : [],
+  performanceStatus: row?.performance_status ?? null,
+  performanceScore: row?.performance_score ?? null,
+  performanceSummary: row?.performance_summary ?? null,
+  performanceNotes: row?.performance_notes ?? null,
+  performanceUpdatedAt: row?.performance_updated_at ?? null,
+  bannerImageUrl: row?.banner_image_url ?? null,
+  updatedAt: row?.updated_at ?? null,
+});
+
+export async function updateUnitPerformance(
+  unitId: string,
+  payload: {
+    performanceScore: number | null;
+    performanceStatus: string | null;
+    performanceSummary: string | null;
+    performanceNotes: string | null;
+  }
+) {
+  const { performanceScore, performanceStatus, performanceSummary, performanceNotes } = payload;
+
+  const { data, error } = await supabase
+    .from("work_units")
+    .update({
+      performance_score: performanceScore,
+      performance_status: performanceStatus,
+      performance_summary: performanceSummary,
+      performance_notes: performanceNotes,
+      performance_updated_at: new Date().toISOString(),
+    })
+    .eq("id", unitId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as WorkUnitRow;
+}
 
 export const mapWorkPositionRow = (row: WorkPositionRow): WorkPosition => {
   // Debug logging in development only

@@ -5,10 +5,15 @@ export interface FilterOption {
   id: string;
   name: string;
 }
+export interface FilterGroup {
+  title: string;
+  options: FilterOption[];
+}
 export interface FilterConfig {
   id: string;
   title: string;
-  options: FilterOption[];
+  options?: FilterOption[];
+  groups?: FilterGroup[];
 }
 interface AccordionSectionProps {
   title: string;
@@ -58,28 +63,48 @@ export function FilterSidebar({
   };
   const textSizeClass = isResponsive ? 'text-xs' : 'text-sm';
   const spacingClass = isResponsive ? 'space-y-1' : 'space-y-2';
+
+  const renderOptions = (options: FilterOption[], sectionId: string, groupKey?: string) => (
+    <div className={spacingClass}>
+      {options.map(option => {
+        const optionValue = option.id;
+        const selectedValues = filters[sectionId] ?? [];
+        const isChecked = selectedValues.includes(optionValue);
+        const inputId = `${isResponsive ? 'mobile' : 'desktop'}-${sectionId}-${groupKey ?? 'option'}-${option.id}`;
+        return <div key={option.id} className="flex items-center">
+            <input
+              type="checkbox"
+              id={inputId}
+              checked={isChecked}
+              onChange={() => onFilterChange(sectionId, optionValue)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor={inputId} className={`ml-2 ${textSizeClass} text-gray-700`}>
+              {option.name}
+            </label>
+          </div>;
+      })}
+    </div>
+  );
+
   return <div className="space-y-2">
       {filterConfig.map(config => <AccordionSection key={config.id} title={config.title} isOpen={openSections[config.id] ?? defaultOpen} onToggle={() => toggleSection(config.id)}>
-          <div className={spacingClass}>
-            {config.options.map(option => {
-            const optionValue = option.id;
-            const selectedValues = filters[config.id] ?? [];
-            const isChecked = selectedValues.includes(optionValue);
-            const inputId = `${isResponsive ? 'mobile' : 'desktop'}-${config.id}-${option.id}`;
-            return <div key={option.id} className="flex items-center">
-                <input
-                  type="checkbox"
-                  id={inputId}
-                  checked={isChecked}
-                  onChange={() => onFilterChange(config.id, optionValue)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor={inputId} className={`ml-2 ${textSizeClass} text-gray-700`}>
-                  {option.name}
-                </label>
-              </div>;
-          })}
-          </div>
+          {config.groups && config.groups.length > 0 ? (
+            <div className="space-y-3">
+              {config.groups
+                .filter(group => group.options.length > 0)
+                .map(group => (
+                  <div key={group.title} className="space-y-1">
+                    <p className={`${textSizeClass} font-semibold text-gray-500 uppercase tracking-wide`}>
+                      {group.title}
+                    </p>
+                    {renderOptions(group.options, config.id, group.title)}
+                  </div>
+                ))}
+            </div>
+          ) : (
+            renderOptions(config.options ?? [], config.id)
+          )}
         </AccordionSection>)}
     </div>;
 }

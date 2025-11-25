@@ -43,6 +43,23 @@ function deriveDepartmentFromUnitName(unitName: string): string {
   return unitName;
 }
 
+const normalizeFocusTags = (tags: string[]): string[] => {
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+  for (const tag of tags) {
+    const lower = tag?.toLowerCase() ?? '';
+    const isUxUi =
+      lower === 'ux' || lower === 'ui' || lower === 'ux/ui' || lower === 'ux / ui';
+    const value = isUxUi ? 'UX/UI' : tag;
+    const key = isUxUi ? 'ux/ui' : value.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      normalized.push(isUxUi ? 'UX/UI' : value);
+    }
+  }
+  return normalized;
+};
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -50,14 +67,26 @@ const slugify = (value: string) =>
     .replace(/(^-|-$)+/g, "");
 
 const UNIT_COLUMNS =
-  "id, sector, unit_name, unit_type, mandate, location, banner_image_url, priority_scope, performance_status, focus_tags, slug, wi_areas, priorities, performance_summary, priorities_list, current_focus, performance_notes, created_at, updated_at";
+  "id, sector, unit_name, unit_type, mandate, location, banner_image_url, priority_scope, priority_level, performance_status, performance_score, focus_tags, slug, wi_areas, priorities, performance_summary, priorities_list, current_focus, performance_notes, created_at, updated_at";
+
+const jsonToStringArray = (value: unknown): string[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter(Boolean) as string[];
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    if (Array.isArray(parsed)) return parsed.filter(Boolean) as string[];
+  } catch {
+    // ignore parse errors
+  }
+  return [];
+};
 
 // Mapper functions to convert snake_case DB fields to camelCase for UI
 function mapWorkUnit(dbUnit: WorkUnitRow): WorkUnit {
   const fallbackSlug = slugify(dbUnit.unit_name);
-  const focusTags = Array.isArray(dbUnit.focus_tags) ? dbUnit.focus_tags : [];
-  const wiAreas = Array.isArray(dbUnit.wi_areas) ? dbUnit.wi_areas : [];
-  const prioritiesList = Array.isArray(dbUnit.priorities_list) ? dbUnit.priorities_list : [];
+  const focusTags = normalizeFocusTags(jsonToStringArray(dbUnit.focus_tags));
+  const wiAreas = jsonToStringArray(dbUnit.wi_areas);
+  const prioritiesList = jsonToStringArray(dbUnit.priorities_list);
   return {
     id: dbUnit.id,
     slug: dbUnit.slug || fallbackSlug,
@@ -68,7 +97,10 @@ function mapWorkUnit(dbUnit: WorkUnitRow): WorkUnit {
     location: dbUnit.location,
     focusTags,
     priorityScope: dbUnit.priority_scope ?? null,
+    priorityScopeRaw: dbUnit.priority_scope ?? null,
+    priorityLevel: dbUnit.priority_level ?? null,
     performanceStatus: dbUnit.performance_status ?? null,
+    performanceScore: dbUnit.performance_score ?? null,
     wiAreas,
     bannerImageUrl: dbUnit.banner_image_url ?? null,
     department: deriveDepartmentFromUnitName(dbUnit.unit_name),
@@ -77,6 +109,7 @@ function mapWorkUnit(dbUnit: WorkUnitRow): WorkUnit {
     prioritiesList,
     currentFocus: dbUnit.current_focus ?? null,
     performanceNotes: dbUnit.performance_notes ?? null,
+    updatedAt: dbUnit.updated_at ?? null,
   };
 }
 

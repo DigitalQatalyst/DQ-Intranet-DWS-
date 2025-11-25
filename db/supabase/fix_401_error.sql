@@ -52,3 +52,31 @@ WHERE schemaname = 'public'
 --     FOR SELECT
 --     USING (true);
 
+-- ============================================================================
+-- Cleanup: normalize UX/UI focus tags on work_units
+-- ============================================================================
+-- Replace separate 'UX' and 'UI' tags with a single combined 'UX/UI' tag.
+
+-- 1) Units that currently have BOTH UX and UI → collapse to UX/UI
+UPDATE public.work_units
+SET focus_tags = ARRAY['UX/UI']
+                  || (
+                      SELECT ARRAY_AGG(tag)
+                      FROM UNNEST(focus_tags) AS tag
+                      WHERE tag NOT IN ('UX', 'UI')
+                  )
+WHERE 'UX' = ANY(focus_tags) AND 'UI' = ANY(focus_tags);
+
+-- 2) Units that have either UX OR UI (but not both) → normalize to UX/UI
+UPDATE public.work_units
+SET focus_tags = ARRAY[
+  CASE 
+    WHEN 'UX' = ANY(focus_tags) OR 'UI' = ANY(focus_tags) 
+    THEN 'UX/UI' 
+  END
+] || (
+  SELECT ARRAY_AGG(tag)
+  FROM UNNEST(focus_tags) AS tag
+  WHERE tag NOT IN ('UX', 'UI')
+)
+WHERE ('UX' = ANY(focus_tags) OR 'UI' = ANY(focus_tags));
