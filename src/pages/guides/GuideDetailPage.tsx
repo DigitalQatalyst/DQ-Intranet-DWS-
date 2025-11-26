@@ -856,18 +856,18 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                                      actualIsStrategyDomain ? 'view_strategy_clicked' : 'view_guide_clicked'
                       track('Guides.CTA', { category, slug: guide.slug || guide.id, title: guide.title })
                     }}
-                    className={`px-6 py-3 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${!primaryDocUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-6 py-3 text-white font-semibold rounded-full transition-all flex items-center justify-center gap-2 whitespace-nowrap ${!primaryDocUrl ? 'opacity-50 cursor-not-allowed' : ''} focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]`}
                     style={{ 
-                      backgroundColor: '#0B1E67',
+                      backgroundColor: '#030E31',
                     }}
                     onMouseEnter={(e) => {
                       if (primaryDocUrl) {
-                        e.currentTarget.style.backgroundColor = '#092256'
+                        e.currentTarget.style.backgroundColor = '#020A28'
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (primaryDocUrl) {
-                        e.currentTarget.style.backgroundColor = '#0B1E67'
+                        e.currentTarget.style.backgroundColor = '#030E31'
                       }
                     }}
                   >
@@ -1035,18 +1035,18 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                                      actualIsStrategyDomain ? 'view_strategy_clicked' : 'view_guide_clicked'
                       track('Guides.CTA', { category, slug: guide.slug || guide.id, title: guide.title })
                     }}
-                    className={`px-6 py-3 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${!primaryDocUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-6 py-3 text-white font-semibold rounded-full transition-all flex items-center justify-center gap-2 whitespace-nowrap ${!primaryDocUrl ? 'opacity-50 cursor-not-allowed' : ''} focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]`}
                     style={{ 
-                      backgroundColor: '#0B1E67',
+                      backgroundColor: '#030E31',
                     }}
                     onMouseEnter={(e) => {
                       if (primaryDocUrl) {
-                        e.currentTarget.style.backgroundColor = '#092256'
+                        e.currentTarget.style.backgroundColor = '#020A28'
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (primaryDocUrl) {
-                        e.currentTarget.style.backgroundColor = '#0B1E67'
+                        e.currentTarget.style.backgroundColor = '#030E31'
                       }
                     }}
                   >
@@ -1180,10 +1180,10 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                   href={primaryDocUrl || '#templates'}
                   target={primaryDocUrl ? '_blank' : undefined}
                   rel={primaryDocUrl ? 'noopener noreferrer' : undefined}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full self-start text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]"
-                  style={{ backgroundColor: '#0B1E67' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#092256'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B1E67'}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full self-start text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)] transition-all"
+                  style={{ backgroundColor: '#030E31' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#020A28'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030E31'}
                 >
                   <span>View Blueprint</span>
                   <ExternalLink size={16} className="opacity-90" />
@@ -1194,10 +1194,10 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                   href={primaryDocUrl || '#'}
                   target={primaryDocUrl && primaryDocUrl !== '#' ? '_blank' : undefined}
                   rel={primaryDocUrl && primaryDocUrl !== '#' ? 'noopener noreferrer' : undefined}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full self-start text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]"
-                  style={{ backgroundColor: '#0B1E67' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#092256'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B1E67'}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full self-start text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)] transition-all"
+                  style={{ backgroundColor: '#030E31' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#020A28'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030E31'}
                 >
                   <span>View Guideline</span>
                   <ExternalLink size={16} className="opacity-90" />
@@ -1208,10 +1208,10 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                   href={primaryDocUrl || '#'}
                   target={primaryDocUrl && primaryDocUrl !== '#' ? '_blank' : undefined}
                   rel={primaryDocUrl && primaryDocUrl !== '#' ? 'noopener noreferrer' : undefined}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full self-start text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]"
-                  style={{ backgroundColor: '#0B1E67' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#092256'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B1E67'}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full self-start text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)] transition-all"
+                  style={{ backgroundColor: '#030E31' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#020A28'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030E31'}
                 >
                   <span>View Strategy</span>
                   <ExternalLink size={16} className="opacity-90" />
@@ -1222,10 +1222,10 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                   href={primaryDocUrl || '#'}
                   target={primaryDocUrl && primaryDocUrl !== '#' ? '_blank' : undefined}
                   rel={primaryDocUrl && primaryDocUrl !== '#' ? 'noopener noreferrer' : undefined}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full self-start text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]"
-                  style={{ backgroundColor: '#0B1E67' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#092256'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0B1E67'}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full self-start text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)] transition-all"
+                  style={{ backgroundColor: '#030E31' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#020A28'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030E31'}
                 >
                   <span>View Testimonial</span>
                   <ExternalLink size={16} className="opacity-90" />
