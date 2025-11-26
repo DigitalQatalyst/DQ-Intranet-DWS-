@@ -193,19 +193,25 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
   return (
     <div className="h-full rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md flex flex-col">
       <div className="flex items-center gap-4 mb-4">
-        {testimonial.avatar ? (
-          <img
-            src={testimonial.avatar}
-            alt={testimonial.name}
-            className="w-12 h-12 rounded-full object-cover border border-gray-100"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-semibold border border-gray-200">
-            {initials}
-          </div>
-        )}
+        <div className="w-12 h-12 rounded-lg bg-white border-2 border-gray-200 flex items-center justify-center flex-shrink-0">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-gray-600"
+          >
+            <path
+              d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+              fill="currentColor"
+            />
+            <path
+              d="M12 14C7.58172 14 4 16.6863 4 20V22H20V20C20 16.6863 16.4183 14 12 14Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
         <div>
           <p className="text-base font-semibold text-gray-900">
             {testimonial.name}

@@ -23,6 +23,7 @@ import {
 } from '@/lms/config';
 import GuidesFilters, { GuidesFacets } from '../guides/GuidesFilters';
 import GuidesGrid from '../guides/GuidesGrid';
+import TestimonialsGrid from '../guides/TestimonialsGrid';
 import { supabaseClient } from '../../lib/supabaseClient';
 import { track } from '../../utils/analytics';
 const LEARNING_TYPE_FILTER: FilterConfig = {
@@ -1339,6 +1340,16 @@ type WorkGuideTab = 'guidelines' | 'strategy' | 'blueprints' | 'testimonials' | 
                       </div>
                     )}
                   </>
+                ) : activeTab === 'testimonials' ? (
+                  <TestimonialsGrid
+                    items={filteredItems}
+                    onClickGuide={(g) => {
+                      const qs = queryParams.toString();
+                      navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`, {
+                        state: { fromQuery: qs, activeTab }
+                      });
+                    }}
+                  />
                 ) : (
                   <>
                     <GuidesGrid

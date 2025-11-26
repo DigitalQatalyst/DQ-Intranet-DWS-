@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react"
 
 interface Props {
   items: any[]
@@ -6,34 +6,34 @@ interface Props {
 }
 
 const avatarOverrides: Record<string, string> = {
-  'khalifa-fund-client-testimonial': 'https://randomuser.me/api/portraits/men/52.jpg',
-  'adib-client-testimonial': 'https://randomuser.me/api/portraits/men/50.jpg',
-  'dfsa-client-testimonial': 'https://randomuser.me/api/portraits/men/40.jpg'
+  "khalifa-fund-client-testimonial": "https://randomuser.me/api/portraits/men/52.jpg",
+  "adib-client-testimonial": "https://randomuser.me/api/portraits/men/50.jpg",
+  "dfsa-client-testimonial": "https://randomuser.me/api/portraits/men/40.jpg"
 }
 
 const getAvatarUrl = (item: any): string => {
   if (item.hero_image_url) return item.hero_image_url
-  const slug = (item.slug || '').toLowerCase()
+  const slug = (item.slug || "").toLowerCase()
   if (slug && avatarOverrides[slug]) return avatarOverrides[slug]
-  const name = encodeURIComponent(item.author_name || item.title || 'DQ')
+  const name = encodeURIComponent(item.author_name || item.title || "DQ")
   return `https://ui-avatars.com/api/?name=${name}&size=80&background=003049&color=ffffff&bold=true`
 }
 
 const getDisplayName = (item: any) => {
-  if (item.slug === 'khalifa-fund-client-testimonial') return 'Ali Al Jasmi'
-  if (item.slug === 'adib-client-testimonial') return 'Kamran Sheikh'
-  if (item.slug === 'dfsa-client-testimonial') return 'Waleed Saeed Al Awadhi'
-  return item.author_name || item.title || 'Unnamed Testimonial'
+  if (item.slug === "khalifa-fund-client-testimonial") return "Ali Al Jasmi"
+  if (item.slug === "adib-client-testimonial") return "Kamran Sheikh"
+  if (item.slug === "dfsa-client-testimonial") return "Waleed Saeed Al Awadhi"
+  return item.author_name || item.title || "Unnamed Testimonial"
 }
 
 const getDisplayOrg = (item: any) => {
-  if (item.slug === 'khalifa-fund-client-testimonial') return 'Head of Technology ‚Ä¢ Khalifa Fund'
-  if (item.slug === 'adib-client-testimonial') return 'Head of Enterprise Architecture & Analytics ‚Ä¢ ADIB'
-  if (item.slug === 'dfsa-client-testimonial') return 'Chief Operating Officer ‚Ä¢ DFSA'
-  return item.author_org || item.domain || ''
+  if (item.slug === "khalifa-fund-client-testimonial") return "Head of Technology ï Khalifa Fund"
+  if (item.slug === "adib-client-testimonial") return "Head of Enterprise Architecture & Analytics ï ADIB"
+  if (item.slug === "dfsa-client-testimonial") return "Chief Operating Officer ï DFSA"
+  return item.author_org || item.domain || ""
 }
 
-const TestimonialsGrid: React.FC<Props> = ({ items, onClickGuide }) => {
+const TestimonialsGrid: React.FC<Props> = ({ items }) => {
   if (!items || items.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-8 text-center">
@@ -48,18 +48,15 @@ const TestimonialsGrid: React.FC<Props> = ({ items, onClickGuide }) => {
       {items.map((item) => {
         const name = getDisplayName(item)
         const organization = getDisplayOrg(item)
-        const quote = (item.summary || item.body || '').trim()
-        const location = item.locations && item.locations.length > 0 ? item.locations[0] : ''
+        const quote = (item.summary || item.body || "").trim()
 
         return (
-          <button
+          <div
             key={item.id || item.slug}
-            type="button"
-            onClick={() => onClickGuide?.(item)}
-            className="h-full rounded-2xl border border-gray-200 bg-white text-left p-5 shadow-sm transition-shadow duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0F172A]"
+            className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm"
           >
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-200">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
                 <img
                   src={getAvatarUrl(item)}
                   alt={name}
@@ -68,29 +65,13 @@ const TestimonialsGrid: React.FC<Props> = ({ items, onClickGuide }) => {
                   decoding="async"
                 />
               </div>
-              <div className="<<<<<<< HEAD
-flex-1 leading-tight">
+              <div className="leading-tight">
                 <p className="font-semibold text-gray-900 text-[15px]">{name}</p>
-                {organization && <p className="text-xs text-gray-500">{organization}</p>}
-                {location && <p className="text-xs text-gray-400 mt-0.5">{location}</p>}
-=======
-leading-tight">
-                <p className="font-semibold text-gray-900">{name}</p>
-                {organization && (
-                  <p className="text-xs text-gray-500 whitespace-pre-line">{organization}</p>
-                )}
->>>>>>> c8cba32 (Added Clients card)
+                {organization && <p className="text-xs text-gray-500 whitespace-pre-line">{organization}</p>}
               </div>
             </div>
-<<<<<<< HEAD
-            <p className="text-sm text-gray-600 leading-relaxed">
-              ‚Äú{quote}‚Äù
-=======
-            <p className="text-gray-600 leading-relaxed text-base">
-              ‚Äú{quote}‚Äù
->>>>>>> c8cba32 (Added Clients card)
-            </p>
-          </button>
+            <p className="text-sm text-gray-700 leading-relaxed">ì{quote}î</p>
+          </div>
         )
       })}
     </div>
