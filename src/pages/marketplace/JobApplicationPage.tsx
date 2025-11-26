@@ -1,28 +1,73 @@
-import React, { useState, type FormEvent } from 'react';
+import React, { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { HomeIcon, ChevronRightIcon } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
-import { JOBS, SFIA_LEVELS } from '@/data/media/jobs';
+import { SFIA_LEVELS, type JobItem } from '@/data/media/jobs';
+import { fetchJobById } from '@/services/mediaCenterService';
+import { submitJobApplication } from '@/services/jobApplicationsService';
 
 const JobApplicationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const job = JOBS.find((item) => item.id === id);
-
+  const [job, setJob] = useState<JobItem | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) {
+      setLoadError('Job ID is required.');
+      setIsLoading(false);
+      return;
+    }
+    let isMounted = true;
+
+    async function loadJob(jobId: string) {
+      setIsLoading(true);
+      try {
+        const item = await fetchJobById(jobId);
+        if (!isMounted) return;
+        setJob(item);
+        setLoadError(item ? null : 'Role not found.');
+      } catch (error) {
+        if (!isMounted) return;
+        // eslint-disable-next-line no-console
+        console.error('Error loading job for application form', error);
+        setLoadError('Unable to load this opportunity right now.');
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadJob(id);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
   if (!job) {
     return (
       <div className="flex min-h-screen flex-col bg-gray-50">
         <Header toggleSidebar={() => {}} sidebarOpen={false} />
         <main className="flex flex-1 flex-col items-center justify-center px-4 text-center">
-          <h1 className="mb-2 text-2xl font-semibold text-gray-900">Role not found</h1>
+          <h1 className="mb-2 text-2xl font-semibold text-gray-900">
+            {isLoading ? 'Loading role' : 'Role not found'}
+          </h1>
           <p className="mb-6 max-w-md text-gray-600">
-            The opportunity you're trying to apply for is unavailable. Browse the latest openings in the Media Center.
+            {isLoading
+              ? 'Fetching the latest details. Please wait.'
+              : "The opportunity you're trying to apply for is unavailable. Browse the latest openings in the Media Center."}
           </p>
+          {loadError && !isLoading && (
+            <p className="mb-4 text-sm text-red-600">{loadError}</p>
+          )}
           <button
             onClick={() => navigate(`/marketplace/opportunities${location.search || '?tab=opportunities'}`)}
             className="rounded-lg bg-[#030f35] px-6 py-3 text-sm font-semibold text-white"
@@ -35,31 +80,51 @@ const JobApplicationPage: React.FC = () => {
     );
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || !job) return;
     setIsSubmitting(true);
+    setSubmitError(null);
 
     const formData = new FormData(event.currentTarget);
+    const name = String(formData.get('name') || '').trim();
+    const email = String(formData.get('email') || '').trim();
+    const currentRole = String(formData.get('currentRole') || '').trim();
+    const locationValue = String(formData.get('location') || '').trim();
+    const sfiaLevel = String(formData.get('sfiaLevel') || '').trim();
+    const motivation = String(formData.get('motivation') || '').trim();
+
+    if (!name || !email || !currentRole || !locationValue || !sfiaLevel || !motivation) {
+      setSubmitError('All fields are required. Please complete the form before submitting.');
+      setIsSubmitting(false);
+      return;
+    }
+
     const payload = {
       jobId: job.id,
       jobTitle: job.title,
-      name: String(formData.get('name') || '').trim(),
-      email: String(formData.get('email') || '').trim(),
-      currentRole: String(formData.get('currentRole') || '').trim(),
-      location: String(formData.get('location') || '').trim(),
-      sfiaLevel: String(formData.get('sfiaLevel') || '').trim(),
-      motivation: String(formData.get('motivation') || '').trim()
+      name,
+      email,
+      currentRole,
+      location: locationValue,
+      sfiaLevel,
+      motivation
     };
 
-    // Placeholder: integrate with actual submission endpoint when available
-    // eslint-disable-next-line no-console
-    console.log('Job application submitted via Marketplace', payload);
-
-    window.setTimeout(() => {
+    try {
+      await submitJobApplication(payload);
       setIsSubmitted(true);
+      // Disable form after successful submission
+      event.currentTarget.reset();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to submit your application right now. Please try again later.';
+      setSubmitError(errorMessage);
+    } finally {
       setIsSubmitting(false);
-    }, 600);
+    }
   };
 
   const sfiaOptions = Object.entries(SFIA_LEVELS);
@@ -124,7 +189,7 @@ const JobApplicationPage: React.FC = () => {
                   readiness for this move.
                 </p>
 
-                <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+                <form className="mt-4 space-y-4" onSubmit={handleSubmit} noValidate>
                   <div>
                     <label htmlFor="name" className="mb-1 block text-sm font-semibold text-gray-900">
                       Full name
@@ -132,7 +197,9 @@ const JobApplicationPage: React.FC = () => {
                     <input
                       id="name"
                       name="name"
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E]"
+                      required
+                      disabled={isSubmitted}
+                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E] disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -144,7 +211,9 @@ const JobApplicationPage: React.FC = () => {
                       id="email"
                       name="email"
                       type="email"
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E]"
+                      required
+                      disabled={isSubmitted}
+                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E] disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -155,7 +224,9 @@ const JobApplicationPage: React.FC = () => {
                     <input
                       id="currentRole"
                       name="currentRole"
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E]"
+                      required
+                      disabled={isSubmitted}
+                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E] disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -167,8 +238,10 @@ const JobApplicationPage: React.FC = () => {
                       <select
                         id="location"
                         name="location"
+                        required
                         defaultValue={job.location}
-                        className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E]"
+                        disabled={isSubmitted}
+                        className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E] disabled:bg-gray-100 disabled:cursor-not-allowed"
                       >
                         <option value="Dubai">Dubai</option>
                         <option value="Nairobi">Nairobi</option>
@@ -183,8 +256,10 @@ const JobApplicationPage: React.FC = () => {
                       <select
                         id="sfiaLevel"
                         name="sfiaLevel"
+                        required
                         defaultValue={job.sfiaLevel}
-                        className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E]"
+                        disabled={isSubmitted}
+                        className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E] disabled:bg-gray-100 disabled:cursor-not-allowed"
                       >
                         {sfiaOptions.map(([key, value]) => (
                           <option key={key} value={key}>
@@ -203,10 +278,18 @@ const JobApplicationPage: React.FC = () => {
                       id="motivation"
                       name="motivation"
                       rows={4}
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E]"
+                      required
+                      disabled={isSubmitted}
+                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[#1A2E6E] focus:outline-none focus:ring-1 focus:ring-[#1A2E6E] disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="Share your motivation, relevant experience, and the SFIA evidence that backs this move."
                     />
                   </div>
+
+                  {submitError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                      {submitError}
+                    </div>
+                  )}
 
                   {isSubmitted && (
                     <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
@@ -217,15 +300,19 @@ const JobApplicationPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isSubmitted}
                       className="inline-flex flex-1 items-center justify-center rounded-xl bg-[#030f35] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
                     >
                       {isSubmitting ? 'Submitting... Please wait' : 'Submit application'}
                     </button>
                     <button
                       type="button"
-                      onClick={() => navigate(-1)}
-                      className="inline-flex flex-1 items-center justify-center rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                      onClick={() => {
+                        const tab = (location.state as { tab?: string } | null)?.tab || 'opportunities';
+                        navigate(`/marketplace/opportunities/${job.id}`, { state: { tab } });
+                      }}
+                      disabled={isSubmitting}
+                      className="inline-flex flex-1 items-center justify-center rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-70"
                     >
                       Cancel
                     </button>
