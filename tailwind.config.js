@@ -44,7 +44,7 @@ module.exports = {
         dqWhite: "#FFFFFF",
         primary: {
           DEFAULT: "#0030E3",
-          dark: "#002080",
+          dark: "#030F35",
           light: "#99B2FF",
         },
         teal: {

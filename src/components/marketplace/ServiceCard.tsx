@@ -44,6 +44,11 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   };
   // Generate appropriate CTA text based on marketplace type
   const getPrimaryCTAText = () => {
+    // Check if it's an AI Tool
+    if (item.category === 'AI Tools') {
+      return 'Request Access';
+    }
+    
     switch (type) {
       case 'courses':
         return 'Enroll Now';
@@ -61,7 +66,13 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   };
   const handlePrimaryAction = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`${getItemRoute()}?action=true`);
+    
+    // For AI Tools, open the access request form in a new tab
+    if (item.category === 'AI Tools') {
+      window.open('https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl', '_blank', 'noopener,noreferrer');
+    } else {
+      navigate(`${getItemRoute()}?action=true`);
+    }
   };
   // Display tags if available, otherwise use category and deliveryMode
   const displayTags = item.tags || [item.category, item.deliveryMode].filter(Boolean);
@@ -131,7 +142,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           <button onClick={handleViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap min-w-[120px] flex-1 ${type === 'non-financial' ? 'bg-white border' : 'text-blue-600 bg-white border border-blue-600 hover:bg-blue-50'}`} style={type === 'non-financial' ? { color: '#030F35', borderColor: '#030F35' } : {}} onMouseEnter={(e) => { if (type === 'non-financial') e.currentTarget.style.backgroundColor = '#f0f4f8'; }} onMouseLeave={(e) => { if (type === 'non-financial') e.currentTarget.style.backgroundColor = 'white'; }}>
             View Details
           </button>
-          <button onClick={handlePrimaryAction} className="px-4 py-2 text-sm font-bold text-white rounded-md transition-colors whitespace-nowrap flex-1" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#030F35'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030F35'}>
+          <button onClick={handlePrimaryAction} className="px-4 py-2 text-sm font-bold text-white rounded-md transition-colors whitespace-nowrap flex-1" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#020a23'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030F35'}>
             {getPrimaryCTAText()}
           </button>
         </div>

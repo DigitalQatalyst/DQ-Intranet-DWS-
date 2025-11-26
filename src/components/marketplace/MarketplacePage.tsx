@@ -1060,7 +1060,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                         ? 'border-blue-700'
                         : 'text-gray-700 border-transparent hover:text-gray-900 hover:border-gray-300'
                     }`}
-                    style={isActive ? { color: '#1A2E6E', borderColor: '#1A2E6E' } : {}}
+                    style={isActive ? { color: '#030F35', borderColor: '#030F35' } : {}}
                     aria-current={isActive ? 'page' : undefined}
                   >
                     {tab.label}

@@ -162,11 +162,24 @@ export const ServiceQuickViewModal: React.FC<ServiceQuickViewModalProps> = ({
               </ul>
             </div>}
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
-            <button onClick={onViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${marketplaceType === 'non-financial' ? 'bg-white' : 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100'}`} style={marketplaceType === 'non-financial' ? { color: '#1A2E6E', borderColor: '#1A2E6E' } : {}} onMouseEnter={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#f0f4f8'; }} onMouseLeave={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = 'white'; }}>
+            <button onClick={onViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${marketplaceType === 'non-financial' ? 'bg-white' : 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100'}`} style={marketplaceType === 'non-financial' ? { color: '#030F35', borderColor: '#030F35' } : {}} onMouseEnter={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#f0f4f8'; }} onMouseLeave={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = 'white'; }}>
               View Full Details
             </button>
-            <button className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${marketplaceType === 'non-financial' ? '' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'}`} style={marketplaceType === 'non-financial' ? { backgroundColor: '#1A2E6E' } : {}} onMouseEnter={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#1A2E6E'; }} onMouseLeave={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#1A2E6E'; }}>
-              {primaryButtonText}
+            <button 
+              onClick={() => {
+                // For AI Tools, open the access request form in a new tab
+                if (service.category === 'AI Tools') {
+                  window.open('https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl', '_blank', 'noopener,noreferrer');
+                } else {
+                  onViewDetails();
+                }
+              }}
+              className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${marketplaceType === 'non-financial' ? '' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'}`} 
+              style={marketplaceType === 'non-financial' ? { backgroundColor: '#030F35' } : {}} 
+              onMouseEnter={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#020a23'; }} 
+              onMouseLeave={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#030F35'; }}
+            >
+              {service.category === 'AI Tools' ? 'Request Access' : primaryButtonText}
             </button>
           </div>
         </div>

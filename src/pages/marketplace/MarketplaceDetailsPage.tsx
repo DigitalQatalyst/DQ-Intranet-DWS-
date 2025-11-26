@@ -10,6 +10,7 @@ import { fetchMarketplaceItemDetails, fetchRelatedMarketplaceItems } from '../..
 import { ErrorDisplay } from '../../components/SkeletonLoader';
 import { Link } from 'react-router-dom';
 import { getFallbackItemDetails, getFallbackItems } from '../../utils/fallbackData';
+import { getAIToolDataById } from '../../utils/aiToolsData';
 interface MarketplaceDetailsPageProps {
   marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding';
   bookmarkedItems?: string[];
@@ -310,7 +311,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const itemDescription = item.description;
   const provider = item.provider;
   const isPromptLibrary = item.id === '17' || item.category === 'Prompt Library';
-  const primaryAction = isPromptLibrary ? 'Visit Page' : config.primaryCTA;
+  const isAITool = item.category === 'AI Tools';
+  const primaryAction = isPromptLibrary ? 'Visit Page' : isAITool ? 'Request Access' : config.primaryCTA;
   // const secondaryAction = config.secondaryCTA;
   // Extract tags based on marketplace type
   const displayTags = item.tags || [item.category, marketplaceType === 'courses' ? item.deliveryMode : item.serviceType, item.businessStage].filter(Boolean);
@@ -407,9 +409,305 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     const tab = tabsToUse.find(t => t.id === tabId);
     if (!tab) return null;
     
+    // Special handling for AI Tools - MUST BE FIRST before generic content
+    if (item?.category === 'AI Tools') {
+      const toolData = getAIToolDataById(item?.id);
+      
+      if (toolData) {
+        // About Tab for AI Tools
+        if (tabId === 'about') {
+          const content = getServiceTabContent(marketplaceType, item?.id, tabId);
+          
+          return <div className="space-y-8">
+              {/* Overview Text */}
+              {content?.blocks && content.blocks.length > 0 && content.blocks[0].type === 'p' && (
+                <div className="text-gray-700 text-lg leading-relaxed">
+                  {content.blocks[0].text}
+                </div>
+              )}
+              
+              {/* Key Features Section */}
+              <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-8">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-2xl font-bold text-gray-900">Key Features Included</h4>
+                </div>
+                
+                <div className="grid gap-3 md:grid-cols-2">
+                  {toolData.features.keyFeatures.map((feature, index) => (
+                    <div key={index} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
+                      <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                        <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <span className="text-gray-700 font-medium leading-relaxed">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>;
+        }
+        
+        // System Requirements Tab for AI Tools
+        if (tabId === 'system_requirements') {
+          const requirements = toolData.systemRequirements;
+
+          return (
+            <div className="space-y-6">
+              {/* Header */}
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">System Requirements</h2>
+                <p className="text-sm text-gray-600">
+                  Ensure your system meets these specifications for optimal {toolData.name} performance
+                </p>
+              </div>
+
+              {/* Minimum Requirements */}
+              <div className="border-l-4 bg-white p-5 rounded-r-lg shadow-sm" style={{ borderLeftColor: '#FB5535' }}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Minimum Requirements</h3>
+                <ul className="space-y-2.5">
+                  {Object.entries(requirements.minimum).map(([key, value]) => (
+                    <li key={key} className="flex items-start gap-3">
+                      <span className="text-xs font-semibold text-gray-500 uppercase w-24 flex-shrink-0 pt-0.5">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}:
+                      </span>
+                      <span className="text-sm text-gray-700 flex-1">{value}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Recommended Requirements */}
+              <div className="border-l-4 bg-white p-5 rounded-r-lg shadow-sm" style={{ borderLeftColor: '#030F35' }}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Recommended Requirements</h3>
+                <ul className="space-y-2.5">
+                  {Object.entries(requirements.recommended).map(([key, value]) => (
+                    <li key={key} className="flex items-start gap-3">
+                      <span className="text-xs font-semibold text-gray-500 uppercase w-24 flex-shrink-0 pt-0.5">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}:
+                      </span>
+                      <span className="text-sm text-gray-700 flex-1">{value}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Additional Notes */}
+              {requirements.additionalNotes && requirements.additionalNotes.length > 0 && (
+                <div className="border-l-4 border-gray-400 bg-white p-5 rounded-r-lg shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Additional Notes</h3>
+                  <ul className="space-y-2">
+                    {requirements.additionalNotes.map((note, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-gray-400 mt-0.5">•</span>
+                        <span className="text-sm text-gray-700">{note}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          );
+        }
+        
+        // Licenses Tab for AI Tools
+        if (tabId === 'licenses') {
+          const content = getServiceTabContent(marketplaceType, item?.id, tabId);
+          
+          return <div className="space-y-8">
+              {/* Intro Text */}
+              {content?.blocks && content.blocks.length > 0 && content.blocks[0].type === 'p' && (
+                <div className="text-gray-700 text-lg leading-relaxed">
+                  {content.blocks[0].text}
+                </div>
+              )}
+              
+              {/* License Status Cards */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Subscription Status Card */}
+                <div className="group relative overflow-hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-green-400/20 blur-3xl"></div>
+                  <div className="absolute -left-4 -bottom-4 h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl"></div>
+                  
+                  <div className="absolute right-4 top-4 opacity-5">
+                    <svg className="h-24 w-24 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="mb-4 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/50">
+                        <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Subscription Status</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Current License State</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 mb-4">
+                      <p className="text-4xl font-black text-green-700">{toolData.license.subscriptionStatus}</p>
+                      <div className="flex h-3 w-3 items-center justify-center">
+                        <span className="absolute h-3 w-3 animate-ping rounded-full bg-green-500 opacity-75"></span>
+                        <span className="relative h-3 w-3 rounded-full bg-green-600 shadow-lg shadow-green-500/50"></span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-green-800 bg-green-100/50 rounded-lg px-3 py-2">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <span className="font-medium">Fully operational & ready to use</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Expiry Date Card */}
+                <div className="group relative overflow-hidden rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl"></div>
+                  <div className="absolute -left-4 -bottom-4 h-24 w-24 rounded-full bg-indigo-400/20 blur-2xl"></div>
+                  
+                  <div className="absolute right-4 top-4 opacity-5">
+                    <svg className="h-24 w-24" style={{ color: '#1A2E6E' }} fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
+                    </svg>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="mb-4 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl shadow-lg" style={{ 
+                        background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)',
+                        boxShadow: '0 10px 25px -5px rgba(26, 46, 110, 0.5)'
+                      }}>
+                        <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Expiry Date</p>
+                        <p className="text-xs text-gray-500 mt-0.5">License Validity</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <p className="text-4xl font-black" style={{ color: '#1A2E6E' }}>{toolData.license.expiryDate}</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-blue-900 bg-blue-100/50 rounded-lg px-3 py-2">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium">No expiration - continuous access</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>;
+        }
+        
+        // Visit Site Tab for AI Tools
+        if (tabId === 'visit_site') {
+          const content = getServiceTabContent(marketplaceType, item?.id, tabId);
+          const urlField = content?.action?.urlField;
+          const computedUrl = (urlField && item && item[urlField]) || content?.action?.fallbackUrl || toolData.homepage || '#';
+          
+          return <div className="space-y-8">
+              {/* Hero Section */}
+              <div className="relative overflow-hidden rounded-2xl" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0" style={{ 
+                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                    backgroundSize: '40px 40px'
+                  }}></div>
+                </div>
+                <div className="relative px-8 py-10">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+                        <svg className="h-9 w-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-3xl font-bold text-white mb-1">{toolData.name}</h3>
+                        <p className="text-blue-100 text-sm">Official Website</p>
+                      </div>
+                    </div>
+                    <a 
+                      href={computedUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-8 py-4 bg-white hover:bg-blue-50 text-gray-900 rounded-xl font-bold transition-all duration-200 hover:scale-105 shadow-xl"
+                    >
+                      Visit Website
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              {content?.blocks && content.blocks.length > 0 && (
+                <div className="text-gray-700 text-lg leading-relaxed">
+                  {renderBlocks(content.blocks)}
+                </div>
+              )}
+            </div>;
+        }
+      }
+    }
+    
     // Check if this is a custom tab with its own content
     const content = getServiceTabContent(marketplaceType, item?.id, tabId);
     if (content) {
+      // Special handling for visit_site tab
+      if (tabId === 'visit_site') {
+        const urlField = content.action?.urlField;
+        const computedUrl = (urlField && item && item[urlField]) || content.action?.fallbackUrl || '#';
+        
+        return <div className="space-y-8">
+            <div className="prose max-w-none">
+              {content.heading && <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">{content.heading}</h2>}
+              {renderBlocks(content.blocks || [])}
+            </div>
+            <div className="pt-4">
+              <button 
+                id="action-section" 
+                className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 inline-flex items-center gap-2" 
+                style={{ backgroundColor: '#1A2E6E' }} 
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#152347')} 
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1A2E6E')} 
+                onClick={() => window.open(computedUrl, '_blank', 'noopener,noreferrer')}
+              >
+                {content.action?.label || 'Visit Website'}
+                <svg 
+                  className="w-4 h-4" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" 
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>;
+      }
+      
       // Render content with action button if available
       return <div className="space-y-8">
           <div className="prose max-w-none">
@@ -430,6 +728,195 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     
     // Return specific tab content based on tab ID for non-custom tabs
     switch (tabId) {
+      case 'licenses': {
+        // Special rendering for AI tools licenses tab
+        const isAITool = item?.category === 'AI Tools';
+        if (isAITool) {
+          const content = getServiceTabContent(marketplaceType, item?.id, tabId);
+          const toolData = getAIToolDataById(item?.id);
+          
+          return <div className="space-y-8">
+              {/* Hero Section with Tool Name */}
+              <div className="relative overflow-hidden rounded-2xl" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0" style={{ 
+                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                    backgroundSize: '40px 40px'
+                  }}></div>
+                </div>
+                <div className="relative px-8 py-10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+                        <svg className="h-9 w-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-3xl font-bold text-white mb-1">{toolData?.name || item?.title}</h3>
+                        <p className="text-blue-100 text-sm">License Information</p>
+                      </div>
+                    </div>
+                    <a 
+                      href={toolData?.homepage || '#'} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hidden md:flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-white font-medium transition-all duration-200 hover:scale-105"
+                    >
+                      Visit Website
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Intro Text */}
+              {content?.blocks && content.blocks.length > 0 && (
+                <div className="text-gray-700 text-lg leading-relaxed">
+                  {renderBlocks(content.blocks)}
+                </div>
+              )}
+              
+              {/* License Status Cards */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Subscription Status Card */}
+                <div className="group relative overflow-hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                  {/* Decorative Elements */}
+                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-green-400/20 blur-3xl"></div>
+                  <div className="absolute -left-4 -bottom-4 h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl"></div>
+                  
+                  {/* Icon Background */}
+                  <div className="absolute right-4 top-4 opacity-5">
+                    <svg className="h-24 w-24 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="mb-4 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/50">
+                        <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Subscription Status</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Current License State</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 mb-4">
+                      <p className="text-4xl font-black text-green-700">{toolData?.license.subscriptionStatus || 'Active'}</p>
+                      <div className="flex h-3 w-3 items-center justify-center">
+                        <span className="absolute h-3 w-3 animate-ping rounded-full bg-green-500 opacity-75"></span>
+                        <span className="relative h-3 w-3 rounded-full bg-green-600 shadow-lg shadow-green-500/50"></span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-green-800 bg-green-100/50 rounded-lg px-3 py-2">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <span className="font-medium">Fully operational & ready to use</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Expiry Date Card */}
+                <div className="group relative overflow-hidden rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                  {/* Decorative Elements */}
+                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl"></div>
+                  <div className="absolute -left-4 -bottom-4 h-24 w-24 rounded-full bg-indigo-400/20 blur-2xl"></div>
+                  
+                  {/* Icon Background */}
+                  <div className="absolute right-4 top-4 opacity-5">
+                    <svg className="h-24 w-24" style={{ color: '#1A2E6E' }} fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
+                    </svg>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="mb-4 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl shadow-lg" style={{ 
+                        background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)',
+                        boxShadow: '0 10px 25px -5px rgba(26, 46, 110, 0.5)'
+                      }}>
+                        <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Expiry Date</p>
+                        <p className="text-xs text-gray-500 mt-0.5">License Validity</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <p className="text-4xl font-black" style={{ color: '#1A2E6E' }}>{toolData?.license.expiryDate || 'N/A'}</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-blue-900 bg-blue-100/50 rounded-lg px-3 py-2">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium">No expiration - continuous access</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Key Features Section */}
+              {toolData?.features && (
+                <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-8">
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                      <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-2xl font-bold text-gray-900">Key Features Included</h4>
+                  </div>
+                  
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {toolData.features.keyFeatures.map((feature, index) => (
+                      <div key={index} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
+                        <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                          <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-gray-700 font-medium leading-relaxed">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Info Banner */}
+              <div className="rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100">
+                    <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h5 className="mb-2 text-lg font-bold text-blue-900">License Management</h5>
+                    <p className="text-blue-800 leading-relaxed">
+                      Your license remains active as long as you are actively using {toolData?.shortName || 'the tool'} and remain employed at DQ. 
+                      Inactive licenses may be reallocated after 60 days of non-use. For questions about your license status or to request 
+                      access, contact the Digital Innovation team.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>;
+        }
+        // Fallback to default rendering for non-AI tools
+        break;
+      }
       case 'submit_request': {
         const content = getServiceTabContent(marketplaceType, item?.id, tabId);
         const urlField = content?.action?.urlField;
@@ -983,6 +1470,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           onClick={() => {
             if (isPromptLibrary && item.sourceUrl) {
               window.open(item.sourceUrl, '_blank', 'noopener,noreferrer');
+            } else if (isAITool) {
+              window.open('https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl', '_blank', 'noopener,noreferrer');
             }
           }}
         >
@@ -1225,6 +1714,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 onClick={() => {
                   if (isPromptLibrary && item.sourceUrl) {
                     window.open(item.sourceUrl, '_blank', 'noopener,noreferrer');
+                  } else if (isAITool) {
+                    window.open('https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl', '_blank', 'noopener,noreferrer');
                   }
                 }}
               >

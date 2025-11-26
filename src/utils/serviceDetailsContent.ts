@@ -12,8 +12,8 @@ export interface TabContent {
   blocks: ContentBlock[];
   action?: {
     label: string;
-    // Which field from the item to open if present (e.g., requestUrl, formUrl, videoUrl, templateUrl)
-    urlField?: 'requestUrl' | 'formUrl' | 'videoUrl' | 'templateUrl';
+    // Which field from the item to open if present (e.g., requestUrl, formUrl, videoUrl, templateUrl, homepageUrl)
+    urlField?: 'requestUrl' | 'formUrl' | 'videoUrl' | 'templateUrl' | 'homepageUrl';
     fallbackUrl?: string;
   };
 }
@@ -32,6 +32,36 @@ export const SERVICE_CUSTOM_TABS: Record<string, Record<string, CustomTab[]>> = 
   'non-financial': {
     '3': [ // IT Support Walkthrough
       { id: 'submit_request', label: 'Video Tutorial' },
+    ],
+    '10': [ // Cursor AI
+      { id: 'about', label: 'About' },
+      { id: 'system_requirements', label: 'System Requirements' },
+      { id: 'licenses', label: 'Licenses' },
+      { id: 'visit_site', label: 'Visit Site' },
+    ],
+    '11': [ // Lovable AI
+      { id: 'about', label: 'About' },
+      { id: 'system_requirements', label: 'System Requirements' },
+      { id: 'licenses', label: 'Licenses' },
+      { id: 'visit_site', label: 'Visit Site' },
+    ],
+    '12': [ // ChatGPT
+      { id: 'about', label: 'About' },
+      { id: 'system_requirements', label: 'System Requirements' },
+      { id: 'licenses', label: 'Licenses' },
+      { id: 'visit_site', label: 'Visit Site' },
+    ],
+    '20': [ // Mokkup.ai
+      { id: 'about', label: 'About' },
+      { id: 'system_requirements', label: 'System Requirements' },
+      { id: 'licenses', label: 'Licenses' },
+      { id: 'visit_site', label: 'Visit Site' },
+    ],
+    '21': [ // Voiceflow
+      { id: 'about', label: 'About' },
+      { id: 'system_requirements', label: 'System Requirements' },
+      { id: 'licenses', label: 'Licenses' },
+      { id: 'visit_site', label: 'Visit Site' },
     ],
     '17': [ // Supabase Full-Stack Development Prompt
       { id: 'submit_request', label: 'Prompt' },
@@ -262,303 +292,7 @@ const SERVICE_DETAILS_CONTENT: Record<
         ],
       },
     },
-    // Cursor AI
-    '10': {
-      submit_request: {
-        heading: 'Request Cursor AI Access',
-        blocks: [
-          {
-            type: 'p',
-            text:
-              'Cursor AI is an advanced AI-powered code editor that enhances your development workflow with intelligent code completion, natural language editing, and AI-assisted debugging. This tool helps developers write better code faster by leveraging cutting-edge AI technology.',
-          },
-          {
-            type: 'p',
-            text:
-              'Click the "Request Service" button below to submit your Cursor AI access request. The form will open in a new window where you can provide the necessary information for license provisioning.',
-          },
-          { type: 'p', text: 'Steps to request Cursor AI access:' },
-          {
-            type: 'ol',
-            items: [
-              'Open the request form: Click the Request Service button to launch the Cursor AI access request form.',
-              'Provide your details: Enter your name, department, role, and DQ email address.',
-              'Specify use case: Describe your primary use case and how Cursor AI will benefit your work (e.g., backend development, frontend work, full-stack projects, code reviews).',
-              'Acknowledge policies: Review and accept the AI tool usage policies and best practices guidelines.',
-              'Select license type: Choose between individual license or team license (if requesting for multiple team members).',
-              'Submit the form: Review your entries and click Submit. You will receive an email confirmation with your request number.',
-            ],
-          },
-          {
-            type: 'p',
-            text:
-              'After submission, the Digital Innovation team will review your request and verify your eligibility. Once approved, you will receive license activation instructions, installation guides, and access to onboarding resources. Initial setup typically takes 1-2 business days.',
-          },
-        ],
-        action: {
-          label: 'Request Service',
-          urlField: 'requestUrl',
-          fallbackUrl: 'https://forms.office.com/pages/responsepage.aspx?id=CursorAIRequest',
-        },
-      },
-      self_service_faq: {
-        heading: 'Cursor AI FAQs & Best Practices',
-        blocks: [
-          {
-            type: 'p',
-            text:
-              'Before submitting your request, review these frequently asked questions and best practices to ensure you get the most out of Cursor AI.',
-          },
-          { type: 'p', text: 'Frequently Asked Questions:' },
-          {
-            type: 'ul',
-            items: [
-              'What is Cursor AI? Cursor AI is an AI-powered code editor built on VS Code that provides intelligent code completion, natural language code generation, chat-based coding assistance, and AI-powered debugging capabilities.',
-              'Who is eligible? All DQ developers, engineers, and technical staff working on software development projects are eligible to request Cursor AI access.',
-              'What does the license include? The license includes full access to Cursor AI features, AI model access (GPT-4, Claude, etc.), unlimited code completions, and integration with DQ development environments.',
-              'Do I need training? Yes, basic AI tool usage training is required. You will receive access to a 30-minute onboarding session and documentation covering best practices, security guidelines, and effective prompting techniques.',
-              'Can I use it with existing projects? Yes, Cursor AI works with all programming languages and can be integrated into your existing development workflow. It supports all major frameworks and version control systems.',
-              'What about data privacy? All code processed by Cursor AI follows DQ data governance policies. Sensitive or proprietary code should be reviewed according to our AI usage guidelines before using AI assistance.',
-            ],
-          },
-          { type: 'p', text: 'Best Practices:' },
-          {
-            type: 'ul',
-            items: [
-              'Start with small tasks: Begin by using Cursor AI for code completion and refactoring before moving to more complex tasks.',
-              'Review AI-generated code: Always review and test AI-generated code before committing to ensure it meets quality standards and security requirements.',
-              'Use natural language effectively: Write clear, specific prompts when asking Cursor AI to generate or modify code.',
-              'Leverage context: Cursor AI works best when it has access to relevant files and context in your project.',
-              'Follow security guidelines: Do not share sensitive credentials, API keys, or proprietary business logic in prompts.',
-              'Stay updated: Regularly check for Cursor AI updates and new feature announcements from the Digital Innovation team.',
-            ],
-          },
-          {
-            type: 'p',
-            text:
-              'For additional resources, tips, and community discussions, join the #cursor-ai channel on Microsoft Teams.',
-          },
-        ],
-      },
-      contact_sla: {
-        heading: 'Contact & Service Level',
-        blocks: [
-          {
-            type: 'p',
-            text:
-              'Purpose: Provide contact information, support hours, and expected response times for Cursor AI access requests and support.',
-          },
-          {
-            type: 'p',
-            text:
-              'Support Hours: Monday–Friday, 9:00 AM to 5:00 PM (DQ business days). Requests submitted outside these hours will be processed on the next business day.',
-          },
-          { type: 'p', text: 'Contact Methods:' },
-          {
-            type: 'ul',
-            items: [
-              'Access Requests: Submit via the request form or email digital-innovation@dq.com for new access requests.',
-              'Technical Support: For installation or usage issues, contact the Digital Innovation team via Microsoft Teams (#cursor-ai channel) or email.',
-              'License Issues: For license activation or renewal issues, email digital-innovation@dq.com with your request number.',
-              'Training & Onboarding: Schedule onboarding sessions through the Digital Innovation team.',
-            ],
-          },
-          { type: 'p', text: 'Service Level Agreements:' },
-          {
-            type: 'ul',
-            items: [
-              'Request Acknowledgment: All requests are acknowledged within 2 hours during business hours.',
-              'Initial Response: Eligibility review and initial response within 1 business day.',
-              'License Provisioning: Approved requests are processed and licenses provisioned within 1-2 business days.',
-              'Technical Support: Installation and technical issues are addressed within 4 hours during business hours.',
-              'Training Access: Onboarding materials and training session links provided within 24 hours of license activation.',
-            ],
-          },
-          {
-            type: 'p',
-            text:
-              'Scope & Eligibility: Cursor AI access is available to DQ technical staff with development responsibilities. Requests must include a valid business justification and manager approval for team licenses. Personal or non-DQ projects are not supported.',
-          },
-        ],
-      },
-      required_documents: {
-        heading: 'Required Documents',
-        blocks: [
-          {
-            type: 'p',
-            text:
-              'To complete your Cursor AI access request, you may need to provide the following information or documentation:',
-          },
-          {
-            type: 'ul',
-            items: [
-              'Business Justification: Brief description of how Cursor AI will be used in your role (provided in the request form).',
-              'Manager Approval: For individual licenses, manager approval may be required based on your department policy.',
-              'Team License Request: For team licenses (5+ users), provide list of team members with names, email addresses, and roles.',
-              'Project Details: If requesting for a specific project, provide project name and expected duration of usage.',
-              'Training Completion: After receiving access, completion of the mandatory AI tool usage training is required within 5 business days.',
-            ],
-          },
-          {
-            type: 'p',
-            text:
-              'Note: Most individual license requests only require completion of the online form with business justification. Additional documentation is typically only needed for team licenses or special circumstances.',
-          },
-        ],
-      },
-    },
-    // Lovable AI
-    '11': {
-      submit_request: {
-        heading: 'Request Lovable AI Access',
-        blocks: [
-          {
-            type: 'p',
-            text:
-              'Lovable AI is an innovative low-code platform that leverages artificial intelligence to help you build full-stack web applications rapidly. With natural language instructions, you can create production-ready applications without extensive coding experience. This platform is ideal for rapid prototyping, MVP development, and bringing ideas to life quickly.',
-          },
-          {
-            type: 'p',
-            text:
-              'Click the "Request Service" button below to submit your Lovable AI access request. The form will open in a new window where you can provide the necessary information for platform access provisioning.',
-          },
-          { type: 'p', text: 'Steps to request Lovable AI access:' },
-          {
-            type: 'ol',
-            items: [
-              'Open the request form: Click the Request Service button to launch the Lovable AI access request form.',
-              'Provide your details: Enter your name, department, role, and DQ email address.',
-              'Specify use case: Describe what you plan to build with Lovable AI (e.g., internal tools, customer-facing apps, prototypes, MVPs).',
-              'Project information: Provide brief details about your project including expected timeline and business value.',
-              'Acknowledge policies: Review and accept the AI tool usage policies, data governance guidelines, and low-code platform best practices.',
-              'Select access level: Choose between individual access or team access (if requesting for multiple team members).',
-              'Submit the form: Review your entries and click Submit. You will receive an email confirmation with your request number.',
-            ],
-          },
-          {
-            type: 'p',
-            text:
-              'After submission, the Digital Innovation team will review your request and assess the use case. Once approved, you will receive platform access credentials, getting started guides, and links to tutorial resources. Platform access is typically provisioned within 1-2 business days.',
-          },
-        ],
-        action: {
-          label: 'Request Service',
-          urlField: 'requestUrl',
-          fallbackUrl: 'https://forms.office.com/pages/responsepage.aspx?id=LovableAIRequest',
-        },
-      },
-      self_service_faq: {
-        heading: 'Lovable AI FAQs & Best Practices',
-        blocks: [
-          {
-            type: 'p',
-            text:
-              'Before submitting your request, review these frequently asked questions and best practices to maximize your success with Lovable AI.',
-          },
-          { type: 'p', text: 'Frequently Asked Questions:' },
-          {
-            type: 'ul',
-            items: [
-              'What is Lovable AI? Lovable AI is a low-code platform powered by AI that enables you to build full-stack web applications using natural language instructions. It generates production-ready code, handles frontend and backend development, and integrates with databases and APIs.',
-              'Who should use Lovable AI? Product managers, designers, business analysts, and developers who need to rapidly prototype ideas, build MVPs, or create internal tools without extensive coding are ideal users.',
-              'What can I build? You can build various web applications including dashboards, CRUD applications, admin panels, internal tools, customer portals, and prototypes for proof-of-concept projects.',
-              'Do I need coding experience? While coding experience is helpful for advanced customizations, Lovable AI is designed to be accessible to users with limited coding knowledge. You describe what you want in natural language, and the AI generates the code.',
-              'What technologies does it use? Lovable AI generates modern web applications using React, TypeScript, Node.js, and popular frameworks. The generated code is clean, maintainable, and follows industry best practices.',
-              'Can I export the code? Yes, you can export and deploy the generated code to your own infrastructure. The platform generates standard code that you own and can modify as needed.',
-              'What about data and security? All applications built on Lovable AI must follow DQ data governance policies. Avoid using production data or sensitive information during development. Review security guidelines before deployment.',
-            ],
-          },
-          { type: 'p', text: 'Best Practices:' },
-          {
-            type: 'ul',
-            items: [
-              'Start simple: Begin with a basic application to learn the platform before tackling complex projects.',
-              'Be specific in prompts: Provide clear, detailed descriptions of what you want to build. The more specific your instructions, the better the AI-generated results.',
-              'Iterate incrementally: Build your application in small steps, testing each feature before adding new ones.',
-              'Review generated code: Always review the AI-generated code to understand what was created and ensure it meets your requirements.',
-              'Follow naming conventions: Use consistent naming for components, pages, and features to keep your project organized.',
-              'Test thoroughly: Test all features and user flows before deploying to production or sharing with stakeholders.',
-              'Document your work: Keep notes on your prompts and design decisions to help with future iterations and team handoffs.',
-              'Join the community: Connect with other Lovable AI users in the #lovable-ai channel on Microsoft Teams to share tips and learn from others.',
-            ],
-          },
-          {
-            type: 'p',
-            text:
-              'For tutorials, video guides, and template projects, visit the Lovable AI resource center or join the weekly office hours session hosted by the Digital Innovation team.',
-          },
-        ],
-      },
-      contact_sla: {
-        heading: 'Contact & Service Level',
-        blocks: [
-          {
-            type: 'p',
-            text:
-              'Purpose: Provide contact information, support hours, and expected response times for Lovable AI access requests and platform support.',
-          },
-          {
-            type: 'p',
-            text:
-              'Support Hours: Monday–Friday, 9:00 AM to 5:00 PM (DQ business days). Requests submitted outside these hours will be processed on the next business day.',
-          },
-          { type: 'p', text: 'Contact Methods:' },
-          {
-            type: 'ul',
-            items: [
-              'Access Requests: Submit via the request form or email digital-innovation@dq.com for new access requests.',
-              'Platform Support: For platform issues, usage questions, or troubleshooting, contact the Digital Innovation team via Microsoft Teams (#lovable-ai channel) or email.',
-              'License Issues: For access problems or account issues, email digital-innovation@dq.com with your request number.',
-              'Training & Resources: Join weekly office hours every Wednesday at 2:00 PM or schedule one-on-one sessions through the Digital Innovation team.',
-              'Project Consultation: For guidance on whether Lovable AI is suitable for your project, request a consultation with the Digital Innovation team.',
-            ],
-          },
-          { type: 'p', text: 'Service Level Agreements:' },
-          {
-            type: 'ul',
-            items: [
-              'Request Acknowledgment: All requests are acknowledged within 2 hours during business hours.',
-              'Initial Response: Use case review and eligibility assessment within 1 business day.',
-              'Access Provisioning: Approved requests are processed and platform access granted within 1-2 business days.',
-              'Technical Support: Platform issues and technical questions are addressed within 4 hours during business hours.',
-              'Training Access: Getting started guides and tutorial access provided immediately upon platform access activation.',
-              'Consultation Requests: Project consultation meetings scheduled within 3 business days.',
-            ],
-          },
-          {
-            type: 'p',
-            text:
-              'Scope & Eligibility: Lovable AI access is available to DQ staff working on approved internal projects, prototypes, or MVPs. Requests must include a valid use case and business justification. External client projects may require additional approvals. Personal or non-DQ projects are not supported.',
-          },
-        ],
-      },
-      required_documents: {
-        heading: 'Required Documents',
-        blocks: [
-          {
-            type: 'p',
-            text:
-              'To complete your Lovable AI access request, you may need to provide the following information:',
-          },
-          {
-            type: 'ul',
-            items: [
-              'Use Case Description: Detailed description of what you plan to build and the business problem it solves (provided in the request form).',
-              'Project Brief: Brief overview of your project including objectives, expected users, and timeline.',
-              'Manager Approval: Manager approval may be required for certain projects based on department policy.',
-              'Team Access Request: For team access (multiple users), provide list of team members with names, email addresses, and their roles in the project.',
-              'Data Governance Acknowledgment: Confirmation that you understand and will comply with DQ data governance policies when building applications.',
-              'Training Completion: After receiving access, completion of the getting started tutorial and AI tool usage training is recommended within 5 business days.',
-            ],
-          },
-          {
-            type: 'p',
-            text:
-              'Note: Most individual access requests only require completion of the online form with a clear use case description. Additional documentation is typically only needed for team access or projects involving sensitive data.',
-          },
-        ],
-      },
-    },
+    // Note: Cursor AI (id: '10') and Lovable AI (id: '11') content is now managed in aiToolsData.ts
     // Leave Application
     '13': {
       annual_leave: {

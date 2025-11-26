@@ -107,7 +107,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
         {itemsWithPromos.map((item, idx) => {
         if (item.type === 'service') {
           const service = item.data as ServiceItem;
-          return <ServiceCard key={`service-${service.id}`} service={service} onClick={() => onServiceSelect(service)} onQuickView={() => setQuickViewService(service)} isBookmarked={bookmarkedServices.includes(service.id)} onToggleBookmark={() => onToggleBookmark(service.id)} onAddToComparison={() => onAddToComparison(service)} marketplaceType={marketplaceType} primaryButtonText={primaryButtonText} />;
+          return <ServiceCard key={`service-${service.id}`} item={service} type={marketplaceType} isBookmarked={bookmarkedServices.includes(service.id)} onToggleBookmark={() => onToggleBookmark(service.id)} onQuickView={() => setQuickViewService(service)} />;
         } else if (item.type === 'promo') {
           const promo = item.data;
           return <PromoCard key={`promo-${promo.id}-${idx}`} title={promo.title} description={promo.description} icon={promo.icon} path={promo.path} gradientFrom={promo.gradientFrom} gradientTo={promo.gradientTo} />;
