@@ -16,6 +16,61 @@ INSERT INTO public.news (
   "focusArea", content
 ) VALUES
 
+-- DQ Changes | Updated Scrum Master Structure
+('dq-scrum-master-structure-update', 
+ 'DQ Changes: Updated Scrum Master Structure', 
+ 'Announcement', 
+ '2025-11-27', 
+ 'Felicia Araba', 
+ NULL, 
+ 0, 
+ 'As part of our organizational optimization, we are updating the leadership structure across functions to streamline responsibilities and enhance ownership.', 
+ NULL, 
+ NULL, 
+ 'Remote', 
+ 'Operations', 
+ 'Delivery', 
+ ARRAY['Scrum Master', 'Organizational Structure', 'Leadership'], 
+ '10–20', 
+ 'Corporate Announcements', 
+ 'DQ Leadership', 
+ 'Culture & People', 
+ 'As part of our organizational optimization, we are updating the leadership structure across functions to streamline responsibilities and enhance ownership.
+
+Previously, our leadership structure included Sector Leads, Factory Leads, Tower Leads, and Scrum Masters. These have now been streamlined into 4 unified Scrum Master framework.
+
+## Updated Scrum Master Structure
+
+DQ will now operate under four defined Scrum Master categories:
+
+## COE Scrum Masters
+
+(Existing position) – Supporting enterprise-wide capability excellence.
+
+## Delivery Scrum Masters
+
+(New role) – Driving end-to-end delivery flow, ensuring teams progress predictably from brief to outcome.
+
+## Working Room Scrum Masters
+
+(New role) – Managing daily execution within working rooms, resolving blockers, and ensuring day-to-day operational throughput.
+
+## Unit Scrum Masters
+
+(Updated position) – The former Sector, Factory, and Tower Lead positions redefined as:
+
+- Sector Scrum Master
+- Factory Scrum Master
+- Tower Scrum Master
+
+## Purpose
+
+To maintain a streamlined, transparent, and consistent leadership structure that strengthens delivery ownership, enhances blocker resolution, and drives teams toward clear, measurable outcomes.
+
+## Role Expectation
+
+All Scrum Masters are expected to take full ownership of their unit, delivery area, or working room proactively identifying blockers, facilitating progress, and ensuring achievement of defined delivery targets.'),
+
 -- DQ Townhall Meeting Agenda
 ('dq-townhall-meeting-agenda', 
  'DQ Townhall Meeting Agenda', 
@@ -556,7 +611,7 @@ When you develop your leadership superpowers, you don''t just improve your own e
 
 -- Company Wide Lunch Break Schedule
 ('company-wide-lunch-break-schedule', 
- 'DQ CHANGES | COMPANY-WIDE LUNCH BREAK SCHEDULE', 
+ 'DQ Changes | Company-Wide Lunch Break Schedule', 
  'Announcement', 
  '2025-11-13', 
  'Irene Musyoki', 
@@ -609,7 +664,7 @@ Thank you for your cooperation in helping us build a more synchronized and effic
 
 -- Grading Review Program
 ('grading-review-program-grp', 
- 'DQ ADP | GRADING REVIEW PROGRAM (GRP)', 
+ 'DQ ADP | Grading Review Program (GRP)', 
  'Announcement', 
  '2025-11-13', 
  'Irene Musyoki', 
