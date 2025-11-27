@@ -28,6 +28,7 @@ const featuredTestimonialsData = [
 
 const TestimonialsDetailPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<string>("all")
+  const disclaimer = '(not approved for external publication)'
 
   // Hero image for testimonials - office collaboration scene
   const heroImage = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -133,7 +134,10 @@ const TestimonialsDetailPage: React.FC = () => {
                   <p className="font-semibold text-gray-900 text-center">{testimonial.name}</p>
                   <p className="text-xs text-gray-500 text-center mt-1">{testimonial.organization}</p>
                 </div>
-                <p className="text-sm text-gray-600 leading-relaxed">"{testimonial.quote}"</p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  "{testimonial.quote}"
+                  <span className="block text-xs text-gray-500 italic mt-2">{disclaimer}</span>
+                </p>
               </div>
             ))}
           </div>

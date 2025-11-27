@@ -182,6 +182,7 @@ const impactStats = [
 ];
 
 const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
+  const disclaimer = '(not approved for external publication)'
   const initials =
     testimonial.name
       .split(" ")
@@ -222,8 +223,9 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
       </div>
       <p className="text-gray-600 leading-relaxed text-base">
         "{testimonial.quote}"
+        <span className="block text-xs text-gray-500 italic mt-2">{disclaimer}</span>
       </p>
-      {testimonial.note && (
+      {testimonial.note && testimonial.note.toLowerCase().trim() !== disclaimer.replace(/[()]/g, '').toLowerCase() && (
         <p className="text-xs text-amber-600 mt-4">
           {testimonial.note}
         </p>

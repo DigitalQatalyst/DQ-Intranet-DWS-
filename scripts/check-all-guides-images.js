@@ -1,99 +1,59 @@
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
+dotenv.config()
 
-dotenv.config();
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Missing Supabase credentials in .env file');
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-async function checkAllGuides() {
-  console.log('🔍 Checking all guides for images...\n');
-
-  // Fetch all approved guides
-  const { data: guides, error } = await supabase
+async function checkAllGuidesImages() {
+  console.log('🔍 Checking all guides for missing images...\n')
+  
+  const { data: allGuides, error } = await supabase
     .from('guides')
-    .select('id, title, hero_image_url, domain, guide_type')
-    .eq('status', 'Approved');
-
+    .select('slug, title, domain, guide_type, hero_image_url')
+    .eq('status', 'Approved')
+    .order('domain')
+    .order('title')
+  
   if (error) {
-    console.error('❌ Error fetching guides:', error);
-    return;
+    console.error('❌ Error:', error.message)
+    return
   }
-
-  // Categorize guides
-  const strategy = [];
-  const guidelines = [];
-  const blueprints = [];
-  const testimonials = [];
-
-  (guides || []).forEach(g => {
-    const domain = (g.domain || '').toLowerCase();
-    const guideType = (g.guide_type || '').toLowerCase();
-    const title = (g.title || '').toLowerCase();
-
-    if (domain.includes('strategy') || guideType.includes('strategy') || title.includes('strategy')) {
-      strategy.push(g);
-    } else if (domain.includes('blueprint') || guideType.includes('blueprint') || title.includes('blueprint')) {
-      blueprints.push(g);
-    } else if (domain.includes('testimonial') || guideType.includes('testimonial') || title.includes('testimonial')) {
-      testimonials.push(g);
-    } else {
-      guidelines.push(g);
-    }
-  });
-
-  function checkCategory(name, categoryGuides) {
-    console.log(`\n📋 ${name.toUpperCase()} (${categoryGuides.length} guides):`);
-    let withImages = 0;
-    let withoutImages = 0;
-
-    categoryGuides.forEach(g => {
-      const imageUrl = g.hero_image_url;
-      const hasImage = imageUrl && imageUrl.trim() !== '' && !imageUrl.includes('/image.png');
-      
-      if (hasImage) {
-        withImages++;
-      } else {
-        console.log(`   ❌ ${g.title} - No image`);
-        withoutImages++;
-      }
-    });
-
-    console.log(`   ✅ With images: ${withImages}`);
-    console.log(`   ❌ Without images: ${withoutImages}`);
+  
+  if (!allGuides || allGuides.length === 0) {
+    console.log('⚠️  No guides found')
+    return
+  }
+  
+  const withImages = allGuides.filter(g => g.hero_image_url && g.hero_image_url.trim().length > 0)
+  const withoutImages = allGuides.filter(g => !g.hero_image_url || g.hero_image_url.trim().length === 0)
+  
+  console.log(`📊 Total guides: ${allGuides.length}`)
+  console.log(`✅ With images: ${withImages.length}`)
+  console.log(`❌ Without images: ${withoutImages.length}\n`)
+  
+  if (withoutImages.length > 0) {
+    console.log('❌ Guides WITHOUT images:\n')
+    const byDomain = {}
+    withoutImages.forEach(guide => {
+      const domain = guide.domain || 'Unknown'
+      if (!byDomain[domain]) byDomain[domain] = []
+      byDomain[domain].push(guide)
+    })
     
-    return { withImages, withoutImages };
-  }
-
-  const strategyStats = checkCategory('Strategy', strategy);
-  const guidelinesStats = checkCategory('Guidelines', guidelines);
-  const blueprintsStats = checkCategory('Blueprints', blueprints);
-  const testimonialsStats = checkCategory('Testimonials', testimonials);
-
-  console.log(`\n📊 OVERALL SUMMARY:`);
-  console.log(`   Strategy: ${strategyStats.withImages}/${strategy.length} with images`);
-  console.log(`   Guidelines: ${guidelinesStats.withImages}/${guidelines.length} with images`);
-  console.log(`   Blueprints: ${blueprintsStats.withImages}/${blueprints.length} with images`);
-  console.log(`   Testimonials: ${testimonialsStats.withImages}/${testimonials.length} with images`);
-  
-  const totalWithImages = strategyStats.withImages + guidelinesStats.withImages + blueprintsStats.withImages + testimonialsStats.withImages;
-  const totalGuides = guides.length;
-  
-  console.log(`\n   Total: ${totalWithImages}/${totalGuides} guides have images`);
-  
-  if (totalWithImages < totalGuides) {
-    console.log(`\n⚠️  ${totalGuides - totalWithImages} guides still need images`);
+    Object.keys(byDomain).sort().forEach(domain => {
+      console.log(`\n📁 ${domain} (${byDomain[domain].length} guides):`)
+      byDomain[domain].forEach((guide, index) => {
+        console.log(`   ${index + 1}. ${guide.title} (${guide.slug})`)
+      })
+    })
   } else {
-    console.log(`\n✅ All guides have images!`);
+    console.log('✅ All guides have images!')
   }
+  
+  return { allGuides, withoutImages }
 }
 
-checkAllGuides().catch(console.error);
-
+checkAllGuidesImages().catch(console.error)

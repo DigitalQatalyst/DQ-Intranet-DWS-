@@ -114,10 +114,10 @@ const MarkdownRenderer: React.FC<{ body: string; onRendered?: () => void }> = ({
           <tr className="hover:bg-gray-50 transition-colors" {...(props as any)} />
         ),
         th: ({ node, ...props }) => (
-          <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200" style={{ minWidth: '180px' }} {...(props as any)} />
+          <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b border-gray-200" style={{ minWidth: '180px', color: '#000000' }} {...(props as any)} />
         ),
         td: ({ node, ...props }) => (
-          <td className="px-6 py-4 text-sm text-gray-600 border-b border-gray-100" style={{ minWidth: '300px' }} {...(props as any)} />
+          <td className="px-6 py-4 text-sm border-b border-gray-100" style={{ minWidth: '300px', color: '#000000' }} {...(props as any)} />
         )
       }}
     >

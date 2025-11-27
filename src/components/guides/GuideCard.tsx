@@ -42,14 +42,48 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ')
   }
+  const normalizeTag = (value?: string | null) => {
+    if (!value) return ''
+    const cleaned = value.toLowerCase().replace(/[_-]+/g, ' ').trim()
+    return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
+  }
   const domainLabel = formatLabel(domain)
-  const imageUrl = getGuideImageUrl({ heroImageUrl: guide.heroImageUrl, domain: guide.domain, guideType: guide.guideType })
+  const isDuplicateTag = normalizeTag(domain) !== '' && normalizeTag(domain) === normalizeTag(guide.guideType)
+  // Ensure we're using the correct property name - check both camelCase and snake_case
+  const heroImage = guide.heroImageUrl || (guide as any).hero_image_url || null
+  const imageUrl = getGuideImageUrl({
+    heroImageUrl: heroImage,
+    domain: guide.domain,
+    guideType: guide.guideType,
+    id: guide.id,
+    slug: guide.slug || guide.id,
+    title: guide.title,
+  })
   const isTestimonial = ((guide.domain || '').toLowerCase().includes('testimonial')) || ((guide.guideType || '').toLowerCase().includes('testimonial'))
+  
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // If image fails to load, try to use a fallback
+    const target = e.currentTarget
+    if (target.src && !target.src.includes('/image.png')) {
+      // Try fallback image
+      target.src = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+    }
+  }
   
   return (
     <div className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col" onClick={onClick}>
       {imageUrl && (
-        <img src={imageUrl} alt={guide.title} className="w-full h-40 object-cover rounded mb-3" loading="lazy" decoding="async" width={640} height={180} />
+        <img 
+          src={imageUrl} 
+          alt={guide.title} 
+          className="w-full h-40 object-cover rounded mb-3" 
+          loading="lazy" 
+          decoding="async" 
+          width={640} 
+          height={180}
+          onError={handleImageError}
+          crossOrigin="anonymous"
+        />
       )}
       <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[40px]" title={guide.title}>{guide.title}</h3>
       <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px] mb-3">{guide.summary}</p>
@@ -59,7 +93,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
             {domainLabel}
           </span>
         )}
-        {guide.guideType && !isTestimonial && (
+        {guide.guideType && !isTestimonial && !isDuplicateTag && (
           <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
             {formatLabel(guide.guideType)}
           </span>

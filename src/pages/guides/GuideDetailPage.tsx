@@ -271,7 +271,20 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
     return () => { cancelled = true }
   }, [guide?.id, guide?.domain, guide?.guideType, guide?.slug])
 
-  const imageUrl = useMemo(() => getGuideImageUrl({ heroImageUrl: guide?.heroImageUrl || undefined, domain: guide?.domain || undefined, guideType: guide?.guideType || undefined }), [guide?.heroImageUrl, guide?.domain, guide?.guideType])
+  const imageUrl = useMemo(() => getGuideImageUrl({
+    heroImageUrl: guide?.heroImageUrl || undefined,
+    domain: guide?.domain || undefined,
+    guideType: guide?.guideType || undefined,
+    id: guide?.id,
+    slug: guide?.slug,
+    title: guide?.title,
+  }), [guide?.heroImageUrl, guide?.domain, guide?.guideType, guide?.id, guide?.slug, guide?.title])
+  const normalizeTag = (value?: string | null) => {
+    if (!value) return ''
+    const cleaned = value.toLowerCase().replace(/[_-]+/g, ' ').trim()
+    return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
+  }
+  const isDuplicateTag = normalizeTag(guide?.domain) !== '' && normalizeTag(guide?.domain) === normalizeTag(guide?.guideType)
 
   // Parse guide body into sections for tabs (for Guidelines, Strategy, Testimonials, and Blueprints)
   const guideSections = useMemo(() => {
@@ -976,7 +989,14 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                     className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                   >
                     <img
-                      src={getGuideImageUrl({ heroImageUrl: r.heroImageUrl || undefined, domain: r.domain || undefined, guideType: r.guideType || undefined })}
+                      src={getGuideImageUrl({
+                        heroImageUrl: r.heroImageUrl || undefined,
+                        domain: r.domain || undefined,
+                        guideType: r.guideType || undefined,
+                        id: r.id,
+                        slug: r.slug,
+                        title: r.title,
+                      })}
                       alt={r.title}
                       className="w-full h-32 object-cover"
                       loading="lazy"
@@ -1155,7 +1175,14 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                     className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                   >
                     <img
-                      src={getGuideImageUrl({ heroImageUrl: r.heroImageUrl || undefined, domain: r.domain || undefined, guideType: r.guideType || undefined })}
+                      src={getGuideImageUrl({
+                        heroImageUrl: r.heroImageUrl || undefined,
+                        domain: r.domain || undefined,
+                        guideType: r.guideType || undefined,
+                        id: r.id,
+                        slug: r.slug,
+                        title: r.title,
+                      })}
                       alt={r.title}
                       className="w-full h-32 object-cover"
                       loading="lazy"
@@ -1273,12 +1300,20 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
             {/* Tags + View Blueprint (Blueprints) */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <div className="flex flex-wrap items-center gap-2">
-                {guide.domain && (
+                {guide.domain && !guide.domain?.toLowerCase().includes('blueprint') && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
                     {guide.domain}
                   </span>
                 )}
-                {guide.guideType && !actualIsTestimonialsDomain && (
+                {guide.guideType && !actualIsTestimonialsDomain && (() => {
+                  const domainLower = (guide.domain || '').toLowerCase()
+                  const guideTypeLower = (guide.guideType || '').toLowerCase()
+                  // Hide guideType if it's too similar to domain (e.g., "Guideline" vs "Guidelines", "Blueprint" vs "Blueprints")
+                  const isSimilar = domainLower.includes(guideTypeLower) || guideTypeLower.includes(domainLower) || 
+                                   (domainLower.includes('guideline') && guideTypeLower.includes('guideline')) ||
+                                   (domainLower.includes('blueprint') && guideTypeLower.includes('blueprint'))
+                  return !(isDuplicateTag || isSimilar)
+                })() && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
                     {guide.guideType}
                   </span>
@@ -1444,7 +1479,10 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                           <p className="text-xs text-gray-500">{client.role}</p>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-700 leading-relaxed">“{client.quote}”</p>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        "{client.quote}"
+                        <span className="block text-xs text-gray-500 italic mt-2">(not approved for external publication)</span>
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -1591,7 +1629,14 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                     >
                       <div className="flex gap-3">
                         <img
-                          src={getGuideImageUrl({ heroImageUrl: r.heroImageUrl || undefined, domain: r.domain || undefined, guideType: r.guideType || undefined })}
+                          src={getGuideImageUrl({
+                            heroImageUrl: r.heroImageUrl || undefined,
+                            domain: r.domain || undefined,
+                            guideType: r.guideType || undefined,
+                            id: r.id,
+                            slug: r.slug,
+                            title: r.title,
+                          })}
                           alt={r.title}
                           className="w-20 h-20 object-cover rounded"
                           loading="lazy"
