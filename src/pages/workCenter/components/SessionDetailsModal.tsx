@@ -1,18 +1,18 @@
 import React from 'react';
-import { X, Calendar, Users, FileText, MapPin, User } from 'lucide-react';
+import { X, Calendar, Users, FileText, MapPin } from 'lucide-react';
 
 interface Session {
   id: string;
   title: string;
   start: Date;
   end: Date;
-  type: 'retro' | 'cws' | 'onboarding' | 'scrum' | 'townhall';
+  type: 'retro' | 'cws' | 'scrum' | 'townhall' | 'wr' | 'ct';
   department: string;
   location: string;
   attendees: string[];
   agenda: string[];
   description?: string;
-  moderator: string;
+  joinLink: string;
   frequency: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly';
 }
 
@@ -33,9 +33,10 @@ export const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
     const labels: Record<string, string> = {
       retro: 'Retro',
       cws: 'CWS',
-      onboarding: 'Onboarding',
       scrum: 'Scrum',
       townhall: 'Townhall',
+      wr: 'Working Room',
+      ct: 'Control Tower',
     };
     return labels[type] || type;
   };
@@ -117,15 +118,6 @@ export const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
             </span>
           </div>
 
-          {/* Moderator */}
-          <div className="flex items-start gap-3">
-            <User className="text-gray-400 mt-1" size={20} />
-            <div>
-              <p className="font-medium text-gray-800">Moderator</p>
-              <p className="text-gray-600">{session.moderator}</p>
-            </div>
-          </div>
-
           {/* Frequency */}
           <div>
             <p className="font-medium text-gray-800 mb-2">Frequency</p>
@@ -183,11 +175,14 @@ export const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
           >
             Close
           </button>
-          <button
+          <a
+            href={session.joinLink}
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Join Session
-          </button>
+          </a>
         </div>
       </div>
     </div>
