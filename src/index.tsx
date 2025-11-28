@@ -7,6 +7,7 @@ import { MsalProvider } from "@azure/msal-react";
 import { msalInstance } from "./services/auth/msal";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // Import test function for debugging (only in dev)
 if (import.meta.env.DEV) {
@@ -27,15 +28,20 @@ if (container) {
   // Render function to avoid duplication
   const renderApp = () => {
     root.render(
-      <ApolloProvider client={client}>
-        <MsalProvider instance={msalInstance}>
-          <AppRouter />
-        </MsalProvider>
-      </ApolloProvider>
+      <ErrorBoundary>
+        <ApolloProvider client={client}>
+          <MsalProvider instance={msalInstance}>
+            <AppRouter />
+          </MsalProvider>
+        </ApolloProvider>
+      </ErrorBoundary>
     );
   };
 
-  // Ensure MSAL is initialized and redirect response handled before using any APIs
+  // Render immediately - don't wait for MSAL
+  renderApp();
+
+  // Initialize MSAL in the background
   msalInstance
     .initialize()
     .then(() => msalInstance.handleRedirectPromise())
@@ -64,11 +70,9 @@ if (container) {
       } catch (error) {
         console.warn("Error processing authentication state:", error);
       }
-      renderApp();
     })
     .catch((e) => {
       console.error("MSAL initialization failed:", e);
-      // Render app anyway - authentication will be handled gracefully
-      renderApp();
+      // App is already rendered, continue
     });
 }
