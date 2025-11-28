@@ -605,6 +605,11 @@ interface PartnerLogoProps {
 
 const PartnerLogo = ({ partner }: PartnerLogoProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  
+  if (!partner || !partner.logo || !partner.name) {
+    return null;
+  }
+  
   return (
     <div
       className={`relative mx-4 my-1 transition-all duration-300 ease-out transform ${
@@ -685,7 +690,7 @@ const FeaturedPartnersCarousel = () => {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {[...sectors, ...sectors].map((sector, index) => (
-            <PartnerLogo key={`${sector.id}-${index}`} sector={sector} />
+            <PartnerLogo key={`${sector.id}-${index}`} partner={sector} />
           ))}
         </div>
 
