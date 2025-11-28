@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { CourseType } from "./utils/mockData";
 import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
@@ -8,6 +8,13 @@ import { App } from './App';
 
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
 import LmsCourseDetailPage from "./pages/lms/LmsCourseDetailPage";
+import LmsCourseReviewsPage from "./pages/lms/LmsCourseReviewsPage";
+
+// Wrapper component to force remount on slug change
+const LmsCourseDetailPageWrapper = () => {
+  const { slug } = useParams<{ slug: string }>();
+  return <LmsCourseDetailPage key={slug} />;
+};
 import LmsCourseDetail from "./pages/LmsCourseDetail";
 import LmsCourses from "./pages/LmsCourses";
 import AssetLibraryPage from "./pages/assetLibrary";
@@ -68,7 +75,11 @@ export function AppRouter() {
             <Route path="/*" element={<App />} />
             <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
             <Route path="/lms" element={<LmsCourses />} />
-            <Route path="/lms/:slug" element={<LmsCourseDetail />} />
+            <Route path="/lms/:slug/reviews" element={<LmsCourseReviewsPage />} />
+            <Route 
+              path="/lms/:slug" 
+              element={<LmsCourseDetailPageWrapper />} 
+            />
             <Route
               path="/onboarding/:itemId"
               element={

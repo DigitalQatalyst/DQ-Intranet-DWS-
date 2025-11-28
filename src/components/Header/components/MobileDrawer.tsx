@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MenuIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
-import { BuildingIcon, GraduationCapIcon, CalendarIcon, UsersIcon, NewspaperIcon, SparklesIcon, BookOpen } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, GraduationCapIcon, CalendarIcon, UsersIcon, NewspaperIcon, SparklesIcon, BookOpen } from 'lucide-react';
 import { scrollToSupport } from '../../../utils/scroll';
 interface MobileDrawerProps {
   isCompact?: boolean;
@@ -10,11 +10,35 @@ interface MobileDrawerProps {
   isSignedIn: boolean;
 }
 const marketplaces = [{
-  id: 'learning-center',
-  name: 'DQ Learning Center',
-  description: 'Courses, learning tracks, and associate reviews.',
+  id: 'non-financial',
+  name: 'IT & Systems Support',
+  description: 'Helpdesk, access requests, device & app support.',
+  icon: BuildingIcon,
+  href: '/marketplace/non-financial'
+}, {
+  id: 'finance',
+  name: 'HR & Finance Services',
+  description: 'Leave, payroll, benefits, and reimbursements.',
+  icon: CreditCardIcon,
+  href: '/marketplace/finance'
+}, {
+  id: 'media',
+  name: 'Facilities & Logistics',
+  description: 'Office access, seating, travel, and logistics.',
+  icon: NewspaperIcon,
+  href: '/marketplace/media'
+}, {
+  id: 'community',
+  name: 'Associates Directory',
+  description: 'Find people, teams, and contacts across DQ.',
+  icon: UsersIcon,
+  href: '/marketplace/community'
+}, {
+  id: 'course',
+  name: 'Learning Center',
+  description: '7x GHC, 6x Digital, 12x HoV, 1x Day in DQ, Key Tools.',
   icon: GraduationCapIcon,
-  href: '/dq-learning-center'
+  href: '/lms'
 }, {
   id: 'services-center',
   name: 'DQ Services Center',

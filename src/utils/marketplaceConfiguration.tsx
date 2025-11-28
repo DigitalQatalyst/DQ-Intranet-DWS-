@@ -417,8 +417,8 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       id: 'location',
       title: 'Location & Studio',
       options: [{
-        id: 'Global',
-        name: 'Global'
+        id: 'Riyadh',
+        name: 'Riyadh'
       }, {
         id: 'Dubai',
         name: 'Dubai'

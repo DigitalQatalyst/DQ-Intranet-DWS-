@@ -123,7 +123,12 @@ export function Footer({
             </AccordionSection>
             <AccordionSection title="For You">
               <ul className="space-y-3">
-                {forYouLinks.map((label) => (
+                <li>
+                  <a href="/lms" className="text-white/90 hover:text-white transition-colors text-sm block">
+                    Learning Center
+                  </a>
+                </li>
+                {forYouLinks.filter(label => label !== 'DQ LMS Courses').map((label) => (
                   <li key={label}>
                     <button
                       type="button"
@@ -210,7 +215,12 @@ export function Footer({
             <div>
               <h3 className="font-semibold text-lg mb-6">For You</h3>
               <ul className="space-y-4">
-                {forYouLinks.map((label) => (
+                <li>
+                  <a href="/lms" className="text-white/90 hover:text-white transition-colors text-sm">
+                    Learning Center
+                  </a>
+                </li>
+                {forYouLinks.filter(label => label !== 'DQ LMS Courses').map((label) => (
                   <li key={label}>
                     <button
                       type="button"
