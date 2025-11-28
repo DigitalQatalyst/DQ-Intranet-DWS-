@@ -1,0 +1,192 @@
+---
+description: Project-specific patterns for Supabase, routing, and DQ Intranet conventions
+globs: ['**/*.tsx', '**/*.ts']
+alwaysApply: true
+---
+
+# Project-Specific Patterns
+
+## Supabase Integration
+
+### Client Usage
+- Use `supabaseClient` from `@/lib/supabaseClient` for client-side operations
+- Use `supabaseAdmin` from API routes for admin operations
+- Always handle errors from Supabase queries
+- Use TypeScript types from Supabase when available
+
+### Query Patterns
+```tsx
+import { supabaseClient } from '@/lib/supabaseClient';
+
+// Good: Error handling
+const { data, error } = await supabaseClient
+  .from('table_name')
+  .select('*')
+  .eq('column', 'value');
+
+if (error) {
+  console.error('Error:', error);
+  return;
+}
+
+// Use data...
+```
+
+### React Query Integration
+- Use `@tanstack/react-query` for data fetching
+- Create query hooks in `src/hooks/` directory
+- Use proper query keys for cache management
+
+## Routing
+
+### React Router
+- Use `react-router-dom` v6 patterns
+- Define routes in `AppRouter.tsx` or similar
+- Use `useNavigate` for programmatic navigation
+- Use `useSearchParams` for URL query parameters
+- Use `useParams` for route parameters
+
+### Route Organization
+- Keep route definitions centralized
+- Use route constants for paths
+- Implement protected routes with authentication checks
+
+## API Routes
+
+### Vercel API Routes
+- Place API routes in `/api` directory
+- Use TypeScript for all API routes
+- Handle errors appropriately
+- Return proper HTTP status codes
+- Use proper request/response types
+
+### API Route Structure
+```ts
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    // API logic
+    res.status(200).json({ data: result });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+```
+
+## Path Aliases
+
+- Use `@/` alias for `src/` directory imports
+- Configured in `tsconfig.json`
+- Example: `import { Button } from '@/components/Button'`
+
+## Communities Feature
+
+- Communities components in `src/communities/`
+- Use `CommunitiesRouter` for routing
+- Follow existing patterns for community features
+- Use Supabase for community data
+
+## Data Fetching Patterns
+
+### Guides
+- Guides API in `/api/guides/`
+- Use proper error handling
+- Support filtering and pagination
+- Use TypeScript types for guide data
+
+### Work Directory
+- Work directory API in `src/api/workDirectory.ts`
+- Follow existing patterns
+
+## State Management
+
+- Use React hooks for local state
+- Use React Query for server state
+- Use Context API for global app state when needed
+- Avoid prop drilling - use context or state management library
+
+## Form Handling
+
+- Use `react-hook-form` for form management
+- Use `@hookform/resolvers` with validation (Yup or Zod)
+- Follow existing form patterns in the codebase
+- Use Radix UI form components when available
+
+## UI Component Library
+
+### Radix UI
+- Use Radix UI primitives for accessible components
+- Import from `@radix-ui/react-*` packages
+- Follow Radix UI patterns and documentation
+- Customize with TailwindCSS
+
+### Custom Components
+- Place reusable components in `src/components/`
+- Follow component structure rules
+- Use TypeScript interfaces for props
+- Export as named exports
+
+## Authentication
+
+### Microsoft Authentication
+- Use `@azure/msal-react` for Microsoft auth
+- Follow patterns in `src/api/auth/microsoft/`
+- Handle authentication state properly
+- Protect routes that require authentication
+
+## File Organization
+
+### Directory Structure
+- `src/components/` - Reusable UI components
+- `src/pages/` - Page components
+- `src/hooks/` - Custom React hooks
+- `src/utils/` - Utility functions
+- `src/services/` - API services
+- `src/types/` - TypeScript type definitions
+- `src/lib/` - Library configurations (Supabase, etc.)
+- `api/` - Vercel API routes
+
+## Error Handling
+
+- Use try/catch for async operations
+- Provide user-friendly error messages
+- Log errors appropriately
+- Use error boundaries for React errors
+- Handle Supabase errors gracefully
+
+## Performance
+
+- Use code splitting for routes
+- Lazy load heavy components
+- Optimize images
+- Use React Query caching effectively
+- Memoize expensive computations
+
+## Testing
+
+- Write tests in `tests/` directory
+- Use Vitest for testing
+- Test components and utilities
+- Keep tests focused and maintainable
+
+## Environment Variables
+
+- Use environment variables for configuration
+- Access via `import.meta.env` in Vite
+- Never commit sensitive values
+- Document required env vars
+
+## Build and Deployment
+
+- Use Vite for building
+- Follow Vercel deployment patterns
+- Ensure proper environment setup
+- Test builds locally before deploying

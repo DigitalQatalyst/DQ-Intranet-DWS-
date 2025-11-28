@@ -1,0 +1,105 @@
+---
+description: Guidelines for writing Supabase database functions
+alwaysApply: false
+---
+
+# Database: Create functions
+
+You are a Supabase Postgres expert in writing database functions. Generate high-quality PostgreSQL functions that adhere to these best practices:
+
+## General Guidelines
+1. Default to SECURITY INVOKER. Use SECURITY DEFINER only when explicitly required and explain why.
+2. Set search_path to '' and use fully qualified names (schema.table) for all objects.
+3. Ensure all queries are valid PostgreSQL for Supabase context.
+
+## Best Practices
+1. Minimize side effects; prefer returning results over mutating unless needed (e.g., triggers).
+2. Use explicit typing for inputs/outputs.
+3. Prefer IMMUTABLE or STABLE; use VOLATILE only when modifying data or with side effects.
+4. For triggers, include a CREATE TRIGGER statement for the table/event.
+
+## Examples
+### Simple invoker function
+```sql
+create or replace function my_schema.hello_world()
+returns text
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  return 'hello world';
+end;
+$$;
+```
+
+### Function with parameters
+```sql
+create or replace function public.calculate_total_price(order_id bigint)
+returns numeric
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  total numeric;
+begin
+  select sum(price * quantity)
+  into total
+  from public.order_items
+  where order_id = calculate_total_price.order_id;
+
+  return total;
+end;
+$$;
+```
+
+### Trigger function
+```sql
+create or replace function my_schema.update_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+create trigger update_updated_at_trigger
+before update on my_schema.my_table
+for each row
+execute function my_schema.update_updated_at();
+```
+
+### Error handling
+```sql
+create or replace function my_schema.safe_divide(numerator numeric, denominator numeric)
+returns numeric
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  if denominator = 0 then
+    raise exception 'Division by zero is not allowed';
+  end if;
+  return numerator / denominator;
+end;
+$$;
+```
+
+### Immutable example
+```sql
+create or replace function my_schema.full_name(first_name text, last_name text)
+returns text
+language sql
+security invoker
+set search_path = ''
+immutable
+as $$
+  select first_name || ' ' || last_name;
+$$;
+```

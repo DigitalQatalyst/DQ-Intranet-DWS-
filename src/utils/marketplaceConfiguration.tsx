@@ -677,7 +677,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     id: 'non-financial',
     title: 'Business Services Marketplace',
     description: 'Find professional services to support and grow your business',
-    route: '/marketplace/non-financial',
+    route: '/it-systems-support',
     primaryCTA: 'Request Service',
     secondaryCTA: 'View Details',
     itemName: 'Business Service',
