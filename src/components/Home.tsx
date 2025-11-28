@@ -30,7 +30,7 @@ import {
   FadeInUpOnScroll,
   useInView,
 } from './AnimationUtils';
-import ServiceCarousel from './marketplace/ServiceCarousel';
+import { ServiceCarousel } from './marketplace/ServiceCarousel';
 import { fetchServicesByCategory } from '@/services/homeContentService';
 import type { ServiceCard as ServiceCardRecord } from '@/services/homeContentService';
 
