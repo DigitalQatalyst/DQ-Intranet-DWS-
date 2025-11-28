@@ -40,63 +40,59 @@ const sixDigitalSteps: SixDigitalStep[] = [
     id: "D1",
     stepNumber: 1,
     label: "Dimension",
-    title: "Digital Economy (D1)",
-    shortDescription:
-      "How organisations create value, compete, and grow in a digital-first economy.",
+    title: "Digital Economy (DE)",
+    shortDescription: "How organisations create value, compete, and grow in a digital-first economy.",
     keyAreas: [
-      "Design digital value chains & revenue models",
+      "Understand shifts in market logic and customer behaviour",
       "Align offerings with digital market ecosystems",
-      "Strengthen competitiveness in core and new markets",
+      "Strengthen competitiveness in core and emerging markets",
     ],
     ctaLabel: "Explore Digital Economy",
     icon: <Building2 size={24} className="transition-colors duration-300" />,
     modalDescription:
-      "The Digital Economy dimension focuses on how organisations create, capture, and protect value in a fully digital market. It covers new value chains, revenue models, and the partnerships needed to stay competitive.",
+      "How organisations create value, compete, and grow in a digital-first economy.",
     services: createServices("D1", "Digital Economy"),
   },
   {
     id: "D2",
     stepNumber: 2,
     label: "Dimension",
-    title: "Digital Cognitive Organisations (D2)",
-    shortDescription:
-      "How organisations think, learn, and decide using data, intelligence, and feedback loops.",
+    title: "Digital Cognitive Organisation (DCO)",
+    shortDescription: "How organisations think, learn, and decide using data, intelligence, and feedback loops.",
     keyAreas: [
       "Build data-driven decision frameworks",
-      "Strengthen organisational learning & memory",
-      "Enable adaptive behaviours in teams and systems",
+      "Strengthen organisational learning and memory",
+      "Enable adaptive behaviours across teams and systems",
     ],
     ctaLabel: "Explore Cognitive Organisations",
     icon: <Brain size={24} className="transition-colors duration-300" />,
     modalDescription:
-      "Digital Cognitive Organisations leverage intelligence, data, and feedback loops to sense, decide, and act faster. It embeds learning systems, knowledge flows, and adaptive behaviours inside every team.",
+      "How organisations think, learn, and decide using data, intelligence, and feedback loops.",
     services: createServices("D2", "Digital Cognitive Organisations"),
   },
   {
     id: "D3",
     stepNumber: 3,
     label: "Dimension",
-    title: "Digital Business Platforms (D3)",
-    shortDescription:
-      "Technology platforms that connect services, data, and stakeholders at scale.",
+    title: "Digital Business Platforms (DBP)",
+    shortDescription: "Technology platforms that connect services, data, and stakeholders at scale.",
     keyAreas: [
-      "Design platform architectures and APIs",
-      "Standardise core services and capabilities",
-      "Enable reusable, scalable digital products",
+      "Design modular, integrated, and data-driven architectures",
+      "Standardise core capabilities and operating platforms",
+      "Enable scalable and resilient digital ecosystems",
     ],
     ctaLabel: "Explore Business Platforms",
     icon: <Layers size={24} className="transition-colors duration-300" />,
     modalDescription:
-      "Digital Business Platforms connect services, data, and stakeholders via modular architectures. This dimension ensures capabilities are reusable, API-ready, and discoverable across the enterprise.",
+      "Technology platforms that connect services, data, and stakeholders at scale.",
     services: createServices("D3", "Digital Business Platforms"),
   },
   {
     id: "D4",
     stepNumber: 4,
     label: "Dimension",
-    title: "Digital Transformation (D4)",
-    shortDescription:
-      "Next-generation change model for aligned and faster enterprise transformation.",
+    title: "Digital Transformation (DT2.0)",
+    shortDescription: "Next-generation transformation model for designing and deploying change.",
     keyAreas: [
       "Structure end-to-end transformation flows",
       "Align portfolios, programs, and teams",
@@ -105,16 +101,15 @@ const sixDigitalSteps: SixDigitalStep[] = [
     ctaLabel: "Explore Digital Transformation",
     icon: <Shuffle size={24} className="transition-colors duration-300" />,
     modalDescription:
-      "Digital Transformation (DT2.0) provides the next-generation change model for orchestrating cross-functional programmes. It aligns portfolios, squads, and playbooks to move from pilot to scaled outcomes.",
+      "Next-generation transformation model for designing and deploying change.",
     services: createServices("D4", "Digital Transformation"),
   },
   {
     id: "D5",
     stepNumber: 5,
     label: "Dimension",
-    title: "Digital Worker & Workspace (D5)",
-    shortDescription:
-      "Modern digital employee experience – tools, spaces, and ways of working.",
+    title: "Digital Worker & Workspace (DW:WS)",
+    shortDescription: "Modern digital employee experience — tools, spaces, and ways of working.",
     keyAreas: [
       "Design frictionless digital work journeys",
       "Optimise tools, channels, and workplaces",
@@ -123,16 +118,15 @@ const sixDigitalSteps: SixDigitalStep[] = [
     ctaLabel: "Explore Worker & Workspace",
     icon: <Users size={24} className="transition-colors duration-300" />,
     modalDescription:
-      "Digital Worker & Workspace reimagines the employee experience through integrated tools, channels, and rituals. It focuses on boosting productivity, wellbeing, and collaboration for every cohort.",
+      "Modern digital employee experience — tools, spaces, and ways of working.",
     services: createServices("D5", "Digital Worker & Workspace"),
   },
   {
     id: "D6",
     stepNumber: 6,
     label: "Dimension",
-    title: "Digital Accelerators (D6)",
-    shortDescription:
-      "Tools, templates, and automation that speed up delivery and adoption.",
+    title: "Digital Accelerators (Tools)",
+    shortDescription: "Tools, templates, and automation that speed up delivery and adoption.",
     keyAreas: [
       "Reuse frameworks, templates, and playbooks",
       "Reduce time-to-deliver for digital initiatives",
@@ -141,7 +135,7 @@ const sixDigitalSteps: SixDigitalStep[] = [
     ctaLabel: "Explore Digital Accelerators",
     icon: <Rocket size={24} className="transition-colors duration-300" />,
     modalDescription:
-      "Digital Accelerators are the templates, automation, and toolkits that compress delivery time. They codify proven approaches so teams can launch faster with consistent quality.",
+      "Tools, templates, and automation that speed up delivery and adoption.",
     services: createServices("D6", "Digital Accelerators"),
   },
 ];
@@ -256,7 +250,7 @@ const Discover_SixDigitalSection: React.FC = () => {
                   onClick={() => handleOpenModal(step, index)}
                   className="mt-auto text-white font-medium py-2 px-4 rounded-md transition-all duration-300 flex items-center justify-center overflow-hidden group bg-[#131E42] hover:bg-[#0F1A4F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#99B2FF]"
                 >
-                  View Dimension Details
+                  View Details
                   <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">
                     ↗
                   </span>
@@ -286,4 +280,3 @@ const Discover_SixDigitalSection: React.FC = () => {
 };
 
 export default Discover_SixDigitalSection;
-

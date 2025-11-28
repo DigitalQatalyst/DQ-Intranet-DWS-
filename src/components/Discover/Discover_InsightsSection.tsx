@@ -283,7 +283,7 @@ export const Discover_InsightsSection: React.FC<Discover_InsightsSectionProps> =
               {/* Footer CTA */}
               <div className="text-center mt-6 pt-6 border-t border-neutral-100">
                 <button
-                  onClick={() => navigate('/marketplace/growth-areas')}
+                  onClick={() => navigate('/growth-sectors-coming-soon')}
                   className="dws-btn-primary inline-flex items-center gap-2"
                   aria-label="Explore Growth Sectors"
                 >
@@ -300,4 +300,3 @@ export const Discover_InsightsSection: React.FC<Discover_InsightsSectionProps> =
 };
 
 export default Discover_InsightsSection;
-

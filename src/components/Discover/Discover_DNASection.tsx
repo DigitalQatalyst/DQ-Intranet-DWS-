@@ -161,7 +161,7 @@ interface Discover_DNASectionProps {
   onExploreKnowledgeCenter?: () => void;
 }
 
-function Discover_DNASection({ onExploreLearningCenter, onExploreKnowledgeCenter }: Discover_DNASectionProps) {
+function Discover_DNASection({ onExploreLearningCenter }: Discover_DNASectionProps) {
   const [open, setOpen] = useState<number | null>(null);
   const [nodesDb, setNodesDb] = useState<DqDnaNode[] | null>(null);
   const [calloutsDb, setCalloutsDb] = useState<DqDnaCallout[] | null>(null);
@@ -365,14 +365,9 @@ function Discover_DNASection({ onExploreLearningCenter, onExploreKnowledgeCenter
             </div>
           );
         })()}
-        {Boolean(onExploreLearningCenter || onExploreKnowledgeCenter) && (
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            {onExploreLearningCenter && (
-              <SectionCTAButton label="Explore Learning Center" onClick={onExploreLearningCenter} />
-            )}
-            {onExploreKnowledgeCenter && (
-              <SectionCTAButton label="Explore Knowledge Center" onClick={onExploreKnowledgeCenter} />
-            )}
+        {onExploreLearningCenter && (
+          <div className="mt-10 flex justify-center">
+            <SectionCTAButton label="Explore Learning Center" onClick={onExploreLearningCenter} />
           </div>
         )}
       </div>
@@ -383,4 +378,3 @@ function Discover_DNASection({ onExploreLearningCenter, onExploreKnowledgeCenter
 /* Support both import styles */
 export default Discover_DNASection;
 export { Discover_DNASection };
-
