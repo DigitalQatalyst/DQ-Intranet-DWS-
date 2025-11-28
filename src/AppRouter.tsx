@@ -16,6 +16,8 @@ import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DiscoverDQ from "./pages/DiscoverDQ";
+import ComingSoonPage from "./pages/ComingSoonPage";
+import GrowthSectorsComingSoon from "./pages/GrowthSectorsComingSoon";
 import NotFound from "./pages/NotFound";
 import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
@@ -24,6 +26,7 @@ import { ApolloProvider } from "@apollo/client/react";
 import EventsPage from "./pages/events/EventsPage";
 import KfBot from "./bot/KfBot";
 import ThankYou from "./pages/ThankYou";
+import WomenEntrepreneursPage from "./pages/WomenEntrepreneursPage";
 
 export function AppRouter() {
   const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
@@ -60,6 +63,8 @@ export function AppRouter() {
           <KfBot />
           <Routes>
             <Route path="/discover-dq" element={<DiscoverDQ />} />
+            <Route path="/coming-soon" element={<ComingSoonPage />} />
+            <Route path="/growth-sectors-coming-soon" element={<GrowthSectorsComingSoon />} />
             <Route path="/*" element={<App />} />
             <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
             <Route path="/lms" element={<LmsCourses />} />
@@ -110,6 +115,10 @@ export function AppRouter() {
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/communities/*" element={<CommunitiesRouter />} />
+            <Route
+              path="/women-entrepreneurs"
+              element={<WomenEntrepreneursPage />}
+            />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />

@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { XIcon } from "lucide-react";
 import { Header } from "../components/Header/Header";
 import { Footer } from "../components/Footer/Footer";
-import VisionMission from "../components/Discover/VisionMission";
-import DQDNA from "../components/Discover/DQDNA";
-import WorkspaceInsights from "../components/Discover/WorkspaceInsights";
-import DQDirectory from "../components/Discover/DQDirectory";
-import DQ6xDigitalView from "../components/Discover/DQ6xDigitalView";
+import Discover_VisionMissionSection from "../components/Discover/Discover_VisionMissionSection";
+import Discover_DNASection from "../components/Discover/Discover_DNASection";
+import Discover_SixDigitalSection from "../components/Discover/Discover_SixDigitalSection";
+import Discover_InsightsSection from "../components/Discover/Discover_InsightsSection";
+import Discover_DirectorySection from "../components/Discover/Discover_DirectorySection";
 import MapCard from "../components/map/MapCard";
 import {
   DQ_LOCATIONS,
@@ -15,7 +16,7 @@ import {
   type LocationCategory,
   type LocationItem,
 } from "../api/MAPAPI";
-import HeroDiscoverDQ from "../components/Discover/HeroDiscoverDQ";
+import Discover_HeroSection from "../components/Discover/Discover_HeroSection";
 import styles from "./DiscoverDQ.module.css";
 
 const insightsData = [
@@ -29,6 +30,7 @@ const insightsData = [
 ];
 
 const DiscoverDQ: React.FC = () => {
+  const navigate = useNavigate();
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportStatus, setSupportStatus] = useState<string | null>(null);
   const [isSubmittingSupport, setSubmittingSupport] = useState(false);
@@ -82,6 +84,14 @@ const DiscoverDQ: React.FC = () => {
     setSelectedLocationId(null);
   };
 
+  const handleExploreLearningCenter = () => {
+    navigate("/resource-coming-soon?title=DQ%20Learning%20Center%20(Courses%20%26%20Curricula)");
+  };
+
+  const handleExploreKnowledgeCenter = () => {
+    navigate("/insight-coming-soon?title=DQ%20Knowledge%20Center%20(Work%20Guide%20-%20Strategy)");
+  };
+
   const handleSupportSubmit: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     if (isSubmittingSupport) return;
@@ -110,7 +120,7 @@ const DiscoverDQ: React.FC = () => {
         className={`${styles.dwsDiscover} ${prefersReducedMotion ? styles.reducedMotion : ""} relative z-0 bg-transparent`}
       >
         {/* Hero */}
-        <HeroDiscoverDQ />
+        <Discover_HeroSection />
 
         {/* Map Section */}
         <section id="growth-areas" className="bg-[#F6FAFB] py-20 scroll-mt-[72px]">
@@ -152,7 +162,7 @@ const DiscoverDQ: React.FC = () => {
               </button>
             </div>
 
-            <div className="relative z-0 h-[520px] sm:h-[520px] md:h-[560px] lg:h-[560px] overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-black/5">
+            <div className="relative z-0 h-[560px] sm:h-[600px] md:h-[640px] lg:h-[680px] overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-black/5">
               <MapCard
                 className="h-full w-full"
                 locations={filteredLocations}
@@ -165,19 +175,22 @@ const DiscoverDQ: React.FC = () => {
         </section>
 
         {/* Vision & Mission */}
-        <VisionMission />
+        <Discover_VisionMissionSection />
 
         {/* DQ DNA */}
-        <DQDNA />
+        <Discover_DNASection
+          onExploreLearningCenter={handleExploreLearningCenter}
+          onExploreKnowledgeCenter={handleExploreKnowledgeCenter}
+        />
 
         {/* Growth Potential */}
-        <WorkspaceInsights data={insightsData} />
+        <Discover_InsightsSection data={insightsData} />
 
-        {/* Digital View */}
-        <DQ6xDigitalView />
+        {/* Six Digital Architecture */}
+        <Discover_SixDigitalSection />
 
         {/* Directory */}
-        <DQDirectory />
+        <Discover_DirectorySection />
 
         {supportOpen && (
           <div className={styles.modalOverlay} role="dialog" aria-modal="true">

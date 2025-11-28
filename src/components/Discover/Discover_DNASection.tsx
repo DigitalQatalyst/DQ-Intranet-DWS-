@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchDna, DqDnaNode, DqDnaCallout } from "../../services/dq";
+import SectionCTAButton from "../common/SectionCTAButton";
 
 /* ===== Visual tokens ===== */
 const NAVY = "#131E42";
@@ -53,53 +54,37 @@ interface Node {
   subtitle: string;
   fill: "navy" | "white";
   details?: string[];
-  kbUrl: string;     // Knowledge marketplace
-  lmsUrl: string;    // LMS marketplace
 }
 
 /* ===== Data (added URLs) ===== */
 const NODES: Node[] = [
   {
     id: 6, role: "leftTop",
-    title: "Agile Flows", subtitle: "(Value Streams)", fill: "white",
-    kbUrl: "/marketplace/knowledge?dna=agile-flows",
-    lmsUrl: "/lms/courses?dna=agile-flows"
+    title: "Agile Flows", subtitle: "(Value Streams)", fill: "white"
   },
   {
     id: 5, role: "rightTop",
-    title: "Agile SOS", subtitle: "(Governance)", fill: "white",
-    kbUrl: "/marketplace/knowledge?dna=agile-sos",
-    lmsUrl: "/lms/courses?dna=agile-sos"
+    title: "Agile SOS", subtitle: "(Governance)", fill: "white"
   },
   {
     id: 7, role: "leftMid",
-    title: "Agile 6xD", subtitle: "(Products)", fill: "white",
-    kbUrl: "/marketplace/knowledge?dna=agile-dtmf",
-    lmsUrl: "/lms/courses?dna=agile-dtmf"
+    title: "Agile 6xD", subtitle: "(Products)", fill: "white"
   },
   {
     id: 1, role: "center",
-    title: "The Vision", subtitle: "(Purpose)", fill: "navy",
-    kbUrl: "/marketplace/knowledge?dna=vision",
-    lmsUrl: "/lms/courses?dna=vision"
+    title: "The Vision", subtitle: "(Purpose)", fill: "navy"
   },
   {
     id: 4, role: "rightMid",
-    title: "Agile TMS", subtitle: "(Tasks)", fill: "white",
-    kbUrl: "/marketplace/knowledge?dna=agile-tms",
-    lmsUrl: "/lms/courses?dna=agile-tms"
+    title: "Agile TMS", subtitle: "(Tasks)", fill: "white"
   },
   {
     id: 2, role: "leftBot",
-    title: "The HoV", subtitle: "(Culture)", fill: "navy",
-    kbUrl: "/marketplace/knowledge?dna=hov",
-    lmsUrl: "/lms/courses?dna=hov"
+    title: "The HoV", subtitle: "(Culture)", fill: "navy"
   },
   {
     id: 3, role: "rightBot",
-    title: "The Personas", subtitle: "(Identity)", fill: "navy",
-    kbUrl: "/marketplace/knowledge?dna=personas",
-    lmsUrl: "/lms/courses?dna=personas"
+    title: "The Personas", subtitle: "(Identity)", fill: "navy"
   },
 ];
 
@@ -171,34 +156,12 @@ function anchor(role: Role, side: Side) {
   return { x, y: y + HEX_H/2 - 4 };
 }
 
-/* Small UI helpers */
-const Btn: React.FC<React.PropsWithChildren<{ href: string; variant?: "primary"|"ghost" }>> = ({ href, variant="primary", children }) => (
-  <a
-    href={href}
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 8,
-      padding: "10px 14px",
-      borderRadius: 10,
-      fontWeight: 700,
-      fontSize: 14,
-      textDecoration: "none",
-      border: variant === "ghost" ? `2px solid ${NAVY}` : "none",
-      color: variant === "ghost" ? NAVY : "#fff",
-      background: variant === "ghost" ? "#fff" : NAVY,
-      boxShadow: variant === "ghost" ? "none" : "0 6px 16px rgba(19,30,66,.25)",
-      transition: "transform .15s ease, box-shadow .15s ease"
-    }}
-    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-2px)"; }}
-    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; }}
-  >
-    {children}
-    <span style={{ fontSize: 16, lineHeight: 1 }}>↗</span>
-  </a>
-);
+interface Discover_DNASectionProps {
+  onExploreLearningCenter?: () => void;
+  onExploreKnowledgeCenter?: () => void;
+}
 
-function DQDNA() {
+function Discover_DNASection({ onExploreLearningCenter }: Discover_DNASectionProps) {
   const [open, setOpen] = useState<number | null>(null);
   const [nodesDb, setNodesDb] = useState<DqDnaNode[] | null>(null);
   const [calloutsDb, setCalloutsDb] = useState<DqDnaCallout[] | null>(null);
@@ -214,8 +177,19 @@ function DQDNA() {
       });
   }, []);
 
+  const nodes: Node[] = nodesDb
+    ? nodesDb.map((n) => ({
+        id: n.id,
+        role: n.role as Role,
+        title: n.title,
+        subtitle: n.subtitle,
+        fill: n.fill as "navy" | "white",
+        details: n.details ?? undefined,
+      }))
+    : NODES;
+
   return (
-    <section style={{ background: "#fff", padding: "48px 0 80px" }}>
+    <section id="dna" style={{ background: "#fff", padding: "48px 0 80px" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 24px" }}>
         {/* Header (kept minimalist to avoid pushing DNA down) */}
         <div style={{ textAlign: "center", marginBottom: 18 }}>
@@ -277,18 +251,7 @@ function DQDNA() {
           </svg>
 
           {/* Hexes */}
-          {(nodesDb
-            ? nodesDb.map((n) => ({
-                id: n.id,
-                role: n.role as Role,
-                title: n.title,
-                subtitle: n.subtitle,
-                fill: n.fill as "navy" | "white",
-                kbUrl: n.kb_url,
-                lmsUrl: n.lms_url,
-              }))
-            : NODES
-          ).map((n) => {
+          {nodes.map((n) => {
             const left = CANVAS_W / 2 + POS[n.role].x;
             const top  = CANVAS_H / 2 + POS[n.role].y;
 
@@ -343,10 +306,7 @@ function DQDNA() {
 
         {/* Marketplace Modal */}
         {open && (() => {
-          const list = nodesDb
-            ? nodesDb.map((n) => ({ id: n.id, title: n.title, subtitle: n.subtitle, kbUrl: n.kb_url, lmsUrl: n.lms_url, details: n.details || null }))
-            : NODES.map((n) => ({ id: n.id, title: n.title, subtitle: n.subtitle, kbUrl: n.kbUrl, lmsUrl: n.lmsUrl, details: n.details ?? null }));
-          const node = list.find(x => x.id === open)!;
+          const node = nodes.find((x) => x.id === open)!;
           return (
             <div onClick={() => setOpen(null)} style={{
               position: "fixed", inset: 0, zIndex: 70,
@@ -401,28 +361,20 @@ function DQDNA() {
                   </ul>
                 </div>
 
-                {/* actions */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <Btn href={node.kbUrl}>Knowledge Hub</Btn>
-                  <Btn href={node.lmsUrl} variant="ghost">LMS Courses</Btn>
-                </div>
               </div>
             </div>
           );
         })()}
+        {onExploreLearningCenter && (
+          <div className="mt-10 flex justify-center">
+            <SectionCTAButton label="Explore Learning Center" onClick={onExploreLearningCenter} />
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
 /* Support both import styles */
-export default DQDNA;
-export { DQDNA };
+export default Discover_DNASection;
+export { Discover_DNASection };

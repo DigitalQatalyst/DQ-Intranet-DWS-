@@ -19,7 +19,7 @@ export interface InsightDataPoint {
   previousValue?: number;
 }
 
-interface WorkspaceInsightsProps {
+interface Discover_InsightsSectionProps {
   data: InsightDataPoint[];
   yoyData?: InsightDataPoint[];
   loading?: boolean;
@@ -38,7 +38,7 @@ const shortenLabel = (label: string, isMobile: boolean): string => {
   return shortMap[label] || label;
 };
 
-export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({ 
+export const Discover_InsightsSection: React.FC<Discover_InsightsSectionProps> = ({ 
   data, 
   yoyData,
   loading = false 
@@ -283,7 +283,7 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
               {/* Footer CTA */}
               <div className="text-center mt-6 pt-6 border-t border-neutral-100">
                 <button
-                  onClick={() => navigate('/marketplace/growth-areas')}
+                  onClick={() => navigate('/growth-sectors-coming-soon')}
                   className="dws-btn-primary inline-flex items-center gap-2"
                   aria-label="Explore Growth Sectors"
                 >
@@ -299,4 +299,4 @@ export const WorkspaceInsights: React.FC<WorkspaceInsightsProps> = ({
   );
 };
 
-export default WorkspaceInsights;
+export default Discover_InsightsSection;

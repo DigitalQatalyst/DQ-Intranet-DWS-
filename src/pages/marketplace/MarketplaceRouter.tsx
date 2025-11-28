@@ -8,6 +8,7 @@ import { DollarSign, Briefcase, Calendar, BookOpen } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 import NewsPage from './NewsPage';
 import NewsDetailPage from './NewsDetailPage';
+const GrowthAreasPage = React.lazy(() => import('../GrowthAreasPage'));
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
 // Promo cards for courses marketplace
 const coursePromoCards = [{
@@ -134,6 +135,24 @@ export const MarketplaceRouter: React.FC = () => {
       {/* Asset Library */}
       <Route path="/asset-library" element={<AssetLibraryPage />} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
+      {/* Growth Areas */}
+      <Route 
+        path="/growth-areas" 
+        element={
+          <React.Suspense 
+            fallback={
+              <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading Growth Areas...</p>
+                </div>
+              </div>
+            }
+          >
+            <GrowthAreasPage />
+          </React.Suspense>
+        } 
+      />
     </Routes>;
 };
 

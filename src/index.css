@@ -68,6 +68,13 @@
   overflow: hidden !important;
 }
 
+.description-clip {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 input,
 textarea {
   color: #0B1220;
@@ -134,25 +141,87 @@ textarea:-webkit-autofill {
 
 .mapboxgl-canvas {
   border-radius: inherit !important;
+  position: relative;
+  z-index: 0;
 }
 
 .mapboxgl-ctrl-top-right {
   margin: 12px 12px 0 0;
+  z-index: 10;
+}
+
+.mapboxgl-ctrl-group {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(3, 15, 53, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.mapboxgl-ctrl-group button {
+  width: 32px;
+  height: 32px;
+  background: white;
+  color: #030F35;
+  border: none;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  transition: background 0.2s;
+}
+
+.mapboxgl-ctrl-group button:hover {
+  background: #F6FAFB;
+}
+
+.mapboxgl-ctrl-group button:last-child {
+  border-bottom: none;
 }
 
 .mapboxgl-popup {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  z-index: 100;
 }
 
 .mapboxgl-popup-content {
   border-radius: 18px;
-  padding: 16px 18px;
+  padding: 18px 20px;
   box-shadow: 0 18px 45px rgba(3, 15, 53, 0.22);
   border: 1px solid rgba(3, 15, 53, 0.08);
+  background: white;
+  max-width: 320px;
+}
+
+.mapboxgl-popup-content .mapboxgl-popup-close-button {
+  color: #030F35;
+  font-size: 20px;
+  padding: 8px;
+  right: 8px;
+  top: 8px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.mapboxgl-popup-content .mapboxgl-popup-close-button:hover {
+  opacity: 1;
+  background: rgba(3, 15, 53, 0.05);
+  border-radius: 50%;
 }
 
 .mapboxgl-popup-tip {
-  display: none;
+  border-top-color: white;
+  border-width: 8px;
+}
+
+/* DQ Map Marker Styles */
+.dq-map-marker {
+  transition: transform 0.2s ease;
+}
+
+.dq-map-marker:hover {
+  transform: scale(1.1);
+  z-index: 1000;
+}
+
+.dq-map-popup {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .card-shadow {
@@ -187,13 +256,38 @@ textarea:-webkit-autofill {
 
 .dq-map-popup .leaflet-popup-content-wrapper {
   border-radius: 18px;
-  padding: 16px 18px;
+  padding: 0;
   box-shadow: 0 18px 45px rgba(3, 15, 53, 0.22);
   border: 1px solid rgba(3, 15, 53, 0.08);
 }
 
 .dq-map-popup .leaflet-popup-content {
-  margin: 0;
+  margin: 18px 20px;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+}
+
+.dq-map-popup .leaflet-popup-tip {
+  background: white;
+  border: 1px solid rgba(3, 15, 53, 0.08);
+  border-top: none;
+  border-left: none;
+}
+
+.dq-map-popup .leaflet-popup-close-button {
+  color: #030F35;
+  font-size: 20px;
+  padding: 8px;
+  right: 8px;
+  top: 8px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.dq-map-popup .leaflet-popup-close-button:hover {
+  opacity: 1;
+  background: rgba(3, 15, 53, 0.05);
+  border-radius: 50%;
 }
 
 .dq-map-popup .leaflet-popup-tip-container {
