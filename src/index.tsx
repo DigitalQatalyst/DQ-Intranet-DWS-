@@ -23,6 +23,18 @@ const client = new ApolloClient({
 const container = document.getElementById("root");
 if (container) {
   const root = createRoot(container);
+  
+  // Render function to avoid duplication
+  const renderApp = () => {
+    root.render(
+      <ApolloProvider client={client}>
+        <MsalProvider instance={msalInstance}>
+          <AppRouter />
+        </MsalProvider>
+      </ApolloProvider>
+    );
+  };
+
   // Ensure MSAL is initialized and redirect response handled before using any APIs
   msalInstance
     .initialize()
@@ -52,15 +64,11 @@ if (container) {
       } catch (error) {
         console.warn("Error processing authentication state:", error);
       }
-      root.render(
-        <ApolloProvider client={client}>
-          <MsalProvider instance={msalInstance}>
-            <AppRouter />
-          </MsalProvider>
-        </ApolloProvider>
-      );
+      renderApp();
     })
     .catch((e) => {
       console.error("MSAL initialization failed:", e);
+      // Render app anyway - authentication will be handled gracefully
+      renderApp();
     });
 }

@@ -66,7 +66,7 @@ let computedAuthority: string;
 // } else if (TENANT_ID) {
 //   computedAuthority = `https://login.microsoftonline.com/${TENANT_ID}`;
 // } else if (SUB) {
-  computedAuthority = `https://${SUB}.ciamlogin.com/`;
+  computedAuthority = SUB ? `https://${SUB}.ciamlogin.com/` : `https://login.microsoftonline.com/common`;
 // } else {
 //   computedAuthority = env.VITE_AZURE_AUTHORITY || "https://login.microsoftonline.com/common";
 // }
