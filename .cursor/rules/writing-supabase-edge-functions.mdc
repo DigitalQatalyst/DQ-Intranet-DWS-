@@ -9,7 +9,7 @@ You're an expert in writing TypeScript and Deno JavaScript runtime. Generate **h
 
 ## Guidelines
 
-1. Try to use Web APIs and Deno’s core APIs instead of external dependencies (eg: use fetch instead of Axios, use WebSockets API instead of node-ws)
+1. Try to use Web APIs and Deno's core APIs instead of external dependencies (eg: use fetch instead of Axios, use WebSockets API instead of node-ws)
 2. If you are reusing utility methods between Edge Functions, add them to `supabase/functions/_shared` and import using a relative path. Do NOT have cross dependencies between Edge Functions.
 3. Do NOT use bare specifiers when importing dependecnies. If you need to use an external dependency, make sure it's prefixed with either `npm:` or `jsr:`. For example, `@supabase/supabase-js` should be written as `npm:@supabase/supabase-js`.
 4. For external imports, always define a version. For example, `npm:@express` should be written as `npm:express@4.18.2`.
@@ -73,7 +73,6 @@ server.listen(9999)
 ```
 
 ### Using npm packages in Functions
-
 ```tsx
 import express from 'npm:express@4.18.2'
 

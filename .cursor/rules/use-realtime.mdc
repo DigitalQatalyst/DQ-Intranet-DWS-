@@ -1,5 +1,4 @@
 ---
-# Specify the following for Cursor rules
 description: Coding rules for Supabase Realtime
 alwaysApply: false
 ---
@@ -151,6 +150,7 @@ useEffect(() => {
 }, [roomId])
 ```
 
+<<<<<<< HEAD
 ## Database Triggers
 
 ### Using realtime.broadcast_changes (Recommended for database changes)

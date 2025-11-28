@@ -774,7 +774,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
   'non-financial': {
     id: 'non-financial',
     title: 'Services & Requests',
-    description: "Welcome to Digital Qatalyst's Support Services! We’re here to ensure your success by providing dedicated assistance and efficient solutions for all your needs. This platform offers comprehensive support tools, resources, and expert guidance to help you overcome challenges and maximize productivity. Whether you require technical help or operational support we’re here to empower your journey every step of the way.",
+    description: "Welcome to Digital Qatalyst's Support Services! We're here to ensure your success by providing dedicated assistance and efficient solutions for all your needs. This platform offers comprehensive support tools, resources, and expert guidance to help you overcome challenges and maximize productivity. Whether you require technical help or operational support we're here to empower your journey every step of the way.",
     route: '/marketplace/non-financial',
     primaryCTA: 'Request Service',
     secondaryCTA: 'View Details',

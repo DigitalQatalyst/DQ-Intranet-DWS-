@@ -1,5 +1,4 @@
 ---
-# Specify the following for Cursor rules
 description: Guidelines for writing Supabase database functions
 alwaysApply: false
 ---
@@ -44,7 +43,6 @@ You're a Supabase Postgres expert in writing database functions. Generate **high
 ## Example Templates
 
 ### Simple Function with `SECURITY INVOKER`
-
 ```sql
 create or replace function my_schema.hello_world()
 returns text
@@ -59,7 +57,6 @@ $$;
 ```
 
 ### Function with Parameters and Fully Qualified Object Names
-
 ```sql
 create or replace function public.calculate_total_price(order_id bigint)
 returns numeric
@@ -81,7 +78,6 @@ $$;
 ```
 
 ### Function as a Trigger
-
 ```sql
 create or replace function my_schema.update_updated_at()
 returns trigger
@@ -103,7 +99,6 @@ execute function my_schema.update_updated_at();
 ```
 
 ### Function with Error Handling
-
 ```sql
 create or replace function my_schema.safe_divide(numerator numeric, denominator numeric)
 returns numeric
@@ -122,7 +117,6 @@ $$;
 ```
 
 ### Immutable Function for Better Optimization
-
 ```sql
 create or replace function my_schema.full_name(first_name text, last_name text)
 returns text

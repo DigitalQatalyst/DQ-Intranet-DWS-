@@ -1,5 +1,4 @@
 ---
-# Specify the following for Cursor rules
 description: Guidelines for writing Postgres SQL
 alwaysApply: false
 ---
@@ -77,7 +76,6 @@ where start_date between '2021-01-01' and '2021-12-31' and status = 'employed';
 
 - Format joins and subqueries for clarity, aligning them with related SQL clauses.
 - Prefer full table names when referencing tables. This helps for readability.
-
 ```sql
 select
   employees.employee_name,

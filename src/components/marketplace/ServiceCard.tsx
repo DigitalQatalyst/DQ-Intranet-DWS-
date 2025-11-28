@@ -37,7 +37,7 @@ export function ServiceCard({
       case 'financial':
         return `/marketplace/financial/${item.id}`;
       case 'non-financial':
-        return `/marketplace/non-financial/${item.id}`;
+        return `/it-systems-support`;
       default:
         return `/${type}/${item.id}`;
     }

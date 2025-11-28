@@ -27,6 +27,8 @@ interface NewsItem {
   category: string;
   imageUrl: string;
   source?: string;
+  slug?: string;
+  detailPath?: string;
 }
 
 interface Event {
@@ -46,6 +48,7 @@ interface Resource {
   description: string;
   icon: React.ReactNode;
   downloadUrl?: string;
+  link?: string;
   fileSize?: string;
   downloadCount?: number;
   lastUpdated?: string;
@@ -403,17 +406,7 @@ const KnowledgeHubContent = ({ graphqlEndpoint }: KnowledgeHubContentProps) => {
 
   // Add this function to handle event registration
   const handleEventRegister = (event: Event) => {
-    // Here you can implement what happens when someone registers for an event
-    // For example, open a registration modal, navigate to a registration page, etc.
-    console.log("Registering for event:", event.title);
-
-    // Example: Open a registration URL if available
-    // if (event.registrationUrl) {
-    //   window.open(event.registrationUrl, '_blank');
-    // }
-
-    // Or show a confirmation message
-    alert(`Registration for "${event.title}" will be available soon!`);
+    navigate(`/event-coming-soon?title=${encodeURIComponent(event.title)}`);
   };
 
   // Add function to handle resource downloads
@@ -446,17 +439,18 @@ const KnowledgeHubContent = ({ graphqlEndpoint }: KnowledgeHubContentProps) => {
 
   // Add function to handle resource access
   const handleResourceAccess = (resource: Resource) => {
-    console.log("Accessing resource:", resource.title);
-
-    if (resource.isExternal) {
-      // For external resources, open in new tab
-      if (resource.downloadUrl) {
-        window.open(resource.downloadUrl, "_blank");
-      }
-    } else {
-      // For internal resources, navigate to detail page
-      navigate(`/resources/${resource.id}`);
+    if (resource.link && resource.link !== '#') {
+      window.open(resource.link, '_blank', 'noopener,noreferrer');
+      return;
     }
+    if (resource.isExternal && resource.downloadUrl && resource.downloadUrl !== '#') {
+      window.open(resource.downloadUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    navigate(`/resource-coming-soon?title=${encodeURIComponent(resource.title)}`);
+  };
+  const handleNewsReadMore = (news: NewsItem) => {
+    navigate(`/insight-coming-soon?title=${encodeURIComponent(news.title)}`);
   };
 
   return (
@@ -488,7 +482,7 @@ const KnowledgeHubContent = ({ graphqlEndpoint }: KnowledgeHubContentProps) => {
           {/* Error State */}
           {error && !isLoading && <ErrorMessage message={error.message} />}
           {/* News Tab */}
-          {activeTab === "news" && !isLoading && !error && (
+          {activeTab === 'news' && !isLoading && !error && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {getNewsData().map((item, index) => (
                 <div
@@ -508,6 +502,7 @@ const KnowledgeHubContent = ({ graphqlEndpoint }: KnowledgeHubContentProps) => {
                       source: item.source,
                     }}
                     onQuickView={() => navigate(`/news/${item.id}`)}
+                    onReadMore={() => handleNewsReadMore(item)}
                   />
                 </div>
               ))}

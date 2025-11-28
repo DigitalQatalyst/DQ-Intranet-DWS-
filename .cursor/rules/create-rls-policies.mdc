@@ -72,7 +72,6 @@ using ( true );
 ```
 
 ### Correct
-
 ```sql
 create policy "Public profiles are viewable only by authenticated users"
 on profiles
@@ -81,6 +80,7 @@ to authenticated
 using ( true );
 ```
 
+<<<<<<< HEAD
 ## Multiple operations
 
 PostgreSQL policies do not support specifying multiple operations in a single FOR clause. You need to create separate policies for each operation.
@@ -246,3 +246,11 @@ using ( (select auth.uid()) = user_id );
 ```
 
 This prevents the policy `( (select auth.uid()) = user_id )` from running for any `anon` users, since the execution stops at the `to authenticated` step.
+
+## RLS Performance Summary
+
+Performance tips:
+- Add indexes for columns used in policies.
+- Wrap functions in select to cache results per statement when safe.
+- Minimize joins; prefer IN/ANY on sets.
+- Specify roles in policies to avoid unnecessary execution for anon.
