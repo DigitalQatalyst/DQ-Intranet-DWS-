@@ -7,6 +7,40 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 
 const MarkdownRenderer: React.FC<{ body: string; onRendered?: () => void }> = ({ body, onRendered }) => {
+  // Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
+  const rehypePreserveDivClass = React.useMemo(() => {
+    return () => (tree: any) => {
+      const walk = (node: any) => {
+        if (!node || typeof node !== 'object') return
+        if (node.type === 'element' && node.tagName === 'div') {
+          // Ensure class is preserved in properties
+          if (node.properties) {
+            // Get class value (could be string or array)
+            const classValue = node.properties.class
+            if (classValue) {
+              // Convert to string
+              const classStr = Array.isArray(classValue) 
+                ? classValue.join(' ') 
+                : String(classValue)
+              
+              // ALWAYS set className from class (this is critical for react-markdown)
+              node.properties.className = classStr
+              // Also keep class for compatibility
+              node.properties.class = classStr
+            }
+            // If className exists but is array, convert to string
+            if (node.properties.className && Array.isArray(node.properties.className)) {
+              node.properties.className = node.properties.className.join(' ')
+            }
+          }
+        }
+        const kids = node.children || []
+        for (const k of kids) walk(k)
+      }
+      walk(tree)
+    }
+  }, [])
+  
   // Rehype plugin: remove leading icon nodes (img/svg/span with img) from list items
   const rehypeStripListIcons = React.useMemo(() => {
     const stripText = (s: string) => {
@@ -84,7 +118,23 @@ const MarkdownRenderer: React.FC<{ body: string; onRendered?: () => void }> = ({
   return (
     <ReactMarkdown
       remarkPlugins={([remarkGfm as any, remarkSlug as any] as any)}
-      rehypePlugins={[[rehypeAutolinkHeadings, { behavior: 'append' }], rehypeRaw, rehypeStripListIcons as any, rehypeSanitize] as any}
+      rehypePlugins={[
+        [rehypeAutolinkHeadings, { behavior: 'append' }], 
+        rehypeRaw,
+        rehypePreserveDivClass as any,
+        [
+          rehypeSanitize,
+          {
+            tagNames: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'strong', 'em', 'ul', 'ol', 'li', 'blockquote'],
+            attributes: {
+              div: ['class', 'className'],
+              '*': ['class', 'className', 'id']
+            },
+            strip: []
+          }
+        ],
+        rehypeStripListIcons as any
+      ] as any}
       components={{
         img: ({ node, ...props }) => (
           // Constrain and lazy-load images for performance
@@ -118,7 +168,62 @@ const MarkdownRenderer: React.FC<{ body: string; onRendered?: () => void }> = ({
         ),
         td: ({ node, ...props }) => (
           <td className="px-6 py-4 text-sm border-b border-gray-100" style={{ minWidth: '300px', color: '#000000' }} {...(props as any)} />
-        )
+        ),
+        div: (props: any) => {
+          const { node, children, className, class: classProp, ...restProps } = props
+          
+          // CRITICAL: Check node.properties FIRST (this is where rehypePreserveDivClass sets it)
+          const nodeClass = node?.properties?.className || node?.properties?.class
+          const nodeClassStr = nodeClass 
+            ? (Array.isArray(nodeClass) ? nodeClass.join(' ') : String(nodeClass))
+            : ''
+          
+          // Also check props (fallback)
+          const propsClass = className || classProp
+          const propsClassStr = propsClass
+            ? (Array.isArray(propsClass) ? propsClass.join(' ') : String(propsClass))
+            : ''
+          
+          // Combine and check
+          const combinedClass = nodeClassStr || propsClassStr
+          const isFeatureBox = combinedClass && combinedClass.includes('feature-box')
+          
+          if (isFeatureBox) {
+            // Filter out empty children (whitespace-only text nodes, empty elements)
+            const filteredChildren = React.Children.toArray(children).filter((child: any) => {
+              if (typeof child === 'string') {
+                return child.trim().length > 0
+              }
+              if (React.isValidElement(child)) {
+                // Check if element has meaningful content
+                const childProps = child.props || {}
+                const childChildren = childProps.children
+                if (typeof childChildren === 'string') {
+                  return childChildren.trim().length > 0
+                }
+                return true
+              }
+              return true
+            })
+            
+            // Don't render if no meaningful content
+            if (filteredChildren.length === 0) {
+              return null
+            }
+            
+            return (
+              <div
+                className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-4"
+                {...restProps}
+              >
+                {filteredChildren}
+              </div>
+            )
+          }
+          
+          // Default div rendering - preserve className
+          return <div className={combinedClass || className || classProp} {...restProps}>{children}</div>
+        }
       }}
     >
       {processedBody}

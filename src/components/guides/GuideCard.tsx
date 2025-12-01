@@ -49,6 +49,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
   }
   const domainLabel = formatLabel(domain)
   const isDuplicateTag = normalizeTag(domain) !== '' && normalizeTag(domain) === normalizeTag(guide.guideType)
+  const isStrategyFramework = (domain || '').toLowerCase().includes('strategy') && (guide.guideType || '').toLowerCase().includes('framework')
   // Ensure we're using the correct property name - check both camelCase and snake_case
   const heroImage = guide.heroImageUrl || (guide as any).hero_image_url || null
   const imageUrl = getGuideImageUrl({
@@ -93,7 +94,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
             {domainLabel}
           </span>
         )}
-        {guide.guideType && !isTestimonial && !isDuplicateTag && (
+        {guide.guideType && !isTestimonial && !isDuplicateTag && !isStrategyFramework && (
           <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
             {formatLabel(guide.guideType)}
           </span>

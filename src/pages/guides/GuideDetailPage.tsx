@@ -285,6 +285,7 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
     return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
   }
   const isDuplicateTag = normalizeTag(guide?.domain) !== '' && normalizeTag(guide?.domain) === normalizeTag(guide?.guideType)
+  const isStrategyFramework = (guide?.domain || '').toLowerCase().includes('strategy') && (guide?.guideType || '').toLowerCase().includes('framework')
 
   // Parse guide body into sections for tabs (for Guidelines, Strategy, Testimonials, and Blueprints)
   const guideSections = useMemo(() => {
@@ -1312,7 +1313,8 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
                   const isSimilar = domainLower.includes(guideTypeLower) || guideTypeLower.includes(domainLower) || 
                                    (domainLower.includes('guideline') && guideTypeLower.includes('guideline')) ||
                                    (domainLower.includes('blueprint') && guideTypeLower.includes('blueprint'))
-                  return !(isDuplicateTag || isSimilar)
+                  const hideStrategyFramework = isStrategyFramework && guideTypeLower.includes('framework')
+                  return !(isDuplicateTag || isSimilar || hideStrategyFramework)
                 })() && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
                     {guide.guideType}
@@ -1614,7 +1616,6 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
             )}
           </div>
 
-          {/* Sidebar: Related Guides */}
           <aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-24" aria-label="Secondary">
             {related && related.length > 0 && (
               <section aria-labelledby="related-title" className="bg-white rounded-lg shadow p-6" id="related">
