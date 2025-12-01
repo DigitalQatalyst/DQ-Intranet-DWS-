@@ -16,6 +16,7 @@
     "db:seed-services": "npx tsx scripts/seed-marketplace-services.js",
     "db:migrate-services": "node scripts/run-marketplace-services-migration.js",
     "db:migrate-services-auto": "node scripts/run-marketplace-services-migration-auto.js",
+    "db:migrate-services-api": "node scripts/run-marketplace-services-migration-via-api.js",
     "test": "vitest run",
     "db:seed-guides": "node scripts/seed-guides.js",
     "test:supabase": "node test-supabase-connection.js",

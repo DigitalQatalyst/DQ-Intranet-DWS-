@@ -41,6 +41,16 @@ CREATE TABLE public.marketplace_services (
 );
 
 -- ===== Indexes for Performance =====
+-- Drop indexes if they exist, then create them
+DROP INDEX IF EXISTS public.idx_services_marketplace_type;
+DROP INDEX IF EXISTS public.idx_services_category;
+DROP INDEX IF EXISTS public.idx_services_service_type;
+DROP INDEX IF EXISTS public.idx_services_business_stage;
+DROP INDEX IF EXISTS public.idx_services_status;
+DROP INDEX IF EXISTS public.idx_services_tags;
+DROP INDEX IF EXISTS public.idx_services_provider;
+DROP INDEX IF EXISTS public.idx_services_search;
+
 CREATE INDEX idx_services_marketplace_type ON public.marketplace_services(marketplace_type);
 CREATE INDEX idx_services_category ON public.marketplace_services(category) WHERE category IS NOT NULL;
 CREATE INDEX idx_services_service_type ON public.marketplace_services(service_type) WHERE service_type IS NOT NULL;
@@ -64,6 +74,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ===== Triggers =====
+-- Drop trigger if exists, then create it
+DROP TRIGGER IF EXISTS update_marketplace_services_updated_at ON public.marketplace_services;
+
 -- Auto-update updated_at
 CREATE TRIGGER update_marketplace_services_updated_at
   BEFORE UPDATE ON public.marketplace_services
@@ -74,34 +87,40 @@ CREATE TRIGGER update_marketplace_services_updated_at
 ALTER TABLE public.marketplace_services ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS services_select ON public.marketplace_services;
+DROP POLICY IF EXISTS services_insert ON public.marketplace_services;
+DROP POLICY IF EXISTS services_update ON public.marketplace_services;
+DROP POLICY IF EXISTS services_delete ON public.marketplace_services;
+
 -- Allow public read access for active services
 CREATE POLICY services_select ON public.marketplace_services 
   FOR SELECT 
   USING (status = 'active');
 
--- Allow authenticated users to insert
+-- Allow authenticated users and service_role to insert
 CREATE POLICY services_insert ON public.marketplace_services 
   FOR INSERT 
-  TO authenticated
+  TO authenticated, service_role
   WITH CHECK (true);
 
--- Allow authenticated users to update
+-- Allow authenticated users and service_role to update
 CREATE POLICY services_update ON public.marketplace_services 
   FOR UPDATE 
-  TO authenticated
+  TO authenticated, service_role
   USING (true)
   WITH CHECK (true);
 
--- Allow authenticated users to delete
+-- Allow authenticated users and service_role to delete
 CREATE POLICY services_delete ON public.marketplace_services 
   FOR DELETE 
-  TO authenticated
+  TO authenticated, service_role
   USING (true);
 
 -- ===== Grants =====
-GRANT USAGE ON SCHEMA public TO anon, authenticated;
-GRANT SELECT ON public.marketplace_services TO anon, authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.marketplace_services TO authenticated;
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT SELECT ON public.marketplace_services TO anon, authenticated, service_role;
+GRANT INSERT, UPDATE, DELETE ON public.marketplace_services TO authenticated, service_role;
 
 -- ===== Comments for Documentation =====
 COMMENT ON TABLE public.marketplace_services IS 'Financial and non-financial services for the marketplace';

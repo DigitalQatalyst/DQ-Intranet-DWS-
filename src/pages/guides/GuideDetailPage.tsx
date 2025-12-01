@@ -814,14 +814,13 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
           <nav className="flex mb-4" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-2">
               <li className="inline-flex items-center"><Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center"><HomeIcon size={16} className="mr-1" /><span>Home</span></Link></li>
-              {/* <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><span className="ml-1 text-gray-500 md:ml-2">Resources</span></div></li> */}
-              <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><Link to={`/marketplace/guides`} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">Guidelines</Link></div></li>
+              <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><Link to={backHref} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">{breadcrumbLabel}</Link></div></li>
               <li aria-current="page"><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><span className="ml-1 text-gray-500 md:ml-2">Details</span></div></li>
             </ol>
           </nav>
           <div className="bg-white rounded shadow p-8 text-center">
             <h2 className="text-xl font-medium text-gray-900 mb-2">{error || 'Not Found'}</h2>
-            <Link to={`/marketplace/guides`} className="text-[var(--guidelines-primary)]">Back to Guidelines</Link>
+            <Link to={backHref} style={{ color: '#0B1E67' }}>Back to {breadcrumbLabel}</Link>
           </div>
         </main>
         <Footer isLoggedIn={!!user} />
@@ -1218,8 +1217,7 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
         <nav className="flex mb-4" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-2">
             <li className="inline-flex items-center"><Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center"><HomeIcon size={16} className="mr-1" /><span>Home</span></Link></li>
-            <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><span className="ml-1 text-gray-500 md:ml-2">Resources</span></div></li>
-            <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><Link to={backHref} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">Guidelines</Link></div></li>
+            <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><Link to={backHref} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">{breadcrumbLabel}</Link></div></li>
             <li aria-current="page"><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><span className="ml-1 text-gray-500 md:ml-2">{guide.title}</span></div></li>
           </ol>
         </nav>
@@ -1658,7 +1656,21 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
         </section>
 
         <div className="mt-6 text-right">
-          <Link to={backHref} className="text-[var(--guidelines-primary)]">Back to Guidelines</Link>
+          <Link to={backHref} style={{ color: '#0B1E67' }}>Back to {breadcrumbLabel}</Link>
+        </div>
+      </main>
+      <Footer isLoggedIn={!!user} />
+    </div>
+  )
+
+  // Final safety fallback - should never reach here, but ensures something always renders
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50 guidelines-theme">
+      <Header toggleSidebar={() => {}} sidebarOpen={false} />
+      <main className="container mx-auto px-4 py-8 flex-grow max-w-7xl">
+        <div className="bg-white rounded shadow p-8 text-center">
+          <h2 className="text-xl font-medium text-gray-900 mb-2">Unable to load guide</h2>
+          <Link to="/marketplace/guides" style={{ color: '#0B1E67' }}>Back to Guides</Link>
         </div>
       </main>
       <Footer isLoggedIn={!!user} />
