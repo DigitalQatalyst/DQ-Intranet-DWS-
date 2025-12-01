@@ -325,13 +325,13 @@ const GuideDetailPage: React.FC = () => {
             <ol className="inline-flex items-center space-x-1 md:space-x-2">
               <li className="inline-flex items-center"><Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center"><HomeIcon size={16} className="mr-1" /><span>Home</span></Link></li>
               {/* <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><span className="ml-1 text-gray-500 md:ml-2">Resources</span></div></li> */}
-              <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><Link to={`/marketplace/guides`} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">Guidelines</Link></div></li>
+              <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><Link to={`/marketplace/guides`} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">DQ Media Center</Link></div></li>
               <li aria-current="page"><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><span className="ml-1 text-gray-500 md:ml-2">Details</span></div></li>
             </ol>
           </nav>
           <div className="bg-white rounded shadow p-8 text-center">
             <h2 className="text-xl font-medium text-gray-900 mb-2">{error || 'Not Found'}</h2>
-            <Link to={`/marketplace/guides`} className="text-[var(--guidelines-primary)]">Back to Guidelines</Link>
+            <Link to={`/marketplace/guides`} className="text-[var(--guidelines-primary)]">Back to DQ Media Center</Link>
           </div>
         </main>
         <Footer isLoggedIn={!!user} />
@@ -347,7 +347,7 @@ const GuideDetailPage: React.FC = () => {
           <ol className="inline-flex items-center space-x-1 md:space-x-2">
             <li className="inline-flex items-center"><Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center"><HomeIcon size={16} className="mr-1" /><span>Home</span></Link></li>
             <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><span className="ml-1 text-gray-500 md:ml-2">Resources</span></div></li>
-            <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><Link to={backHref} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">Guidelines</Link></div></li>
+            <li><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><Link to={backHref} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">DQ Media Center</Link></div></li>
             <li aria-current="page"><div className="flex items-center"><ChevronRightIcon size={16} className="text-gray-400" /><span className="ml-1 text-gray-500 md:ml-2">{guide.title}</span></div></li>
           </ol>
         </nav>
@@ -610,7 +610,7 @@ const GuideDetailPage: React.FC = () => {
         </section>
 
         <div className="mt-6 text-right">
-          <Link to={backHref} className="text-[var(--guidelines-primary)]">Back to Guidelines</Link>
+          <Link to={backHref} className="text-[var(--guidelines-primary)]">Back to DQ Media Center</Link>
         </div>
       </main>
       <Footer isLoggedIn={!!user} />

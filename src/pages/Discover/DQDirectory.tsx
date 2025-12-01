@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Filter } from 'lucide-react';
-import { DirectoryCard, DirectoryCardData } from '../Directory/DirectoryCard';
-import { AssociateModal } from '../Directory/AssociateModal';
+import { DirectoryCard, DirectoryCardData } from '../../components/Directory/DirectoryCard';
+import DirectoryProfileModal from '../../components/Directory/DirectoryProfileModal';
+import { AssociateModal } from '../../components/Directory/AssociateModal';
 import { unitsData, associatesData } from '../../data/directoryData';
 import type { Unit, Associate, ViewMode, SectorType } from '../../types/directory';
 
@@ -14,13 +15,12 @@ interface DQDirectoryProps {
 /**
  * Map Unit to unified DirectoryCardData
  */
-const mapUnitToCard = (unit: Unit, onViewProfile: () => void): DirectoryCardData => ({
+const mapUnitToCard = (unit: Unit): DirectoryCardData => ({
   logoUrl: unit.logoUrl,
   title: unit.name,
   tag: unit.sector,
   description: unit.description || '',
   towers: unit.streams,
-  onClick: onViewProfile,
 });
 
 /**
@@ -28,7 +28,6 @@ const mapUnitToCard = (unit: Unit, onViewProfile: () => void): DirectoryCardData
  */
 const mapAssociateToCard = (
   associate: Associate,
-  onViewProfile: () => void
 ): DirectoryCardData => ({
   logoUrl: associate.avatarUrl,
   title: associate.name,
@@ -39,7 +38,6 @@ const mapAssociateToCard = (
     unit: associate.unitName,
     email: associate.email,
   },
-  onClick: onViewProfile,
 });
 
 const DQDirectory: React.FC<DQDirectoryProps> = ({
@@ -58,6 +56,8 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [selectedAssociate, setSelectedAssociate] = useState<Associate | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
+  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -109,7 +109,7 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
     return filtered;
   }, [debouncedQuery, selectedSectors, selectedStreams]);
 
-  const filteredAssociates = useMemo(() => {
+const filteredAssociates = useMemo(() => {
     let filtered = [...associatesData];
 
     // Search
@@ -135,12 +135,22 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
       filtered = filtered.filter((person) => selectedSectors.includes(person.sector));
     }
 
-    return filtered;
-  }, [debouncedQuery, selectedSectors]);
+  return filtered;
+}, [debouncedQuery, selectedSectors]);
 
   const handleViewProfile = useCallback((person: Associate) => {
     setSelectedAssociate(person);
     setIsModalOpen(true);
+  }, []);
+
+  const handleOpenUnitProfile = useCallback((unit: Unit) => {
+    setSelectedUnit(unit);
+    setIsUnitModalOpen(true);
+  }, []);
+
+  const handleCloseUnitProfile = useCallback(() => {
+    setIsUnitModalOpen(false);
+    setSelectedUnit(null);
   }, []);
 
   const handleCloseModal = useCallback(() => {
@@ -335,15 +345,15 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
               ? (currentData as Unit[]).map((unit) => (
                   <DirectoryCard
                     key={unit.id}
-                    {...mapUnitToCard(unit, () => {
-                      window.open(unit.marketplaceUrl, '_blank');
-                    })}
+                    {...mapUnitToCard(unit)}
+                    onViewProfile={() => handleOpenUnitProfile(unit)}
                   />
                 ))
               : (currentData as Associate[]).map((person) => (
                   <DirectoryCard
                     key={person.id}
-                    {...mapAssociateToCard(person, () => handleViewProfile(person))}
+                    {...mapAssociateToCard(person)}
+                    onViewProfile={() => handleViewProfile(person)}
                   />
                 ))}
           </div>
@@ -363,9 +373,13 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
 
       {/* Associate Modal */}
       <AssociateModal person={selectedAssociate} isOpen={isModalOpen} onClose={handleCloseModal} />
+      <DirectoryProfileModal
+        open={isUnitModalOpen}
+        unit={selectedUnit}
+        onClose={handleCloseUnitProfile}
+      />
     </section>
   );
 };
 
 export default DQDirectory;
-

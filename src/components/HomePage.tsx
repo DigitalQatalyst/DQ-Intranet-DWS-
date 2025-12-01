@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import HeroSection from './HeroSection';
@@ -11,14 +12,16 @@ import LeadApplySection from './LeadApplySection';
 const HomePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
 
-  // Simulate page loading
+  // Reset loading state when navigating to home page
   useEffect(() => {
+    setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [location.pathname]);
 
   if (isLoading) {
     return (

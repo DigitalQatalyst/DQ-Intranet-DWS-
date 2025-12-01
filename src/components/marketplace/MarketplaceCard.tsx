@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BookmarkIcon } from 'lucide-react';
+import { BookmarkIcon, Clock, Layers } from 'lucide-react';
 import {
   resolveChipIcon
 } from '../../utils/lmsIcons';
@@ -19,11 +19,13 @@ export interface MarketplaceItemProps {
     tags?: string[];
     category?: string;
     deliveryMode?: string;
+    imageUrl?: string;
     [key: string]: any;
   };
   marketplaceType: string;
   isBookmarked: boolean;
   onToggleBookmark: () => void;
+  onAddToComparison?: () => void;
   onQuickView: () => void;
 }
 export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
@@ -68,6 +70,34 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
     navigate(`${getItemRoute()}?action=true`);
   };
   // Display tags if available, otherwise use category and deliveryMode
+  
+  // Calculate lessons/modules count for courses
+  const courseStats = useMemo(() => {
+    if (marketplaceType !== 'courses') return null;
+    
+    const curriculum = item.curriculum || item.raw?.curriculum;
+    if (!curriculum || !Array.isArray(curriculum)) return null;
+    
+    let totalLessons = 0;
+    let totalModules = 0;
+    
+    curriculum.forEach((item: any) => {
+      if (item.topics && Array.isArray(item.topics)) {
+        totalModules += item.topics.length;
+        item.topics.forEach((topic: any) => {
+          if (topic.lessons && Array.isArray(topic.lessons)) {
+            totalLessons += topic.lessons.length;
+          }
+        });
+      } else if (item.lessons && Array.isArray(item.lessons)) {
+        totalModules += 1;
+        totalLessons += item.lessons.length;
+      }
+    });
+    
+    return { totalLessons, totalModules };
+  }, [item, marketplaceType]);
+  
   const chipData = useMemo(() => {
     if (marketplaceType !== 'courses') {
       const typeLabel =
@@ -96,63 +126,23 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
       }
       return baseTags.map((label, index) => ({ key: `generic-${index}`, label, iconValue: label }));
     }
+    
+    // For courses: only show duration and modules count with separator
     const chips: Array<{ key: string; label: string; iconValue?: string }> = [];
     
-    // 1. courseCategory
-    const category = Array.isArray(item.courseCategory)
-      ? item.courseCategory[0]
-      : item.courseCategory || (Array.isArray(item.category) ? item.category[0] : item.category);
-    if (category) {
-      chips.push({ key: 'courseCategory', label: category });
-    }
-    
-    // 2. deliveryMode
-    const delivery = Array.isArray(item.deliveryMode)
-      ? item.deliveryMode[0]
-      : Array.isArray(item.delivery)
-      ? item.delivery[0]
-      : item.deliveryMode || item.delivery;
-    if (delivery) {
-      chips.push({ key: 'deliveryMode', label: delivery, iconValue: delivery });
-    }
-    
-    // 3. duration
+    // 1. duration
     const durationValue = item.duration || item.durationBucket || item.durationLabel;
     const durationLabel = item.durationLabel || durationValue;
     if (durationLabel) {
       chips.push({ key: 'duration', label: durationLabel, iconValue: durationValue });
     }
     
-    // 4. levelCode (as "Lx")
-    if (item.levelCode) {
-      const levelLabel = item.levelShortLabel || item.levelLabel || item.levelCode;
-      chips.push({ key: 'level', label: levelLabel, iconValue: item.levelCode });
-    }
-    
-    // 5. location (if not Global)
-    const locations = Array.isArray(item.locations)
-      ? item.locations
-      : Array.isArray(item.location)
-      ? item.location
-      : item.location
-      ? [item.location]
-      : [];
-    const allowedLocations = new Set<string>(LOCATION_ALLOW as readonly string[]);
-    const specificLocation = locations.find(
-      (loc: string) => loc !== 'Global' && allowedLocations.has(loc)
-    );
-    if (specificLocation) {
-      chips.push({ key: 'location', label: specificLocation });
-    }
-    
-    // 6. audience (if Lead only)
-    const audience = Array.isArray(item.audience)
-      ? item.audience
-      : Array.isArray(item.raw?.audience)
-      ? item.raw.audience
-      : [];
-    if (audience.length === 1 && audience[0].toLowerCase() === 'lead') {
-      chips.push({ key: 'audience', label: 'Lead-only', iconValue: audience[0] });
+    // 2. modules count (only modules, not lessons)
+    if (courseStats && courseStats.totalModules > 0) {
+      chips.push({ 
+        key: 'modules', 
+        label: `${courseStats.totalModules} ${courseStats.totalModules === 1 ? 'module' : 'modules'}` 
+      });
     }
     
     return chips;
@@ -195,21 +185,47 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
           </div>
         </div>
         {/* Description with consistent height */}
-        <div className="mb-2" style={{ marginTop: 4 }}>
-          <p className="text-sm text-gray-600 line-clamp-2 leading-snug" style={{ margin: 0 }}>
+        <div className="mb-5">
+          <p className="text-sm text-gray-600 line-clamp-3 min-h-[72px] leading-relaxed">
             {item.description}
           </p>
         </div>
         {/* Tags and Actions in same row - fixed position */}
         <div className="flex justify-between items-center mt-auto">
-          <div className="flex flex-wrap gap-1 max-w-[70%]">
-            {chipData.map((chip, index) => {
-            const Icon = resolveChipIcon(chip.key, chip.iconValue ?? chip.label);
-            return <span key={`${chip.key}-${chip.label}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate bg-gray-50 text-gray-700 border border-gray-200">
-                {Icon ? <Icon className="h-3.5 w-3.5 mr-1" /> : null}
-                {chip.label}
-              </span>;
-          })}
+          <div className="flex flex-wrap gap-1 max-w-[70%] items-center">
+            {marketplaceType === 'courses' && chipData.length > 0 ? (
+              <>
+                {chipData.map((chip, index) => {
+                  const Icon = chip.key === 'duration' ? Clock : chip.key === 'modules' ? Layers : resolveChipIcon(chip.key, chip.iconValue ?? chip.label);
+                  return (
+                    <React.Fragment key={`${chip.key}-${chip.label}-${index}`}>
+                      {index > 0 && <span className="text-gray-400">.</span>}
+                      <span 
+                        className="inline-flex items-center text-xs font-medium truncate text-gray-700"
+                      >
+                        {Icon ? <Icon className="h-3.5 w-3.5 mr-1" /> : null}
+                        {chip.label}
+                      </span>
+                    </React.Fragment>
+                  );
+                })}
+              </>
+            ) : (
+              chipData.map((chip, index) => {
+                const Icon = resolveChipIcon(chip.key, chip.iconValue ?? chip.label);
+                return <span 
+                  key={`${chip.key}-${chip.label}-${index}`} 
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate"
+                  style={{
+                    backgroundColor: '#F3F4F6',
+                    color: '#000000'
+                  }}
+                >
+                  {Icon ? <Icon className="h-3.5 w-3.5 mr-1" style={{ color: '#000000' }} /> : null}
+                  {chip.label}
+                </span>;
+              })
+            )}
           </div>
           <div className="flex space-x-2 flex-shrink-0">
             <button onClick={e => {
@@ -224,10 +240,21 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
       {/* Card Footer - with two buttons */}
       <div className="mt-auto border-t border-gray-100 p-4 pt-5">
         <div className="flex justify-between gap-2">
-          <button onClick={handleViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap min-w-[120px] flex-1 ${marketplaceType === 'non-financial' ? 'bg-white border' : 'text-blue-600 bg-white border border-blue-600 hover:bg-blue-50'}`} style={marketplaceType === 'non-financial' ? { color: '#030F35', borderColor: '#030F35' } : {}} onMouseEnter={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#f0f4f8'; }} onMouseLeave={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = 'white'; }}>
+          <button 
+            onClick={handleViewDetails} 
+            className="px-4 py-2 text-sm font-medium bg-white border rounded-md hover:opacity-90 transition-colors whitespace-nowrap min-w-[120px] flex-1"
+            style={{ 
+              color: '#030F35',
+              borderColor: '#030F35'
+            }}
+          >
             {config.secondaryCTA}
           </button>
-          <button onClick={handlePrimaryAction} className={`px-4 py-2 text-sm font-bold text-white rounded-md transition-colors whitespace-nowrap flex-1 ${marketplaceType === 'non-financial' ? '' : 'bg-blue-600 hover:bg-blue-700'}`} style={marketplaceType === 'non-financial' ? { backgroundColor: '#030F35' } : {}} onMouseEnter={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#030F35'; }} onMouseLeave={(e) => { if (marketplaceType === 'non-financial') e.currentTarget.style.backgroundColor = '#030F35'; }}>
+          <button 
+            onClick={handlePrimaryAction} 
+            className="px-4 py-2 text-sm font-bold text-white rounded-md hover:opacity-90 transition-colors whitespace-nowrap flex-1"
+            style={{ backgroundColor: '#030F35' }}
+          >
             {config.primaryCTA}
           </button>
         </div>

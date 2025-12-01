@@ -27,6 +27,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // BACKEND CONFIG COMMENTED OUT - USING FRONTEND MOCK DATA ONLY
+  /*
+  define: {
+    // Expose REACT_APP_ environment variables to the client
+    'import.meta.env.REACT_APP_SUPABASE_URL': JSON.stringify(process.env.REACT_APP_SUPABASE_URL),
+    'import.meta.env.REACT_APP_SUPABASE_ANON_KEY': JSON.stringify(process.env.REACT_APP_SUPABASE_ANON_KEY),
+  },
+  */
   server: {
     host: DEV_HOST,
     port: DEV_PORT,

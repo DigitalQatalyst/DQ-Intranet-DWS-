@@ -1,0 +1,87 @@
+import { SFIA_LEVELS, type JobItem } from '@/data/media/jobs';
+import { Link } from 'react-router-dom';
+
+interface JobCardProps {
+  job: JobItem;
+  href?: string;
+  search?: string;
+}
+
+const fallbackImages = [
+  'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?auto=format&fit=crop&w=1200&q=80'
+];
+
+export function JobCard({ job, href, search }: JobCardProps) {
+  const imageSrc = job.image || fallbackImages[Math.abs(job.id.split('').reduce((sum, c) => sum + c.charCodeAt(0), 0)) % fallbackImages.length];
+  const sfia = SFIA_LEVELS[job.sfiaLevel];
+
+  return (
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="relative">
+        <img src={imageSrc} alt={job.title} className="h-40 w-full object-cover" loading="lazy" />
+        <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/80 px-3 py-1 text-xs font-medium text-gray-700 backdrop-blur">
+          <span className="h-2 w-2 rounded-full bg-orange-500" />
+          {job.type}
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-4">
+        <div className="flex flex-1 flex-col">
+          <div className="mb-2 text-xs text-gray-500">
+            {job.type} · {job.location} · {job.roleType}
+          </div>
+          {sfia && (
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-[#1A2E6E]">
+              {sfia.label}
+              <span className="text-[11px] text-[#4C5A86]">{sfia.detail}</span>
+            </div>
+          )}
+          <h3 className="font-semibold text-lg text-gray-900">{job.title}</h3>
+          <p className="mt-2 text-sm text-gray-700 line-clamp-3">{job.summary}</p>
+          <div className="mt-4 flex gap-2">
+            <span className="rounded bg-gray-100 px-2 py-1 text-xs">{job.department}</span>
+            <span className="rounded bg-gray-100 px-2 py-1 text-xs">{job.location}</span>
+          </div>
+        </div>
+
+        <div className="mt-auto pt-4 grid grid-cols-2 gap-3">
+          {href ? (
+            <Link
+              to={`${href}${search || ''}`}
+              className="h-9 rounded-xl border border-gray-300 text-center text-sm font-semibold text-gray-800 leading-9 transition hover:bg-gray-50"
+            >
+              View Details
+            </Link>
+          ) : (
+            <button className="h-9 rounded-xl border border-gray-300 text-sm font-semibold text-gray-800 transition hover:bg-gray-50">
+              View Details
+            </button>
+          )}
+          {href ? (
+            <Link
+              to={`${href}/apply${search || ''}`}
+              className="h-9 rounded-xl bg-[#030f35] text-center text-sm font-semibold text-white leading-9 transition hover:opacity-90"
+            >
+              Apply
+            </Link>
+          ) : job.applyUrl ? (
+            <a
+              href={job.applyUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="h-9 rounded-xl bg-[#030f35] text-center text-sm font-semibold text-white leading-9 transition hover:opacity-90"
+            >
+              Apply
+            </a>
+          ) : (
+            <button className="h-9 rounded-xl bg-[#030f35] text-sm font-semibold text-white transition hover:opacity-90">
+              Apply
+            </button>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}

@@ -15,6 +15,7 @@ export interface ServiceCardProps {
     category?: string;
     deliveryMode?: string;
     featuredImageUrl?: string;
+    requestUrl?: string;
   };
   type: string;
   isBookmarked: boolean;

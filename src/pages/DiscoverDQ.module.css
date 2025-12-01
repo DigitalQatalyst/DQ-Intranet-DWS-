@@ -9,10 +9,15 @@
   --dws-border: #E5E7EB;
 
   min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--dws-gray);
   color: var(--dws-text);
   display: flex;
   flex-direction: column;
+}
+
+.dwsDiscover * {
+  font-family: inherit !important;
 }
 
 .container {
