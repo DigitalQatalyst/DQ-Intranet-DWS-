@@ -71,8 +71,8 @@ const marketplaces: Marketplace[] = [
   },
   {
     id: 'guidelines',
-    name: 'DQ Media Center',
-    description: 'Stories, highlights, and resources from across DQ.',
+    name: 'DQ Knowledge Center',
+    description: 'Access practical guidelines, templates, and processes.',
     icon: BookOpen,
     href: '/marketplace/guides',
   },

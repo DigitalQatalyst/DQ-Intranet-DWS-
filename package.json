@@ -15,6 +15,7 @@
     "db:seed-media": "node --loader ts-node/esm scripts/seed-media.ts",
     "test": "vitest run",
     "db:seed-guides": "node scripts/seed-guides.js",
+    "test:supabase": "node test-supabase-connection.js",
     "postinstall": "npm rebuild rollup"
   },
   "dependencies": {
