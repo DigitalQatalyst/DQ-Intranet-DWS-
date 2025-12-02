@@ -686,9 +686,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
               <button 
                 id="action-section" 
                 className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 inline-flex items-center gap-2" 
-                style={{ backgroundColor: '#1A2E6E' }} 
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#152347')} 
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1A2E6E')} 
+                style={{ backgroundColor: '#030F35' }} 
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} 
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')} 
                 onClick={() => window.open(computedUrl, '_blank', 'noopener,noreferrer')}
               >
                 {content.action?.label || 'Visit Website'}
@@ -717,7 +717,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             {renderBlocks(content.blocks || [])}
           </div>
           {content.action && <div className="pt-4">
-              <button id="action-section" className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" style={{ backgroundColor: '#1A2E6E' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#152347')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1A2E6E')} onClick={() => {
+              <button id="action-section" className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')} onClick={() => {
             const urlField = content.action?.urlField;
             const computedUrl = (urlField && item && item[urlField]) || content.action?.fallbackUrl || '#';
             window.open(computedUrl, '_blank', 'noopener');
@@ -1075,9 +1075,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 <button 
                   id="action-section" 
                   className="px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md" 
-                  style={{ backgroundColor: '#1A2E6E' }} 
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#152554')} 
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1A2E6E')} 
+                  style={{ backgroundColor: '#030F35' }} 
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} 
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')} 
                   onClick={() => window.open(computedUrl, '_blank', 'noopener')}
                 >
                   {content.action.label || 'Submit Request'}
@@ -1605,9 +1605,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
         <button 
           id="action-section" 
           className="w-full px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md mb-3 flex items-center justify-center gap-2"
-          style={{ backgroundColor: '#1A2E6E' }} 
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#152554')} 
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1A2E6E')}
+          style={{ backgroundColor: '#030F35' }} 
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} 
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')}
           onClick={() => {
             if (isPromptLibrary && item.sourceUrl) {
               window.open(item.sourceUrl, '_blank', 'noopener,noreferrer');
@@ -1849,9 +1849,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
               </div>
               <button 
                 className="flex-1 px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md flex items-center justify-center gap-2"
-                style={{ backgroundColor: '#1A2E6E' }} 
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#152554')} 
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1A2E6E')}
+                style={{ backgroundColor: '#030F35' }} 
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} 
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')}
                 onClick={() => {
                   if (isPromptLibrary && item.sourceUrl) {
                     window.open(item.sourceUrl, '_blank', 'noopener,noreferrer');
