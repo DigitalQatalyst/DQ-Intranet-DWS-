@@ -71,10 +71,8 @@ export function Header({
   return (
     <>
       <header
-        className={`flex items-center w-full transition-all duration-300 text-white ${
-          isSticky
-            ? 'fixed top-0 left-0 right-0 z-40 shadow-lg backdrop-blur-sm'
-            : 'relative'
+        className={`dq-app-header sticky top-0 z-[120] flex w-full items-center text-white transition-all duration-300 ${
+          isSticky ? 'shadow-lg backdrop-blur-sm' : ''
         }`}
         style={{
           background: isSticky
@@ -127,13 +125,14 @@ export function Header({
               <>
                 {/* Desktop CTAs */}
                 <div className="hidden lg:flex items-center space-x-3">
-                  <button
+                  <Link
+                    to="/scrum-master-space"
                     className={`px-4 py-2 text-white border border-white/40 rounded-md hover:bg-white/10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
                       isSticky ? 'text-sm px-3 py-1.5' : ''
                     }`}
                   >
-                    Become a Lead
-                  </button>
+                    Scrum Master Space
+                  </Link>
                   <button
                     className={`px-4 py-2 bg-white text-[#030F35] font-medium rounded-md hover:bg-white/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
                       isSticky ? 'text-sm px-3 py-1.5' : ''
@@ -176,9 +175,6 @@ export function Header({
           </div>
         </div>
       </header>
-
-      {/* Spacer for sticky header */}
-      {isSticky && <div className="h-12"></div>}
 
       {/* Notifications */}
       {showNotificationsMenu && user && (

@@ -1,0 +1,37 @@
+---
+description: Guidelines for writing Postgres Row Level Security policies
+alwaysApply: false
+---
+
+# Database: Create RLS policies
+
+You are a Supabase Postgres expert writing RLS policies.
+
+- Output only CREATE POLICY or ALTER POLICY statements; valid SQL only.
+- Wrap SQL in ```sql fences when responding.
+- Use auth.uid() (via select) instead of current_user.
+- SELECT policies: USING only (no WITH CHECK).
+- INSERT policies: WITH CHECK only (no USING).
+- UPDATE policies: WITH CHECK and usually USING.
+- DELETE policies: USING only (no WITH CHECK).
+- Do not use FOR ALL; create separate policies per operation.
+- Policy names should be concise, descriptive, and quoted.
+- Explanations go in text, not inline SQL comments.
+- Prefer PERMISSIVE over RESTRICTIVE unless asked; explain why if restrictive is requested.
+
+Supabase roles: anon (unauthenticated), authenticated (logged-in). Use TO clause after the FOR clause.
+
+Examples (structure):
+```sql
+create policy "Public profiles are viewable only by authenticated users"
+on profiles
+for select
+to authenticated
+using ( true );
+```
+
+Performance tips:
+- Add indexes for columns used in policies.
+- Wrap functions in select to cache results per statement when safe.
+- Minimize joins; prefer IN/ANY on sets.
+- Specify roles in policies to avoid unnecessary execution for anon.

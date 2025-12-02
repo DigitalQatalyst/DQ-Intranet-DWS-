@@ -63,7 +63,7 @@ export default async function handler(req: AnyRequest, res: AnyResponse) {
     const lastPart = pathParts[pathParts.length - 1];
     if (lastPart && lastPart !== 'guides') {
       const id = lastPart;
-      const isUuid = /^[0-9a-z\-]+$/i.test(id);
+      const isUuid = /^[0-9a-z-]+$/i.test(id);
       
       if (req.method === 'GET') {
         const include = (urlObj.searchParams.get('include') || '').toLowerCase();

@@ -8,38 +8,42 @@ export const unitsData: Unit[] = [
   {
     id: 'hra-factory',
     name: 'HRA Factory',
-    sector: 'Operations',
+    sector: 'People & Operations',
     streams: ['H2O', 'O2P', 'Smart DWS', 'Co-share'],
-    description: 'Managing workforce enablement and lifecycle processes that drive associate performance.',
+    description:
+      'Sourcing, onboarding, and developing associates so DQ has the right people, tools, and spaces to perform. HRA manages hiring, onboarding, smart office, and QPMS practices that underpin DQ’s talent engine.',
     marketplaceUrl: '/marketplace/directory/hra',
-    tags: ['HR', 'Talent', 'Workforce'],
+    tags: ['Hiring & Onboarding', 'Smart Workplace', 'Performance & QPMS', 'Learning & Growth'],
   },
   {
     id: 'finance-factory',
     name: 'Finance Factory',
     sector: 'Operations',
     streams: ['Receivables (Receive | Pay)', 'Payables', 'Investment', 'Budget (GPRC)'],
-    description: 'Financial planning, controls, and stewardship across DQ operations and initiatives.',
+    description:
+      'Driving growth while safeguarding compliance and financial health across DQ. Finance manages payroll, payables/receivables, budgeting, investments, and QPMS for financial processes so decisions are grounded in accurate numbers.',
     marketplaceUrl: '/marketplace/directory/finance',
-    tags: ['Finance', 'GPRC', 'Investment'],
+    tags: ['Payroll & Benefits', 'Payables & Receivables', 'Budgeting & Investments', 'Finance QPMS'],
   },
   {
     id: 'deals-factory',
     name: 'Deals Factory',
-    sector: 'Operations',
+    sector: 'Growth & Pipeline',
     streams: ['MarCom', 'BD', 'Partners'],
-    description: 'Driving business development, partnerships, and communications for growth.',
+    description:
+      'Orchestrating the DQ deals pipeline – from campaigns and opportunities to bids and proposals. Deals turns DCO/DBP solutions into qualified enterprise leads through blueprints, campaigns, nurture flows, and proposal support.',
     marketplaceUrl: '/marketplace/directory/deals',
-    tags: ['BD', 'Marketing', 'Partnerships'],
+    tags: ['LeadGen & Campaigns', 'Opportunities & Bids', 'Proposals & Designs', 'Funnels & QPMS'],
   },
   {
     id: 'stories-factory',
     name: 'Stories Factory',
-    sector: 'Operations',
+    sector: 'Content & Communication',
     streams: ['Blueprints', 'Collaterals', 'Intranet | LMS'],
-    description: 'Creating documentation, collaterals, and knowledge systems for DQ communication.',
+    description:
+      'Creating stories, courses, and assets that bring DQ’s frameworks and products to life. Stories designs templates, articles, LMS materials, and social content that support onboarding, learning, and go-to-market execution.',
     marketplaceUrl: '/marketplace/directory/stories',
-    tags: ['Content', 'Documentation', 'Learning'],
+    tags: ['Content Templates', 'Portal & Storybook Assets', 'LMS Materials', 'Social Content'],
   },
 
   // ========================================
@@ -48,11 +52,12 @@ export const unitsData: Unit[] = [
   {
     id: 'intelligence-factory',
     name: 'Intelligence Factory',
-    sector: 'Platform',
+    sector: 'Analytics & AI Platform',
     streams: ['DBS | Pipe | API', 'AI | Analytics', 'DTMP | Plant 4.0'],
-    description: 'Building data pipelines, analytics, and AI solutions for intelligent decision-making.',
+    description:
+      'DQ’s central cognitive engine, embedding analytics and AI into products, platforms, and operations. Intelligence designs and deploys data stores, dashboards, AI agents, and analytics features for DXP, DWS, Products, and QPMS.',
     marketplaceUrl: '/marketplace/directory/intelligence',
-    tags: ['AI', 'Analytics', 'Data'],
+    tags: ['Data Stores & Models', 'Analytics in DXP / DWS / DBP', 'AI Agents & Insights', 'QPMS Analytics'],
   },
   {
     id: 'solutions-factory',
@@ -75,11 +80,12 @@ export const unitsData: Unit[] = [
   {
     id: 'products-factory',
     name: 'Products Factory',
-    sector: 'Platform',
+    sector: 'Products & Frameworks',
     streams: ['DT2.0 | DTMP', 'DTMF Incubate', 'DCO (Patterns)'],
-    description: 'Managing product roadmaps, experience design, and reusable design patterns.',
+    description:
+      'Deploying digital products and frameworks that accelerate the journey to Digital Cognitive Organisations (DCOs). Products owns DT2.0, DTMP, DTMA/S, blueprints, and organisational frameworks used across markets and sectors.',
     marketplaceUrl: '/marketplace/directory/products',
-    tags: ['Product', 'UX', 'Design Systems'],
+    tags: ['DT2.0 & DTMP', 'DTMA / DTMI / DTMB', 'DTMF Frameworks', 'QPM Systems'],
   },
 
   // ========================================
@@ -352,4 +358,3 @@ export const associatesData: Associate[] = [
     profileUrl: '/profiles/emm-wanjiru',
   },
 ];
-

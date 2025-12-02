@@ -39,7 +39,7 @@ export const TemporaryMarketplaceNav: React.FC = () => {
             <Link to="/marketplace/financial" className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${isActive('/marketplace/financial') ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}`}>
               Financial Services
             </Link>
-            <Link to="/marketplace/non-financial" className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${isActive('/marketplace/non-financial') ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}`}>
+            <Link to="/it-systems-support" className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${isActive('/it-systems-support') ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}`}>
               Business Services
             </Link>
           </div>

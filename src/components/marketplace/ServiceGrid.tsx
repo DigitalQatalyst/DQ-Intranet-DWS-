@@ -39,7 +39,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
     title: 'Need expert advice?',
     description: 'Connect with industry experts and get personalized guidance.',
     icon: <Briefcase size={24} className="text-white" />,
-    path: '/marketplace/non-financial',
+    path: '/it-systems-support',
     gradientFrom: 'from-purple-600',
     gradientTo: 'to-pink-500'
   }, {

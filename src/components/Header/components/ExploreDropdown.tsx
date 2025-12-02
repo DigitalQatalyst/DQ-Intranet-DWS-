@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CalendarIcon, ChevronDownIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, SparklesIcon, FileText, LucideProps, BookOpen, Briefcase } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, GraduationCapIcon, UsersIcon, NewspaperIcon, SparklesIcon, FileText, LucideProps, BookOpen, Briefcase } from 'lucide-react';
 
 interface Marketplace {
   id: string;
@@ -50,17 +50,17 @@ const marketplaces: Marketplace[] = [
   },
   {
     id: 'course',
-    name: 'DQ LMS Courses',
+    name: 'Learning Center',
     description: '7x GHC, 6x Digital, 12x HoV, 1x Day in DQ, Key Tools.',
     icon: GraduationCapIcon,
-    href: '/marketplace/courses',
+    href: '/lms',
   },
   {
-    id: 'investment',
-    name: 'Certifications & Onboarding',
-    description: 'Mandatory training and new associate onboarding.',
-    icon: TrendingUpIcon,
-    href: '/marketplace/investment',
+    id: 'services-center',
+    name: 'DQ Services Center',
+    description: 'Business services, technology services, and digital worker tools.',
+    icon: BuildingIcon,
+    href: '/dq-services-center',
   },
   {
     id: 'calendar',
@@ -71,24 +71,45 @@ const marketplaces: Marketplace[] = [
   },
   {
     id: 'guidelines',
-    name: 'Guidelines Marketplace',
+    name: 'DQ Knowledge Center',
     description: 'Access practical guidelines, templates, and processes.',
     icon: BookOpen,
     href: '/marketplace/guides',
   },
   {
-    id: 'opportunity',
-    name: 'News & Announcements',
-    description: 'Company updates and internal notices.',
+    id: 'work-directory',
+    name: 'DQ Work Directory',
+    description: 'Units, positions, and associate profiles.',
+    icon: UsersIcon,
+    href: '/dq-work-directory',
+  },
+  {
+    id: 'media-center',
+    name: 'DQ Media Center',
+    description: 'News, announcements, job openings, and blogs.',
+    icon: NewspaperIcon,
+    href: '/marketplace/guides',
+  },
+  {
+    id: 'work-communities',
+    name: 'DQ Work Communities',
+    description: 'Discussion rooms, pulse updates, and events.',
     icon: SparklesIcon,
-    href: '/marketplace/opportunities',
+    href: '/dq-work-communities',
+  },
+  {
+    id: 'knowledge-center',
+    name: 'DQ Knowledge Center',
+    description: 'Strategy guides, blueprints, libraries, and testimonials.',
+    icon: FileText,
+    href: '/dq-knowledge-center',
   },
   {
     id: 'asset-library',
     name: 'Asset Library',
     description: 'Shared design, deployment and marketing artefacts.',
     icon: FileText,
-    href: '/marketplace/asset-library',
+    href: '/dq-knowledge-center',
   },
   {
     id: 'communities',
@@ -213,14 +234,6 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
           aria-orientation="vertical"
           aria-labelledby="explore-menu"
         >
-          <div className="px-4 py-2 border-b border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-800">
-              Explore Marketplaces
-            </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              Discover opportunities across Abu Dhabi's business ecosystem
-            </p>
-          </div>
           <div className="max-h-96 overflow-y-auto">
             {marketplaces.map((marketplace, index) => {
               const Icon = marketplace.icon;
