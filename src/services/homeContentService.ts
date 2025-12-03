@@ -58,73 +58,72 @@ export type SearchResult = {
   link?: string | null;
 };
 
-async function handle<T>(promise: Promise<{ data: T | null; error: unknown }>): Promise<T> {
-  const { data, error } = await promise;
-  if (error) throw error;
-  return data ?? ([] as unknown as T);
-}
-
 export async function fetchServicesByCategory(category: string, limit = 20): Promise<ServiceCard[]> {
-  return handle(
-    supabase
-      .from('services')
-      .select('id, title, description, category, path, icon, tags, is_active, order')
-      .eq('category', category)
-      .eq('is_active', true)
-      .order('order', { ascending: true })
-      .limit(limit)
-  );
+  const { data, error } = await supabase
+    .from('services')
+    .select('id, title, description, category, path, icon, tags, is_active, order')
+    .eq('category', category)
+    .eq('is_active', true)
+    .order('order', { ascending: true })
+    .limit(limit);
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function fetchStories(limit = 6): Promise<Story[]> {
-  return handle(
-    supabase
-      .from('stories')
-      .select('id, title, excerpt, image, author, published_at')
-      .lte('published_at', new Date().toISOString())
-      .order('published_at', { ascending: false })
-      .limit(limit)
-  );
+  const { data, error } = await supabase
+    .from('stories')
+    .select('id, title, excerpt, image, author, published_at')
+    .lte('published_at', new Date().toISOString())
+    .order('published_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function fetchNews(limit = 6): Promise<NewsItem[]> {
-  return handle(
-    supabase
-      .from('news')
-      .select('id, title, excerpt, link, type, published_at')
-      .lte('published_at', new Date().toISOString())
-      .order('published_at', { ascending: false })
-      .limit(limit)
-  );
+  const { data, error } = await supabase
+    .from('news')
+    .select('id, title, excerpt, link, type, published_at')
+    .lte('published_at', new Date().toISOString())
+    .order('published_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function fetchEvents(limit = 6): Promise<EventItem[]> {
-  return handle(
-    supabase
-      .from('events')
-      .select('id, title, description, location, starts_at, ends_at, link')
-      .gte('ends_at', new Date().toISOString())
-      .order('starts_at', { ascending: true })
-      .limit(limit)
-  );
+  const { data, error } = await supabase
+    .from('events')
+    .select('id, title, description, location, starts_at, ends_at, link')
+    .gte('ends_at', new Date().toISOString())
+    .order('starts_at', { ascending: true })
+    .limit(limit);
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function fetchJourneys(): Promise<JourneyStep[]> {
-  return handle(
-    supabase
-      .from('journeys')
-      .select('id, title, summary, stage, order, cta_label, cta_link')
-      .order('order', { ascending: true })
-  );
+  const { data, error } = await supabase
+    .from('journeys')
+    .select('id, title, summary, stage, order, cta_label, cta_link')
+    .order('order', { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 // If you add a Postgres function "search_home_content(query text)" that returns unified results,
 // this will call it. Adjust the function name/params to match your schema.
 export async function searchHomeContent(query: string): Promise<SearchResult[]> {
   if (!query.trim()) return [];
-  return handle(
-    supabase.rpc('search_home_content', { query }).limit(10)
-  );
+  const { data, error } = await supabase.rpc('search_home_content', { query });
+  if (error) throw error;
+  return (data ?? []).slice(0, 10);
 }
 
 export async function fetchHomePageContent() {

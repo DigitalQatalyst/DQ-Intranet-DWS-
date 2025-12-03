@@ -154,14 +154,13 @@ const impactStats = [
   {
     label: 'Focus Time Saved',
     value: 6,
-    prefix: '+',
-    suffix: 'hrs',
+    suffix: 'hrs+',
     icon: <Clock size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
   },
   {
     label: 'Concepts Learned Daily',
     value: 5,
-    prefix: '+',
+    suffix: '+',
     icon: <BookOpen size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
   },
   {
@@ -427,7 +426,7 @@ const FeaturedPartnersCarousel = () => {
   };
 
   return (
-    <div className="relative pt-6 pb-4 md:pt-8 md:pb-6">
+    <div className="relative h-auto pt-6 pb-2 md:pt-8 md:pb-3">
       <FadeInUpOnScroll className="text-center mb-6">
         <h3 className="text-2xl font-bold text-gray-900 mb-2">
           Featured Sectors
@@ -437,7 +436,7 @@ const FeaturedPartnersCarousel = () => {
         </p>
       </FadeInUpOnScroll>
 
-      <div className="relative overflow-hidden">
+      <div className="relative h-auto overflow-visible">
         <div
           ref={carouselRef}
           className="flex overflow-x-auto py-2 scrollbar-hide gap-6"
@@ -509,8 +508,9 @@ const ProofAndTrust: React.FC = () => {
                   <div className="text-3xl font-bold text-dq-navy mb-1 flex items-baseline justify-center">
                     {stat.prefix && <span className="mr-1">{stat.prefix}</span>}
                     <span className="inline-flex items-baseline tabular-nums">
-                      <AnimatedCounter value={stat.value} />
-                      <span>{stat.suffix ?? ""}</span>
+                      <AnimatedCounter value={stat.value} />{stat.suffix ? (
+                        <span>{stat.suffix}</span>
+                      ) : null}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 text-center leading-tight mt-1 whitespace-normal break-words [text-overflow:clip] [overflow:visible] [display:block]">
@@ -539,7 +539,7 @@ const ProofAndTrust: React.FC = () => {
           </div>
 
         {/* Powered by Strategic Partnerships - NEW SECTION */}
-        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 md:p-12 overflow-hidden relative">
+        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 md:p-12 overflow-visible relative">
           <HorizontalScrollReveal
             direction="left"
             className="text-center mb-10 relative z-10"
