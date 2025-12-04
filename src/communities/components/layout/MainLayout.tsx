@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { Header, AuthProvider as KFAuthProvider } from '@/communities/components/Header';
+import { Header, AuthProvider as CommunitiesAuthProvider } from '@/communities/components/Header';
 //import { Header } from "../../components/Header";
 import { Footer } from '@/communities/components/Footer';
 import { Sidebar } from '@/communities/components/AppSidebar';
@@ -67,10 +67,10 @@ export function MainLayout({
     setSidebarOpen(!sidebarOpen);
   };
   return <div className="flex flex-col min-h-screen w-full">
-      {/* EJP Gradient Header - Always visible */}
-      <KFAuthProvider>
+      {/* DQ Gradient Header - Always visible */}
+      <CommunitiesAuthProvider>
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-      </KFAuthProvider>
+      </CommunitiesAuthProvider>
 
       {/* Main content area with sidebar */}
       <div className="flex flex-1 w-full min-h-screen">

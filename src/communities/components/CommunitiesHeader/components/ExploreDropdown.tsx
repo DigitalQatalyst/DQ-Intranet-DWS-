@@ -147,7 +147,7 @@ export function ExploreDropdown({
               Discover opportunities across Abu Dhabi's business ecosystem
             </p>
           </div>
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[480px] overflow-y-auto">
             {marketplaces.map((marketplace, index) => {
           const Icon = marketplace.icon;
           return <a key={marketplace.id} ref={el => itemRefs.current[index] = el} href={marketplace.href} className={`flex items-start px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors duration-150 ${focusedIndex === index ? 'bg-gray-50' : ''}`} role="menuitem" tabIndex={-1} onClick={e => {

@@ -208,7 +208,7 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
             </p>
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[480px] overflow-y-auto">
             {marketplaces.map((marketplace, index) => {
               const Icon = marketplace.icon;
               const external = isExternal(marketplace.href);

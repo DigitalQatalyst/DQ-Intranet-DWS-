@@ -92,8 +92,8 @@ textarea:-webkit-autofill {
   transition: background-color 9999s ease-in-out 0s;
 }
 
-/* EJP-style CTA Button for Marketplace Cards */
-.cta-ejp {
+/* DQ-style CTA Button for Marketplace Cards */
+.cta-dq {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -111,19 +111,19 @@ textarea:-webkit-autofill {
   transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.cta-ejp:hover {
+.cta-dq:hover {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 1) 100%);
   border-color: rgba(255, 255, 255, 0.9);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px rgba(3, 15, 53, 0.16);
   transform: translateY(-1px);
 }
 
-.cta-ejp .chev {
+.cta-dq .chev {
   transition: transform 0.2s ease;
   margin-left: 8px;
 }
 
-.cta-ejp:hover .chev {
+.cta-dq:hover .chev {
   transform: translateX(4px);
 }
 
