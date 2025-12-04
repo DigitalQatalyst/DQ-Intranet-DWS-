@@ -190,8 +190,11 @@ const VideoTestimonialCarousel = () => {
 
                 {/* DQ Logo - Top Left */}
                 <div className="absolute top-6 left-6 z-10">
-                  <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-lg">
-                    <span className="text-xl font-bold text-[#030F35]">DQ</span>
+                  <div className="flex flex-col items-start">
+                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-lg mb-2">
+                      <span className="text-xl font-bold text-[#030F35]">DQ</span>
+                    </div>
+                    <span className="text-white text-xs font-medium">Digital Qatalyst</span>
                   </div>
                 </div>
 
@@ -227,7 +230,7 @@ const VideoTestimonialCarousel = () => {
                         <p className="text-white font-semibold text-base">
                           {testimonial.name}
                         </p>
-                        <p className="text-white/90 text-sm">{testimonial.position}</p>
+                        <p className="text-white/90 text-sm">{testimonial.position}{testimonial.company ? `, ${testimonial.company}` : ''}</p>
                       </div>
                     </div>
 
