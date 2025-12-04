@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { CourseType } from "./utils/mockData";
 import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
 import { CommunitiesRouter } from "./communities/CommunitiesRouter";
@@ -14,7 +12,6 @@ import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
-import ProtectedRoute from "./components/ProtectedRoute";
 import DiscoverDQ from "./pages/DiscoverDQ";
 import NotFound from "./pages/NotFound";
 import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
@@ -22,29 +19,10 @@ import GuideEditor from "./pages/admin/guides/GuideEditor";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import EventsPage from "./pages/events/EventsPage";
-import KfBot from "./bot/KfBot";
+import ChatBot from "./bot/ChatBot";
 import ThankYou from "./pages/ThankYou";
 
 export function AppRouter() {
-  const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
-  const [compareCourses, setCompareCourses] = useState<CourseType[]>([]);
-  const toggleBookmark = (courseId: string) => {
-    setBookmarkedCourses((prev) => {
-      if (prev.includes(courseId)) {
-        return prev.filter((id) => id !== courseId);
-      } else {
-        return [...prev, courseId];
-      }
-    });
-  };
-  const handleAddToComparison = (course: CourseType) => {
-    if (
-      compareCourses.length < 3 &&
-      !compareCourses.some((c) => c.id === course.id)
-    ) {
-      setCompareCourses((prev) => [...prev, course]);
-    }
-  };
 
   const client = new ApolloClient({
     link: new HttpLink({
@@ -57,7 +35,7 @@ export function AppRouter() {
     <ApolloProvider client={client}>
       <BrowserRouter>
         <AuthProvider>
-          <KfBot />
+          <ChatBot />
           <Routes>
             <Route path="/discover-dq" element={<DiscoverDQ />} />
             <Route path="/*" element={<App />} />

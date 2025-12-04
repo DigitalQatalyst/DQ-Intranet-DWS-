@@ -146,7 +146,7 @@ declare global {
 
 // page specific detection enabled
 
-const KfBot = () => {
+const ChatBot = () => {
   // get pathname
   const pathname = window.location.pathname;
   const isInitialized = useRef(false);
@@ -272,4 +272,4 @@ const KfBot = () => {
   return null;
 };
 
-export default KfBot;
+export default ChatBot;

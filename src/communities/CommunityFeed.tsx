@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { CommunitiesLayout } from './CommunitiesLayout';
-import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/KF eJP Library/PageLayout';
+import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/DesignSystem/PageLayout';
 import { TabsFeed } from '@/communities/components/feed/TabsFeed';
 import { FeedSidebar } from '@/communities/components/feed/FeedSidebar';
 import { InlineComposer } from '@/communities/components/post/InlineComposer';
 import { supabaseClient } from '../lib/supabaseClient';
 import { safeFetch } from '@/communities/utils/safeFetch';
-import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
+import { StickyActionButton } from '@/communities/components/DesignSystem/Button';
 import { Button } from '@/communities/components/ui/button';
 import { X, Search } from 'lucide-react';
 

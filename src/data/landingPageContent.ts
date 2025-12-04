@@ -215,7 +215,8 @@ export const impactStats: ImpactStat[] = [
   {
     label: 'Focus Time Saved',
     value: 6,
-    suffix: 'hrs+',
+    prefix: '+',
+    suffix: 'hrs',
     iconComponent: Clock,
     iconSize: 20,
     iconClassName: "text-[#FB5535]",

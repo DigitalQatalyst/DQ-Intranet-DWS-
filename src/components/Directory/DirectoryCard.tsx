@@ -15,7 +15,7 @@ export type DirectoryCardData = {
 };
 
 /**
- * EJP-style unified directory card for Units and Associates
+ * DQ-style unified directory card for Units and Associates
  * Clean, professional layout with consistent spacing and navy-blue theme
  */
 export const DirectoryCard: React.FC<DirectoryCardData> = ({
@@ -173,7 +173,7 @@ export const DirectoryCard: React.FC<DirectoryCardData> = ({
         </div>
       )}
 
-      {/* CTA Button (EJP Navy) */}
+      {/* CTA Button (DQ Navy) */}
       <button
         onClick={onClick}
         className="w-full font-semibold transition-all"

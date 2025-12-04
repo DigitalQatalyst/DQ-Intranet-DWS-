@@ -9,7 +9,7 @@ import { LoginForm } from '@/communities/components/auth/LoginForm';
 import { useNavigate, Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Users, Sparkles, ChevronRight, MessageSquare, Clock, TrendingUp, Lightbulb, Network, Handshake } from 'lucide-react';
-import { CommunityCard } from '@/communities/components/KF eJP Library/Cards';
+import { CommunityCard } from '@/communities/components/DesignSystem/Cards';
 import { Avatar, AvatarFallback, AvatarImage } from '@/communities/components/ui/avatar';
 import { Badge } from '@/communities/components/ui/badge';
 interface Community {
