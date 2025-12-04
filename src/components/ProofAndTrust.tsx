@@ -167,7 +167,7 @@ const VideoTestimonialCarousel = () => {
         {/* Carousel Container */}
         <div
           ref={carouselRef}
-          className="flex overflow-x-auto scrollbar-hide gap-6 pb-4 snap-x snap-mandatory"
+          className="flex overflow-x-auto scrollbar-hide gap-6 pb-4 snap-x snap-mandatory justify-center"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {testimonials.map((testimonial, index) => (
@@ -189,30 +189,30 @@ const VideoTestimonialCarousel = () => {
                 </div>
 
                 {/* DQ Logo - Top Left */}
-                <div className="absolute top-6 left-6 z-10">
+                <div className="absolute top-4 left-4 z-10">
                   <div className="flex flex-col items-start">
-                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-lg mb-2">
-                      <span className="text-xl font-bold text-[#030F35]">DQ</span>
+                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg mb-1">
+                      <span className="text-lg font-bold text-[#030F35]">DQ</span>
                     </div>
-                    <span className="text-white text-xs font-medium">Digital Qatalyst</span>
+                    <span className="text-white text-[10px] font-medium">Digital Qatalyst</span>
                   </div>
                 </div>
 
                 {/* Content Overlay */}
-                <div className="relative h-full flex flex-col justify-between p-6 z-10">
+                <div className="relative h-full flex flex-col justify-between p-5 z-10">
                   {/* Top Section - Metric */}
-                  <div className="pt-16">
-                    <div className={`text-5xl font-bold mb-2 ${getMetricColor(testimonial.metricColor)}`}>
+                  <div className="pt-12">
+                    <div className={`text-4xl font-bold mb-1 ${getMetricColor(testimonial.metricColor)}`}>
                       {testimonial.metric}
                     </div>
-                    <div className="text-white text-lg font-semibold">
+                    <div className="text-white text-base font-semibold">
                       {testimonial.metricLabel}
                     </div>
                   </div>
 
                   {/* Middle Section - Quote */}
-                  <div className="flex-1 flex items-center py-4">
-                    <p className="text-white text-base leading-relaxed font-medium">
+                  <div className="flex-1 flex items-center py-2">
+                    <p className="text-white text-sm leading-relaxed font-medium">
                       {testimonial.quote}
                     </p>
                   </div>
@@ -220,23 +220,23 @@ const VideoTestimonialCarousel = () => {
                   {/* Bottom Section - Author Info and Play Button */}
                   <div className="flex items-center justify-between">
                     {/* Author Info */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <img
                         src={testimonial.avatar}
                         alt={testimonial.name}
-                        className="w-12 h-12 rounded-full object-cover ring-2 ring-white/30"
+                        className="w-10 h-10 rounded-full object-cover ring-2 ring-white/30"
                       />
                       <div>
-                        <p className="text-white font-semibold text-sm">
+                        <p className="text-white font-semibold text-xs">
                           {testimonial.name}
                         </p>
-                        <p className="text-white/90 text-xs">{testimonial.position}{testimonial.company ? `, ${testimonial.company}` : ''}</p>
+                        <p className="text-white/90 text-[10px] leading-tight">{testimonial.position}{testimonial.company ? `, ${testimonial.company}` : ''}</p>
                       </div>
                     </div>
 
                     {/* Play Button - Bottom Right */}
-                    <div className="w-12 h-12 rounded-full bg-gray-800/95 flex items-center justify-center shadow-xl transition-all duration-300 group-hover:bg-gray-700">
-                      <Play size={16} className="text-white ml-1" fill="currentColor" />
+                    <div className="w-10 h-10 rounded-full bg-gray-800/95 flex items-center justify-center shadow-xl transition-all duration-300 group-hover:bg-gray-700">
+                      <Play size={14} className="text-white ml-0.5" fill="currentColor" />
                     </div>
                   </div>
                 </div>
