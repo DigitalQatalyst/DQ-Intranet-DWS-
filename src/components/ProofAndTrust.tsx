@@ -146,60 +146,94 @@ const VideoTestimonialCarousel = () => {
     }
   }, [isModalOpen]);
 
+  const getMetricColor = (color: string) => {
+    switch (color) {
+      case 'green':
+        return 'text-green-500';
+      case 'orange':
+        return 'text-orange-500';
+      case 'blue':
+        return 'text-blue-500';
+      default:
+        return 'text-white';
+    }
+  };
+
   return (
     <>
       <div className="relative">
         {/* Carousel Container */}
         <div
           ref={carouselRef}
-          className="flex overflow-x-auto scrollbar-hide gap-8 pb-4 snap-x snap-mandatory justify-center"
+          className="flex overflow-x-auto scrollbar-hide gap-6 pb-4 snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {testimonials.map((testimonial, index) => (
             <FadeInUpOnScroll key={testimonial.id} delay={index * 0.08}>
               <div
-                className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 w-[380px] flex-shrink-0 snap-start transform hover:-translate-y-2"
+                className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 min-w-[420px] max-w-[420px] h-[520px] flex-shrink-0 snap-start transform hover:scale-[1.02]"
                 onClick={() => openModal(testimonial)}
               >
-                {/* Video Thumbnail */}
-                <div className="relative aspect-video bg-gray-900 overflow-hidden">
+                {/* Video Thumbnail Background */}
+                <div className="absolute inset-0">
                   <img
                     src={testimonial.videoThumbnail}
                     alt={testimonial.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-all duration-300">
-                    <div className="w-20 h-20 rounded-full bg-white/95 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:bg-white transition-all duration-300">
-                      <Play size={32} className="text-gray-900 ml-1" fill="currentColor" />
-                    </div>
-                  </div>
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Dark Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
+                  {/* Blurred Background Effect */}
+                  <div className="absolute inset-0 backdrop-blur-sm" />
                 </div>
-                {/* Testimonial Info */}
-                <div className="p-6 bg-white">
-                  <div className="flex items-center gap-4 mb-4">
-                    <img
-                      src={testimonial.avatar}
-                      alt={testimonial.name}
-                      className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base font-semibold text-gray-900 truncate">
-                        {testimonial.name}
-                      </p>
-                      <p className="text-sm text-gray-500 truncate">{testimonial.position}</p>
+
+                {/* DQ Logo - Top Left */}
+                <div className="absolute top-6 left-6 z-10">
+                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg">
+                    <span className="text-lg font-bold text-[#030F35]">DQ</span>
+                  </div>
+                </div>
+
+                {/* Content Overlay */}
+                <div className="absolute inset-0 flex flex-col justify-between p-8 z-10">
+                  {/* Top Section - Metric */}
+                  <div className="flex-1 flex flex-col justify-start pt-16">
+                    <div className={`text-5xl font-bold mb-2 ${getMetricColor(testimonial.metricColor)}`}>
+                      {testimonial.metric}
+                    </div>
+                    <div className="text-white text-lg font-semibold mb-6">
+                      {testimonial.metricLabel}
                     </div>
                   </div>
-                  <p className="text-base text-gray-600 line-clamp-3 leading-relaxed mb-4">
-                    "{testimonial.quote}"
-                  </p>
-                  {/* Rating Stars */}
-                  <div className="flex items-center gap-1">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />
-                    ))}
+
+                  {/* Bottom Section - Quote and Author */}
+                  <div className="space-y-4">
+                    {/* Quote */}
+                    <p className="text-white text-lg leading-relaxed font-medium">
+                      "{testimonial.quote}"
+                    </p>
+
+                    {/* Author Info */}
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-white/50"
+                      />
+                      <div>
+                        <p className="text-white font-semibold text-base">
+                          {testimonial.name}
+                        </p>
+                        <p className="text-white/80 text-sm">{testimonial.position}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Play Button - Bottom Right */}
+                  <div className="absolute bottom-6 right-6">
+                    <div className="w-14 h-14 rounded-full bg-gray-800/90 hover:bg-gray-800 flex items-center justify-center shadow-xl transition-all duration-300 group-hover:scale-110">
+                      <Play size={20} className="text-white ml-1" fill="currentColor" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -208,20 +242,20 @@ const VideoTestimonialCarousel = () => {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center transform -translate-y-1/2 pointer-events-none px-4">
+        <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center transform -translate-y-1/2 pointer-events-none px-2">
           <button
-            className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-gray-700 pointer-events-auto flex items-center justify-center transition-all w-12 h-12 rounded-full bg-white/95 hover:bg-white shadow-lg hover:shadow-xl hover:scale-110"
+            className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-gray-700 pointer-events-auto flex items-center justify-center transition-all w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md hover:shadow-lg"
             onClick={handlePrev}
             aria-label="Previous testimonial"
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={24} />
           </button>
           <button
-            className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-gray-700 pointer-events-auto flex items-center justify-center transition-all w-12 h-12 rounded-full bg-white/95 hover:bg-white shadow-lg hover:shadow-xl hover:scale-110"
+            className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-gray-700 pointer-events-auto flex items-center justify-center transition-all w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md hover:shadow-lg"
             onClick={handleNext}
             aria-label="Next testimonial"
           >
-            <ChevronRight size={28} />
+            <ChevronRight size={24} />
           </button>
         </div>
 
@@ -233,7 +267,7 @@ const VideoTestimonialCarousel = () => {
               onClick={() => setActiveIndex(index)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === activeIndex
-                  ? 'w-8 bg-blue-600'
+                  ? 'w-8 bg-red-600'
                   : 'w-2 bg-gray-300 hover:bg-gray-400'
               }`}
               aria-label={`Go to testimonial ${index + 1}`}
