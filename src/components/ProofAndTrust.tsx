@@ -154,6 +154,8 @@ const VideoTestimonialCarousel = () => {
         return 'text-orange-500';
       case 'blue':
         return 'text-blue-500';
+      case 'red':
+        return 'text-red-500';
       default:
         return 'text-white';
     }
@@ -171,68 +173,67 @@ const VideoTestimonialCarousel = () => {
           {testimonials.map((testimonial, index) => (
             <FadeInUpOnScroll key={testimonial.id} delay={index * 0.08}>
               <div
-                className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 min-w-[420px] max-w-[420px] h-[520px] flex-shrink-0 snap-start transform hover:scale-[1.02]"
+                className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 min-w-[480px] max-w-[480px] h-[600px] flex-shrink-0 snap-start"
                 onClick={() => openModal(testimonial)}
               >
-                {/* Video Thumbnail Background */}
+                {/* Video Thumbnail Background with Blur */}
                 <div className="absolute inset-0">
                   <img
                     src={testimonial.videoThumbnail}
                     alt={testimonial.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'blur(4px)' }}
                   />
-                  {/* Dark Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
-                  {/* Blurred Background Effect */}
-                  <div className="absolute inset-0 backdrop-blur-sm" />
+                  {/* Dark Semi-transparent Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-black/80" />
                 </div>
 
                 {/* DQ Logo - Top Left */}
                 <div className="absolute top-6 left-6 z-10">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg">
-                    <span className="text-lg font-bold text-[#030F35]">DQ</span>
+                  <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-lg">
+                    <span className="text-xl font-bold text-[#030F35]">DQ</span>
                   </div>
                 </div>
 
                 {/* Content Overlay */}
-                <div className="absolute inset-0 flex flex-col justify-between p-8 z-10">
+                <div className="relative h-full flex flex-col justify-between p-8 z-10">
                   {/* Top Section - Metric */}
-                  <div className="flex-1 flex flex-col justify-start pt-16">
-                    <div className={`text-5xl font-bold mb-2 ${getMetricColor(testimonial.metricColor)}`}>
+                  <div className="pt-20">
+                    <div className={`text-6xl font-bold mb-3 ${getMetricColor(testimonial.metricColor)}`}>
                       {testimonial.metric}
                     </div>
-                    <div className="text-white text-lg font-semibold mb-6">
+                    <div className="text-white text-xl font-semibold">
                       {testimonial.metricLabel}
                     </div>
                   </div>
 
-                  {/* Bottom Section - Quote and Author */}
-                  <div className="space-y-4">
-                    {/* Quote */}
+                  {/* Middle Section - Quote */}
+                  <div className="flex-1 flex items-center">
                     <p className="text-white text-lg leading-relaxed font-medium">
-                      "{testimonial.quote}"
+                      {testimonial.quote}
                     </p>
+                  </div>
 
+                  {/* Bottom Section - Author Info and Play Button */}
+                  <div className="flex items-center justify-between">
                     {/* Author Info */}
                     <div className="flex items-center gap-3">
                       <img
                         src={testimonial.avatar}
                         alt={testimonial.name}
-                        className="w-12 h-12 rounded-full object-cover ring-2 ring-white/50"
+                        className="w-14 h-14 rounded-full object-cover ring-2 ring-white/30"
                       />
                       <div>
                         <p className="text-white font-semibold text-base">
                           {testimonial.name}
                         </p>
-                        <p className="text-white/80 text-sm">{testimonial.position}</p>
+                        <p className="text-white/90 text-sm">{testimonial.position}</p>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Play Button - Bottom Right */}
-                  <div className="absolute bottom-6 right-6">
-                    <div className="w-14 h-14 rounded-full bg-gray-800/90 hover:bg-gray-800 flex items-center justify-center shadow-xl transition-all duration-300 group-hover:scale-110">
-                      <Play size={20} className="text-white ml-1" fill="currentColor" />
+                    {/* Play Button - Bottom Right */}
+                    <div className="w-14 h-14 rounded-full bg-gray-800/95 flex items-center justify-center shadow-xl transition-all duration-300 group-hover:bg-gray-700">
+                      <Play size={18} className="text-white ml-1" fill="currentColor" />
                     </div>
                   </div>
                 </div>
@@ -244,14 +245,14 @@ const VideoTestimonialCarousel = () => {
         {/* Navigation Buttons */}
         <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center transform -translate-y-1/2 pointer-events-none px-2">
           <button
-            className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-gray-700 pointer-events-auto flex items-center justify-center transition-all w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md hover:shadow-lg"
+            className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-gray-600 pointer-events-auto flex items-center justify-center transition-all w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md hover:shadow-lg"
             onClick={handlePrev}
             aria-label="Previous testimonial"
           >
             <ChevronLeft size={24} />
           </button>
           <button
-            className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-gray-700 pointer-events-auto flex items-center justify-center transition-all w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md hover:shadow-lg"
+            className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-gray-600 pointer-events-auto flex items-center justify-center transition-all w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md hover:shadow-lg"
             onClick={handleNext}
             aria-label="Next testimonial"
           >
@@ -267,7 +268,7 @@ const VideoTestimonialCarousel = () => {
               onClick={() => setActiveIndex(index)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === activeIndex
-                  ? 'w-8 bg-red-600'
+                  ? 'w-8 bg-orange-500'
                   : 'w-2 bg-gray-300 hover:bg-gray-400'
               }`}
               aria-label={`Go to testimonial ${index + 1}`}

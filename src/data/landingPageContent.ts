@@ -138,7 +138,7 @@ export const testimonials: Testimonial[] = [
     videoUrl: "https://samplelib.com/lib/preview/mp4/sample-15s.mp4",
     metric: "3x",
     metricLabel: "Collaboration Growth",
-    metricColor: "blue",
+    metricColor: "red",
   },
 ];
 
