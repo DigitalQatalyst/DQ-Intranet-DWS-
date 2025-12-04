@@ -69,6 +69,7 @@ function mapPositionRow(row: any): WorkPosition {
     id: row.id,
     slug: row.slug,
     positionName: row.position_name || row.positionName,
+    heroTitle: row.hero_title || row.heroTitle || null,
     roleFamily: row.role_family || row.roleFamily || null,
     unit: row.unit || null,
     unitSlug: row.unit_slug || row.unitSlug || null,

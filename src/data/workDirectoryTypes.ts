@@ -27,6 +27,7 @@ export interface WorkPosition {
   id: string;
   slug: string;
   positionName: string;
+  heroTitle?: string | null;
   roleFamily?: string | null;
   unit?: string | null;
   unitSlug?: string | null;
