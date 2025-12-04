@@ -8,6 +8,7 @@ import { DollarSign, Briefcase, Calendar, BookOpen } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 import NewsPage from './NewsPage';
 import NewsDetailPage from './NewsDetailPage';
+import { DQWorkDirectoryPage } from '../DQWorkDirectoryPage';
 import JobDetailPage from './JobDetailPage';
 import JobApplicationPage from './JobApplicationPage';
 const GrowthAreasPage = React.lazy(() => import('../GrowthAreasPage'));
@@ -141,6 +142,8 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/opportunities" element={<NewsPage />} />
       <Route path="/opportunities/:id" element={<JobDetailPage />} />
       <Route path="/opportunities/:id/apply" element={<JobApplicationPage />} />
+      {/* DQ Work Directory */}
+      <Route path="/work-directory" element={<DQWorkDirectoryPage />} />
       {/* Asset Library */}
       <Route path="/asset-library" element={<AssetLibraryPage />} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
