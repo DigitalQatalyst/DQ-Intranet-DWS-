@@ -21,39 +21,6 @@ import {
   type Testimonial,
 } from '../data/landingPageContent';
 
-/* =========================
-   ✅ UPDATED KPI CONTENT
-   ========================= */
-const impactStats = [
-  {
-    label: 'Faster Task Closure',
-    value: 80,
-    prefix: 'Over',
-    suffix: '%',
-    icon: <Users size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
-  },
-  {
-    label: 'Focus Time Saved',
-    value: 6,
-    prefix: '+',
-    suffix: 'hrs',
-    icon: <Clock size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
-  },
-  {
-    label: 'Concepts Learned Daily',
-    value: 5,
-    prefix: '+',
-    icon: <BookOpen size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
-  },
-  {
-    label: 'Collaboration Growth Rate',
-    value: 87,
-    suffix: '%',
-    icon: <Award size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
-  },
-];
->>>>>>> origin/develop
-
 const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
   const disclaimer = '(not approved for external publication)'
   const initials =
@@ -173,7 +140,6 @@ const VideoTestimonialCarousel = () => {
       </div>
       <div className="flex justify-center mt-6">
         <button
-<<<<<<< HEAD
           className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-white pointer-events-auto flex items-center justify-center transition-all"
           onClick={handlePrev}
           aria-label="Previous testimonial"
@@ -186,12 +152,6 @@ const VideoTestimonialCarousel = () => {
           aria-label="Next testimonial"
         >
           <ChevronRight size={24} />
-=======
-          type="button"
-          className="px-5 py-2 text-sm font-semibold text-[var(--guidelines-primary-dark)] border border-gray-200 rounded-full bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]"
-        >
-          Show more stories
->>>>>>> origin/develop
         </button>
       </div>
     </div>
