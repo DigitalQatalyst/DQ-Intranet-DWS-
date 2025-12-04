@@ -45,7 +45,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({
       date: item.date
     },
     primaryCTA: {
-      text: 'Read More',
+      text: 'Details',
       onClick: handleReadMore
     }
   };
