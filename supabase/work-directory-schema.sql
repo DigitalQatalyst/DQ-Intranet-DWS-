@@ -1,12 +1,14 @@
 -- ============================================================================
 -- Work Directory Schema for DQ Work Directory Marketplace
 -- Creates tables for work_units, work_positions, and work_associates
+-- 
+-- SAFE TO RUN: This script uses CREATE TABLE IF NOT EXISTS, so it won't
+-- delete existing tables or data. It will only create tables if they don't exist.
 -- ============================================================================
 
 -- ===== Work Units Table =====
-DROP TABLE IF EXISTS public.work_units CASCADE;
-
-CREATE TABLE public.work_units (
+-- Use CREATE TABLE IF NOT EXISTS to avoid dropping existing data
+CREATE TABLE IF NOT EXISTS public.work_units (
   id text PRIMARY KEY,
   slug text UNIQUE NOT NULL,
   sector text NOT NULL,
@@ -33,9 +35,8 @@ CREATE TABLE public.work_units (
 );
 
 -- ===== Work Positions Table =====
-DROP TABLE IF EXISTS public.work_positions CASCADE;
-
-CREATE TABLE public.work_positions (
+-- Use CREATE TABLE IF NOT EXISTS to avoid dropping existing data
+CREATE TABLE IF NOT EXISTS public.work_positions (
   id text PRIMARY KEY,
   slug text UNIQUE NOT NULL,
   position_name text NOT NULL,
@@ -60,9 +61,8 @@ CREATE TABLE public.work_positions (
 );
 
 -- ===== Work Associates Table =====
-DROP TABLE IF EXISTS public.work_associates CASCADE;
-
-CREATE TABLE public.work_associates (
+-- Use CREATE TABLE IF NOT EXISTS to avoid dropping existing data
+CREATE TABLE IF NOT EXISTS public.work_associates (
   id text PRIMARY KEY,
   name text NOT NULL,
   current_role text NOT NULL,
@@ -132,13 +132,19 @@ CREATE INDEX IF NOT EXISTS idx_employee_profiles_email ON public.employee_profil
 CREATE INDEX IF NOT EXISTS idx_employee_profiles_full_name ON public.employee_profiles(full_name);
 
 -- ===== Row Level Security (RLS) Policies =====
--- Enable RLS on all tables
-ALTER TABLE public.work_units ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.work_positions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.work_associates ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.employee_profiles ENABLE ROW LEVEL SECURITY;
+-- Enable RLS on all tables (safe to run multiple times)
+ALTER TABLE IF EXISTS public.work_units ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.work_positions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.work_associates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.employee_profiles ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read access (adjust based on your security requirements)
+-- Drop existing policies first to avoid conflicts
+DROP POLICY IF EXISTS "Allow public read access to work_units" ON public.work_units;
+DROP POLICY IF EXISTS "Allow public read access to work_positions" ON public.work_positions;
+DROP POLICY IF EXISTS "Allow public read access to work_associates" ON public.work_associates;
+DROP POLICY IF EXISTS "Allow public read access to employee_profiles" ON public.employee_profiles;
+
 CREATE POLICY "Allow public read access to work_units"
   ON public.work_units
   FOR SELECT
