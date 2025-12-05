@@ -124,7 +124,7 @@ const locationLabel = (raw: string) => {
   if (normalized === 'DXB' || raw === 'Dubai') return 'Dubai';
   if (normalized === 'NBO' || raw === 'Nairobi') return 'Nairobi';
   if (normalized === 'KSA' || raw === 'Riyadh') return 'Riyadh';
-  if (normalized === 'REMOTE') return 'Remote';
+  if (normalized === 'HOME' || normalized === 'REMOTE') return 'Remote';
   return raw || 'Remote';
 };
 
@@ -269,10 +269,12 @@ export function DQWorkDirectoryPage() {
     };
 
     const unitOptions = getUniqueValues(allPositions.map((p) => p.unit)).sort().map((v) => ({ id: v, name: v }));
+    const roleFamilyOptions = getUniqueValues(allPositions.map((p) => p.roleFamily)).sort().map((v) => ({ id: v, name: v }));
 
     const config: FilterConfig[] = [
       ...globalFilterConfig.filter((f) => f.id === 'location'),
       unitOptions.length ? { id: 'unit', title: 'Unit', options: unitOptions } : null,
+      roleFamilyOptions.length ? { id: 'roleFamily', title: 'Role Family', options: roleFamilyOptions } : null,
       {
         id: 'level',
         title: 'Rating – SFIA',
@@ -439,12 +441,13 @@ export function DQWorkDirectoryPage() {
         return haystack.includes(query.toLowerCase());
       })
       .filter((position) => {
-        const { unit = [], level = [], location = [] } = positionFilters;
+        const { unit = [], level = [], location = [], roleFamily = [] } = positionFilters;
         const matchesUnit = unit.length === 0 || (position.unit ? unit.includes(position.unit) : false);
         const positionLocation = position.location ? locationLabel(position.location) : null;
         const matchesLocation = location.length === 0 || (positionLocation ? location.includes(positionLocation) : false);
         const matchesSfia = level.length === 0 || (position.sfiaLevel ? level.includes(position.sfiaLevel) : false);
-        return matchesUnit && matchesLocation && matchesSfia;
+        const matchesRoleFamily = roleFamily.length === 0 || (position.roleFamily ? roleFamily.includes(position.roleFamily) : false);
+        return matchesUnit && matchesLocation && matchesSfia && matchesRoleFamily;
       })
       .map((position) => ({
         ...position,
@@ -696,13 +699,25 @@ export function DQWorkDirectoryPage() {
     const slug = position?.slug || '';
     const roleFamily = position?.roleFamily || null;
     const unit = position?.unit || null;
-    const location = position?.location || null;
+    const rawLocation = position?.location || null;
     const sfiaLevel = position?.sfiaLevel || position?.sfiaRating || null;
     const description = position?.description || null;
     const expectations = position?.expectations || null;
     const responsibilities = Array.isArray(position?.responsibilities) 
       ? position.responsibilities 
       : [];
+    
+    // Helper to determine if location should be displayed
+    // Show location only if it's meaningful (not null, not empty, and not "Global" for most cases)
+    const shouldShowLocation = (loc: string | null): boolean => {
+      if (!loc || loc.trim() === '') return false;
+      const normalized = loc.trim();
+      // Show specific cities, Remote, but you can hide "Global" if it's too generic
+      // For now, we'll show all non-empty locations
+      return normalized.length > 0;
+    };
+    
+    const displayLocation = shouldShowLocation(rawLocation) ? locationLabel(rawLocation || '') : null;
     
     // Create 3-bullet preview: description, expectations, responsibilities[0]
     const previewItems: string[] = [];
@@ -755,9 +770,16 @@ export function DQWorkDirectoryPage() {
               {unit}
             </span>
           )}
-          {location && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
-              {location}
+          {displayLocation && (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full ${
+              displayLocation.toLowerCase() === 'remote' 
+                ? 'bg-purple-50 text-purple-700' 
+                : displayLocation.toLowerCase() === 'global'
+                ? 'bg-gray-50 text-gray-700'
+                : 'bg-slate-100 text-slate-700'
+            }`}>
+              {displayLocation.toLowerCase() === 'remote' && '🌐 '}
+              {displayLocation}
             </span>
           )}
           {sfiaLevel && (
