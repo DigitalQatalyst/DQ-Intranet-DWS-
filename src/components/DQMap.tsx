@@ -1,387 +1,284 @@
-import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
-import 'leaflet-defaulticon-compatibility';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import "leaflet-defaulticon-compatibility";
+import type { LocationItem } from "../api/MAPAPI";
+import { MARKER_COLORS } from "./map/constants";
+import LocationModal from "./map/LocationModal";
 
-import type { LocationType, MapLocation, MapStyle, Region } from '../types/map';
-import { MARKER_COLORS } from './map/constants';
-import { fetchAllLocations, fetchLocationsByRegion, fetchLocationsByType } from '../api/MAPAPI';
+// OpenStreetMap tile layer (FREE - no token needed)
+const OSM_TILE_LAYER = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-export type DQMapRef = {
-  locateUser: () => void;
-};
+const INITIAL_CENTER: [number, number] = [25.0, 54.0]; // [lat, lng] for Leaflet
+const INITIAL_ZOOM = 5.5;
 
-const DEFAULT_CENTER: [number, number] = [24.453, 54.377];
-const DEFAULT_ZOOM = 6;
-
-type AllOption<T> = T | 'All';
-
-type MapStateSnapshot = {
-  loading: boolean;
-  locationsCount: number;
-  mapboxEnabled: boolean;
-};
-
-type DQMapProps = {
+const DQMap: React.FC<{
   className?: string;
-  mapStyle: MapStyle;
-  regionFilter?: AllOption<Region>;
-  typeFilter?: AllOption<LocationType>;
-  onStateChange?: (snapshot: MapStateSnapshot) => void;
-  onMapboxAvailabilityChange?: (available: boolean) => void;
-};
-
-const forceResize = (map: L.Map) => {
-  map.invalidateSize();
-  requestAnimationFrame(() => map.invalidateSize());
-};
-
-const createMarkerElement = (strokeColor: string) => {
-  const node = document.createElement('div');
-  node.style.cssText =
-    'width:30px;height:30px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 4px rgba(3,15,53,0.25));z-index:5;';
-  node.innerHTML = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="15" cy="15" r="14" fill="white" stroke="${strokeColor}" stroke-width="2"/>
-    <circle cx="15" cy="15" r="7" fill="${strokeColor}" fill-opacity="0.12"/>
-    <circle cx="15" cy="15" r="3" fill="${strokeColor}"/>
-  </svg>`;
-  return node;
-};
-
-const buildPopupMarkup = (location: MapLocation) =>
-  `<div class="space-y-1">${[
-    `<div class="font-semibold text-base text-slate-900">${location.name}</div>`,
-    `<div class="text-xs text-slate-500">${location.type} · ${location.region}</div>`,
-    location.description && `<div class="text-sm text-slate-600">${location.description}</div>`,
-    location.address && `<div class="text-xs text-slate-500">📍 ${location.address}</div>`,
-    location.contactPhone && `<div class="text-xs text-slate-500">📞 ${location.contactPhone}</div>`,
-    location.services?.length ? `<div class="text-xs text-slate-500">🔧 ${location.services.join(' • ')}</div>` : '',
-    location.operatingHours && `<div class="text-xs text-slate-500">🕐 ${location.operatingHours}</div>`,
-  ]
-    .filter(Boolean)
-    .join('')}</div>`;
-
-export const DQMap = forwardRef<DQMapRef, DQMapProps>(({
-  className = '',
-  mapStyle: _mapStyle,
-  regionFilter = 'All',
-  typeFilter = 'All',
-  onStateChange,
-  onMapboxAvailabilityChange,
-}, ref) => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const mapNodeRef = useRef<HTMLDivElement>(null);
+  locations: LocationItem[];
+  selectedId?: string | null;
+  onSelect?: (location: LocationItem) => void;
+}> = ({ className = "", locations, selectedId, onSelect }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
-  const userLocationMarkerRef = useRef<L.Marker | null>(null);
-  const locationsRef = useRef<MapLocation[]>([]);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
-  const onMapboxAvailabilityChangeRef = useRef(onMapboxAvailabilityChange);
-  const onStateChangeRef = useRef(onStateChange);
+  const markersRef = useRef<Record<string, L.Marker>>({});
+  const [isMapLoading, setIsMapLoading] = useState(true);
+  const [selectedLocation, setSelectedLocation] = useState<LocationItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [mapboxEnabled] = useState<boolean>(false);
-  const [mapReady, setMapReady] = useState<boolean>(false);
-  const [locations, setLocations] = useState<MapLocation[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const validLocations = useMemo(
+    () => locations.filter((item) => item.coordinates),
+    [locations]
+  );
 
-  const effectiveRegion = regionFilter;
-  const effectiveType = useMemo<AllOption<LocationType>>(() => {
-    if (effectiveRegion !== 'All') return 'All';
-    return typeFilter;
-  }, [effectiveRegion, typeFilter]);
-
-  const renderMarkers = useCallback(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = [];
-
-    const dataset = locationsRef.current;
-
-    dataset.forEach((location) => {
-      const stroke = MARKER_COLORS[location.type] ?? MARKER_COLORS.Default;
-      const icon = L.divIcon({
-        html: createMarkerElement(stroke).outerHTML,
-        className: '',
-        iconSize: [30, 30],
-        iconAnchor: [15, 28],
-      });
-      const marker = L.marker([location.position[0], location.position[1]], { icon })
-        .bindPopup(buildPopupMarkup(location));
-      marker.addTo(map);
-      markersRef.current.push(marker);
+  // Create custom marker icon
+  const createMarkerIcon = (color: string): L.DivIcon => {
+    return L.divIcon({
+      className: "dq-map-marker",
+      iconSize: [36, 48],
+      iconAnchor: [18, 42],
+      html: `
+        <div style="
+          width: 36px;
+          height: 48px;
+          position: relative;
+          cursor: pointer;
+          filter: drop-shadow(0 8px 18px rgba(3, 15, 53, 0.25));
+        ">
+          <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 0C8.06 0 0 8.16 0 18.22C0 28.28 10.74 40.98 16.42 47.02C17.1 47.74 18.26 47.74 18.94 47.02C24.62 40.98 35.36 28.28 35.36 18.22C35.36 8.16 27.3 0 17.36 0H18Z" fill="${color}"/>
+            <circle cx="18" cy="18" r="6.5" fill="white" fill-opacity="0.92"/>
+            <circle cx="18" cy="18" r="3.2" fill="${color}"/>
+          </svg>
+        </div>
+      `,
     });
+  };
 
-    if (dataset.length) {
-      const bounds = L.latLngBounds(
-        dataset.map((l) => L.latLng(l.position[0], l.position[1])),
-      );
-      map.fitBounds(bounds.pad(0.15));
-    } else {
-      map.setView([DEFAULT_CENTER[0], DEFAULT_CENTER[1]], DEFAULT_ZOOM);
+
+  // Initialize map
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+
+    try {
+      const map = L.map(containerRef.current, {
+        center: INITIAL_CENTER,
+        zoom: INITIAL_ZOOM,
+        zoomControl: false,
+        attributionControl: false,
+      });
+
+      // Add OpenStreetMap tile layer (FREE - no token needed)
+      L.tileLayer(OSM_TILE_LAYER, {
+        attribution: OSM_ATTRIBUTION,
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Add custom zoom controls
+      L.control
+        .zoom({
+          position: "topright",
+        })
+        .addTo(map);
+
+      // Add attribution
+      L.control
+        .attribution({
+          position: "bottomright",
+          prefix: false,
+        })
+        .addTo(map);
+
+      map.on("load", () => {
+        setIsMapLoading(false);
+      });
+
+      map.whenReady(() => {
+        setIsMapLoading(false);
+        requestAnimationFrame(() => {
+          map.invalidateSize();
+        });
+      });
+
+      mapRef.current = map;
+    } catch (error) {
+      console.error("Failed to initialize map:", error);
+      setIsMapLoading(false);
     }
+
+    return () => {
+      if (mapRef.current) {
+        Object.values(markersRef.current).forEach((marker) => marker.remove());
+        markersRef.current = {};
+        popupRef.current?.remove();
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
   }, []);
 
-  const ensureMarkers = useCallback(() => {
+  // Update markers when locations change
+  useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    forceResize(map);
-    renderMarkers();
-  }, [renderMarkers]);
 
-  const createUserLocationMarker = useCallback(() => {
-    const map = mapRef.current;
-    if (!map || !userLocation) return;
+    // Remove existing markers
+    Object.values(markersRef.current).forEach((marker) => marker.remove());
+    markersRef.current = {};
 
-    // Remove existing user location marker
-    if (userLocationMarkerRef.current) {
-      userLocationMarkerRef.current.remove();
-    }
+    // Add new markers
+    validLocations.forEach((location) => {
+      const coords = location.coordinates;
+      if (!coords) return;
 
-    // Create a custom icon for user location (blue pulsing circle)
-    const userIcon = L.divIcon({
-      html: `
-        <div style="position: relative; width: 40px; height: 40px;">
-          <div style="
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            background: #030F35;
-            border: 3px solid white;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          "></div>
-          <div style="
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            border: 2px solid #030F35;
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: pulse 2s infinite;
-          "></div>
-        </div>
-        <style>
-          @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
-            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-          }
-        </style>
-      `,
-      className: '',
-      iconSize: [40, 40],
-      iconAnchor: [20, 20],
+      const color = MARKER_COLORS[location.type] || MARKER_COLORS.Default;
+      const icon = createMarkerIcon(color);
+
+      const marker = L.marker([coords.lat, coords.lng], { icon }).addTo(map);
+
+      // Handle marker click - open modal instead of popup
+      marker.on("click", () => {
+        onSelect?.(location);
+        setSelectedLocation(location);
+        setIsModalOpen(true);
+
+        // Smooth zoom to marker
+        map.setView([coords.lat, coords.lng], Math.max(map.getZoom(), 12), {
+          animate: true,
+          duration: 0.8,
+        });
+      });
+
+      markersRef.current[location.id] = marker;
     });
 
-    const marker = L.marker([userLocation[0], userLocation[1]], { icon: userIcon })
-      .bindPopup('Your Location')
-      .addTo(map);
+    // Fit bounds to all markers
+    if (validLocations.length > 0) {
+      const bounds = L.latLngBounds(
+        validLocations.map((location) => [
+          location.coordinates!.lat,
+          location.coordinates!.lng,
+        ])
+      );
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, {
+          padding: [60, 60],
+          animate: true,
+          duration: 1.0,
+          maxZoom: 8,
+        });
+      }
+    } else {
+      map.setView(INITIAL_CENTER, INITIAL_ZOOM);
+    }
+  }, [validLocations, onSelect]);
 
-    userLocationMarkerRef.current = marker;
-  }, [userLocation]);
-
-  const locateUser = useCallback(() => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+  // Handle selected location from external selection (e.g., filter)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !selectedId) {
       return;
     }
 
-    const map = mapRef.current;
-    if (!map) return;
+    const location = validLocations.find((item) => item.id === selectedId);
+    if (!location || !location.coordinates) return;
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        const userPos: [number, number] = [latitude, longitude];
-        
-        setUserLocation(userPos);
-        
-        // Center map on user location with zoom
-        map.setView([latitude, longitude], 13, {
-          animate: true,
-          duration: 1.0,
+    const marker = markersRef.current[location.id];
+    if (!marker) return;
+
+    // Open modal for selected location
+    setSelectedLocation(location);
+    setIsModalOpen(true);
+
+    // Smooth zoom to selected location
+    map.setView([location.coordinates.lat, location.coordinates.lng], 13, {
+      animate: true,
+      duration: 0.8,
+    });
+  }, [selectedId, validLocations]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapRef.current) {
+        requestAnimationFrame(() => {
+          mapRef.current?.invalidateSize();
         });
-
-        // Add or update user location marker
-        createUserLocationMarker();
-      },
-      (error) => {
-        console.error('[DQMap] Geolocation error:', error);
-        let message = 'Unable to retrieve your location.';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            message = 'Location access denied. Please enable location permissions in your browser.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            message = 'Location information is unavailable.';
-            break;
-          case error.TIMEOUT:
-            message = 'Location request timed out.';
-            break;
-        }
-        alert(message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      },
-    );
-  }, [createUserLocationMarker]);
-
-  // Update refs when callbacks change (without triggering effects)
-  useEffect(() => {
-    onMapboxAvailabilityChangeRef.current = onMapboxAvailabilityChange;
-  }, [onMapboxAvailabilityChange]);
-
-  useEffect(() => {
-    onStateChangeRef.current = onStateChange;
-  }, [onStateChange]);
-
-  // Only notify when mapboxEnabled changes (using ref to avoid infinite loops)
-  useEffect(() => {
-    onMapboxAvailabilityChangeRef.current?.(mapboxEnabled);
-  }, [mapboxEnabled]);
-
-  // Notify when state changes (using ref to avoid infinite loops)
-  useEffect(() => {
-    onStateChangeRef.current?.({
-      loading,
-      locationsCount: locations.length,
-      mapboxEnabled,
-    });
-  }, [loading, locations.length, mapboxEnabled]);
-
-  useEffect(() => {
-    if (!mapNodeRef.current || mapRef.current) return;
-
-    const map = L.map(mapNodeRef.current, {
-      center: [DEFAULT_CENTER[0], DEFAULT_CENTER[1]],
-      zoom: DEFAULT_ZOOM,
-      zoomControl: false,
-      attributionControl: true,
-    });
-
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19,
-    }).addTo(map);
-
-    mapRef.current = map;
-    setMapReady(true);
-    ensureMarkers();
-
-    if (typeof ResizeObserver !== 'undefined') {
-      const observer = new ResizeObserver(() => {
-        if (mapRef.current) forceResize(mapRef.current);
-      });
-      resizeObserverRef.current = observer;
-      if (wrapperRef.current) observer.observe(wrapperRef.current);
-    }
-
-    const handleWindowResize = () => {
-      if (mapRef.current) forceResize(mapRef.current);
-    };
-    window.addEventListener('resize', handleWindowResize);
-
-    return () => {
-      window.removeEventListener('resize', handleWindowResize);
-      resizeObserverRef.current?.disconnect();
-      resizeObserverRef.current = null;
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current = [];
-      if (userLocationMarkerRef.current) {
-        userLocationMarkerRef.current.remove();
-        userLocationMarkerRef.current = null;
-      }
-      map.remove();
-      mapRef.current = null;
-    };
-  }, [ensureMarkers]);
-
-  // Map style switching is a no-op with Leaflet; keep signals consistent
-  // This is handled by the mapboxEnabled effect above, so remove this duplicate
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-
-    const load = async () => {
-      try {
-        const data =
-          effectiveRegion !== 'All'
-            ? await fetchLocationsByRegion(effectiveRegion as Region)
-            : effectiveType !== 'All'
-            ? await fetchLocationsByType(effectiveType as LocationType)
-            : await fetchAllLocations();
-
-        if (!cancelled) {
-          setLocations(data);
-        }
-      } catch (error) {
-        console.error('[DQMap] Failed to load locations', error);
-        if (!cancelled) {
-          setLocations([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
       }
     };
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [effectiveRegion, effectiveType]);
-
-  useEffect(() => {
-    locationsRef.current = locations;
-    if (!loading) {
-      ensureMarkers();
-    }
-  }, [locations, loading, ensureMarkers]);
-
-  useEffect(() => {
-    if (userLocation) {
-      createUserLocationMarker();
-    }
-  }, [userLocation, createUserLocationMarker]);
-
-  // Expose locateUser function via ref
-  useImperativeHandle(ref, () => ({
-    locateUser,
-  }), [locateUser]);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
-    <div
-      ref={wrapperRef}
-      className={`relative h-full w-full ${className}`}
-    >
-      <div ref={mapNodeRef} className="absolute inset-0 h-full w-full z-0" />
-      {(!mapReady || loading) && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
-          <span className="rounded-full border border-slate-200/70 bg-white/95 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 shadow-sm">
-            Loading map…
-          </span>
+    <div className={`relative h-full w-full overflow-hidden ${className}`.trim()}>
+      <div
+        ref={containerRef}
+        className="absolute inset-0 h-full w-full"
+        style={{
+          borderRadius: "inherit",
+        }}
+      />
+
+      {/* Loading indicator */}
+      {isMapLoading && (
+        <div
+          className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg z-40"
+          style={{
+            borderRadius: "inherit",
+          }}
+        >
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#030F35] mb-2"></div>
+            <p className="text-sm text-gray-600">Loading map...</p>
+          </div>
         </div>
+      )}
+
+      {/* Gradient overlay for EJP style - subtle branded gradient */}
+      {!isMapLoading && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(
+              circle at 50% 50%,
+              rgba(251, 85, 53, 0.02) 0%,
+              rgba(3, 15, 53, 0.04) 50%,
+              rgba(3, 15, 53, 0.06) 100%
+            )`,
+            borderRadius: "inherit",
+            zIndex: 1,
+          }}
+        />
+      )}
+
+      {/* Location Modal - Slides in from the right */}
+      {selectedLocation && (
+        <>
+          {/* Backdrop overlay - subtle darkening */}
+          <div
+            className={`absolute inset-0 bg-black/10 z-40 transition-opacity duration-300 ${
+              isModalOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            onClick={() => {
+              setIsModalOpen(false);
+              setSelectedLocation(null);
+            }}
+          />
+          {/* Slide-in panel */}
+          <LocationModal
+            location={selectedLocation}
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedLocation(null);
+            }}
+          />
+        </>
       )}
     </div>
   );
-});
-
-DQMap.displayName = 'DQMap';
+};
 
 export default DQMap;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ExternalLink, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 interface FooterProps {
   'data-id'?: string;
   isLoggedIn?: boolean;
@@ -25,6 +26,45 @@ export function Footer({
   'data-id': dataId,
   isLoggedIn = false
 }: FooterProps) {
+  const navigate = useNavigate();
+  const handleFooterLinkClick = (title: string) => {
+    navigate(`/workspace-link-coming-soon?title=${encodeURIComponent(title)}`);
+  };
+  const externalLinks = [
+    {
+      label: 'Viva Engage',
+      href: 'https://engage.cloud.microsoft/main/feed'
+    },
+    {
+      label: 'SharePoint',
+      href: 'https://arqitek.sharepoint.com/_layouts/15/sharepoint.aspx'
+    },
+    {
+      label: 'LinkedIn',
+      href: 'https://www.linkedin.com/company/digitalqatalyst/posts/?feedView=all'
+    },
+    {
+      label: 'YouTube',
+      href: 'https://www.youtube.com/@digitalqatalyst'
+    },
+    {
+      label: 'DQ Corporate Website',
+      href: 'https://digitalqatalyst.com/'
+    }
+  ];
+  const getToKnowUsLinks = [
+    'About DQ Workspace',
+    'Help Centre',
+    'DQ Governance & Guidelines',
+    'Privacy Policy',
+    'Terms of Use'
+  ];
+  const forYouLinks = [
+    'DQ LMS Courses',
+    'Services & Requests',
+    'Communities & Surveys',
+    'News & Announcements'
+  ];
   // Minimal App Footer (Post-login)
   if (isLoggedIn) {
     return <footer data-id={dataId} className="bg-gray-50 border-t border-gray-100 w-full h-10">
@@ -68,83 +108,54 @@ export function Footer({
           <div className="mb-8">
             <AccordionSection title="Get to Know Us">
               <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    About DQ Workspace
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    Help Centre
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    DQ Governance & Guidelines
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    Terms of Use
-                  </a>
-                </li>
+                {getToKnowUsLinks.map((label) => (
+                  <li key={label}>
+                    <button
+                      type="button"
+                      onClick={() => handleFooterLinkClick(label)}
+                      className="text-white/90 hover:text-white transition-colors text-sm block text-left w-full"
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </AccordionSection>
             <AccordionSection title="For You">
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    DQ LMS Courses
+                  <a href="/lms" className="text-white/90 hover:text-white transition-colors text-sm block">
+                    Learning Center
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    Services & Requests
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    Communities & Surveys
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm block">
-                    News & Announcements
-                  </a>
-                </li>
+                {forYouLinks.filter(label => label !== 'DQ LMS Courses').map((label) => (
+                  <li key={label}>
+                    <button
+                      type="button"
+                      onClick={() => handleFooterLinkClick(label)}
+                      className="text-white/90 hover:text-white transition-colors text-sm block text-left w-full"
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </AccordionSection>
             <AccordionSection title="Find Us">
               <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                    Viva Engage →
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                    SharePoint →
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                    GitHub →
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                    YouTube →
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
+                {externalLinks.map((item) => (
+                  <li key={item.label}>
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2"
+                    >
+                      {item.label} →
+                      <ExternalLink size={14} />
+                    </a>
+                  </li>
+                ))}
               </ul>
             </AccordionSection>
           </div>
@@ -187,31 +198,17 @@ export function Footer({
             <div>
               <h3 className="font-semibold text-lg mb-6">Get to Know Us</h3>
               <ul className="space-y-4">
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    About DQ Workspace
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    Help Centre
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    DQ Governance & Guidelines
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    Terms of Use
-                  </a>
-                </li>
+                {getToKnowUsLinks.map((label) => (
+                  <li key={label}>
+                    <button
+                      type="button"
+                      onClick={() => handleFooterLinkClick(label)}
+                      className="text-white/90 hover:text-white transition-colors text-sm text-left w-full"
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
             {/* For You */}
@@ -219,55 +216,40 @@ export function Footer({
               <h3 className="font-semibold text-lg mb-6">For You</h3>
               <ul className="space-y-4">
                 <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    DQ LMS Courses
+                  <a href="/lms" className="text-white/90 hover:text-white transition-colors text-sm">
+                    Learning Center
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    Services & Requests
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    Communities & Surveys
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm">
-                    News & Announcements
-                  </a>
-                </li>
+                {forYouLinks.filter(label => label !== 'DQ LMS Courses').map((label) => (
+                  <li key={label}>
+                    <button
+                      type="button"
+                      onClick={() => handleFooterLinkClick(label)}
+                      className="text-white/90 hover:text-white transition-colors text-sm text-left w-full"
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
             {/* Find Us */}
             <div>
               <h3 className="font-semibold text-lg mb-6">Find Us</h3>
               <ul className="space-y-4">
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                    Viva Engage →
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                    SharePoint →
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                    GitHub →
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/90 hover:text-white transition-colors text-sm flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                    YouTube →
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
+                {externalLinks.map((item) => (
+                  <li key={item.label}>
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/90 hover:text-white transition-colors text-sm inline-flex items-center gap-2"
+                    >
+                      {item.label}
+                      <ExternalLink size={14} />
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

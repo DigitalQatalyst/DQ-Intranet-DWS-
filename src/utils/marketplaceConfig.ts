@@ -453,7 +453,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     title: 'DQ LMS Course Marketplace',
     description: 'Discover focused, practical courses to help you work smarter at DQ.',
     route: '/marketplace/courses',
-    primaryCTA: 'Enroll Now',
+    primaryCTA: 'Start Learning',
     secondaryCTA: 'View Details',
     itemName: 'LMS Course',
     itemNamePlural: 'LMS Courses',
@@ -521,8 +521,8 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
         id: 'Nairobi',
         name: 'Nairobi'
       }, {
-        id: 'Global',
-        name: 'Global'
+        id: 'Riyadh',
+        name: 'Riyadh'
       }, {
         id: 'Remote',
         name: 'Remote'
@@ -774,7 +774,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
   'non-financial': {
     id: 'non-financial',
     title: 'Services & Requests',
-    description: "Welcome to Digital Qatalyst's Support Services! We’re here to ensure your success by providing dedicated assistance and efficient solutions for all your needs. This platform offers comprehensive support tools, resources, and expert guidance to help you overcome challenges and maximize productivity. Whether you require technical help or operational support we’re here to empower your journey every step of the way.",
+    description: "Welcome to Digital Qatalyst's Support Services! We're here to ensure your success by providing dedicated assistance and efficient solutions for all your needs. This platform offers comprehensive support tools, resources, and expert guidance to help you overcome challenges and maximize productivity. Whether you require technical help or operational support we're here to empower your journey every step of the way.",
     route: '/marketplace/non-financial',
     primaryCTA: 'Request Service',
     secondaryCTA: 'View Details',
@@ -891,8 +891,8 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     ...knowledgeHubBaseConfig,
     id: 'guides',
     route: '/marketplace/guides',
-    title: 'DQ Media Center',
-    description: 'Explore the latest DQ stories, highlights, and resources to keep every team informed and inspired.'
+    title: 'DQ Knowledge Center',
+    description: 'Access practical guidelines, templates, and processes to support everyday delivery and collaboration.'
   }
 };
 // Helper to get config by marketplace type

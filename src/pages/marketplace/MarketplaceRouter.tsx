@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AssetLibraryPage from '../assetLibrary';
 import { MarketplacePage } from '../../components/marketplace/MarketplacePage';
 import MarketplaceDetailsPage from './MarketplaceDetailsPage';
@@ -8,9 +8,14 @@ import { DollarSign, Briefcase, Calendar, BookOpen } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 import NewsPage from './NewsPage';
 import NewsDetailPage from './NewsDetailPage';
+import { DQWorkDirectoryPage } from '../DQWorkDirectoryPage';
 import JobDetailPage from './JobDetailPage';
 import JobApplicationPage from './JobApplicationPage';
+const GrowthAreasPage = React.lazy(() => import('../GrowthAreasPage'));
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
+const GlossaryPage = React.lazy(() => import('../guides/GlossaryPage'));
+const FAQsPage = React.lazy(() => import('../guides/FAQsPage'));
+const TestimonialsDetailPage = React.lazy(() => import('../guides/TestimonialsDetailPage'));
 // Promo cards for courses marketplace
 const coursePromoCards = [{
   id: 'finance-promo',
@@ -27,7 +32,7 @@ const coursePromoCards = [{
   title: 'Need expert advice?',
   description: 'Connect with industry experts and get personalized guidance.',
   icon: <Briefcase size={24} className="text-white" />,
-  path: '/marketplace/non-financial',
+  path: '/it-systems-support',
   gradientFrom: 'from-purple-600',
   gradientTo: 'to-pink-500'
 }];
@@ -46,7 +51,7 @@ const financialPromoCards = [{
   title: 'Need expert advice?',
   description: 'Connect with industry experts and get personalized guidance.',
   icon: <Briefcase size={24} className="text-white" />,
-  path: '/marketplace/non-financial',
+  path: '/it-systems-support',
   gradientFrom: 'from-purple-600',
   gradientTo: 'to-pink-500'
 }];
@@ -92,6 +97,7 @@ export const MarketplaceRouter: React.FC = () => {
   const financialConfig = getMarketplaceConfig('financial');
   const nonFinancialConfig = getMarketplaceConfig('non-financial');
   const knowledgeHubConfig = getMarketplaceConfig('knowledge-hub');
+  const guidesConfig = getMarketplaceConfig('guides');
   // State for bookmarked items and comparison
   const [bookmarkedItems, setBookmarkedItems] = useState<Record<string, string[]>>({
     courses: [],
@@ -121,20 +127,43 @@ export const MarketplaceRouter: React.FC = () => {
       {/* Non-Financial Services Marketplace */}
       <Route path="/non-financial" element={<MarketplacePage marketplaceType="non-financial" title={nonFinancialConfig.title} description={nonFinancialConfig.description} promoCards={nonFinancialPromoCards} />} />
       <Route path="/non-financial/:itemId" element={<MarketplaceDetailsPage marketplaceType="non-financial" bookmarkedItems={bookmarkedItems['non-financial']} onToggleBookmark={itemId => handleToggleBookmark('non-financial', itemId)} />} />
-      {/* Guides Marketplace (canonical) - Now shows Media Center */}
-      <Route path="/guides" element={<NewsPage />} />
+      {/* Guides Marketplace (canonical) */}
+      <Route path="/guides" element={<MarketplacePage marketplaceType="guides" title={guidesConfig.title} description={guidesConfig.description} promoCards={knowledgeHubPromoCards} />} />
+      <Route path="/guides/glossary" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GlossaryPage /></React.Suspense>} />
+      <Route path="/guides/faqs" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><FAQsPage /></React.Suspense>} />
+      <Route path="/guides/testimonials" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><TestimonialsDetailPage /></React.Suspense>} />
       <Route path="/guides/:itemId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailPage /></React.Suspense>} />
       {/* Backward compatibility: Knowledge Hub routes (aliased to Guides) */}
       <Route path="/knowledge-hub" element={<MarketplacePage marketplaceType="knowledge-hub" title={knowledgeHubConfig.title} description={knowledgeHubConfig.description} promoCards={knowledgeHubPromoCards} />} />
       <Route path="/knowledge-hub/:itemId" element={<MarketplaceDetailsPage marketplaceType="knowledge-hub" bookmarkedItems={bookmarkedItems['knowledge-hub']} onToggleBookmark={itemId => handleToggleBookmark('knowledge-hub', itemId)} />} />
-      {/* News & Opportunities Marketplace */}
-      <Route path="/news" element={<NewsPage />} />
+      {/* News & Opportunities Marketplace - Redirected to /guides */}
+      <Route path="/news" element={<Navigate to="/marketplace/guides" replace />} />
       <Route path="/news/:id" element={<NewsDetailPage />} />
       <Route path="/opportunities" element={<NewsPage />} />
       <Route path="/opportunities/:id" element={<JobDetailPage />} />
       <Route path="/opportunities/:id/apply" element={<JobApplicationPage />} />
+      {/* DQ Work Directory */}
+      <Route path="/work-directory" element={<DQWorkDirectoryPage />} />
       {/* Asset Library */}
       <Route path="/asset-library" element={<AssetLibraryPage />} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
+      {/* Growth Areas */}
+      <Route 
+        path="/growth-areas" 
+        element={
+          <React.Suspense 
+            fallback={
+              <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading Growth Areas...</p>
+                </div>
+              </div>
+            }
+          >
+            <GrowthAreasPage />
+          </React.Suspense>
+        } 
+      />
     </Routes>;
 };

@@ -31,3 +31,7 @@ ORDER BY tablename, policyname;
 -- 2. Supabase project settings allow anonymous access
 -- 3. The policies use USING (true) for anonymous reads
 
+
+
+
+

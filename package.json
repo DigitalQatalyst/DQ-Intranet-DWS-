@@ -13,8 +13,10 @@
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed-guides.js",
     "db:seed-media": "node --loader ts-node/esm scripts/seed-media.ts",
+    "db:seed-services": "npx tsx scripts/seed-marketplace-services.js",
     "test": "vitest run",
     "db:seed-guides": "node scripts/seed-guides.js",
+    "test:supabase": "node test-supabase-connection.js",
     "postinstall": "npm rebuild rollup"
   },
   "dependencies": {
@@ -92,7 +94,7 @@
     "remark-gfm": "^4.0.0",
     "remark-slug": "^7.0.1",
     "rxjs": "^7.8.2",
-    "sonner": "^2.0.1",
+    "sonner": "^2.0.7",
     "tailwind-merge": "latest",
     "vaul": "latest",
     "yup": "^1.7.1"

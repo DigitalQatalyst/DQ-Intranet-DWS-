@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 export interface FilterOption {
   id: string;
   name: string;
 }
+export interface FilterGroup {
+  title: string;
+  options: FilterOption[];
+}
+
 export interface FilterConfig {
   id: string;
   title: string;
   options: FilterOption[];
+  groups?: FilterGroup[];
 }
 interface AccordionSectionProps {
   title: string;
@@ -45,7 +51,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onResetFilters,
   isResponsive = false
 }) => {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(Object.fromEntries(filterConfig.map(config => [config.id, true])));
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(filterConfig.map(config => [config.id, false]))
+  );
+
+  useEffect(() => {
+    setOpenSections(Object.fromEntries(filterConfig.map(config => [config.id, false])));
+  }, [filterConfig]);
+
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({
       ...prev,

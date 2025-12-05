@@ -1,12 +1,12 @@
 /* DWS Theme Colors & Tokens */
 :root {
-  /* EJP-Style Light Theme (Primary) */
+  /* DQ-Style Light Theme (Primary) */
   --dws-bg: #F9FAFB;                  /* page background */
   --dws-card: #FFFFFF;                /* cards */
   --dws-card-border: #E3E7F8;         /* subtle card border */
   --dws-text: #131E42;                /* titles & primary text */
   --dws-accent: #25406F;              /* icons / small accents */
-  --dws-navy: #0B1E67;                /* EJP-like navy for buttons */
+  --dws-navy: #0B1E67;                /* DQ navy for buttons */
   --dws-navy-press: #092256;          /* pressed/hover navy */
   --dws-outline: #0B1E67;             /* outline for focused elements */
   
@@ -42,12 +42,12 @@
   --dws-line: rgba(28, 34, 64, 0.14);
   --dws-line-soft: rgba(28, 34, 64, 0.08);
   
-  /* EJP Card Shadows */
+  /* DQ Card Shadows */
   --dws-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
   --dws-shadow-md: 0 6px 20px rgba(17, 24, 39, 0.06);
   --dws-shadow-lg: 0 10px 30px rgba(7, 14, 41, 0.14);
   
-  /* Info Box (EJP-style) */
+  /* Info Box (DQ-style) */
   --dws-info-box-bg: #F6F8FF;
   --dws-info-box-border: #EAEFFB;
   
@@ -97,7 +97,7 @@
   box-shadow: 0 10px 30px rgba(7, 14, 41, 0.14);
 }
 
-/* Button Styles (EJP Navy) */
+/* Button Styles (DQ Navy) */
 .dws-btn-primary {
   background: var(--dws-navy);
   color: var(--dws-white);

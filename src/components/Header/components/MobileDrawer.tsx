@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MenuIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, BookOpen } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, GraduationCapIcon, CalendarIcon, UsersIcon, NewspaperIcon, SparklesIcon, BookOpen } from 'lucide-react';
 import { scrollToSupport } from '../../../utils/scroll';
 interface MobileDrawerProps {
   isCompact?: boolean;
@@ -35,23 +35,23 @@ const marketplaces = [{
   href: '/marketplace/community'
 }, {
   id: 'course',
-  name: 'DQ LMS Courses',
+  name: 'Learning Center',
   description: '7x GHC, 6x Digital, 12x HoV, 1x Day in DQ, Key Tools.',
   icon: GraduationCapIcon,
-  href: '/marketplace/courses'
+  href: '/lms'
 }, {
-  id: 'investment',
-  name: 'Certifications & Onboarding',
-  description: 'Mandatory training and new associate onboarding.',
-  icon: TrendingUpIcon,
-  href: '/marketplace/investment'
+  id: 'services-center',
+  name: 'DQ Services Center',
+  description: 'Business services, technology services, and digital worker tools.',
+  icon: BuildingIcon,
+  href: '/dq-services-center'
 }, {
-    id: 'calendar',
-    name: 'Calendar & Events',
-    description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
-    icon: CalendarIcon,
-    href: '/events',
-  },{
+  id: 'calendar',
+  name: 'Calendar & Events',
+  description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
+  icon: CalendarIcon,
+  href: '/events',
+}, {
   id: 'opportunity',
   name: 'News & Announcements',
   description: 'Company updates and internal notices.',
@@ -59,8 +59,8 @@ const marketplaces = [{
   href: '/marketplace/opportunities'
 }, {
   id: 'guides',
-  name: 'DQ Media Center',
-  description: 'Stories, highlights, and resources from across DQ.',
+  name: 'DQ Knowledge Center',
+  description: 'Access practical guidelines, templates, and processes.',
   icon: BookOpen,
   href: '/marketplace/guides'
 }];

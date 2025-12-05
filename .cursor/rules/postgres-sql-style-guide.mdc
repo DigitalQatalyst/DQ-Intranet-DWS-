@@ -1,0 +1,42 @@
+---
+description: Guidelines for writing Postgres SQL
+alwaysApply: false
+---
+
+# Postgres SQL Style Guide
+
+## General
+- Use lowercase for SQL keywords.
+- Use clear, descriptive identifiers; snake_case for tables/columns.
+- Add whitespace/indentation for readability.
+- Store dates in ISO 8601.
+- Comment complex logic with /* */ or --.
+
+## Tables
+- Avoid reserved words; keep names under 63 chars.
+- Prefer plural table names.
+- Add id bigint generated always as identity primary key unless specified otherwise.
+- Create tables in public unless specified; qualify schema in queries.
+- Add a comment describing the table.
+
+## Columns
+- Prefer singular names; avoid generic id in non-PK contexts.
+- Foreign keys: singular_table_name_id (e.g., user_id).
+
+## Queries
+- Keep small queries compact; break long ones into multiple lines.
+- Align joins/subqueries for clarity.
+- Use meaningful aliases with AS.
+
+## CTEs
+- Use CTEs for complex queries; keep linear and commented.
+
+Examples:
+```sql
+select
+  employees.employee_name,
+  departments.department_name
+from employees
+join departments on employees.department_id = departments.department_id
+where employees.start_date > '2022-01-01';
+```

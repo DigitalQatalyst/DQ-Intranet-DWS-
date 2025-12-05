@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { CourseType } from "./utils/mockData";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "./components/Header";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
 import { CommunitiesRouter } from "./communities/CommunitiesRouter";
@@ -8,43 +6,34 @@ import { App } from './App';
 
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
 import LmsCourseDetailPage from "./pages/lms/LmsCourseDetailPage";
-import LmsCourseDetail from "./pages/LmsCourseDetail";
+import LmsCourseReviewsPage from "./pages/lms/LmsCourseReviewsPage";
+
+// Wrapper component to force remount on slug change
+const LmsCourseDetailPageWrapper = () => {
+  const { slug } = useParams<{ slug: string }>();
+  return <LmsCourseDetailPage key={slug} />;
+};
 import LmsCourses from "./pages/LmsCourses";
 import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
-import ProtectedRoute from "./components/ProtectedRoute";
 import DiscoverDQ from "./pages/DiscoverDQ";
+import ComingSoonPage from "./pages/ComingSoonPage";
+import GrowthSectorsComingSoon from "./pages/GrowthSectorsComingSoon";
 import NotFound from "./pages/NotFound";
 import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import EventsPage from "./pages/events/EventsPage";
-import KfBot from "./bot/KfBot";
+import ChatBot from "./bot/ChatBot";
 import ThankYou from "./pages/ThankYou";
+import UnitProfilePage from "./pages/UnitProfilePage";
+import WorkPositionProfilePage from "./pages/WorkPositionProfilePage";
+import WomenEntrepreneursPage from "./pages/WomenEntrepreneursPage";
 
 export function AppRouter() {
-  const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
-  const [compareCourses, setCompareCourses] = useState<CourseType[]>([]);
-  const toggleBookmark = (courseId: string) => {
-    setBookmarkedCourses((prev) => {
-      if (prev.includes(courseId)) {
-        return prev.filter((id) => id !== courseId);
-      } else {
-        return [...prev, courseId];
-      }
-    });
-  };
-  const handleAddToComparison = (course: CourseType) => {
-    if (
-      compareCourses.length < 3 &&
-      !compareCourses.some((c) => c.id === course.id)
-    ) {
-      setCompareCourses((prev) => [...prev, course]);
-    }
-  };
 
   const client = new ApolloClient({
     link: new HttpLink({
@@ -57,13 +46,19 @@ export function AppRouter() {
     <ApolloProvider client={client}>
       <BrowserRouter>
         <AuthProvider>
-          <KfBot />
+          <ChatBot />
           <Routes>
             <Route path="/discover-dq" element={<DiscoverDQ />} />
+            <Route path="/coming-soon" element={<ComingSoonPage />} />
+            <Route path="/growth-sectors-coming-soon" element={<GrowthSectorsComingSoon />} />
             <Route path="/*" element={<App />} />
             <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
             <Route path="/lms" element={<LmsCourses />} />
-            <Route path="/lms/:slug" element={<LmsCourseDetail />} />
+            <Route path="/lms/:slug/reviews" element={<LmsCourseReviewsPage />} />
+            <Route 
+              path="/lms/:slug" 
+              element={<LmsCourseDetailPageWrapper />} 
+            />
             <Route
               path="/onboarding/:itemId"
               element={
@@ -110,6 +105,13 @@ export function AppRouter() {
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/communities/*" element={<CommunitiesRouter />} />
+            {/* Work Directory Routes */}
+            <Route path="/work-directory/units/:slug" element={<UnitProfilePage />} />
+            <Route path="/work-directory/positions/:slug" element={<WorkPositionProfilePage />} />
+            <Route
+              path="/women-entrepreneurs"
+              element={<WomenEntrepreneursPage />}
+            />
             <Route path="/404" element={<NotFound />} />
 
             <Route path="*" element={<Navigate to="/404" replace />} />

@@ -8,4 +8,10 @@ if (!url || !anon) {
   throw new Error('Supabase environment not configured')
 }
 
-export const mediaSupabaseClient = createClient(url, anon)
+export const mediaSupabaseClient = createClient(url, anon, {
+  auth: {
+    storageKey: 'supabase-auth-media',
+    persistSession: true,
+    autoRefreshToken: true
+  }
+})

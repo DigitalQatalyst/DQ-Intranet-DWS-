@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Send, ChevronDown, ArrowRight, Users } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { Send, ChevronDown, ArrowRight, Users } from 'lucide-react';
 import {
   AnimatedText,
   FadeInUpOnScroll,
   StaggeredFadeIn,
-} from "./AnimationUtils";
-import { scrollToReadyMove } from "../utils/scroll";
-import { Link } from "react-router-dom";
-import { useAuth } from "./Header";
+} from './AnimationUtils';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from './Header';
+import { heroContent } from '../data/landingPageContent';
 interface HeroSectionProps {
   "data-id"?: string;
 }
@@ -18,19 +18,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
   const ctaHref = isAuthenticated
     ? onboardingPath
     : `/signin?redirect=${encodeURIComponent(onboardingPath)}`;
-  const [prompt, setPrompt] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [prompt, setPrompt] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const handleSubmitPrompt = () => {
-    if (!prompt.trim()) return;
-    setIsProcessing(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      setPrompt("");
-      // Here you would typically handle the actual AI response
-    }, 1500);
+  const navigate = useNavigate();
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
+    navigate(`/search?query=${encodeURIComponent(trimmed)}`);
+    setPrompt('');
   };
   const scrollToMarketplaces = () => {
     const marketplacesSection = document.getElementById("marketplaces-section");
@@ -52,12 +49,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
     }
     return () => clearTimeout(timer);
   }, [isSearchFocused]);
-  const suggestionPills = [
-    "Open an IT service request",
-    "Where’s the HR leave policy?",
-    'Start "Day in DQ" onboarding',
-    "Show this week’s LMS courses",
-  ];
+  const suggestionPills = heroContent.suggestionPills;
   return (
     <div
       className="relative w-full bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 overflow-hidden"
@@ -79,13 +71,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
       ></div>
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight overflow-hidden">
-            <AnimatedText text="Your Digital Workspace" gap="1rem" />
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible">
+            <AnimatedText text={heroContent.title} gap="1rem" />
           </h1>
           <FadeInUpOnScroll delay={0.8}>
             <p className="text-xl text-white/90 mb-8">
-              One trusted hub for tools, requests, learning, and collaboration
-              so every Qatalyst can move work forward, fast.
+              {heroContent.subtitle}
             </p>
           </FadeInUpOnScroll>
         </div>
@@ -97,14 +88,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
             }`}
           >
             <div className="p-2 md:p-3">
-              <div className="flex items-center">
+              <form className="flex items-center" onSubmit={handleSubmit}>
                 {/* Input field */}
                 <div className="flex-grow relative">
                   <input
                     type="text"
                     placeholder="Find tools, policies, or service requests…"
                     className={`w-full py-3 px-4 outline-none text-gray-700 rounded-lg bg-gray-50 transition-all duration-300 ${
-                      isSearchFocused ? "bg-white" : ""
+                      isSearchFocused ? 'bg-white' : ''
                     }`}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
@@ -112,29 +103,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
                     onBlur={() =>
                       setTimeout(() => setIsSearchFocused(false), 200)
                     }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSubmitPrompt();
-                      }
-                    }}
                   />
                 </div>
                 {/* Submit button */}
                 <button
-                  onClick={handleSubmitPrompt}
-                  disabled={isProcessing || !prompt.trim()}
+                  type="submit"
+                  aria-label="Search"
+                  disabled={!prompt.trim()}
                   className={`ml-2 p-3 rounded-lg flex items-center justify-center transition-all ${
-                    isProcessing || !prompt.trim()
-                      ? "bg-gray-200 cursor-not-allowed text-gray-400"
-                      : "bg-[image:var(--dq-cta-gradient)] hover:brightness-105 text-white"
+                    !prompt.trim()
+                      ? 'bg-gray-200 cursor-not-allowed text-gray-400'
+                      : 'bg-[image:var(--dq-cta-gradient)] hover:brightness-105 text-white'
                   }`}
                 >
-                  <Send
-                    size={20}
-                    className={isProcessing ? "animate-pulse" : ""}
-                  />
+                  <Send size={20} />
                 </button>
-              </div>
+              </form>
             </div>
             {/* Example prompts with staggered animation */}
             <div
@@ -192,20 +176,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
               <span className="absolute inset-0 bg-white/20 transform scale-0 opacity-0 group-hover:scale-[2.5] group-hover:opacity-100 rounded-full transition-all duration-700 origin-center"></span>
             </span>
           </Link>
-          <a
-            href="#ready-move"
+          <Link
+            to="/scrum-master-space"
             className="group px-8 py-3 rounded-lg border border-[#1A2E6E] bg-white text-[#1A2E6E] font-semibold shadow-lg inline-flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-[#1A2E6E] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#FB5535]"
-            onClick={(event) => {
-              event.preventDefault();
-              scrollToReadyMove();
-            }}
           >
-            Become a Lead
+            Scrum Master Space
             <Users
               size={18}
               className="text-[#1A2E6E] transition-colors duration-300 group-hover:text-white"
             />
-          </a>
+          </Link>
         </StaggeredFadeIn>
       </div>
       {/* Scroll indicator with animation */}

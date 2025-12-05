@@ -86,13 +86,13 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
         )}
       </div>
 
-      <div className="mt-auto">
+      <div className="mt-auto pt-3 border-t border-gray-100">
         <button 
           onClick={(e) => {
             e.stopPropagation();
             setIsModalOpen(true);
           }}
-          className="w-full px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full inline-flex items-center justify-center rounded-full bg-[#030f35] text-white text-sm font-semibold px-4 py-2 transition-all hover:bg-[#05154d] focus:outline-none focus:ring-2 focus:ring-[#1e2a78]"
         >
           View Details
         </button>

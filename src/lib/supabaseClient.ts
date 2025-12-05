@@ -1,5 +1,3 @@
-// BACKEND CODE COMMENTED OUT - USING FRONTEND MOCK DATA ONLY
-/*
 import { createClient } from '@supabase/supabase-js'
 
 // Support both REACT_APP_ and VITE_ prefixes (prioritize REACT_APP_)
@@ -26,9 +24,3 @@ export const supabaseClient = createClient(url, anon, {
 // Backwards compatibility: also export as 'supabase'
 export const supabase = supabaseClient
 export default supabaseClient
-*/
-
-// MOCK CLIENT FOR FRONTEND-ONLY OPERATION
-export const supabaseClient = null
-export const supabase = null
-export default null
