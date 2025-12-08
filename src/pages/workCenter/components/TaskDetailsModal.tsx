@@ -1,0 +1,220 @@
+import React from 'react';
+import { X, User, Calendar, Tag, CheckCircle2, Circle } from 'lucide-react';
+
+interface WorkItem {
+  id: string;
+  title: string;
+  assignedTo: string;
+  state: 'new' | 'active' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high';
+  activityDate: Date;
+  tags: string[];
+  projectId: string;
+  context?: string;
+  purpose?: string;
+  mvps?: string[];
+  discussion?: string[];
+  checklist?: Array<{ id: string; text: string; completed: boolean }>;
+}
+
+interface TaskDetailsModalProps {
+  task: WorkItem;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
+  task,
+  isOpen,
+  onClose,
+}) => {
+  if (!isOpen) return null;
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStateColor = (state: string) => {
+    switch (state) {
+      case 'new':
+        return 'bg-gray-100 text-gray-800';
+      case 'active':
+        return 'bg-blue-100 text-blue-800';
+      case 'resolved':
+        return 'bg-green-100 text-green-800';
+      case 'closed':
+        return 'bg-gray-200 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-start">
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">{task.title}</h2>
+            <div className="flex gap-2">
+              <span
+                className={`px-3 py-1 text-sm font-medium rounded capitalize ${getStateColor(
+                  task.state
+                )}`}
+              >
+                {task.state}
+              </span>
+              <span
+                className={`px-3 py-1 text-sm font-medium rounded ${getPriorityColor(
+                  task.priority
+                )}`}
+              >
+                {task.priority.toUpperCase()} Priority
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors ml-4"
+            aria-label="Close modal"
+          >
+            <X size={24} className="text-gray-500" />
+          </button>
+        </div>
+
+        <div className="px-6 py-4 space-y-6">
+          {/* Basic Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-start gap-3">
+              <User className="text-gray-400 mt-1" size={20} />
+              <div>
+                <p className="text-sm text-gray-600">Assigned To</p>
+                <p className="font-medium text-gray-800">{task.assignedTo}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Calendar className="text-gray-400 mt-1" size={20} />
+              <div>
+                <p className="text-sm text-gray-600">Activity Date</p>
+                <p className="font-medium text-gray-800">
+                  {task.activityDate.toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tags */}
+          {task.tags.length > 0 && (
+            <div>
+              <div className="flex items-start gap-3 mb-2">
+                <Tag className="text-gray-400 mt-1" size={20} />
+                <p className="font-medium text-gray-800">Tags</p>
+              </div>
+              <div className="flex flex-wrap gap-2 ml-8">
+                {task.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Context */}
+          {task.context && (
+            <div>
+              <p className="font-medium text-gray-800 mb-2">Context</p>
+              <p className="text-gray-600 bg-gray-50 p-3 rounded">{task.context}</p>
+            </div>
+          )}
+
+          {/* Purpose */}
+          {task.purpose && (
+            <div>
+              <p className="font-medium text-gray-800 mb-2">Purpose</p>
+              <p className="text-gray-600 bg-gray-50 p-3 rounded">{task.purpose}</p>
+            </div>
+          )}
+
+          {/* MVPs */}
+          {task.mvps && task.mvps.length > 0 && (
+            <div>
+              <p className="font-medium text-gray-800 mb-2">MVPs</p>
+              <ul className="space-y-1 ml-4">
+                {task.mvps.map((mvp, index) => (
+                  <li key={index} className="text-gray-600 flex items-start">
+                    <span className="text-blue-600 mr-2">•</span>
+                    <span>{mvp}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Discussion */}
+          {task.discussion && task.discussion.length > 0 && (
+            <div>
+              <p className="font-medium text-gray-800 mb-2">Discussion</p>
+              <div className="bg-gray-50 p-3 rounded space-y-2">
+                {task.discussion.map((comment, index) => (
+                  <div key={index} className="border-l-2 border-blue-500 pl-3">
+                    <p className="text-gray-600">{comment}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Checklist */}
+          {task.checklist && task.checklist.length > 0 && (
+            <div>
+              <p className="font-medium text-gray-800 mb-2">Checklist</p>
+              <div className="space-y-2">
+                {task.checklist.map((item) => (
+                  <div key={item.id} className="flex items-start gap-2">
+                    {item.completed ? (
+                      <CheckCircle2 className="text-green-500 mt-0.5" size={20} />
+                    ) : (
+                      <Circle className="text-gray-400 mt-0.5" size={20} />
+                    )}
+                    <span
+                      className={`${
+                        item.completed ? 'line-through text-gray-500' : 'text-gray-800'
+                      }`}
+                    >
+                      {item.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            Close
+          </button>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Edit Task
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+

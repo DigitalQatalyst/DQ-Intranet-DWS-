@@ -6,8 +6,14 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
+import { resolve } from 'path'
 
 /* ------------------------------ Setup ------------------------------ */
+
+// Load environment variables
+dotenv.config()
+dotenv.config({ path: resolve(process.cwd(), '.env.local') })
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.resolve(__dirname, '..')
@@ -129,40 +135,41 @@ async function upsertGuides(rows) {
 
 /* ----------------------- Backfill (one-time) ------------------------ */
 
-async function backfillExistingDomains () {
-  console.log('Backfilling existing guides -> canonical domains...')
-  let from = 0
-  const pageSize = 200
-
-  while (true) {
-    const { data, error } = await sb
-      .from('guides')
-      .select('id, title, domain, guide_type')
-      .order('id', { ascending: true })
-      .range(from, from + pageSize - 1)
-
-    if (error) throw error
-    if (!data || data.length === 0) break
-
-    const updates = data
-      .map(row => {
-        const nextDomain = classifyDomain(row)
-        return (nextDomain !== row.domain) ? { id: row.id, domain: nextDomain } : null
-      })
-      .filter(Boolean)
-
-    if (updates.length) {
-      const { error: upErr } = await sb.from('guides').upsert(updates)
-      if (upErr) throw upErr
-      console.log(`Updated ${updates.length} existing rows (batch starting at ${from}).`)
-    }
-
-    if (data.length < pageSize) break
-    from += pageSize
-  }
-
-  console.log('Backfill complete.')
-}
+// DISABLED - This function was modifying existing guides' domains
+// async function backfillExistingDomains () {
+//   console.log('Backfilling existing guides -> canonical domains...')
+//   let from = 0
+//   const pageSize = 200
+//
+//   while (true) {
+//     const { data, error } = await sb
+//       .from('guides')
+//       .select('id, title, domain, guide_type')
+//       .order('id', { ascending: true })
+//       .range(from, from + pageSize - 1)
+//
+//     if (error) throw error
+//     if (!data || data.length === 0) break
+//
+//     const updates = data
+//       .map(row => {
+//         const nextDomain = classifyDomain(row)
+//         return (nextDomain !== row.domain) ? { id: row.id, domain: nextDomain } : null
+//       })
+//       .filter(Boolean)
+//
+//     if (updates.length) {
+//       const { error: upErr } = await sb.from('guides').upsert(updates)
+//       if (upErr) throw upErr
+//       console.log(`Updated ${updates.length} existing rows (batch starting at ${from}).`)
+//     }
+//
+//     if (data.length < pageSize) break
+//     from += pageSize
+//   }
+//
+//   console.log('Backfill complete.')
+// }
 
 /* ------------------------------ Main ------------------------------- */
 
@@ -243,34 +250,11 @@ effect immediately upon approval.`,
   const baseRows = combinedGuides.map(mapGuideToDb)
   await upsertGuides(baseRows)
 
-  // Prune any guides not in the seed set (includes policies)
-  const keepSlugs = new Set(combinedGuides.map(g => g.slug))
-  const { data: existing, error: fetchErr } = await sb.from('guides').select('id,slug')
-  if (fetchErr) throw fetchErr
-  const toDelete = (existing || []).filter(r => !keepSlugs.has(r.slug))
+  // NOTE: We only add/update guides, we NEVER delete existing guides
+  // This ensures we don't accidentally remove guides that were added manually
+  // or through other means
 
-  if (toDelete.length) {
-    const ids = toDelete.map(r => r.id)
-    console.log(`Pruning ${ids.length} old guides not in seed set...`)
-    const tables = [
-      'guide_steps',
-      'guide_attachments',
-      'guide_templates',
-      'guide_tool_xref',
-      'guide_topic_xref',
-      'guide_audience_xref',
-      'guide_format_xref',
-      'guide_language_xref'
-    ]
-    for (const t of tables) {
-      try { await sb.from(t).delete().in('guide_id', ids) } catch { /* ignore */ }
-    }
-    const { error: delErr } = await sb.from('guides').delete().in('id', ids)
-    if (delErr) throw delErr
-    console.log(`Deleted ${ids.length} guides.`)
-  }
-
-  console.log(`Done. Upserted ${baseRows.length} guides. Retained only seed set.`)
+  console.log(`Done. Upserted ${baseRows.length} guides. Existing guides preserved.`)
   console.log('Example queries:')
   console.log('- /api/guides?domain=strategy&page=1&pageSize=12')
   console.log('- /api/guides?domain=guidelines&page=1&pageSize=12')
@@ -279,6 +263,16 @@ effect immediately upon approval.`,
 
 /* ----------------------------- Execute ----------------------------- */
 
-main()
-  .then(() => backfillExistingDomains())
-  .catch(err => { console.error('Seed failed:', err?.message || err); process.exit(1) })
+// SCRIPT DISABLED - Do not run this script as it modifies existing guides
+// Use individual update scripts instead for specific guides
+
+console.log('⚠️  This script is disabled to prevent accidental modifications.')
+console.log('   Use individual update scripts for specific guides instead.')
+process.exit(0)
+
+// main()
+//   .then(() => {
+//     console.log('\n⚠️  NOTE: backfillExistingDomains() is disabled to preserve existing guide domains.')
+//     console.log('   Existing guides will keep their original domain values.')
+//   })
+//   .catch(err => { console.error('Seed failed:', err?.message || err); process.exit(1) })

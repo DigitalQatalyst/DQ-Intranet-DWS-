@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MenuIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, BookOpen } from 'lucide-react';
+import { BuildingIcon, CreditCardIcon, GraduationCapIcon, CalendarIcon, UsersIcon, NewspaperIcon, SparklesIcon, BookOpen } from 'lucide-react';
 import { scrollToSupport } from '../../../utils/scroll';
 interface MobileDrawerProps {
   isCompact?: boolean;
@@ -10,11 +10,11 @@ interface MobileDrawerProps {
   isSignedIn: boolean;
 }
 const marketplaces = [{
-  id: 'non-financial',
-  name: 'IT & Systems Support',
+  id: 'service-center',
+  name: 'Services Center',
   description: 'Helpdesk, access requests, device & app support.',
   icon: BuildingIcon,
-  href: '/marketplace/non-financial'
+  href: '/marketplace/services-center'
 }, {
   id: 'finance',
   name: 'HR & Finance Services',
@@ -35,23 +35,23 @@ const marketplaces = [{
   href: '/marketplace/community'
 }, {
   id: 'course',
-  name: 'DQ LMS Courses',
+  name: 'Learning Center',
   description: '7x GHC, 6x Digital, 12x HoV, 1x Day in DQ, Key Tools.',
   icon: GraduationCapIcon,
-  href: '/marketplace/courses'
+  href: '/lms'
 }, {
-  id: 'investment',
-  name: 'Certifications & Onboarding',
-  description: 'Mandatory training and new associate onboarding.',
-  icon: TrendingUpIcon,
-  href: '/marketplace/investment'
+  id: 'services-center',
+  name: 'DQ Services Center',
+  description: 'Business services, technology services, and digital worker tools.',
+  icon: BuildingIcon,
+  href: '/dq-services-center'
 }, {
-    id: 'calendar',
-    name: 'Calendar & Events',
-    description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
-    icon: CalendarIcon,
-    href: '/events',
-  },{
+  id: 'calendar',
+  name: 'Calendar & Events',
+  description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
+  icon: CalendarIcon,
+  href: '/events',
+}, {
   id: 'opportunity',
   name: 'News & Announcements',
   description: 'Company updates and internal notices.',
@@ -59,7 +59,7 @@ const marketplaces = [{
   href: '/marketplace/opportunities'
 }, {
   id: 'guides',
-  name: 'Guidelines Marketplace',
+  name: 'DQ Knowledge Center',
   description: 'Access practical guidelines, templates, and processes.',
   icon: BookOpen,
   href: '/marketplace/guides'
@@ -146,6 +146,12 @@ export function MobileDrawer({
           <div className={`flex-1 overflow-y-auto ${!isSignedIn ? 'pb-20' : ''}`}>
             {/* Navigation Section - Show for Mobile only, Tablet has these in header */}
             <div className="px-4 py-3 md:hidden">
+              <button onClick={() => handleMarketplaceClick('/discover-dq')} className="w-full text-left py-2 px-3 hover:bg-dq-coral/10 rounded-md transition-colors mb-1">
+                <span className="text-sm font-medium text-dq-navy">Discover DQ</span>
+              </button>
+              <button onClick={() => handleMarketplaceClick('/work-center')} className="w-full text-left py-2 px-3 hover:bg-dq-coral/10 rounded-md transition-colors mb-2">
+                <span className="text-sm font-medium text-dq-navy">Work Center</span>
+              </button>
               <h3 className="text-xs font-semibold text-dq-navy/60 uppercase tracking-wider mb-2 md:text-[11px] sm:text-[10px]">
                 Navigation
               </h3>

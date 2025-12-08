@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 export interface FilterOption {
   id: string;
@@ -45,7 +45,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onResetFilters,
   isResponsive = false
 }) => {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(Object.fromEntries(filterConfig.map(config => [config.id, true])));
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(Object.fromEntries(filterConfig.map(config => [config.id, false])));
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({
       ...prev,
@@ -55,7 +55,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const textSizeClass = isResponsive ? 'text-xs' : 'text-sm';
   const spacingClass = isResponsive ? 'space-y-1' : 'space-y-2';
   return <div className="space-y-2">
-      {filterConfig.map(config => <AccordionSection key={config.id} title={config.title} isOpen={openSections[config.id] ?? true} onToggle={() => toggleSection(config.id)}>
+      {filterConfig.map(config => <AccordionSection key={config.id} title={config.title} isOpen={openSections[config.id] ?? false} onToggle={() => toggleSection(config.id)}>
           <div className={spacingClass}>
             {config.options.map(option => {
             const optionValue = option.id;

@@ -1,357 +1,586 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  ChevronRight,
-  Home,
-  BookmarkIcon,
-  Share2,
-  Eye
-} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
-import { fetchNewsArticle, fetchRelatedArticles } from '../../services/newsService';
-import type { NewsArticleWithDetails } from '../../types/news';
+import { HomeIcon, ChevronRightIcon, Share2, BookmarkIcon, ArrowUpRight } from 'lucide-react';
+import type { NewsItem } from '@/data/media/news';
+import { fetchAllNews, fetchNewsById } from '@/services/mediaCenterService';
 
-const formatDate = (dateString?: string) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return dateString;
-  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const formatDate = (input: string) =>
+  new Date(input).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+const fallbackHero =
+  'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1600&q=80';
+
+const fallbackImages = [
+  'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80'
+];
+
+const MEDIA_SEEN_STORAGE_KEY = 'dq-media-center-seen-items';
+
+const markMediaItemSeen = (kind: 'news' | 'job', id: string) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = window.localStorage.getItem(MEDIA_SEEN_STORAGE_KEY);
+    let seen: { news: string[]; jobs: string[] } = { news: [], jobs: [] };
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<{ news: string[]; jobs: string[] }>;
+      seen = {
+        news: parsed.news ?? [],
+        jobs: parsed.jobs ?? []
+      };
+    }
+
+    const key = kind === 'news' ? 'news' : 'jobs';
+    if (!seen[key].includes(id)) {
+      seen[key] = [...seen[key], id];
+      window.localStorage.setItem(MEDIA_SEEN_STORAGE_KEY, JSON.stringify(seen));
+    }
+  } catch {
+    // Ignore storage errors
+  }
+};
+
+const buildBody = (article: NewsItem & { content?: string }) => {
+  // Use content field if available, otherwise fall back to default paragraphs
+  if (article.content) {
+    // Split content into blocks, preserving list structure
+    const blocks: string[] = [];
+    const lines = article.content.split('\n');
+    let currentBlock = '';
+    let inList = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      const isEmpty = !line;
+      const isListLine = /^[-*\d.]\s+/.test(line) || /^  [-*\d.]\s+/.test(line);
+      
+      if (isEmpty && currentBlock) {
+        // Empty line ends current block
+        blocks.push(currentBlock.trim());
+        currentBlock = '';
+        inList = false;
+      } else if (isListLine) {
+        // List item - add to current block
+        if (currentBlock && !inList) {
+          // Previous block wasn't a list, start new block
+          if (currentBlock.trim()) {
+            blocks.push(currentBlock.trim());
+          }
+          currentBlock = line;
+        } else {
+          currentBlock += (currentBlock ? '\n' : '') + line;
+        }
+        inList = true;
+      } else if (line) {
+        // Regular content line
+        if (inList && currentBlock) {
+          // End list block, start new block
+          blocks.push(currentBlock.trim());
+          currentBlock = line;
+          inList = false;
+        } else {
+          currentBlock += (currentBlock ? '\n' : '') + line;
+        }
+      }
+    }
+
+    // Push remaining block
+    if (currentBlock.trim()) {
+      blocks.push(currentBlock.trim());
+    }
+
+    return blocks.filter(p => p.trim());
+  }
+  
+  return [
+    article.excerpt,
+    'Since launching, DQ teams continue to connect dots across studios, squads, and journeys. Every announcement is an opportunity to reinforce a shared language, codify repeatable wins, and inspire new experiments.',
+    'This story highlights the rituals, playbooks, and leadership behaviors that help teams deliver value faster—while keeping culture, clarity, and craft at the center.',
+    'Read on for the context, quotes, and resources you can plug into right away.'
+  ];
+};
+
+// Parse bold text (**text** or **text**)
+const parseBold = (text: string) => {
+  const parts: (string | JSX.Element)[] = [];
+  const regex = /\*\*(.+?)\*\*/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    // Add bold text
+    parts.push(<strong key={match.index} className="font-bold">{match[1]}</strong>);
+    lastIndex = regex.lastIndex;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [text];
+};
+
+// Format content with proper markdown parsing
+const formatContent = (content: string, index: number) => {
+  const trimmed = content.trim();
+  if (!trimmed) return null;
+
+  // Parse H1 headings (# Heading) - strip hashtags
+  if (trimmed.match(/^#+\s+(.+)$/)) {
+    const match = trimmed.match(/^#+\s+(.+)$/);
+    if (match && match[1]) {
+      let text = match[1].trim();
+      // Remove any remaining markdown hashtags from the text
+      text = text.replace(/^#+\s*/, '');
+      const boldText = parseBold(text);
+      // Check if it's H1, H2, or H3 based on number of # at start
+      const hashCount = (trimmed.match(/^#+/)?.[0] || '').length;
+      if (hashCount === 1) {
+        return (
+          <h1 key={index} className="text-3xl font-bold mb-6 text-gray-900">
+            {boldText}
+          </h1>
+        );
+      } else if (hashCount === 2) {
+        return (
+          <h2 key={index} className="text-2xl font-bold mb-5 text-gray-900 mt-6">
+            {boldText}
+          </h2>
+        );
+      } else {
+        return (
+          <h3 key={index} className="text-xl font-bold mb-4 text-gray-900 mt-5">
+            {boldText}
+          </h3>
+        );
+      }
+    }
+  }
+
+  // Parse lists (- item, * item, or 1. item, or numbered with ➜)
+  const hasListItems = content.split('\n').some(line => {
+    const trimmedLine = line.trim();
+    return /^[-*]\s+/.test(trimmedLine) || /^\d+\.\s+/.test(trimmedLine) || /^➜\s+/.test(trimmedLine);
+  });
+  
+  if (hasListItems) {
+    const lines = content.split('\n').filter(line => line.trim());
+    const listItems: Array<{ text: string; level: number; isNumbered: boolean }> = [];
+    
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+      // Match different list patterns: -, *, ➜, or numbered (1. 2. etc.)
+      let itemMatch = trimmedLine.match(/^(\s*)([-*]|\d+\.|➜)\s+(.+)$/);
+      if (!itemMatch) {
+        // Try matching with ➜ at start without space before
+        itemMatch = trimmedLine.match(/^(\s*)(➜)\s*(.+)$/);
+      }
+      if (itemMatch) {
+        const level = (itemMatch[1] || '').length; // Indentation level
+        const marker = itemMatch[2] || '';
+        const itemText = itemMatch[3] || '';
+        const isNumbered = /^\d+\.$/.test(marker);
+        listItems.push({ text: itemText.trim(), level, isNumbered });
+      }
+    });
+
+    if (listItems.length > 0) {
+      const ListComponent = listItems[0].isNumbered ? 'ol' : 'ul';
+      const listClass = listItems[0].isNumbered 
+        ? 'list-decimal list-inside space-y-3 text-gray-700'
+        : 'list-disc list-inside space-y-3 text-gray-700';
+      
+      return (
+        <ListComponent key={index} className={listClass}>
+          {listItems.map((item, itemIndex) => {
+            const boldText = parseBold(item.text);
+            const indentStyle = item.level > 0 ? { marginLeft: `${item.level * 1.5}rem` } : {};
+            return (
+              <li key={itemIndex} className="leading-relaxed" style={indentStyle}>
+                {boldText}
+              </li>
+            );
+          })}
+        </ListComponent>
+      );
+    }
+  }
+
+  // Regular paragraphs - strip any markdown hashtags that might appear
+  let cleanedText = trimmed.replace(/^#+\s*/, '').trim();
+  const boldText = parseBold(cleanedText);
+  return (
+    <p key={index} className="text-gray-700 text-base leading-relaxed mb-4">
+      {boldText}
+    </p>
+  );
 };
 
 const NewsDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [item, setItem] = useState<NewsArticleWithDetails | null>(null);
-  const [relatedNews, setRelatedNews] = useState<NewsArticleWithDetails[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const [article, setArticle] = useState<NewsItem | null>(null);
+  const [related, setRelated] = useState<NewsItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Fetch article data from Supabase
+  const getImageSrc = (item: NewsItem) => {
+    if (item.image) return item.image;
+    const hash = Math.abs(item.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0));
+    return fallbackImages[hash % fallbackImages.length] || fallbackHero;
+  };
+
+  const body = article ? buildBody(article) : [];
+
   useEffect(() => {
-    const loadArticle = async () => {
-      if (!id) return;
-      
+    if (!id) return;
+    let isMounted = true;
+
+    async function loadArticle() {
+      setIsLoading(true);
       try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch the article (by ID or slug)
-        const article = await fetchNewsArticle(id);
-        
-        if (article) {
-          setItem(article);
-          
-          // Fetch related articles
-          const related = await fetchRelatedArticles(article.id, article.category_id);
-          setRelatedNews(related);
-          
-          // Check if bookmarked (requires user ID - implement based on your auth)
-          // const userId = 'current-user-id'; // Get from auth context
-          // const bookmarked = await isArticleBookmarked(article.id, userId);
-          // setIsBookmarked(bookmarked);
-        } else {
-          setError('Article not found');
+        const [item, allNews] = await Promise.all([fetchNewsById(id), fetchAllNews()]);
+        if (!isMounted) return;
+        setArticle(item);
+        setRelated(allNews.filter((newsItem) => newsItem.id !== id).slice(0, 3));
+        if (item) {
+          markMediaItemSeen('news', item.id);
         }
-      } catch (err) {
-        console.error('Error loading article:', err);
-        setError('Failed to load article');
+        setLoadError(null);
+      } catch (error) {
+        if (!isMounted) return;
+        // eslint-disable-next-line no-console
+        console.error('Error loading news article', error);
+        setLoadError('Unable to load this article right now.');
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-    };
-    
+    }
+
     loadArticle();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
-  const handleToggleBookmark = async () => {
-    if (!item) return;
-    
-    try {
-      // TODO: Get user ID from auth context
-      // const userId = 'current-user-id';
-      // const newBookmarkState = await toggleBookmark(item.id, userId);
-      // setIsBookmarked(newBookmarkState);
-      
-      // For now, just toggle locally
-      setIsBookmarked(!isBookmarked);
-    } catch (err) {
-      console.error('Error toggling bookmark:', err);
-    }
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: item?.title,
-        text: item?.description,
-        url: window.location.href,
-      });
-    }
-  };
-
-  if (loading) {
+  if (!article) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
-          </div>
+        <Header toggleSidebar={() => {}} sidebarOpen={false} />
+        <main className="flex flex-1 flex-col items-center justify-center text-center px-4">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            {isLoading ? 'Loading article' : 'Article not found'}
+          </h1>
+          <p className="text-gray-600 mb-6 max-w-md">
+            {isLoading
+              ? 'Fetching the latest details. Please wait.'
+              : "The article you're trying to view is unavailable or has been archived. Please browse the latest announcements."}
+          </p>
+          {loadError && !isLoading && (
+            <p className="text-sm text-red-600 mb-4">{loadError}</p>
+          )}
+          <button
+            onClick={() => navigate(`/marketplace/guides${location.search || ''}`)}
+            className="rounded-lg bg-[#030f35] px-6 py-3 text-sm font-semibold text-white"
+          >
+            Back to Media Center
+          </button>
         </main>
         <Footer isLoggedIn={false} />
       </div>
     );
   }
 
-  if (!item) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">News Not Found</h2>
-            <p className="text-gray-600 mb-6">The news article you're looking for doesn't exist.</p>
-            <button
-              onClick={() => navigate('/marketplace/opportunities')}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition-colors"
-            >
-              Back to News
-            </button>
-          </div>
-        </main>
-        <Footer isLoggedIn={false} />
-      </div>
-    );
-  }
-
-  const publishedOn = formatDate(item.published_at);
-  const publisherDisplay = item.publisher_department 
-    ? `${item.publisher_name || 'Digital Qatalyst'} • ${item.publisher_department}`
-    : item.publisher_name || 'Digital Qatalyst';
+  const displayAuthor =
+    article.type === 'Thought Leadership'
+      ? (article.byline || article.author || 'DQ Media Team')
+      : article.author;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-      
-      <main className="flex-grow">
-        {/* Breadcrumb */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <nav className="flex items-center space-x-2 text-sm text-gray-600">
-              <Link to="/" className="hover:text-blue-600 transition-colors flex items-center">
-                <Home size={16} className="mr-1" />
+    <div className="min-h-screen flex flex-col bg-[#F3F6FB]">
+      <Header toggleSidebar={() => {}} sidebarOpen={false} />
+      <main className="flex-1">
+        <section className="border-b border-gray-200 bg-white">
+          <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
+            <nav className="flex items-center text-sm text-gray-600" aria-label="Breadcrumb">
+              <Link to="/" className="inline-flex items-center gap-1 hover:text-[#1A2E6E]">
+                <HomeIcon size={16} />
                 Home
               </Link>
-              <ChevronRight size={16} />
-              <Link to="/marketplace/opportunities" className="hover:text-blue-600 transition-colors">
-                News & Opportunities
+              <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
+              <Link to={`/marketplace/guides${location.search || ''}`} className="hover:text-[#1A2E6E]">
+                DQ Media Center
               </Link>
-              <ChevronRight size={16} />
-              <span className="text-gray-900 font-medium truncate">{item.title}</span>
+              <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
+              <span className="text-gray-900 line-clamp-1">{article.title}</span>
             </nav>
+            <div className="flex gap-2 text-sm text-gray-500">
+              <button className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 hover:text-[#1A2E6E]">
+                <Share2 size={16} />
+                Share
+              </button>
+              <button className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 hover:text-[#1A2E6E]">
+                <BookmarkIcon size={16} />
+                Save
+              </button>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Hero Section with Image */}
-        <div className="bg-white">
-          <div className="max-w-7xl mx-auto px-6">
-            {/* Featured Image - Consistent margins */}
-            {item.featured_image_url && (
-              <div className="w-full mb-8">
-                <img
-                  src={item.featured_image_url}
-                  alt={item.title}
-                  className="w-full h-[400px] object-cover rounded-lg"
-                />
-              </div>
-            )}
-
-            <div className="flex gap-8">
+        <section className="bg-[#F3F6FB] py-8">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Content Area */}
-              <div className="flex-1 max-w-3xl">
-                {/* Title */}
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">{item.title}</h1>
-
-                {/* Description */}
-                <p className="text-base text-gray-700 mb-6 leading-relaxed">
-                  {item.description}
-                </p>
-
-                {/* Meta Information Tags */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {item.category_name && (
-                    <span 
-                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
-                      style={{
-                        backgroundColor: item.category_color ? `${item.category_color}20` : '#DBEAFE',
-                        color: item.category_color || '#1E40AF'
-                      }}
-                    >
-                      {item.category_name}
-                    </span>
-                  )}
-                  {item.tags && item.tags.map((tag) => (
-                    <span key={tag.id} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                      {tag.name}
-                    </span>
-                  ))}
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Updated {publishedOn || 'TBA'}
-                  </span>
+              <div className="lg:col-span-2 space-y-6">
+                {/* Hero Image */}
+                <div className="rounded-2xl bg-gray-100 overflow-hidden shadow-sm">
+                  <img
+                    src={getImageSrc(article)}
+                    alt={article.title}
+                    className="h-[400px] w-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
 
-                {/* Stats and Action Buttons */}
-                <div className="flex items-center justify-between pb-6 border-b border-gray-200">
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <Eye size={16} />
-                      {item.views_count.toLocaleString()} views
-                    </span>
-                    {item.comment_count > 0 && (
-                      <span className="flex items-center gap-1">
-                        💬 {item.comment_count} {item.comment_count === 1 ? 'comment' : 'comments'}
-                      </span>
-                    )}
-                    {Object.values(item.reaction_counts).reduce((a, b) => (a || 0) + (b || 0), 0) > 0 && (
-                      <span className="flex items-center gap-1">
-                        ❤️ {Object.values(item.reaction_counts).reduce((a, b) => (a || 0) + (b || 0), 0)} reactions
-                      </span>
+                {/* Article Header */}
+                <div className="bg-white rounded-xl p-8 shadow-sm">
+                  <h1 className="text-4xl font-bold text-gray-900 mb-4">{article.title}</h1>
+                  <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
+                    <span>{formatDate(article.date)}</span>
+                    {article.readingTime && (
+                      <>
+                        <span>•</span>
+                        <span>{article.readingTime} min read</span>
+                      </>
                     )}
                   </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleToggleBookmark}
-                      className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors ${
-                        isBookmarked
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      <BookmarkIcon size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
-                      {isBookmarked ? 'Bookmarked' : 'Bookmark'}
-                    </button>
-                    <button
-                      onClick={handleShare}
-                      className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                </div>
+
+                {/* Article Content */}
+                <article className="space-y-6">
+                  {(() => {
+                    interface Section {
+                      heading: string | null;
+                      items: string[];
+                    }
+                    const sections: Section[] = [];
+                    let currentSection: Section | null = null;
+
+                    body.forEach((paragraph) => {
+                      const trimmed = paragraph.trim();
+                      if (!trimmed) return;
+
+                      const isHeading = trimmed.match(/^#+\s+(.+)$/); // Any markdown heading (# ## ###) creates new sections
+
+                      if (isHeading) {
+                        // Start new section with this heading
+                        if (currentSection !== null && currentSection.items.length > 0) {
+                          sections.push(currentSection);
+                        }
+                        currentSection = { heading: trimmed, items: [] };
+                      } else {
+                        // Add content to current section (or create new section if none exists)
+                        if (currentSection === null) {
+                          currentSection = { heading: null, items: [] };
+                        }
+                        if (currentSection !== null) {
+                          currentSection.items.push(paragraph);
+                        }
+                      }
+                    });
+
+                    if (currentSection !== null) {
+                      const finalSection: Section = currentSection;
+                      if (finalSection.items.length > 0) {
+                        sections.push(finalSection);
+                      }
+                    }
+
+                    return sections.map((section, sectionIndex) => {
+                      // Check if section has lists
+                      const hasLists = section.items.some(item => {
+                        const trimmed = item.trim();
+                        return trimmed.match(/^[-*\d.]\s+/) || trimmed.match(/^➜\s+/) || item.split('\n').some(line => /^[-*\d.]\s+/.test(line.trim()) || /^➜\s+/.test(line.trim()));
+                      });
+                      
+                      const bgColor = hasLists ? 'bg-blue-50' : 'bg-white';
+                      const borderColor = 'border border-gray-200';
+                      
+                      return (
+                        <div key={sectionIndex} className={`${bgColor} ${borderColor} rounded-xl p-8 shadow-sm`}>
+                          <div className="space-y-4">
+                            {section.heading && (
+                              <div>
+                                {formatContent(section.heading, 0)}
+                              </div>
+                            )}
+                            {section.items.map((item, itemIndex) => {
+                              const formatted = formatContent(item, itemIndex);
+                              return formatted;
+                            })}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </article>
+              </div>
+
+              {/* Right Sidebar */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-8 space-y-6">
+                  {/* Article Summary Card */}
+                  <div className="bg-gray-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-900 mb-6">Article Summary</h2>
+                    <div className="space-y-4">
+                      {article.type && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Type</div>
+                          <div className="text-sm text-gray-900 font-medium">{article.type}</div>
+                        </div>
+                      )}
+                      {article.department && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Department</div>
+                          <div className="text-sm text-gray-900 font-medium">{article.department}</div>
+                        </div>
+                      )}
+                      {article.location && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Location</div>
+                          <div className="text-sm text-gray-900 font-medium">{article.location}</div>
+                        </div>
+                      )}
+                      {article.domain && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Domain</div>
+                          <div className="text-sm text-gray-900 font-medium">{article.domain}</div>
+                        </div>
+                      )}
+                      {article.newsType && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">News Type</div>
+                          <div className="text-sm text-gray-900 font-medium">{article.newsType}</div>
+                        </div>
+                      )}
+                      {article.newsSource && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Source</div>
+                          <div className="text-sm text-gray-900 font-medium">{article.newsSource}</div>
+                        </div>
+                      )}
+                      {article.focusArea && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Focus Area</div>
+                          <div className="text-sm text-gray-900 font-medium">{article.focusArea}</div>
+                        </div>
+                      )}
+                      <div>
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Published</div>
+                        <div className="text-sm text-gray-900 font-medium">{formatDate(article.date)}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Author</div>
+                        <div className="text-sm text-gray-900 font-medium">{displayAuthor}</div>
+                      </div>
+                      {article.views !== undefined && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Views</div>
+                          <div className="text-sm text-gray-900 font-medium">{article.views.toLocaleString()}</div>
+                        </div>
+                      )}
+                      {article.tags && article.tags.length > 0 && (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tags</div>
+                          <div className="flex flex-wrap gap-2">
+                            {article.tags.map((tag, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-3">
+                    <button 
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: article.title,
+                            text: article.excerpt,
+                            url: window.location.href,
+                          }).catch(() => {});
+                        } else {
+                          navigator.clipboard.writeText(window.location.href).catch(() => {});
+                        }
+                      }}
+                      className="w-full rounded-xl bg-[#030f35] px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition-colors shadow-sm inline-flex items-center justify-center gap-2"
                     >
                       <Share2 size={16} />
-                    Share
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Content Section */}
-        <div className="bg-white py-8">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex gap-8">
-              {/* Main Content Area */}
-              <div className="flex-1 max-w-3xl">
-                {/* Article Content - Render HTML content from database */}
-                <div 
-                  className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: item.content }}
-                />
-
-                  {/* News Info Box */}
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mt-8">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">
-                      News Info
-                    </h3>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Category</p>
-                        <p className="text-sm font-medium text-blue-600">{item.category_name || 'General'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Status</p>
-                        <p className="text-sm font-medium text-gray-900 capitalize">{item.status}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Published</p>
-                        <p className="text-sm font-medium text-blue-600">{publishedOn || 'TBA'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Publisher</p>
-                        <p className="text-sm font-medium text-gray-900">{publisherDisplay}</p>
-                      </div>
-                      {item.is_featured && (
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">Featured</p>
-                          <p className="text-sm font-medium text-orange-600">⭐ Featured Article</p>
-                        </div>
-                      )}
-                      {item.is_pinned && (
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">Pinned</p>
-                          <p className="text-sm font-medium text-purple-600">📌 Pinned</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Back Button */}
-                  <div className="mt-8">
-                    <button
-                      onClick={() => navigate('/marketplace/opportunities')}
-                      className="text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm"
-                    >
-                      ← Back to News
+                      Share Article
+                    </button>
+                    <button className="w-full rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors inline-flex items-center justify-center gap-2">
+                      <BookmarkIcon size={16} />
+                      Save for Later
                     </button>
                   </div>
                 </div>
-
-                {/* Sidebar - Related News */}
-                <aside className="w-80 flex-shrink-0">
-                  <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-4">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">
-                      Related News
-                    </h3>
-                    <div className="space-y-4">
-                      {relatedNews.length > 0 ? (
-                        relatedNews.map((relatedItem) => (
-                          <Link
-                            key={relatedItem.id}
-                            to={`/marketplace/opportunities/${relatedItem.id}`}
-                            className="flex gap-3 group"
-                          >
-                            <div className="w-16 h-16 flex-shrink-0 bg-gray-200 rounded overflow-hidden">
-                              {relatedItem.featured_image_url ? (
-                                <img
-                                  src={relatedItem.featured_image_url}
-                                  alt={relatedItem.title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-900" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                                {relatedItem.title}
-                              </h4>
-                              <p className="text-xs text-gray-600 line-clamp-2">
-                                {relatedItem.description}
-                              </p>
-                            </div>
-                          </Link>
-                        ))
-                      ) : (
-                        <p className="text-sm text-gray-500">No related news available</p>
-                      )}
-                    </div>
-                  </div>
-                </aside>
               </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        <section className="border-t border-gray-200 bg-[#F8FAFF]">
+          <div className="mx-auto max-w-6xl px-6 py-10">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Related Resources</h2>
+              <button className="text-sm font-semibold text-[#1A2E6E] inline-flex items-center gap-1">
+                See All Resources
+                <ArrowUpRight size={16} />
+              </button>
+            </div>
+            <div className="grid gap-6 md:grid-cols-3">
+              {related.map((item) => (
+                <article key={item.id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <img
+                    src={getImageSrc(item)}
+                    alt={item.title}
+                    className="mb-4 h-32 w-full rounded-xl object-cover"
+                  />
+                  <div className="text-xs text-gray-500">{formatDate(item.date)}</div>
+                  <h3 className="mt-2 text-lg font-semibold text-gray-900 line-clamp-2">{item.title}</h3>
+                  <p className="mt-2 text-sm text-gray-600 line-clamp-3">{item.excerpt}</p>
+                  <Link
+                    to={`/marketplace/news/${item.id}${location.search || ''}`}
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#030f35] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                  >
+                    Read Article
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer isLoggedIn={false} />

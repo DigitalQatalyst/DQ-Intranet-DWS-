@@ -1,0 +1,113 @@
+---
+description: TailwindCSS styling guidelines and design system patterns
+globs: ['**/*.tsx', '**/*.css']
+alwaysApply: true
+---
+
+# Styling Rules
+
+## TailwindCSS Guidelines
+
+- **Use TailwindCSS utility classes** for all styling - avoid inline styles or CSS modules
+- **Mobile-first approach** - Design for mobile, then enhance for larger screens
+- **Use design tokens** from `tailwind.config.js` when available (e.g., `dq-navy`, `dq-orange`, `primary`, `teal`)
+- **Prefer composition** - Combine utility classes rather than creating custom CSS
+- **Use responsive prefixes** - `sm:`, `md:`, `lg:`, `xl:`, `2xl:` for responsive design
+
+## Design System Colors
+
+Use the project's custom color palette:
+- **DQ Brand Colors**: `dq-navy`, `dq-orange`, `dq-blue`, `dq-white`
+- **Primary**: `primary`, `primary-dark`, `primary-light`
+- **Teal**: `teal`, `teal-dark`, `teal-light`
+- **Purple**: `purple`, `purple-dark`, `purple-light`
+- **DQ Secondary**: `dqsec-indigo`, `dqsec-teal`, `dqsec-aqua`, `dqsec-sky`, `dqsec-tint`
+
+## Typography
+
+- **Display font**: Use `font-display` for headings and display text
+- **Body font**: Use `font-body` for body text (default)
+- **Font sizes**: Use Tailwind's scale (`text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl`, etc.)
+- **Font weights**: `font-normal`, `font-medium`, `font-bold` as appropriate
+
+## Spacing
+
+- Use Tailwind's spacing scale consistently
+- Common patterns:
+  - Card padding: `p-6`
+  - Content gap: `gap-4`
+  - Grid gap: `gap-6`
+  - Section spacing: `py-8` or `py-12`
+
+## Layout Patterns
+
+- **Flexbox**: Use `flex` with appropriate direction and alignment
+- **Grid**: Use `grid` for two-dimensional layouts
+- **Container**: Use `container` class for responsive max-width containers
+- **Centering**: Use `flex items-center justify-center` or `grid place-items-center`
+
+## Visual Elements
+
+- **Border radius**: Use `rounded-lg` (8px) for cards, `rounded-md` for smaller elements
+- **Shadows**: 
+  - Default: `shadow-md`
+  - Hover: `hover:shadow-lg`
+  - Focus: `focus:shadow-lg`
+- **Borders**: Use `border border-gray-200` for subtle borders
+- **Transitions**: Use `transition-all duration-200` for smooth interactions
+
+## Component-Specific Patterns
+
+### Cards
+- Minimum height: `min-h-[340px]` or similar
+- Padding: `p-6`
+- Border: `border border-gray-200`
+- Shadow: `shadow-md hover:shadow-lg`
+- Border radius: `rounded-lg`
+
+### Buttons
+- Use consistent padding: `px-4 py-2` or `px-6 py-3`
+- Include hover and focus states
+- Use appropriate color variants
+
+### Forms
+- Use consistent spacing between form fields
+- Include proper focus states
+- Use error states with red colors (`text-red-600`, `border-red-300`)
+
+## Responsive Design
+
+- Always test on mobile first
+- Use breakpoint prefixes: `sm:`, `md:`, `lg:`, `xl:`, `2xl:`
+- Common breakpoints:
+  - `sm`: 640px
+  - `md`: 768px
+  - `lg`: 1024px
+  - `xl`: 1280px
+  - `2xl`: 1536px
+
+## Dark Mode (if applicable)
+
+- Use `dark:` prefix for dark mode styles
+- Test both light and dark modes
+- Ensure sufficient contrast in both modes
+
+## Custom Backgrounds
+
+Use project-specific background gradients:
+- `bg-dq-header`: Header gradient
+- `bg-dq-cta`: CTA gradient
+- `bg-dq-gradient`: General gradient
+
+## Z-Index Management
+
+- Use the custom z-index scale when needed: `z-400` for overlays
+- Standard Tailwind z-index values for most cases
+
+## Best Practices
+
+- **Avoid arbitrary values** when standard utilities exist
+- **Group related classes** logically (layout, spacing, typography, colors)
+- **Use `clsx` or `tailwind-merge`** for conditional classes
+- **Keep class lists readable** - consider line breaks for long class lists
+- **Extract repeated patterns** into reusable components rather than duplicating classes

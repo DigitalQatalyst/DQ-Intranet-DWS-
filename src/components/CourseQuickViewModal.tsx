@@ -86,8 +86,8 @@ export const CourseQuickViewModal: React.FC<CourseQuickViewModalProps> = ({
               </li>
             </ol>
           </nav>
+          {/* Provider Section - Logo removed */}
           <div className="flex items-center mb-4">
-            <img src={course.provider.logoUrl} alt={`${course.provider.name} logo`} className="h-12 w-12 object-contain mr-4" />
             <div>
               <span className="text-sm text-gray-500">Provided by</span>
               <h3 className="text-lg font-medium text-gray-900">
@@ -135,7 +135,7 @@ export const CourseQuickViewModal: React.FC<CourseQuickViewModalProps> = ({
             </h3>
             <ul className="space-y-2">
               {keyHighlights.map((highlight, index) => <li key={index} className="flex items-start">
-                  <CheckCircleIcon size={18} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <CheckCircleIcon size={18} className="text-dqYellow mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">{highlight}</span>
                 </li>)}
             </ul>

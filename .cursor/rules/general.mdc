@@ -1,0 +1,88 @@
+---
+description: General coding standards and best practices
+globs: ['**/*']
+alwaysApply: true
+---
+
+# General Coding Standards
+
+## Code Quality
+
+- **Write clean, readable code** - Code is read more often than written
+- **Keep functions small and focused** - Single responsibility principle
+- **Use meaningful names** - Names should clearly express intent
+- **Avoid magic numbers** - Use named constants
+- **Comment why, not what** - Code should be self-documenting
+- **Remove dead code** - Don't leave commented-out code
+
+## Consistency
+
+- **Follow existing patterns** - Maintain consistency with the codebase
+- **Use project conventions** - Stick to established naming and structure
+- **Be consistent with formatting** - Use Prettier or similar
+- **Follow TypeScript strict mode** - Leverage type safety
+
+## Performance
+
+- **Optimize when necessary** - Don't premature optimize, but be mindful
+- **Use appropriate data structures** - Choose the right tool for the job
+- **Avoid unnecessary re-renders** - Use React optimization techniques
+- **Lazy load when appropriate** - Code split large bundles
+
+## Security
+
+- **Never commit secrets** - Use environment variables
+- **Validate user input** - Don't trust client-side data
+- **Use parameterized queries** - Prevent SQL injection
+- **Sanitize user content** - Prevent XSS attacks
+- **Follow authentication patterns** - Secure routes and APIs
+
+## Git Practices
+
+- **Write clear commit messages** - Describe what and why
+- **Keep commits focused** - One logical change per commit
+- **Use meaningful branch names** - Follow project conventions
+- **Review code before committing** - Catch issues early
+
+## Documentation
+
+- **Document complex logic** - Explain non-obvious decisions
+- **Keep README updated** - Document setup and usage
+- **Document API changes** - Help other developers
+- **Use JSDoc for public APIs** - Document function signatures
+
+## Accessibility
+
+- **Write semantic HTML** - Use proper elements
+- **Ensure keyboard navigation** - All interactions should be keyboard accessible
+- **Provide alt text** - Describe images meaningfully
+- **Use ARIA attributes** - When semantic HTML isn't enough
+- **Test with screen readers** - Verify accessibility
+
+## Error Handling
+
+- **Handle errors gracefully** - Don't let errors crash the app
+- **Provide user feedback** - Users should know what happened
+- **Log errors appropriately** - Help with debugging
+- **Use error boundaries** - Catch React errors
+
+## Testing
+
+- **Write testable code** - Make testing easier
+- **Test critical paths** - Focus on important functionality
+- **Keep tests simple** - Easy to understand and maintain
+- **Update tests with code** - Don't let tests get stale
+
+## Dependencies
+
+- **Keep dependencies updated** - Security and features
+- **Avoid unnecessary dependencies** - Keep bundle size small
+- **Use well-maintained packages** - Check activity and support
+- **Document why dependencies are needed** - Help future developers
+
+## Code Review
+
+- **Review your own code first** - Catch obvious issues
+- **Be open to feedback** - Code review is a learning opportunity
+- **Provide constructive feedback** - Help improve code quality
+- **Focus on code, not people** - Keep it professional

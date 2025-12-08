@@ -1,0 +1,14 @@
+---
+description: Keep lightweight security notes per branch
+globs: ['**/*']
+alwaysApply: true
+---
+
+# Security Notes
+
+- Maintain `docs/security-notes.md` as a simple log for this branch.
+- After security-relevant changes or discussions (auth, access control, data handling, secrets, dependencies), append a dated bullet:
+  - `YYYY-MM-DD | area | short note (what/why/impact)`
+- Areas: auth, access, data, deps, infra, other.
+- Keep it brief; ASCII only; no personal data.
+- If file missing, create it with header `# Security Notes`.

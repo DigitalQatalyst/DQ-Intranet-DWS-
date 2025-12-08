@@ -56,7 +56,7 @@ export function ServiceRequestDetails({
     const getStatusIcon = (status: string) => {
         switch (status) {
             case 'approved':
-                return <CheckCircleIcon size={16} className="text-green-500" />;
+                return <CheckCircleIcon size={16} className="text-dqYellow" />;
             case 'rejected':
                 return <XCircleIcon size={16} className="text-red-500" />;
             case 'pending':

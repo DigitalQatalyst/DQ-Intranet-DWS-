@@ -81,8 +81,8 @@ export const mockCourses: CourseType[] = [
     learningOutcomes: [
       "Submit IT support requests efficiently",
       "Provide detailed problem descriptions",
-      "Include relevant error messages",
-      "Track support request progress",
+      "Include relevant error messages or screenshots"
+     
     ],
     startDate: "Available Now",
     price: "Free",

@@ -7,11 +7,11 @@ interface MobileDrawerProps {
   isSignedIn: boolean;
 }
 const marketplaces = [{
-  id: 'non-financial',
+  id: 'service-center',
   name: 'Non-Financial Marketplace',
   description: 'Business registration, legal advisory, tax, compliance, and SME support services',
   icon: BuildingIcon,
-  href: '/marketplace/non-financial'
+  href: '/marketplace/services-center'
 }, {
   id: 'finance',
   name: 'Finance Marketplace',

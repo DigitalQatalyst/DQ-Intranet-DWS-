@@ -1,7 +1,7 @@
 // Remove dependency on graphql-request and implement a simple mock client
 // import { GraphQLClient } from 'graphql-request'
 import { mockCourses } from "../../utils/mockData";
-import { getMarketplaceConfig } from "../../utils/marketplaceConfiguration";
+import { getMarketplaceConfig } from "../../utils/marketplaceConfig";
 
 // Create a simple mock GraphQL client since we don't have access to graphql-request
 const mockGraphQLClient = {
@@ -24,15 +24,13 @@ export const getMockResponse = (
   variables: any,
   marketplaceType?: string
 ) => {
-  console.log(`Using mock data fallback for query: ${queryName}`);
-
   // If marketplaceType is provided, use the mockData from the config
   if (marketplaceType) {
     try {
       const config = getMarketplaceConfig(marketplaceType);
       if (config.mockData) {
         // Handle different query types
-        if (queryName.includes("getItems")) {
+        if (queryName.includes("getItems") || queryName.includes("Items")) {
           return {
             items: config.mockData.items,
           };
@@ -109,7 +107,8 @@ export const request = async <T>(
   marketplaceType?: string
 ): Promise<T> => {
   try {
-    const data = await mockGraphQLClient.request(query, variables);
+    // Use getMockResponse directly with the marketplace type
+    const data = getMockResponse(queryName, variables, marketplaceType);
     return data as T;
   } catch (error) {
     console.error(`GraphQL request error for ${queryName}:`, error);

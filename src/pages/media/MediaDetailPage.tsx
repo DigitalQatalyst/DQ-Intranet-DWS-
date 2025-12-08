@@ -1646,15 +1646,8 @@ const MediaDetailPage: React.FC = () => {
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight max-w-4xl">
                 {item.title}
               </h1>
-              {/* Provider information - moved from sidebar and made compact */}
+              {/* Provider information - moved from sidebar and made compact - Logo removed */}
               <div className="bg-gray-50 border border-gray-100 rounded-lg p-3 mb-4 flex items-center">
-                {item.provider?.logoUrl && (
-                  <img
-                    src={item.provider.logoUrl}
-                    alt={item.provider.name}
-                    className="h-10 w-10 object-contain rounded mr-3"
-                  />
-                )}
                 <div className="flex-grow">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-gray-900">

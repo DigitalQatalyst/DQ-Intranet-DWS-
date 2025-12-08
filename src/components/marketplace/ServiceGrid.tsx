@@ -5,6 +5,7 @@ import { PromoCard } from '../PromoCard';
 import { DollarSign, Briefcase, Users, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceQuickViewModal } from './ServiceQuickViewModal';
+import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 interface ServiceGridProps {
   services: ServiceItem[];
   onServiceSelect: (service: ServiceItem) => void;
@@ -39,7 +40,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
     title: 'Need expert advice?',
     description: 'Connect with industry experts and get personalized guidance.',
     icon: <Briefcase size={24} className="text-white" />,
-    path: '/marketplace/non-financial',
+    path: '/marketplace/services-center',
     gradientFrom: 'from-purple-600',
     gradientTo: 'to-pink-500'
   }, {
@@ -106,7 +107,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
         {itemsWithPromos.map((item, idx) => {
         if (item.type === 'service') {
           const service = item.data as ServiceItem;
-          return <ServiceCard key={`service-${service.id}`} service={service} onClick={() => onServiceSelect(service)} onQuickView={() => setQuickViewService(service)} isBookmarked={bookmarkedServices.includes(service.id)} onToggleBookmark={() => onToggleBookmark(service.id)} onAddToComparison={() => onAddToComparison(service)} marketplaceType={marketplaceType} primaryButtonText={primaryButtonText} />;
+          return <ServiceCard key={`service-${service.id}`} item={service} type={marketplaceType} isBookmarked={bookmarkedServices.includes(service.id)} onToggleBookmark={() => onToggleBookmark(service.id)} onQuickView={() => setQuickViewService(service)} />;
         } else if (item.type === 'promo') {
           const promo = item.data;
           return <PromoCard key={`promo-${promo.id}-${idx}`} title={promo.title} description={promo.description} icon={promo.icon} path={promo.path} gradientFrom={promo.gradientFrom} gradientTo={promo.gradientTo} />;
@@ -117,10 +118,8 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
       {/* Quick View Modal */}
       {quickViewService && <ServiceQuickViewModal service={quickViewService} onClose={() => setQuickViewService(null)} onViewDetails={() => {
       setQuickViewService(null);
-      navigate(`/marketplace/${marketplaceType}/${quickViewService.id}`);
-    }} isBookmarked={bookmarkedServices.includes(quickViewService.id)} onToggleBookmark={() => onToggleBookmark(quickViewService.id)} onAddToComparison={() => {
-      onAddToComparison(quickViewService);
-      setQuickViewService(null);
-    }} marketplaceType={marketplaceType} primaryButtonText={primaryButtonText} />}
+      const config = getMarketplaceConfig(marketplaceType);
+      navigate(`${config.route}/${quickViewService.id}`);
+    }} isBookmarked={bookmarkedServices.includes(quickViewService.id)} onToggleBookmark={() => onToggleBookmark(quickViewService.id)} marketplaceType={marketplaceType} primaryButtonText={primaryButtonText} />}
     </div>;
 };

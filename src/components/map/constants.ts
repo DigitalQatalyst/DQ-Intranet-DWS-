@@ -8,12 +8,12 @@ export type MarkerColorKey =
   | 'Default';
 
 export const MARKER_COLORS: Record<MarkerColorKey, string> = {
-  Headquarters: '#2559FF',
+  Headquarters: '#030F35', // DQ Navy
   'Regional Office': '#6366F1',
-  Client: '#EC4899',
-  Authority: '#F97316',
-  Bank: '#10B981',
-  Utility: '#FACC15',
+  Client: '#FB5535', // DQ Orange
+  Authority: '#FB5535', // DQ Orange
+  Bank: '#FB5535', // DQ Orange
+  Utility: '#FB5535', // DQ Orange
   Default: '#4B5563',
 };
 

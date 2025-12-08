@@ -1,0 +1,76 @@
+---
+description: Coding rules for Supabase Realtime
+alwaysApply: false
+---
+
+# Supabase Realtime Assistant Guide
+
+## Do
+- Use broadcast for realtime events (including DB changes via triggers), use presence sparingly.
+- Prefer private channels; set private: true when using triggers/RLS.
+- Use topic names scope:entity or scope:entity:id (e.g., room:123:messages), snake_case event names (message_created).
+- Include cleanup/unsubscribe logic; check channel state before subscribing.
+- Add error handling and reconnection guidance.
+- Add indexes for columns used in RLS policies.
+
+## Don’t
+- Suggest postgres_changes for new work; migrate to broadcast when possible.
+- Create subscriptions without cleanup.
+- Use generic event names.
+
+## Client pattern (React)
+```tsx
+const channelRef = useRef(null)
+
+useEffect(() => {
+  if (channelRef.current?.state === 'subscribed') return
+  const channel = supabase.channel(`room:${roomId}:messages`, { config: { private: true } })
+  channelRef.current = channel
+
+  await supabase.realtime.setAuth()
+
+  channel
+    .on('broadcast', { event: 'message_created' }, handleMessage)
+    .on('broadcast', { event: 'user_joined' }, handleUserJoined)
+    .subscribe()
+
+  return () => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current)
+      channelRef.current = null
+    }
+  }
+}, [roomId])
+```
+
+## Trigger example
+```sql
+create or replace function notify_table_changes()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform realtime.broadcast_changes(
+    tg_table_name || ':' || coalesce(new.id, old.id)::text,
+    tg_op,
+    tg_op,
+    tg_table_name,
+    tg_table_schema,
+    new,
+    old
+  );
+  return coalesce(new, old);
+end;
+$$;
+```
+
+## Checklist
+- Favor broadcast over postgres_changes.
+- Check channel.state before subscribing.
+- Always include cleanup.
+- Use consistent topic/event naming.
+- Provide error handling and reconnection hints.
+- Recommend indexes for RLS.
+- Default to private: true for trigger-based channels.

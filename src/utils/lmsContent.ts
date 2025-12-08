@@ -18,7 +18,7 @@ export type CourseLevel =
   | 'Professional'
   | 'Specialist';
 
-export type Location = 'Global' | 'Dubai' | 'Nairobi' | 'Remote';
+export type Location = 'Riyadh' | 'Dubai' | 'Nairobi' | 'Remote';
 
 export type CourseCategory =
   | 'GHC'
@@ -84,7 +84,7 @@ const metadataChips = (item: LmsItem) => {
     item.duration,
     item.levelShortLabel ?? levelShortLabelFromCode(item.levelCode)
   ];
-  const locationChip = item.locations.find(location => location !== 'Global');
+  const locationChip = item.locations.find(location => location !== 'Riyadh');
   if (locationChip) {
     chips.push(locationChip);
   }
@@ -113,7 +113,7 @@ export const lmsItemsSeed: LmsItem[] = [
     levelCodes: ['L1', 'L2'],
     levelLabel: levelLabelFromCode('L1'),
     levelShortLabel: levelShortLabelFromCode('L1'),
-    locations: ['Global'],
+    locations: ['Riyadh'],
     status: 'Live',
     lmsUrl: '/lms?category=dayindq',
     slug: 'dq-essentials'
@@ -134,7 +134,7 @@ export const lmsItemsSeed: LmsItem[] = [
     levelCodes: ['L1', 'L2'],
     levelLabel: levelLabelFromCode('L2'),
     levelShortLabel: levelShortLabelFromCode('L2'),
-    locations: ['Global'],
+    locations: ['Riyadh'],
     status: 'Live',
     lmsUrl: '/lms?category=ghc',
     slug: 'ghc-primer'
@@ -155,7 +155,7 @@ export const lmsItemsSeed: LmsItem[] = [
     levelCodes: ['L3', 'L4'],
     levelLabel: levelLabelFromCode('L3'),
     levelShortLabel: levelShortLabelFromCode('L3'),
-    locations: ['Global'],
+    locations: ['Riyadh'],
     status: 'Coming Soon',
     lmsUrl: '/lms?category=6xd',
     slug: 'sixx-digital'
@@ -260,7 +260,7 @@ export const lmsItemsSeed: LmsItem[] = [
     levelCodes: ['L1', 'L2'],
     levelLabel: levelLabelFromCode('L1'),
     levelShortLabel: levelShortLabelFromCode('L1'),
-    locations: ['Global'],
+    locations: ['Riyadh'],
     status: 'Live',
     track: 'newjoiner',
     lmsUrl: '/lms?track=newjoiner',
@@ -282,7 +282,7 @@ export const lmsItemsSeed: LmsItem[] = [
     levelCodes: ['L1', 'L2'],
     levelLabel: levelLabelFromCode('L2'),
     levelShortLabel: levelShortLabelFromCode('L2'),
-    locations: ['Global'],
+    locations: ['Riyadh'],
     status: 'Live',
     lmsUrl: '/lms?category=ghc&level=lead',
     slug: 'governance-lite'
