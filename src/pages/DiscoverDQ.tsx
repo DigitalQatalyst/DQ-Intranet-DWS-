@@ -126,8 +126,15 @@ const DiscoverDQ: React.FC = () => {
         <section id="growth-areas" className="bg-[#F6FAFB] py-20 scroll-mt-[72px]">
           <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 text-center sm:px-10 lg:px-12">
             <h2
-              className="font-serif text-3xl font-bold tracking-[0.04em] text-[#030F35] sm:text-4xl"
-              style={{ fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }}
+              className="font-bold"
+              style={{ 
+                fontFamily: 'Palatino, serif',
+                fontSize: '48px',
+                fontWeight: 700,
+                color: '#000000',
+                textAlign: 'center',
+                textDecoration: 'none'
+              }}
             >
               Discover the DQ Ecosystem
             </h2>

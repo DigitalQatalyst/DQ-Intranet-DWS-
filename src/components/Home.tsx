@@ -444,7 +444,7 @@ export const HomePage: React.FC = () => {
           description:
             "Explore sectors, units, mandates, priorities, and performance data.",
           icon: <Building />,
-          path: "#",
+          path: "/marketplace/work-directory?tab=units",
           isActive: true,
         },
         {
@@ -453,7 +453,7 @@ export const HomePage: React.FC = () => {
           description:
             "Browse DQ positions, role descriptions, and key responsibilities.",
           icon: <Briefcase />,
-          path: "#",
+          path: "/marketplace/work-directory?tab=positions",
           isActive: true,
         },
         {
@@ -462,7 +462,7 @@ export const HomePage: React.FC = () => {
           description:
             "View associate profiles, contacts, skills, and performance details.",
           icon: <Users />,
-          path: "#",
+          path: "/marketplace/work-directory?tab=associates",
           isActive: true,
         },
         {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchDna, DqDnaNode, DqDnaCallout } from "../../services/dq";
 import SectionCTAButton from "../common/SectionCTAButton";
 
@@ -195,12 +195,13 @@ function Discover_DNASection({ onExploreLearningCenter }: Discover_DNASectionPro
         <div style={{ textAlign: "center", marginBottom: 18 }}>
           <h2
             style={{
-              color: "#030F35",
+              fontFamily: 'Palatino, serif',
+              fontSize: '48px',
               fontWeight: 700,
-              fontSize: 44,
+              color: '#000000',
+              textAlign: 'center',
+              textDecoration: 'none',
               margin: "0 0 8px",
-              fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif',
-              letterSpacing: "0.04em",
             }}
           >
             Growth Dimensions

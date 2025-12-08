@@ -38,7 +38,7 @@ const marketplaces: Marketplace[] = [
     name: 'DQ Work Directory',
     description: 'Explore sectors, units, positions, and associates across DQ to connect and collaborate.',
     icon: UsersIcon,
-    href: '#',
+    href: '/marketplace/work-directory',
   },
   {
     id: 'media-center',
@@ -182,7 +182,9 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
           <div className="max-h-96 overflow-y-auto">
             {marketplaces.map((marketplace, index) => {
               const Icon = marketplace.icon;
-              const isActive = marketplace.id === 'media-center' && (location.pathname.startsWith('/marketplace/opportunities') || location.pathname.startsWith('/marketplace/news'));
+              const isActive = 
+                (marketplace.id === 'media-center' && (location.pathname.startsWith('/marketplace/opportunities') || location.pathname.startsWith('/marketplace/news'))) ||
+                (marketplace.id === 'work-directory' && location.pathname.startsWith('/marketplace/work-directory'));
               return (
                 <a
                   key={marketplace.id}
