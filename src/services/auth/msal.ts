@@ -8,7 +8,14 @@ import {
 // Support both NEXT_PUBLIC_* and VITE_* envs
 const env = (import.meta as any).env as Record<string, string | undefined>;
 
-const CLIENT_ID = env.NEXT_PUBLIC_AAD_CLIENT_ID || env.VITE_AZURE_CLIENT_ID || "f996140d-d79b-419d-a64c-f211d23a38ad";
+// Client ID must be provided via environment variable
+const CLIENT_ID = env.NEXT_PUBLIC_AAD_CLIENT_ID || env.VITE_AZURE_CLIENT_ID;
+if (!CLIENT_ID) {
+  throw new Error(
+    "Azure AD Client ID is required. Please set VITE_AZURE_CLIENT_ID or NEXT_PUBLIC_AAD_CLIENT_ID in your .env file.\n\n" +
+    "This application uses Azure Entra ID (not B2C) for authentication."
+  );
+}
 const REDIRECT_URI =
   env.NEXT_PUBLIC_REDIRECT_URI ||
   env.VITE_AZURE_REDIRECT_URI ||
@@ -28,8 +35,9 @@ const DEFAULT_OIDC_SCOPES = ["openid", "profile", "email", "offline_access"] as 
 // Entra ID (Azure AD) Configuration
 // Tenant ID is required for Entra ID authentication
 // Can be provided as either tenant ID (GUID) or verified domain name
-const TENANT_ID = env.NEXT_PUBLIC_TENANT_ID || env.VITE_AZURE_TENANT_ID || "199ebd0d-2986-4f3d-8659-4388c5b2a724";
-const TENANT_DOMAIN = env.NEXT_PUBLIC_TENANT_DOMAIN || env.VITE_AZURE_TENANT_DOMAIN || "DigitalQatalyst.com";
+// Tenant ID or Domain must be provided via environment variable
+const TENANT_ID = env.NEXT_PUBLIC_TENANT_ID || env.VITE_AZURE_TENANT_ID;
+const TENANT_DOMAIN = env.NEXT_PUBLIC_TENANT_DOMAIN || env.VITE_AZURE_TENANT_DOMAIN;
 
 // Custom domain support (optional)
 const CUSTOM_DOMAIN = env.NEXT_PUBLIC_CIAM_CUSTOM_DOMAIN || env.VITE_AZURE_CUSTOM_DOMAIN;

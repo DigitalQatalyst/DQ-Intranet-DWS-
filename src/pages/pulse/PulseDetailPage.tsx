@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useSearchParams, useNavigate, Link, useParams } from "react-router-dom";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { supabase } from "../../lib/supabaseClient";
@@ -44,7 +44,9 @@ interface PulseItem {
 
 export const PulseDetailPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const id = searchParams.get('id');
+  const { id: pathId } = useParams<{ id?: string }>();
+  // Support both query param (?id=...) and path param (/pulse/:id)
+  const id = searchParams.get('id') || pathId || null;
   const navigate = useNavigate();
   const [item, setItem] = useState<PulseItem | null>(null);
   const [loading, setLoading] = useState(true);

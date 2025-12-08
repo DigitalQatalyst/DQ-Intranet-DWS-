@@ -49,6 +49,11 @@ import ThankYou from "./pages/ThankYou";
 import { WorkCenterRouter } from "./pages/workCenter/WorkCenterRouter";
 import WomenEntrepreneursPage from "./pages/WomenEntrepreneursPage";
 import { CommunitiesRouter } from "./communities/CommunitiesRouter";
+import DQCommsPage from "./pages/dqComms/DQCommsPage";
+import PulseMarketplacePage from "./pages/pulse/PulseMarketplacePage";
+import { PulseDetailPage } from "./pages/pulse/PulseDetailPage";
+import EventsMarketplacePage from "./pages/events/EventsMarketplacePage";
+import { EventDetailPage } from "./pages/events/EventDetailPage";
 
 export function AppRouter() {
   const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
@@ -139,6 +144,19 @@ export function AppRouter() {
                 <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/communities/*" element={<CommunitiesRouter />} />
+                <Route path="/community/:id" element={<Community />} />
+                <Route path="/community/:id/members" element={<CommunityMembers />} />
+                <Route path="/community/:id/settings" element={<CommunitySettings />} />
+                <Route path="/community/:id/analytics" element={<CommunityAnalytics />} />
+                <Route path="/create-post" element={<CreatePost />} />
+                <Route path="/post/:id" element={<PostDetail />} />
+                <Route path="/dq-comms" element={<DQCommsPage />} />
+                <Route path="/marketplace/pulse" element={<PulseMarketplacePage />} />
+                <Route path="/marketplace/pulse/detailsPage" element={<PulseDetailPage />} />
+                <Route path="/pulse/:id" element={<PulseDetailPage />} />
+                <Route path="/marketplace/events" element={<EventsMarketplacePage />} />
+                <Route path="/marketplace/events/detailsPage" element={<EventDetailPage />} />
+                <Route path="/events/:id" element={<EventDetailPage />} />
                 <Route path="/work-center/*" element={<WorkCenterRouter />} />
                 <Route
                   path="/women-entrepreneurs"

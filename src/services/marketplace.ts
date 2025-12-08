@@ -2,7 +2,7 @@ import { request } from "./graphql/client";
 import { MARKETPLACE_QUERIES } from "./graphql/queries";
 import { FilterConfig } from "../components/marketplace/FilterSidebar";
 import { MarketplaceItem } from "../components/marketplace/MarketplaceGrid";
-import { getMarketplaceConfig } from "../utils/marketplaceConfiguration";
+import { getMarketplaceConfig } from "../utils/marketplaceConfig";
 import { supabaseClient } from "../lib/supabaseClient";
 
 /**
@@ -170,7 +170,6 @@ const transformEventDetail = (event: any): any => {
     provider: provider,
     date: dateStr,
     time: timeRangeStr, // Use time range instead of just start time
-    endTime: endTimeStr,
     location: event.location || "TBA",
     location_filter: event.location_filter || event.location || "TBA",
     capacity: event.max_attendees ? `${event.max_attendees} attendees` : undefined,
@@ -188,7 +187,7 @@ const transformEventDetail = (event: any): any => {
     organizerName: event.organizer_name || null,
     organizerId: event.organizer_id || null,
     startTime: event.start_time,
-    endTime: event.end_time,
+    endTime: event.end_time || endTimeStr,
     duration: durationStr,
     status: event.status || "published",
     isFeatured: event.is_featured || false,

@@ -190,18 +190,20 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             return;
           }
           setItem(itemData);
-          setIsBookmarked(bookmarkedItems.includes(itemData.id));
+          if (itemData && 'id' in itemData) {
+            setIsBookmarked(bookmarkedItems.includes(itemData.id));
+          }
           
           // Fetch related events from database (only for events marketplace)
-          if (marketplaceType === 'events' && itemData.category) {
+          if (marketplaceType === 'events' && itemData && 'category' in itemData && itemData.category) {
             setRelatedEventsLoading(true);
             try {
               const { data: relatedEventsData, error: relatedError } = await supabaseClient
                 .from('events_v2')
                 .select('id, title, description, start_time, end_time, category, location, image_url, tags')
-                .eq('status', 'published')
-                .eq('category', itemData.category) // Filter by same category
-                .neq('id', itemId) // Exclude current event
+                .eq('status', 'published' as any)
+                .eq('category', itemData.category as any) // Filter by same category
+                .neq('id', itemId || '' as any) // Exclude current event
                 .gte('start_time', new Date().toISOString()) // Only future events
                 .order('start_time', { ascending: true })
                 .limit(5); // Limit to 5 events
@@ -227,9 +229,13 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             }
           } else {
             // For non-events or events without category, fetch related items normally
-            let relatedItemsData = [];
+            let relatedItemsData: any[] = [];
             try {
-              relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, itemData.id, itemData.category || '', itemData.provider?.name || '');
+              if (itemData && 'id' in itemData) {
+                const category = 'category' in itemData ? itemData.category : '';
+                const providerName = itemData.provider && 'name' in itemData.provider ? itemData.provider.name : '';
+                relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, itemData.id, category || '', providerName || '');
+              }
             } catch (relatedError) {
               console.error('Error fetching related items:', relatedError);
             }
@@ -242,9 +248,13 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             setItem(finalItemData);
             setIsBookmarked(bookmarkedItems.includes(finalItemData.id));
             // Fetch related items
-            let relatedItemsData = [];
+            let relatedItemsData: any[] = [];
             try {
-              relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, finalItemData.category || '', finalItemData.provider?.name || '');
+              if (finalItemData && 'id' in finalItemData) {
+                const category = 'category' in finalItemData ? finalItemData.category : '';
+                const providerName = finalItemData.provider && 'name' in finalItemData.provider ? finalItemData.provider.name : '';
+                relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, category || '', providerName || '');
+              }
             } catch (relatedError) {
               console.error('Error fetching related items:', relatedError);
               // Use fallback related items on error
@@ -344,7 +354,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           user_id: user.id,
           event_id: itemId,
           status: 'registered'
-        });
+        } as any);
 
       if (registrationError) {
         // Check if user is already registered

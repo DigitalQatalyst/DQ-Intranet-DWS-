@@ -119,6 +119,13 @@ const marketplaces: Marketplace[] = [
     href: '/communities',
   },
   {
+    id: 'dq-comms',
+    name: 'DQ COMMS',
+    description: 'Discussion rooms, pulse updates, and community events.',
+    icon: UsersIcon,
+    href: '/dq-comms',
+  },
+  {
     id: 'work-center',
     name: 'Work Center',
     description: 'Manage sessions, tasks, and trackers across projects and teams.',

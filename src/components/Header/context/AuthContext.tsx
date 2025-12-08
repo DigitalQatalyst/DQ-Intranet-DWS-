@@ -196,7 +196,7 @@ export function AuthProvider({
     });
   }, [instance]);
 
-  // For B2C with a combined SUSI policy, signup is the same as login
+  // For Entra ID, signup is the same as login (no separate policies like B2C)
   const signup = useCallback(() => {
     instance.loginRedirect({
       ...signupRequest,
