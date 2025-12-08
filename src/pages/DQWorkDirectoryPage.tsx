@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ChevronRightIcon, FilterIcon, HomeIcon, MapPin } from 'lucide-react';
+import { Building2, ChevronRightIcon, FilterIcon, HomeIcon, MapPin } from 'lucide-react';
 
 import { AssociateCard } from '@/components/associates/AssociateCard';
 import { AssociateProfileModal } from '@/components/work-directory/AssociateProfileModal';
@@ -56,6 +56,7 @@ interface MappedWorkPosition {
   status?: string | null;
   imageUrl?: string | null;
   bannerImageUrl?: string | null;
+  department?: string | null;
 }
 
 interface MappedAssociate {
@@ -271,6 +272,12 @@ export function DQWorkDirectoryPage() {
     const unitOptions = getUniqueValues(allPositions.map((p) => p.unit)).sort().map((v) => ({ id: v, name: v }));
     const roleFamilyOptions = getUniqueValues(allPositions.map((p) => p.roleFamily)).sort().map((v) => ({ id: v, name: v }));
 
+    // Debug: Log role families found
+    if (import.meta.env.DEV) {
+      console.log('[Position Filter] Role Families found:', roleFamilyOptions);
+      console.log('[Position Filter] Sample positions:', allPositions.slice(0, 5).map(p => ({ name: p.positionName, roleFamily: p.roleFamily })));
+    }
+
     const config: FilterConfig[] = [
       ...globalFilterConfig.filter((f) => f.id === 'location'),
       unitOptions.length ? { id: 'unit', title: 'Unit', options: unitOptions } : null,
@@ -442,11 +449,33 @@ export function DQWorkDirectoryPage() {
       })
       .filter((position) => {
         const { unit = [], level = [], location = [], roleFamily = [] } = positionFilters;
-        const matchesUnit = unit.length === 0 || (position.unit ? unit.includes(position.unit) : false);
+        const matchesUnit = unit.length === 0 || (position.unit ? unit.includes(position.unit.trim()) : false);
         const positionLocation = position.location ? locationLabel(position.location) : null;
         const matchesLocation = location.length === 0 || (positionLocation ? location.includes(positionLocation) : false);
+        // SFIA level filtering: check if position's level matches any selected level
+        // For positions with ranges (stored as primary level), we check exact match
+        // The filter will show positions that match the selected level(s)
         const matchesSfia = level.length === 0 || (position.sfiaLevel ? level.includes(position.sfiaLevel) : false);
-        const matchesRoleFamily = roleFamily.length === 0 || (position.roleFamily ? roleFamily.includes(position.roleFamily) : false);
+        // Role Family filtering: normalize both filter values and position values for comparison
+        const matchesRoleFamily = roleFamily.length === 0 || (() => {
+          if (!position.roleFamily) return false;
+          const positionRoleFamily = position.roleFamily.trim();
+          return roleFamily.some(filterValue => filterValue.trim() === positionRoleFamily);
+        })();
+        
+        // Debug logging for role family filter
+        if (import.meta.env.DEV && roleFamily.length > 0 && position.roleFamily) {
+          const matched = matchesRoleFamily;
+          if (!matched) {
+            console.log('[Position Filter] Role Family mismatch:', {
+              positionName: position.positionName,
+              positionRoleFamily: position.roleFamily,
+              filterRoleFamilies: roleFamily,
+              matched
+            });
+          }
+        }
+        
         return matchesUnit && matchesLocation && matchesSfia && matchesRoleFamily;
       })
       .map((position) => ({
@@ -698,106 +727,81 @@ export function DQWorkDirectoryPage() {
     const positionName = position?.positionName || 'TBC';
     const slug = position?.slug || '';
     const roleFamily = position?.roleFamily || null;
-    const unit = position?.unit || null;
     const rawLocation = position?.location || null;
     const sfiaLevel = position?.sfiaLevel || position?.sfiaRating || null;
-    const description = position?.description || null;
-    const expectations = position?.expectations || null;
-    const responsibilities = Array.isArray(position?.responsibilities) 
-      ? position.responsibilities 
-      : [];
     
     // Helper to determine if location should be displayed
-    // Show location only if it's meaningful (not null, not empty, and not "Global" for most cases)
     const shouldShowLocation = (loc: string | null): boolean => {
       if (!loc || loc.trim() === '') return false;
       const normalized = loc.trim();
-      // Show specific cities, Remote, but you can hide "Global" if it's too generic
-      // For now, we'll show all non-empty locations
       return normalized.length > 0;
     };
     
     const displayLocation = shouldShowLocation(rawLocation) ? locationLabel(rawLocation || '') : null;
-    
-    // Create 3-bullet preview: description, expectations, responsibilities[0]
-    const previewItems: string[] = [];
-    if (description) previewItems.push(description);
-    if (expectations) previewItems.push(expectations);
-    if (responsibilities.length > 0) previewItems.push(responsibilities[0]);
+
 
     // Debug logging in dev
     if (import.meta.env.DEV && !slug) {
       console.warn("[PositionCard] Position missing slug:", positionName, position);
     }
 
+    // Get responsibilities or summary for display
+    const getResponsibilitiesDisplay = () => {
+      if (position.responsibilities && position.responsibilities.length > 0) {
+        return position.responsibilities.slice(0, 3); // Show first 3
+      }
+      // If no responsibilities, try to create bullets from summary
+      if (position.summary) {
+        // Split summary into sentences and take first 3
+        const sentences = position.summary.split(/[.!?]+/).filter(s => s.trim().length > 0);
+        return sentences.slice(0, 3).map(s => s.trim());
+      }
+      return null;
+    };
+
+    const responsibilitiesDisplay = getResponsibilitiesDisplay();
+
     return (
-      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 p-5 flex flex-col h-full">
-        {/* Image banner if available */}
-        {position?.imageUrl && (
-          <div className="mb-4 -m-5 -mt-5 rounded-t-2xl overflow-hidden">
-            <img
-              src={position.imageUrl}
-              alt={positionName}
-              className="w-full h-32 object-cover"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = 'none';
-              }}
-            />
+      <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
+        {/* Position Title */}
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">
+          {positionName}
+        </h3>
+
+        {/* Responsibilities List */}
+        {responsibilitiesDisplay && responsibilitiesDisplay.length > 0 ? (
+          <ul className="mb-4 space-y-2 flex-1">
+            {responsibilitiesDisplay.map((item, index) => (
+              <li key={index} className="flex items-start gap-2 text-sm text-slate-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></span>
+                <span className="line-clamp-2">{item}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="mb-4 flex-1 text-sm text-slate-500 italic">
+            Details available in profile
           </div>
         )}
-        
-        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{positionName}</h3>
-        {previewItems.length > 0 && (
-          <div className="mt-3">
-            <ul className="space-y-2 text-sm text-gray-700">
-              {previewItems.slice(0, 3).map((item, idx) => (
-                <li key={idx} className="flex gap-2">
-                  <span className="mt-[6px] h-[6px] w-[6px] rounded-full bg-indigo-500 flex-shrink-0" />
-                  <span className="line-clamp-2">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+
+        {/* Role Family Tag */}
+        {roleFamily && (
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-700 mb-4">
+            {roleFamily}
+          </span>
         )}
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-slate-600">
-          {roleFamily && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700">
-              {roleFamily}
-            </span>
-          )}
-          {unit && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
-              {unit}
-            </span>
-          )}
-          {displayLocation && (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full ${
-              displayLocation.toLowerCase() === 'remote' 
-                ? 'bg-purple-50 text-purple-700' 
-                : displayLocation.toLowerCase() === 'global'
-                ? 'bg-gray-50 text-gray-700'
-                : 'bg-slate-100 text-slate-700'
-            }`}>
-              {displayLocation.toLowerCase() === 'remote' && '🌐 '}
-              {displayLocation}
-            </span>
-          )}
-          {sfiaLevel && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-              {sfiaLevel}
-            </span>
-          )}
-        </div>
-        <div className="mt-auto pt-4">
+
+        {/* View Profile Button */}
+        <div className="mt-auto">
           {slug ? (
             <Link
-              to={`/work-directory/positions/${slug}`}
-              className="inline-flex items-center justify-center rounded-lg bg-[#030F35] px-4 py-2 text-sm font-semibold text-white hover:bg-[#051040] transition-colors"
+              to={`/roles/${slug}`}
+              className="inline-flex w-full items-center justify-center rounded-full bg-[#030F35] px-4 py-2 text-sm font-semibold text-white hover:bg-[#051040] transition-all duration-200"
             >
               View role profile
             </Link>
           ) : (
-            <div className="inline-flex items-center justify-center rounded-lg bg-gray-300 px-4 py-2 text-sm font-semibold text-gray-500 cursor-not-allowed">
+            <div className="inline-flex w-full items-center justify-center rounded-full bg-gray-300 px-4 py-2 text-sm font-semibold text-gray-500 cursor-not-allowed">
               Profile unavailable
             </div>
           )}

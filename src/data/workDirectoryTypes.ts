@@ -43,6 +43,7 @@ export interface WorkPosition {
   bannerImageUrl?: string | null;
   department?: string | null;
   contractType?: string | null;
+  reportsTo?: string | null;
 }
 
 export interface EmployeeProfile {
