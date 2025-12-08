@@ -27,6 +27,7 @@ export interface WorkPosition {
   id: string;
   slug: string;
   positionName: string;
+  heroTitle?: string | null;
   roleFamily?: string | null;
   unit?: string | null;
   unitSlug?: string | null;
@@ -42,6 +43,7 @@ export interface WorkPosition {
   bannerImageUrl?: string | null;
   department?: string | null;
   contractType?: string | null;
+  reportsTo?: string | null;
 }
 
 export interface EmployeeProfile {

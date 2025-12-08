@@ -69,6 +69,7 @@ function mapPositionRow(row: any): WorkPosition {
     id: row.id,
     slug: row.slug,
     positionName: row.position_name || row.positionName,
+    heroTitle: row.hero_title || row.heroTitle || null,
     roleFamily: row.role_family || row.roleFamily || null,
     unit: row.unit || null,
     unitSlug: row.unit_slug || row.unitSlug || null,
@@ -124,6 +125,11 @@ export function useWorkUnits(): UseWorkUnitsResult {
     const fetchUnits = async () => {
       try {
         setLoading(true);
+        
+        if (!supabaseClient) {
+          throw new Error('Supabase client is not initialized. Please check your environment variables.');
+        }
+        
         const { data, error: fetchError } = await supabaseClient
           .from('work_units')
           .select('*')
@@ -131,6 +137,13 @@ export function useWorkUnits(): UseWorkUnitsResult {
 
         if (fetchError) {
           console.error('Error fetching work units:', fetchError);
+          // Provide more helpful error message
+          if (fetchError.code === 'PGRST116' || fetchError.message?.includes('does not exist')) {
+            throw new Error('work_units table does not exist. Please run the schema migration in Supabase. See supabase/work-directory-schema.sql');
+          }
+          if (fetchError.code === '42501' || fetchError.message?.includes('permission denied') || fetchError.message?.includes('row-level security')) {
+            throw new Error('Permission denied accessing work_units. Please check RLS policies. Run supabase/fix-work-directory-rls.sql to fix this.');
+          }
           throw fetchError;
         }
 
@@ -180,6 +193,10 @@ export function useWorkUnits(): UseWorkUnitsResult {
         updateData.performance_notes = data.performanceNotes;
       }
 
+      if (!supabaseClient) {
+        return { error: new Error('Supabase client is not initialized. Please check your environment variables.') };
+      }
+
       const { error: updateError } = await supabaseClient
         .from('work_units')
         .update(updateData)
@@ -224,6 +241,11 @@ export function useWorkPositions(): UseWorkPositionsResult {
     const fetchPositions = async () => {
       try {
         setLoading(true);
+        
+        if (!supabaseClient) {
+          throw new Error('Supabase client is not initialized. Please check your environment variables.');
+        }
+        
         const { data, error: fetchError } = await supabaseClient
           .from('work_positions')
           .select('*')
@@ -231,6 +253,13 @@ export function useWorkPositions(): UseWorkPositionsResult {
 
         if (fetchError) {
           console.error('Error fetching work positions:', fetchError);
+          // Provide more helpful error message
+          if (fetchError.code === 'PGRST116' || fetchError.message?.includes('does not exist')) {
+            throw new Error('work_positions table does not exist. Please run the schema migration in Supabase. See supabase/work-directory-schema.sql');
+          }
+          if (fetchError.code === '42501' || fetchError.message?.includes('permission denied') || fetchError.message?.includes('row-level security')) {
+            throw new Error('Permission denied accessing work_positions. Please check RLS policies. Run supabase/fix-work-directory-rls.sql to fix this.');
+          }
           throw fetchError;
         }
 
@@ -265,6 +294,11 @@ export function useAssociates(): UseAssociatesResult {
     const fetchAssociates = async () => {
       try {
         setLoading(true);
+        
+        if (!supabaseClient) {
+          throw new Error('Supabase client is not initialized. Please check your environment variables.');
+        }
+        
         const { data, error: fetchError } = await supabaseClient
           .from('work_associates')
           .select('*')
@@ -272,6 +306,13 @@ export function useAssociates(): UseAssociatesResult {
 
         if (fetchError) {
           console.error('Error fetching work associates:', fetchError);
+          // Provide more helpful error message
+          if (fetchError.code === 'PGRST116' || fetchError.message?.includes('does not exist')) {
+            throw new Error('work_associates table does not exist. Please run the schema migration in Supabase. See supabase/work-directory-schema.sql');
+          }
+          if (fetchError.code === '42501' || fetchError.message?.includes('permission denied') || fetchError.message?.includes('row-level security')) {
+            throw new Error('Permission denied accessing work_associates. Please check RLS policies. Run supabase/fix-work-directory-rls.sql to fix this.');
+          }
           throw fetchError;
         }
 
@@ -312,20 +353,31 @@ export function useUnitProfile(slug: string | undefined): UseUnitProfileResult {
 
     try {
       setLoading(true);
+      
+      if (!supabaseClient) {
+        throw new Error('Supabase client is not initialized. Please check your environment variables.');
+      }
+      
       const { data, error: fetchError } = await supabaseClient
         .from('work_units')
         .select('*')
         .eq('slug', slug)
         .single();
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        // Provide more helpful error message for missing table
+        if (fetchError.code === 'PGRST116' || fetchError.message?.includes('does not exist')) {
+          throw new Error('work_units table does not exist. Please run the schema migration in Supabase. See supabase/work-directory-schema.sql');
+        }
+        throw fetchError;
+      }
       
       const mappedUnit = data ? mapUnitRow(data) : null;
       setUnit(mappedUnit);
       setError(null);
 
       // Fetch related associates
-      if (mappedUnit) {
+      if (mappedUnit && supabaseClient) {
         setAssociatesLoading(true);
         const { data: associatesData, error: associatesError } = await supabaseClient
           .from('work_associates')

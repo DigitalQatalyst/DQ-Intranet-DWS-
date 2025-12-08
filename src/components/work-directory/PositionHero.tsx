@@ -10,6 +10,12 @@ interface PositionHeroProps {
   description?: string | null;
 }
 
+// Helper to determine if location should be displayed
+const shouldShowLocation = (loc: string | null | undefined): boolean => {
+  if (!loc || loc.trim() === '') return false;
+  return loc.trim().length > 0;
+};
+
 export function PositionHero({
   title,
   unitName,
@@ -19,6 +25,8 @@ export function PositionHero({
   bannerImageUrl,
   description,
 }: PositionHeroProps) {
+  const displayLocation = shouldShowLocation(location) ? location : null;
+  
   return (
     <section className="rounded-3xl text-white shadow-xl overflow-hidden">
       <div className="relative p-6 sm:p-10 bg-gradient-to-br from-[#030F35] via-[#1A2E6E] to-[#4B61D1]">
@@ -41,8 +49,11 @@ export function PositionHero({
             {unitName && (
               <span className="px-3 py-1 rounded-full bg-white/10 text-white">{unitName}</span>
             )}
-            {location && (
-              <span className="px-3 py-1 rounded-full bg-white/10 text-white">{location}</span>
+            {displayLocation && (
+              <span className="px-3 py-1 rounded-full bg-white/10 text-white">
+                {displayLocation.toLowerCase() === 'remote' && '🌐 '}
+                {displayLocation}
+              </span>
             )}
             {sfiaLevel && (
               <span className="px-3 py-1 rounded-full bg-white/10 text-white">{sfiaLevel}</span>

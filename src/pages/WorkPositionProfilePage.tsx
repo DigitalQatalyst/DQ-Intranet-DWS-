@@ -108,7 +108,11 @@ const WorkPositionProfilePage: React.FC = () => {
         {position && (
           <>
             <PositionHero
-              title={position.positionName || "TBC"}
+              title={
+                position.heroTitle?.trim() ||
+                position.positionName?.trim() ||
+                'Position'
+              }
               unitName={position.unit}
               location={position.location}
               sfiaLevel={position.sfiaLevel || position.sfiaRating || null}
