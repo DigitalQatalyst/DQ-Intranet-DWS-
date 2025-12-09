@@ -152,7 +152,8 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/work-directory" element={<DQWorkDirectoryPage />} />
       {/* Asset Library */}
       <Route path="/asset-library" element={<AssetLibraryPage />} />
-      <Route path="/marketplace/activities" element={<ActivitiesPage />} />
+      {/* Work Center - Activities */}
+      <Route path="/activities" element={<ActivitiesPage />} />
     </Routes>;
 };
 

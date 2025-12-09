@@ -116,7 +116,7 @@ const marketplaces: Marketplace[] = [
     name: 'Work Center',
     description: 'Manage sessions, tasks, and trackers across projects and teams.',
     icon: Briefcase,
-    href: '/work-center',
+    href: '/marketplace/activities',
   },
 ];
 
@@ -232,7 +232,7 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
               const Icon = marketplace.icon;
               const isActive = 
                 (marketplace.id === 'guides' && (location.pathname.startsWith('/marketplace/guides') || location.pathname.startsWith('/marketplace/knowledge-hub'))) ||
-                (marketplace.id === 'work-center' && location.pathname.startsWith('/work-center')) ||
+                (marketplace.id === 'work-center' && location.pathname.startsWith('/marketplace/activities')) ||
                 (marketplace.id === 'work-directory' && location.pathname.startsWith('/marketplace/work-directory'));
               return (
                 <a
