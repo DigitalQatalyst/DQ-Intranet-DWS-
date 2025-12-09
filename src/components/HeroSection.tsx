@@ -7,6 +7,7 @@ import {
 } from './AnimationUtils';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './Header';
+import { heroContent } from '../data/landingPageContent';
 interface HeroSectionProps {
   "data-id"?: string;
 }
@@ -48,12 +49,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
     }
     return () => clearTimeout(timer);
   }, [isSearchFocused]);
-  const suggestionPills = [
-    "Open an IT service request",
-    "Where’s the HR leave policy?",
-    'Start "Day in DQ" onboarding',
-    "Show this week’s LMS courses",
-  ];
+  const suggestionPills = heroContent.suggestionPills;
   return (
     <div
       className="relative w-full bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 overflow-hidden"
@@ -76,12 +72,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible">
-            <AnimatedText text="Your Digital Workspace" gap="1rem" />
+            <AnimatedText text={heroContent.title} gap="1rem" />
           </h1>
           <FadeInUpOnScroll delay={0.8}>
             <p className="text-xl text-white/90 mb-8">
-              One trusted hub for tools, requests, learning, and collaboration
-              so every Qatalyst can move work forward, fast.
+              {heroContent.subtitle}
             </p>
           </FadeInUpOnScroll>
         </div>

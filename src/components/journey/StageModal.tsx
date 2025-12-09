@@ -235,75 +235,41 @@ const StageModal = ({ stage, isOpen, onClose }: StageModalProps) => {
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <h3 className="text-lg font-semibold text-[#030F35]">Available Services</h3>
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-                    <button
-                      type="button"
-                      className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                        viewMode === "grid"
-                          ? "bg-[#030F35] text-white shadow"
-                          : "text-[#030F35] hover:bg-slate-100"
-                      }`}
-                      onClick={() => setViewMode("grid")}
-                      aria-pressed={viewMode === "grid"}
-                    >
-                      <LayoutGrid className="h-4 w-4" aria-hidden="true" />
-                      Grid
-                    </button>
-                    <button
-                      type="button"
-                      className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                        viewMode === "list"
-                          ? "bg-[#030F35] text-white shadow"
-                          : "text-[#030F35] hover:bg-slate-100"
-                      }`}
-                      onClick={() => setViewMode("list")}
-                      aria-pressed={viewMode === "list"}
-                    >
-                      <ListIcon className="h-4 w-4" aria-hidden="true" />
-                      List
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <h3 className="text-lg font-semibold text-[#030F35]">About This Level</h3>
 
-              <div className="flex flex-wrap gap-2">
-                {stageFilters.map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => setActiveFilter(filter)}
-                    aria-pressed={activeFilter === filter}
-                    className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
-                      activeFilter === filter
-                        ? "border-[#030F35] bg-[#030F35] text-white shadow"
-                        : "border-slate-200 text-[#030F35] hover:bg-slate-100"
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-6">
+                {stage.levelSummary && (
+                  <div>
+                    <h4 className="text-base font-semibold text-[#030F35] mb-2">Level Summary</h4>
+                    <p className="text-sm leading-relaxed text-slate-600">{stage.levelSummary}</p>
+                  </div>
+                )}
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                {filteredServices.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center gap-3 py-10 text-center text-slate-500">
-                    <p className="text-sm font-semibold text-[#030F35]">
-                      No services match this filter yet.
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Try another filter or explore the full list to keep momentum.
-                    </p>
+                {stage.growthExpectations && stage.growthExpectations.length > 0 && (
+                  <div>
+                    <h4 className="text-base font-semibold text-[#030F35] mb-3">Growth Expectations</h4>
+                    <ul className="space-y-2 text-sm text-slate-600">
+                      {stage.growthExpectations.map((expectation, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="mt-1 h-2 w-2 rounded-full bg-[#FB5535] flex-shrink-0" aria-hidden="true" />
+                          <span>{expectation}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                ) : viewMode === "grid" ? (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {filteredServices.map(renderServiceCard)}
-                  </div>
-                ) : (
-                  <div className="divide-y divide-slate-200">
-                    {filteredServices.map(renderServiceRow)}
+                )}
+
+                {stage.whatGoodLooksLike && stage.whatGoodLooksLike.length > 0 && (
+                  <div>
+                    <h4 className="text-base font-semibold text-[#030F35] mb-3">What Good Looks Like</h4>
+                    <ul className="space-y-2 text-sm text-slate-600">
+                      {stage.whatGoodLooksLike.map((item, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="mt-1 h-2 w-2 rounded-full bg-[#FB5535] flex-shrink-0" aria-hidden="true" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>

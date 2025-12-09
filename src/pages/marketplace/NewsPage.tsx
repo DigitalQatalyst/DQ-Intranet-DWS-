@@ -304,6 +304,18 @@ const NewsPage: React.FC = () => {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Update tab when searchParams change (e.g., when navigating with query params)
+  useEffect(() => {
+    const paramTab = searchParams.get('tab');
+    if (paramTab === 'announcements' || paramTab === 'insights' || paramTab === 'opportunities') {
+      setTab(paramTab);
+    } else if (location.pathname.includes('/opportunities')) {
+      setTab('opportunities');
+    } else if (!paramTab) {
+      setTab('announcements');
+    }
+  }, [searchParams, location.pathname]);
+
   useEffect(() => {
     setFilters({});
   }, [tab]);

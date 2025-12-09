@@ -169,7 +169,17 @@ const Discover_SixDigitalSection: React.FC = () => {
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
             Architecture
           </p>
-          <h2 className="mb-3 text-3xl font-bold text-gray-900">
+          <h2 
+            className="mb-3 font-bold"
+            style={{ 
+              fontFamily: 'Palatino, serif',
+              fontSize: '48px',
+              fontWeight: 700,
+              color: '#000000',
+              textAlign: 'center',
+              textDecoration: 'none'
+            }}
+          >
             DQ | 6x Digital Architecture
           </h2>
           <p className="mx-auto max-w-3xl text-lg text-gray-600">

@@ -28,19 +28,19 @@ const StageCard: React.FC<StageCardProps> = ({
   setActiveIndex
 }) => {
   const isActive = index === activeIndex;
-  const baseClasses = 'bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 min-w-[300px] flex flex-col flex-shrink-0 md:min-w-0 relative h-full min-h-[420px]';
+  const baseClasses = 'bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 w-[486px] md:w-full flex flex-col flex-shrink-0 relative';
   const activeClasses = 'ring-2 ring-blue-500 shadow-lg';
   const inactiveClasses = 'hover:shadow-lg hover:-translate-y-1';
   return <div className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`} onMouseEnter={() => setActiveIndex(index)}>
-      <div className="p-6 flex flex-col h-full">
-        <div className="flex items-center mb-4">
+      <div className="p-6 flex flex-col">
+        <div className="flex items-center mb-3">
           <div className={`p-3 rounded-full mr-4 transition-colors duration-300 ${isActive ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-600'}`}>
             {icon}
           </div>
           <h3 className="text-xl font-bold text-gray-800 clamp-1">{title}</h3>
         </div>
-        <p className="text-gray-600 mb-4 clamp-2">{description}</p>
-        <div className="mb-6">
+        <p className="text-gray-600 mb-3 clamp-2">{description}</p>
+        <div className="mb-4 flex-1">
           <h4 className="font-semibold text-gray-700 mb-2">Key Benefits:</h4>
           <ul className="text-gray-600 space-y-1">
             {benefits.map((benefit, i) => <li key={i} className="flex items-start">
@@ -61,7 +61,7 @@ const StageCard: React.FC<StageCardProps> = ({
             }
           }}
           data-stage-trigger={stageId}
-          className="mt-auto text-white font-medium py-2 px-4 rounded-md transition-all duration-300 flex items-center justify-center overflow-hidden group bg-[#131E42] hover:bg-[#0F1A4F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#99B2FF]"
+          className="text-white font-medium py-2.5 px-4 rounded-md transition-all duration-300 flex items-center justify-center overflow-hidden group bg-[#131E42] hover:bg-[#0F1A4F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#99B2FF]"
         >
           {ctaText}
           <ArrowRight size={16} className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />

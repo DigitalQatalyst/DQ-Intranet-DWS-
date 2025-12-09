@@ -71,7 +71,7 @@ export const Discover_HeroSection: React.FC = () => {
             </a>
             <button
               type="button"
-              onClick={() => navigate('/coming-soon?label=Strategy%20Center')}
+              onClick={() => navigate('/marketplace/guides?tab=strategy')}
               className="inline-flex items-center justify-center rounded-full border border-white/55 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(9,20,45,0.3)] transition hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#030F35]"
             >
               Explore Strategy Center →

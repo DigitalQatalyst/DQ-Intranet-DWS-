@@ -42,7 +42,13 @@ export const LmsCourses: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('courses');
+  
+  // Get tab from URL params, default to 'courses'
+  const tabFromUrl = searchParams.get('tab') as TabType;
+  const initialTab: TabType = (tabFromUrl && ['courses', 'tracks', 'reviews'].includes(tabFromUrl)) 
+    ? tabFromUrl 
+    : 'courses';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12; // Show 12 items per page
   
@@ -195,6 +201,14 @@ export const LmsCourses: React.FC = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+  // Sync tab from URL params
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab') as TabType;
+    if (tabFromUrl && ['courses', 'tracks', 'reviews'].includes(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams, activeTab]);
 
   // Reset to page 1 when filters or tab changes
   // Create a stable key from search params and search query to detect actual changes
@@ -558,7 +572,12 @@ export const LmsCourses: React.FC = () => {
         <div className="border-b border-gray-200 mb-6" data-tabs-section>
           <div className="flex space-x-8">
             <button
-              onClick={() => setActiveTab('courses')}
+              onClick={() => {
+                setActiveTab('courses');
+                const params = new URLSearchParams(searchParams);
+                params.set('tab', 'courses');
+                setSearchParams(params, { replace: true });
+              }}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'courses'
                   ? 'border-blue-600 text-blue-600'
@@ -569,7 +588,12 @@ export const LmsCourses: React.FC = () => {
               Courses
             </button>
             <button
-              onClick={() => setActiveTab('tracks')}
+              onClick={() => {
+                setActiveTab('tracks');
+                const params = new URLSearchParams(searchParams);
+                params.set('tab', 'tracks');
+                setSearchParams(params, { replace: true });
+              }}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'tracks'
                   ? 'border-blue-600 text-blue-600'
@@ -580,7 +604,12 @@ export const LmsCourses: React.FC = () => {
               Learning Tracks
             </button>
             <button
-              onClick={() => setActiveTab('reviews')}
+              onClick={() => {
+                setActiveTab('reviews');
+                const params = new URLSearchParams(searchParams);
+                params.set('tab', 'reviews');
+                setSearchParams(params, { replace: true });
+              }}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'reviews'
                   ? 'border-blue-600 text-blue-600'

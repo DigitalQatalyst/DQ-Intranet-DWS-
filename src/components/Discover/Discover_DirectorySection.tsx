@@ -1,294 +1,60 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Search, Filter } from 'lucide-react';
-import { DirectoryCard, DirectoryCardData } from '../Directory/DirectoryCard';
-import DirectoryProfileModal from '../Directory/DirectoryProfileModal';
-import DirectoryAssociateModal, {
-  DirectoryAssociateProfile,
-} from '../Directory/DirectoryAssociateModal';
-import { unitsData } from '../../data/directoryData';
-import type { Unit, ViewMode, SectorType } from '../../types/directory';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { MapPin, Search, Filter } from 'lucide-react';
+import { AssociateCard } from '@/components/associates/AssociateCard';
+import { AssociateProfileModal } from '@/components/work-directory/AssociateProfileModal';
+import { getPerformanceStyle } from '@/components/work-directory/unitStyles';
+import { getUnitIcon } from '@/components/Directory/unitIcons';
+import { useAssociates, useWorkUnits } from '@/hooks/useWorkDirectory';
+import { supabase } from '@/lib/supabaseClient';
+import type { ViewMode } from '../../types/directory';
+import type { Associate } from '@/components/associates/AssociateCard';
+import type { EmployeeProfile } from '@/data/workDirectoryTypes';
 
 interface Discover_DirectorySectionProps {
   title?: string;
   subtitle?: string;
 }
 
-/**
- * Map Unit to unified DirectoryCardData
- */
-const mapUnitToCard = (unit: Unit): DirectoryCardData => ({
-  logoUrl: unit.logoUrl,
-  title: unit.name,
-  tag: unit.sector,
-  description: unit.description || '',
-  towers: unit.streams,
-});
-
-type Associate = {
-  name: string;
-  title: string;
-  role: string;
-  unit: string;
-  tag: string;
-  email?: string;
-  mobile?: string;
-  location?: string;
-  company?: string;
-  website?: string;
-  sector?: SectorType;
+const locationLabel = (raw: string) => {
+  const normalized = raw?.toUpperCase() || '';
+  if (normalized === 'DXB' || raw === 'Dubai') return 'Dubai';
+  if (normalized === 'NBO' || raw === 'Nairobi') return 'Nairobi';
+  if (normalized === 'KSA' || raw === 'Riyadh') return 'Riyadh';
+  if (normalized === 'HOME' || normalized === 'REMOTE') return 'Remote';
+  return raw || 'Remote';
 };
 
-const RAW_ASSOCIATES_SHOWCASE = `
-Anthony Mwangi	Product Owner	Sector Lead (DBP Platforms)	DBP Platforms	DBP Platform	anthony.mwangi@digitalqatalyst.com		NBO
-Pelagie Njiki	Operation Analyst	Unit Lead (CoE)	CoE | Lead	CoE Lead	njiki.pelagie@digitalqatalyst.com	+971 55 623 1439	Dubai
-Bilal Waqar	Enterprise Architect	Unit Lead (Designs)	DBP Delivery	DBP Delivery	bilal.waqar@digitalqatalyst.com	+971 544 757 550	Dubai
-Rayyan Basha	Business Analyst	Delivery Lead (KSA Accounts)	DBP Delivery | Deploys	Account	rayyan.basha@digitalqatalyst.com	+971 559 295 369	Saudi Arabia
-Mohamed Thameez	Solution Analyst	Delivery Scrum Master (Designs)	DBP Delivery | Designs	Designs	mohamed.thameez@digitalqatalyst.com	+971 585 046 171	Dubai
-Habab Siddique	Scrum Master 	Product Owner (Deploys)	DBP Delivery | Deploys	Deploy	habab.siddig@digitalqatalyst.com	+971 561 314 934	Dubai
-Mart-Pearly Iyondong	Operation Analyst	HR Analyst	DCO Operations | HRA	O2P	mart-pearly.iyondong@digitalqatalyst.com	+971 569 590 488	Dubai
-Simon Kariuki	Data Enginner	Tower Lead (Intelligence)	DBP Platform | Intelligence	DBs | Pipe | API	simon.kariuki@digitalqatalyst.com	+254 790 504 948	Nairobi
-Stephanie Njunge	Solution Engineer	Tower Lead (Solutions)	DBP Platform | Solutions	eCom | DXP	stephanie.njunge@digitalqatalyst.com	+254 700 702 332	NBO
-Wilson Chege	Product Owner	Factory Lead (Products)	DBP Platform | Products	Products	wilson.chege@digitalqatalyst.com	+254 715 673 582	NBO
-Freshia Njoki	Solution Engineer	Factory Lead (SecDevOps)	DBP Platform | SecDevOps	SecDevOps	freshia.njoki@digitalqatalyst.com	+254 745 756 365	NBO
-Michael Kimeu	DevOps Engineer	Endpoint Developer	DBP Platform | SecDevOps	CICD | Test | Host	michael.kimeu@digitalqatalyst.com	+254 115 391 736	NBO
-Joseph Mwangi	CRM Engineer	Tower Lead (Solutions)	DBP Platform | Solutions	eCom | DWS	joseph.mwangi@digitalqatalyst.com	+254 768 280 212	NBO
-Mercy Wangari	Industrial Automative Engineer	Process Automation Developer	DBP Platform | Intelligence	DT2.0 | DTMP	mercy.wangari@digitalqatalyst.com	+254 705 123 305	NBO
-Dominic Paul	DevOps Engineer	Factory Lead (SecDevOps)	DBP Platform | SecDevOps	SecDevOps	dominic.paul@digitalqatalyst.com	+254 708 251 527	NBO
-Ian Kipkorir	Full-Stack Developer 	Factory Lead (Solutions)	DBP Platform | Solutions	eCom | DWS	ian.kipkorir@digitalqatalyst.com	+254 799 567 379	NBO
-Debra Wangari	Product Owner	Sector Lead (DBP Platforms)	DBP Platform | Products	DBP Platform	debra.wangari@digitalqatalyst.com	+254 717 574 734	NBO
-Eugene Ndichu	Product Owner	Tower Lead (DT2.0 | DTMP)	DBP Platform | Products	DT2.0 | DTMP	eugene.ndichu@digitalqatalyst.com	+254 797 680 821	NBO
-`.trim();
-
-const initials = (name: string): string =>
-  name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0] || '')
-    .join('')
-    .toUpperCase();
-
-const sanitizeTelHref = (value: string): string => value.replace(/\s+/g, '');
-
-const inferSectorFromTag = (tag: string, unit: string): SectorType => {
-  const text = `${tag} ${unit}`.toLowerCase();
-  if (text.includes('governance')) return 'Governance';
-  if (
-    text.includes('operation') ||
-    text.includes('hra') ||
-    text.includes('coe') ||
-    text.includes('o2p')
-  ) {
-    return 'Operations';
-  }
-  if (
-    text.includes('deliver') ||
-    text.includes('deploy') ||
-    text.includes('design') ||
-    text.includes('account')
-  ) {
-    return 'Delivery';
-  }
-  return 'Platform';
-};
-
-const parseAssociates = (raw: string): Associate[] =>
-  raw
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => line.split(/\t+|\s{2,}/).map((part) => part.trim()))
-    .map((parts) => {
-      const [
-        name = '',
-        title = '',
-        role = '',
-        unit = '',
-        tag = '',
-        email = '',
-        mobile = '',
-        location = '',
-        company = '',
-        website = '',
-      ] = parts;
-
-      const associate: Associate = {
-        name,
-        title,
-        role,
-        unit,
-        tag,
-        email: email || undefined,
-        mobile: mobile || undefined,
-        location: location || undefined,
-        company: company || 'DigitalQatalyst',
-        website: website || undefined,
-      };
-
-      associate.sector = inferSectorFromTag(associate.tag, associate.unit);
-
-      return associate;
-    })
-    .filter((item) => item.name);
-
-const getDescription = (associate: Associate): string => {
-  const title = associate.title?.trim();
-  const role = associate.role?.trim();
-  if (title && role) {
-    return title.length <= role.length ? title : role;
-  }
-  return title || role || '';
-};
-
-const getOneLiner = (a: Associate): string => {
-  const parts = [a.title?.trim(), a.role?.trim()].filter(Boolean);
-  return parts.join(' • ');
-};
-
-const mapAssociateToProfile = (associate: Associate): DirectoryAssociateProfile => ({
-  name: associate.name,
-  roleTitle: getOneLiner(associate) || associate.title || associate.role,
-  unitName: associate.unit || 'DigitalQatalyst',
-  tag: associate.tag,
-  email: associate.email,
-  phone: associate.mobile,
-  location: associate.location,
-  studio: associate.company,
-  description: getDescription(associate) || undefined,
-  skills: associate.tag ? [associate.tag] : undefined,
-});
-
-const CARD_BASE =
-  'rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:ring-1 hover:ring-slate-200 transition';
-const PAD = 'flex min-h-[360px] flex-col p-6';
-const META_PANEL = 'rounded-xl bg-slate-50 p-4 mb-4';
-const CTA_NAVY =
-  'w-full rounded-xl bg-[#131E42] text-white text-sm py-2.5 font-semibold hover:bg-[#0F1633] transition-colors';
-
-interface AssociateCardProps {
-  associate: Associate;
-  onOpen: (associate: Associate) => void;
+interface MappedWorkUnit {
+  id: string;
+  slug: string;
+  sector: string;
+  unitName: string;
+  unitType: string;
+  mandate?: string | null;
+  location: string;
+  focusTags: string[];
+  performanceStatus?: string | null;
+  performanceScore?: number | null;
 }
 
-const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
-  const { name, tag, email, mobile, location, website } = associate;
-  const mailHref = email ? `mailto:${email}` : undefined;
-  const phoneHref = mobile ? `tel:${sanitizeTelHref(mobile)}` : undefined;
-  const description = getDescription(associate);
-  const oneLiner = getOneLiner(associate);
-  const locationLabel = website ? website.replace(/^https?:\/\//, '') : location;
-  const websiteHref =
-    website && (website.startsWith('http://') || website.startsWith('https://'))
-      ? website
-      : website
-      ? `https://${website}`
-      : undefined;
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onOpen(associate)}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onOpen(associate);
-        }
-      }}
-      className={`${CARD_BASE} focus:outline-none focus:ring-2 focus:ring-[#131E42]/40`}
-    >
-      <div className={PAD}>
-        {/* Header */}
-        <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-sm font-semibold text-slate-700">
-            {initials(name)}
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-base font-semibold text-slate-900">{name}</h3>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                {tag}
-              </span>
-            </div>
-            {description && (
-              <p className="mt-1 text-sm text-slate-600 clamp-2">{description}</p>
-            )}
-            {oneLiner && (
-              <p className="mt-2 text-[13px] leading-5 text-slate-600 clamp-2">{oneLiner}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex-grow" />
-
-        {/* Contact panel sits just above CTA */}
-        <div className={META_PANEL}>
-          {mobile && (
-            <div className="flex items-center gap-2 text-sm text-slate-700">
-              <span aria-hidden="true">📞</span>
-              <a
-                href={phoneHref}
-                onClick={(event) => event.stopPropagation()}
-                className="underline underline-offset-2 hover:text-slate-900"
-              >
-                {mobile}
-              </a>
-            </div>
-          )}
-          {email && (
-            <div className="mt-1 flex items-center gap-2 text-sm text-slate-700">
-              <span aria-hidden="true">✉️</span>
-              <a
-                href={mailHref}
-                onClick={(event) => event.stopPropagation()}
-                className="truncate underline underline-offset-2 hover:text-slate-900"
-              >
-                {email}
-              </a>
-            </div>
-          )}
-          {locationLabel && (
-            <div className="mt-1 flex items-center gap-2 text-sm text-slate-700">
-              <span aria-hidden="true">🌐</span>
-              {websiteHref ? (
-                <a
-                  href={websiteHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(event) => event.stopPropagation()}
-                  className="underline underline-offset-2 hover:text-slate-900"
-                >
-                  {locationLabel}
-                </a>
-              ) : (
-                <span>{locationLabel}</span>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="mt-auto pt-4">
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onOpen(associate);
-            }}
-            className={CTA_NAVY}
-          >
-            View Profile
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+interface MappedAssociate {
+  id: string;
+  name: string;
+  currentRole: string;
+  department: string;
+  unit: string;
+  location: string;
+  email?: string | null;
+  avatarUrl?: string | null;
+  keySkills?: string[] | null;
+}
 
 const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
   subtitle = 'Connect with DQ sectors, teams, and associates driving collaboration, delivery, and innovation across the Digital Workspace.',
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // State
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -296,14 +62,16 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
   const [viewMode, setViewMode] = useState<ViewMode>(
     (searchParams.get('view') as ViewMode) || 'units'
   );
-  const [selectedSectors, setSelectedSectors] = useState<SectorType[]>([]);
-  const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
-  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
-  const [selectedAssociateProfile, setSelectedAssociateProfile] =
-    useState<DirectoryAssociateProfile | null>(null);
-  const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
+  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [selectedAssociate, setSelectedAssociate] = useState<Associate | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [profile, setProfile] = useState<EmployeeProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+
+  // Fetch data from DQ Work Directory
+  const { units: allUnits, loading: unitsLoading } = useWorkUnits();
+  const { associates: allAssociates, loading: associatesLoading } = useAssociates();
 
   // Debounce search
   useEffect(() => {
@@ -313,28 +81,46 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Update URL params
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (debouncedQuery) params.set('q', debouncedQuery);
-    if (viewMode !== 'units') params.set('view', viewMode);
-    if (selectedSectors.length > 0) params.set('sectors', selectedSectors.join(','));
-    if (selectedStreams.length > 0) params.set('streams', selectedStreams.join(','));
-    
-    setSearchParams(params, { replace: true });
-  }, [debouncedQuery, viewMode, selectedSectors, selectedStreams, setSearchParams]);
+  // Map units to display format
+  const mappedUnits = useMemo<MappedWorkUnit[]>(() => {
+    return allUnits.map((unit) => ({
+      id: unit.id,
+      slug: unit.slug,
+      sector: unit.sector,
+      unitName: unit.unitName,
+      unitType: unit.unitType,
+      mandate: unit.mandate,
+      location: unit.location,
+      focusTags: unit.focusTags || [],
+      performanceStatus: unit.performanceStatus,
+      performanceScore: unit.performanceScore,
+    }));
+  }, [allUnits]);
 
-  const showcaseAssociates = useMemo<Associate[]>(() => parseAssociates(RAW_ASSOCIATES_SHOWCASE), []);
+  // Map associates to display format
+  const mappedAssociates = useMemo<MappedAssociate[]>(() => {
+    return allAssociates.map((associate) => ({
+      id: associate.id,
+      name: associate.name,
+      currentRole: associate.currentRole || '',
+      department: associate.department || '',
+      unit: associate.unit || '',
+      location: associate.location || '',
+      email: associate.email,
+      avatarUrl: associate.avatarUrl,
+      keySkills: associate.keySkills || [],
+    }));
+  }, [allAssociates]);
 
-  // Filter logic
+  // Filter units based on search and filters
   const filteredUnits = useMemo(() => {
-    let filtered = [...unitsData];
+    let filtered = [...mappedUnits];
 
-    // Search
+    // Search filter
     if (debouncedQuery.trim()) {
       const lower = debouncedQuery.toLowerCase();
       filtered = filtered.filter((unit) =>
-        [unit.name, unit.description, unit.sector, ...(unit.streams || []), ...(unit.tags || [])]
+        [unit.unitName, unit.mandate, unit.sector, unit.unitType, ...(unit.focusTags || [])]
           .filter(Boolean)
           .join(' ')
           .toLowerCase()
@@ -347,35 +133,23 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
       filtered = filtered.filter((unit) => selectedSectors.includes(unit.sector));
     }
 
-    // Stream filter
-    if (selectedStreams.length > 0) {
-      filtered = filtered.filter((unit) =>
-        unit.streams?.some((stream) => selectedStreams.includes(stream))
-      );
-    }
-
     return filtered;
-  }, [debouncedQuery, selectedSectors, selectedStreams]);
+  }, [mappedUnits, debouncedQuery, selectedSectors]);
 
+  // Filter associates based on search and filters
   const filteredAssociates = useMemo(() => {
-    let filtered = [...showcaseAssociates];
+    let filtered = [...mappedAssociates];
 
-    // Search
+    // Search filter
     if (debouncedQuery.trim()) {
       const lower = debouncedQuery.toLowerCase();
-      filtered = filtered.filter((person) =>
+      filtered = filtered.filter((associate) =>
         [
-          person.name,
-          person.title,
-          person.role,
-          person.unit,
-          person.sector,
-          person.tag,
-          person.email,
-          person.mobile,
-          person.location,
-          person.company,
-          person.website,
+          associate.name,
+          associate.currentRole,
+          associate.department,
+          associate.unit,
+          ...(associate.keySkills || []),
         ]
           .filter(Boolean)
           .join(' ')
@@ -384,21 +158,30 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
       );
     }
 
-    // Sector filter
+    // Sector filter (using department as proxy for sector)
     if (selectedSectors.length > 0) {
-      filtered = filtered.filter(
-        (person) => person.sector && selectedSectors.includes(person.sector)
-      );
+      filtered = filtered.filter((associate) => {
+        // Map department to sector for filtering
+        const dept = associate.department?.toLowerCase() || '';
+        return selectedSectors.some((sector) => {
+          const sectorLower = sector.toLowerCase();
+          if (sectorLower === 'platform' && dept.includes('platform')) return true;
+          if (sectorLower === 'delivery' && dept.includes('delivery')) return true;
+          if (sectorLower === 'operations' && dept.includes('operation')) return true;
+          if (sectorLower === 'governance' && dept.includes('governance')) return true;
+          return false;
+        });
+      });
     }
 
     return filtered;
-  }, [debouncedQuery, selectedSectors, showcaseAssociates]);
-  const visibleAssociates = useMemo(
-    () => filteredAssociates.slice(0, 9),
-    [filteredAssociates]
-  );
+  }, [mappedAssociates, debouncedQuery, selectedSectors]);
 
-  const toggleSector = (sector: SectorType) => {
+  // Show first 6 items
+  const displayedUnits = useMemo(() => filteredUnits.slice(0, 6), [filteredUnits]);
+  const displayedAssociates = useMemo(() => filteredAssociates.slice(0, 6), [filteredAssociates]);
+
+  const toggleSector = (sector: string) => {
     setSelectedSectors((prev) =>
       prev.includes(sector) ? prev.filter((s) => s !== sector) : [...prev, sector]
     );
@@ -406,41 +189,184 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
 
   const clearFilters = () => {
     setSelectedSectors([]);
-    setSelectedStreams([]);
     setSearchQuery('');
   };
 
-  const hasActiveFilters = selectedSectors.length > 0 || selectedStreams.length > 0 || searchQuery.trim();
-  const sectors: SectorType[] = ['Governance', 'Operations', 'Platform', 'Delivery'];
-  const filteredSectionUnits = filteredUnits.filter(
-    (unit) =>
-      unit.name !== 'DQ Delivery (Designs)' && unit.name !== 'DQ Delivery (Accounts)'
-  );
+  const hasActiveFilters = selectedSectors.length > 0 || searchQuery.trim();
+  const sectors = ['Governance', 'Operations', 'Platform', 'Delivery'];
+
+  // Map associate to AssociateCard format
+  const mapToAssociate = (mapped: MappedAssociate): Associate => ({
+    id: mapped.id,
+    name: mapped.name,
+    current_role: mapped.currentRole,
+    department: mapped.department,
+    unit: mapped.unit,
+    location: mapped.location,
+    sfia_rating: null,
+    status: null,
+    email: mapped.email ?? null,
+    phone: null,
+    teams_link: '',
+    avatar_url: mapped.avatarUrl ?? null,
+    key_skills: mapped.keySkills || [],
+    summary: null,
+    bio: null,
+    hobbies: [],
+    technicalSkills: [],
+    functionalSkills: [],
+    softSkills: [],
+    keyCompetencies: [],
+    languages: [],
+  });
+
+  // Update URL params
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedQuery) params.set('q', debouncedQuery);
+    if (viewMode !== 'units') params.set('view', viewMode);
+    if (selectedSectors.length > 0) params.set('sectors', selectedSectors.join(','));
+    setSearchParams(params, { replace: true });
+  }, [debouncedQuery, viewMode, selectedSectors, setSearchParams]);
+
   const handleViewFullDirectory = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      window.open('/marketplace/directory', '_blank', 'noopener,noreferrer');
+    const tab = viewMode === 'associates' ? 'associates' : 'units';
+    navigate(`/marketplace/work-directory?tab=${tab}`);
+  }, [viewMode, navigate]);
+
+  const fetchAssociateProfile = async (associate: Associate) => {
+    setProfileLoading(true);
+    setProfile(null);
+    try {
+      if (!supabase) {
+        throw new Error('Supabase client is not initialized. Please check your environment variables.');
+      }
+      
+      let fetched: EmployeeProfile | null = null;
+      if (associate.email) {
+        const { data, error } = await supabase
+          .from('employee_profiles')
+          .select('*')
+          .ilike('email', associate.email)
+          .single();
+        if (!error && data) {
+          fetched = data as EmployeeProfile;
+        }
+      }
+      if (!fetched) {
+        const { data, error } = await supabase
+          .from('employee_profiles')
+          .select('*')
+          .ilike('full_name', associate.name)
+          .single();
+        if (!error && data) {
+          fetched = data as EmployeeProfile;
+        }
+      }
+      setProfile(fetched);
+    } catch (err) {
+      console.error('Error loading associate profile', err);
+      setProfile(null);
+    } finally {
+      setProfileLoading(false);
     }
-  }, []);
-
-  const openUnitModal = (unit: Unit) => {
-    setSelectedUnit(unit);
-    setIsUnitModalOpen(true);
   };
 
-  const closeUnitModal = () => {
-    setIsUnitModalOpen(false);
-    setTimeout(() => setSelectedUnit(null), 200);
+  const handleViewProfile = async (associate: Associate) => {
+    setSelectedAssociate(associate);
+    setShowModal(true);
+    await fetchAssociateProfile(associate);
   };
 
-  const openAssociateModal = (person: Associate) => {
-    setSelectedAssociateProfile(mapAssociateToProfile(person));
-    setIsAssociateModalOpen(true);
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedAssociate(null);
+    setProfile(null);
+    setProfileLoading(false);
   };
 
-  const closeAssociateModal = () => {
-    setIsAssociateModalOpen(false);
-    setTimeout(() => setSelectedAssociateProfile(null), 200);
-  };
+  function UnitCard({ unit }: { unit: MappedWorkUnit }) {
+    const performanceStyle = getPerformanceStyle(unit.performanceStatus);
+    const Icon = getUnitIcon({ sector: unit.sector, unitName: unit.unitName });
+    const formatStatusLabel = (value?: string | null) => {
+      if (!value) return "Unknown";
+      const normalized = value.toLowerCase();
+      if (normalized === "leading") return "Leading";
+      if (normalized === "on track" || normalized === "on_track") return "On track";
+      if (normalized === "at risk" || normalized === "at_risk") return "At risk";
+      return value;
+    };
+
+    return (
+      <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+        {/* Icon + chips */}
+        <div className="mb-2 flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-slate-500">
+            <span className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5">
+              {unit.unitType}
+            </span>
+            <span className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 max-w-[60%] truncate">
+              {unit.sector}
+            </span>
+          </div>
+        </div>
+
+        {/* Header */}
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-slate-900">{unit.unitName}</h3>
+          <div className="flex items-center gap-1 text-sm text-slate-500">
+            <MapPin size={14} className="text-slate-400" />
+            <span>{locationLabel(unit.location)}</span>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="mt-2 flex-1 text-sm text-slate-600">
+          <p className="line-clamp-3">{unit.mandate || "Not yet added."}</p>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-3 border-t border-slate-100 pt-3 space-y-2">
+          {unit.performanceStatus && (
+            <div className="flex items-center justify-between text-xs">
+              <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold border ${performanceStyle.pillClass}`}>
+                <span className="h-2 w-2 rounded-full bg-current" />
+                <span className="font-medium">{formatStatusLabel(unit.performanceStatus)}</span>
+                {unit.performanceScore != null && (
+                  <span className="text-slate-400">{unit.performanceScore} / 100</span>
+                )}
+              </span>
+            </div>
+          )}
+
+          {unit.focusTags && unit.focusTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {unit.focusTags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-700"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div>
+            <Link
+              to={`/work-directory/units/${unit.slug}`}
+              className="inline-flex w-full items-center justify-center rounded-full bg-[#030F35] px-4 py-2 text-sm font-semibold text-white hover:bg-[#051040] transition-colors"
+            >
+              View Unit Profile
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section
@@ -454,8 +380,15 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
         <div className="text-center mb-8 md:mb-10">
           <h1
             id="directory-heading"
-            className="font-serif text-[32px] md:text-[40px] font-bold tracking-[0.04em] leading-tight text-[#030F35] mb-3"
-            style={{ fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }}
+            className="font-bold mb-3"
+            style={{ 
+              fontFamily: 'Palatino, serif',
+              fontSize: '48px',
+              fontWeight: 700,
+              color: '#000000',
+              textAlign: 'center',
+              textDecoration: 'none'
+            }}
           >
             {viewMode === 'units' ? 'DQ Directory' : 'DQ Directory'}
           </h1>
@@ -547,7 +480,7 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
                 className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
                 style={{ backgroundColor: '#FB5535', color: '#fff' }}
               >
-                {selectedSectors.length + selectedStreams.length + (searchQuery.trim() ? 1 : 0)}
+                {selectedSectors.length + (searchQuery.trim() ? 1 : 0)}
               </span>
             )}
           </button>
@@ -571,16 +504,16 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {['Governance', 'Operations', 'Platform', 'Delivery'].map((sector) => (
+              {sectors.map((sector) => (
                 <button
                   key={sector}
-                  onClick={() => toggleSector(sector as SectorType)}
+                  onClick={() => toggleSector(sector)}
                   className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
                   style={{
-                    backgroundColor: selectedSectors.includes(sector as SectorType) ? '#131E42' : '#F9FAFB',
-                    color: selectedSectors.includes(sector as SectorType) ? '#fff' : '#334266',
+                    backgroundColor: selectedSectors.includes(sector) ? '#131E42' : '#F9FAFB',
+                    color: selectedSectors.includes(sector) ? '#fff' : '#334266',
                     border: `1px solid ${
-                      selectedSectors.includes(sector as SectorType) ? '#131E42' : '#E3E7F8'
+                      selectedSectors.includes(sector) ? '#131E42' : '#E3E7F8'
                     }`,
                   }}
                 >
@@ -599,60 +532,87 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
           </p>
         </div>
 
-        {/* Grid */}
-        {viewMode === 'associates' ? (
+        {/* Cards Grid */}
+        {viewMode === 'units' ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {visibleAssociates.map((person, index) => (
-                <AssociateCard
-                  key={`${person.name}-${person.unit}-${index}`}
-                  associate={person}
-                  onOpen={openAssociateModal}
-                />
-              ))}
-            </div>
-            {filteredAssociates.length > 9 && (
-              <div className="mt-10 flex justify-center">
-                <button
-                  type="button"
-                  onClick={handleViewFullDirectory}
-                  className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
-                >
-                  View Full Directory →
-                </button>
+            {unitsLoading ? (
+              <div className="text-center py-12">
+                <p className="text-sm text-gray-600">Loading units...</p>
+              </div>
+            ) : displayedUnits.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                {displayedUnits.map((unit) => (
+                  <UnitCard key={unit.id} unit={unit} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-sm text-gray-600">No units available</p>
               </div>
             )}
           </>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {filteredSectionUnits.map((unit) => (
-                <DirectoryCard
-                  key={unit.id}
-                  {...mapUnitToCard(unit)}
-                  onViewProfile={() => openUnitModal(unit)}
-                />
-              ))}
-            </div>
-            <div className="mt-10 flex justify-center">
-              <button
-                type="button"
-                onClick={handleViewFullDirectory}
-                className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
-              >
-                View Full Directory →
-              </button>
-            </div>
+            {associatesLoading ? (
+              <div className="text-center py-12">
+                <p className="text-sm text-gray-600">Loading associates...</p>
+              </div>
+            ) : displayedAssociates.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                {displayedAssociates.map((associate) => (
+                  <AssociateCard
+                    key={associate.id}
+                    associate={mapToAssociate(associate)}
+                    onViewProfile={handleViewProfile}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-sm text-gray-600">No associates available</p>
+              </div>
+            )}
           </>
         )}
 
+        {/* View Full Directory Button */}
+        <div className="flex justify-center mt-8">
+          <button
+            type="button"
+            onClick={handleViewFullDirectory}
+            className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
+          >
+            View Full Directory →
+          </button>
+        </div>
       </div>
-      <DirectoryAssociateModal
-        open={isAssociateModalOpen}
-        profile={selectedAssociateProfile}
-        onClose={closeAssociateModal}
+
+      {/* Associate Profile Modal */}
+      <AssociateProfileModal
+        open={showModal}
+        onClose={handleCloseModal}
+        profile={profile}
+        loading={profileLoading}
+        fallbackName={selectedAssociate?.name}
+        fallbackRole={selectedAssociate?.current_role}
+        fallbackLocation={selectedAssociate?.location}
+        fallbackEmail={selectedAssociate?.email}
+        fallbackPhone={selectedAssociate?.phone ?? null}
+        fallbackProfileImageUrl={selectedAssociate?.avatar_url ?? null}
+        fallbackSummary={selectedAssociate?.summary ?? null}
+        fallbackBio={selectedAssociate?.bio ?? null}
+        fallbackKeySkills={selectedAssociate?.key_skills ?? []}
+        fallbackSfiaRating={selectedAssociate?.sfia_rating ?? null}
+        fallbackStatus={selectedAssociate?.status ?? null}
+        fallbackUnit={selectedAssociate?.unit ?? null}
+        fallbackDepartment={selectedAssociate?.department ?? null}
+        fallbackHobbies={selectedAssociate?.hobbies ?? []}
+        fallbackTechnicalSkills={selectedAssociate?.technicalSkills ?? []}
+        fallbackFunctionalSkills={selectedAssociate?.functionalSkills ?? []}
+        fallbackSoftSkills={selectedAssociate?.softSkills ?? []}
+        fallbackKeyCompetencies={selectedAssociate?.keyCompetencies ?? []}
+        fallbackLanguages={selectedAssociate?.languages ?? []}
       />
-      <DirectoryProfileModal open={isUnitModalOpen} unit={selectedUnit} onClose={closeUnitModal} />
     </section>
   );
 };

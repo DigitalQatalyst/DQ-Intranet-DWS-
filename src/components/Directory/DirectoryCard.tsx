@@ -16,6 +16,10 @@ export type DirectoryCardData = {
 
 const getInitial = (title: string) => title?.[0]?.toUpperCase() ?? 'D';
 
+/**
+ * DQ-style unified directory card for Units and Associates
+ * Clean, professional layout with consistent spacing and navy-blue theme
+ */
 export const DirectoryCard: React.FC<DirectoryCardData> = ({
   logoUrl,
   title,
@@ -136,38 +140,39 @@ export const DirectoryCard: React.FC<DirectoryCardData> = ({
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={onViewProfile}
-          className="mt-6 w-full font-semibold transition-all"
-          style={{
-            height: '48px',
-            borderRadius: '12px',
-            backgroundColor: 'var(--dws-navy)',
-            color: 'var(--dws-white)',
-            fontSize: '14px',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--dws-navy-press)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(11, 30, 103, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--dws-navy)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.outline = '2px solid var(--dws-outline)';
-            e.currentTarget.style.outlineOffset = '2px';
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.outline = 'none';
-          }}
-          aria-label={`View profile for ${title}`}
-        >
-          View Profile
-        </button>
+      {/* CTA Button (DQ Navy) */}
+      <button
+        type="button"
+        onClick={onViewProfile}
+        className="mt-6 w-full font-semibold transition-all"
+        style={{
+          height: '48px',
+          borderRadius: '12px',
+          backgroundColor: 'var(--dws-navy)',
+          color: 'var(--dws-white)',
+          fontSize: '14px',
+          border: 'none',
+          cursor: 'pointer',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--dws-navy-press)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(11, 30, 103, 0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--dws-navy)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.outline = '2px solid var(--dws-outline)';
+          e.currentTarget.style.outlineOffset = '2px';
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.outline = 'none';
+        }}
+        aria-label={`View profile for ${title}`}
+      >
+        View Profile
+      </button>
       </div>
     </article>
   );

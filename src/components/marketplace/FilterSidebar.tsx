@@ -4,10 +4,16 @@ export interface FilterOption {
   id: string;
   name: string;
 }
+export interface FilterGroup {
+  title: string;
+  options: FilterOption[];
+}
+
 export interface FilterConfig {
   id: string;
   title: string;
   options: FilterOption[];
+  groups?: FilterGroup[];
 }
 interface AccordionSectionProps {
   title: string;

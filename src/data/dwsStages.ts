@@ -21,6 +21,9 @@ export type DwsStage = {
   ctaLabel: string;
   ctaHref: string;
   services: StageService[];
+  levelSummary?: string;
+  growthExpectations?: string[];
+  whatGoodLooksLike?: string[];
 };
 
 export const stageFilters = ["All", "Learning", "Service"] as const;
@@ -37,6 +40,18 @@ export const dwsStages: DwsStage[] = [
     keyBenefits: ["Onboarding guides", "LMS starter courses", "Knowledge Hub access"],
     ctaLabel: "Start Learning",
     ctaHref: "#",
+    levelSummary: "Build DQ foundations and understand the workspace environment.",
+    growthExpectations: [
+      "Complete onboarding guides and LMS starter courses",
+      "Learn core DQ tools and daily workflows",
+      "Understand team structure, roles, and responsibilities",
+      "Follow guidance from mentors and buddies",
+    ],
+    whatGoodLooksLike: [
+      "You understand basic tools and processes",
+      "You ask questions early and often",
+      "You complete assigned starter tasks successfully",
+    ],
     services: [
       {
         id: "starting-courses",
@@ -96,6 +111,18 @@ export const dwsStages: DwsStage[] = [
     keyBenefits: ["Daily checklists", "Buddy system", "Workspace orientation"],
     ctaLabel: "Follow the Path",
     ctaHref: "#",
+    levelSummary: "Practice with guidance and begin contributing to simple tasks.",
+    growthExpectations: [
+      "Follow daily checklists and work routines",
+      "Seek guidance proactively from the team",
+      "Complete assigned tasks with accuracy",
+      "Learn how your work contributes to team goals",
+    ],
+    whatGoodLooksLike: [
+      "You finish tasks on time with minimal rework",
+      "You use team processes consistently",
+      "You collaborate respectfully and communicate clearly",
+    ],
     services: [
       {
         id: "follow-onboarding",
@@ -146,6 +173,18 @@ export const dwsStages: DwsStage[] = [
     keyBenefits: ["Agile boards", "Services & Requests", "Team deliverables"],
     ctaLabel: "Assist Your Team",
     ctaHref: "#",
+    levelSummary: "Contribute independently and collaborate actively.",
+    growthExpectations: [
+      "Handle basic tasks end-to-end",
+      "Communicate progress clearly",
+      "Participate in team deliverables",
+      "Use Agile tools and work boards correctly",
+    ],
+    whatGoodLooksLike: [
+      "You require less supervision",
+      "You take responsibility for your deliverables",
+      "You help teammates when needed",
+    ],
     services: [
       {
         id: "assist-work-sessions",
@@ -205,6 +244,18 @@ export const dwsStages: DwsStage[] = [
     keyBenefits: ["Productivity dashboards", "Specialized LMS", "Cross-unit projects"],
     ctaLabel: "Apply Your Skills",
     ctaHref: "#",
+    levelSummary: "Own outcomes and drive value within your squad.",
+    growthExpectations: [
+      "Deliver tasks and features independently",
+      "Solve non-routine problems using judgment",
+      "Collaborate across squads",
+      "Support sprint planning and retros",
+    ],
+    whatGoodLooksLike: [
+      "You deliver consistent, high-quality outcomes",
+      "You anticipate blockers and escalate effectively",
+      "You contribute to team alignment",
+    ],
     services: [
       {
         id: "apply-projects-tasks",
@@ -255,6 +306,18 @@ export const dwsStages: DwsStage[] = [
     keyBenefits: ["Team sync playbook", "Scaling ceremonies", "Coaching guides"],
     ctaLabel: "Enable Your Teams",
     ctaHref: "#",
+    levelSummary: "Enable multi-squad alignment and drive team coordination.",
+    growthExpectations: [
+      "Guide others through work processes",
+      "Facilitate team syncs and ceremonies",
+      "Coordinate cross-squad dependencies",
+      "Mentor juniors where needed",
+    ],
+    whatGoodLooksLike: [
+      "You improve team workflows",
+      "Teams rely on you for clarity and direction",
+      "You help resolve blockers across squads",
+    ],
     services: [
       {
         id: "enable-team-sync-playbook",
@@ -314,6 +377,18 @@ export const dwsStages: DwsStage[] = [
     keyBenefits: ["Governance playbooks", "Release discipline", "Risk & compliance flows"],
     ctaLabel: "Ensure at Org Level",
     ctaHref: "#",
+    levelSummary: "Steer organizational outcomes and maintain delivery discipline.",
+    growthExpectations: [
+      "Apply governance playbooks and frameworks",
+      "Ensure compliance and risk controls",
+      "Manage release cycles and approval flows",
+      "Provide leadership guidance to teams",
+    ],
+    whatGoodLooksLike: [
+      "You bring structure and stability",
+      "You foresee organizational risks early",
+      "Your decisions improve delivery outcomes",
+    ],
     services: [
       {
         id: "ensure-blueprint-library",
@@ -364,6 +439,18 @@ export const dwsStages: DwsStage[] = [
     keyBenefits: ["Cross-unit playbooks", "Communities of practice", "Change toolkits"],
     ctaLabel: "Influence at Scale",
     ctaHref: "#",
+    levelSummary: "Scale good practices across units and teams.",
+    growthExpectations: [
+      "Create cross-unit playbooks",
+      "Build communities of practice",
+      "Lead change-management activities",
+      "Influence decision-making across groups",
+    ],
+    whatGoodLooksLike: [
+      "You uplift work quality across teams",
+      "You introduce scalable processes",
+      "You drive cross-unit alignment",
+    ],
     services: [
       {
         id: "influence-communities-of-practice",
@@ -423,6 +510,18 @@ export const dwsStages: DwsStage[] = [
     keyBenefits: ["Strategy hubs", "Innovation forums", "Thought leadership"],
     ctaLabel: "Inspire the Market",
     ctaHref: "#",
+    levelSummary: "Shape the ecosystem and inspire strategic direction.",
+    growthExpectations: [
+      "Lead strategy discussions and forums",
+      "Promote innovation and thought leadership",
+      "Influence the wider market and ecosystem",
+      "Inspire teams toward long-term vision",
+    ],
+    whatGoodLooksLike: [
+      "You shape strategic direction",
+      "You champion innovation at scale",
+      "Teams look to you for guidance and inspiration",
+    ],
     services: [
       {
         id: "inspire-strategy-hubs",

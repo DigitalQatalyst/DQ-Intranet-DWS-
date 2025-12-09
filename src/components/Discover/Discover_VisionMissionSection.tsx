@@ -8,8 +8,15 @@ export const Discover_VisionMissionSection: React.FC = () => {
         <div className="text-center mb-12 md:mb-16">
           <h2
             id="vm-heading"
-            className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-[0.04em] text-[#030F35] mb-3"
-            style={{ fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }}
+            className="font-bold mb-3"
+            style={{ 
+              fontFamily: 'Palatino, serif',
+              fontSize: '48px',
+              fontWeight: 700,
+              color: '#000000',
+              textAlign: 'center',
+              textDecoration: 'none'
+            }}
           >
             Vision &amp; Mission
           </h2>
