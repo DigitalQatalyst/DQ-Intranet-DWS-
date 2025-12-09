@@ -1,7 +1,7 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabaseClient } from '@/lib/supabaseClient';
 import { getServiceIcon } from '@/utils/serviceIconMap';
-import type { LucideIcon } from 'lucide-react';
 
 export interface HomeService {
   id: string;
