@@ -81,7 +81,7 @@ const marketplaces: Marketplace[] = [
     name: 'DQ Work Directory',
     description: 'Units, positions, and associate profiles.',
     icon: UsersIcon,
-    href: '/dq-work-directory',
+    href: '/marketplace/work-directory',
   },
   {
     id: 'media-center',
@@ -232,7 +232,8 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
               const Icon = marketplace.icon;
               const isActive = 
                 (marketplace.id === 'guides' && (location.pathname.startsWith('/marketplace/guides') || location.pathname.startsWith('/marketplace/knowledge-hub'))) ||
-                (marketplace.id === 'work-center' && location.pathname.startsWith('/work-center'));
+                (marketplace.id === 'work-center' && location.pathname.startsWith('/work-center')) ||
+                (marketplace.id === 'work-directory' && location.pathname.startsWith('/marketplace/work-directory'));
               return (
                 <a
                   key={marketplace.id}

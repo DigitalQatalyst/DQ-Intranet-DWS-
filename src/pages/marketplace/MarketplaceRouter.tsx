@@ -4,6 +4,7 @@ import AssetLibraryPage from '../assetLibrary';
 import { MarketplacePage } from '../../components/marketplace/MarketplacePage';
 import MarketplaceDetailsPage from './MarketplaceDetailsPage';
 import ActivitiesPage from './ActivitiesPage';
+import { DQWorkDirectoryPage } from '../DQWorkDirectoryPage';
 import { DollarSign, Briefcase, Calendar, BookOpen } from 'lucide-react';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
@@ -147,6 +148,8 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/news/:id" element={<NewsDetailPage />} />
       <Route path="/opportunities" element={<NewsPage />} />
       <Route path="/opportunities/:id" element={<NewsDetailPage />} />
+      {/* DQ Work Directory */}
+      <Route path="/work-directory" element={<DQWorkDirectoryPage />} />
       {/* Asset Library */}
       <Route path="/asset-library" element={<AssetLibraryPage />} />
       <Route path="/marketplace/activities" element={<ActivitiesPage />} />
