@@ -3,7 +3,24 @@ import { useSearchParams, useNavigate, useParams, Link } from 'react-router-dom'
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { supabase } from '../../lib/supabaseClient';
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Building, HomeIcon, ChevronRightIcon } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  Building, 
+  HomeIcon, 
+  ChevronRightIcon,
+  ExternalLink,
+  Share2,
+  Mail,
+  Tag,
+  AlertCircle,
+  CheckCircle
+} from 'lucide-react';
+import { MarketplaceEventCard } from '../../components/events/MarketplaceEventCard';
+import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/PageLayout';
 
 interface EventDetails {
   id: string;
@@ -26,6 +43,19 @@ interface EventDetails {
   tags: string[] | null;
   department: string | null;
   metadata: any | null;
+  status?: string;
+}
+
+interface RelatedEvent {
+  id: string;
+  title: string;
+  description: string | null;
+  start_time: string;
+  end_time: string;
+  category: string;
+  location: string;
+  image_url: string | null;
+  department: string | null;
 }
 
 export const EventDetailPage: React.FC = () => {
@@ -35,6 +65,7 @@ export const EventDetailPage: React.FC = () => {
   const id = searchParams.get('id') || pathId || null;
   const navigate = useNavigate();
   const [event, setEvent] = useState<EventDetails | null>(null);
+  const [relatedEvents, setRelatedEvents] = useState<RelatedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +91,27 @@ export const EventDetailPage: React.FC = () => {
 
         if (data) {
           setEvent(data);
+          
+          // Fetch related events (same category or department, excluding current event)
+          const relatedQuery = supabase
+            .from('events_v2')
+            .select('id, title, description, start_time, end_time, category, location, image_url, department')
+            .neq('id', id)
+            .gte('start_time', new Date().toISOString())
+            .order('start_time', { ascending: true })
+            .limit(3);
+
+          // Filter by category or department if available
+          if (data.category) {
+            relatedQuery.or(`category.eq.${data.category}${data.department ? `,department.eq.${data.department}` : ''}`);
+          } else if (data.department) {
+            relatedQuery.eq('department', data.department);
+          }
+
+          const { data: relatedData } = await relatedQuery;
+          if (relatedData) {
+            setRelatedEvents(relatedData as RelatedEvent[]);
+          }
         } else {
           setError('Event not found');
         }
@@ -74,11 +126,65 @@ export const EventDetailPage: React.FC = () => {
     fetchEvent();
   }, [id]);
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(date);
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    }).format(date);
+  };
+
+  const getSpeakers = (): string[] => {
+    if (!event || !event.metadata) return [];
+    
+    if (event.metadata.speakers && Array.isArray(event.metadata.speakers)) {
+      return event.metadata.speakers.map((s: any) => 
+        typeof s === 'string' ? s : (s.name || s.speakerName || s.full_name || '')
+      ).filter(Boolean);
+    }
+    
+    if (event.metadata.speaker) {
+      return [event.metadata.speaker];
+    }
+    
+    return [];
+  };
+
+  const handleShare = async () => {
+    if (navigator.share && event) {
+      try {
+        await navigator.share({
+          title: event.title,
+          text: event.description || '',
+          url: window.location.href,
+        });
+      } catch (err) {
+        // User cancelled or error occurred
+        console.log('Share cancelled');
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+  };
+
   if (loading) {
     return (
       <>
         <Header />
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="animate-pulse text-gray-500">Loading event details...</div>
         </div>
         <Footer />
@@ -90,12 +196,13 @@ export const EventDetailPage: React.FC = () => {
     return (
       <>
         <Header />
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
-            <p className="text-red-600 mb-4">{error || 'Event not found'}</p>
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600 mb-4 text-lg">{error || 'Event not found'}</p>
             <button
               onClick={() => navigate('/marketplace/events')}
-              className="px-4 py-2 bg-dq-navy text-white rounded-md hover:bg-[#13285A]"
+              className="px-6 py-3 bg-dq-navy text-white rounded-md hover:bg-[#13285A] transition-colors font-semibold"
             >
               Back to Events
             </button>
@@ -106,195 +213,319 @@ export const EventDetailPage: React.FC = () => {
     );
   }
 
-  // Convert event to the format expected by EventDetailsModal
-  const eventForModal = {
-    id: event.id,
-    title: event.title,
-    description: event.description || '',
-    start_time: event.start_time,
-    end_time: event.end_time,
-    category: event.category,
-    location: event.location,
-    location_filter: event.location_filter,
-    organizer_name: event.organizer_name,
-    organizer_email: event.organizer_email,
-    meeting_link: event.meeting_link,
-    is_virtual: event.is_virtual,
-    is_all_day: event.is_all_day,
-    max_attendees: event.max_attendees,
-    registration_required: event.registration_required,
-    registration_deadline: event.registration_deadline,
-    image_url: event.image_url,
-    tags: event.tags,
-    department: event.department,
-    metadata: event.metadata,
-  };
+  const speakers = getSpeakers();
+  const isRegistrationOpen = event.registration_deadline 
+    ? new Date(event.registration_deadline) > new Date()
+    : true;
 
   return (
     <>
       <Header />
       <div className="min-h-screen bg-gray-50">
-        {/* Breadcrumbs */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <nav className="flex" aria-label="Breadcrumb">
-              <ol className="inline-flex items-center space-x-1 md:space-x-2">
-                <li className="inline-flex items-center">
-                  <Link
-                    to="/"
-                    className="text-gray-600 hover:text-gray-900 inline-flex items-center text-sm md:text-base transition-colors"
-                  >
-                    <HomeIcon size={16} className="mr-1" />
-                    <span>Home</span>
-                  </Link>
-                </li>
-                <li>
-                  <div className="flex items-center">
-                    <ChevronRightIcon size={16} className="text-gray-400 mx-1" />
-                    <Link
-                      to="/marketplace/events"
-                      className="text-gray-600 hover:text-gray-900 text-sm md:text-base font-medium transition-colors"
-                    >
-                      Events
-                    </Link>
-                  </div>
-                </li>
-                <li aria-current="page">
-                  <div className="flex items-center min-w-[80px]">
-                    <ChevronRightIcon size={16} className="text-gray-400 mx-1" />
-                    <span className="text-gray-500 text-sm md:text-base font-medium truncate">
-                      {event.title}
-                    </span>
-                  </div>
-                </li>
-              </ol>
-            </nav>
-          </div>
-        </div>
-
-        {/* Event Details - Using Modal Component in Full Page Mode */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <button
-            onClick={() => navigate('/marketplace/events')}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-          >
-            <ArrowLeft size={20} className="mr-2" />
-            Back to Events
-          </button>
-
-          {/* Event Details Content */}
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            {/* Header Section */}
-            <div className="relative bg-gradient-to-r from-[#FB5535] via-[#1A2E6E] to-[#030F35] text-white p-8">
-              <div className="mb-4">
-                <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/20">
-                  {event.category}
-                </span>
-              </div>
-              <h1 className="text-3xl font-bold mb-4">{event.title}</h1>
-              {event.description && (
-                <p className="text-white/90 text-lg">{event.description}</p>
-              )}
+        <PageLayout
+          title={event.title}
+          breadcrumbs={[
+            { label: 'Home', href: '/' },
+            { label: 'Events', href: '/marketplace/events' },
+            { label: event.title, current: true }
+          ]}
+          headerSubtitle={event.description || undefined}
+        >
+          {/* Hero Image Section */}
+          {event.image_url && (
+            <div className="mb-6 -mx-4 sm:-mx-6 lg:-mx-8">
+              <img
+                src={event.image_url}
+                alt={event.title}
+                className="w-full h-64 sm:h-80 lg:h-96 object-cover"
+              />
             </div>
+          )}
 
-            {/* Content Section */}
-            <div className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {/* Date & Time */}
-                <div className="flex items-start space-x-3">
-                  <Calendar className="h-5 w-5 text-dq-navy mt-1 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-gray-900">Date & Time</p>
-                    <p className="text-gray-600">
-                      {new Date(event.start_time).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                    <p className="text-gray-600">
-                      {new Date(event.start_time).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                      })} - {new Date(event.end_time).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Location */}
-                <div className="flex items-start space-x-3">
-                  <MapPin className="h-5 w-5 text-dq-navy mt-1 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-gray-900">Location</p>
-                    <p className="text-gray-600">{event.location}</p>
-                    {event.is_virtual && (
-                      <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                        Virtual Event
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content - 2 columns */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Event Details Card */}
+              <PageSection>
+                <SectionHeader 
+                  title="Event Details" 
+                  description="All the information you need about this event"
+                />
+                <SectionContent>
+                  <div className="space-y-6">
+                    {/* Category Badge */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-dq-navy/10 text-dq-navy">
+                        {event.category}
                       </span>
+                      {event.is_virtual && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          Virtual Event
+                        </span>
+                      )}
+                      {event.department && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          <Building className="h-3 w-3 mr-1" />
+                          {event.department}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    {event.description && (
+                      <div className="prose max-w-none">
+                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                          {event.description}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Tags */}
+                    {event.tags && event.tags.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Tag className="h-4 w-4 text-gray-400" />
+                        {event.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Speakers */}
+                    {speakers.length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-2">Speakers</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {speakers.map((speaker, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-gray-50 text-gray-700 border border-gray-200"
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              {speaker}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
+                </SectionContent>
+              </PageSection>
 
-                {/* Department */}
-                {event.department && (
-                  <div className="flex items-start space-x-3">
-                    <Building className="h-5 w-5 text-dq-navy mt-1 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-gray-900">Department</p>
-                      <p className="text-gray-600">{event.department}</p>
+              {/* Additional Information */}
+              {event.metadata && Object.keys(event.metadata).length > 0 && (
+                <PageSection>
+                  <SectionHeader title="Additional Information" />
+                  <SectionContent>
+                    <div className="space-y-3">
+                      {Object.entries(event.metadata).map(([key, value]) => {
+                        if (key === 'speakers' || key === 'speaker' || !value) return null;
+                        return (
+                          <div key={key} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
+                            <span className="font-medium text-gray-700 capitalize">
+                              {key.replace(/_/g, ' ')}:
+                            </span>
+                            <span className="text-gray-600">
+                              {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
-                )}
+                  </SectionContent>
+                </PageSection>
+              )}
+            </div>
 
-                {/* Capacity */}
-                {event.max_attendees && (
-                  <div className="flex items-start space-x-3">
-                    <Users className="h-5 w-5 text-dq-navy mt-1 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-gray-900">Capacity</p>
-                      <p className="text-gray-600">{event.max_attendees} attendees</p>
+            {/* Sidebar - 1 column */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Event Info Card */}
+              <PageSection>
+                <SectionHeader title="Event Information" />
+                <SectionContent>
+                  <div className="space-y-4">
+                    {/* Date & Time */}
+                    <div className="flex items-start gap-3">
+                      <Calendar className="h-5 w-5 text-dq-navy mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-semibold text-gray-900 text-sm">Date & Time</p>
+                        <p className="text-gray-600 text-sm">{formatDate(event.start_time)}</p>
+                        {!event.is_all_day && (
+                          <p className="text-gray-600 text-sm">
+                            {formatTime(event.start_time)} - {formatTime(event.end_time)}
+                          </p>
+                        )}
+                        {event.is_all_day && (
+                          <p className="text-gray-600 text-sm">All Day Event</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
 
-              {/* Registration Button */}
+                    {/* Location */}
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-dq-navy mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-semibold text-gray-900 text-sm">Location</p>
+                        <p className="text-gray-600 text-sm">{event.location}</p>
+                        {event.location_filter && (
+                          <p className="text-gray-500 text-xs mt-1">{event.location_filter}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Capacity */}
+                    {event.max_attendees && (
+                      <div className="flex items-start gap-3">
+                        <Users className="h-5 w-5 text-dq-navy mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm">Capacity</p>
+                          <p className="text-gray-600 text-sm">{event.max_attendees} attendees</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Organizer */}
+                    {event.organizer_name && (
+                      <div className="flex items-start gap-3">
+                        <Building className="h-5 w-5 text-dq-navy mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm">Organizer</p>
+                          <p className="text-gray-600 text-sm">{event.organizer_name}</p>
+                          {event.organizer_email && (
+                            <a
+                              href={`mailto:${event.organizer_email}`}
+                              className="text-dq-navy text-sm hover:underline flex items-center gap-1 mt-1"
+                            >
+                              <Mail className="h-3 w-3" />
+                              Contact
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Registration Deadline */}
+                    {event.registration_deadline && (
+                      <div className="flex items-start gap-3">
+                        <Clock className="h-5 w-5 text-dq-navy mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm">Registration Deadline</p>
+                          <p className="text-gray-600 text-sm">
+                            {formatDate(event.registration_deadline)} at {formatTime(event.registration_deadline)}
+                          </p>
+                          {!isRegistrationOpen && (
+                            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3" />
+                              Registration closed
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </SectionContent>
+              </PageSection>
+
+              {/* Registration Card */}
               {event.registration_required && (
-                <div className="mt-8">
-                  {event.meeting_link ? (
-                    <a
-                      href={event.meeting_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block px-6 py-3 bg-dq-navy text-white rounded-md hover:bg-[#13285A] transition-colors font-semibold"
-                    >
-                      Register Now
-                    </a>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        // Handle registration logic here
-                        alert('Registration form will open here');
-                      }}
-                      className="px-6 py-3 bg-dq-navy text-white rounded-md hover:bg-[#13285A] transition-colors font-semibold"
-                    >
-                      Register Now
-                    </button>
-                  )}
-                </div>
+                <PageSection>
+                  <SectionContent>
+                    <div className="space-y-4">
+                      {isRegistrationOpen ? (
+                        <>
+                          {event.meeting_link ? (
+                            <a
+                              href={event.meeting_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full inline-flex items-center justify-center px-6 py-3 bg-dq-navy text-white rounded-md hover:bg-[#13285A] transition-colors font-semibold gap-2"
+                            >
+                              <CheckCircle className="h-5 w-5" />
+                              Register Now
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                if (event.organizer_email) {
+                                  window.location.href = `mailto:${event.organizer_email}?subject=Registration for ${event.title}`;
+                                } else {
+                                  alert('Please contact the organizer to register for this event.');
+                                }
+                              }}
+                              className="w-full inline-flex items-center justify-center px-6 py-3 bg-dq-navy text-white rounded-md hover:bg-[#13285A] transition-colors font-semibold gap-2"
+                            >
+                              <CheckCircle className="h-5 w-5" />
+                              Register Now
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-center py-3">
+                          <p className="text-red-600 text-sm font-medium mb-2">Registration Closed</p>
+                          <p className="text-gray-500 text-xs">
+                            The registration deadline has passed for this event.
+                          </p>
+                        </div>
+                      )}
+                      
+                      <button
+                        onClick={handleShare}
+                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors gap-2"
+                      >
+                        <Share2 className="h-4 w-4" />
+                        Share Event
+                      </button>
+                    </div>
+                  </SectionContent>
+                </PageSection>
               )}
             </div>
           </div>
-        </div>
+
+          {/* Related Events Section */}
+          {relatedEvents.length > 0 && (
+            <PageSection className="mt-8">
+              <SectionHeader 
+                title="Related Events" 
+                description="You might also be interested in these upcoming events"
+              />
+              <SectionContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {relatedEvents.map((relatedEvent) => (
+                    <Link
+                      key={relatedEvent.id}
+                      to={`/events/${relatedEvent.id}`}
+                      className="block"
+                    >
+                      <MarketplaceEventCard
+                        item={{
+                          id: relatedEvent.id,
+                          title: relatedEvent.title,
+                          description: relatedEvent.description || '',
+                          start: new Date(relatedEvent.start_time),
+                          end: new Date(relatedEvent.end_time),
+                          category: relatedEvent.category,
+                          location: relatedEvent.location,
+                          image_url: relatedEvent.image_url,
+                          department: relatedEvent.department,
+                        }}
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </SectionContent>
+            </PageSection>
+          )}
+        </PageLayout>
       </div>
       <Footer />
     </>
   );
 };
-

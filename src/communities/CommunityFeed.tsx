@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { CommunitiesLayout } from './CommunitiesLayout';
-import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/DesignSystem/PageLayout';
+import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/PageLayout';
 import { TabsFeed } from '@/communities/components/feed/TabsFeed';
 import { FeedSidebar } from '@/communities/components/feed/FeedSidebar';
 import { InlineComposer } from '@/communities/components/post/InlineComposer';
 import { supabase } from '@/lib/supabaseClient';
 import { safeFetch } from '@/communities/utils/safeFetch';
-import { StickyActionButton } from '@/communities/components/DesignSystem/Button';
+import { StickyActionButton } from '@/communities/components/Button';
 import { Button } from '@/communities/components/ui/button';
 import { X, Search } from 'lucide-react';
 
@@ -69,7 +69,7 @@ export function CommunityFeed() {
     
     try {
       // Fetch posts from communities the user is a member of
-      let query = supabaseClient
+      let query = supabase
         .from('posts')
         .select(`
           *,
@@ -80,7 +80,7 @@ export function CommunityFeed() {
         `)
         .eq('status', 'active')
         .in('community_id', 
-          supabaseClient
+          supabase
             .from('memberships')
             .select('community_id')
             .eq('user_id', user.id)
@@ -138,7 +138,7 @@ export function CommunityFeed() {
     
     try {
       // Fetch all public posts
-      let query = supabaseClient
+      let query = supabase
         .from('posts')
         .select(`
           *,
@@ -198,7 +198,7 @@ export function CommunityFeed() {
     
     try {
       // Fetch trending posts (posts with most reactions in last 7 days)
-      let query = supabaseClient
+      let query = supabase
         .from('posts')
         .select(`
           *,

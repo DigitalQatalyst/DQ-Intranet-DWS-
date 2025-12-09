@@ -44,7 +44,7 @@ import GuideEditor from "./pages/admin/guides/GuideEditor";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import EventsPage from "./pages/events/EventsPage";
-import KfBot from "./bot/KfBot";
+import ChatBot from "./bot/ChatBot";
 import ThankYou from "./pages/ThankYou";
 import { WorkCenterRouter } from "./pages/workCenter/WorkCenterRouter";
 import WomenEntrepreneursPage from "./pages/WomenEntrepreneursPage";
@@ -88,7 +88,7 @@ export function AppRouter() {
       <BrowserRouter>
         <AuthProvider>
           <CommunitiesAuthProvider>
-            <KfBot />
+            <ChatBot />
             <ProtectedRoute>
               <Routes>
                 <Route path="/discover-dq" element={<DiscoverDQ />} />
