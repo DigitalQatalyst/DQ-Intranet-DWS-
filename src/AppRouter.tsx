@@ -43,6 +43,7 @@ import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import EventsPage from "./pages/events/EventsPage";
 import ChatBot from "./bot/ChatBot";
 import ThankYou from "./pages/ThankYou";
@@ -83,9 +84,20 @@ export function AppRouter() {
     cache: new InMemoryCache(),
   });
 
+  // Create a QueryClient instance for React Query
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        refetchOnWindowFocus: false,
+      },
+    },
+  });
+
   return (
-    <ApolloProvider client={client}>
-      <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <ApolloProvider client={client}>
+        <BrowserRouter>
         <AuthProvider>
           <CommunitiesAuthProvider>
             <ChatBot />
@@ -170,5 +182,6 @@ export function AppRouter() {
         </AuthProvider>
       </BrowserRouter>
     </ApolloProvider>
+    </QueryClientProvider>
   );
 }
