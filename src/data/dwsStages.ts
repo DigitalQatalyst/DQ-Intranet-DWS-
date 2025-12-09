@@ -34,7 +34,7 @@ export const dwsStages: DwsStage[] = [
     order: 1,
     level: "L0",
     title: "Starting (Learning)",
-    subtitle: "Build DQ foundations.",
+    subtitle: "Build your DQ foundation with essential onboarding, tools, and starter learning needed to begin contributing.",
     about:
       "Lay the groundwork for your DQ journey with guided onboarding resources and curated starter courses that help you understand the workspace quickly.",
     keyBenefits: ["Onboarding guides", "LMS starter courses", "Knowledge Hub access"],
@@ -105,7 +105,7 @@ export const dwsStages: DwsStage[] = [
     order: 2,
     level: "L1",
     title: "Follow (Self Aware)",
-    subtitle: "Practice with guidance.",
+    subtitle: "Practice guided tasks, build confidence in daily routines, and understand how your work supports team goals.",
     about:
       "Strengthen awareness of DQ rhythms by pairing with mentors, applying daily rituals, and observing high-performing squads.",
     keyBenefits: ["Daily checklists", "Buddy system", "Workspace orientation"],
@@ -167,7 +167,7 @@ export const dwsStages: DwsStage[] = [
     order: 3,
     level: "L2",
     title: "Assist (Self Lead)",
-    subtitle: "Contribute and collaborate.",
+    subtitle: "Contribute independently to small tasks, collaborate with your squad, and communicate clearly to keep work moving.",
     about:
       "Own small deliverables, collaborate with your squad, and practice structured communication to unblock teammates.",
     keyBenefits: ["Agile boards", "Services & Requests", "Team deliverables"],
@@ -238,7 +238,7 @@ export const dwsStages: DwsStage[] = [
     order: 4,
     level: "L3",
     title: "Apply (Drive Squad)",
-    subtitle: "Own outcomes.",
+    subtitle: "Own outcomes within your squad, deliver consistent work, and play an active role in cross-team collaboration.",
     about:
       "Lead sprint rituals, track performance signals, and coach peers to deliver predictable squad outcomes.",
     keyBenefits: ["Productivity dashboards", "Specialized LMS", "Cross-unit projects"],
@@ -300,7 +300,7 @@ export const dwsStages: DwsStage[] = [
     order: 5,
     level: "L4",
     title: "Enable (Drive Team)",
-    subtitle: "Enable multi-squad alignment.",
+    subtitle: "Support multi-squad alignment, improve workflows, and guide teammates through shared delivery processes.",
     about:
       "Coordinate multiple squads, build shared rituals, and scale best practices that keep teams aligned.",
     keyBenefits: ["Team sync playbook", "Scaling ceremonies", "Coaching guides"],
@@ -371,7 +371,7 @@ export const dwsStages: DwsStage[] = [
     order: 6,
     level: "L5",
     title: "Ensure (Steer Org)",
-    subtitle: "Steer organization outcomes.",
+    subtitle: "Strengthen organization-level outcomes by applying governance, risk controls, and disciplined release management.",
     about:
       "Orchestrate releases, manage risk, and ensure compliance by connecting delivery signals to governance frameworks.",
     keyBenefits: ["Governance playbooks", "Release discipline", "Risk & compliance flows"],
@@ -433,7 +433,7 @@ export const dwsStages: DwsStage[] = [
     order: 7,
     level: "L6",
     title: "Influence (Steer Cross)",
-    subtitle: "Scale good practices.",
+    subtitle: "Scale best practices across units, lead change initiatives, and elevate quality through cross-organization influence.",
     about:
       "Establish communities of practice, design change programs, and share patterns across business units.",
     keyBenefits: ["Cross-unit playbooks", "Communities of practice", "Change toolkits"],
@@ -504,7 +504,7 @@ export const dwsStages: DwsStage[] = [
     order: 8,
     level: "L7",
     title: "Inspire (Inspire Market)",
-    subtitle: "Shape the ecosystem.",
+    subtitle: "Shape strategic direction, promote innovation, and inspire the wider ecosystem through thought leadership.",
     about:
       "Drive market influence by sharing thought leadership, showcasing innovation, and cultivating external partnerships.",
     keyBenefits: ["Strategy hubs", "Innovation forums", "Thought leadership"],
