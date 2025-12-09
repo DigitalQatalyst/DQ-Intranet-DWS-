@@ -34,6 +34,7 @@ import {
 } from "./AnimationUtils.tsx";
 import ServiceCarousel from "./marketplace/ServiceCarousel.tsx";
 import { DirectoryHubCard } from "./DirectoryHubCard.tsx";
+import { useHomeServices } from "@/hooks/useHomeServices";
 
 /* ----------------------------- AI Chatbot ----------------------------- */
 const AIChatbot = () => {
@@ -267,15 +268,17 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
-  // Services organized by new categories
-  const allServices = useMemo(() => {
+  // Fetch services from Supabase
+  const { data: supabaseServices, isLoading: servicesLoading, error: servicesError } = useHomeServices();
+
+  // Fallback hardcoded services (used if Supabase fails or returns empty)
+  const fallbackServices = useMemo(() => {
     return {
       learningKnowledge: [
         {
           id: "courses",
           title: "Courses",
-          description:
-            "Explore LMS courses across GHC, 6xD, DWS, DXP, and core curricula.",
+          description: "Explore LMS courses across GHC, 6xD, DWS, DXP, and core curricula.",
           icon: <GraduationCap />,
           path: "/lms?tab=courses",
           isActive: true,
@@ -283,35 +286,15 @@ export const HomePage: React.FC = () => {
         {
           id: "learning-tracks",
           title: "Learning Tracks",
-          description:
-            "Explore structured learning tracks that combine multiple courses into comprehensive learning journeys.",
+          description: "Explore structured learning tracks that combine multiple courses into comprehensive learning journeys.",
           icon: <Layers />,
           path: "/lms?tab=tracks",
           isActive: true,
         },
         {
-          id: "reviews",
-          title: "Reviews & Testimonials",
-          description:
-            "Read real experiences and insights from DQ associates who have completed courses.",
-          icon: <Star />,
-          path: "/lms?tab=reviews",
-          isActive: false,
-        },
-        {
-          id: "onboarding",
-          title: "Onboarding",
-          description:
-            "Follow onboarding tracks to complete role-based learning and setup.",
-          icon: <Compass />,
-          path: "/onboarding",
-          isActive: false,
-        },
-        {
           id: "strategy-guide",
           title: "Strategy Guide",
-          description:
-            "Understand DQ's journey, history, 6xD, initiatives, clients, and operating models.",
+          description: "Understand DQ's journey, history, 6xD, initiatives, clients, and operating models.",
           icon: <BarChart />,
           path: "/marketplace/guides?tab=strategy",
           isActive: true,
@@ -319,8 +302,7 @@ export const HomePage: React.FC = () => {
         {
           id: "operational-guide",
           title: "Operational Guide",
-          description:
-            "Access operational guidelines, policies, templates, and governance playbooks.",
+          description: "Access operational guidelines, policies, templates, and governance playbooks.",
           icon: <BookIcon />,
           path: "/marketplace/guides?tab=guidelines",
           isActive: true,
@@ -328,8 +310,7 @@ export const HomePage: React.FC = () => {
         {
           id: "knowledge-library",
           title: "Knowledge Library",
-          description:
-            "Browse glossaries, FAQs, and reference resources for everyday work.",
+          description: "Browse glossaries, FAQs, and reference resources for everyday work.",
           icon: <BookOpen />,
           path: "/marketplace/guides?tab=resources",
           isActive: true,
@@ -339,8 +320,7 @@ export const HomePage: React.FC = () => {
         {
           id: "technology-services",
           title: "Technology Services",
-          description:
-            "Submit technology requests: queries, support, environments, and self-service tools.",
+          description: "Submit technology requests: queries, support, environments, and self-service tools.",
           icon: <Briefcase />,
           path: "#",
           isActive: true,
@@ -348,8 +328,7 @@ export const HomePage: React.FC = () => {
         {
           id: "business-services",
           title: "Business Services",
-          description:
-            "Submit business, finance, and admin requests through a unified console.",
+          description: "Submit business, finance, and admin requests through a unified console.",
           icon: <Globe />,
           path: "#",
           isActive: true,
@@ -357,8 +336,7 @@ export const HomePage: React.FC = () => {
         {
           id: "digital-worker-tools",
           title: "Digital Worker Tools",
-          description:
-            "Use Doc Writers, prompting kits, AI tools, agents, and BPM helpers for delivery.",
+          description: "Use Doc Writers, prompting kits, AI tools, agents, and BPM helpers for delivery.",
           icon: <Lightbulb />,
           path: "#",
           isActive: true,
@@ -366,8 +344,7 @@ export const HomePage: React.FC = () => {
         {
           id: "blueprint-library",
           title: "Blueprint Library",
-          description:
-            "Access blueprint packs for 6xD design, DevOps, DBP, DXP, and DWS delivery.",
+          description: "Access blueprint packs for 6xD design, DevOps, DBP, DXP, and DWS delivery.",
           icon: <Compass />,
           path: "/marketplace/guides?tab=blueprints",
           isActive: true,
@@ -377,8 +354,7 @@ export const HomePage: React.FC = () => {
         {
           id: "work-sessions",
           title: "Work Sessions",
-          description:
-            "Run daily and weekly work sessions, reviews, retros, and collaborator touchpoints.",
+          description: "Run daily and weekly work sessions, reviews, retros, and collaborator touchpoints.",
           icon: <Clock />,
           path: "/marketplace/activities?tab=sessions",
           isActive: true,
@@ -386,8 +362,7 @@ export const HomePage: React.FC = () => {
         {
           id: "projects-tasks",
           title: "Projects & Tasks",
-          description:
-            "Manage tasks, planners, chat threads, and ATP delivery activities.",
+          description: "Manage tasks, planners, chat threads, and ATP delivery activities.",
           icon: <ClipboardList />,
           path: "/marketplace/activities?tab=projects-tasks",
           isActive: true,
@@ -395,8 +370,7 @@ export const HomePage: React.FC = () => {
         {
           id: "performance-trackers",
           title: "Performance Trackers",
-          description:
-            "Track statuses, categories, descriptions, and live workflow updates.",
+          description: "Track statuses, categories, descriptions, and live workflow updates.",
           icon: <TrendingUp />,
           path: "/marketplace/activities?tab=trackers",
           isActive: true,
@@ -404,8 +378,7 @@ export const HomePage: React.FC = () => {
         {
           id: "team-discussions",
           title: "Team Discussions",
-          description:
-            "Join forums on topics, DNA practices, learnings, and team conversations.",
+          description: "Join forums on topics, DNA practices, learnings, and team conversations.",
           icon: <MessageCircle />,
           path: "/communities",
           isActive: true,
@@ -413,8 +386,7 @@ export const HomePage: React.FC = () => {
         {
           id: "pulse-insights",
           title: "Pulse Insights",
-          description:
-            "Share insights through polls, surveys, and feedback loops.",
+          description: "Share insights through polls, surveys, and feedback loops.",
           icon: <HeartHandshake />,
           path: "/communities",
           isActive: true,
@@ -424,8 +396,7 @@ export const HomePage: React.FC = () => {
         {
           id: "dq-media-center",
           title: "DQ Media Center",
-          description:
-            "View DQ updates, corporate news, trends, and essential announcements.",
+          description: "View DQ updates, corporate news, trends, and essential announcements.",
           icon: <Newspaper />,
           path: "/marketplace/opportunities",
           isActive: true,
@@ -433,8 +404,7 @@ export const HomePage: React.FC = () => {
         {
           id: "career-opportunities",
           title: "Career Opportunities",
-          description:
-            "Browse new job postings and internal career opportunities.",
+          description: "Browse new job postings and internal career opportunities.",
           icon: <JobIcon />,
           path: "/marketplace/opportunities?tab=opportunities",
           isActive: true,
@@ -442,8 +412,7 @@ export const HomePage: React.FC = () => {
         {
           id: "blogs-stories",
           title: "Blogs & Stories",
-          description:
-            "Read stories, updates, and insights from teams across DQ.",
+          description: "Read stories, updates, and insights from teams across DQ.",
           icon: <BookIcon />,
           path: "/marketplace/opportunities?tab=insights",
           isActive: true,
@@ -451,8 +420,7 @@ export const HomePage: React.FC = () => {
         {
           id: "events-calendars",
           title: "Events & Calendars",
-          description:
-            "Stay aligned with scheduled huddles, events, calendars, and logistics.",
+          description: "Stay aligned with scheduled huddles, events, calendars, and logistics.",
           icon: <Calendar />,
           path: "/events",
           isActive: true,
@@ -462,18 +430,16 @@ export const HomePage: React.FC = () => {
         {
           id: "work-directory-hub",
           title: "Work Directory Hub",
-          description:
-            "Explore units, positions, and associates in one unified directory.",
+          description: "Explore units, positions, and associates in one unified directory.",
           icon: <Building />,
           path: "/marketplace/work-directory",
           isActive: true,
-          isTabbedCard: true, // Special flag for tabbed card
+          isTabbedCard: true,
         },
         {
           id: "client-testimonials",
           title: "Client Testimonials",
-          description:
-            "Explore client stories, cases, achievements, and leadership references.",
+          description: "Explore client stories, cases, achievements, and leadership references.",
           icon: <Award />,
           path: "/marketplace/guides?tab=testimonials",
           isActive: true,
@@ -481,6 +447,41 @@ export const HomePage: React.FC = () => {
       ],
     };
   }, []);
+
+  // Use Supabase data if available, otherwise fallback to hardcoded
+  const allServices = useMemo(() => {
+    if (supabaseServices && 
+        (supabaseServices.learningKnowledge.length > 0 || 
+         supabaseServices.servicesDigital.length > 0 ||
+         supabaseServices.workCollaboration.length > 0 ||
+         supabaseServices.cultureEvents.length > 0 ||
+         supabaseServices.peopleOrg.length > 0)) {
+      // Map Supabase services to the format expected by ServiceCard
+      return {
+        learningKnowledge: supabaseServices.learningKnowledge.map(s => ({
+          ...s,
+          icon: s.iconComponent || <CircleDot />,
+        })),
+        servicesDigital: supabaseServices.servicesDigital.map(s => ({
+          ...s,
+          icon: s.iconComponent || <CircleDot />,
+        })),
+        workCollaboration: supabaseServices.workCollaboration.map(s => ({
+          ...s,
+          icon: s.iconComponent || <CircleDot />,
+        })),
+        cultureEvents: supabaseServices.cultureEvents.map(s => ({
+          ...s,
+          icon: s.iconComponent || <CircleDot />,
+        })),
+        peopleOrg: supabaseServices.peopleOrg.map(s => ({
+          ...s,
+          icon: s.iconComponent || <CircleDot />,
+        })),
+      };
+    }
+    return fallbackServices;
+  }, [supabaseServices, fallbackServices]);
 
   /* --------- ROW COLORS + EJP BUTTON/ICON TREATMENT (UPDATED) --------- */
   const sectionStyles: Record<string, SectionStyle> = {
@@ -565,8 +566,8 @@ export const HomePage: React.FC = () => {
     },
   };
 
-  const handleServiceClick = (path: string) => {
-    if (path === "#" || !path) return; // Don't navigate if path is # or empty
+  const handleServiceClick = (path: string | null | undefined) => {
+    if (!path || path === "#") return; // Don't navigate if path is # or empty/null
     
     // Handle query parameters properly
     if (path.includes('?')) {
@@ -600,7 +601,7 @@ export const HomePage: React.FC = () => {
               <CategoryHeader
                 icon={<GraduationCap size={24} />}
                 title="Learning & Work Knowledge Hub"
-                count={7}
+                count={allServices.learningKnowledge.length}
               />
             </FadeInUpOnScroll>
             <ServiceCarousel
@@ -629,7 +630,7 @@ export const HomePage: React.FC = () => {
               <CategoryHeader
                 icon={<Briefcase size={24} />}
                 title="Services & Digital Enablement"
-                count={4}
+                count={allServices.servicesDigital.length}
               />
             </FadeInUpOnScroll>
             <ServiceCarousel
@@ -658,7 +659,7 @@ export const HomePage: React.FC = () => {
               <CategoryHeader
                 icon={<Users size={24} />}
                 title="Work Execution & Collaboration"
-                count={5}
+                count={allServices.workCollaboration.length}
               />
             </FadeInUpOnScroll>
             <ServiceCarousel
@@ -687,7 +688,7 @@ export const HomePage: React.FC = () => {
               <CategoryHeader
                 icon={<Newspaper size={24} />}
                 title="Culture, Events & Communications"
-                count={4}
+                count={allServices.cultureEvents.length}
               />
             </FadeInUpOnScroll>
             <ServiceCarousel
