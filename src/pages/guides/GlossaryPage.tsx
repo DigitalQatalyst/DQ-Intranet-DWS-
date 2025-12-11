@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { HomeIcon, ChevronRightIcon, Search } from 'lucide-react'
@@ -184,8 +184,61 @@ const GLOSSARY_DATA: GlossaryTerm[] = [
 
 const GlossaryPage: React.FC = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null)
+
+  // Related Frameworks data
+  const relatedFrameworks = [
+    {
+      id: "6xd",
+      title: "Agile 6×D (Products)",
+      description: "DQ's six essential perspectives for designing, building, and delivering digital products.",
+      image: "/images/knowledge/6xd.png",
+      link: "/knowledge-center/6xd"
+    },
+    {
+      id: "ghc",
+      title: "Golden Honeycomb of Competence (GHC)",
+      description: "DQ's core competency model that enables associate growth, performance, and digital mastery.",
+      image: "/images/knowledge/ghc.png",
+      link: "/knowledge-center/ghc"
+    }
+  ]
+
+  // Glossary Categories data
+  const glossaryCategories = [
+    {
+      title: "Digital Transformation Concepts",
+      description: "Core DT2.0 terminology used across DQ's digital operating model.",
+      link: "#dt"
+    },
+    {
+      title: "DQ Tools & Platforms",
+      description: "Key systems such as Abacus, Ardoq, DBP, DTMP, DTMA used across DQ.",
+      link: "#tools"
+    },
+    {
+      title: "Leadership & Change",
+      description: "Terms covering change management, leadership behavior, and governance.",
+      link: "#leadership"
+    },
+    {
+      title: "Agile & Delivery",
+      description: "Terminology related to Agile, delivery, and execution frameworks.",
+      link: "#agile"
+    },
+    {
+      title: "Business & Customer Design",
+      description: "Business design, journeys, value, and customer-centricity concepts.",
+      link: "#business"
+    },
+    {
+      title: "Working Rooms & Operating Rhythm",
+      description: "CWS, UWS, PWS, WR, ATP, SEDU and DQ ways of working.",
+      link: "#wr"
+    }
+  ]
 
   // Get all available letters
   const allLetters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
@@ -267,6 +320,48 @@ const GlossaryPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Related Frameworks Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+          {relatedFrameworks.map(item => (
+            <div 
+              key={item.id}
+              className="bg-white shadow-sm rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition cursor-pointer"
+              onClick={() => navigate(item.link)}
+            >
+              <img src={item.image} alt={item.title} className="w-full h-[160px] object-cover" />
+              <div className="p-5">
+                <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                <p className="text-gray-600 mt-2 text-sm">{item.description}</p>
+                <button className="mt-4 w-full bg-[#0A1433] text-white py-2.5 rounded-xl text-sm hover:bg-[#0A1433]/90">
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Glossary Category Cards */}
+        <div className="mt-14">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Glossary Categories</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {glossaryCategories.map(cat => (
+              <div
+                key={cat.title}
+                className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 hover:shadow-md cursor-pointer transition"
+                onClick={() => {
+                  const element = document.querySelector(cat.link)
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }}
+              >
+                <h3 className="text-lg font-semibold text-gray-900">{cat.title}</h3>
+                <p className="text-sm text-gray-600 mt-2">{cat.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Search Bar */}
         <div className="mb-6 max-w-2xl mx-auto">
           <div className="relative">
@@ -281,8 +376,36 @@ const GlossaryPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Category Section Headers with Anchors */}
+        <div className="bg-white">
+          <div id="dt" className="scroll-mt-20 mt-14">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Digital Transformation Concepts</h2>
+            <p className="text-gray-600 mb-6">Core DT2.0 terminology used across DQ's digital operating model.</p>
+          </div>
+          <div id="tools" className="scroll-mt-20 mt-14">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">DQ Tools & Platforms</h2>
+            <p className="text-gray-600 mb-6">Key systems such as Abacus, Ardoq, DBP, DTMP, DTMA used across DQ.</p>
+          </div>
+          <div id="leadership" className="scroll-mt-20 mt-14">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Leadership & Change</h2>
+            <p className="text-gray-600 mb-6">Terms covering change management, leadership behavior, and governance.</p>
+          </div>
+          <div id="agile" className="scroll-mt-20 mt-14">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Agile & Delivery</h2>
+            <p className="text-gray-600 mb-6">Terminology related to Agile, delivery, and execution frameworks.</p>
+          </div>
+          <div id="business" className="scroll-mt-20 mt-14">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Business & Customer Design</h2>
+            <p className="text-gray-600 mb-6">Business design, journeys, value, and customer-centricity concepts.</p>
+          </div>
+          <div id="wr" className="scroll-mt-20 mt-14">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Working Rooms & Operating Rhythm</h2>
+            <p className="text-gray-600 mb-6">CWS, UWS, PWS, WR, ATP, SEDU and DQ ways of working.</p>
+          </div>
+        </div>
+
         {/* Alphabetical Navigation - Theme colors */}
-        <div className="mb-8 flex flex-wrap justify-center gap-2">
+        <div className="mb-8 mt-8 flex flex-wrap justify-center gap-2">
           {allLetters.map(letter => {
             const hasContent = lettersWithContent.includes(letter)
             const isActive = selectedLetter === letter
@@ -310,21 +433,33 @@ const GlossaryPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredTerms.map((term, index) => (
-                <div 
-                  key={`${term.letter}-${index}`} 
-                  className="bg-slate-50 rounded-lg border border-gray-200 shadow-sm p-6"
-                >
-                  {/* Term Title - Theme color, bold */}
-                  <h3 className="text-lg font-bold text-[var(--guidelines-primary)] mb-3">
-                    {term.term}
-                  </h3>
-                  {/* Definition - Regular black text */}
-                  <p className="text-base text-gray-800 leading-relaxed">
-                    {term.definition}
-                  </p>
-                </div>
-              ))}
+              {filteredTerms.map((term, index) => {
+                // Check if this is the first term of a new letter to add section anchor
+                const isFirstOfLetter = index === 0 || filteredTerms[index - 1].letter !== term.letter
+                const letterId = `letter-${term.letter}`
+                
+                return (
+                  <React.Fragment key={`${term.letter}-${index}`}>
+                    {isFirstOfLetter && (
+                      <div id={letterId} className="scroll-mt-20">
+                        <h2 className="text-2xl font-semibold text-gray-900 mt-14 mb-4">
+                          {term.letter}
+                        </h2>
+                      </div>
+                    )}
+                    <div className="bg-slate-50 rounded-lg border border-gray-200 shadow-sm p-6">
+                      {/* Term Title - Theme color, bold */}
+                      <h3 className="text-lg font-bold text-[var(--guidelines-primary)] mb-3">
+                        {term.term}
+                      </h3>
+                      {/* Definition - Regular text with proper spacing */}
+                      <p className="text-base text-gray-700 leading-relaxed space-y-3">
+                        {term.definition}
+                      </p>
+                    </div>
+                  </React.Fragment>
+                )
+              })}
             </div>
           )}
         </div>

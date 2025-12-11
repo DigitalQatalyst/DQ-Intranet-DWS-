@@ -555,6 +555,48 @@ function GuidelinePage() {
         </div>
       </main>
 
+      {/* Need Help Section */}
+      <section className="bg-white border-t border-gray-200 py-12 px-6 md:px-12 lg:px-24">
+        <div className="container mx-auto max-w-5xl">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            {/* Left side - Title */}
+            <div>
+              <h3 className="text-2xl font-bold mb-2" style={{ color: '#0A1A3B' }}>
+                Need Help?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Contact the team for assistance
+              </p>
+            </div>
+
+            {/* Right side - Contacts */}
+            <div className="flex flex-wrap gap-4">
+              {/* Contact 1 - Sreya Lakshmi */}
+              <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 border border-gray-200 hover:bg-gray-100 transition-colors">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm font-bold">SL</span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Sreya Lakshmi</p>
+                  <p className="text-xs text-gray-600">CoE Analyst CoE</p>
+                </div>
+              </div>
+
+              {/* Contact 2 - Fadil Alli */}
+              <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 border border-gray-200 hover:bg-gray-100 transition-colors">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm font-bold">FA</span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Fadil Alli</p>
+                  <p className="text-xs text-gray-600">CoE Analyst CoE</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <Footer isLoggedIn={!!user} />
     </div>
   )

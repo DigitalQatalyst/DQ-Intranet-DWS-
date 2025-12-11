@@ -7,10 +7,10 @@
 // - Added accessibility attributes and improved button styling per spec
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams, Link } from 'react-router-dom'
+import { useLocation, useParams, Link } from 'react-router-dom'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
-import { ChevronRightIcon, HomeIcon, CheckCircle, Download, AlertTriangle, ExternalLink, ChevronDown } from 'lucide-react'
+import { ChevronRightIcon, HomeIcon, CheckCircle, Download, AlertTriangle, ExternalLink } from 'lucide-react'
 import { supabaseClient } from '../../lib/supabaseClient'
 import { getGuideImageUrl } from '../../utils/guideImageMap'
 import { track } from '../../utils/analytics'
@@ -52,7 +52,6 @@ interface GuideRecord {
 const GuideDetailPage: React.FC = () => {
   const { itemId } = useParams()
   const location = useLocation() as any
-  const navigate = useNavigate()
   const { user } = useAuth()
 
   const [guide, setGuide] = useState<GuideRecord | null>(null)
@@ -62,7 +61,6 @@ const GuideDetailPage: React.FC = () => {
   const [checklistState, setChecklistState] = useState<Record<string, boolean>>({})
   const [previewUnavailable, setPreviewUnavailable] = useState(false)
   const articleRef = useRef<HTMLDivElement | null>(null)
-  const [toc, setToc] = useState<Array<{ id: string; text: string; level: number }>>([])
   const [activeContentTab, setActiveContentTab] = useState<string>('overview')
   const isClientTestimonials = useMemo(() => (guide?.slug || '').toLowerCase() === 'client-testimonials', [guide?.slug])
   const isL24WorkingRooms = useMemo(() => (guide?.slug || '').toLowerCase() === 'dq-l24-working-rooms-guidelines' || (guide?.title || '').toLowerCase().includes('l24 working rooms'), [guide?.slug, guide?.title])
@@ -108,14 +106,6 @@ const TAB_LABELS: Record<GuideTabKey, string> = {
     normalizedStateTab === 'strategy' || normalizedStateTab === 'blueprints'
       ? normalizedStateTab as GuideTabKey
       : undefined
-const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
-  const domain = (g?.domain || '').toLowerCase()
-  const guideType = (g?.guideType || '').toLowerCase()
-  if (domain.includes('blueprint') || guideType.includes('blueprint')) return 'blueprints'
-  if (domain.includes('strategy') || guideType.includes('strategy')) return 'strategy'
-  if (domain.includes('testimonial') || guideType.includes('testimonial')) return 'testimonials'
-  return 'guidelines'
-}
 
   useEffect(() => {
     let cancelled = false
@@ -198,9 +188,6 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
   useEffect(() => {
     const el = articleRef.current
     if (!el) return
-    const hs = Array.from(el.querySelectorAll('h2, h3')) as HTMLElement[]
-    const items = hs.map(h => ({ id: h.id, text: h.innerText.trim(), level: h.tagName === 'H2' ? 2 : 3 }))
-    setToc(items.filter(i => i.id && i.text))
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement | null
       if (!t) return
@@ -494,11 +481,13 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
 
   // Blueprint TOC state - MOVED TO TOP
   const [activeTOCSection, setActiveTOCSection] = useState<string>('')
-  const [showMobileTOC, setShowMobileTOC] = useState(false)
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  
+  // activeTOCSection is set by IntersectionObserver but not currently used in render
+  void activeTOCSection
 
   // Helper function to format Features: list the 10 DWS platform features
-  const makeFeaturesPrecise = (content: string): string => {
+  const makeFeaturesPrecise = (_content: string): string => {
     // Return the standard 10 DWS features for blueprints
     const standardFeatures = [
       { title: 'DWS Landing (Home)', description: 'Main entry point and navigation hub for the Digital Workspace platform' },
@@ -746,11 +735,6 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
     if (!guide?.body) return []
     return parseGuideSections(guide.body)
   }, [guide?.body])
-  
-  const estimatedReadTime = useMemo(() => 
-    guide?.body ? Math.max(5, Math.ceil((guide.body.split(/\s+/).length || 0) / 200)) : 5,
-    [guide?.body]
-  )
 
   // Open/Print removed per new design
   const handleDownload = (category: 'attachment' | 'template', item: any) => {
@@ -779,7 +763,6 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
   const lastUpdated = useMemo(() => guide?.lastUpdatedAt ? new Date(guide.lastUpdatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null, [guide?.lastUpdatedAt])
   const isApproved = useMemo(() => ((guide?.status) || 'Approved') === 'Approved', [guide?.status])
   const isPolicy = useMemo(() => type === 'policy', [type])
-  const showDocumentActions = hasDocument
   const isPreviewableDocument = useMemo(() => {
     if (!isPolicy || !hasDocument) return false
     const base = documentUrl.split('#')[0].split('?')[0].toLowerCase()
@@ -848,15 +831,6 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
   }
 
 
-  // Scroll to section
-  const scrollToSection = (sectionId: string) => {
-    const element = sectionRefs.current[sectionId]
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      setActiveTOCSection(sectionId)
-      setShowMobileTOC(false)
-    }
-  }
 
   // Render Blueprint with DQ Products layout (same as DQ Products)
   if (actualIsBlueprintDomain) {

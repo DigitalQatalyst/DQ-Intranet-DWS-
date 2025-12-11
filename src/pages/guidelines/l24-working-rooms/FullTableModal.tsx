@@ -62,6 +62,9 @@ export function FullTableModal({ isOpen, onClose, title, columns, data, descript
 
   if (!isOpen) return null
 
+  // Filter out empty columns (columns with empty header or empty accessor)
+  const filteredColumns = columns.filter(col => col.header.trim() !== '' && col.accessor.trim() !== '')
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
@@ -105,7 +108,7 @@ export function FullTableModal({ isOpen, onClose, title, columns, data, descript
             <table className="min-w-full border-collapse border" style={{ borderColor: '#E5E7EB' }}>
               <thead>
                 <tr style={{ backgroundColor: '#0A1A3B' }}>
-                  {columns.map((col, idx) => (
+                  {filteredColumns.map((col, idx) => (
                     <th
                       key={idx}
                       className="px-6 py-4 text-left text-sm font-semibold text-white border"
@@ -119,7 +122,7 @@ export function FullTableModal({ isOpen, onClose, title, columns, data, descript
               <tbody className="bg-white">
                 {data.map((row, rowIdx) => (
                   <tr key={rowIdx} className="bg-white">
-                    {columns.map((col, colIdx) => (
+                    {filteredColumns.map((col, colIdx) => (
                       <td
                         key={colIdx}
                         className="px-6 py-4 text-sm border"

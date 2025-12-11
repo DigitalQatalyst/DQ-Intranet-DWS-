@@ -175,7 +175,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const config = getMarketplaceConfig(marketplaceType);
 
   // Items & filters state
-  const [items, setItems] = useState<any[]>([]);
+  const [_items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -311,11 +311,10 @@ type WorkGuideTab = 'guidelines' | 'strategy' | 'blueprints' | 'testimonials' | 
       keysToDelete = ['strategy_type', 'strategy_framework', 'blueprint_framework', 'blueprint_sector'];
     }
     // Clear tab-specific filters when switching away from their respective tabs
-    if (activeTab !== 'guidelines') {
-      if (next.has('guidelines_category')) {
-        next.delete('guidelines_category');
-        changed = true;
-      }
+    // Note: activeTab cannot be 'guidelines' here due to early return above
+    if (next.has('guidelines_category')) {
+      next.delete('guidelines_category');
+      changed = true;
     }
     if (activeTab !== 'blueprints') {
       if (next.has('blueprint_framework')) {
@@ -965,7 +964,7 @@ type WorkGuideTab = 'guidelines' | 'strategy' | 'blueprints' | 'testimonials' | 
       if (Array.isArray(current)) {
         const exists = current.includes(value);
         const nextValues = exists ? current.filter(v => v !== value) : [...current, value];
-        return { ...prev, [filterType]: nextValues };
+        return { ...prev, [filterType]: Array.isArray(nextValues) ? nextValues.join(',') : nextValues };
       } else {
         return { ...prev, [filterType]: value === prev[filterType] ? '' : value };
       }
@@ -1265,44 +1264,70 @@ type WorkGuideTab = 'guidelines' | 'strategy' | 'blueprints' | 'testimonials' | 
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                       {/* Glossary Card */}
-                      <Link to="/marketplace/guides/glossary" className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow cursor-pointer block">
-                        <div className="flex items-center mb-4">
-                          <div className="w-12 h-12 bg-[var(--guidelines-primary-surface)] rounded-lg flex items-center justify-center mr-4">
-                            <svg className="w-6 h-6 text-[var(--guidelines-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                          </div>
-                          <h3 className="text-xl font-semibold text-gray-800">Glossary</h3>
+                      <Link 
+                        to="/marketplace/guides/glossary" 
+                        className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow cursor-pointer block"
+                      >
+                        {/* 16:9 Header Image */}
+                        <div className="relative w-full bg-gray-100 overflow-hidden rounded-t-2xl" style={{ aspectRatio: '16/9' }}>
+                          <img
+                            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3"
+                            alt="Glossary - Dictionary and terminology reference"
+                            className="absolute inset-0 w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
                         </div>
-                        <p className="text-gray-600 mb-4">
-                          Comprehensive dictionary of DQ terminology, acronyms, and key concepts to help you understand our language and processes.
-                        </p>
-                        <div className="flex items-center text-[var(--guidelines-primary)] font-medium">
-                          <span>View Glossary</span>
-                          <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
+                        
+                        {/* Content Section */}
+                        <div className="p-6 flex flex-col flex-grow">
+                          <h3 className="text-[20px] font-semibold text-gray-900">Glossary</h3>
+                          <p className="text-[15px] text-gray-600 mt-1 line-clamp-3">
+                            Comprehensive dictionary of DQ terminology, acronyms, and key concepts to help you understand our language and processes.
+                          </p>
+                          
+                          {/* CTA Button */}
+                          <div className="mt-auto pt-4">
+                            <div className="w-full bg-[#0A1433] text-white py-3 rounded-xl font-medium hover:bg-[#0A1433]/90 transition text-center">
+                              View Glossary
+                            </div>
+                          </div>
                         </div>
                       </Link>
 
                       {/* FAQs Card */}
-                      <Link to="/marketplace/guides/faqs" className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow cursor-pointer block">
-                        <div className="flex items-center mb-4">
-                          <div className="w-12 h-12 bg-[var(--guidelines-primary-surface)] rounded-lg flex items-center justify-center mr-4">
-                            <svg className="w-6 h-6 text-[var(--guidelines-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </div>
-                          <h3 className="text-xl font-semibold text-gray-800">FAQs</h3>
+                      <Link 
+                        to="/marketplace/guides/faqs" 
+                        className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow cursor-pointer block"
+                      >
+                        {/* 16:9 Header Image */}
+                        <div className="relative w-full bg-gray-100 overflow-hidden rounded-t-2xl" style={{ aspectRatio: '16/9' }}>
+                          <img
+                            src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3"
+                            alt="FAQs - Frequently asked questions and help"
+                            className="absolute inset-0 w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
                         </div>
-                        <p className="text-gray-600 mb-4">
-                          Frequently asked questions about DQ processes, tools, workflows, and best practices with detailed answers and guidance.
-                        </p>
-                        <div className="flex items-center text-[var(--guidelines-primary)] font-medium">
-                          <span>View FAQs</span>
-                          <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
+                        
+                        {/* Content Section */}
+                        <div className="p-6 flex flex-col flex-grow">
+                          <h3 className="text-[20px] font-semibold text-gray-900">FAQs</h3>
+                          <p className="text-[15px] text-gray-600 mt-1 line-clamp-3">
+                            Frequently asked questions about DQ processes, tools, workflows, and best practices with detailed answers and guidance.
+                          </p>
+                          
+                          {/* CTA Button */}
+                          <div className="mt-auto pt-4">
+                            <div className="w-full bg-[#0A1433] text-white py-3 rounded-xl font-medium hover:bg-[#0A1433]/90 transition text-center">
+                              View FAQs
+                            </div>
+                          </div>
                         </div>
                       </Link>
                     </div>
@@ -1354,7 +1379,7 @@ type WorkGuideTab = 'guidelines' | 'strategy' | 'blueprints' | 'testimonials' | 
                   <>
                     <GuidesGrid
                       items={filteredItems}
-                      hideEmptyState={activeTab === 'resources'}
+                      hideEmptyState={false}
                       onClickGuide={(g) => {
                         const qs = queryParams.toString();
                         navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`, {

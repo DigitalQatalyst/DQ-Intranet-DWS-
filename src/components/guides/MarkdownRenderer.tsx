@@ -6,7 +6,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 
-const MarkdownRenderer: React.FC<{ body: string; onRendered?: () => void }> = ({ body, onRendered }) => {
+const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
   // Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
   const rehypePreserveDivClass = React.useMemo(() => {
     return () => (tree: any) => {
@@ -196,8 +196,8 @@ const MarkdownRenderer: React.FC<{ body: string; onRendered?: () => void }> = ({
               }
               if (React.isValidElement(child)) {
                 // Check if element has meaningful content
-                const childProps = child.props || {}
-                const childChildren = childProps.children
+                const childProps = child.props as { children?: unknown } | undefined
+                const childChildren = childProps?.children
                 if (typeof childChildren === 'string') {
                   return childChildren.trim().length > 0
                 }

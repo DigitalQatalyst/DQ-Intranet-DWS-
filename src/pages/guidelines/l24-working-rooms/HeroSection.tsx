@@ -36,7 +36,7 @@ export function HeroSection() {
             <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center font-bold">
               DW
             </div>
-            <span>Digital Workspace Team • Digital Qatalyst</span>
+            <span>EVOM UNIT • Digital Qatalyst</span>
           </div>
         </div>
       </div>
