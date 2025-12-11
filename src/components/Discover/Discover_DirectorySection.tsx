@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, Filter } from 'lucide-react';
 import { DirectoryCard, DirectoryCardData } from '../Directory/DirectoryCard';
-import DirectoryProfileModal from '../Directory/DirectoryProfileModal';
 import DirectoryAssociateModal, {
   DirectoryAssociateProfile,
 } from '../Directory/DirectoryAssociateModal';
-import { unitsData } from '../../data/directoryData';
-import type { Unit, ViewMode, SectorType } from '../../types/directory';
+import { useWorkUnits, useAssociates } from '../../hooks/useWorkDirectory';
+import type { ViewMode, SectorType } from '../../types/directory';
+import type { WorkUnit, WorkAssociate } from '../../data/workDirectoryTypes';
 
 interface Discover_DirectorySectionProps {
   title?: string;
@@ -15,15 +15,36 @@ interface Discover_DirectorySectionProps {
 }
 
 /**
- * Map Unit to unified DirectoryCardData
+ * Map WorkUnit to unified DirectoryCardData
  */
-const mapUnitToCard = (unit: Unit): DirectoryCardData => ({
-  logoUrl: unit.logoUrl,
-  title: unit.name,
-  tag: unit.sector,
-  description: unit.description || '',
-  towers: unit.streams,
+const mapWorkUnitToCard = (workUnit: WorkUnit): DirectoryCardData => ({
+  logoUrl: workUnit.bannerImageUrl || undefined,
+  title: workUnit.unitName,
+  tag: workUnit.sector,
+  description: workUnit.mandate || workUnit.currentFocus || '',
+  towers: workUnit.focusTags || workUnit.wiAreas || undefined,
 });
+
+/**
+ * Map WorkAssociate to unified Associate type used in Discover_DirectorySection
+ */
+const mapWorkAssociateToAssociate = (workAssociate: WorkAssociate): Associate => {
+  // Extract first skill/tag for the tag field
+  const tag = workAssociate.keySkills?.[0] || workAssociate.department || workAssociate.currentRole || '';
+  
+  return {
+    name: workAssociate.name,
+    title: workAssociate.currentRole,
+    role: workAssociate.currentRole,
+    unit: workAssociate.unit,
+    tag: tag,
+    email: workAssociate.email,
+    mobile: workAssociate.phone || undefined,
+    location: workAssociate.location,
+    company: 'DigitalQatalyst',
+    sector: inferSectorFromTag(tag, workAssociate.unit),
+  };
+};
 
 type Associate = {
   name: string;
@@ -38,27 +59,6 @@ type Associate = {
   website?: string;
   sector?: SectorType;
 };
-
-const RAW_ASSOCIATES_SHOWCASE = `
-Anthony Mwangi	Product Owner	Sector Lead (DBP Platforms)	DBP Platforms	DBP Platform	anthony.mwangi@digitalqatalyst.com		NBO
-Pelagie Njiki	Operation Analyst	Unit Lead (CoE)	CoE | Lead	CoE Lead	njiki.pelagie@digitalqatalyst.com	+971 55 623 1439	Dubai
-Bilal Waqar	Enterprise Architect	Unit Lead (Designs)	DBP Delivery	DBP Delivery	bilal.waqar@digitalqatalyst.com	+971 544 757 550	Dubai
-Rayyan Basha	Business Analyst	Delivery Lead (KSA Accounts)	DBP Delivery | Deploys	Account	rayyan.basha@digitalqatalyst.com	+971 559 295 369	Saudi Arabia
-Mohamed Thameez	Solution Analyst	Delivery Scrum Master (Designs)	DBP Delivery | Designs	Designs	mohamed.thameez@digitalqatalyst.com	+971 585 046 171	Dubai
-Habab Siddique	Scrum Master 	Product Owner (Deploys)	DBP Delivery | Deploys	Deploy	habab.siddig@digitalqatalyst.com	+971 561 314 934	Dubai
-Mart-Pearly Iyondong	Operation Analyst	HR Analyst	DCO Operations | HRA	O2P	mart-pearly.iyondong@digitalqatalyst.com	+971 569 590 488	Dubai
-Simon Kariuki	Data Enginner	Tower Lead (Intelligence)	DBP Platform | Intelligence	DBs | Pipe | API	simon.kariuki@digitalqatalyst.com	+254 790 504 948	Nairobi
-Stephanie Njunge	Solution Engineer	Tower Lead (Solutions)	DBP Platform | Solutions	eCom | DXP	stephanie.njunge@digitalqatalyst.com	+254 700 702 332	NBO
-Wilson Chege	Product Owner	Factory Lead (Products)	DBP Platform | Products	Products	wilson.chege@digitalqatalyst.com	+254 715 673 582	NBO
-Freshia Njoki	Solution Engineer	Factory Lead (SecDevOps)	DBP Platform | SecDevOps	SecDevOps	freshia.njoki@digitalqatalyst.com	+254 745 756 365	NBO
-Michael Kimeu	DevOps Engineer	Endpoint Developer	DBP Platform | SecDevOps	CICD | Test | Host	michael.kimeu@digitalqatalyst.com	+254 115 391 736	NBO
-Joseph Mwangi	CRM Engineer	Tower Lead (Solutions)	DBP Platform | Solutions	eCom | DWS	joseph.mwangi@digitalqatalyst.com	+254 768 280 212	NBO
-Mercy Wangari	Industrial Automative Engineer	Process Automation Developer	DBP Platform | Intelligence	DT2.0 | DTMP	mercy.wangari@digitalqatalyst.com	+254 705 123 305	NBO
-Dominic Paul	DevOps Engineer	Factory Lead (SecDevOps)	DBP Platform | SecDevOps	SecDevOps	dominic.paul@digitalqatalyst.com	+254 708 251 527	NBO
-Ian Kipkorir	Full-Stack Developer 	Factory Lead (Solutions)	DBP Platform | Solutions	eCom | DWS	ian.kipkorir@digitalqatalyst.com	+254 799 567 379	NBO
-Debra Wangari	Product Owner	Sector Lead (DBP Platforms)	DBP Platform | Products	DBP Platform	debra.wangari@digitalqatalyst.com	+254 717 574 734	NBO
-Eugene Ndichu	Product Owner	Tower Lead (DT2.0 | DTMP)	DBP Platform | Products	DT2.0 | DTMP	eugene.ndichu@digitalqatalyst.com	+254 797 680 821	NBO
-`.trim();
 
 const initials = (name: string): string =>
   name
@@ -91,45 +91,6 @@ const inferSectorFromTag = (tag: string, unit: string): SectorType => {
   }
   return 'Platform';
 };
-
-const parseAssociates = (raw: string): Associate[] =>
-  raw
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => line.split(/\t+|\s{2,}/).map((part) => part.trim()))
-    .map((parts) => {
-      const [
-        name = '',
-        title = '',
-        role = '',
-        unit = '',
-        tag = '',
-        email = '',
-        mobile = '',
-        location = '',
-        company = '',
-        website = '',
-      ] = parts;
-
-      const associate: Associate = {
-        name,
-        title,
-        role,
-        unit,
-        tag,
-        email: email || undefined,
-        mobile: mobile || undefined,
-        location: location || undefined,
-        company: company || 'DigitalQatalyst',
-        website: website || undefined,
-      };
-
-      associate.sector = inferSectorFromTag(associate.tag, associate.unit);
-
-      return associate;
-    })
-    .filter((item) => item.name);
 
 const getDescription = (associate: Associate): string => {
   const title = associate.title?.trim();
@@ -289,6 +250,11 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
   subtitle = 'Connect with DQ sectors, teams, and associates driving collaboration, delivery, and innovation across the Digital Workspace.',
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  // Fetch units and associates from DQ Work Directory
+  const { units: workUnits, loading: workUnitsLoading } = useWorkUnits();
+  const { associates: workAssociates, loading: workAssociatesLoading } = useAssociates();
 
   // State
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -299,8 +265,6 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
   const [selectedSectors, setSelectedSectors] = useState<SectorType[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
-  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
   const [selectedAssociateProfile, setSelectedAssociateProfile] =
     useState<DirectoryAssociateProfile | null>(null);
   const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
@@ -324,17 +288,28 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
     setSearchParams(params, { replace: true });
   }, [debouncedQuery, viewMode, selectedSectors, selectedStreams, setSearchParams]);
 
-  const showcaseAssociates = useMemo<Associate[]>(() => parseAssociates(RAW_ASSOCIATES_SHOWCASE), []);
+  // Use Work Directory associates instead of hardcoded data
+  const showcaseAssociates = useMemo<Associate[]>(() => {
+    return workAssociates.map(mapWorkAssociateToAssociate);
+  }, [workAssociates]);
 
-  // Filter logic
-  const filteredUnits = useMemo(() => {
-    let filtered = [...unitsData];
+  // Filter logic for Work Directory units
+  const filteredWorkUnits = useMemo(() => {
+    let filtered = [...workUnits];
 
     // Search
     if (debouncedQuery.trim()) {
       const lower = debouncedQuery.toLowerCase();
       filtered = filtered.filter((unit) =>
-        [unit.name, unit.description, unit.sector, ...(unit.streams || []), ...(unit.tags || [])]
+        [
+          unit.unitName,
+          unit.mandate,
+          unit.currentFocus,
+          unit.sector,
+          unit.unitType,
+          ...(unit.focusTags || []),
+          ...(unit.wiAreas || []),
+        ]
           .filter(Boolean)
           .join(' ')
           .toLowerCase()
@@ -344,18 +319,11 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
 
     // Sector filter
     if (selectedSectors.length > 0) {
-      filtered = filtered.filter((unit) => selectedSectors.includes(unit.sector));
-    }
-
-    // Stream filter
-    if (selectedStreams.length > 0) {
-      filtered = filtered.filter((unit) =>
-        unit.streams?.some((stream) => selectedStreams.includes(stream))
-      );
+      filtered = filtered.filter((unit) => selectedSectors.includes(unit.sector as SectorType));
     }
 
     return filtered;
-  }, [debouncedQuery, selectedSectors, selectedStreams]);
+  }, [debouncedQuery, selectedSectors, workUnits]);
 
   const filteredAssociates = useMemo(() => {
     let filtered = [...showcaseAssociates];
@@ -412,25 +380,25 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
 
   const hasActiveFilters = selectedSectors.length > 0 || selectedStreams.length > 0 || searchQuery.trim();
   const sectors: SectorType[] = ['Governance', 'Operations', 'Platform', 'Delivery'];
-  const filteredSectionUnits = filteredUnits.filter(
-    (unit) =>
-      unit.name !== 'DQ Delivery (Designs)' && unit.name !== 'DQ Delivery (Accounts)'
-  );
+  
+  // Map and filter Work Directory units for display (limit to 9)
+  const workDirectoryUnitsForDisplay = useMemo(() => {
+    return filteredWorkUnits.slice(0, 9).map(mapWorkUnitToCard);
+  }, [filteredWorkUnits]);
+  
+  // Keep track of original work units for click handler
+  const workUnitsForDisplay = useMemo(() => {
+    return filteredWorkUnits.slice(0, 9);
+  }, [filteredWorkUnits]);
+  
   const handleViewFullDirectory = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      window.open('/marketplace/directory', '_blank', 'noopener,noreferrer');
-    }
-  }, []);
-
-  const openUnitModal = (unit: Unit) => {
-    setSelectedUnit(unit);
-    setIsUnitModalOpen(true);
-  };
-
-  const closeUnitModal = () => {
-    setIsUnitModalOpen(false);
-    setTimeout(() => setSelectedUnit(null), 200);
-  };
+    const tab = viewMode === 'associates' ? 'associates' : 'units';
+    navigate(`/marketplace/work-directory?tab=${tab}`);
+  }, [navigate, viewMode]);
+  
+  const handleWorkUnitClick = useCallback((workUnit: WorkUnit) => {
+    navigate(`/work-directory/units/${workUnit.slug}`);
+  }, [navigate]);
 
   const openAssociateModal = (person: Associate) => {
     setSelectedAssociateProfile(mapAssociateToProfile(person));
@@ -571,16 +539,16 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {['Governance', 'Operations', 'Platform', 'Delivery'].map((sector) => (
+              {sectors.map((sector) => (
                 <button
                   key={sector}
-                  onClick={() => toggleSector(sector as SectorType)}
+                  onClick={() => toggleSector(sector)}
                   className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
                   style={{
-                    backgroundColor: selectedSectors.includes(sector as SectorType) ? '#131E42' : '#F9FAFB',
-                    color: selectedSectors.includes(sector as SectorType) ? '#fff' : '#334266',
+                    backgroundColor: selectedSectors.includes(sector) ? '#131E42' : '#F9FAFB',
+                    color: selectedSectors.includes(sector) ? '#fff' : '#334266',
                     border: `1px solid ${
-                      selectedSectors.includes(sector as SectorType) ? '#131E42' : '#E3E7F8'
+                      selectedSectors.includes(sector) ? '#131E42' : '#E3E7F8'
                     }`,
                   }}
                 >
@@ -594,7 +562,7 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
         {/* Results Count */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-sm font-medium" style={{ color: '#334266', opacity: 0.85 }}>
-            {viewMode === 'units' ? filteredUnits.length : filteredAssociates.length}{' '}
+            {viewMode === 'units' ? filteredWorkUnits.length : filteredAssociates.length}{' '}
             {viewMode === 'units' ? 'units' : 'associates'} found
           </p>
         </div>
@@ -602,47 +570,64 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
         {/* Grid */}
         {viewMode === 'associates' ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {visibleAssociates.map((person, index) => (
-                <AssociateCard
-                  key={`${person.name}-${person.unit}-${index}`}
-                  associate={person}
-                  onOpen={openAssociateModal}
-                />
-              ))}
-            </div>
-            {filteredAssociates.length > 9 && (
-              <div className="mt-10 flex justify-center">
-                <button
-                  type="button"
-                  onClick={handleViewFullDirectory}
-                  className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
-                >
-                  View Full Directory →
-                </button>
-              </div>
+            {workAssociatesLoading ? (
+              <div className="py-12 text-center text-sm text-slate-500">Loading associates...</div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                  {visibleAssociates.map((person, index) => (
+                    <AssociateCard
+                      key={`${person.name}-${person.unit}-${index}`}
+                      associate={person}
+                      onOpen={openAssociateModal}
+                    />
+                  ))}
+                </div>
+                {visibleAssociates.length > 0 && (
+                  <div className="mt-10 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={handleViewFullDirectory}
+                      className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
+                    >
+                      View Full Directory →
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {filteredSectionUnits.map((unit) => (
-                <DirectoryCard
-                  key={unit.id}
-                  {...mapUnitToCard(unit)}
-                  onViewProfile={() => openUnitModal(unit)}
-                />
-              ))}
-            </div>
-            <div className="mt-10 flex justify-center">
-              <button
-                type="button"
-                onClick={handleViewFullDirectory}
-                className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
-              >
-                View Full Directory →
-              </button>
-            </div>
+            {workUnitsLoading ? (
+              <div className="py-12 text-center text-sm text-slate-500">Loading units...</div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                  {workDirectoryUnitsForDisplay.map((cardData, index) => {
+                    const workUnit = workUnitsForDisplay[index];
+                    return (
+                      <DirectoryCard
+                        key={workUnit?.id || index}
+                        {...cardData}
+                        onViewProfile={() => workUnit && handleWorkUnitClick(workUnit)}
+                      />
+                    );
+                  })}
+                </div>
+                {workDirectoryUnitsForDisplay.length > 0 && (
+                  <div className="mt-10 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={handleViewFullDirectory}
+                      className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
+                    >
+                      View Full Directory →
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </>
         )}
 
@@ -652,7 +637,6 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
         profile={selectedAssociateProfile}
         onClose={closeAssociateModal}
       />
-      <DirectoryProfileModal open={isUnitModalOpen} unit={selectedUnit} onClose={closeUnitModal} />
     </section>
   );
 };
