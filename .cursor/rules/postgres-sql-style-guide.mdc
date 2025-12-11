@@ -1,0 +1,66 @@
+# Postgres SQL Style Guide
+
+## General Guidelines
+- Use UPPERCASE for SQL keywords (SELECT, FROM, WHERE, etc.)
+- Use snake_case for identifiers (table names, column names, functions)
+- Use descriptive names
+- Format queries for readability
+
+## Naming Conventions
+
+### Tables
+- Use plural nouns: `users`, `working_rooms`, `sprint_plans`
+- Be descriptive: `user_profiles` not `profiles`
+
+### Columns
+- Use singular nouns: `user_id`, `room_name`, `created_at`
+- Use descriptive names: `last_active_at` not `last_active`
+
+### Indexes
+- Prefix with `idx_`: `idx_users_email`, `idx_rooms_status`
+
+### Constraints
+- Prefix with type: `fk_`, `pk_`, `ck_`, `uq_`
+- Example: `fk_rooms_user_id`, `uq_users_email`
+
+## Query Formatting
+```sql
+SELECT 
+  u.id,
+  u.email,
+  u.created_at
+FROM users u
+WHERE u.status = 'active'
+  AND u.created_at > NOW() - INTERVAL '30 days'
+ORDER BY u.created_at DESC
+LIMIT 10;
+```
+
+## Best Practices
+- Always specify column names in SELECT (avoid SELECT *)
+- Use table aliases for clarity
+- Use JOIN syntax instead of WHERE joins
+- Use parameterized queries
+- Add comments for complex logic
+- Use transactions for multi-statement operations
+
+## Data Types
+- Use UUID for primary keys: `UUID PRIMARY KEY DEFAULT gen_random_uuid()`
+- Use TIMESTAMPTZ for timestamps: `TIMESTAMPTZ DEFAULT NOW()`
+- Use TEXT for variable-length strings
+- Use BOOLEAN for true/false values
+- Use appropriate numeric types (INTEGER, BIGINT, DECIMAL)
+
+## Common Patterns
+```sql
+-- Timestamps
+created_at TIMESTAMPTZ DEFAULT NOW(),
+updated_at TIMESTAMPTZ DEFAULT NOW()
+
+-- Soft deletes
+deleted_at TIMESTAMPTZ
+
+-- Status columns
+status TEXT NOT NULL DEFAULT 'active',
+CHECK (status IN ('active', 'inactive', 'archived'))
+```

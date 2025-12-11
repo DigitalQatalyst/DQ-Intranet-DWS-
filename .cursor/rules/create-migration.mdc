@@ -1,0 +1,75 @@
+# Creating Postgres Migrations
+
+## Migration File Naming
+- Format: `YYYYMMDDHHMMSS_description.sql`
+- Use descriptive names that explain the change
+- Example: `20241211100000_add_working_rooms_table.sql`
+
+## Migration Structure
+```sql
+-- Migration: Brief description
+-- Created: YYYY-MM-DD
+-- Author: Name
+
+BEGIN;
+
+-- Up migration
+CREATE TABLE IF NOT EXISTS table_name (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  -- other columns
+);
+
+-- Add indexes
+CREATE INDEX IF NOT EXISTS idx_table_name_column ON table_name(column_name);
+
+-- Add constraints
+ALTER TABLE table_name ADD CONSTRAINT constraint_name CHECK (condition);
+
+COMMIT;
+```
+
+## Best Practices
+- Always use transactions (BEGIN/COMMIT)
+- Use IF NOT EXISTS for idempotency
+- Add comments explaining the migration purpose
+- Test migrations on development first
+- Never modify existing migrations (create new ones)
+- Include rollback instructions in comments if complex
+
+## Common Patterns
+
+### Adding a Column
+```sql
+ALTER TABLE table_name 
+ADD COLUMN IF NOT EXISTS column_name TYPE DEFAULT value;
+```
+
+### Creating a Table
+```sql
+CREATE TABLE IF NOT EXISTS table_name (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  -- columns
+);
+```
+
+### Adding Foreign Keys
+```sql
+ALTER TABLE table_name
+ADD CONSTRAINT fk_table_reference
+FOREIGN KEY (column_name) REFERENCES referenced_table(id);
+```
+
+### Creating Indexes
+```sql
+CREATE INDEX IF NOT EXISTS idx_table_column 
+ON table_name(column_name);
+```
+
+## Supabase-Specific
+- Use `gen_random_uuid()` for UUID defaults
+- Use `TIMESTAMPTZ` for timestamps
+- Consider RLS policies in separate migration
+- Use Supabase auth helpers when needed

@@ -1,0 +1,59 @@
+# Creating Supabase Database Functions
+
+## Function Creation Guidelines
+
+### Naming Conventions
+- Use snake_case for function names
+- Prefix with descriptive module/feature name when appropriate
+- Use clear, descriptive names that indicate purpose
+- Example: `get_user_profile`, `calculate_sprint_metrics`
+
+### Function Structure
+```sql
+CREATE OR REPLACE FUNCTION function_name(param1 type, param2 type)
+RETURNS return_type
+LANGUAGE plpgsql
+SECURITY DEFINER -- or SECURITY INVOKER as appropriate
+AS $$
+BEGIN
+  -- Function logic
+  RETURN result;
+END;
+$$;
+```
+
+### Security
+- Use `SECURITY DEFINER` only when necessary (e.g., bypassing RLS)
+- Prefer `SECURITY INVOKER` for most functions
+- Always validate input parameters
+- Use parameterized queries to prevent SQL injection
+
+### Best Practices
+- Document functions with comments
+- Handle errors gracefully
+- Return appropriate data types
+- Consider performance implications
+- Test functions thoroughly before deployment
+
+### Example
+```sql
+CREATE OR REPLACE FUNCTION get_user_working_room_status(user_id UUID)
+RETURNS TABLE (
+  room_id UUID,
+  status TEXT,
+  last_active TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    wr.id as room_id,
+    wr.status,
+    wr.last_active
+  FROM working_rooms wr
+  WHERE wr.user_id = get_user_working_room_status.user_id;
+END;
+$$;
+```

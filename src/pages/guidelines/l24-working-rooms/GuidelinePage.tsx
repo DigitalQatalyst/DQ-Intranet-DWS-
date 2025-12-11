@@ -578,7 +578,7 @@ function GuidelinePage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Sreya Lakshmi</p>
-                  <p className="text-xs text-gray-600">CoE Analyst CoE</p>
+                  <p className="text-xs text-gray-600">CoE Analyst</p>
                 </div>
               </div>
 
@@ -589,7 +589,7 @@ function GuidelinePage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Fadil Alli</p>
-                  <p className="text-xs text-gray-600">CoE Analyst CoE</p>
+                  <p className="text-xs text-gray-600">CoE Analyst</p>
                 </div>
               </div>
             </div>

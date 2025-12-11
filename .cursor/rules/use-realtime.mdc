@@ -1,0 +1,115 @@
+# Using Supabase Realtime
+
+## Realtime Setup
+- Enable Realtime on tables that need live updates
+- Use channels for subscribing to changes
+- Handle connection states appropriately
+
+## Enabling Realtime on Tables
+```sql
+-- Enable Realtime for a table
+ALTER PUBLICATION supabase_realtime ADD TABLE table_name;
+
+-- Or in Supabase Dashboard: Database > Replication
+```
+
+## Client-Side Usage
+
+### Basic Subscription
+```typescript
+import { supabaseClient } from '@/lib/supabaseClient';
+
+const channel = supabaseClient
+  .channel('table-changes')
+  .on(
+    'postgres_changes',
+    {
+      event: '*', // INSERT, UPDATE, DELETE, or *
+      schema: 'public',
+      table: 'table_name',
+    },
+    (payload) => {
+      console.log('Change received!', payload);
+      // Handle the change
+    }
+  )
+  .subscribe();
+```
+
+### Filtered Subscriptions
+```typescript
+// Subscribe to specific changes
+const channel = supabaseClient
+  .channel('user-updates')
+  .on(
+    'postgres_changes',
+    {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'users',
+      filter: 'id=eq.' + userId,
+    },
+    (payload) => {
+      // Handle user update
+    }
+  )
+  .subscribe();
+```
+
+### Cleanup
+```typescript
+// Always unsubscribe when component unmounts
+useEffect(() => {
+  const channel = supabaseClient
+    .channel('table-changes')
+    .on('postgres_changes', { ... }, handleChange)
+    .subscribe();
+
+  return () => {
+    channel.unsubscribe();
+  };
+}, []);
+```
+
+## Best Practices
+- Unsubscribe from channels when not needed
+- Handle connection errors gracefully
+- Use specific event types when possible (not '*')
+- Filter subscriptions to reduce unnecessary updates
+- Consider using React Query with Realtime for state management
+- Test connection handling in different network conditions
+
+## React Hook Example
+```typescript
+function useRealtimeSubscription(table: string) {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const channel = supabaseClient
+      .channel(`${table}-changes`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table,
+      }, (payload) => {
+        // Update state based on event type
+        if (payload.eventType === 'INSERT') {
+          setData(prev => [...prev, payload.new]);
+        } else if (payload.eventType === 'UPDATE') {
+          setData(prev => prev.map(item => 
+            item.id === payload.new.id ? payload.new : item
+          ));
+        } else if (payload.eventType === 'DELETE') {
+          setData(prev => prev.filter(item => item.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [table]);
+
+  return data;
+}
+```
