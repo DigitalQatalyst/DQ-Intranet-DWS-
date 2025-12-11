@@ -81,7 +81,7 @@ const marketplaces: Marketplace[] = [
     name: 'DQ Work Directory',
     description: 'Units, positions, and associate profiles.',
     icon: UsersIcon,
-    href: '/dq-work-directory',
+    href: '/marketplace/work-directory',
   },
   {
     id: 'media-center',

@@ -29,6 +29,9 @@ import { ApolloProvider } from "@apollo/client/react";
 import EventsPage from "./pages/events/EventsPage";
 import ChatBot from "./bot/ChatBot";
 import ThankYou from "./pages/ThankYou";
+import UnitProfilePage from "./pages/UnitProfilePage";
+import WorkPositionProfilePage from "./pages/WorkPositionProfilePage";
+import RoleProfilePage from "./pages/RoleProfilePage";
 import WomenEntrepreneursPage from "./pages/WomenEntrepreneursPage";
 
 export function AppRouter() {
@@ -103,6 +106,11 @@ export function AppRouter() {
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/communities/*" element={<CommunitiesRouter />} />
+            {/* Work Directory Routes */}
+            <Route path="/work-directory/units/:slug" element={<UnitProfilePage />} />
+            <Route path="/work-directory/positions/:slug" element={<WorkPositionProfilePage />} />
+            {/* Role Profile Route */}
+            <Route path="/roles/:slug" element={<RoleProfilePage />} />
             <Route
               path="/women-entrepreneurs"
               element={<WomenEntrepreneursPage />}
