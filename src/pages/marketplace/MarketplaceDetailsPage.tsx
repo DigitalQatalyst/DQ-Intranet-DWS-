@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, XIcon } from 'lucide-react';
+import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, XIcon, Plus, Minus } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
@@ -12,6 +12,9 @@ import { Link } from 'react-router-dom';
 import { getFallbackItemDetails, getFallbackItems } from '../../utils/fallbackData';
 import { getAIToolDataById } from '../../utils/aiToolsData';
 import { getDigitalWorkerServiceById } from '../../utils/digitalWorkerData';
+import { ProcedureStages, procedureStagesConfigs } from '../../components/ProcedureStages';
+import RequestForm from '../../components/marketplace/RequestForm';
+import { INITIAL_APPROVERS } from '../../utils/mockApprovers';
 interface MarketplaceDetailsPageProps {
   marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding';
   bookmarkedItems?: string[];
@@ -46,6 +49,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const [showStickyBottomCTA, setShowStickyBottomCTA] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(80);
   const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isRequestFormOpen, setIsRequestFormOpen] = useState(false);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -314,10 +318,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const isPromptLibrary = item.id === '17' || item.category === 'Prompt Library';
   const isAITool = item.category === 'AI Tools';
   const isDigitalWorker = item.category === 'Digital Worker';
-  const primaryAction = isPromptLibrary ? 'Visit Page' : isAITool ? 'Request Access' : isDigitalWorker ? 'Request Service' : config.primaryCTA;
+  const isLeaveApplication = item.id === '13';
+  const primaryAction = isLeaveApplication ? 'Apply For Leave' : isPromptLibrary ? 'Visit Page' : isAITool ? 'Request Access' : isDigitalWorker ? 'Request Service' : config.primaryCTA;
   // const secondaryAction = config.secondaryCTA;
-  // Extract tags based on marketplace type
-  const displayTags = item.tags || [item.category, marketplaceType === 'courses' ? item.deliveryMode : item.serviceType, item.businessStage].filter(Boolean);
   // Extract details for the sidebar
   const detailItems = config.attributes.map(attr => ({
     label: attr.label,
@@ -372,10 +375,84 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     );
   };
 
+  // Accordion component for FAQs
+  const AccordionBlock: React.FC<{ items: Array<{ question: string; answer: string }> }> = ({ items }) => {
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const toggleAccordion = (index: number) => {
+      setOpenIndex(openIndex === index ? null : index);
+    };
+
+    return (
+      <div className="space-y-4 mb-6">
+        {items.map((item, index) => {
+          const isOpen = openIndex === index;
+          return (
+            <div
+              key={index}
+              className="rounded-lg overflow-hidden transition-all duration-300 ease-in border-2"
+              style={{ 
+                borderColor: isOpen ? '#030F35' : '#E5E7EB',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+              }}
+            >
+              <button
+                onClick={() => toggleAccordion(index)}
+                className="w-full flex items-center justify-between p-5 text-left transition-all duration-300 ease-in"
+                style={isOpen ? { 
+                  backgroundColor: '#030F35',
+                  color: 'white'
+                } : { 
+                  backgroundColor: 'white',
+                  color: '#374151' 
+                }}
+                onMouseEnter={(e) => {
+                  if (!isOpen) {
+                    e.currentTarget.style.backgroundColor = '#F9FAFB';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isOpen) {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }
+                }}
+              >
+                <span className="text-base font-medium pr-4">
+                  {item.question}
+                </span>
+                <div 
+                  className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ease-in"
+                  style={isOpen ? { backgroundColor: 'white' } : { backgroundColor: '#E5E7EB' }}
+                >
+                  {isOpen ? (
+                    <Minus className="w-4 h-4" style={{ color: '#030F35' }} />
+                  ) : (
+                    <Plus className="w-4 h-4 text-gray-600" />
+                  )}
+                </div>
+              </button>
+              <div
+                className="overflow-hidden transition-all duration-300 ease-in"
+                style={{
+                  maxHeight: isOpen ? '500px' : '0px',
+                  opacity: isOpen ? 1 : 0,
+                }}
+              >
+                <div className="px-5 pb-5 pt-2.5 bg-white">
+                  <p className="text-gray-600 text-base leading-relaxed">{item.answer}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderBlocks = (blocks: ContentBlock[]) => {
     return (blocks || []).map((block, idx) => {
       if (block.type === 'p') {
-        return <p key={idx} className="text-gray-700 text-base leading-relaxed mb-4">{block.text}</p>;
+        return <p key={idx} className="text-gray-700 text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: block.text }}></p>;
       }
       if (block.type === 'ol') {
         return <ol key={idx} className="list-decimal pl-6 space-y-3 text-gray-700 mb-4 text-base">
@@ -401,8 +478,18 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             />
           </div>;
       }
+      if (block.type === 'accordion') {
+        return <AccordionBlock key={idx} items={block.items || []} />;
+      }
       if (block.type === 'code') {
         return <CodeBlock key={idx} code={block.code} language={block.language} title={block.title} />;
+      }
+      if (block.type === 'procedure_stages') {
+        const config = procedureStagesConfigs[block.configKey as keyof typeof procedureStagesConfigs];
+        if (config) {
+          return <ProcedureStages key={idx} config={{ ...config, title: '' }} className="my-6" />;
+        }
+        return null;
       }
       return null;
     });
@@ -418,15 +505,11 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
       if (toolData) {
         // About Tab for AI Tools
         if (tabId === 'about') {
-          const content = getServiceTabContent(marketplaceType, item?.id, tabId);
-          
           return <div className="space-y-8">
-              {/* Overview Text */}
-              {content?.blocks && content.blocks.length > 0 && content.blocks[0].type === 'p' && (
-                <div className="text-gray-700 text-lg leading-relaxed">
-                  {content.blocks[0].text}
-                </div>
-              )}
+              {/* Tool Description */}
+              <div className="text-gray-700 text-lg leading-relaxed mb-4">
+                {itemDescription}
+              </div>
               
               {/* Key Features Section */}
               <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-8">
@@ -710,17 +793,17 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           </div>;
       }
       
-      // Render content with action button if available
+      // Render content with action button if available (skip for leave applications as they use sidebar button)
       return <div className="space-y-8">
           <div className="prose max-w-none">
             {content.heading && <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">{content.heading}</h2>}
             {renderBlocks(content.blocks || [])}
           </div>
-          {content.action && <div className="pt-4">
+          {content.action && content.action.label !== 'Apply For Leave' && <div className="pt-4">
               <button id="action-section" className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')} onClick={() => {
-            const urlField = content.action?.urlField;
-            const computedUrl = (urlField && item && item[urlField]) || content.action?.fallbackUrl || '#';
-            window.open(computedUrl, '_blank', 'noopener');
+              const urlField = content.action?.urlField;
+              const computedUrl = (urlField && item && item[urlField]) || content.action?.fallbackUrl || '#';
+              window.open(computedUrl, '_blank', 'noopener');
           }}>
                 {content.action.label}
               </button>
@@ -1609,7 +1692,10 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} 
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')}
           onClick={() => {
-            if (isPromptLibrary && item.sourceUrl) {
+            // Check if this is Leave Application service (id '13')
+            if (isLeaveApplication) {
+              setIsRequestFormOpen(true);
+            } else if (isPromptLibrary && item.sourceUrl) {
               window.open(item.sourceUrl, '_blank', 'noopener,noreferrer');
             } else if (isAITool) {
               window.open('https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl', '_blank', 'noopener,noreferrer');
@@ -1686,24 +1772,6 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
               </ol>
             </nav>
             <div className="flex flex-col items-start max-w-3xl py-4">
-              {/* Provider */}
-              <div className="flex items-center mb-2">
-                {/* Provider logo - commented out, uncomment to restore */}
-                {/* <img src={provider.logoUrl} alt={`${provider.name} logo`} className="h-10 w-10 object-contain mr-3 rounded-md" /> */}
-                <span className="text-gray-600 font-medium">
-                  {provider.name}
-                </span>
-              </div>
-              {/* Title */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight">
-                {itemTitle}
-              </h1>
-              {/* Tags row - Separated from ratings */}
-              <div className="flex flex-wrap gap-2 mb-2">
-                {displayTags.map((tag, index) => <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-50 text-gray-700 border border-gray-200">
-                    {tag}
-                  </span>)}
-              </div>
               {/* Ratings and bookmark row - Now in a single row with proper alignment */}
               {/* <div className="flex items-center justify-between w-full mb-4">
                 <div className="flex items-center">
@@ -1724,8 +1792,6 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   <BookmarkIcon size={18} className={isBookmarked ? 'fill-yellow-600' : ''} />
                 </button>
               </div> */}
-              {/* Description */}
-              <p className="text-gray-700 mb-4 max-w-2xl">{itemDescription}</p>
             </div>
           </div>
         </div>
@@ -1853,7 +1919,10 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} 
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')}
                 onClick={() => {
-                  if (isPromptLibrary && item.sourceUrl) {
+                  // Check if this is Leave Application service (id '13')
+                  if (isLeaveApplication) {
+                    setIsRequestFormOpen(true);
+                  } else if (isPromptLibrary && item.sourceUrl) {
                     window.open(item.sourceUrl, '_blank', 'noopener,noreferrer');
                   } else if (isAITool) {
                     window.open('https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl', '_blank', 'noopener,noreferrer');
@@ -1875,6 +1944,13 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           </div>}
       </main>
       <Footer isLoggedIn={false} />
+      
+      {/* Request Form Modal */}
+      <RequestForm 
+        isOpen={isRequestFormOpen} 
+        onClose={() => setIsRequestFormOpen(false)}
+        initialApprovers={INITIAL_APPROVERS}
+      />
     </div>;
 };
 export default MarketplaceDetailsPage;

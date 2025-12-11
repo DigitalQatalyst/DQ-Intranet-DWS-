@@ -119,23 +119,9 @@ export const ServiceQuickViewModal: React.FC<ServiceQuickViewModalProps> = ({
               </li>
             </ol>
           </nav>
-          {/* Provider Section - Logo removed */}
-          <div className="flex items-center mb-4">
-            <div>
-              <span className="text-sm text-gray-500">Department</span>
-              <h3 className="text-lg font-medium text-gray-900">
-                {service.provider.name}
-              </h3>
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4 mt-2">
             {service.title}
           </h1>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {service.tags && service.tags.map((tag, index) => <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-50 text-gray-700 border border-gray-200">
-                  {tag}
-                </span>)}
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
             {service.startDate && <div className="flex items-center text-gray-700">
                 <Calendar className="mr-2" size={18} />

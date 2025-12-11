@@ -44,8 +44,6 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
   const keyHighlights = item.highlights || item.learningOutcomes || item.details || (item.eligibility ? [`Eligibility: ${item.eligibility}`] : []);
   // Limit to 3 highlights for consistency
   const highlightItems = keyHighlights.slice(0, 3);
-  // Extract tags from item - use tags if available, otherwise use category and other relevant fields
-  const displayTags = item.tags || [item.category, item.deliveryMode, item.businessStage, item.serviceType].filter(Boolean).slice(0, 3);
   return <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div ref={modalRef} className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
@@ -89,21 +87,6 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
               </li>
             </ol>
           </nav>
-          {/* Provider Section - Logo removed */}
-          <div className="flex items-center mb-2">
-            <div>
-              <span className="text-sm text-gray-500">Department</span>
-              <h3 className="text-lg font-medium text-gray-900">
-                {item.provider.name}
-              </h3>
-            </div>
-          </div>
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-3">
-            {displayTags.map((tag: string, index: number) => <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-50 text-gray-700 border border-gray-200">
-                {tag}
-              </span>)}
-          </div>
           {/* Key Attributes */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {config.attributes.slice(0, 4).map((attr, index) => {

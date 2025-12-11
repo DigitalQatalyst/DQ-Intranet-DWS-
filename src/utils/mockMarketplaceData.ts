@@ -712,7 +712,7 @@ export const mockNonFinancialServices = [
       'Access structured documentation templates',
     ],
     tags: ['IT Support', 'Hybrid', 'Technology'],
-    featuredImageUrl: '/images/services/support-chatter-template.jpg',
+    featuredImageUrl: '/images/services/tech-support.jpg',
   },
   {
     id: '3',
@@ -748,12 +748,12 @@ export const mockNonFinancialServices = [
     id: '10',
     title: 'Cursor AI',
     description:
-      'Request access to Cursor AI, an advanced AI-powered code editor that accelerates development with intelligent code completion, natural language editing, and AI-assisted debugging. Submit your requisition to get started with this cutting-edge development tool.',
+      'Cursor AI is an advanced AI-powered code editor built on VS Code that transforms how developers write code. At DQ, we use Cursor to accelerate software development through intelligent code completion, natural language editing, and AI-assisted debugging—helping our teams ship features faster with fewer errors.',
     category: 'AI Tools',
     serviceType: 'Requisition',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
-    toolCategory: 'code_assistants',
+    toolCategory: 'coding_ides',
     accessType: 'request_access',
     pricing: 'paid',
     provider: {
@@ -781,12 +781,12 @@ export const mockNonFinancialServices = [
     id: '11',
     title: 'Lovable AI',
     description:
-      'Request access to Lovable AI, an innovative low-code platform that uses AI to help you build full-stack web applications quickly. Perfect for rapid prototyping, MVPs, and creating production-ready web apps without extensive coding. Submit your requisition to start building with AI assistance.',
+      'Lovable AI is an innovative low-code platform that uses AI to build full-stack web applications through natural language. DQ leverages Lovable for rapid prototyping and MVP development, enabling teams to validate ideas quickly and create production-ready web applications without extensive coding expertise.',
     category: 'AI Tools',
     serviceType: 'Requisition',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
-    toolCategory: 'code_assistants',
+    toolCategory: 'low_code_tools',
     accessType: 'request_access',
     pricing: 'paid',
     provider: {
@@ -814,12 +814,12 @@ export const mockNonFinancialServices = [
     id: '12',
     title: 'ChatGPT',
     description:
-      'Request access to ChatGPT, OpenAI\'s advanced conversational AI assistant powered by GPT-4. Perfect for content creation, research, coding assistance, data analysis, and problem-solving. Submit your requisition to unlock intelligent AI-powered productivity.',
+      'ChatGPT is OpenAI\'s advanced conversational AI assistant powered by GPT-4, capable of understanding and generating human-like text. DQ uses ChatGPT to enhance productivity across content creation, research, coding assistance, data analysis, and problem-solving—empowering teams to work smarter and faster.',
     category: 'AI Tools',
     serviceType: 'Requisition',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
-    toolCategory: 'conversational_ai',
+    toolCategory: 'llm',
     accessType: 'request_access',
     pricing: 'paid',
     provider: {
@@ -849,12 +849,12 @@ export const mockNonFinancialServices = [
     id: '20',
     title: 'Mokkup.ai',
     description:
-      'Request access to Mokkup.ai, an intelligent AI-powered mockup generator that creates professional product visualizations in seconds. Perfect for designers, marketers, and e-commerce teams who need stunning mockups for presentations, marketing materials, and product showcases. Submit your requisition to start creating beautiful mockups.',
+      'Mokkup.ai is an AI-powered mockup generator that creates professional product visualizations in seconds. DQ uses Mokkup.ai to streamline our design workflow, enabling designers and marketers to quickly produce stunning mockups for presentations, marketing campaigns, and product showcases without manual editing.',
     category: 'AI Tools',
     serviceType: 'Requisition',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
-    toolCategory: 'design_tools',
+    toolCategory: 'content_generators',
     accessType: 'request_access',
     pricing: 'paid',
     provider: {
@@ -884,12 +884,12 @@ export const mockNonFinancialServices = [
     id: '21',
     title: 'Voiceflow',
     description:
-      'Request access to Voiceflow, the leading platform for building AI-powered customer service agents. Design human-like voice and chat agents with visual workflows, deploy across multiple channels, and integrate with your tech stack. Trusted by 4,000+ customers to automate support and scale customer interactions. Submit your requisition to start building intelligent agents.',
+      'Voiceflow is a leading platform for building AI-powered conversational agents with visual workflows. DQ uses Voiceflow to automate customer support and scale interactions through intelligent voice and chat agents, reducing response times while maintaining high-quality, human-like customer experiences across multiple channels.',
     category: 'AI Tools',
     serviceType: 'Requisition',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
-    toolCategory: 'conversational_ai',
+    toolCategory: 'content_generators',
     accessType: 'request_access',
     pricing: 'paid',
     provider: {
@@ -920,7 +920,7 @@ export const mockNonFinancialServices = [
     title: 'Leave Application',
     description:
       'Submit leave requests using the DQ Approvals app for annual leave (30 days), sick leave (5 days), emergency leave, maternity leave (45 days), or compassionate leave (3-5 days). All associates must obtain line manager approval and follow standardized procedures. Leaves exceeding one day require handover catalog submission with sign-off.',
-    category: 'Business',
+    category: 'Employee Services',
     serviceType: 'Requisition',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
@@ -951,7 +951,7 @@ export const mockNonFinancialServices = [
     title: 'Shifts Allocation',
     description:
       'View and manage your work shifts using the DQ Shifts app. Confirm assigned shifts by Friday each week, request shift changes through your line manager, and clock in/out on time. All shifts are published by Wednesday. Supports morning, evening, split shifts, and remote work schedules with 100% compliance requirements.',
-    category: 'Business',
+    category: 'Employee Services',
     serviceType: 'Query',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
@@ -982,7 +982,7 @@ export const mockNonFinancialServices = [
     title: 'Reimbursements',
     description:
       'Request reimbursement for economy class return flight tickets to your home country. Submit requests at least one month before travel with three quotes from reputable platforms. Reimbursement is based on average ticket cost. Admin reviews eligibility, Ops Lead approves bookings, and Finance processes payments. Book flights at least two weeks before travel.',
-    category: 'Business',
+    category: 'Employee Services',
     serviceType: 'Requisition',
     deliveryMode: 'Online',
     businessStage: 'All Stages',
@@ -1013,7 +1013,7 @@ export const mockNonFinancialServices = [
     title: 'Staff Requisition',
     description:
       'DigitalQatalyst (DQ) is strengthening its Centre of Excellence (CoE) to embed consistent quality, performance, and agility across the organization. As DQ grows, the CoE ensures unified standards, reduces inefficiencies, and reinforces strong governance through the QPMS framework. To support this mandate, the CoE requires analysts with strong analytical and operational skills who can work cross-functionally, provide clear insights, and translate performance frameworks into measurable impact.',
-    category: 'Business',
+    category: 'Employee Services',
     serviceType: 'Requisition',
     deliveryMode: 'Online',
     businessStage: 'All Stages',

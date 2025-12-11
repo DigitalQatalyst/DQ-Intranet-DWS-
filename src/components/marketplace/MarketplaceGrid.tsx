@@ -57,8 +57,8 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
   const overallCount = typeof totalCount === 'number' ? totalCount : nonPromoItems.length;
   const visibleCount = nonPromoItems.length;
   if (visibleCount === 0) {
-    // Creative "Coming Soon" page for DOC Writer and Digital Worker tabs
-    if (activeServiceTab === 'doc_writer' || activeServiceTab === 'digital_worker') {
+    // Creative "Coming Soon" page for Digital Worker tab
+    if (activeServiceTab === 'digital_worker') {
       return (
         <div className="flex items-center justify-center min-h-[500px] bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100">
           <div className="text-center">
@@ -107,14 +107,14 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
         </p>
       </div>;
   }
-  // Insert promo cards after every 6 regular items
+  // Insert promo cards after every 6 regular items (but not on digital_worker tab)
   const itemsWithPromos = nonPromoItems.reduce((acc, item, index) => {
     acc.push({
       type: 'item',
       data: item
     });
-    // Insert a promo card after every 6 items
-    if ((index + 1) % 6 === 0 && promoCards.length > 0 && promoCards[Math.floor(index / 6) % promoCards.length]) {
+    // Insert a promo card after every 6 items (skip on digital_worker tab)
+    if ((index + 1) % 6 === 0 && promoCards.length > 0 && promoCards[Math.floor(index / 6) % promoCards.length] && activeServiceTab !== 'digital_worker') {
       const promoIndex = Math.floor(index / 6) % promoCards.length;
       acc.push({
         type: 'promo',

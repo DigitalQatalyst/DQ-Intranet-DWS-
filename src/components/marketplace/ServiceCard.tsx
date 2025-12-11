@@ -1,6 +1,5 @@
 import React from 'react';
 import { resolveServiceImage } from '../../utils/serviceCardImages';
-import { BookmarkIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 export interface ServiceCardProps {
   item: {
@@ -25,8 +24,8 @@ export interface ServiceCardProps {
 export const ServiceCard: React.FC<ServiceCardProps> = ({
   item,
   type,
-  isBookmarked,
-  onToggleBookmark,
+  isBookmarked: _isBookmarked,
+  onToggleBookmark: _onToggleBookmark,
   onQuickView
 }) => {
   const navigate = useNavigate();
@@ -62,10 +61,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     }
   };
   const handleViewDetails = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(getItemRoute());
-  };
-  const handlePrimaryAction = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     
     // For AI Tools and Digital Worker, open the request form in a new tab
@@ -76,8 +72,18 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       navigate(`${getItemRoute()}?action=true`);
     }
   };
-  // Display tags if available, otherwise use category and deliveryMode
-  const displayTags = item.tags || [item.category, item.deliveryMode].filter(Boolean);
+  const handlePrimaryAction = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // For AI Tools and Digital Worker, open the request form in a new tab
+    if (item.category === 'AI Tools' || item.category === 'Digital Worker') {
+      const requestUrl = item.requestUrl || 'https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl';
+      window.open(requestUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      navigate(`${getItemRoute()}?action=true`);
+    }
+  };
   
   // Prefer explicit featuredImageUrl, else mapped image by id/title, else default
   const imageSrc =
@@ -120,22 +126,6 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           <p className="text-sm text-gray-600 line-clamp-2 leading-snug" style={{ margin: 0 }}>
             {item.description}
           </p>
-        </div>
-        {/* Tags and Actions in same row - fixed position */}
-        <div className="flex justify-between items-center mt-auto">
-          <div className="flex flex-wrap gap-1 max-w-[70%]">
-            {displayTags.map((tag, index) => <span key={index} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate bg-gray-50 text-gray-700 border border-gray-200">
-                {tag}
-              </span>)}
-          </div>
-          <div className="flex space-x-2 flex-shrink-0">
-            <button onClick={e => {
-            e.stopPropagation();
-            onToggleBookmark();
-          }} className={`p-1.5 rounded-full ${isBookmarked ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`} aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'} title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
-              <BookmarkIcon size={16} className={isBookmarked ? 'fill-yellow-600' : ''} />
-            </button>
-          </div>
         </div>
       </div>
       {/* Card Footer - with two buttons */}

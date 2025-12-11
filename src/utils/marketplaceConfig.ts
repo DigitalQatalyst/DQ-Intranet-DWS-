@@ -90,16 +90,13 @@ export const mockNonFinancialServicesData = {
       name: 'Technology'
     }, {
       id: 'business',
-      name: 'Business'
+      name: 'Employee Services'
     }, {
       id: 'digital_worker',
       name: 'Digital Worker'
     }, {
       id: 'prompt_library',
       name: 'Prompt Library'
-    }, {
-      id: 'doc_writer',
-      name: 'DOC Writer'
     }, {
       id: 'ai_tools',
       name: 'AI Tools'
@@ -752,6 +749,10 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     itemName: 'Business Service',
     itemNamePlural: 'Services Center',
     attributes: [{
+      key: 'category',
+      label: 'Department',
+      icon: React.createElement(Building, { size: 18, className: "mr-2" })
+    }, {
       key: 'serviceType',
       label: 'Service Type',
       icon: React.createElement(Award, { size: 18, className: "mr-2" })
@@ -775,22 +776,15 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       },
       {
         id: 'self_service_faq',
-        label: 'Self-Service & FAQs',
+        label: 'FAQ',
         icon: BookOpen,
         iconBgColor: 'bg-purple-50',
         iconColor: 'text-purple-600'
       },
       {
         id: 'contact_sla',
-        label: 'Contact & SLAs',
+        label: 'Contacts',
         icon: Info,
-        iconBgColor: 'bg-amber-50',
-        iconColor: 'text-amber-600'
-      },
-      {
-        id: 'required_documents',
-        label: 'Required Documents',
-        icon: FileText,
         iconBgColor: 'bg-amber-50',
         iconColor: 'text-amber-600'
       }
@@ -840,9 +834,6 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       }, {
         id: 'prompt_library',
         name: 'Prompt Library'
-      }, {
-        id: 'doc_writer',
-        name: 'DOC Writer'
       }, {
         id: 'ai_tools',
         name: 'AI Tools'
@@ -1055,33 +1046,16 @@ export const getTabSpecificFilters = (tabId?: string): FilterCategoryConfig[] =>
     }
   ];
 
-  // Tab-specific filters for DOC Writer category
-  const docWriterSpecificFilters: FilterCategoryConfig[] = [
-    {
-      id: 'documentCategory',
-      title: 'Document Type',
-      options: [
-        { id: 'contracts', name: 'Contracts' },
-        { id: 'proposals', name: 'Proposals' },
-        { id: 'reports', name: 'Reports' },
-        { id: 'presentations', name: 'Presentations' },
-        { id: 'policies', name: 'Policies' },
-        { id: 'procedures', name: 'Procedures' }
-      ]
-    }
-  ];
-
   // Tab-specific filters for AI Tools category
   const aiToolsSpecificFilters: FilterCategoryConfig[] = [
     {
       id: 'toolCategory',
       title: 'Tool Category',
       options: [
-        { id: 'llms', name: 'Large Language Models' },
-        { id: 'code_assistants', name: 'Code Assistants' },
-        { id: 'design_tools', name: 'Design Tools' },
-        { id: 'data_analytics', name: 'Data Analytics' },
-        { id: 'automation', name: 'Automation Tools' }
+        { id: 'llm', name: 'LLM' },
+        { id: 'coding_ides', name: 'Coding IDEs' },
+        { id: 'low_code_tools', name: 'Low Code Tools' },
+        { id: 'content_generators', name: 'Content Generators' }
       ]
     }
   ];
@@ -1101,10 +1075,6 @@ export const getTabSpecificFilters = (tabId?: string): FilterCategoryConfig[] =>
   
   if (tabId === 'prompt_library') {
     return [...baseFilters, ...promptLibrarySpecificFilters];
-  }
-  
-  if (tabId === 'doc_writer') {
-    return [...baseFilters, ...docWriterSpecificFilters];
   }
   
   if (tabId === 'ai_tools') {
