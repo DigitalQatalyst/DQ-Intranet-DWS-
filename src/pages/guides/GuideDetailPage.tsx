@@ -17,6 +17,7 @@ import { track } from '../../utils/analytics'
 import { useAuth } from '../../components/Header/context/AuthContext'
 // CODEx: import new preview component
 import { DocumentPreview } from '../../components/guides/DocumentPreview'
+const GuidelinePage = React.lazy(() => import('../guidelines/l24-working-rooms/GuidelinePage'))
 
 const Markdown = React.lazy(() => import('../../components/guides/MarkdownRenderer'))
 
@@ -64,6 +65,7 @@ const GuideDetailPage: React.FC = () => {
   const [toc, setToc] = useState<Array<{ id: string; text: string; level: number }>>([])
   const [activeContentTab, setActiveContentTab] = useState<string>('overview')
   const isClientTestimonials = useMemo(() => (guide?.slug || '').toLowerCase() === 'client-testimonials', [guide?.slug])
+  const isL24WorkingRooms = useMemo(() => (guide?.slug || '').toLowerCase() === 'dq-l24-working-rooms-guidelines' || (guide?.title || '').toLowerCase().includes('l24 working rooms'), [guide?.slug, guide?.title])
   const featuredClientTestimonials = [
     {
       id: 'khalifa',
@@ -825,6 +827,23 @@ const deriveTabKey = (g?: GuideRecord | null): GuideTabKey => {
         </main>
         <Footer isLoggedIn={!!user} />
       </div>
+    )
+  }
+
+  // Use custom layout for L24 Working Rooms Guidelines
+  if (isL24WorkingRooms) {
+    return (
+      <React.Suspense fallback={
+        <div className="min-h-screen flex flex-col bg-gray-50">
+          <Header toggleSidebar={() => {}} sidebarOpen={false} />
+          <main className="container mx-auto px-4 py-8 flex-grow max-w-7xl">
+            <div className="bg-white rounded shadow p-8 text-center text-gray-500">Loading…</div>
+          </main>
+          <Footer isLoggedIn={!!user} />
+        </div>
+      }>
+        <GuidelinePage />
+      </React.Suspense>
     )
   }
 
