@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Sparkles, Bell, Lock } from 'lucide-react';
+import { ArrowRight, Sparkles, Lock } from 'lucide-react';
 import {
   AnimatedText,
   FadeInUpOnScroll,
@@ -90,17 +90,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
                 </button>
               </div>
             </div>
-            {/* Bottom info bar */}
-            <div className="bg-gray-50 border-t border-gray-100 px-4 py-2.5 flex items-center justify-between">
-              <p className="text-xs text-gray-400 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                Powered by DQ AI — launching soon across the workspace
-              </p>
-              <span className="text-xs text-gray-400 flex items-center gap-1.5">
-                <Bell className="w-3.5 h-3.5" />
-                Stay tuned
-              </span>
-            </div>
+
           </div>
         </FadeInUpOnScroll>
         {/* Call to Action Buttons with animations */}
