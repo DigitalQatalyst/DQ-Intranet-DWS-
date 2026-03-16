@@ -92,6 +92,28 @@ module.exports = {
           sky: "#57D3FF",
           tint: "#DDE8FF",
         },
+        // Learning Center / News Detail Page Tokens
+        hero: {
+          DEFAULT: "hsl(var(--hero))",
+          foreground: "hsl(var(--hero-foreground))",
+          muted: "hsl(var(--hero-muted))",
+        },
+        cta: {
+          DEFAULT: "hsl(var(--cta))",
+          foreground: "hsl(var(--cta-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        "nav-dark": {
+          DEFAULT: "hsl(var(--nav-dark))",
+          foreground: "hsl(var(--nav-dark-foreground))",
+        },
+        footer: {
+          DEFAULT: "hsl(var(--footer))",
+          foreground: "hsl(var(--footer-foreground))",
+        },
       },
       fontFamily: {
         display: ["Palatino", "serif"],

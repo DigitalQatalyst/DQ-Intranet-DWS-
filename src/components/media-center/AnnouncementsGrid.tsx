@@ -19,6 +19,25 @@ const ITEMS_PER_PAGE = 9;
 const matchesSelection = (value: string | undefined, selections?: string[]) =>
   !selections?.length || (value && selections.includes(value));
 
+// Location label → tag aliases for multi-location items
+const LOCATION_TAG_MAP: Record<string, string[]> = {
+  Dubai: ['DXB', 'Dubai'],
+  Riyadh: ['KSA', 'Riyadh'],
+  Nairobi: ['NBO', 'Nairobi'],
+  Remote: ['Remote'],
+};
+
+const matchesLocation = (item: NewsItem, selections?: string[]) => {
+  if (!selections?.length) return true;
+  return selections.some((sel) => {
+    // Direct location match
+    if (item.location === sel) return true;
+    // Tag-based match (for multi-location items)
+    const aliases = LOCATION_TAG_MAP[sel] || [sel];
+    return item.tags?.some(tag => aliases.some(alias => tag.toLowerCase() === alias.toLowerCase()));
+  });
+};
+
 export default function AnnouncementsGrid({ query, items }: GridProps) {
   const sourceItems: NewsItem[] = items;
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,6 +56,7 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
     };
 
     return sourceItems
+      .filter((item) => !item.archived)
       .filter((item) => UPDATE_TYPES.includes(item.type))
       .filter((item) => {
         if (!search) return true;
@@ -56,7 +76,7 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
         const audience = query.filters?.audience;
         const dateRange = query.filters?.dateRange;
         const okDepartment = matchesSelection(item.department, department);
-        const okLocation = matchesSelection(item.location, location);
+        const okLocation = matchesLocation(item, location);
         const okNewsType = matchesSelection(item.newsType, newsType);
         const okSource = matchesSelection(item.newsSource, newsSource);
         const okFocus = matchesSelection(item.focusArea, focusArea);
@@ -165,7 +185,6 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
       <section className="space-y-3">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <h3 className="font-medium text-gray-800">Available Items (0)</h3>
-          <span>Auto-refresh · Live</span>
         </div>
         <div className="text-center py-12 text-gray-500">No items found</div>
       </section>
@@ -176,7 +195,6 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
     <section className="space-y-3">
       <div className="flex items-center justify-between text-sm text-gray-600">
         <h3 className="font-medium text-gray-800">Available Items ({filteredItems.length})</h3>
-        <span>Auto-refresh · Live</span>
       </div>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {paginatedItems.map((item: NewsItem) => (

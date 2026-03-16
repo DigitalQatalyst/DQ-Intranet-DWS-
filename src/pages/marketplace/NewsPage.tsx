@@ -13,6 +13,13 @@ import type { FacetConfig, FiltersValue, MediaCenterTabKey } from '@/components/
 import type { NewsItem } from '@/data/media/news';
 import type { JobItem } from '@/data/media/jobs';
 import { fetchAllNews, fetchAllJobs } from '@/services/mediaCenterService';
+
+const LOCATION_OPTIONS = [
+  { value: 'Dubai', label: 'DXB' },
+  { value: 'Nairobi', label: 'NBO' },
+  { value: 'Riyadh', label: 'KSA' },
+  { value: 'Remote', label: 'Remote' },
+];
 import { markMediaItemSeen, getSeenMediaItems } from '@/utils/mediaTracking';
 
 const PINNED_FACETS: FacetConfig[] = [
@@ -35,16 +42,16 @@ const PINNED_FACETS: FacetConfig[] = [
       'DBP Delivery'
     ]
   },
-  { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] }
+  { key: 'location', label: 'Location', options: LOCATION_OPTIONS }
 ];
 
 const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
   announcements: [
-    { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] },
+    { key: 'location', label: 'Location', options: LOCATION_OPTIONS },
     {
       key: 'newsType',
       label: 'Type',
-      options: ['Policy Update', 'Upcoming Events', 'Company News', 'Holidays']
+      options: ['Policy Update', 'Upcoming Events', 'Company News', 'Holidays', 'Leadership Messages', 'Product Updates', 'Operational Notices']
     },
     {
       key: 'dateRange',
@@ -53,7 +60,7 @@ const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
     }
   ],
   insights: [
-    { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] },
+    { key: 'location', label: 'Location', options: LOCATION_OPTIONS },
     {
       key: 'readingTime',
       label: 'Reading Time',
@@ -64,7 +71,7 @@ const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
     {
       key: 'readingTime',
       label: 'Duration',
-      options: ['10–20', '20+']
+      options: ['10–20 Min', '20+ Min']
     }
   ],
   opportunities: [
@@ -87,7 +94,7 @@ const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
         'DBP Delivery'
       ]
     },
-    { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] },
+    { key: 'location', label: 'Location', options: LOCATION_OPTIONS },
     { key: 'deptType', label: 'Role Type', options: ['Tech', 'Design', 'Ops', 'Finance', 'HR'] },
     {
       key: 'sfiaLevel',
@@ -181,19 +188,19 @@ const TAB_SUMMARIES: Record<
   announcements: {
     title: 'News & Announcements',
     description:
-      'Discover what is happening in DQ, including important announcements, and what teams are building.',
+      'Stay updated with the latest news, important announcements, and key updates happening across DQ.',
     meta: 'Sourced from DQ Leadership, Operations, and Communications.'
   },
   insights: {
     title: 'Blogs',
     description:
-      'Dive into thought leadership, personal stories, and expert insights written by colleagues across DQ.',
+      'Behind every idea is a story. Explore insights and perspectives from DQ Leaders and Associates.',
     meta: 'Authored by DQ Associates, Leads, and Partners.'
   },
   podcasts: {
     title: 'Podcasts',
     description:
-      'Tune in to conversations, stories, and expert insights from DQ leaders and associates.',
+      'Tune in to conversations and stories, from DQ leaders and associates.',
     meta: 'Listen to conversations that matter.'
   },
   opportunities: {
@@ -221,6 +228,19 @@ const NewsPage: React.FC = () => {
     return 'announcements';
   });
   const [queryText, setQueryText] = useState(() => searchParams.get('q') ?? '');
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
+  const searchRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchDropdownOpen(false);
+        setQueryText('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const [filters, setFilters] = useState<FiltersValue>({});
   const [showFilters, setShowFilters] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -314,17 +334,55 @@ const NewsPage: React.FC = () => {
           item.format === 'Podcast' ||
           item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))
       )
-      .filter((item) => item.title.toLowerCase().includes(search));
+      .filter((item) =>
+        item.title.toLowerCase().includes(search) ||
+        item.excerpt?.toLowerCase().includes(search)
+      );
+  }, [tab, queryText, newsItems]);
+
+  // News & Announcements search dropdown results
+  const announcementSearchResults = useMemo(() => {
+    if (tab !== 'announcements') return [] as NewsItem[];
+    const search = queryText.trim().toLowerCase();
+    if (!search) return [] as NewsItem[];
+    const UPDATE_TYPES_LOCAL = ['Announcement', 'Guidelines', 'Notice'];
+    return newsItems
+      .filter((item) => UPDATE_TYPES_LOCAL.includes(item.type))
+      .filter((item) =>
+        item.title.toLowerCase().includes(search) ||
+        item.excerpt?.toLowerCase().includes(search) ||
+        item.author?.toLowerCase().includes(search)
+      )
+      .slice(0, 8);
+  }, [tab, queryText, newsItems]);
+
+  // Blog search dropdown results
+  const blogSearchResults = useMemo(() => {
+    if (tab !== 'insights') return [] as NewsItem[];
+    const search = queryText.trim().toLowerCase();
+    if (!search) return [] as NewsItem[];
+    return newsItems
+      .filter((item) => item.type === 'Thought Leadership')
+      .filter((item) => {
+        const isPodcast = item.format === 'Podcast' || item.tags?.some(tag => tag.toLowerCase().includes('podcast'));
+        return !isPodcast;
+      })
+      .filter((item) =>
+        item.title.toLowerCase().includes(search) ||
+        item.excerpt?.toLowerCase().includes(search) ||
+        item.author?.toLowerCase().includes(search)
+      )
+      .slice(0, 8);
   }, [tab, queryText, newsItems]);
 
   const searchPlaceholder = useMemo(() => {
     switch (tab) {
       case 'announcements':
-        return 'Search announcements and updates… e.g., townhall, product update';
+        return 'Search News & Announcements';
       case 'insights':
-        return 'Search blogs and insights… e.g., case study, delivery lessons';
+        return 'Search Blogs';
       case 'podcasts':
-        return 'Search podcast titles… e.g., Execution Beats Intelligence';
+        return 'Search Podcasts and Episodes';
       case 'opportunities':
         return 'Search jobs and roles… e.g., SFIA L3, frontend developer';
       default:
@@ -353,36 +411,7 @@ const NewsPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header toggleSidebar={() => setSidebarOpen((prev) => !prev)} sidebarOpen={sidebarOpen} />
 
-      {newItem && (
-        <div className="fixed right-4 top-18 z-50 w-full max-w-xs p-2 sm:right-4 sm:top-20">
-          <div className="group flex items-stretch overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-[0_15px_60px_rgba(15,23,42,0.15)] transition-all duration-200 hover:shadow-[0_20px_40px_rgba(15,23,42,0.25)]">
-            <div className="flex flex-1 flex-col gap-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#1A2E6E]">
-                {newItem.kind === 'job' ? 'New job opening' : 'New story'}
-              </p>
-              <p className="text-sm font-semibold leading-5 text-gray-900 line-clamp-2">{newItem.title}</p>
-              <p className="text-xs leading-snug text-gray-600 line-clamp-2">{newItem.meta}</p>
-              <div className="flex flex-wrap gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleViewNewItem}
-                  className="inline-flex min-w-[120px] items-center justify-center rounded-xl bg-[#030f35] px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-white transition-colors duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#030f35]"
-                >
-                  View now
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDismissNewItem}
-                  className="inline-flex items-center justify-center rounded-xl border border-gray-200 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500 transition-colors duration-200 hover:border-gray-300 hover:text-gray-700"
-                  aria-label="Dismiss new item notification"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
       <main className="container mx-auto px-4 py-8 flex-grow">
         <nav className="flex mb-4 text-sm text-gray-600" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-2">
@@ -466,14 +495,61 @@ const NewsPage: React.FC = () => {
           </div>
 
           <div className="mt-4 mb-4 flex flex-col gap-3 md:mb-6 md:flex-row md:items-center md:justify-between">
-            <div className="relative w-full">
+            <div className="relative w-full" ref={searchRef}>
               <Input
                 value={queryText}
-                onChange={(e) => setQueryText(e.target.value)}
+                onChange={(e) => { setQueryText(e.target.value); setSearchDropdownOpen(true); }}
+                onFocus={() => setSearchDropdownOpen(true)}
                 placeholder={searchPlaceholder}
                 className="h-11 w-full"
               />
-              {tab === 'podcasts' && queryText.trim() && (
+              {searchDropdownOpen && tab === 'announcements' && queryText.trim() && (
+                <div className="absolute z-20 mt-1 w-full max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                  {announcementSearchResults.length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-gray-500">No results found matching "{queryText}".</div>
+                  ) : (
+                    announcementSearchResults.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setQueryText('');
+                          setSearchDropdownOpen(false);
+                          navigate(`/marketplace/news/${item.id}`);
+                        }}
+                        className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="font-medium text-gray-900 line-clamp-1">{item.title}</span>
+                        <span className="text-xs text-gray-500">{item.newsType ?? item.type}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+              {searchDropdownOpen && tab === 'insights' && queryText.trim() && (
+                <div className="absolute z-20 mt-1 w-full max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                  {blogSearchResults.length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-gray-500">No blogs found matching "{queryText}".</div>
+                  ) : (
+                    blogSearchResults.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setQueryText('');
+                          setSearchDropdownOpen(false);
+                          navigate(`/marketplace/news/${item.id}`);
+                        }}
+                        className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="font-medium text-gray-900 line-clamp-1">{item.title}</span>
+                        <span className="text-xs text-gray-500">Blog · {item.author}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+              {searchDropdownOpen && tab === 'podcasts' && queryText.trim() && (
                 <div className="absolute z-20 mt-1 w-full max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
                   {podcastSearchResults.length === 0 ? (
                     <div className="px-3 py-2 text-sm text-gray-500">
@@ -486,6 +562,7 @@ const NewsPage: React.FC = () => {
                         type="button"
                         onClick={() => {
                           setQueryText('');
+                          setSearchDropdownOpen(false);
                           const params = new URLSearchParams();
                           params.set('tab', 'podcasts');
                           params.set('episode', item.id);
@@ -569,20 +646,6 @@ const NewsPage: React.FC = () => {
               <div className="rounded-xl bg-white p-4 shadow">
                 <div className="mb-2 flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Filters</h2>
-                  <div className="flex items-center gap-3">
-                    {hasActiveFilters && (
-                      <button type="button" className="text-sm font-medium text-[#1A2E6E]" onClick={clearFilters}>
-                        Reset All
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                      onClick={() => setSidebarCollapsed((v) => !v)}
-                    >
-                      {sidebarCollapsed ? 'Show' : 'Hide'}
-                    </button>
-                  </div>
                 </div>
                 {!sidebarCollapsed && (
                   <FiltersPanel

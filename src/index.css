@@ -30,6 +30,19 @@ html {
   --card-foreground: 224 56% 17%;
   --border: 228 40% 93%;
   --radius: 0.75rem;
+  
+  /* Learning Center / News Detail Page Tokens */
+  --hero: 226 71% 10%;
+  --hero-foreground: 210 40% 98%;
+  --hero-muted: 220 20% 65%;
+  --cta: 340 82% 55%;
+  --cta-foreground: 0 0% 100%;
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 100%;
+  --nav-dark: 226 71% 7%;
+  --nav-dark-foreground: 210 40% 98%;
+  --footer: 226 71% 7%;
+  --footer-foreground: 220 20% 75%;
 }
 
 .gradient-hero {

@@ -11,12 +11,9 @@ import { ArticleSummary } from '@/components/media-center/detail/ArticleSummary'
 import { EngagementMetrics } from '@/components/media-center/detail/EngagementMetrics';
 import { ErrorState } from '@/components/media-center/detail/ErrorState';
 
-// Helper function to determine layout type
+// Helper function to determine layout type - only podcasts use the series page, all others use standard layout
 const shouldUseNewLayout = (article: NewsItem | null): boolean => {
-  if (!article) return false;
-  const isBlogArticle = article.type === 'Thought Leadership' && article.format !== 'Podcast';
-  return isBlogArticle || 
-    (article.format === 'Podcast' || (article.tags?.some(tag => tag.toLowerCase().includes('podcast')) ?? false));
+  return false; // All articles now use the standard layout
 };
 
 
@@ -24,6 +21,7 @@ const NewsDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [activeTab, setActiveTab] = useState<'details' | 'highlights' | 'related'>('details');
 
   const { article, related, isLoading, loadError } = useArticleData(id);
   const { likes, hasLiked, views, handleLike } = useEngagementMetrics(id, article?.id);
@@ -41,7 +39,7 @@ const NewsDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F3F6FB]">
+    <div className="min-h-screen flex flex-col bg-[#F8F9FC]">
       <Header toggleSidebar={() => {}} sidebarOpen={false} />
       <main className="flex-1">
         <HeroSection 
@@ -51,25 +49,29 @@ const NewsDetailPage: React.FC = () => {
           onBookmarkToggle={() => setIsBookmarked(!isBookmarked)}
         />
 
-        <section className="bg-white pt-8 pb-8">
-          <div className="mx-auto px-6 sm:px-8 lg:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              <div className="lg:col-span-3 space-y-6">
-                <ArticleContent
-                  article={article}
-                  related={related}
-                  shouldUseNewLayout={useNewLayout}
-                />
-                <EngagementMetrics
-                  views={views}
-                  likes={likes}
-                  hasLiked={hasLiked}
-                  onLike={handleLike}
-                />
+        {/* Main Content Section - seamless transition from hero */}
+        <section className="bg-white relative" style={{ zIndex: 20, borderTop: 'none', marginTop: '-120px' }}>
+          <div className="mx-auto pt-0 pb-8" style={{ maxWidth: '1336px', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Content - 2/3 width */}
+              <div className="lg:col-span-2">
+                {/* Article Content - no tabs */}
+                <div>
+                  <div className="prose max-w-none">
+                    <ArticleContent
+                      article={article}
+                      related={related}
+                      shouldUseNewLayout={useNewLayout}
+                    />
+                  </div>
+                </div>
               </div>
               
+              {/* Right Sidebar - 1/3 width */}
               <div className="lg:col-span-1">
-                <ArticleSummary article={article} shouldUseNewLayout={true} />
+                <div className="sticky top-8">
+                  <ArticleSummary article={article} shouldUseNewLayout={true} />
+                </div>
               </div>
             </div>
           </div>

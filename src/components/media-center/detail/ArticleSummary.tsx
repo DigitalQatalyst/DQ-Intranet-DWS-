@@ -6,100 +6,96 @@ import { formatDate, getNewsTypeDisplay } from '@/utils/newsUtils';
 interface ArticleSummaryProps {
   article: NewsItem;
   shouldUseNewLayout: boolean;
+  onListenNow?: () => void;
 }
 
-export const ArticleSummary: React.FC<ArticleSummaryProps> = ({ article, shouldUseNewLayout }) => {
+export const ArticleSummary: React.FC<ArticleSummaryProps> = ({ article, shouldUseNewLayout, onListenNow }) => {
   const location = useLocation();
   const announcementDate = article.date ? formatDate(article.date) : '';
   const displayAuthor = article.type === 'Thought Leadership'
     ? (article.byline || article.author || 'DQ Media Team')
     : article.author;
-
-  const getFullBlogUrl = (): string => {
-    if (article.id === 'compute-nationalism-rise') {
-      return 'https://corp-web.qatalyst.tech/blog/rise-of-compute-nationalism';
-    }
-
-    if (article.id === 'beijing-ai-superstate') {
-      return 'https://corp-web.qatalyst.tech/blog/china-ai-superstate';
-    }
-
-    if (article.id === 'europe-ethical-ai-compute') {
-      return 'https://corp-web.qatalyst.tech/blog/europe-ai-compute-challenge';
-    }
-
-    return `/marketplace/news/${article.id}${location.search || ''}`;
-  };
-
-  if (shouldUseNewLayout) {
-    return (
-      <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" aria-label="Article Summary">
-        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Article Summary</h3>
-        </div>
-        <div className="p-4 space-y-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Author</span>
-            <span className="text-gray-900 font-medium">{displayAuthor}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Date</span>
-            <span className="text-gray-900 font-medium">{announcementDate}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Reading Time</span>
-            <span className="text-gray-900 font-medium">{article.readingTime || '5–10'} min</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Category</span>
-            <span className="text-gray-900 font-medium">{getNewsTypeDisplay(article).label}</span>
-          </div>
-        </div>
-        <div className="px-4 pb-4 space-y-3">
-          <button 
-            type="button"
-            className="w-full px-4 py-3 text-white font-semibold rounded-md transition-colors shadow-md hover:opacity-90 bg-[hsl(210_100%_70%)] hover:bg-[hsl(210_100%_60%)]" 
-            onClick={() => {
-              window.open(getFullBlogUrl(), '_blank');
-            }}
-          >
-            View Full Blog
-          </button>
-          <button 
-            type="button"
-            className="w-full px-4 py-3 text-gray-700 font-semibold rounded-md transition-colors border border-gray-300 hover:bg-gray-50" 
-            onClick={() => {
-              // Handle secondary action
-            }}
-          >
-            Download PDF
-          </button>
-        </div>
-      </section>
-    );
-  }
+  const isBlog = article.type === 'Thought Leadership' && article.format !== 'Podcast';
+  const isPodcast = article.format === 'Podcast' || article.tags?.some(tag => tag.toLowerCase().includes('podcast'));
 
   return (
-    <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" aria-label="Announcement Summary">
-      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Announcement Summary</h3>
-      </div>
-      <div className="p-4 space-y-4">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Author</span>
-          <span className="text-gray-900 font-medium">{displayAuthor}</span>
+    <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ml-auto" style={{ maxWidth: '320px' }} aria-label="Announcement Summary">
+      <div className="px-5 py-5">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
+        {isPodcast ? 'Episode Summary' : isBlog ? 'Blog Summary' : 'Announcement Summary'}
+      </h3>
+        
+        <div className="space-y-3 mb-5">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400 text-sm">Author</span>
+            <span className="text-gray-900 font-semibold text-sm">{displayAuthor}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400 text-sm">Date</span>
+            <span className="text-gray-900 font-semibold text-sm">{announcementDate}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400 text-sm">{isPodcast ? 'Duration' : 'Reading Time'}</span>
+            <span className="text-gray-900 font-semibold text-sm">&lt;5 min</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400 text-sm">Category</span>
+            <span className="text-gray-900 font-semibold text-sm">{getNewsTypeDisplay(article).label}</span>
+          </div>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Date</span>
-          <span className="text-gray-900 font-medium">{announcementDate}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Reading Time</span>
-          <span className="text-gray-900 font-medium">{article.readingTime || '5–10'} min</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Category</span>
-          <span className="text-gray-900 font-medium">{getNewsTypeDisplay(article).label}</span>
+
+        <div>
+          {isPodcast ? (
+            onListenNow ? (
+              <button
+                type="button"
+                onClick={onListenNow}
+                className="block w-full px-5 py-3 text-white font-semibold text-sm rounded-lg transition-all hover:opacity-90 text-center"
+                style={{ backgroundColor: '#122157' }}
+              >
+                Listen Now
+              </button>
+            ) : (
+            <a
+              href={article.audioUrl || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full px-5 py-3 text-white font-semibold text-sm rounded-lg transition-all hover:opacity-90 text-center"
+              style={{ backgroundColor: '#122157' }}
+            >
+              Listen Now
+            </a>
+            )
+          ) : isBlog ? (
+            <a
+              href={article.externalUrl || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full px-5 py-3 text-white font-semibold text-sm rounded-lg transition-all hover:opacity-90 text-center" 
+              style={{ backgroundColor: '#122157' }}
+            >
+              Read More
+            </a>
+          ) : (
+            <button 
+              type="button"
+              className="w-full px-5 py-3 text-white font-semibold text-sm rounded-lg transition-all hover:opacity-90 flex items-center justify-center" 
+              style={{ backgroundColor: '#122157' }}
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: article.title,
+                    text: article.excerpt,
+                    url: window.location.href,
+                  }).catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                }
+              }}
+            >
+              Share Announcement
+            </button>
+          )}
         </div>
       </div>
     </section>

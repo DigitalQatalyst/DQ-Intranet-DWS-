@@ -18,57 +18,53 @@ const fallbackHero =
   'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1600&q=80';
 
 export function NewsCard({ item, href }: NewsCardProps) {
-  // Use shared utility function to ensure consistency with detail pages
   const imageSrc = getNewsImageSrc(item, fallbackImages, fallbackHero);
   const displayTitle = generateTitle(item);
   const newsTypeDisplay = getNewsTypeDisplay(item);
-  
-  // Get views from localStorage (synced with details page)
-  const storedViews = typeof window !== 'undefined' ? localStorage.getItem(`news-views-${item.id}`) : null;
-  const views = storedViews ? parseInt(storedViews, 10) : 0;
 
-  return (
-    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div className="relative">
-        <img src={imageSrc} alt={displayTitle} className="h-48 w-full object-cover object-top" loading="lazy" />
-        <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/80 px-3 py-1 text-xs font-semibold text-gray-700 backdrop-blur">
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: newsTypeDisplay.color }} />
-          {newsTypeDisplay.label}
-        </div>
+  const inner = (
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer min-h-[360px]">
+      {/* Image */}
+      <div className="overflow-hidden rounded-t-2xl">
+        <img src={imageSrc} alt={displayTitle} className="h-48 w-full object-cover object-top transition-transform duration-300 hover:scale-105" loading="lazy" />
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex flex-1 flex-col">
-          <div className="text-xs text-gray-500">
-            {item.type} · {formatDateVeryShort(item.date)}
-          </div>
-          <h3 className="mt-2 text-lg font-semibold text-gray-900 line-clamp-2 min-h-[3.25rem]">
-            {displayTitle}
-          </h3>
-          <p className="mt-2 text-sm text-gray-700 line-clamp-3 min-h-[3.5rem]">
-            {item.excerpt}
-          </p>
-
-          <div className="mt-3 text-xs text-gray-500">
-            {views} views {item.location ? ` · ${item.location}` : ''}
-          </div>
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-3">
+        {/* Tag row */}
+        <div className="mb-2">
+          <span
+            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+            style={{ backgroundColor: `${newsTypeDisplay.color}18`, color: newsTypeDisplay.color }}
+          >
+            {newsTypeDisplay.label}
+          </span>
         </div>
 
-        <div className="mt-auto pt-4">
-          {href ? (
-            <Link
-              to={href}
-              className="block h-9 rounded-xl bg-[#030f35] text-center text-sm font-semibold text-white leading-9 transition hover:opacity-90"
-            >
-              View Details
-            </Link>
-          ) : (
-            <button className="h-9 w-full rounded-xl bg-[#030f35] text-sm font-semibold text-white transition hover:opacity-90">
-              View Details
-            </button>
-          )}
+        {/* Title */}
+        <h3 className="text-base font-bold text-gray-900 line-clamp-2 leading-snug mb-2">
+          {displayTitle}
+        </h3>
+
+        {/* Excerpt */}
+        <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed flex-1">
+          {item.excerpt}
+        </p>
+
+        {/* Date */}
+        <div className="mt-2 text-xs text-gray-400 font-medium">
+          {formatDateVeryShort(item.date)}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-2">
+          <span className="block h-9 rounded-full bg-[#030f35] text-center text-sm font-semibold text-white leading-9 transition hover:opacity-90">
+            View Details
+          </span>
         </div>
       </div>
     </article>
   );
+
+  return href ? <Link to={href} className="flex h-full flex-col no-underline">{inner}</Link> : inner;
 }

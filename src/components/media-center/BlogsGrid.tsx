@@ -127,7 +127,6 @@ export default function BlogsGrid({ query, items }: GridProps) {
       <section className="space-y-3">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <h3 className="font-medium text-gray-800">Available Items (0)</h3>
-          <span>Editors' picks refreshed weekly</span>
         </div>
         <div className="text-center py-12 text-gray-500">No items found</div>
       </section>
@@ -138,7 +137,6 @@ export default function BlogsGrid({ query, items }: GridProps) {
     <section className="space-y-3">
       <div className="flex items-center justify-between text-sm text-gray-600">
         <h3 className="font-medium text-gray-800">Available Items ({filteredItems.length})</h3>
-        <span>Editors' picks refreshed weekly</span>
       </div>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {paginatedItems.map((item: NewsItem) => (

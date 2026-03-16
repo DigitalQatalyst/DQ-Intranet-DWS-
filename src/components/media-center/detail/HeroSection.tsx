@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRightIcon, Share2, BookmarkIcon } from 'lucide-react';
+import { Home, Share2, Bookmark } from 'lucide-react';
 import type { NewsItem } from '@/data/media/news';
 import { generateTitle, getNewsTypeDisplay, formatDate } from '@/utils/newsUtils';
 
@@ -21,7 +21,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const mediaCenterUrl = (() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    return tab ? `/marketplace/opportunities?tab=${tab}` : '/marketplace/opportunities';
+    return tab ? `/marketplace/media-center?tab=${tab}` : '/marketplace/media-center';
   })();
 
   const handleShare = () => {
@@ -39,103 +39,71 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
 
   return (
-    <section className="relative min-h-[320px] md:min-h-[400px] flex flex-col" aria-labelledby="article-title">
-      {/* Gradient Background - dark colors cover most of hero, white starts at very bottom */}
-      <div
-        className="absolute inset-0"
+    <div className="relative hero-section" style={{ zIndex: 1 }}>
+      <div 
+        className="relative overflow-visible px-6"
         style={{
-          background: 'linear-gradient(to bottom, #192D6C 0%, #051139 55%, #051139 92%, #ffffff 100%)',
+          background: 'linear-gradient(to bottom, #0f2055 0%, #0f2055 35%, #122461 50%, rgba(18, 36, 97, 0.7) 65%, rgba(255, 255, 255, 0.15) 78%, rgba(255, 255, 255, 0.45) 88%, rgba(255, 255, 255, 0.75) 95%, #ffffff 100%)',
+          paddingTop: '1rem',
+          paddingBottom: '180px',
         }}
-      />
-      
-      {/* Mesh Pattern Overlay */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,_rgba(59_130_246_/_0.3),_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,_rgba(34_197_94_/_0.2),_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,_rgba(251_146_60_/_0.1),_transparent_50%)]" />
-      </div>
-      
-      <div className="relative z-10 w-full pt-4">
-        <div className="mx-auto max-w-7xl px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-white/90">
-              <Link to="/" className="hover:text-white hover:underline transition-colors">
+      >
+        {/* Subtle Mesh Pattern Overlay */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
+          <div 
+            className="absolute top-[10%] left-[15%] w-48 h-48 rounded-full opacity-20"
+            style={{ background: 'radial-gradient(circle, rgba(91, 142, 255, 0.4), transparent 70%)' }}
+          />
+          <div 
+            className="absolute top-[30%] right-[10%] w-64 h-64 rounded-full opacity-15"
+            style={{ background: 'radial-gradient(circle, rgba(0, 177, 133, 0.3), transparent 70%)' }}
+          />
+          <div 
+            className="absolute bottom-[5%] left-[40%] w-56 h-56 rounded-full opacity-10"
+            style={{ background: 'radial-gradient(circle, rgba(87, 211, 255, 0.3), transparent 70%)' }}
+          />
+        </div>
+
+        <div className="container mx-auto relative z-10" style={{ maxWidth: '1336px' }}>
+          {/* Breadcrumb */}
+          <div className="pb-6">
+            <div className="flex items-center gap-2 text-sm">
+              <Link to="/" className="text-white/70 hover:text-white/90 transition-colors">
                 Home
               </Link>
-              <ChevronRightIcon size={16} />
-              <Link to={mediaCenterUrl} className="hover:text-white hover:underline transition-colors">
-                DQ Media Center
+              <span className="text-white/40">/</span>
+              <Link to={mediaCenterUrl} className="text-white/70 hover:text-white/90 transition-colors">
+                Media Center
               </Link>
-              <ChevronRightIcon size={16} />
-              <span className="text-white font-medium">{generateTitle(article)}</span>
+              <span className="text-white/40">/</span>
+              <span className="font-medium text-white/90">{getNewsTypeDisplay(article).label}</span>
             </div>
-            <div className="flex gap-2 text-sm">
-              <button 
-                type="button"
-                onClick={handleShare}
-                className="inline-flex items-center gap-1 rounded-lg border border-white/30 bg-white/10 backdrop-blur-sm px-3 py-2 text-white hover:bg-white/20 transition-colors cursor-pointer"
-                aria-label="Share article"
+          </div>
+
+          {/* Content Panel - 1336px x 220px */}
+          <div 
+            className="backdrop-blur-xl bg-white/[0.08] border border-white/[0.15] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+            style={{ height: '220px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+          >
+            <div className="space-y-1.5">
+              {/* Title */}
+              <h1 
+                id="article-title" 
+                className="text-xl font-bold tracking-tight text-white md:text-2xl lg:text-3xl"
               >
-                <Share2 size={16} />
-                Share
-              </button>
-              <button 
-                type="button"
-                onClick={onBookmarkToggle}
-                className={`inline-flex items-center gap-1 rounded-lg border border-white/30 backdrop-blur-sm px-3 py-2 transition-colors cursor-pointer ${
-                  isBookmarked 
-                    ? 'bg-white/20 text-white border-white/40' 
-                    : 'bg-white/10 text-white hover:bg-white/20'
-                }`}
-                aria-label={isBookmarked ? 'Remove bookmark' : 'Save article'}
-              >
-                <BookmarkIcon size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
-                Save
-              </button>
+                {generateTitle(article)}
+              </h1>
+
+              {/* Description */}
+              {article.excerpt && (
+                <p className="max-w-2xl text-sm leading-relaxed text-white/80">
+                  {article.excerpt}
+                </p>
+              )}
             </div>
           </div>
         </div>
       </div>
-      
-      <div className="relative z-10 mx-auto px-6 sm:px-8 lg:px-12 py-4 md:py-6 w-full flex-1 flex items-center">
-        <div className="w-full">
-          {/* Title Section - spans full width with small margins */}
-          <div className="bg-black/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
-            {/* Badge */}
-            <div className="mb-6">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-500 text-white">
-                {getNewsTypeDisplay(article).label}
-              </span>
-            </div>
-
-            {/* Title */}
-            <h1 id="article-title" className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4 break-words">
-              {generateTitle(article)}
-            </h1>
-
-            {/* Description */}
-            <p className="text-lg text-white/90 leading-relaxed">
-              {article.excerpt}
-            </p>
-
-            {/* Metadata Chips */}
-            <div className="flex flex-wrap gap-3 mt-6">
-              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-black/5 border border-white/10">
-                <span className="text-xs font-medium text-white/70">Date:</span>
-                <span className="text-xs text-white ml-1">{announcementDate}</span>
-              </div>
-              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-black/5 border border-white/10">
-                <span className="text-xs font-medium text-white/70">Author:</span>
-                <span className="text-xs text-white ml-1">{article.author}</span>
-              </div>
-              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-black/5 border border-white/10">
-                <span className="text-xs font-medium text-white/70">Reading:</span>
-                <span className="text-xs text-white ml-1">{article.readingTime || '5–10'} min</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 };
