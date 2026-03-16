@@ -5,6 +5,7 @@ import CreateAccountPage from "./pages/CreateAccountPage";
 import LeadFormPopup from "./components/LeadFormPopup";
 import WorkspaceLanding from "./pages/WorkspaceLanding";
 import OnboardingMarketplacePage from "./pages/OnboardingMarketplace";
+import OnboardingLanding from "./pages/OnboardingLanding";
 import ComingSoonCountdownPage from "./components/common/ComingSoonCountdownPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import ServiceComingSoonPage from "./pages/ServiceComingSoonPage";
@@ -25,14 +26,7 @@ export function App() {
         <Route path="/onboarding" element={<OnboardingMarketplacePage />} />
         <Route path="/onboarding-flows" element={<Navigate to="/onboarding" replace />} />
         <Route path="/onboarding/start" element={<div>HR-style form lives here</div>} />
-        <Route
-          path="/onboarding/welcome"
-          element={
-            <div className="p-10 text-center text-lg font-semibold text-[#030F35]">
-              Welcome to DQ onboarding — dedicated content is coming soon.
-            </div>
-          }
-        />
+        <Route path="/onboarding/welcome" element={<OnboardingLanding />} />
         <Route
           path="/onboarding/profile"
           element={

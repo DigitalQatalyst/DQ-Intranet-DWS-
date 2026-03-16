@@ -15,8 +15,8 @@ interface CourseDetailPageProps {
 }
 export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   bookmarkedCourses = [],
-  onToggleBookmark = () => {},
-  onAddToComparison = () => {}
+  onToggleBookmark = () => undefined,
+  onAddToComparison = () => undefined
 }) => {
   const {
     courseId

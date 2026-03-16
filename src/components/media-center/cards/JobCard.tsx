@@ -55,7 +55,7 @@ const getJobImage = (job: JobItem): string => {
 };
 
 export function JobCard({ job, href, search }: JobCardProps) {
-  const imageSrc = getJobImage(job);
+  const imageSrc = '/job openings.jpg';
   const sfia = SFIA_LEVELS[job.sfiaLevel];
 
   return (
@@ -66,13 +66,6 @@ export function JobCard({ job, href, search }: JobCardProps) {
           alt={job.title} 
           className="h-40 w-full object-cover" 
           loading="lazy"
-          onError={(e) => {
-            // Fallback to a default job image if the image fails to load
-            const target = e.target as HTMLImageElement;
-            if (target.src !== 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80') {
-              target.src = 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80';
-            }
-          }}
         />
         <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/80 px-3 py-1 text-xs font-medium text-gray-700 backdrop-blur">
           <span className="h-2 w-2 rounded-full bg-orange-500" />

@@ -428,13 +428,24 @@ export const calculateMandatoryCompletion = (
   };
 };
 // Check if onboarding has been completed
-export const isOnboardingCompleted = () => {
+// Check if onboarding has been completed
+export const isOnboardingCompleted = async () => {
   // Check localStorage first
   const onboardingStatus = localStorage.getItem("onboardingComplete");
   if (onboardingStatus === "true") {
     return true;
   }
-  // Check if we have profile data in the cache
+
+  // If we don't have cached data, try to fetch it
+  if (!dataCache) {
+    try {
+      await fetchBusinessProfileData();
+    } catch (error) {
+      console.error("Error fetching business profile during onboarding check:", error);
+    }
+  }
+
+  // Check if we have profile data in the cache (possibly just fetched)
   if (dataCache) {
     // Check if mandatory fields are filled
     const { companyStage, sections } = dataCache;
@@ -446,6 +457,7 @@ export const isOnboardingCompleted = () => {
       sections.basic && Object.keys(sections.basic.fields || {}).length > 0
     );
   }
+
   // Check localStorage for profile data
   const storedData = localStorage.getItem("profileData");
   if (storedData) {

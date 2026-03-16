@@ -155,9 +155,9 @@ class ChatService {
       replyTo: replyToId,
       voiceMessage: voiceMessage
         ? {
-            duration: voiceMessage.duration,
-            audioUrl: voiceMessage.audioUrl,
-          }
+          duration: voiceMessage.duration,
+          audioUrl: voiceMessage.audioUrl,
+        }
         : undefined,
     };
     // Add message to local storage
@@ -220,9 +220,9 @@ class ChatService {
       replyTo: shouldReply ? replyToId : undefined,
       voiceMessage: shouldReplyWithVoice
         ? {
-            duration: 5 + Math.floor(Math.random() * 25),
-            audioUrl,
-          }
+          duration: 5 + Math.floor(Math.random() * 25),
+          audioUrl,
+        }
         : undefined,
     };
     // Add message to storage
@@ -283,10 +283,10 @@ class ChatService {
       this.messages = this.messages.map((msg) =>
         msg.id === messageId
           ? {
-              ...msg,
-              content: "This message was deleted",
-              isDeletedForMe: true,
-            }
+            ...msg,
+            content: "This message was deleted",
+            isDeletedForMe: true,
+          }
           : msg
       );
     }

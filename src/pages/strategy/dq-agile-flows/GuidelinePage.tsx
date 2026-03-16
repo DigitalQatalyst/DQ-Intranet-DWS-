@@ -5,6 +5,7 @@ import { Header } from '../../../components/Header'
 import { Footer } from '../../../components/Footer'
 import { useAuth } from '../../../components/Header/context/AuthContext'
 import { supabaseClient } from '../../../lib/supabaseClient'
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 import { HeroSection } from '../shared/HeroSection'
 import { GUIDE_CONTENT } from '../../../constants/guideContent'
 
@@ -27,7 +28,7 @@ function GuidelinePage() {
     ;(async () => {
       try {
         setLoading(true)
-        const { data, error: fetchError } = await supabaseClient
+        const { data, error: fetchError } = await knowledgeHubSupabase
           .from('guides')
           .select('*')
           .eq('slug', currentSlug)

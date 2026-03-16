@@ -4,6 +4,7 @@ import { fetchDna, DqDnaNode, DqDnaCallout } from "../../services/dq";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { supabaseClient } from "../../lib/supabaseClient";
+import { knowledgeHubSupabase } from '../../services/knowledgeHubClient'
 
 /* ===== PIXEL-PERFECT CONSTANTS ===== */
 const NAVY = "#162862"; // Exact navy from image
@@ -628,7 +629,7 @@ function Discover_DNASection({}: Discover_DNASectionProps) {
   useEffect(() => {
     async function fetchGHCGuides() {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await knowledgeHubSupabase
           .from('guides')
           .select('slug, title, summary, body, hero_image_url')
           .in('slug', GHC_SLUGS)

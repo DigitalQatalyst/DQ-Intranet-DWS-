@@ -55,7 +55,7 @@ const JobApplicationPage: React.FC = () => {
   if (!job) {
     return (
       <div className="flex min-h-screen flex-col bg-gray-50">
-        <Header toggleSidebar={() => {}} sidebarOpen={false} />
+        <Header toggleSidebar={() => undefined} sidebarOpen={false} />
         <main className="flex flex-1 flex-col items-center justify-center px-4 text-center">
           <h1 className="mb-2 text-2xl font-semibold text-gray-900">
             {isLoading ? 'Loading role' : 'Role not found'}
@@ -69,7 +69,11 @@ const JobApplicationPage: React.FC = () => {
             <p className="mb-4 text-sm text-red-600">{loadError}</p>
           )}
           <button
-            onClick={() => navigate(`/marketplace/opportunities${location.search || '?tab=opportunities'}`)}
+            onClick={() => {
+              const params = new URLSearchParams(location.search);
+              const tab = params.get('tab') || 'opportunities';
+              navigate(`/marketplace/opportunities?tab=${tab}`);
+            }}
             className="rounded-lg bg-[#030f35] px-6 py-3 text-sm font-semibold text-white"
           >
             Back to Opportunities
@@ -131,7 +135,7 @@ const JobApplicationPage: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F3F6FB]">
-      <Header toggleSidebar={() => {}} sidebarOpen={false} />
+      <Header toggleSidebar={() => undefined} sidebarOpen={false} />
       <main className="flex-1">
         <section className="border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
@@ -145,7 +149,11 @@ const JobApplicationPage: React.FC = () => {
                 DQ Media Center
               </Link>
               <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
-              <Link to={`/marketplace/opportunities${location.search || ''}`} className="hover:text-[#1A2E6E]">
+              <Link to={(() => {
+                const params = new URLSearchParams(location.search);
+                const tab = params.get('tab') || 'opportunities';
+                return `/marketplace/opportunities?tab=${tab}`;
+              })()} className="hover:text-[#1A2E6E]">
                 Opportunities &amp; Openings
               </Link>
               <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
@@ -308,8 +316,9 @@ const JobApplicationPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        const tab = (location.state as { tab?: string } | null)?.tab || 'opportunities';
-                        navigate(`/marketplace/opportunities/${job.id}`, { state: { tab } });
+                        const params = new URLSearchParams(location.search);
+                        const tab = params.get('tab') || 'opportunities';
+                        navigate(`/marketplace/opportunities/${job.id}?tab=${tab}`);
                       }}
                       disabled={isSubmitting}
                       className="inline-flex flex-1 items-center justify-center rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-70"

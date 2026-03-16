@@ -8,7 +8,8 @@ export const LOCATION_ALLOW = [
 export type AllowedLocation = (typeof LOCATION_ALLOW)[number];
 
 export const LEVELS = [
-  { code: 'L1', label: 'L1 – Starting' },
+  { code: 'L0', label: 'L0 – Starting (Learning)' },
+  { code: 'L1', label: 'L1 – Follow (Self Aware)' },
   { code: 'L2', label: 'L2 – Following' },
   { code: 'L3', label: 'L3 – Assisting' },
   { code: 'L4', label: 'L4 – Applying' },

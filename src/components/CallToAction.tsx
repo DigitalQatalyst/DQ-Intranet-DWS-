@@ -103,7 +103,7 @@ const CTACard: React.FC<CTACardProps> = ({
   description,
   buttonText,
   buttonColor,
-  onClick = () => {},
+  onClick = () => undefined,
   delay = 0,
   isExpanded = false,
   onExpand = undefined,

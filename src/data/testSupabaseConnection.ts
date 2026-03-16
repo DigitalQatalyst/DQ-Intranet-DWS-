@@ -82,16 +82,19 @@ export async function testSupabaseConnection() {
 export function checkEnvVars() {
   console.log('=== Checking Environment Variables ===');
   const url = import.meta.env.VITE_SUPABASE_URL;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
   
   console.log('VITE_SUPABASE_URL:', url ? '✅ Set' : '❌ Missing');
-  console.log('VITE_SUPABASE_ANON_KEY:', key ? '✅ Set' : '❌ Missing');
+  console.log('VITE_SUPABASE_ANON_KEY:', anonKey ? '✅ Set' : '❌ Missing');
+  console.log('VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY:', publishableKey ? '✅ Set' : '❌ Missing');
   
   if (url) {
     console.log('URL value:', url.substring(0, 30) + '...');
   }
-  if (key) {
-    console.log('Key value:', key.substring(0, 30) + '...');
+  const effectiveKey = anonKey || publishableKey;
+  if (effectiveKey) {
+    console.log('Key value:', effectiveKey.substring(0, 30) + '...');
   }
 }
 

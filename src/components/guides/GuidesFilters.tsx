@@ -273,6 +273,45 @@ const CheckboxList: React.FC<{ idPrefix: string; name: string; options: Facet[];
   )
 }
 
+function getLocationOptions(isGuidelinesSelected: boolean, isFAQsSelected: boolean, isTestimonialsSelected: boolean, facetsLocation?: Facet[]): Facet[] {
+  if (isGuidelinesSelected || isFAQsSelected) return GUIDELINES_LOCATIONS
+  if (isTestimonialsSelected) return TESTIMONIAL_LOCATIONS
+  return facetsLocation || []
+}
+
+function getTabKeysToDelete(isStrategySelected: boolean, isTestimonialsSelected: boolean): string[] {
+  if (isStrategySelected) return ['guide_type', 'sub_domain', 'domain', 'unit', 'location']
+  if (isTestimonialsSelected) return ['guide_type', 'sub_domain', 'domain']
+  return ['guide_type', 'sub_domain', 'unit', 'domain']
+}
+
+function getAllowedLocationIds(isBlueprintSelected: boolean, isTestimonialsSelected: boolean): string[] | undefined {
+  if (isBlueprintSelected) return BLUEPRINT_LOCATIONS.map(opt => opt.id)
+  if (isTestimonialsSelected) return TESTIMONIAL_LOCATIONS.map(opt => opt.id)
+  return undefined
+}
+
+function cleanLocationFilter(
+  next: URLSearchParams,
+  isStrategySelected: boolean,
+  isBlueprintSelected: boolean,
+  isTestimonialsSelected: boolean
+): boolean {
+  if (isStrategySelected) {
+    if (!next.has('location')) return false
+    next.delete('location')
+    return true
+  }
+  const allowedLocationIds = getAllowedLocationIds(isBlueprintSelected, isTestimonialsSelected)
+  if (!allowedLocationIds) return false
+  const current = parseCsv(next.get('location'))
+  const filtered = current.filter(val => allowedLocationIds.includes(val))
+  if (filtered.length === current.length) return false
+  if (filtered.length) next.set('location', filtered.join(','))
+  else next.delete('location')
+  return true
+}
+
 export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, activeTab }) => {
   const instanceId = useId()
   const isStrategySelected = activeTab === 'strategy'
@@ -342,65 +381,29 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, active
   // Clean up incompatible filters when switching tabs (only run on actual tab change, not on query changes)
   // Also collapse all filters when switching tabs
   useEffect(() => {
-    // Only run if tab actually changed
     if (prevTabRef.current === activeTab) return
     prevTabRef.current = activeTab
-    
+
     const next = new URLSearchParams(query.toString())
-    let changed = false
-    
-    // Collapse all filters when switching tabs
     const allCollapsed = new Set(ALL_CATEGORIES)
     const currentCollapsed = new Set(parseCsv(next.get('collapsed')))
-    // Check if collapsed state needs to be updated
-    const collapsedChanged = ALL_CATEGORIES.some(cat => {
-      return allCollapsed.has(cat) !== currentCollapsed.has(cat)
-    })
+    const collapsedChanged = ALL_CATEGORIES.some(cat => !currentCollapsed.has(cat))
+    let changed = collapsedChanged
     if (collapsedChanged) {
       next.set('collapsed', Array.from(allCollapsed).join(','))
       setCollapsedSet(allCollapsed)
-      changed = true
     }
-    
+
     if (!(isStrategySelected || isBlueprintSelected || isTestimonialsSelected)) {
       if (changed) onChange(next)
       return
     }
-    
-    const keysToDelete = isStrategySelected 
-      ? ['guide_type', 'sub_domain', 'domain', 'unit', 'location']
-      : isTestimonialsSelected
-        ? ['guide_type', 'sub_domain', 'domain']
-        : ['guide_type', 'sub_domain', 'unit', 'domain']
+
+    const keysToDelete = getTabKeysToDelete(isStrategySelected, isTestimonialsSelected)
     keysToDelete.forEach(key => {
-      if (next.has(key)) {
-        next.delete(key)
-        changed = true
-      }
+      if (next.has(key)) { next.delete(key); changed = true }
     })
-    // Don't allow location filter for strategy tab
-    if (!isStrategySelected) {
-      const allowedLocationIds = isBlueprintSelected
-        ? BLUEPRINT_LOCATIONS.map(opt => opt.id)
-        : isTestimonialsSelected
-          ? TESTIMONIAL_LOCATIONS.map(opt => opt.id)
-          : undefined
-      if (allowedLocationIds) {
-        const current = parseCsv(next.get('location'))
-        const filtered = current.filter(val => allowedLocationIds.includes(val))
-        if (filtered.length !== current.length) {
-          changed = true
-          if (filtered.length) next.set('location', filtered.join(','))
-          else next.delete('location')
-        }
-      }
-    } else {
-      // Remove location filter if strategy tab is selected
-      if (next.has('location')) {
-        next.delete('location')
-        changed = true
-      }
-    }
+    if (cleanLocationFilter(next, isStrategySelected, isBlueprintSelected, isTestimonialsSelected)) changed = true
     if (!changed) return
     onChange(next)
   }, [activeTab, isStrategySelected, isBlueprintSelected, isTestimonialsSelected, query, onChange])
@@ -414,14 +417,14 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, active
     if (value) next.set('collapsed', value); else next.delete('collapsed')
     onChange(next)
   }
+  const locationOptions = getLocationOptions(isGuidelinesSelected, isFAQsSelected, isTestimonialsSelected, facets.location)
   return (
     <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} aria-label="Guides filters">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Filters</h2>
         <button onClick={clearAll} className="text-[var(--guidelines-primary)] text-sm font-medium">Clear all</button>
       </div>
-      {isGlossarySelected ? (() => {
-        return (
+      {isGlossarySelected ? (
           <>
             {/* ALPHABETICAL FILTER: A–Z browsing for fast scanning */}
             <Section
@@ -468,8 +471,7 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, active
               </div>
             </Section>
           </>
-        )
-      })() : isBlueprintSelected ? (
+      ) : isBlueprintSelected ? (
         <>
           <Section idPrefix={instanceId} title="Class" category="product_class" collapsed={collapsedSet.has('product_class')} onToggle={toggleCollapsed}>
             <CheckboxList idPrefix={instanceId} name="product_class" options={PRODUCT_CLASSES} query={query} onChange={onChange} />
@@ -592,21 +594,9 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, active
       </>
     )}
       {!isGlossarySelected && !isBlueprintSelected && !isStrategySelected && (
-        <>
-          {(isGuidelinesSelected || isFAQsSelected) ? (
-            <Section idPrefix={instanceId} title="Location" category="location" collapsed={collapsedSet.has('location')} onToggle={toggleCollapsed}>
-              <CheckboxList idPrefix={instanceId} name="location" options={GUIDELINES_LOCATIONS} query={query} onChange={onChange} />
-            </Section>
-          ) : isTestimonialsSelected ? (
-            <Section idPrefix={instanceId} title="Location" category="location" collapsed={collapsedSet.has('location')} onToggle={toggleCollapsed}>
-              <CheckboxList idPrefix={instanceId} name="location" options={TESTIMONIAL_LOCATIONS} query={query} onChange={onChange} />
-            </Section>
-          ) : (
-            <Section idPrefix={instanceId} title="Location" category="location" collapsed={collapsedSet.has('location')} onToggle={toggleCollapsed}>
-              <CheckboxList idPrefix={instanceId} name="location" options={facets.location || []} query={query} onChange={onChange} />
-            </Section>
-          )}
-        </>
+        <Section idPrefix={instanceId} title="Location" category="location" collapsed={collapsedSet.has('location')} onToggle={toggleCollapsed}>
+          <CheckboxList idPrefix={instanceId} name="location" options={locationOptions} query={query} onChange={onChange} />
+        </Section>
       )}
     </div>
   )

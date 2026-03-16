@@ -12,6 +12,7 @@ import PodcastSeriesPage from './PodcastSeriesPage';
 import { DQWorkDirectoryPage } from '../DQWorkDirectoryPage';
 import JobDetailPage from './JobDetailPage';
 import JobApplicationPage from './JobApplicationPage';
+import DesignSystemDetailPage from './DesignSystemDetailPage';
 const GrowthAreasPage = React.lazy(() => import('../GrowthAreasPage'));
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
 const GuideDetailsPage = React.lazy(() => import('../guides/GuideDetailsPage'));
@@ -162,7 +163,7 @@ export const MarketplaceRouter: React.FC = () => {
       
       {/* Design System Marketplace */}
       <Route path="/design-system" element={<MarketplacePage marketplaceType="design-system" title={designSystemConfig.title} description={designSystemConfig.description} promoCards={[]} />} />
-      <Route path="/design-system/:itemId" element={<MarketplaceDetailsPage marketplaceType="design-system" bookmarkedItems={bookmarkedItems['design-system'] || []} onToggleBookmark={itemId => handleToggleBookmark('design-system', itemId)} />} />
+      <Route path="/design-system/:cardId" element={<DesignSystemDetailPage />} />
       {/* News & Opportunities Marketplace - Redirected to /guides */}
       <Route path="/news" element={<Navigate to="/marketplace/guides" replace />} />
       <Route path="/news/action-solver-podcast" element={<PodcastSeriesPage />} />

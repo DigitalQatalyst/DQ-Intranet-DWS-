@@ -2,14 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
-import { FilterIcon, HomeIcon, XIcon, ChevronRightIcon, Search } from 'lucide-react';
+import { FilterIcon, HomeIcon, XIcon, ChevronRightIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import FiltersPanel from '@/components/media-center/FiltersPanel';
 import AnnouncementsGrid from '@/components/media-center/AnnouncementsGrid';
 import BlogsGrid from '@/components/media-center/BlogsGrid';
 import PodcastsGrid from '@/components/media-center/PodcastsGrid';
-import JobsGrid from '@/components/media-center/JobsGrid';
 import type { FacetConfig, FiltersValue, MediaCenterTabKey } from '@/components/media-center/types';
 import type { NewsItem } from '@/data/media/news';
 import type { JobItem } from '@/data/media/jobs';
@@ -41,93 +40,20 @@ const PINNED_FACETS: FacetConfig[] = [
 
 const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
   announcements: [
-    {
-      key: 'department',
-      label: 'Department',
-      options: [
-        'HRA (People)',
-        'Finance',
-        'Deals',
-        'Stories',
-        'Intelligence',
-        'Solutions',
-        'SecDevOps',
-        'Products',
-        'Delivery — Deploys',
-        'Delivery — Designs',
-        'DCO Operations',
-        'DBP Platform',
-        'DBP Delivery'
-      ]
-    },
     { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] },
     {
       key: 'newsType',
       label: 'Type',
-      options: [
-        'Policy Update',
-        'Upcoming Events',
-        'Company News',
-        'Holidays'
-      ]
+      options: ['Policy Update', 'Upcoming Events', 'Company News', 'Holidays']
     },
     {
-      key: 'newsSource',
-      label: 'News Source',
-      options: ['DQ Leadership', 'DQ Operations', 'DQ Communications']
-    },
-    {
-      key: 'focusArea',
-      label: 'Topic / Focus Area',
-      options: ['GHC', 'DWS', 'Culture & People']
-    },
-    {
-      key: 'audience',
-      label: 'Audience',
-      options: ['All Hands', 'Leads', 'Partners', 'Public']
-    },
-    {
-      key: 'channel',
-      label: 'Channel',
-      options: ['Email', 'Townhall', 'Portal', 'Social']
+      key: 'dateRange',
+      label: 'Date',
+      options: ['Last 7 days', 'Last 30 days', 'Last 90 days', 'This year']
     }
   ],
   insights: [
-    {
-      key: 'format',
-      label: 'Format',
-      options: ['Blog', 'Article', 'Research Report']
-    },
-    {
-      key: 'source',
-      label: 'Category',
-      options: ['DigitalQatalyst', 'ADGM Academy', 'Abu Dhabi Export Office', 'Khalifa Fund']
-    },
-    {
-      key: 'department',
-      label: 'Department',
-      options: [
-        'HRA (People)',
-        'Finance',
-        'Deals',
-        'Stories',
-        'Intelligence',
-        'Solutions',
-        'SecDevOps',
-        'Products',
-        'Delivery — Deploys',
-        'Delivery — Designs',
-        'DCO Operations',
-        'DBP Platform',
-        'DBP Delivery'
-      ]
-    },
     { key: 'location', label: 'Location', options: ['Dubai', 'Nairobi', 'Riyadh', 'Remote'] },
-    {
-      key: 'domain',
-      label: 'Domain',
-      options: ['Technology', 'Business', 'People', 'Operations']
-    },
     {
       key: 'theme',
       label: 'Theme',
@@ -140,11 +66,6 @@ const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
     }
   ],
   podcasts: [
-    {
-      key: 'domain',
-      label: 'Domain',
-      options: ['Business', 'People', 'Operations']
-    },
     {
       key: 'theme',
       label: 'Theme',
@@ -270,25 +191,25 @@ const TAB_SUMMARIES: Record<
   announcements: {
     title: 'News & Announcements',
     description:
-      'Live corporate announcements, product / project updates, events, and comms so every studio keeps pace with what is shipping across DQ.',
+      'Discover what is happening in DQ, including important announcements, and what teams are building.',
     meta: 'Sourced from DQ Leadership, Operations, and Communications.'
   },
   insights: {
     title: 'Blogs',
     description:
-      'Long-form blogs and thought-leadership pieces that codify craft, behaviours, and delivery lessons from across chapters.',
+      'Dive into thought leadership, personal stories, and expert insights written by colleagues across DQ.',
     meta: 'Authored by DQ Associates, Leads, and Partners.'
   },
   podcasts: {
     title: 'Podcasts',
     description:
-      'Audio content featuring interviews, discussions, and insights from DQ leaders, associates, and industry experts.',
+      'Tune in to conversations, stories, and expert insights from DQ leaders and associates.',
     meta: 'Listen to conversations that matter.'
   },
   opportunities: {
     title: 'Job Openings',
     description:
-      'Internal mobility postings for current DQ teammates looking to rotate into a new role, studio, or craft without leaving the company.',
+      'Ready for a new challenge? Grow with us. Explore open roles exclusively for DQ associates.',
     meta: 'Use Department, Location, Role Type, and SFIA to find the right internal match.'
   }
 };
@@ -492,25 +413,12 @@ const NewsPage: React.FC = () => {
           </ol>
         </nav>
 
-        <header className="mb-6 space-y-4">
+        <header className="mb-6 space-y-2">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">DQ Media Center</h1>
-            <p className="text-gray-600">
-              Discover the latest stories, highlights, and announcements from across DQ.
+            <p className="mt-2 max-w-2xl text-sm text-gray-600">
+              Your starting point for news, stories, podcasts, and career opportunities at DQ.
             </p>
-          </div>
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Current focus</p>
-                <p className="mt-1 text-base font-semibold text-[#1A2E6E]">{TAB_SUMMARIES[tab].title}</p>
-                <p className="mt-1 text-sm text-gray-700">{TAB_SUMMARIES[tab].description}</p>
-                {TAB_SUMMARIES[tab].meta && <p className="mt-2 text-xs text-gray-500">{TAB_SUMMARIES[tab].meta}</p>}
-              </div>
-              <div className="rounded-xl bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-[#1A2E6E]">
-                Tab overview
-              </div>
-            </div>
           </div>
         </header>
 
@@ -558,20 +466,28 @@ const NewsPage: React.FC = () => {
             </TabsList>
           </div>
 
+          {/* Tab-specific about block below navigation (compact 1–2 line description) */}
+          <div className="mt-3 mb-4">
+            <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
+              <p className="text-sm text-gray-700 leading-snug line-clamp-2">
+                {TAB_SUMMARIES[tab].description}
+              </p>
+            </div>
+          </div>
+
           <div className="mt-4 mb-4 flex flex-col gap-3 md:mb-6 md:flex-row md:items-center md:justify-between">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 value={queryText}
                 onChange={(e) => setQueryText(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="h-11 pl-10 w-full"
+                className="h-11 w-full"
               />
               {tab === 'podcasts' && queryText.trim() && (
                 <div className="absolute z-20 mt-1 w-full max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
                   {podcastSearchResults.length === 0 ? (
                     <div className="px-3 py-2 text-sm text-gray-500">
-                      No podcast episodes found.
+                      No podcast episodes found matching "{queryText}".
                     </div>
                   ) : (
                     podcastSearchResults.map((item) => (
@@ -580,12 +496,12 @@ const NewsPage: React.FC = () => {
                         type="button"
                         onClick={() => {
                           setQueryText('');
-                          const params = new URLSearchParams(location.search);
+                          const params = new URLSearchParams();
                           params.set('tab', 'podcasts');
                           params.set('episode', item.id);
                           navigate(`/marketplace/news/action-solver-podcast?${params.toString()}`);
                         }}
-                        className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-gray-50"
+                        className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors"
                       >
                         <span className="font-medium text-gray-900 line-clamp-1">{item.title}</span>
                         <span className="text-xs text-gray-500">Podcast episode</span>
@@ -709,7 +625,29 @@ const NewsPage: React.FC = () => {
                 <PodcastsGrid query={query} items={newsItems} />
               </TabsContent>
               <TabsContent value="opportunities">
-                <JobsGrid query={query} jobs={jobItems} />
+                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <div className="relative h-48 w-full bg-gray-200">
+                      <img
+                        src="/image (8).jpg"
+                        alt="Job Openings Coming Soon"
+                        className="h-full w-full object-cover object-top"
+                        loading="lazy"
+                      />
+                      {/* Centered overlay text across the image */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="rounded-full bg-black/60 px-5 py-2">
+                          <p className="text-sm font-semibold text-white">Job Openings Coming Soon</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-6 py-4 text-center">
+                      <p className="text-sm text-gray-600 max-w-xl mx-auto">
+                        Internal job postings will be published here once the Job Openings feature is live.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
             </section>
           </div>

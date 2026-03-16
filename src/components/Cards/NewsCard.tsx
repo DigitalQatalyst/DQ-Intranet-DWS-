@@ -1,6 +1,8 @@
 import React from 'react';
 import { UnifiedCard, CardContent, CardVariantConfig } from './UnifiedCard';
-import { Calendar, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+import { toTitleCase } from '../../utils/textUtils';
+
 export interface NewsItem {
   id: string;
   title: string;
@@ -11,6 +13,7 @@ export interface NewsItem {
   imageUrl?: string;
   sourceLogoUrl?: string;
 }
+
 export interface NewsCardProps {
   item: NewsItem;
   onReadMore: () => void;
@@ -19,6 +22,7 @@ export interface NewsCardProps {
   ctaLabel?: string;
   'data-id'?: string;
 }
+
 export const NewsCard: React.FC<NewsCardProps> = ({
   item,
   onReadMore,
@@ -27,13 +31,16 @@ export const NewsCard: React.FC<NewsCardProps> = ({
   ctaLabel = 'Details',
   'data-id': dataId
 }) => {
+
   const handleReadMore = (e: React.MouseEvent) => {
     e.stopPropagation();
     onReadMore();
   };
 
+  const displayTitle = toTitleCase(item.title);
+
   const content: CardContent = {
-    title: item.title,
+    title: displayTitle,
     subtitle: item.source,
     description: item.excerpt,
     media: {
