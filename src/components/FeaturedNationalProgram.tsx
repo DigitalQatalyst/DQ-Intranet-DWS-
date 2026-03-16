@@ -137,7 +137,7 @@ export const FeaturedNationalProgram: React.FC = () => {
         </h2>
         <div>
           <p className="text-base sm:text-lg text-gray-600 mx-auto text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
-            Catch the latest DQ news, insights, and job opportunities curated for quick scanning, with one click to dive deeper.
+            Explore the latest DQ news, insights, and job opportunities.
           </p>
         </div>
       </FadeInUpOnScroll>
