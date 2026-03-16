@@ -16,10 +16,7 @@ export const DesignSystemDetailPage: React.FC = () => {
   if (!item) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          sidebarOpen={sidebarOpen}
-        />
+        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Design System Not Found</h1>
@@ -57,66 +54,51 @@ export const DesignSystemDetailPage: React.FC = () => {
   };
 
   const handleViewDetails = () => {
-    // Navigate to the appropriate service detail page with table of contents based on the design system type
     switch (item.type) {
-      case 'vds':
-        navigate('/marketplace/vds-service-detail');
-        break;
-      case 'cds':
-        navigate('/marketplace/cds-service-detail');
-        break;
-      case 'cids':
-        navigate('/marketplace/cids-service-detail');
-        break;
-      default:
-        // Fallback to the framework page if type is not recognized
-        navigate(`/marketplace/design-system/${cardId}/framework`);
-        break;
+      case 'vds': navigate('/marketplace/vds-service-detail'); break;
+      case 'cds': navigate('/marketplace/cds-service-detail'); break;
+      case 'cids': navigate('/marketplace/cids-service-detail'); break;
+      default: navigate(`/marketplace/design-system/${cardId}/framework`); break;
     }
   };
 
+  const tabs = [
+    { id: 'details', label: 'Overview' },
+    { id: 'outcomes', label: 'Purpose' },
+    { id: 'curriculum', label: 'Approach' },
+    { id: 'reviews', label: 'Application' },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        sidebarOpen={sidebarOpen}
-      />
-      
+      <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+
       <main className="flex-1">
-        {/* Hero Section - Dark Navy Blue */}
-        <div className="bg-gradient-to-r from-blue-950 to-blue-900 text-white relative overflow-hidden">
-          {/* White gradient fade at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent z-20"></div>
-          
-          <div className="relative z-10">
+        {/* ── Hero ── */}
+        <div className="relative overflow-hidden" style={{ background: 'linear-gradient(to right, #192D6C, #051139)' }}>
+          {/* soft bottom fade into page bg */}
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 to-transparent z-10" />
+
+          <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Breadcrumb */}
-            <div className="px-4 sm:px-6 lg:px-8 pt-6">
-              <nav className="flex items-center space-x-2 text-white/80 text-sm">
-                <Home size={16} />
-                <ChevronRight size={16} />
-                <Link to="/marketplace/design-system" className="hover:text-white transition-colors">
-                  Design Systems
-                </Link>
-                <ChevronRight size={16} />
-                <span className="text-white">{item.title}</span>
-              </nav>
-            </div>
+            <nav className="flex items-center gap-2 text-white/60 text-sm pt-5 pb-6">
+              <Home size={14} />
+              <ChevronRight size={14} />
+              <Link to="/marketplace/design-system" className="hover:text-white transition-colors">
+                Design Systems
+              </Link>
+              <ChevronRight size={14} />
+              <span className="text-white/90">{item.title}</span>
+            </nav>
 
-            {/* Hero Content - Card Container */}
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
-              <div className="w-full bg-blue-900/40 backdrop-blur-sm rounded-3xl border border-white/10 p-8 shadow-2xl mx-auto" style={{ maxWidth: 'calc(100vw - 4rem)' }}>
-                {/* Course Badge */}
-                <div className="inline-flex items-center px-3 py-1 bg-white/20 rounded text-sm font-medium mb-6">
-                  FRAMEWORK
-                </div>
-
-                {/* Title */}
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            {/* Hero content — card box on gradient */}
+            <div className="pb-10">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/15 px-10 py-14 w-full min-h-[256px] flex flex-col justify-center">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
                   {getFrameworkName(item.type)} ({getFrameworkShortName(item.type)})
                 </h1>
 
-                {/* Description */}
-                <p className="text-lg text-white/90 mb-8 max-w-2xl">
+                <p className="text-base text-white/80 max-w-xl leading-relaxed">
                   {item.description}
                 </p>
               </div>
@@ -124,225 +106,266 @@ export const DesignSystemDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* ── Body ── */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left Column - Content */}
-            <div className="flex-1">
-              {/* Navigation Tabs */}
+
+            {/* ── Left: tabs + content ── */}
+            <div className="flex-1 min-w-0">
+              {/* Tab bar */}
               <div className="border-b border-gray-200 mb-8">
-                <nav className="flex space-x-8">
-                  {[
-                    { id: 'details', label: 'Course Details' },
-                    { id: 'outcomes', label: 'Learning Outcomes' },
-                    { id: 'curriculum', label: 'Curriculum' },
-                    { id: 'reviews', label: 'Reviews' }
-                  ].map((tabItem) => (
+                <nav className="flex gap-0">
+                  {tabs.map((t) => (
                     <button
-                      key={tabItem.id}
-                      onClick={() => setActiveTab(tabItem.id as any)}
-                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                        activeTab === tabItem.id
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      key={t.id}
+                      onClick={() => setActiveTab(t.id as any)}
+                      className={`relative py-3 px-5 text-sm font-medium transition-colors whitespace-nowrap ${
+                        activeTab === t.id
+                          ? 'text-gray-900'
+                          : 'text-gray-500 hover:text-gray-700'
                       }`}
                     >
-                      {tabItem.label}
+                      {t.label}
+                      {activeTab === t.id && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 rounded-full" />
+                      )}
                     </button>
                   ))}
                 </nav>
               </div>
 
-              {/* Tab Content */}
+              {/* Course Details */}
               {activeTab === 'details' && (
                 <div className="space-y-8">
-                  {/* Framework Overview */}
-                  <div>
-                    <p className="text-gray-600 mb-6 leading-relaxed">
-                      Get to know how we work. This course explores the {getFrameworkName(item.type)}: 
-                      our organizational DNA. It is the shared language that guides how we think, collaborate, 
-                      and make decisions across DQ. Designed for every associate, this self-paced guide helps 
-                      you understand our unique culture and put these principles into practice for better 
-                      teamwork and execution every day.
-                    </p>
-                  </div>
+                  <p className="text-gray-600 leading-relaxed">
+                    {item.type === 'vds'
+                      ? 'V.DS is the video design system that helps teams plan, produce, review, and distribute video content consistently across DQ. It brings structure to how videos are shaped, designed, and delivered while ensuring cinematic quality, storytelling clarity, and brand consistency across every channel.'
+                      : item.type === 'cds'
+                      ? "CDS is the marketing campaigns design system that helps teams plan, design, deploy, and review campaigns consistently across DQ. It brings structure to how campaigns are shaped, aligned, and delivered across channels and stakeholders."
+                      : 'CI.CD is the content item design system that helps teams structure, create, review, and manage content consistently across DQ. It brings clarity to how content is designed, governed, and delivered across the organization.'
+                    }
+                  </p>
 
-                  {/* Course Highlights */}
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4 border-l-4 border-pink-500 pl-4">
-                      Course Highlights
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="w-1 h-5 rounded-full inline-block" style={{ backgroundColor: '#de4f3c' }} />
+                      {item.type === 'vds' ? 'V.DS Highlights' : item.type === 'cds' ? 'CDS Highlights' : 'CI.CD Highlights'}
                     </h2>
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-                        <div>
-                          <p className="text-gray-700">
-                            <strong>Explore the Framework:</strong> A complete guide to the {getFrameworkShortName(item.type)} ({getFrameworkName(item.type)}).
-                          </p>
+                    <div className="space-y-3">
+                      {(item.type === 'vds'
+                        ? [
+                            'Brings a unified system for creating high-impact video content across DQ',
+                            'Strengthens storytelling, visual quality, and brand consistency in every video',
+                            'Supports collaboration across creative, technical, and strategic teams',
+                            'Improves production clarity from concept through release and performance tracking',
+                          ]
+                        : item.type === 'cds'
+                        ? [
+                            'Standardizes how marketing campaigns are conceived, executed, and governed',
+                            "Aligns campaign activity with DQ's vision, values, voice, and content pillars",
+                            'Supports stronger collaboration across creative, technical, strategic, and data teams',
+                            'Improves campaign consistency, quality, and effectiveness across channels',
+                          ]
+                        : [
+                            'Standardizes how content items are created and managed',
+                            'Improves consistency across teams, channels, and outputs',
+                            'Supports clearer review, approval, and governance workflows',
+                            'Aligns content delivery with DQ standards and strategic intent',
+                          ]
+                      ).map((text) => (
+                        <div key={text} className="flex items-start gap-3">
+                          <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={18} />
+                          <p className="text-gray-700 text-sm">{text}</p>
                         </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-                        <div>
-                          <p className="text-gray-700">
-                            <strong>Flexible Learning:</strong> Enjoy short, focused video lessons at your own pace.
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-                        <div>
-                          <p className="text-gray-700">
-                            <strong>Real Application:</strong> Practical checks to help you lock in your learning.
-                          </p>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               )}
 
+              {/* Purpose */}
               {activeTab === 'outcomes' && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Learning Outcomes</h2>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-                      <p className="text-gray-700">Understand the core principles of {getFrameworkShortName(item.type)} framework</p>
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-gray-900">Why It Matters</h2>
+                  {(item.type === 'vds'
+                    ? [
+                        'Establish a clear and consistent way to conceptualize, produce, and distribute video content across DQ',
+                        'Ensure every video delivers cinematic quality, narrative coherence, and strong brand expression',
+                        'Improve collaboration between scriptwriters, editors, designers, reviewers, and marketers',
+                        'Strengthen audience engagement and video performance through a more structured production system',
+                      ]
+                    : item.type === 'cds'
+                    ? [
+                        'Establish a clear and consistent way to manage marketing campaigns across DQ',
+                        "Ensure campaigns reflect DQ's brand identity, strategic direction, and narrative clarity",
+                        'Improve campaign quality, repeatability, and cross-team alignment',
+                        'Accelerate production while strengthening campaign effectiveness and impact',
+                      ]
+                    : [
+                        'Establish a clear and consistent way to design, create, review, and manage content across DQ',
+                        'Improve quality, governance, and alignment across all content items and delivery teams',
+                        "Ensure content is structured to support DQ's standards, brand logic, and strategic intent",
+                        'Enable teams to produce content more efficiently with greater clarity, consistency, and control',
+                      ]
+                  ).map((text) => (
+                    <div key={text} className="flex items-start gap-3">
+                      <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={18} />
+                      <p className="text-gray-700">{text}</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-                      <p className="text-gray-700">Apply design system guidelines in real-world projects</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-                      <p className="text-gray-700">Collaborate effectively using shared design language</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-                      <p className="text-gray-700">Maintain consistency across all design deliverables</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
 
+              {/* Approach */}
               {activeTab === 'curriculum' && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Curriculum</h2>
-                  <div className="space-y-4">
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2">Module 1: Introduction to {getFrameworkShortName(item.type)}</h3>
-                      <p className="text-gray-600 text-sm mb-2">Understanding the fundamentals and core principles</p>
-                      <span className="text-xs text-gray-500">15 minutes</span>
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-gray-900">How It Works</h2>
+                  {(item.type === 'vds'
+                    ? [
+                        'Uses a structured lifecycle from strategy and ideation to production, review, and publishing',
+                        "Aligns each video to DQ's narrative, audience, format, and channel before production begins",
+                        'Supports consistency through shared templates, planning tools, milestones, and review checkpoints',
+                        'Combines creative direction, production discipline, and performance readiness into one operating system',
+                      ]
+                    : item.type === 'cds'
+                    ? [
+                        'Uses a structured campaign lifecycle covering planning, design, execution, and governance',
+                        "Organizes campaigns around DQ's five content pillars to maintain message consistency and strategic fit",
+                        'Guides teams through campaign briefs, messaging frameworks, asset templates, and review checkpoints',
+                        'Combines creative production, channel planning, deployment discipline, and performance learning into one system',
+                      ]
+                    : [
+                        'Uses a structured workflow to guide content from planning through creation, review, and delivery',
+                        'Defines clear stages, responsibilities, and review points across the content lifecycle',
+                        'Supports consistency through shared standards, templates, and governance practices',
+                        'Helps teams manage content more effectively across different channels, formats, and use cases',
+                      ]
+                  ).map((text) => (
+                    <div key={text} className="flex items-start gap-3">
+                      <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={18} />
+                      <p className="text-gray-700">{text}</p>
                     </div>
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2">Module 2: Design Components</h3>
-                      <p className="text-gray-600 text-sm mb-2">Exploring the component library and usage guidelines</p>
-                      <span className="text-xs text-gray-500">20 minutes</span>
-                    </div>
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2">Module 3: Implementation Guidelines</h3>
-                      <p className="text-gray-600 text-sm mb-2">Best practices for implementing the design system</p>
-                      <span className="text-xs text-gray-500">15 minutes</span>
-                    </div>
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2">Module 4: Collaboration & Workflow</h3>
-                      <p className="text-gray-600 text-sm mb-2">Working effectively with teams using the framework</p>
-                      <span className="text-xs text-gray-500">10 minutes</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
 
+              {/* Application */}
               {activeTab === 'reviews' && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
-                  <div className="text-center py-12">
-                    <p className="text-gray-500">No reviews yet. Be the first to review this course!</p>
-                  </div>
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-gray-900">Where It Applies</h2>
+                  {(item.type === 'vds'
+                    ? [
+                        'Used for instructional, promotional, strategic, and storytelling videos across DQ',
+                        'Applies to internal communications, learning content, social media, and thought leadership videos',
+                        'Supports video use across marketing, HRA, DTMA, DQ Stories, and other contributing teams',
+                        'Ensures every video remains aligned, high-quality, and consistent regardless of format, length, or platform',
+                      ]
+                    : item.type === 'cds'
+                    ? [
+                        'Used when DQ teams are creating, launching, managing, or reviewing marketing campaigns',
+                        'Applies across brand, product, education, community, and thought-leadership campaigns',
+                        'Supports campaign delivery across website, LinkedIn, YouTube, Instagram, email, and other relevant channels',
+                        'Helps ensure campaigns stay aligned, measurable, and consistent from strategy through execution and review',
+                      ]
+                    : [
+                        'Used when teams are creating, reviewing, publishing, or updating content across DQ',
+                        'Applies to internal, external, learning, and client-facing content items',
+                        'Supports use across different teams, channels, platforms, and delivery contexts',
+                        'Helps ensure content remains consistent, governed, and aligned from creation to release',
+                      ]
+                  ).map((text) => (
+                    <div key={text} className="flex items-start gap-3">
+                      <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={18} />
+                      <p className="text-gray-700">{text}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Right Column - Sidebar */}
-            <div className="lg:w-80">
-              <div className="bg-white rounded-lg shadow p-6 sticky top-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Course Summary</h3>
-                
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Duration</span>
-                    <span className="font-medium">1hr</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Lessons</span>
-                    <span className="font-medium">9 lessons</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Level</span>
-                    <span className="font-medium">L0. Starting (Learning)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Modules</span>
-                    <span className="font-medium">1 module</span>
-                  </div>
+            {/* ── Right: sidebar ── */}
+            <div className="lg:w-72 xl:w-80 flex-shrink-0">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 sticky top-6 overflow-hidden">
+                <div className="px-5 pt-5 pb-4 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-900">Design System Summary</h3>
                 </div>
-
-                <button 
-                  onClick={handleViewDetails}
-                  className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors mb-4"
-                >
-                  Start Course →
-                </button>
+                <div className="px-5 py-4 space-y-3">
+                  {[
+                    { label: 'Uploaded Date', value: '16 March 2026' },
+                    { label: 'Created by', value: 'Helen' },
+                    { label: 'Unit', value: 'Stories' },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">{row.label}</span>
+                      <span className="font-medium text-gray-900">{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-5 pb-5">
+                  <button
+                    onClick={handleViewDetails}
+                    className="w-full flex items-center justify-center gap-2 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                    style={{ backgroundColor: '#051139' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0a1f5c')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#051139')}
+                  >
+                  Read More
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Related Courses - Full width below the main content */}
-          <div className="mt-12">
+          {/* ── Related Design Systems ── */}
+          <section className="mt-16 pt-10 border-t border-gray-200">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Related Courses</h2>
-              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                Browse all courses →
+              <h2 className="text-xl font-semibold text-gray-900">Related Design Systems</h2>
+              <button
+                onClick={() => navigate('/marketplace/design-system')}
+                className="text-sm text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1"
+              >
+                Browse all →
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Related Course Cards */}
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">COURSE</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Data Governance Essentials</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Learn the foundations of data governance policies and frameworks across the enterprise.
-                </p>
-                <button className="text-pink-600 hover:text-pink-700 text-sm font-medium">
-                  Read more →
-                </button>
-              </div>
-
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">COURSE</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Effective Communication at DQ</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Build stronger communication skills aligned with DQ's collaboration competencies.
-                </p>
-                <button className="text-pink-600 hover:text-pink-700 text-sm font-medium">
-                  Read more →
-                </button>
-              </div>
-
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">COURSE</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Innovation Mindset Workshop</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Develop creative problem-solving techniques rooted in DQ's innovation framework.
-                </p>
-                <button className="text-pink-600 hover:text-pink-700 text-sm font-medium">
-                  Read more →
-                </button>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {[
+                item.type !== 'cids' && {
+                  title: 'Content Intelligence Design System (CI.DS)',
+                  desc: "CI.DS is DQ's intelligent system for turning ideas into consistent, high-impact content at scale.",
+                  route: '/marketplace/design-system/cids-introduction',
+                },
+                item.type !== 'vds' && {
+                  title: 'Video Design System (V.DS)',
+                  desc: "V.DS defines DQ's cinematic system for creating strategic, scalable, high-impact video content.",
+                  route: '/marketplace/design-system/vds-framework',
+                },
+                item.type !== 'cds' && {
+                  title: 'Campaign Design System (CDS)',
+                  desc: "CDS defines DQ's unified operating system for designing strategic, scalable, high-impact marketing campaigns.",
+                  route: '/marketplace/design-system/cds-campaigns-design-system',
+                },
+              ]
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((ds: any) => (
+                  <div
+                    key={ds.title}
+                    className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => navigate(ds.route)}
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3 block">
+                      Design System
+                    </span>
+                    <h3 className="font-semibold text-gray-900 mb-2 text-sm">{ds.title}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed mb-4">{ds.desc}</p>
+                    <button className="text-xs font-medium flex items-center gap-1 transition-colors" style={{ color: '#de4f3c' }}>
+                      Read more →
+                    </button>
+                  </div>
+                ))}
             </div>
-          </div>
+          </section>
         </div>
       </main>
 

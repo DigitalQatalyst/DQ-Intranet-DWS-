@@ -42,6 +42,9 @@ export const DesignSystemCard: React.FC<DesignSystemCardProps> = ({
           {description}
         </p>
 
+        {/* Date */}
+        <p className="text-xs text-gray-400 mb-3">March 16, 2026</p>
+
         {/* Spacer to push button to bottom */}
         <div className="flex-grow"></div>
 
