@@ -54,75 +54,52 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
         </div>
         {/* Coming Soon AI Search Bar */}
         <FadeInUpOnScroll delay={1.2} className="w-full max-w-3xl mb-10">
-          <div className="relative">
-            {/* Glow effect behind the card */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur-lg opacity-40 animate-pulse" />
-
-            <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-2xl">
-              {/* Top bar with Coming Soon badge */}
-              <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-red-400/70" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-400/70" />
-                    <span className="w-3 h-3 rounded-full bg-green-400/70" />
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            {/* Search input row */}
+            <div className="p-2 md:p-3">
+              <div className="flex items-center gap-2">
+                {/* Input field */}
+                <div className="flex-grow relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <Sparkles className="w-5 h-5 text-gray-300" />
                   </div>
-                  <span className="text-white/50 text-xs ml-2 font-mono">dq-ai-assistant.dws</span>
-                </div>
-                <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-violet-500/30 to-fuchsia-500/30 border border-violet-400/40 text-violet-200 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                  <Sparkles className="w-3 h-3" />
-                  Coming Soon
-                </span>
-              </div>
-
-              {/* Fake search input */}
-              <div className="px-5 py-4">
-                <div className="relative flex items-center gap-3 bg-white/5 border border-white/15 rounded-xl px-4 py-3.5 cursor-not-allowed">
-                  {/* AI icon */}
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-violet-500 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-4 h-4 text-white" />
-                  </div>
-
-                  {/* Animated placeholder text */}
-                  <div className="flex-1 overflow-hidden">
-                    <p className="text-white/40 text-sm font-medium truncate select-none">
-                      {isAuthenticated
-                        ? `Hi ${user?.firstName ?? 'there'} — your AI assistant is almost ready...`
-                        : 'Ask anything about DQ — your AI assistant is almost ready...'}
-                    </p>
-                  </div>
-
-                  {/* Lock icon */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Lock className="w-4 h-4 text-white/30" />
-                  </div>
-                </div>
-
-                {/* Feature pills */}
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {['Smart Search', 'AI Answers', 'Guided Navigation', 'Instant Results'].map((feat, i) => (
-                    <span
-                      key={feat}
-                      className="inline-flex items-center gap-1.5 text-[11px] font-medium text-white/50 bg-white/5 border border-white/10 rounded-full px-3 py-1"
-                      style={{ animationDelay: `${i * 0.1}s` }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-violet-400/60" />
-                      {feat}
+                  <input
+                    type="text"
+                    disabled
+                    placeholder={
+                      isAuthenticated
+                        ? `Hi ${user?.firstName ?? 'there'}, your AI assistant is coming soon...`
+                        : 'AI-powered search — coming soon...'
+                    }
+                    className="w-full py-3 pl-12 pr-4 outline-none text-gray-400 rounded-lg bg-gray-50 cursor-not-allowed select-none"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                      Coming Soon
                     </span>
-                  ))}
+                  </div>
                 </div>
-              </div>
-
-              {/* Bottom notify bar */}
-              <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-blue-600/20 to-violet-600/20 border-t border-white/10">
-                <p className="text-white/50 text-xs">
-                  Powered by DQ AI — launching soon across the workspace
-                </p>
-                <button className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-300 hover:text-white transition-colors">
-                  <Bell className="w-3.5 h-3.5" />
-                  Notify me
+                {/* Disabled submit button */}
+                <button
+                  type="button"
+                  disabled
+                  className="ml-1 p-3 rounded-lg bg-gray-100 cursor-not-allowed text-gray-300 flex items-center justify-center"
+                >
+                  <Lock className="w-5 h-5" />
                 </button>
               </div>
+            </div>
+            {/* Bottom info bar */}
+            <div className="bg-gray-50 border-t border-gray-100 px-4 py-2.5 flex items-center justify-between">
+              <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                Powered by DQ AI — launching soon across the workspace
+              </p>
+              <span className="text-xs text-gray-400 flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5" />
+                Stay tuned
+              </span>
             </div>
           </div>
         </FadeInUpOnScroll>
