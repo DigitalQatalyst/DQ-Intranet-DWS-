@@ -923,7 +923,7 @@ const ProofAndTrust: React.FC = () => {
               Primary Work Sectors in DQ
             </h2>
             <div>
-              <p className="text-base sm:text-lg text-gray-600 mx-auto mb-8 text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
+              <p className="text-base sm:text-lg text-gray-600 mx-auto mb-8 leading-tight text-center whitespace-nowrap">
                 GHC sets the direction, and Agile Flows turn it into execution. These sectors show how ownership, governance, and delivery work together across DQ.
               </p>
             </div>
