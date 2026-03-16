@@ -892,11 +892,11 @@ const ProofAndTrust: React.FC = () => {
         <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 overflow-hidden relative">
           <FadeInUpOnScroll className="text-center mb-8 relative z-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-              Some Associates' Perspectives
+              Qatalyst Perspectives
             </h2>
             <div>
               <p className="text-base sm:text-lg text-gray-600 mx-auto clamp-1 leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
-                Short reflections from Qatalysts living the DQ DNA what helped them collaborate better, learn faster, and deliver smarter today.
+                Short reflections from Qatalysts on how DQ DNA helps them collaborate better, learn faster, and deliver more impact.
               </p>
             </div>
           </FadeInUpOnScroll>
@@ -924,7 +924,7 @@ const ProofAndTrust: React.FC = () => {
             </h2>
             <div>
               <p className="text-base sm:text-lg text-gray-600 mx-auto mb-8 text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
-                GHC sets compass; Agile Flows turn it into execution. These pillars show ownership, governance, and delivery across DQ.
+                GHC sets the direction, and Agile Flows turn it into execution. These sectors show how ownership, governance, and delivery work together across DQ.
               </p>
             </div>
           </FadeInUpOnScroll>
