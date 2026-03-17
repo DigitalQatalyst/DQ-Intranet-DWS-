@@ -190,14 +190,20 @@ export const getNewsTypeDisplay = (item: NewsItem): { label: string; color: stri
     'Policy Update': '#0f2055',        // Dark blue for policy/guidelines
     'Upcoming Events': '#F97316',      // Orange for events
     'Company News': '#0EA5E9',         // Blue for company news
-    'Holidays': '#16A34A'              // Green for holidays/notices
+    'Holidays': '#16A34A',             // Green for holidays/notices
+    'Leadership Messages': '#7C3AED',  // Purple for leadership
+    'Product Updates': '#0EA5E9',      // Blue for product updates
+    'Operational Notices': '#F97316'   // Orange for operational notices
   };
 
   const newsTypeLabel: Record<NonNullable<NewsItem['newsType']>, string> = {
     'Policy Update': 'Policy Update',
     'Upcoming Events': 'Upcoming Events',
     'Company News': 'Company News',
-    'Holidays': 'Holidays'
+    'Holidays': 'Holidays',
+    'Leadership Messages': 'Leadership Messages',
+    'Product Updates': 'Product Updates',
+    'Operational Notices': 'Operational Notices'
   };
 
   if (item.newsType) {

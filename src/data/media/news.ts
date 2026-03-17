@@ -14,7 +14,7 @@ export type NewsItem = {
   theme?: 'Leadership' | 'Delivery' | 'Culture' | 'DTMF';
   tags?: string[];
   readingTime?: '<5' | '5–10' | '10–20' | '20+';
-  newsType?: 'Policy Update' | 'Upcoming Events' | 'Company News' | 'Holidays';
+  newsType?: 'Policy Update' | 'Upcoming Events' | 'Company News' | 'Holidays' | 'Leadership Messages' | 'Product Updates' | 'Operational Notices';
   newsSource?: 'DQ Leadership' | 'DQ Operations' | 'DQ Communications';
   focusArea?: 'GHC' | 'DWS' | 'Culture & People';
   content?: string; // Full article content for detail pages
@@ -38,6 +38,7 @@ export const NEWS: NewsItem[] = [
     id: 'dxb-eoy-event-postponement',
     title: 'DXB EoY Event Postponement',
     type: 'Announcement',
+    archived: true,
     date: '2025-12-19',
     author: 'Fadil A',
     byline: 'DQ Operations',
@@ -1576,6 +1577,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'company-wide-lunch-break-schedule',
     title: 'DQ CHANGES | COMPANY-WIDE LUNCH BREAK SCHEDULE',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-13',
     author: 'Irene Musyoki',
     byline: 'Corporate Comms',
@@ -2069,6 +2071,7 @@ For questions about any of these resources or to request additional documentatio
     id: 'dq-scrum-master-structure-update',
     title: 'DQ Changes: Updated Scrum Master Structure',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-27',
     author: 'Felicia Araba',
     views: 0,

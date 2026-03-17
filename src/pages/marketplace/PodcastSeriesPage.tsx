@@ -28,9 +28,7 @@ export default function PodcastSeriesPage() {
   const navigate = useNavigate();
   const isExecutionMindsetSeries = location.pathname.includes('the-execution-mindset');
   const seriesTitle = isExecutionMindsetSeries ? 'The Execution Mindset' : 'Action-Solver Podcast';
-  const seriesDescription = isExecutionMindsetSeries
-    ? 'The Execution Mindset series explores practical habits and mental models that help digital workers cut noise, move from intention to action, and build high-velocity team cultures.'
-    : 'The Action-Solver Podcast delivers concise, actionable insights for busy professionals. Each episode tackles a specific challenge faced by DQ teams, providing practical frameworks and strategies you can implement immediately.';
+
 
   const [episodes, setEpisodes] = useState<NewsItem[]>([]);
 
@@ -49,7 +47,7 @@ export default function PodcastSeriesPage() {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [hoveredEpisode, setHoveredEpisode] = useState<string | null>(null);
   const [episodeDurations, setEpisodeDurations] = useState<Map<string, number>>(new Map());
-  const [activeTab, setActiveTab] = useState<'details' | 'episodes'>('details');
+  const [activeTab, setActiveTab] = useState<'overview' | 'highlights' | 'impact' | 'episodes'>('overview');
   const [expandedEpisode, setExpandedEpisode] = useState<string | null>(null);
   const [savedEpisodes, setSavedEpisodes] = useState<Set<string>>(new Set());
   const [shareSuccess, setShareSuccess] = useState<string | null>(null);
@@ -455,54 +453,207 @@ export default function PodcastSeriesPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F9FC]">
+    <div className="min-h-screen flex flex-col bg-white">
       <Header />
       <audio ref={audioRef} preload="metadata" />
-      <main className="flex-1">
-        {/* Hero Section - same as Blog/News detail pages */}
-        <HeroSection
-          article={seriesAsArticle}
-          location={location}
-          isBookmarked={false}
-          onBookmarkToggle={() => {}}
-        />
 
-        {/* Main Content - seamless overlap from hero */}
-        <section className="bg-white relative" style={{ zIndex: 20, borderTop: 'none', marginTop: '-120px' }}>
-          <div className="mx-auto pt-0 pb-8" style={{ maxWidth: '1336px', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Hero banner */}
+      <HeroSection
+        article={seriesAsArticle}
+        location={location}
+        isBookmarked={false}
+        onBookmarkToggle={() => {}}
+      />
 
-              {/* Left: Episode List */}
-              <div className="lg:col-span-2">
-                {/* Tabs */}
-                <div className="border-b border-gray-200 mb-4">
-                  <nav className="flex space-x-8">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('details')}
-                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'details' ? 'border-[#1A2E6E] text-[#1A2E6E]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                    >
-                      Details
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('episodes')}
-                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'episodes' ? 'border-[#1A2E6E] text-[#1A2E6E]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                    >
-                      Episodes
-                    </button>
-                  </nav>
-                </div>
+      {/* Main content — pulled up to overlap hero fade */}
+      <main className="flex-1 px-6 pb-12" style={{ marginTop: '0', position: 'relative', zIndex: 20 }}>
+        <div className="container mx-auto grid grid-cols-1 gap-8 lg:grid-cols-3" style={{ maxWidth: '1336px' }}>
 
-                {/* Details Tab - series overview */}
-                {activeTab === 'details' && (
-                  <section className="py-4 space-y-3">
-                    <p className="text-gray-700 text-sm leading-relaxed">{seriesDescription}</p>
-                    <p className="text-gray-700 text-sm leading-relaxed">Ready to dive in? Click "Listen Now" to play the episode.</p>
-                  </section>
+          {/* Left: Episode List */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Tab bar */}
+            <div className="border-b border-border">
+              <div className="flex gap-0">
+                {(['overview', 'highlights', 'impact', 'episodes'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={`relative whitespace-nowrap px-5 py-3 text-sm font-medium transition-colors capitalize ${
+                      activeTab === tab ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    {activeTab === tab && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+                {/* Overview Tab */}
+                {activeTab === 'overview' && (
+                  <div className="py-2 max-w-[760px] space-y-6">
+                    {isExecutionMindsetSeries ? (
+                      <>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">The Execution Mindset Series is designed to build the mindset required to consistently move from intention to execution. It focuses on how work gets done — shifting from discussion, delay, and inconsistency to clarity, ownership, and follow-through.</p>
+                        <div className="space-y-3">
+                          <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+                            <span className="h-6 w-1 rounded-full bg-[#0f2055] shrink-0" />
+                            What You'll Gain
+                          </h2>
+                          <ul className="space-y-[11px] pt-1">
+                            {[
+                              'Develop a mindset of execution over discussion',
+                              'Strengthen ownership from task initiation to closure',
+                              'Improve consistency in delivering results',
+                              'Build discipline in defining and completing actions',
+                              'Reduce delays caused by overthinking or lack of clarity',
+                            ].map((item, i) => (
+                              <li key={i} className="flex items-start gap-3">
+                                <svg className="mt-0.5 h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <span className="text-base font-normal leading-[1.6] text-[#475467]">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">The Action Solver Podcast is designed to shift how we respond to problems at work — from discussion and observation to structured action and execution.</p>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">Each episode tackles real scenarios at DQ, helping you move from passive behaviors to becoming a Practical Solver — someone who thinks clearly, acts early, and follows through.</p>
+                        <div className="space-y-3">
+                          <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+                            <span className="h-6 w-1 rounded-full bg-[#0f2055] shrink-0" />
+                            What You'll Gain
+                          </h2>
+                          <ul className="space-y-[11px] pt-1">
+                            {[
+                              'Move from talking about problems → solving them',
+                              'Take action earlier instead of reacting late',
+                              'Improve decision-making with clarity and intent',
+                              'Strengthen ownership and follow-through',
+                            ].map((item, i) => (
+                              <li key={i} className="flex items-start gap-3">
+                                <svg className="mt-0.5 h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <span className="text-base font-normal leading-[1.6] text-[#475467]">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
 
-                {/* Episodes Tab - Episode List with search/sort */}
+                {/* Highlights Tab */}
+                {activeTab === 'highlights' && (
+                  <div className="py-2 max-w-[760px] space-y-6">
+                    {isExecutionMindsetSeries ? (
+                      <>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">This episode is designed for associates looking to strengthen their execution and follow-through, especially those who start tasks but struggle to close them. It is also valuable for teams aiming to improve accountability and delivery, as well as anyone looking to build a more consistent execution mindset.</p>
+                        <div className="space-y-3">
+                          <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+                            <span className="h-6 w-1 rounded-full bg-[#0f2055] shrink-0" />
+                            Approach
+                          </h2>
+                          <ul className="space-y-[11px] pt-1">
+                            {[
+                              'Listen Actively',
+                              'Spot the pattern',
+                              'Use the insights on a current task or decision',
+                            ].map((item, i) => (
+                              <li key={i} className="flex items-start gap-3">
+                                <svg className="mt-0.5 h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <span className="text-base font-normal leading-[1.6] text-[#475467]">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">This episode is ideal for associates looking to improve how they approach challenges, especially those who find themselves stuck in discussions without action, waiting for direction, or taking unstructured actions.</p>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">It is designed for anyone ready to become a more practical and effective problem solver.</p>
+                        <div className="space-y-3">
+                          <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+                            <span className="h-6 w-1 rounded-full bg-[#0f2055] shrink-0" />
+                            Approach
+                          </h2>
+                          <ul className="space-y-[11px] pt-1">
+                            {[
+                              'Listen actively',
+                              'Spot the pattern',
+                              'Use the insight on a current task or decision',
+                            ].map((item, i) => (
+                              <li key={i} className="flex items-start gap-3">
+                                <svg className="mt-0.5 h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <span className="text-base font-normal leading-[1.6] text-[#475467]">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Impact Tab */}
+                {activeTab === 'impact' && (
+                  <div className="py-2 max-w-[760px] space-y-6">
+                    {isExecutionMindsetSeries ? (
+                      <>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">Listen to this series when tasks are started but never completed, work slows down due to unclear ownership, or when discussions keep happening but action doesn't follow. It's designed to help you cut through the noise, take control, and build consistency in how you deliver results.</p>
+                        <div className="space-y-3">
+                          <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+                            <span className="h-6 w-1 rounded-full bg-[#0f2055] shrink-0" />
+                            When to Listen
+                          </h2>
+                          <ul className="space-y-[11px] pt-1">
+                            {[
+                              'At the start of your day',
+                              'Before planning your work',
+                              'When reviewing tasks or progress',
+                              'When work feels stuck or delayed',
+                            ].map((item, i) => (
+                              <li key={i} className="flex items-start gap-3">
+                                <svg className="mt-0.5 h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <span className="text-base font-normal leading-[1.6] text-[#475467]">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">Listen to this series when tasks are started but never completed, work slows down due to unclear ownership, or when discussions keep happening but action doesn't follow.</p>
+                        <p className="text-base font-normal leading-[1.75] text-[#475467]">It's designed to help you cut through the noise, take control, and build consistency in how you deliver results.</p>
+                        <div className="space-y-3">
+                          <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+                            <span className="h-6 w-1 rounded-full bg-[#0f2055] shrink-0" />
+                            When to Listen
+                          </h2>
+                          <ul className="space-y-[11px] pt-1">
+                            {[
+                              'At the start of your day',
+                              'Before planning your work',
+                              'When reviewing tasks or progress',
+                              'When work feels stuck or delayed',
+                            ].map((item, i) => (
+                              <li key={i} className="flex items-start gap-3">
+                                <svg className="mt-0.5 h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <span className="text-base font-normal leading-[1.6] text-[#475467]">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Episodes Tab */}
                 {activeTab === 'episodes' && (
                   <>
                     <div className="flex items-center justify-between mb-4">
@@ -587,69 +738,67 @@ export default function PodcastSeriesPage() {
                 </div>
                   </>
                 )}
-              </div>
-
-              {/* Right Sidebar */}
-              <div className="lg:col-span-1">
-                <div className="sticky top-8">
-                  <ArticleSummary
-                    article={seriesAsArticle}
-                    shouldUseNewLayout={true}
-                    onListenNow={() => {
-                      setActiveTab('episodes');
-                      const firstEpisode = filteredAndSortedEpisodes[0];
-                      if (firstEpisode) handlePlayEpisode(firstEpisode);
-                    }}
-                  />
-                </div>
-              </div>
-
-            </div>
           </div>
-        </section>
+
+          {/* Right Sidebar */}
+          <aside className="order-first lg:order-last">
+            <div className="sticky top-8">
+              <ArticleSummary
+                article={seriesAsArticle}
+                shouldUseNewLayout={true}
+                onListenNow={() => {
+                  setActiveTab('episodes');
+                  const firstEpisode = filteredAndSortedEpisodes[0];
+                  if (firstEpisode) handlePlayEpisode(firstEpisode);
+                }}
+              />
+            </div>
+          </aside>
+
+        </div>
+      </main>
 
         {/* Related Podcasts */}
-        <section className="mx-auto max-w-7xl px-4 py-10 border-t border-gray-200">
+        <section className="mx-auto px-6 py-10 border-t border-border" style={{ maxWidth: '1336px' }}>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Related Podcasts</h2>
-            <a href={`/marketplace/media-center?tab=podcasts${location.search ? '&' + location.search.slice(1) : ''}`} className="text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1">
+            <h2 className="text-xl font-semibold text-foreground">Related Podcasts</h2>
+            <a href={`/marketplace/media-center?tab=podcasts${location.search ? '&' + location.search.slice(1) : ''}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
               Browse all podcasts <span>→</span>
             </a>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {!isExecutionMindsetSeries && (
               <div
-                className="flex flex-col rounded-lg p-6 bg-white border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                className="flex flex-col rounded-2xl p-6 bg-card border border-border hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer"
                 onClick={() => navigate(`/marketplace/news/the-execution-mindset${location.search}`)}
               >
                 <div className="flex flex-col flex-grow space-y-3">
-                  <span className="inline-block px-3 py-1 rounded text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-100 self-start">Podcast</span>
-                  <h3 className="text-base font-bold text-gray-900 leading-snug">The Execution Mindset</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 flex-grow">Short conversations that solve real work problems at DQ.</p>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors mt-auto">
-                    Listen now <span>→</span>
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide text-muted-foreground border border-border self-start">Podcast</span>
+                  <h3 className="text-base font-semibold text-foreground leading-snug">The Execution Mindset</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-grow">Short conversations that solve real work problems at DQ.</p>
+                  <span className="inline-flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors mt-auto">
+                    Listen now →
                   </span>
                 </div>
               </div>
             )}
             {isExecutionMindsetSeries && (
               <div
-                className="flex flex-col rounded-lg p-6 bg-white border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                className="flex flex-col rounded-2xl p-6 bg-card border border-border hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer"
                 onClick={() => navigate(`/marketplace/news/action-solver-podcast${location.search}`)}
               >
                 <div className="flex flex-col flex-grow space-y-3">
-                  <span className="inline-block px-3 py-1 rounded text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-100 self-start">Podcast</span>
-                  <h3 className="text-base font-bold text-gray-900 leading-snug">Action-Solver Podcast</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 flex-grow">Short conversations that solve real work problems at DQ.</p>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors mt-auto">
-                    Listen now <span>→</span>
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide text-muted-foreground border border-border self-start">Podcast</span>
+                  <h3 className="text-base font-semibold text-foreground leading-snug">Action-Solver Podcast</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-grow">Short conversations that solve real work problems at DQ.</p>
+                  <span className="inline-flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors mt-auto">
+                    Listen now →
                   </span>
                 </div>
               </div>
             )}
           </div>
         </section>
-      </main>
 
       {/* Persistent Bottom Audio Player */}
       {currentlyPlaying && (

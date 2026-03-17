@@ -12,6 +12,52 @@ const EXCLUDED_NEWS_IDS: string[] = [
 const MOCK_NEWS: NewsItem[] = [
   // ANNOUNCEMENTS (for News & Announcements tab)
   {
+    id: 'eid-al-fitr-holiday-2026',
+    title: 'EID AL-FITR HOLIDAY',
+    type: 'Announcement',
+    date: '2026-03-16',
+    author: 'HRA',
+    byline: 'DQ Operations',
+    views: 0,
+    excerpt: 'As we approach the end of Ramadan, please find latest update regarding the Eid Al-Fitr holiday.',
+    department: 'DQ Operations',
+    location: 'Dubai',
+    domain: 'Operations',
+    tags: ['eid', 'holiday', 'ramadan', 'announcement'],
+    readingTime: '<5',
+    newsType: 'Operational Notices',
+    newsSource: 'DQ Operations',
+    focusArea: 'Culture & People',
+    how: `Eid Al-Fitr holidays for DXB and KSA associates have been confirmed from Thursday, 19 March 2026 to Sunday, 22 March 2026, with work resuming on Monday, 23 March 2026.
+
+For NBO associates, the holiday dates in Kenya remain tentative and are pending official gazettement.
+
+The holiday is expected to fall on either Thursday, 19 March or Friday, 20 March 2026, and final confirmation will be shared once the official announcement is made.
+Key Highlights:
+- DXB & KSA Holidays Confirmed: 19 March – 22 March 2026
+- Work Resumes: Monday, 23 March 2026
+- NBO Holiday Dates: Pending official confirmation (expected 19 or 20 March)
+- Final confirmation for NBO will be shared once announced`,
+    what: `The following holiday schedule updates outline confirmed dates for DXB and KSA, along with tentative timelines for NBO to help teams plan effectively.
+What's Changing:
+- DXB & KSA Holidays Confirmed: 19 March – 22 March 2026
+- Work Resumes: Monday, 23 March 2026
+- NBO Holiday Dates: Pending official confirmation (expected 19 or 20 March)
+- Final confirmation for NBO will be shared once announced`,
+    when: `The following timeline outlines confirmed holiday dates and expected schedules to help teams plan accordingly.
+Timeline:
+- DXB & KSA Holidays: 19 March – 22 March 2026
+- Work Resumes: 23 March 2026
+- NBO Holiday: Expected on 19 or 20 March (TBC)
+- Final NBO confirmation will be shared once officially announced`,
+    why: `As Ramadan concludes, Eid Al-Fitr holiday updates have been shared for DXB, KSA, and NBO. While DXB and KSA dates are confirmed, NBO dates remain tentative, and teams are advised to plan work accordingly.
+Purpose:
+- Provide clarity on Eid Al-Fitr holiday dates for DXB, KSA, and NBO teams
+- Ensure teams are aware of confirmed vs tentative schedules
+- Support proactive planning and workload management
+- Maintain smooth operations and minimal disruption during the holiday period`,
+  },
+  {
     id: 'ramadan-work-timings-2026',
     title: 'Ramadan Work Timings Updates',
     type: 'Announcement',
@@ -44,25 +90,27 @@ What's changing:
 - Working hours are exclusive of a lunch break
 - NBO associates will continue with their regular working hours
 - NBO lunch break adjusted: 3:00 PM – 4:00 PM (DXB Time) / 2:00 PM – 3:00 PM (NBO Time)`,
-    how: `In observance of the holy month of Ramadan, updated working arrangements will take effect from Tuesday, 17 February 2026, to support employees while maintaining smooth collaboration across teams.
-DXB and KSA associates will follow Ramadan working hours from 9:00 AM – 3:00 PM (Monday–Friday) without a lunch break, while NBO associates will continue with their regular schedule. To support cross-team collaboration, the NBO lunch break will be temporarily adjusted to 3:00 PM – 4:00 PM (DXB Time) / 2:00 PM – 3:00 PM (NBO Time), creating a shared meeting window from 2:00 PM – 3:00 PM (DXB Time).
-Sessions that were previously scheduled during the adjusted period are being coordinated with Sreya Lakshmi and will be rescheduled to align with the new arrangement. Teams are encouraged to update their calendars accordingly to ensure a smooth workflow throughout the Ramadan period. Ramadan Mubarak to all observing — we wish everyone a blessed and peaceful month.
+    how: `In observance of Ramadan, updated working arrangements will take effect from 17 February 2026 to support employees while ensuring smooth collaboration across teams. DXB and KSA associates will follow revised working hours, while NBO will continue with its regular schedule.
+
+DXB and KSA will work from 9:00 AM – 3:00 PM (Monday–Friday) without a lunch break. The NBO lunch break will be temporarily adjusted to enable a shared collaboration window from 2:00 PM – 3:00 PM (DXB Time).
+
+Sessions scheduled during the adjusted period will be rescheduled to align with the new arrangement. Teams are encouraged to update their calendars to ensure a smooth workflow throughout the Ramadan period.
 Key Highlights:
 - Revised Ramadan Working Hours: DXB and KSA associates will work 9:00 AM – 3:00 PM (Monday–Friday) without a lunch break.
 - NBO Working Hours: NBO associates will continue with their regular working hours.
 - Adjusted NBO Lunch Break: Temporarily moved to 3:00 PM – 4:00 PM (DXB Time) / 2:00 PM – 3:00 PM (NBO Time) to support cross-team collaboration.
 - Collaboration Window: A shared meeting window from 2:00 PM – 3:00 PM (DXB Time) will be available for cross-location coordination.
 - Session Rescheduling: Sessions scheduled during the adjusted period will be rescheduled in coordination with Sreya Lakshmi.`,
-    when: `Effective Tuesday, 17th February 2026 through the end of Ramadan.
-
-All DXB and KSA associates are expected to follow the revised schedule from the first day of Ramadan.
-
-Ramadan Mubarak to all observing. We wish everyone a blessed and peaceful month.`,
+    when: `Ramadan Mubarak to all observing. We wish everyone a blessed and peaceful month.
+Timeline:
+- Effective Tuesday, 17th February 2026 through the end of Ramadan.
+- All DXB and KSA associates are expected to follow the revised schedule from the first day of Ramadan.`,
   },
   {
     id: 'dxb-eoy-event-postponement',
     title: 'DXB EoY Event Postponement',
     type: 'Announcement',
+    archived: true,
     date: '2025-12-19',
     author: 'Fadil A',
     byline: 'DQ Operations',
@@ -193,7 +241,32 @@ We are excited to announce that the DQ Story is now officially published on the 
     newsSource: 'DQ Leadership',
     focusArea: 'GHC',
     tags: ['Geopolitics & Technology'],
-    content: `This blog explores the rise of "compute nationalism," where nations compete to control the infrastructure powering artificial intelligence. Click "Read More" to discover how compute power could shape the future of AI.`
+    content: `This blog explores the rise of compute nationalism, where countries are competing to control AI infrastructure and computing power as a strategic asset. It highlights how this shift is reshaping global power dynamics and what it means for businesses and the future of the AI economy.
+What You'll Gain:
+- Understand how compute is becoming a key global power resource
+- Learn why nations are competing for AI infrastructure and dominance
+- Gain insights into the geopolitical impact on technology and business
+- Explore what this shift means for the future of AI and global innovation`,
+    what: `This blog explores the growing concept of compute nationalism, where nations compete to control AI infrastructure and computing power. It highlights how this shift is redefining global power dynamics and shaping the future of technology and business.
+Key Highlights:
+- Rise of compute as a strategic global resource
+- Nations competing for AI infrastructure dominance
+- Shift from traditional resources to digital sovereignty
+- Increasing geopolitical tension around AI capabilities
+- Risks of centralized AI power and inequality
+- Opportunities for emerging regions to become compute hubs`,
+    how: `This blog helps associates understand how global shifts in AI and compute power can influence business strategy, innovation, and decision-making. It encourages a broader perspective on how technology trends shape opportunities and risks in the evolving digital landscape.
+Key Impact:
+- Builds awareness of global AI and technology trends
+- Helps think more strategically about innovation and future readiness
+- Encourages understanding of geopolitical impact on business
+- Supports better decision-making in a rapidly evolving tech landscape
+- Highlights opportunities in emerging areas like AI infrastructure and compute hubs`,
+    when: `After reading this blog, you will gain a clearer understanding of how compute is becoming a critical global resource and why it matters for the future of AI, business, and innovation. It helps you think more strategically about the role of technology, competition, and global power in shaping opportunities and risks.
+Key Points:
+- Understand why compute is central to the future of AI and business
+- Recognize how global competition impacts technology and innovation
+- Learn the importance of AI infrastructure in strategic decision-making`,
   },
   {
     id: 'beijing-ai-superstate',
@@ -213,9 +286,31 @@ We are excited to announce that the DQ Story is now officially published on the 
     newsSource: 'DQ Leadership',
     focusArea: 'GHC',
     tags: ['Geopolitics & Technology'],
-    content: `China's AI strategy is unfolding quietly but at massive scale. While the U.S. publicly pushes a compute nationalism agenda, China is steadily expanding its AI infrastructure through coordinated investments, rapid datacenter construction, and vertically integrated technology supply chains.
-
-This blog explores how China's silent but strategic approach could reshape the global AI race and raise an important question: is the world's first AI superstate already taking shape in Beijing? Click Read More to uncover China's quiet AI strategy.`
+    content: `This blog explores how China is quietly building massive AI infrastructure through a coordinated, state-driven approach. It highlights how this strategy could reshape global AI leadership and competitive dynamics.
+What You'll Gain:
+- Understand China's approach to AI infrastructure expansion
+- Learn how coordination gives strategic advantage at scale
+- Gain perspective on global AI competition dynamics
+- Explore how infrastructure shapes future technological power`,
+    what: `A quick overview of the key themes and developments discussed in this blog.
+Key Highlights:
+- Rapid expansion of AI compute capacity in China
+- Control over end-to-end hardware supply chains
+- Faster datacenter build cycles compared to the West
+- Development of large-scale compute clusters with limited visibility`,
+    how: `This blog helps you understand how different national strategies in AI can influence innovation, competition, and business environments globally.
+Key Impact:
+- Builds awareness of global AI infrastructure strategies
+- Highlights importance of speed and coordination in execution
+- Encourages thinking beyond models to infrastructure advantage
+- Helps assess risks of uneven or hidden technological progress`,
+    when: `After reading this blog, you gain a clearer understanding of how China's quiet and structured approach can become a major competitive advantage in the global AI race.
+Key Points:
+- AI leadership depends on infrastructure, not just innovation
+- Execution speed is a critical competitive differentiator
+- Supply chain control strengthens technological independence
+- Quiet strategies can outperform visible competition
+- The AI race is shifting toward compute and scale dominance`,
   },
   {
     id: 'europe-ethical-ai-compute',
@@ -235,9 +330,31 @@ This blog explores how China's silent but strategic approach could reshape the g
     newsSource: 'DQ Leadership',
     focusArea: 'GHC',
     tags: ['Geopolitics & Technology'],
-    content: `Europe has positioned itself as a global leader in ethical and responsible AI, championing privacy, regulation, and digital rights. But as the global AI race accelerates, a critical question is emerging: can ethical leadership matter without strong compute infrastructure?
-
-This blog explores Europe's growing compute challenge from high energy costs to limited hyper-scale infrastructure and what it could mean for the region's ability to compete in the AI economy. Click Read More to explore whether Europe can balance ethical leadership with compute power.`
+    content: `This blog examines Europe's strong focus on ethical AI and regulation, while highlighting its growing gap in compute infrastructure. It questions whether ethical leadership alone is enough to compete in the global AI race.
+What You'll Gain:
+- Understand Europe's position on ethical AI and regulation
+- Learn why compute is critical for AI competitiveness
+- Gain insight into Europe's current infrastructure challenges
+- Explore the gap between policy leadership and execution capability`,
+    what: `A quick overview of the key themes and arguments presented in this blog.
+Key Highlights:
+- Europe leads in AI ethics, regulation, and digital rights
+- High energy costs limit datacenter scalability
+- Regulatory processes slow down infrastructure development
+- Lack of hyperscale tech giants creates compute dependency`,
+    how: `This blog helps you understand how gaps in infrastructure can limit innovation, even when strong policies are in place. It highlights the importance of balancing regulation with execution.
+Key Impact:
+- Builds awareness of trade-offs between regulation and innovation
+- Highlights importance of compute in driving AI leadership
+- Encourages thinking about execution vs policy balance
+- Supports strategic thinking on building sustainable AI ecosystems`,
+    when: `After reading this blog, you will get a clearer understanding that ethical leadership alone is not enough — real influence in AI requires strong compute infrastructure and execution capability.
+Key Points:
+- Ethical leadership without compute leads to limited global influence
+- AI competitiveness depends on infrastructure, energy, and scale
+- Over-regulation can slow down innovation and adoption
+- Sovereign compute is key to technological independence
+- The future of AI belongs to those who can build, not just regulate`,
   },
   
   // PODCASTS (for Podcasts tab)
@@ -371,6 +488,7 @@ Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
     id: 'company-wide-lunch-break-schedule',
     title: 'DQ CHANGES | COMPANY-WIDE LUNCH BREAK SCHEDULE',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-13',
     author: 'Irene Musyoki',
     byline: 'Corporate Comms',
@@ -388,6 +506,7 @@ Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
     id: 'grading-review-program-grp',
     title: 'DQ ADP | GRADING REVIEW PROGRAM (GRP)',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-13',
     author: 'Irene Musyoki',
     byline: 'Corporate Comms',
@@ -404,6 +523,7 @@ Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
     id: 'dq-scrum-master-structure-update',
     title: 'DQ Changes: Updated Scrum Master Structure',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-27',
     author: 'Felicia Araba',
     views: 0,
@@ -614,6 +734,34 @@ Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
     newsSource: 'DQ Leadership',
     focusArea: 'GHC',
     tags: ['Geopolitics & Technology'],
+    content: `This blog explores how limited access to compute is creating a new digital divide, potentially leaving the Global South behind in the AI revolution. It highlights both the risks of dependency and the opportunities to build regional AI ecosystems.
+What You'll Gain:
+- Understand how compute access shapes the global AI landscape
+- Learn why the Global South risks being left out of AI innovation
+- Gain insight into the emerging digital divide in AI
+- Explore opportunities for building regional compute ecosystems`,
+    what: `A quick overview of the key themes and realities discussed in this blog.
+Key Highlights:
+- AI development is becoming compute-gated and capital intensive
+- A growing divide between compute-rich and compute-poor nations
+- High costs limit access to training and infrastructure
+- Dependence on foreign clouds increases digital reliance
+- Global South has advantages like renewable energy and lower costs
+- Emerging regions are positioning as future compute hubs`,
+    how: `This blog helps you understand how unequal access to technology infrastructure can influence global innovation, economic growth, and digital independence.
+Key Impact:
+- Builds awareness of the new digital divide in AI
+- Highlights risks of technological and economic dependency
+- Encourages thinking about inclusive innovation and access
+- Supports understanding of global inequality in tech ecosystems
+- Promotes strategic thinking on building local capabilities`,
+    when: `After reading this blog, you gain a clearer understanding that access to compute is critical for participation in the AI economy, and that regions without it risk long-term dependency unless they act now.
+Key Points:
+- Compute access determines who innovates and who consumes
+- Lack of infrastructure can lead to long-term digital dependency
+- Renewable energy and cost advantages offer unique opportunities
+- Building local compute is key to sovereignty and growth
+- The future of AI depends on inclusive access to infrastructure`,
   },
   {
     id: 'nations-weaponize-attention',
@@ -633,6 +781,30 @@ Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
     newsSource: 'DQ Leadership',
     focusArea: 'GHC',
     tags: ['Digital Warfare'],
+    content: `This blog explores how modern geopolitics is shifting from physical conflict to digital influence, where attention, narratives, and public sentiment are shaped long before any real-world action occurs.
+What You'll Gain:
+- Understand how attention has become a strategic geopolitical asset
+- Learn how narratives shape public perception and global decisions
+- Gain insight into the role of digital platforms in modern conflict
+- Explore how AI is transforming influence and misinformation at scale`,
+    what: `A quick overview of the key ideas and mechanisms discussed in this blog.
+Key Highlights:
+- Shift from traditional warfare to attention-driven influence battles
+- Rise of coordinated misinformation and narrative campaigns
+- Emotional content spreading faster than verified information
+- AI enabling scalable, realistic, and rapid propaganda`,
+    how: `This blog helps you understand how digital influence and attention manipulation affect global stability, decision-making, and the way information shapes reality.
+Key Impact:
+- Builds awareness of digital influence on public perception
+- Highlights risks of misinformation and trust erosion
+- Encourages critical thinking in high-noise digital environments
+- Promotes awareness of cognitive resilience as a key capability`,
+    when: `After reading this blog, you will gain a deeper understanding that control over attention and narratives is becoming as powerful as traditional military or economic strength.
+Key Points:
+- Attention is now a primary battlefield in modern geopolitics
+- Narratives can shape outcomes before physical conflict begins
+- Misinformation spreads faster than truth in digital ecosystems
+- Critical thinking and awareness are essential to navigate digital influence`,
   },
   {
     id: 'half-attention-worker',
@@ -652,6 +824,31 @@ Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
     newsSource: 'DQ Leadership',
     focusArea: 'Culture & People',
     tags: ['Digital Worker'],
+    content: `This blog explores how modern digital work environments are creating "half-attention" behaviors, reducing focus, quality, and wellbeing. It highlights how organizations and individuals can reclaim deep focus through better systems and habits.
+What You'll Gain:
+- Understand how digital environments impact focus and attention
+- Learn why multitasking leads to reduced quality and clarity
+- Gain insight into the cognitive cost of constant interruptions
+- Explore ways to restore deep work and meaningful productivity`,
+    what: `A quick overview of the key themes and ideas discussed in this blog.
+Key Highlights:
+- Rise of the "Half-Attention Worker" in digital workplaces
+- Constant notifications causing context switching and fragmentation
+- Multitasking is an illusion of productivity
+- Digital culture prioritizes speed over depth`,
+    how: `This blog helps you understand how attention directly impacts performance, decision-making, and wellbeing, and why organizations must redesign work environments to support focus.
+Key Impact:
+- Builds awareness of attention as a critical productivity asset
+- Highlights risks of burnout, fatigue, and mental overload
+- Encourages shift from reactive work to intentional execution
+- Promotes healthier and more sustainable work practices`,
+    when: `After reading this blog, you gain a clear understanding that focus is a competitive advantage, and both individuals and organizations must actively protect and design for it.
+Key Points:
+- Multitasking reduces effectiveness and cognitive performance
+- Deep work enables better thinking and higher-quality outcomes
+- Attention must be intentionally protected and managed
+- Systems and environments shape how people work and think
+- The future of work belongs to those who prioritize focus over noise`,
   },
   {
     id: 'architecture-addiction',
@@ -671,6 +868,30 @@ Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
     newsSource: 'DQ Leadership',
     focusArea: 'Culture & People',
     tags: ['Social Media & Behavioral Design'],
+    content: `This blog explores how modern digital interfaces are intentionally designed to capture attention and build addictive habits. It highlights how UI patterns shape behavior and why rethinking design is critical in the Digital Cognitive era.
+What You'll Gain:
+- Understand how interface design influences user behavior and habits
+- Learn how platforms engineer engagement and attention loops
+- Gain insight into the attention economy and its impact
+- Explore ways to build a healthier relationship with technology`,
+    how: `This blog helps you understand how digital design affects focus, behavior, and wellbeing, and why conscious interaction with technology is essential.
+Key Impact:
+- Builds awareness of how design shapes daily behavior
+- Highlights risks of addiction, distraction, and cognitive overload
+- Encourages more intentional and mindful technology use
+- Promotes understanding of human-centered design principles`,
+    when: `After reading this blog, you will gain a clear understanding that attention is being actively shaped by design, and reclaiming control requires both better systems and conscious user behavior.
+Key Points:
+- Digital habits are often engineered, not accidental
+- Attention is the core currency of the digital economy
+- Small design and behavior changes can restore user control
+- The future of tech depends on designing for human wellbeing`,
+    what: `A quick overview of the key concepts and mechanisms discussed in this blog.
+Key Highlights:
+- Platforms operate as attention-driven economic systems
+- UI patterns like infinite scroll and autoplay remove friction
+- Variable rewards reinforce compulsive engagement
+- Shift needed from attention extraction to attention protection`,
   },
   
   // MORE PODCASTS

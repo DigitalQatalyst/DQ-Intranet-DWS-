@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import type { NewsItem } from '@/data/media/news';
 import { formatDate, getNewsTypeDisplay } from '@/utils/newsUtils';
 
@@ -9,95 +9,83 @@ interface ArticleSummaryProps {
   onListenNow?: () => void;
 }
 
-export const ArticleSummary: React.FC<ArticleSummaryProps> = ({ article, shouldUseNewLayout, onListenNow }) => {
-  const location = useLocation();
+export const ArticleSummary: React.FC<ArticleSummaryProps> = ({ article, onListenNow }) => {
   const announcementDate = article.date ? formatDate(article.date) : '';
-  const displayAuthor = article.type === 'Thought Leadership'
+  const isBlog = article.type === 'Thought Leadership' && article.format !== 'Podcast';
+  const isPodcast = article.format === 'Podcast' || article.tags?.some(t => t.toLowerCase().includes('podcast'));
+  const displayAuthor = isBlog || isPodcast
     ? (article.byline || article.author || 'DQ Media Team')
     : article.author;
-  const isBlog = article.type === 'Thought Leadership' && article.format !== 'Podcast';
-  const isPodcast = article.format === 'Podcast' || article.tags?.some(tag => tag.toLowerCase().includes('podcast'));
+
+  const summaryTitle = isPodcast ? 'Episode Summary' : isBlog ? 'Blog Summary' : 'Announcement Summary';
+
+  const rows = [
+    { label: 'Author', value: displayAuthor ?? '—' },
+    { label: 'Date', value: announcementDate },
+    { label: isPodcast ? 'Duration' : 'Reading Time', value: isPodcast ? '60+ Minutes' : (article.readingTime ? `${article.readingTime} min` : '<5 min') },
+    { label: 'Category', value: getNewsTypeDisplay(article).label },
+  ];
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({ title: article.title, text: article.excerpt, url: window.location.href }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href).catch(() => {});
+    }
+  };
 
   return (
-    <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ml-auto" style={{ maxWidth: '320px' }} aria-label="Announcement Summary">
-      <div className="px-5 py-5">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">
-        {isPodcast ? 'Episode Summary' : isBlog ? 'Blog Summary' : 'Announcement Summary'}
-      </h3>
-        
-        <div className="space-y-3 mb-5">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400 text-sm">Author</span>
-            <span className="text-gray-900 font-semibold text-sm">{displayAuthor}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400 text-sm">Date</span>
-            <span className="text-gray-900 font-semibold text-sm">{announcementDate}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400 text-sm">{isPodcast ? 'Duration' : 'Reading Time'}</span>
-            <span className="text-gray-900 font-semibold text-sm">&lt;5 min</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400 text-sm">Category</span>
-            <span className="text-gray-900 font-semibold text-sm">{getNewsTypeDisplay(article).label}</span>
-          </div>
+    <div className="sticky top-8 space-y-4">
+      {/* Summary Card */}
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <div className="px-5 pt-5 pb-3">
+          <h3 className="text-base font-semibold text-foreground">{summaryTitle}</h3>
         </div>
+        <div className="px-5 pb-5">
+          {/* Key-value rows */}
+          <div className="space-y-2.5 mb-5">
+            {rows.map((row, i) => (
+              <div key={i} className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{row.label}</span>
+                <span className="font-medium text-foreground text-right">{row.value}</span>
+              </div>
+            ))}
+          </div>
 
-        <div>
-          {isPodcast ? (
-            onListenNow ? (
+          {/* Primary CTA */}
+          <div className="space-y-2.5">
+            {isPodcast ? (
               <button
                 type="button"
                 onClick={onListenNow}
-                className="block w-full px-5 py-3 text-white font-semibold text-sm rounded-lg transition-all hover:opacity-90 text-center"
-                style={{ backgroundColor: '#122157' }}
+                className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#081540' }}
               >
-                Listen Now
+                Listen Now <ArrowRight className="h-4 w-4" />
               </button>
+            ) : isBlog ? (
+              <a
+                href={article.externalUrl || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#081540' }}
+              >
+                Read More <ArrowRight className="h-4 w-4" />
+              </a>
             ) : (
-            <a
-              href={article.audioUrl || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full px-5 py-3 text-white font-semibold text-sm rounded-lg transition-all hover:opacity-90 text-center"
-              style={{ backgroundColor: '#122157' }}
-            >
-              Listen Now
-            </a>
-            )
-          ) : isBlog ? (
-            <a
-              href={article.externalUrl || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full px-5 py-3 text-white font-semibold text-sm rounded-lg transition-all hover:opacity-90 text-center" 
-              style={{ backgroundColor: '#122157' }}
-            >
-              Read More
-            </a>
-          ) : (
-            <button 
-              type="button"
-              className="w-full px-5 py-3 text-white font-semibold text-sm rounded-lg transition-all hover:opacity-90 flex items-center justify-center" 
-              style={{ backgroundColor: '#122157' }}
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: article.title,
-                    text: article.excerpt,
-                    url: window.location.href,
-                  }).catch(() => {});
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                }
-              }}
-            >
-              Share Announcement
-            </button>
-          )}
+              <button
+                type="button"
+                onClick={handleShare}
+                className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#081540' }}
+              >
+                Share Announcement <ArrowRight className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
