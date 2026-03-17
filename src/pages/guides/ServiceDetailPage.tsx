@@ -26,6 +26,18 @@ const isGHCService = (itemId: string): boolean => {
   return GHC_SERVICE_IDS.includes(itemId);
 };
 
+// Helper function to detect if this is a Digital Workspace guideline
+const isDigitalWorkspaceGuideline = (guide: GuideRecord | null): boolean => {
+  if (!guide) return false;
+  const slug = (guide.slug || '').toLowerCase();
+  const title = (guide.title || '').toLowerCase();
+  
+  // Check for Digital Workspace guidelines - specifically Associate Owned Asset Guidelines
+  return slug.includes('associate-owned-asset') || 
+         title.includes('associate owned asset') ||
+         slug.includes('dq-ops');
+};
+
 // Helper function to map GHC itemId to GUIDE_CONTENT key
 const getGHCContentKey = (itemId: string): string => {
   // Map dq-ghc to ghc for GUIDE_CONTENT lookup
@@ -113,7 +125,7 @@ interface GuideRecord {
   body?: string | null;
 }
 
-type TabId = 'overview' | 'understand' | 'learn-practice' | 'other-materials';
+type TabId = 'overview' | 'understand' | 'learn-practice' | 'other-materials' | 'purpose' | 'guideline' | 'application' | 'timing';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'overview',        label: 'Overview' },
@@ -125,6 +137,13 @@ const TABS: { id: TabId; label: string }[] = [
 const NON_GHC_TABS: { id: TabId; label: string }[] = [
   { id: 'overview',        label: 'Overview' },
   { id: 'other-materials', label: 'Other Materials' },
+];
+
+const DIGITAL_WORKSPACE_TABS: { id: TabId; label: string }[] = [
+  { id: 'purpose',         label: 'Purpose' },
+  { id: 'guideline',       label: 'Guideline' },
+  { id: 'application',     label: 'Application' },
+  { id: 'timing',          label: 'Timing' },
 ];
 
 /* ─────────────────────────────── Sub-components ────────────────────────── */
@@ -175,20 +194,27 @@ export const ServiceDetailPage: React.FC = () => {
 
   // Check if this is a GHC service - use ghcContent state for accurate detection
   const isGHC = !!ghcContent;
+  const isDigitalWorkspace = isDigitalWorkspaceGuideline(guide);
   
   // Memoize tab selection to ensure it updates when ghcContent changes
   const currentTabs = useMemo(() => {
-    return isGHC ? TABS : NON_GHC_TABS;
-  }, [isGHC]);
+    if (isGHC) return TABS;
+    if (isDigitalWorkspace) return DIGITAL_WORKSPACE_TABS;
+    return NON_GHC_TABS;
+  }, [isGHC, isDigitalWorkspace]);
 
-  // Force re-render when ghcContent changes to update tabs
+  // Force re-render when ghcContent or guide changes to update tabs
   useEffect(() => {
-    if (ghcContent) {
-      // Force component to re-render with correct tabs
-      setActiveTab('overview');
+    if (ghcContent || guide) {
+      // Set appropriate default tab based on guideline type
+      if (isDigitalWorkspaceGuideline(guide)) {
+        setActiveTab('purpose');
+      } else {
+        setActiveTab('overview');
+      }
       setForceUpdate(prev => prev + 1);
     }
-  }, [ghcContent]);
+  }, [ghcContent, guide]);
 
   useEffect(() => {
     let cancelled = false;
@@ -480,7 +506,7 @@ export const ServiceDetailPage: React.FC = () => {
             {/* Left — Tab content (2 cols) */}
             <div className="lg:col-span-2 space-y-8">
 
-              {activeTab === 'overview' && (
+              {activeTab === 'overview' && !isDigitalWorkspace && (
                 <>
                   <Heading text="Overview" />
                   {isGHC && ghcContent ? (
@@ -515,8 +541,103 @@ export const ServiceDetailPage: React.FC = () => {
                         })}
                       </div>
                     </div>
+                  ) : isDigitalWorkspace ? (
+                    // Digital Workspace Overview content - refined and comprehensive
+                    <div className="space-y-6">
+                      {/* Main Description */}
+                      <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
+                        <p>
+                          The Associate Owned Asset Initiative represents a strategic transformation in how DQ manages workplace technology. 
+                          By shifting from traditional company-owned devices to associate-owned assets, we create a more flexible, 
+                          cost-effective, and secure approach to device management.
+                        </p>
+                        <p>
+                          These guidelines establish clear frameworks for three distinct programs—BYOD, FYOD, and HYOD—each designed 
+                          to accommodate different associate needs while maintaining operational excellence and security standards.
+                        </p>
+                      </div>
+
+                      {/* Key Objectives */}
+                      <div className="space-y-5">
+                        <SubHeading text="Strategic Objectives" />
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 mt-1">
+                              <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Mitigate Asset Theft</h4>
+                              <p className="text-gray-700 text-sm">Reduce risk of device misappropriation through clear ownership structures and accountability measures.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 mt-1">
+                              <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Promote Accountability</h4>
+                              <p className="text-gray-700 text-sm">Establish direct responsibility for device maintenance, security, and proper usage among associates.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 mt-1">
+                              <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Support Seamless Transitions</h4>
+                              <p className="text-gray-700 text-sm">Ensure smooth onboarding and device management processes with minimal work disruption.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 mt-1">
+                              <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Optimize Operational Efficiency</h4>
+                              <p className="text-gray-700 text-sm">Streamline IT operations and reduce administrative overhead through distributed device management.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Program Overview */}
+                      <div className="space-y-5">
+                        <SubHeading text="Available Programs" />
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 text-center">
+                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <span className="text-blue-600 font-bold">BYOD</span>
+                            </div>
+                            <h4 className="font-semibold text-blue-900 mb-2">Bring Your Own Device</h4>
+                            <p className="text-blue-800 text-sm">Use your personal device for work with company security standards.</p>
+                          </div>
+                          <div className="p-4 bg-green-50 rounded-lg border border-green-200 text-center">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <span className="text-green-600 font-bold">FYOD</span>
+                            </div>
+                            <h4 className="font-semibold text-green-900 mb-2">Finance Your Own Device</h4>
+                            <p className="text-green-800 text-sm">Purchase a company device with salary deduction options.</p>
+                          </div>
+                          <div className="p-4 bg-orange-50 rounded-lg border border-orange-200 text-center">
+                            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <span className="text-orange-600 font-bold">HYOD</span>
+                            </div>
+                            <h4 className="font-semibold text-orange-900 mb-2">Hold Your Own Device</h4>
+                            <p className="text-orange-800 text-sm">Temporary company device for emergency situations.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    // Non-GHC Overview content (existing)
+                    // Non-GHC, Non-Digital Workspace Overview content (existing)
                     <div className="space-y-4 text-gray-700 leading-relaxed">
                       <p>
                         The Associate Owned Asset Initiative is a strategic effort aimed at enhancing operational efficiency, 
@@ -655,6 +776,95 @@ export const ServiceDetailPage: React.FC = () => {
                     }
                   </p>
                 </div>
+              )}
+
+              {/* Digital Workspace Guideline Tabs */}
+              {activeTab === 'purpose' && isDigitalWorkspace && (
+                <>
+                  <div className="space-y-6">
+                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                      <p>
+                        These guidelines address critical operational challenges by creating a more efficient, secure, and accountable device management system that reduces asset theft while empowering associates with flexible device ownership options.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <SubHeading text="Key Benefits" />
+                      <Checklist items={[
+                        "Enhanced Security: Clear ownership reduces risk of asset misappropriation",
+                        "Cost Reduction: Lower procurement and maintenance expenses for the company", 
+                        "Improved Accountability: Associates take direct responsibility for device care",
+                        "Operational Flexibility: Multiple programs accommodate different associate needs"
+                      ]} />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'guideline' && isDigitalWorkspace && (
+                <>
+                  <div className="space-y-6">
+                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                      <p>
+                        The Associate Owned Asset Guidelines establish three core programs (BYOD, FYOD, HYOD) that provide flexible device ownership options while maintaining security and operational standards for all DQ associates.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <SubHeading text="Available Programs" />
+                      <Checklist items={[
+                        "BYOD Program: Use personal devices that meet DQ technical specifications",
+                        "FYOD Program: Purchase company devices with salary deduction options",
+                        "HYOD Program: Temporary company devices for emergency situations",
+                        "Compliance Standards: All programs ensure security and company policy adherence"
+                      ]} />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'application' && isDigitalWorkspace && (
+                <>
+                  <div className="space-y-6">
+                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                      <p>
+                        Implementation involves assessing your device needs, checking technical requirements, submitting the appropriate program application, and maintaining ongoing compliance with security protocols and company policies.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <SubHeading text="Implementation Steps" />
+                      <Checklist items={[
+                        "Simple Process: Four-step implementation from assessment to compliance",
+                        "Technical Support: IT assistance for device setup and requirements verification",
+                        "Security Protocols: Clear guidelines for device maintenance and data protection",
+                        "Ongoing Support: Regular compliance reviews and policy updates"
+                      ]} />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'timing' && isDigitalWorkspace && (
+                <>
+                  <div className="space-y-6">
+                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                      <p>
+                        Apply these guidelines during new employee onboarding, device replacement needs, emergency situations requiring temporary devices, or role changes that affect device requirements and technical specifications.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <SubHeading text="Key Scenarios" />
+                      <Checklist items={[
+                        "Onboarding Support: Seamless device setup within first week of employment",
+                        "Emergency Response: Same-day temporary device access for critical situations",
+                        "Planned Transitions: 30-day advance planning for device replacements",
+                        "Role Flexibility: Easy program updates when job requirements change"
+                      ]} />
+                    </div>
+                  </div>
+                </>
               )}
             </div>
 
