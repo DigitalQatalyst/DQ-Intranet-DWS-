@@ -16,12 +16,16 @@ export interface ServiceCardProps {
     featuredImageUrl?: string;
     requestUrl?: string;
   };
+  // Clean up specific duplicate tagline the user asked to remove
+  const sanitizedDescription = (item.description || '')
+    .replace('Purpose gives meaning to every action, and direction to every choice.', '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
   type: string;
   isBookmarked: boolean;
   onToggleBookmark: () => void;
   onQuickView: () => void;
 }
-
 export const ServiceCard: React.FC<ServiceCardProps> = ({
   item,
   type,
@@ -29,11 +33,6 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   onToggleBookmark: _onToggleBookmark,
   onQuickView
 }) => {
-  // Clean up specific duplicate tagline the user asked to remove
-  const sanitizedDescription = (item.description || '')
-    .replace('Purpose gives meaning to every action, and direction to every choice.', '')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
   const navigate = useNavigate();
   // Generate route based on marketplace type
   const getItemRoute = () => {
