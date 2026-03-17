@@ -8,6 +8,7 @@ import { supabaseClient } from '../../../lib/supabaseClient'
 import { HeroSection } from './HeroSection'
 import { SideNav } from './SideNav'
 import { AccentHeading } from '../../../components/shared/AccentHeading'
+import { HTMLProcessor } from '../../../components/guidelines/HTMLProcessor'
 
 function GuidelinePage() {
   const { user } = useAuth()
@@ -201,8 +202,9 @@ function GuidelinePage() {
 
             {/* Right Column - Content Area */}
             <div className="lg:col-span-3 bg-white rounded-lg shadow-sm p-8 md:p-12">
-              {/* HTML Content */}
-              <div 
+              {/* HTML Content with Table Processing */}
+              <HTMLProcessor 
+                html={guideHtml}
                 className="prose prose-lg max-w-none accent-headers
                            prose-headings:font-bold prose-headings:text-gray-900
                            prose-h1:text-4xl prose-h1:mt-12 prose-h1:mb-6 prose-h1:first:mt-0
@@ -213,12 +215,7 @@ function GuidelinePage() {
                            prose-ul:list-disc prose-ul:ml-6 prose-ul:mb-4
                            prose-ol:list-decimal prose-ol:ml-6 prose-ol:mb-4
                            prose-li:mb-2
-                           prose-strong:font-semibold prose-strong:text-gray-900
-                           prose-table:border-collapse prose-table:w-full prose-table:my-6
-                           prose-th:border prose-th:border-gray-300 prose-th:bg-gray-100 prose-th:p-3 prose-th:text-left prose-th:font-semibold
-                           prose-td:border prose-td:border-gray-300 prose-td:p-3
-                           prose-tr:even:bg-gray-50"
-                dangerouslySetInnerHTML={{ __html: guideHtml }}
+                           prose-strong:font-semibold prose-strong:text-gray-900"
               />
             </div>
           </div>

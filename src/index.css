@@ -25,20 +25,22 @@
   --sdp-footer-foreground: 220 20% 75%;
 }
 
-/* Colored accent bars for headers - H1 only */
+/* Colored accent bars for headers - H1 only with 20% fade from bottom */
 .accent-headers h1 {
   display: flex !important;
-  align-items: center !important;
-  gap: 0.75rem !important; /* 12px */
+  align-items: center !important; /* Center align for better horizontal alignment */
+  gap: 1rem !important; /* 16px */
+  line-height: 1.2 !important;
 }
 
 .accent-headers h1::before {
   content: '';
-  height: 1.5rem; /* 24px */
-  width: 0.25rem; /* 4px */
-  border-radius: 9999px;
-  background-color: #030E31;
+  width: 10px; /* Much thicker line as requested */
+  height: 1.2em; /* Match the line-height of the text for perfect alignment */
+  border-radius: 5px; /* Rounded corners proportional to width */
+  background: linear-gradient(to bottom, #030E31 0%, #030E31 80%, rgba(3, 14, 49, 0.2) 100%);
   flex-shrink: 0;
+  align-self: stretch; /* Stretch to match the full height of the text line */
 }
 
 /* Guidelines section theme */

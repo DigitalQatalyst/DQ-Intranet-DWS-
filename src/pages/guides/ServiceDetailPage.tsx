@@ -366,7 +366,7 @@ export const ServiceDetailPage: React.FC = () => {
   const displayTitle = isGHC && ghcContent ? ghcContent.title : guide.title;
   const displaySubtitle = isGHC && ghcContent ? 'GHC is the operating framework that connects direction, culture, and execution at DQ.' : 'Guidelines for transitioning to an associate-owned device model at DQ';
   const summaryTitle = isGHC && ghcContent ? `${ghcContent.title.split('(')[0].trim()} Summary` : 'Guideline summary';
-  const relatedSectionTitle = isGHC ? 'Related Competencies' : 'Related Guidelines';
+  const relatedSectionTitle = isGHC ? 'Related GHC Components' : 'Related Guidelines';
   const browseAllText = isGHC ? 'Browse all competencies' : 'Browse all guidelines';
   const moreDetailButtonText = 'View Guidelines';
 
@@ -1055,21 +1055,21 @@ export const ServiceDetailPage: React.FC = () => {
                   <Link
                     key={competency.id}
                     to={`/marketplace/guides/service/${competency.id}`}
-                    className="group block rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-200"
+                    className="group flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-200 h-full"
                   >
                     <div className="mb-4">
                       <span className="inline-block px-3 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full uppercase tracking-wide">
                         COMPETENCY
                       </span>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 transition-colors">
                       {competency.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow">
                       {competency.description}
                     </p>
-                    <div className="flex items-center text-sm text-blue-600 font-medium group-hover:text-blue-700">
-                      Read more <ArrowRight className="ml-1 h-4 w-4" />
+                    <div className="flex items-center text-sm font-medium transition-colors mt-auto" style={{ color: '#FB5535' }}>
+                      <span className="group-hover:text-orange-400">Read more</span> <ArrowRight className="ml-1 h-4 w-4" />
                     </div>
                   </Link>
                 ))}

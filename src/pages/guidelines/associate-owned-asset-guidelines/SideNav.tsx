@@ -36,26 +36,22 @@ export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
     // Better intersection observer settings for accurate section detection
     const observerOptions = {
       root: null,
-      rootMargin: '-100px 0px -66% 0px', // Top offset accounts for navbar, bottom gives priority to top sections
-      threshold: [0, 0.25, 0.5, 0.75, 1], // Multiple thresholds for better detection
+      rootMargin: '-80px 0px -80% 0px', // Improved margins for better detection
+      threshold: [0, 0.1, 0.25, 0.5], // Simplified thresholds
     }
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       // Find the entry with the highest intersection ratio that's actually intersecting
-      const intersectingEntries = entries.filter(entry => entry.isIntersecting)
+      const intersectingEntries = entries.filter(entry => entry.isIntersecting && entry.intersectionRatio > 0)
       
       if (intersectingEntries.length > 0) {
-        // Sort by intersection ratio and position (prefer sections closer to top)
+        // Sort by position on page (prefer sections closer to top of viewport)
         intersectingEntries.sort((a, b) => {
-          // If both have similar intersection ratios, prefer the one higher on page
-          if (Math.abs(a.intersectionRatio - b.intersectionRatio) < 0.1) {
-            return a.boundingClientRect.top - b.boundingClientRect.top
-          }
-          return b.intersectionRatio - a.intersectionRatio
+          return a.boundingClientRect.top - b.boundingClientRect.top
         })
         
         const sectionId = intersectingEntries[0].target.getAttribute('id')
-        if (sectionId) {
+        if (sectionId && sectionId !== currentSection) {
           setCurrentSection(sectionId)
         }
       }
@@ -90,8 +86,8 @@ export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
     
     const element = document.getElementById(sectionId)
     if (element) {
-      // Calculate offset to account for fixed header (adjust this value based on your header height)
-      const headerOffset = 100 // Adjust this value to match your navbar height + desired spacing
+      // Calculate offset to account for fixed header and add some padding
+      const headerOffset = 120 // Adjust this value to match your navbar height + desired spacing
       const elementPosition = element.getBoundingClientRect().top
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset
 
@@ -99,6 +95,11 @@ export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
         top: offsetPosition,
         behavior: 'smooth'
       })
+      
+      // Update URL hash without triggering scroll
+      if (window.history.replaceState) {
+        window.history.replaceState(null, '', `#${sectionId}`)
+      }
     }
   }
 
@@ -117,11 +118,12 @@ export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
             <li key={section.id}>
               <button
                 onClick={() => handleClick(section.id)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none ${
                   currentSection === section.id
-                    ? 'bg-blue-50 text-blue-700 font-medium shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'text-gray-900 font-medium border-l-4 pl-2'
+                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                 }`}
+                style={currentSection === section.id ? { borderLeftColor: '#030E31' } : {}}
               >
                 {section.label}
               </button>
