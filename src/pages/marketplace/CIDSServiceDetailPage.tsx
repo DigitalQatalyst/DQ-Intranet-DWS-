@@ -1,3 +1,4 @@
+// Updated: 2026-03-17 - Design System Marketplace with improved scroll functionality
 import { useState, useEffect } from 'react';
 import { Header } from '../../components/Header/Header';
 import { Footer } from '../../components/Footer/Footer';
