@@ -5,6 +5,104 @@ import { useNavigate } from 'react-router-dom'
 import { supabaseClient } from '../../lib/supabaseClient'
 import { getProductMetadata } from '../../utils/productMetadata'
 
+function formatAuthorText(authorName?: string, authorOrg?: string): string | null {
+  const text = `${authorName || ''}${authorOrg ? ` - ${authorOrg}` : ''}`.trim()
+  return (text.toLowerCase() === 'bb' || text.length <= 2) ? null : text
+}
+
+function formatLabel(value?: string | null): string {
+  if (!value) return ''
+  return value
+    .replace(/[_-]+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
+function normalizeTag(value?: string | null): string {
+  if (!value) return ''
+  const cleaned = value.toLowerCase().replace(/[_-]+/g, ' ').trim()
+  return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
+}
+
+const GHC_TITLE_BY_SLUG: Record<string, string> = {
+  'dq-ghc': 'GHC Overview',
+  'dq-vision': 'GHC 1 - Vision (Purpose)',
+  'dq-hov': 'GHC 2 - House of Values (HoV)',
+  'dq-persona': 'GHC 3 - Persona',
+  'dq-agile-tms': 'GHC 4 - Agile TMS',
+  'dq-agile-sos': 'GHC 5 - Agile SoS',
+  'dq-agile-flows': 'GHC 6 - Agile Flows',
+  'dq-agile-6xd': 'GHC 7 - Agile 6xD (Products)',
+}
+
+const HOV_ORDER = [
+  'dq-competencies-emotional-intelligence', 'dq-competencies-growth-mindset',
+  'dq-competencies-purpose', 'dq-competencies-perceptive', 'dq-competencies-proactive',
+  'dq-competencies-perseverance', 'dq-competencies-precision', 'dq-competencies-customer',
+  'dq-competencies-learning', 'dq-competencies-collaboration',
+  'dq-competencies-responsibility', 'dq-competencies-trust',
+]
+
+const KNOWN_PRODUCT_NAMES = [
+  'Digital Workspace System (DWS)',
+  'Digital Transformation Management Academy (DTMA)',
+  'Digital Business Platforms (DBP Assists)',
+  'Digital Transformation Management Platform (DTMP)',
+  'DTO4T – Digital Transformation Operating Framework',
+  'TMaaS – Transformation Management as a Service',
+]
+
+function hovTitleFromSlug(s: string): string | null {
+  const idx = HOV_ORDER.indexOf(s)
+  if (idx === -1) return null
+  const label = s.replace('dq-competencies-', '').replace(/-/g, ' ')
+  const nice = label.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  return `HoV ${idx + 1} - ${nice}`
+}
+
+function resolveGhcTitle(rawTitle: string, slug: string): string {
+  if (GHC_TITLE_BY_SLUG[slug]) return GHC_TITLE_BY_SLUG[slug]
+  const hovTitle = hovTitleFromSlug(slug)
+  if (hovTitle) return hovTitle
+  if (rawTitle.toLowerCase().includes('golden honeycomb')) return 'GHC Overview'
+  const match = rawTitle.match(/^GHC\s+Competency\s+(\d+):\s*(.+)/i)
+  if (match) return `GHC ${match[1]} - ${match[2].trim()}`
+  return rawTitle
+}
+
+function resolveDwsTitle(title: string, cleanedTitle: string, productMetadata: any): string | null {
+  const lower = title.toLowerCase()
+  if (!lower.includes('dws') || lower.includes('digital workspace system')) return null
+  if (productMetadata && (lower.includes('dws') || lower.includes('digital workspace'))) return 'Digital Workspace System (DWS)'
+  if (cleanedTitle.toLowerCase() === 'dws') return 'Digital Workspace System (DWS)'
+  if (cleanedTitle.toLowerCase().startsWith('dws')) return cleanedTitle.replace(/^dws\s*/i, 'Digital Workspace System (DWS)')
+  return null
+}
+
+function matchKnownProduct(productMetadata: any): string | null {
+  if (!productMetadata) return null
+  for (const productName of KNOWN_PRODUCT_NAMES) {
+    const meta = getProductMetadata(productName)
+    if (meta && meta.productType === productMetadata.productType && meta.productStage === productMetadata.productStage) {
+      return productName
+    }
+  }
+  return null
+}
+
+function resolveBlueprintTitle(title: string, hasStaticProps: boolean, productMetadata: any): string {
+  if (hasStaticProps) return title
+  const cleanedTitle = title.replace(/\s*Blueprint\s*/gi, '').trim()
+  const dwsTitle = resolveDwsTitle(title, cleanedTitle, productMetadata)
+  if (dwsTitle) return dwsTitle
+  const finalTitle = cleanedTitle.replace(/\s*blueprint\s*/gi, '').trim()
+  const knownProduct = matchKnownProduct(productMetadata)
+  if (knownProduct) return knownProduct
+  return (!finalTitle || finalTitle.toLowerCase() === 'blueprint') ? 'Product' : finalTitle
+}
+
 export interface GuideCardProps {
   guide: any
   onClick: () => void
@@ -39,21 +137,6 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
     // Fallback to Guidelines tab search
     navigate(`/marketplace/guides?tab=guidelines&q=${encodeURIComponent(guide.title)}`)
   }
-  const formatLabel = (value?: string | null) => {
-    if (!value) return ''
-    return value
-      .replace(/[_-]+/g, ' ')
-      .split(' ')
-      .filter(Boolean)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ')
-  }
-  const normalizeTag = (value?: string | null) => {
-    if (!value) return ''
-    const cleaned = value.toLowerCase().replace(/[_-]+/g, ' ').trim()
-    return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
-  }
-  
   // Determine the badge label based on framework for Strategy guides
   const getBadgeLabel = (): string => {
     if (isBlueprint) return 'Product'
@@ -98,117 +181,8 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
   
   // Transform title to remove "Blueprint" and use proper product naming
   const getDisplayTitle = (): string => {
-    if (!isBlueprint) {
-      const rawTitle = guide.title || ''
-      const slug = (guide.slug || '').toLowerCase()
-      
-      // Canonical GHC element titles with numbering
-      const ghcTitleBySlug: Record<string, string> = {
-        'dq-ghc': 'GHC Overview',
-        'dq-vision': 'GHC 1 - Vision (Purpose)',
-        'dq-hov': 'GHC 2 - House of Values (HoV)',
-        'dq-persona': 'GHC 3 - Persona',
-        'dq-agile-tms': 'GHC 4 - Agile TMS',
-        'dq-agile-sos': 'GHC 5 - Agile SoS',
-        'dq-agile-flows': 'GHC 6 - Agile Flows',
-        'dq-agile-6xd': 'GHC 7 - Agile 6xD (Products)',
-      }
-      const hovOrder = [
-        'dq-competencies-emotional-intelligence',
-        'dq-competencies-growth-mindset',
-        'dq-competencies-purpose',
-        'dq-competencies-perceptive',
-        'dq-competencies-proactive',
-        'dq-competencies-perseverance',
-        'dq-competencies-precision',
-        'dq-competencies-customer',
-        'dq-competencies-learning',
-        'dq-competencies-collaboration',
-        'dq-competencies-responsibility',
-        'dq-competencies-trust'
-      ]
-      const hovTitleFromSlug = (s: string): string | null => {
-        const idx = hovOrder.indexOf(s)
-        if (idx === -1) return null
-        const label = s.replace('dq-competencies-', '').replace(/-/g, ' ')
-        const nice = label.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-        return `HoV ${idx + 1} - ${nice}`
-      }
-      if (slug && ghcTitleBySlug[slug]) return ghcTitleBySlug[slug]
-      const hovTitle = slug ? hovTitleFromSlug(slug) : null
-      if (hovTitle) return hovTitle
-      
-      // Title-based fallback for GHC overview
-      const lowerTitle = rawTitle.toLowerCase()
-      if (lowerTitle.includes('golden honeycomb')) return 'GHC Overview'
-      
-      // Regex rename for legacy "GHC Competency N: X (Y)"
-      const ghcCompetencyMatch = rawTitle.match(/^GHC\s+Competency\s+(\d+):\s*(.+)/i)
-      if (ghcCompetencyMatch) {
-        const [, num, rest] = ghcCompetencyMatch
-        return `GHC ${num} - ${rest.trim()}`
-      }
-      return rawTitle
-    }
-    
-    const title = guide.title || ''
-    
-    // If this is a static product (has productType/productStage directly), use title as-is
-    if (guide.productType && guide.productStage) {
-      return title
-    }
-    
-    // Otherwise, this is a legacy blueprint item - clean up the title
-    const lowerTitle = title.toLowerCase()
-    
-    // Remove "Blueprint" from title
-    let cleanedTitle = title.replace(/\s*Blueprint\s*/gi, '').trim()
-    
-    // Map common patterns to proper product names
-    if (lowerTitle.includes('dws') && !lowerTitle.includes('digital workspace system')) {
-      // If it's just "DWS Blueprint" or similar, use full product name
-      if (productMetadata) {
-        if (lowerTitle.includes('dws') || lowerTitle.includes('digital workspace')) {
-          return 'Digital Workspace System (DWS)'
-        }
-      }
-      // Fallback: clean up and add Product if needed
-      if (cleanedTitle.toLowerCase() === 'dws') {
-        return 'Digital Workspace System (DWS)'
-      }
-      if (cleanedTitle.toLowerCase().startsWith('dws')) {
-        return cleanedTitle.replace(/^dws\s*/i, 'Digital Workspace System (DWS)')
-      }
-    }
-    
-    // If title still contains "blueprint" after cleaning, remove it
-    cleanedTitle = cleanedTitle.replace(/\s*blueprint\s*/gi, '').trim()
-    
-    // Try to match to known product names using metadata
-    if (productMetadata) {
-      const knownProducts = [
-        'Digital Workspace System (DWS)',
-        'Digital Transformation Management Academy (DTMA)',
-        'Digital Business Platforms (DBP Assists)',
-        'Digital Transformation Management Platform (DTMP)',
-        'DTO4T – Digital Transformation Operating Framework',
-        'TMaaS – Transformation Management as a Service'
-      ]
-      
-      for (const productName of knownProducts) {
-        const productMeta = getProductMetadata(productName)
-        if (productMeta && productMeta.productType === productMetadata.productType && productMeta.productStage === productMetadata.productStage) {
-          return productName
-        }
-      }
-    }
-    
-    // Final fallback: if title is empty or just "Blueprint", use a generic product name
-    if (!cleanedTitle || cleanedTitle.toLowerCase() === 'blueprint') {
-      return 'Product'
-    }
-    
-    return cleanedTitle
+    if (!isBlueprint) return resolveGhcTitle(guide.title || '', (guide.slug || '').toLowerCase())
+    return resolveBlueprintTitle(guide.title || '', !!(guide.productType && guide.productStage), productMetadata)
   }
   
   const displayTitle = getDisplayTitle()
@@ -322,15 +296,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
             className="truncate"
             title={`${guide.authorName || ""}${guide.authorOrg ? " - " + guide.authorOrg : ""}`}
           >
-            {/* Filter out "bb" and other placeholder text */}
-            {(() => {
-              const authorText = `${guide.authorName || ""}${guide.authorOrg ? ` - ${guide.authorOrg}` : ""}`.trim();
-              // Don't show if it's just "bb" or other single/double letter placeholders
-              if (authorText.toLowerCase() === 'bb' || authorText.length <= 2) {
-                return null;
-              }
-              return authorText;
-            })()}
+            {formatAuthorText(guide.authorName, guide.authorOrg)}
           </span>
         </div>
       )}

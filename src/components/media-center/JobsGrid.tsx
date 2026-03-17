@@ -47,6 +47,7 @@ export default function JobsGrid({ query, jobs }: GridProps) {
           matches(job.type, f.contract) &&
           matches(job.sfiaLevel, f.sfiaLevel) &&
           matches(job.roleType, f.deptType) &&
+          matches(job.workMode, f.workMode) &&
           withinOk
         );
       })

@@ -400,7 +400,7 @@ class ModerationAPIService {
    * Subscribe to realtime updates for reports and actions
    */
   subscribe(communityIds: string[], onUpdate: (event: 'report' | 'action', data: any) => void): () => void {
-    if (communityIds.length === 0) return () => {};
+    if (communityIds.length === 0) return () => undefined;
     const channelId = `moderation-${communityIds.join('-')}`;
 
     // Clean up existing subscription

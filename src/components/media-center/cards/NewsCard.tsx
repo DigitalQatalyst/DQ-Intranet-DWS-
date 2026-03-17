@@ -1,6 +1,6 @@
 import type { NewsItem } from '@/data/media/news';
 import { Link } from 'react-router-dom';
-import { formatDateVeryShort, generateTitle, getNewsTypeDisplay, getFallbackImage } from '@/utils/newsUtils';
+import { formatDateVeryShort, generateTitle, getNewsTypeDisplay, getNewsImageSrc } from '@/utils/newsUtils';
 
 interface NewsCardProps {
   item: NewsItem;
@@ -14,15 +14,23 @@ const fallbackImages = [
   'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80'
 ];
 
-export function NewsCard({ item, href }: Readonly<NewsCardProps>) {
-  const imageSrc = item.image || getFallbackImage(item.id, fallbackImages);
+const fallbackHero =
+  'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1600&q=80';
+
+export function NewsCard({ item, href }: NewsCardProps) {
+  // Use shared utility function to ensure consistency with detail pages
+  const imageSrc = getNewsImageSrc(item, fallbackImages, fallbackHero);
   const displayTitle = generateTitle(item);
   const newsTypeDisplay = getNewsTypeDisplay(item);
+  
+  // Get views from localStorage (synced with details page)
+  const storedViews = typeof window !== 'undefined' ? localStorage.getItem(`news-views-${item.id}`) : null;
+  const views = storedViews ? parseInt(storedViews, 10) : 0;
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="relative">
-        <img src={imageSrc} alt={displayTitle} className="h-40 w-full object-cover" loading="lazy" />
+        <img src={imageSrc} alt={displayTitle} className="h-48 w-full object-cover object-top" loading="lazy" />
         <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/80 px-3 py-1 text-xs font-semibold text-gray-700 backdrop-blur">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: newsTypeDisplay.color }} />
           {newsTypeDisplay.label}
@@ -34,20 +42,16 @@ export function NewsCard({ item, href }: Readonly<NewsCardProps>) {
           <div className="text-xs text-gray-500">
             {item.type} · {formatDateVeryShort(item.date)}
           </div>
-          <h3 className="mt-2 text-lg font-semibold text-gray-900">{displayTitle}</h3>
-          <p className="mt-2 text-sm text-gray-700 line-clamp-3">{item.excerpt}</p>
+          <h3 className="mt-2 text-lg font-semibold text-gray-900 line-clamp-2 min-h-[3.25rem]">
+            {displayTitle}
+          </h3>
+          <p className="mt-2 text-sm text-gray-700 line-clamp-3 min-h-[3.5rem]">
+            {item.excerpt}
+          </p>
 
           <div className="mt-3 text-xs text-gray-500">
-            {item.views} views {item.location ? ` · ${item.location}` : ''}
+            {views} views {item.location ? ` · ${item.location}` : ''}
           </div>
-
-          {(item.newsType || item.focusArea || item.newsSource) && (
-            <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium text-gray-600">
-              {item.newsType && <span className="rounded-full bg-gray-100 px-2 py-1">{item.newsType}</span>}
-              {item.newsSource && <span className="rounded-full bg-gray-100 px-2 py-1">{item.newsSource}</span>}
-              {item.focusArea && <span className="rounded-full bg-gray-100 px-2 py-1">{item.focusArea}</span>}
-            </div>
-          )}
         </div>
 
         <div className="mt-auto pt-4">

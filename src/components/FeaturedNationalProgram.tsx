@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { FadeInUpOnScroll } from './AnimationUtils';
 import { fetchAllNews } from '@/services/mediaCenterService';
 import type { NewsItem } from '@/data/media/news';
+import { getNewsImageSrc } from '@/utils/newsUtils';
 
 interface FeaturedProgram {
   id: string;
@@ -41,7 +42,7 @@ export const FeaturedNationalProgram: React.FC = () => {
 
     const interval = setInterval(() => {
       setActiveIndex((prevIndex) => (prevIndex + 1) % programs.length);
-    }, 5000); // Change every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [programs]);
@@ -52,7 +53,6 @@ export const FeaturedNationalProgram: React.FC = () => {
 
     async function loadFeatured() {
       try {
-        // Fetch latest news and blogs from Media Center
         const newsData = await fetchAllNews();
 
         if (!isMounted) return;
@@ -63,40 +63,49 @@ export const FeaturedNationalProgram: React.FC = () => {
           return;
         }
 
-        // Transform Media Center news data to FeaturedProgram format
-        const transformedPrograms: FeaturedProgram[] = newsData
+        // Show mix of latest announcements and blogs
+        const fallbackImages = [
+          'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80'
+        ];
+        const fallbackHero = 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1600&q=80';
+
+        // Get 3 latest announcements
+        const announcements = newsData
           .filter((item: NewsItem) => {
-            // Include announcements, blogs, and thought leadership
             const itemType = (item.type || '').toLowerCase();
-            return itemType === 'announcement' || 
-                   itemType === 'blog' || 
-                   itemType === 'thought leadership';
+            return itemType === 'announcement';
           })
-          .slice(0, 8)
-          .map((item: NewsItem) => {
+          .slice(0, 3);
+
+        // Get 3 latest blogs (Thought Leadership)
+        const blogs = newsData
+          .filter((item: NewsItem) => {
             const itemType = (item.type || '').toLowerCase();
-            
-            // Determine category and CTA based on type
-            let category: 'News' | 'Insight' | 'Jobs';
-            let ctaLabel: string;
-            
-            if (itemType === 'thought leadership' || itemType === 'blog') {
-              category = 'Insight';
-              ctaLabel = 'READ INSIGHT';
-            } else {
-              category = 'News';
-              ctaLabel = 'READ STORY';
-            }
+            return itemType === 'thought leadership';
+          })
+          .slice(0, 3);
+
+        // Combine and sort by date (newest first)
+        const combinedItems = [...announcements, ...blogs].sort((a, b) => {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+
+        const transformedPrograms: FeaturedProgram[] = combinedItems
+          .map((item: NewsItem) => {
+            const imageSrc = getNewsImageSrc(item, fallbackImages, fallbackHero);
 
             return {
               id: item.id,
               partnership: item.author || item.newsSource || 'DQ Communications',
               title: item.title,
               description: item.excerpt || '',
-              learnMoreHref: `/media-center/news/${item.id}`,
-              backgroundImage: item.image ? `url(${item.image})` : undefined,
-              category,
-              ctaLabel,
+              learnMoreHref: `/marketplace/news/${item.id}`,
+              backgroundImage: `url("${imageSrc}")`,
+              category: 'News' as const,
+              ctaLabel: 'READ STORY',
             };
           });
 
@@ -149,7 +158,6 @@ export const FeaturedNationalProgram: React.FC = () => {
                 }
           }
         >
-
           <div className="flex-1 flex flex-col justify-center text-white relative z-10">
             <h3 className="font-bold mb-4 text-white max-w-3xl leading-tight" style={{ fontSize: '30px' }}>
               {activeProgram.title}

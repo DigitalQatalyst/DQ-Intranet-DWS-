@@ -446,10 +446,14 @@ const hydrateLocations = async () => {
   if (cachedLocations) return cachedLocations;
 
   const clean = await resolveCleanLocations(RAW_LOCATIONS);
-  cachedLocations = clean.map<MapLocation>((loc) => ({
+  const withCoords = clean.filter((loc): loc is RawLocation & { lat: number; lng: number } => 
+    typeof loc.lat === 'number' && typeof loc.lng === 'number'
+  );
+
+  cachedLocations = withCoords.map<MapLocation>((loc) => ({
     id: loc.id,
     name: loc.name,
-    position: [loc.lat!, loc.lng!],
+    position: [loc.lat, loc.lng],
     description: loc.description ?? '',
     address: loc.address,
     type: mapCategoryToType(loc.category),

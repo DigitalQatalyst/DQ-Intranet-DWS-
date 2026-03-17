@@ -2,22 +2,25 @@ import React, { useEffect, useState, useRef } from "react";
 // import Link from 'next/link';
 import {
   X,
-  ChevronDown,
   Info,
   Lock,
   Home,
-  Users,
-  Settings,
-  BarChart3,
   User,
-  FolderOpen,
   Send,
+  BarChart3,
+  Settings,
   HelpCircle,
   ExternalLink,
-  Plus,
-  Check,
   Menu,
-  MessageCircleIcon,
+  Wallet,
+  LayoutGrid,
+  ShieldCheck,
+  Navigation,
+  BookOpen,
+  TrendingUp,
+  CheckSquare,
+  Timer,
+  History,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -35,6 +38,7 @@ interface MenuItem {
   category?: "category";
   external?: boolean;
   href?: string; // <--- new
+  comingSoon?: boolean;
 }
 interface SidebarProps {
   isOpen?: boolean;
@@ -53,38 +57,10 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   isOpen = true,
   onClose,
-  onSectionChange,
   onboardingComplete = true,
-  companies = [
-    {
-      id: "1",
-      name: "FutureTech LLC",
-      role: "Owner",
-      isActive: true,
-      badge: "Primary",
-    },
-    {
-      id: "2",
-      name: "StartupCo Inc",
-      role: "Admin",
-      badge: "Secondary",
-    },
-    {
-      id: "3",
-      name: "Enterprise Solutions",
-      role: "Member",
-    },
-  ],
-  onCompanyChange,
-  onAddNewEnterprise,
   isLoggedIn = true,
   "data-id": dataId,
 }) => {
-  const [tooltipItem, setTooltipItem] = useState<string | null>(null);
-  const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
-  const [formsDropdownOpen, setFormsDropdownOpen] = useState(false);
-  const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const formsDropdownRef = useRef<HTMLDivElement>(null);
   const menuItemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const location = useLocation();
@@ -98,16 +74,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setCompanyDropdownOpen(false);
-      }
-      if (
         formsDropdownRef.current &&
         !formsDropdownRef.current.contains(event.target as Node)
       ) {
-        setFormsDropdownOpen(false);
+        // Handle forms dropdown if needed
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -123,31 +93,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       );
       switch (event.key) {
         case "Escape":
-          if (companyDropdownOpen) {
-            setCompanyDropdownOpen(false);
-            return;
-          }
-          if (formsDropdownOpen) {
-            setFormsDropdownOpen(false);
-            return;
-          }
           onClose?.();
           break;
         case "ArrowDown":
           event.preventDefault();
-          setFocusedMenuIndex((prev) => {
-            const next = prev < menuItems.length - 1 ? prev + 1 : 0;
-            menuItemsRef.current[next]?.focus();
-            return next;
-          });
-          break;
-        case "ArrowUp":
-          event.preventDefault();
-          setFocusedMenuIndex((prev) => {
-            const next = prev > 0 ? prev - 1 : menuItems.length - 1;
-            menuItemsRef.current[next]?.focus();
-            return next;
-          });
+          // Arrow navigation logic could be simplified or removed if redundant
           break;
       }
     };
@@ -155,33 +105,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isOpen, companyDropdownOpen, formsDropdownOpen, onClose]);
+  }, [isOpen, onClose]);
 
   if (!isLoggedIn) return null;
 
   const getMenuItems = (): MenuItem[] => {
     const items: MenuItem[] = [];
 
-    if (!onboardingComplete) {
-      items.push({
-        id: "onboarding",
-        label: "Onboarding",
-        icon: <Users size={20} />,
-        href: "/dashboard/onboarding",
-      });
-    } else {
-      items.push({
-        id: "overview",
-        label: "Overview",
-        icon: <Home size={20} />,
-        href: "/dashboard/overview",
-      });
-    }
-
+    // Overview
     items.push(
       {
-        id: "essentials",
-        label: "ESSENTIALS",
+        id: "overview-cat",
+        label: "Overview",
+        category: "category",
+      } as MenuItem,
+      {
+        id: "overview",
+        label: "Overview / Home",
+        icon: <Home size={20} />,
+        href: onboardingComplete ? "/dashboard/overview" : "/dashboard/onboarding",
+        comingSoon: true,
+      }
+    );
+
+    // Essentials
+    items.push(
+      {
+        id: "essentials-cat",
+        label: "Essentials",
         category: "category",
       } as MenuItem,
       {
@@ -189,37 +140,128 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "Profile",
         icon: <User size={20} />,
         href: "/dashboard/profile",
+        comingSoon: true,
       },
       {
-        id: "documents",
-        label: "Documents",
-        icon: <FolderOpen size={20} />,
+        id: "wallet",
+        label: "Wallet",
+        icon: <Wallet size={20} />,
         href: "/dashboard/documents",
-      },
+        comingSoon: true,
+      }
+    );
+
+    // Work & Transactions
+    items.push(
       {
-        id: "transactions",
-        label: "TRANSACTIONS",
+        id: "work-transactions-cat",
+        label: "Work & Transactions",
         category: "category",
       } as MenuItem,
+      {
+        id: "workspace",
+        label: "My Workspace",
+        icon: <LayoutGrid size={20} />,
+        href: "/dashboard/workspace",
+        comingSoon: true,
+      },
       {
         id: "requests",
         label: "Requests",
         icon: <Send size={20} />,
         href: "/dashboard/requests",
-      },
+        comingSoon: true,
+      }
+    );
+
+    // Compliance & Obligations
+    items.push(
+      {
+        id: "compliance-obligations-cat",
+        label: "Compliance & Obligations",
+        category: "category",
+      } as MenuItem,
       {
         id: "reporting-obligations",
         label: "Reporting Obligations",
         icon: <BarChart3 size={20} />,
-        href: "/dashboard/reporting-obligations",
+        href: "/dashboard/coming-soon?label=Reporting%20Obligations",
+        comingSoon: true,
       },
       {
-        id: "forms",
-        label: "Forms",
-        icon: <FolderOpen size={20} />,
+        id: "compliance-tasks",
+        label: "Compliance Tasks",
+        icon: <ShieldCheck size={20} />,
+        href: "/dashboard/coming-soon?label=Compliance%20Tasks",
+        comingSoon: true,
+      }
+    );
+
+    // Learning & Enablement
+    items.push(
+      {
+        id: "learning-enablement-cat",
+        label: "Learning & Enablement",
+        category: "category",
       } as MenuItem,
       {
-        id: "settings-support",
+        id: "onboarding-journey",
+        label: "Onboarding Journey",
+        icon: <Navigation size={20} />,
+        href: "/dashboard/coming-soon?label=Onboarding%20Journey",
+        comingSoon: true,
+      },
+      {
+        id: "my-courses",
+        label: "My Courses",
+        icon: <BookOpen size={20} />,
+        href: "/dashboard/learning",
+      }
+    );
+
+    // Communication - Removed as per user request
+
+    // My Performance
+    items.push(
+      {
+        id: "my-performance-cat",
+        label: "My Performance",
+        category: "category",
+      } as MenuItem,
+      {
+        id: "performance-overview",
+        label: "Performance Overview",
+        icon: <TrendingUp size={20} />,
+        href: "/dashboard/performance/overview",
+        comingSoon: true,
+      },
+      {
+        id: "task-completion",
+        label: "Task Completion",
+        icon: <CheckSquare size={20} />,
+        href: "/dashboard/performance/tasks",
+        comingSoon: true,
+      },
+      {
+        id: "request-turnaround",
+        label: "Request Turnaround",
+        icon: <Timer size={20} />,
+        href: "/dashboard/performance/turnaround",
+        comingSoon: true,
+      },
+      {
+        id: "activity-timeline",
+        label: "Activity Timeline",
+        icon: <History size={20} />,
+        href: "/dashboard/performance/timeline",
+        comingSoon: true,
+      }
+    );
+
+    // Settings & Support
+    items.push(
+      {
+        id: "settings-support-cat",
         label: "Settings & Support",
         category: "category",
       } as MenuItem,
@@ -228,18 +270,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "Settings",
         icon: <Settings size={20} />,
         href: "/dashboard/settings",
+        comingSoon: true,
       },
       {
         id: "support",
         label: "Support",
         icon: <HelpCircle size={20} />,
         href: "/dashboard/support",
-      },
-      {
-        id: "chat-support",
-        label: "Chat Support",
-        icon: <MessageCircleIcon size={20} />,
-        href: "/dashboard/chat-support",
+        comingSoon: true,
       },
       {
         id: "help-center",
@@ -247,88 +285,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
         icon: <ExternalLink size={16} />,
         external: true,
         href: "https://docs.example.com/help",
+        comingSoon: true,
       }
     );
+
     return items;
   };
 
-  const activeCompany = companies.find((c) => c.isActive) || companies[0];
-
   return (
     <div
-      className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } lg:w-60 overflow-y-auto`}
+      className={`fixed lg:relative inset-y-0 left-0 z-30 w-64 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        } lg:w-60 h-full overflow-y-auto custom-scrollbar`}
       data-id={dataId}
     >
-      {/* Header with Company Switcher */}
+      {/* Header */}
       <div className="p-4 border-b border-gray-200">
-        <div className="flex justify-between items-center mb-3">
+        <div className="flex justify-between items-center">
           <button className="lg:hidden text-gray-500" onClick={onClose}>
             <X size={20} />
           </button>
-        </div>
-        <div className="relative" ref={dropdownRef}>
-          <button
-            className=" w-full flex items-center justify-between text-left p-3 rounded-md hover:bg-gray-100 transition-colors"
-            onClick={() => setCompanyDropdownOpen(!companyDropdownOpen)}
-          >
-            <div className="flex-1 min-w-0">
-              <h2 className="text-blue-800 font-bold text-lg leading-tight truncate">
-                {activeCompany.name}
-              </h2>
-              {activeCompany.badge && (
-                <span className="text-xs text-gray-500 font-medium mt-0.5 block">
-                  {activeCompany.badge}
-                </span>
-              )}
-            </div>
-            <ChevronDown
-              size={18}
-              className={`text-gray-500 transition-transform ml-2 flex-shrink-0 ${companyDropdownOpen ? "rotate-180" : ""
-                }`}
-            />
-          </button>
-          {companyDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-              <div className="py-1">
-                {companies.map((company) => (
-                  <button
-                    key={company.id}
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center justify-between"
-                    onClick={() => onCompanyChange?.(company.id)}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 truncate">
-                        {company.name}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {company.role}
-                      </div>
-                    </div>
-                    <div className="flex items-center ml-2 flex-shrink-0">
-                      {company.badge && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded mr-2">
-                          {company.badge}
-                        </span>
-                      )}
-                      {company.isActive && (
-                        <Check size={16} className="text-blue-600" />
-                      )}
-                    </div>
-                  </button>
-                ))}
-                <div className="border-t border-gray-100 mt-1 pt-1">
-                  <button
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center text-blue-600"
-                    onClick={onAddNewEnterprise}
-                  >
-                    <Plus size={16} className="mr-2 flex-shrink-0" />
-                    Add New Enterprise
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -361,20 +336,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
             );
           }
 
-          const isDisabled = !onboardingComplete && item.id !== "onboarding";
+          const isComingSoon = item.comingSoon;
+          const isDisabled = (!onboardingComplete && item.id !== "onboarding") || isComingSoon;
           const isActive = activeSection === item.id;
 
           const baseClasses = `flex items-center px-4 py-3 relative transition-colors ${isActive
             ? "bg-blue-700 text-white"
             : isDisabled
-              ? "text-gray-400 cursor-not-allowed"
+              ? isComingSoon 
+                ? "text-gray-400 cursor-default" 
+                : "text-gray-400 cursor-not-allowed"
               : "text-gray-700 hover:bg-gray-200 cursor-pointer"
             }`;
 
           const content = (
             <>
               <span className="w-8 flex items-center justify-center flex-shrink-0">
-                {isDisabled && !isActive ? (
+                {isDisabled && !isActive && !isComingSoon ? (
                   <div className="relative">
                     {item.icon}
                     <Lock
@@ -387,6 +365,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 )}
               </span>
               <span className="flex-1 ml-3">{item.label}</span>
+              {item.comingSoon && (
+                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-600 rounded uppercase tracking-wider">
+                  Soon
+                </span>
+              )}
               {item.external && !isDisabled && (
                 <ExternalLink
                   size={14}
@@ -396,121 +379,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </>
           );
 
-          // Special handling for Forms dropdown
-          if (item.id === "forms" && !isDisabled) {
-            return (
-              <div key={item.id} className="relative" ref={formsDropdownRef}>
-                <div
-                  className={`${baseClasses} cursor-pointer`}
-                  onClick={() => setFormsDropdownOpen(!formsDropdownOpen)}
-                >
-                  <span className="w-8 flex items-center justify-center flex-shrink-0">
-                    {item.icon}
-                  </span>
-                  <span className="flex-1 ml-3">{item.label}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`text-gray-500 transition-transform ml-2 flex-shrink-0 ${formsDropdownOpen ? "rotate-180" : ""
-                      }`}
-                  />
-                </div>
-                <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${formsDropdownOpen
-                    ? "max-h-96 opacity-100"
-                    : "max-h-0 opacity-0"
-                    }`}
-                >
-                  <div className="transform transition-transform duration-300 ease-in-out max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    <Link
-                      to="/dashboard/forms/book-consultation-for-entrepreneurship"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Book Consultation for Entrepreneurship
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/collateral-user-guide"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Collateral User Guide
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/cancel-loan"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Cancel Loan
-                    </Link>
 
-                    <Link
-                      to="/dashboard/forms/disburse-approved-loan"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Disburse an Approved Loan
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/facilitate-communication"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Facilitate Communication
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/issue-support-letter"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Issue Support Letter
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/needs-assessment-form"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Needs Assessment Form
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/reallocation-of-loan-disbursement"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Reallocation of Loan Disbursement
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/request-for-funding"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Request For Funding
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/request-for-membership"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Request for Membership
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/request-to-amend-existing-loan-details"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Request to Amend Existing Loan Details
-                    </Link>
-                    <Link
-                      to="/dashboard/forms/training-in-entrepreneurship"
-                      className="flex items-center px-4 py-3 pl-12 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                      onClick={() => setFormsDropdownOpen(false)}
-                    >
-                      Training in Entrepreneurship
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            );
-          }
 
           if (item.href && !isDisabled) {
             return item.external ? (
@@ -533,12 +402,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           return (
             <div key={item.id} className={baseClasses}>
               {content}
-              {tooltipItem === item.id && (
-                <div className="absolute left-full ml-2 bg-gray-800 text-white text-xs py-2 px-3 rounded-md w-48 z-50">
-                  Complete onboarding to unlock this section
-                  <div className="absolute top-1/2 -left-1 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
-                </div>
-              )}
             </div>
           );
         })}

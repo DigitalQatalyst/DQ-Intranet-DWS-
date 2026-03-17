@@ -1,61 +1,118 @@
 // steps/ReviewStep.js
 import React from 'react';
 import { CheckIcon } from 'lucide-react';
-import { profileConfig } from '../utils/profileConfig';
 
 export function ReviewStep({ formData, isRevisit }) {
-    const companyStageInfo = profileConfig.companyStages.find(
-        stage => stage.id === formData.companyStage
-    ) || profileConfig.companyStages[0];
-
     const dataGroups = [
         {
-            title: 'Company Information',
+            title: 'Welcome Information',
             fields: [
-                { label: 'Company Name', value: formData.tradeName },
-                { label: 'Industry', value: formData.industry },
-                { label: 'Business Size', value: formData.businessSize },
-                { label: 'Registration Number', value: formData.registrationNumber },
-                { label: 'Establishment Date', value: formData.establishmentDate },
-                {
-                    label: 'Company Stage',
-                    value: companyStageInfo.label,
-                    badge: <span className={`ml-2 inline-block w-2 h-2 rounded-full ${companyStageInfo.color}`} />
-                },
-            ],
-        },
-        {
-            title: 'Business Profile',
-            fields: [
-                { label: 'Business Pitch', value: formData.businessPitch },
-                { label: 'Problem Statement', value: formData.problemStatement },
-            ],
-        },
-        {
-            title: 'Location & Contact',
-            fields: [
-                { label: 'Address', value: formData.address },
-                { label: 'City', value: formData.city },
-                { label: 'Country', value: formData.country },
-                { label: 'Website', value: formData.website },
-                { label: 'Phone', value: formData.phone },
+                { label: 'Name', value: formData.tradeName },
+                { label: 'Role', value: formData.role },
                 { label: 'Email', value: formData.email },
+                { label: 'Phone', value: formData.phone },
             ],
         },
         {
-            title: 'Operations',
+            title: 'Professional Summary',
             fields: [
-                { label: 'Employee Count', value: formData.employeeCount },
-                { label: 'Founders', value: formData.founders },
-                { label: 'Founding Year', value: formData.foundingYear },
+                { label: 'Bio', value: formData.bio },
+                { label: 'Hobbies', value: formData.hobbies },
+                { label: 'Technical Skills', value: formData.technicalSkills },
+                { label: 'Functional Skills', value: formData.functionalSkills },
+                { label: 'Soft Skills', value: formData.softSkills },
+                { label: 'Key Competencies', value: formData.keyCompetencies },
+                { label: 'Languages', value: formData.languages },
             ],
         },
         {
-            title: 'Funding & Needs',
+            title: 'Profile Information',
             fields: [
-                { label: 'Initial Capital (USD)', value: formData.initialCapital },
-                { label: 'Funding Needs (USD)', value: formData.fundingNeeds },
-                { label: 'Business Needs', value: formData.needsList },
+                { label: 'Date of Birth', value: formData.dob },
+                { label: 'Gender', value: formData.gender },
+                { label: 'Personal Email', value: formData.personalEmail },
+                { label: 'Marital Status', value: formData.maritalStatus },
+                { label: 'Address', value: formData.homeAddress },
+                { label: 'Home Country', value: formData.homeCountry },
+                { label: 'Children', value: formData.numberOfChildren },
+                { label: 'Dependants', value: formData.numberOfDependants },
+            ],
+        },
+        {
+            title: 'Identity Information',
+            fields: [
+                { label: 'Residence', value: formData.countryOfResidence },
+                { label: 'Citizenship', value: formData.countryOfCitizenship },
+                { label: 'National ID', value: formData.nationalIdNumber },
+                { label: 'Passport No.', value: formData.passportNumber },
+                { label: 'Passport Expiry', value: formData.passportExpiryDate },
+                { label: 'KRA Pin', value: formData.kraPin },
+                { label: 'Emirates ID', value: formData.emiratesIdNumber },
+                { label: 'UAE Visa Type', value: formData.uaeVisaType },
+            ],
+        },
+        {
+            title: 'Education',
+            fields: [
+                { label: 'Highest Level', value: formData.highestEducationLevel },
+                { label: 'Degree', value: formData.degreeAttained },
+                { label: 'Major', value: formData.majorStudy },
+                { label: 'Further Study Aspirations', value: formData.furtherStudyAspirations },
+                { label: 'Further Study Status', value: formData.furtherStudyStatus },
+            ],
+        },
+        {
+            title: 'Work Experience',
+            fields: [
+                { label: 'Years of Experience', value: formData.yearsExperience },
+                { label: 'Skill 1', value: formData.skill1 },
+                { label: 'Skill 2', value: formData.skill2 },
+                { label: 'Skill 3', value: formData.skill3 },
+            ],
+        },
+        {
+            title: 'Proficiency',
+            fields: [
+                { label: 'Tools & Systems', value: formData.toolsSystemProficiency },
+            ],
+        },
+        {
+            title: 'Payroll Information',
+            fields: [
+                { label: 'Bank Name', value: formData.bankName },
+                { label: 'Account Name', value: formData.bankAccountName },
+                { label: 'Account Number', value: formData.bankAccountNumber },
+                { label: 'IBAN', value: formData.iban },
+                { label: 'Mpesa Name', value: formData.mpesaAccountName },
+                { label: 'Mpesa Number', value: formData.mpesaAccountNumber },
+            ],
+        },
+        {
+            title: 'Health Information',
+            fields: [
+                { label: 'Allergies', value: formData.allergies },
+                { label: 'Conditions', value: formData.medicalConditions },
+                { label: 'Medications', value: formData.currentMedications },
+                { label: 'Dietary Restrictions', value: formData.dietaryRestrictions },
+            ],
+        },
+        {
+            title: 'Emergency Contact',
+            fields: [
+                { label: 'Name', value: formData.emergencyName },
+                { label: 'Relationship', value: formData.emergencyRelationship },
+                { label: 'Phone', value: formData.emergencyPhone },
+                { label: 'Email', value: formData.emergencyEmail },
+            ],
+        },
+        {
+            title: 'Referee',
+            fields: [
+                { label: 'Name', value: formData.refereeName },
+                { label: 'Organization', value: formData.refereeOrganization },
+                { label: 'Position', value: formData.refereePosition },
+                { label: 'Phone', value: formData.refereePhone },
+                { label: 'Email', value: formData.refereeEmail },
             ],
         },
     ];
@@ -92,7 +149,6 @@ export function ReviewStep({ formData, isRevisit }) {
                                             <dt className="text-sm font-medium text-gray-500">{field.label}:</dt>
                                             <dd className="text-sm text-gray-800 text-right flex items-center justify-end max-w-xs">
                                                 <span className="break-words">{field.value}</span>
-                                                {field.badge}
                                             </dd>
                                         </div>
                                     ) : null
@@ -107,7 +163,7 @@ export function ReviewStep({ formData, isRevisit }) {
                 <p className="text-sm text-blue-700 text-center">
                     {isRevisit
                         ? 'You can update your information at any time by navigating to the Onboarding section from the sidebar.'
-                        : "After completing onboarding, you'll be able to add more details to your company profile."}
+                        : "After completing onboarding, you'll be able to add more details to your profile."}
                 </p>
             </div>
         </div>

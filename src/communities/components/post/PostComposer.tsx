@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
-import { supabase } from '@/communities/integrations/supabase/client';
+import { supabase } from "@/lib/supabaseClient";
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
 import { Button } from '@/communities/components/ui/button';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
 import { RichTextEditor } from './RichTextEditor';
 import { TagAutocomplete } from './TagAutocomplete';
+import { SignInModal } from '@/communities/components/auth/SignInModal';
 import { Loader2, X, Plus, FileText, Image as ImageIcon, BarChart3, Calendar, MapPin, Link as LinkIcon, Tag as TagIcon } from 'lucide-react';
 import { toast } from 'sonner';
 interface Community {
@@ -31,7 +32,8 @@ export function PostComposer({
   communityId: initialCommunityId
 }: PostComposerProps) {
   const {
-    user
+    user,
+    isAuthenticated
   } = useAuth();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,13 +67,16 @@ export function PostComposer({
   const titleCharCount = title.length;
   const contentCharCount = content.length;
   useEffect(() => {
-    if (open && user) {
-      fetchUserCommunities();
-      if (initialCommunityId) {
-        setCommunityId(initialCommunityId);
+    if (open) {
+      // User should be authenticated via Azure AD at app level
+      if (user) {
+        fetchUserCommunities();
+        if (initialCommunityId) {
+          setCommunityId(initialCommunityId);
+        }
       }
     }
-  }, [open, user, initialCommunityId]);
+  }, [open, user, isAuthenticated, initialCommunityId]);
 
   // Reset form when closed
   useEffect(() => {
@@ -196,7 +201,12 @@ export function PostComposer({
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !validateForm()) return;
+    // User should be authenticated via Azure AD at app level
+    if (!user) {
+      toast.error('Please wait for authentication to complete');
+      return;
+    }
+    if (!validateForm()) return;
     setSubmitting(true);
     try {
       // Prepare metadata based on post type
@@ -216,17 +226,32 @@ export function PostComposer({
         if (rsvpLimit) metadata.rsvp_limit = parseInt(rsvpLimit);
       }
 
-      // Insert the post
-      const query = supabase.from('posts').insert({
-        title,
-        content,
-        content_html: contentHtml,
-        post_type: postType,
-        metadata,
-        tags,
+      // Get user ID from Azure AD authentication
+      if (!user?.id) {
+        console.error('❌ User not authenticated');
+        toast.error('Unable to verify authentication. Please sign in again.');
+        setSubmitting(false);
+        return;
+      }
+
+      const userId = user.id;
+
+      // Insert the post into posts_v2 (simplified schema)
+      // Note: posts_v2 only has: id, community_id, user_id, title, content, created_at, updated_at
+      // Additional metadata (post_type, tags, etc.) can be stored in content or handled separately
+      let postContent = contentHtml || content; // Use HTML if available, otherwise plain text
+
+      // If media post, add media HTML to content immediately
+      if (postType === 'media' && mediaUrl) {
+        const mediaHtml = `<div class="media-content"><img src="${mediaUrl.trim()}" alt="${caption || 'Media'}" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 12px;" />${caption ? `<p class="text-sm text-gray-600 mt-2">${caption}</p>` : ''}</div>`;
+        postContent = postContent ? `${postContent}\n${mediaHtml}` : mediaHtml;
+      }
+
+      const query = supabase.from('posts_v2').insert({
+        title: title.trim(),
+        content: postContent.trim(),
         community_id: communityId,
-        created_by: user.id,
-        status: 'active'
+        user_id: userId // Must match auth.uid() for RLS
       }).select().single();
       const [postData, postError] = await safeFetch(query);
       if (postError || !postData) {
@@ -262,6 +287,13 @@ export function PostComposer({
           });
         }
       }
+
+      // Media is already included in content above, so no need to save separately
+      // Note: media_files table has foreign key to posts(id), not posts_v2(id), so we store in content instead
+      if (postType === 'media' && mediaUrl) {
+        console.log('✅ Media included in post content');
+      }
+
       toast.success('Post created successfully!');
       resetForm();
       onPostCreated();
@@ -273,41 +305,84 @@ export function PostComposer({
     setSubmitting(false);
   };
   const isFormValid = title.trim() && content.trim() && communityId && !submitting;
-  return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Create New Post</DialogTitle>
-          <DialogDescription>
-            Share your thoughts, media, polls, or events with your community
-          </DialogDescription>
-        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Post Type Tabs */}
-          <Tabs value={postType} onValueChange={value => setPostType(value as PostType)} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-muted h-auto p-1">
-              <TabsTrigger value="text" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <FileText className="h-4 w-4" />
-                Text
-              </TabsTrigger>
-              <TabsTrigger value="media" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <ImageIcon className="h-4 w-4" />
-                Media
-              </TabsTrigger>
-              <TabsTrigger value="poll" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <BarChart3 className="h-4 w-4" />
-                Poll
-              </TabsTrigger>
-              <TabsTrigger value="event" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Calendar className="h-4 w-4" />
-                Event
-              </TabsTrigger>
-            </TabsList>
+  // User should be authenticated via Azure AD at app level
+  // If user is not available, show loading state
+  if (!user && loading) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Loading...</DialogTitle>
+            <DialogDescription>
+              Please wait while we verify your authentication.
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
-            {/* Common Fields */}
-            <div className="space-y-4 mt-4">
-              {/* Community Selection */}
-              {!initialCommunityId && <div className="space-y-2">
+  if (!user) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Authentication Required</DialogTitle>
+            <DialogDescription>
+              You need to be signed in to create posts. Redirecting to sign in...
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button onClick={() => {
+              signIn();
+              onOpenChange(false);
+            }}>
+              Sign In with Microsoft
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Create New Post</DialogTitle>
+            <DialogDescription>
+              Share your thoughts, media, polls, or events with your community
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Post Type Tabs */}
+            <Tabs value={postType} onValueChange={value => setPostType(value as PostType)} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 bg-muted h-auto p-1">
+                <TabsTrigger value="text" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <FileText className="h-4 w-4" />
+                  Text
+                </TabsTrigger>
+                <TabsTrigger value="media" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <ImageIcon className="h-4 w-4" />
+                  Media
+                </TabsTrigger>
+                <TabsTrigger value="poll" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <BarChart3 className="h-4 w-4" />
+                  Poll
+                </TabsTrigger>
+                <TabsTrigger value="event" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Calendar className="h-4 w-4" />
+                  Event
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Common Fields */}
+              <div className="space-y-4 mt-4">
+                {/* Community Selection */}
+                {!initialCommunityId && <div className="space-y-2">
                   <Label htmlFor="community">Community</Label>
                   <Select value={communityId} onValueChange={setCommunityId} disabled={loading || submitting}>
                     <SelectTrigger id="community">
@@ -315,132 +390,134 @@ export function PostComposer({
                     </SelectTrigger>
                     <SelectContent>
                       {communities.map(community => <SelectItem key={community.id} value={community.id}>
-                          {community.name}
-                        </SelectItem>)}
+                        {community.name}
+                      </SelectItem>)}
                     </SelectContent>
                   </Select>
                   {communities.length === 0 && !loading && <p className="text-sm text-muted-foreground">
-                      Join a community first to create posts
-                    </p>}
+                    Join a community first to create posts
+                  </p>}
                 </div>}
 
-              {/* Title */}
-              <div className="space-y-2">
-                <Label htmlFor="title">
-                  Title <span className="text-muted-foreground text-xs">({titleCharCount}/100)</span>
-                </Label>
-                <Input id="title" placeholder="Enter post title..." value={title} onChange={e => setTitle(e.target.value)} required disabled={submitting} maxLength={100} />
+                {/* Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="title">
+                    Title <span className="text-muted-foreground text-xs">({titleCharCount}/100)</span>
+                  </Label>
+                  <Input id="title" placeholder="Enter post title..." value={title} onChange={e => setTitle(e.target.value)} required disabled={submitting} maxLength={100} />
+                </div>
+
+                {/* Content */}
+                <div className="space-y-2">
+                  <Label htmlFor="content">
+                    Content <span className="text-muted-foreground text-xs">({contentCharCount}/1000)</span>
+                  </Label>
+                  <RichTextEditor content={contentHtml} onUpdate={(html, text) => {
+                    setContentHtml(html);
+                    setContent(text);
+                  }} placeholder="What's on your mind?" />
+                </div>
+
+                {/* Tags */}
+                <div className="space-y-2">
+                  <Label htmlFor="tags" className="flex items-center gap-2">
+                    <TagIcon className="h-4 w-4" />
+                    Tags (Optional)
+                  </Label>
+                  <TagAutocomplete selectedTags={tags} onTagsChange={handleTagsChange} maxTags={5} />
+                </div>
               </div>
 
-              {/* Content */}
-              <div className="space-y-2">
-                <Label htmlFor="content">
-                  Content <span className="text-muted-foreground text-xs">({contentCharCount}/1000)</span>
-                </Label>
-                <RichTextEditor content={contentHtml} onUpdate={(html, text) => {
-                setContentHtml(html);
-                setContent(text);
-              }} placeholder="What's on your mind?" />
-              </div>
+              {/* Type-Specific Fields */}
+              <TabsContent value="media" className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mediaUrl" className="flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    Media URL *
+                  </Label>
+                  <Input id="mediaUrl" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://example.com/image.jpg" disabled={submitting} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="caption">Caption (Optional)</Label>
+                  <Input id="caption" value={caption} onChange={e => setCaption(e.target.value)} placeholder="Add a caption..." disabled={submitting} />
+                </div>
+              </TabsContent>
 
-              {/* Tags */}
-              <div className="space-y-2">
-                <Label htmlFor="tags" className="flex items-center gap-2">
-                  <TagIcon className="h-4 w-4" />
-                  Tags (Optional)
-                </Label>
-                <TagAutocomplete selectedTags={tags} onTagsChange={handleTagsChange} maxTags={5} />
-              </div>
-            </div>
-
-            {/* Type-Specific Fields */}
-            <TabsContent value="media" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="mediaUrl" className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4" />
-                  Media URL *
-                </Label>
-                <Input id="mediaUrl" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://example.com/image.jpg" disabled={submitting} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="caption">Caption (Optional)</Label>
-                <Input id="caption" value={caption} onChange={e => setCaption(e.target.value)} placeholder="Add a caption..." disabled={submitting} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="poll" className="space-y-4">
-              <div className="space-y-2">
-                <Label>Poll Options</Label>
-                {pollOptions.map((option, index) => <div key={index} className="flex gap-2">
+              <TabsContent value="poll" className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Poll Options</Label>
+                  {pollOptions.map((option, index) => <div key={index} className="flex gap-2">
                     <Input value={option} onChange={e => handlePollOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`} disabled={submitting} maxLength={200} />
                     {pollOptions.length > 2 && <Button type="button" variant="outline" size="icon" onClick={() => handleRemovePollOption(index)} disabled={submitting}>
-                        <X className="h-4 w-4" />
-                      </Button>}
+                      <X className="h-4 w-4" />
+                    </Button>}
                   </div>)}
-                {pollOptions.length < 5 && <Button type="button" variant="outline" onClick={handleAddPollOption} disabled={submitting} className="w-full">
+                  {pollOptions.length < 5 && <Button type="button" variant="outline" onClick={handleAddPollOption} disabled={submitting} className="w-full">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Option
                   </Button>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pollDuration">Poll Duration (Days)</Label>
-                <Select value={pollDuration} onValueChange={setPollDuration} disabled={submitting}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 Day</SelectItem>
-                    <SelectItem value="3">3 Days</SelectItem>
-                    <SelectItem value="7">7 Days</SelectItem>
-                    <SelectItem value="14">14 Days</SelectItem>
-                    <SelectItem value="30">30 Days</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="event" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="eventStart">Start Date/Time *</Label>
-                  <Input id="eventStart" type="datetime-local" value={eventStart} onChange={e => setEventStart(e.target.value)} disabled={submitting} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="eventEnd">End Date/Time</Label>
-                  <Input id="eventEnd" type="datetime-local" value={eventEnd} onChange={e => setEventEnd(e.target.value)} disabled={submitting} />
+                  <Label htmlFor="pollDuration">Poll Duration (Days)</Label>
+                  <Select value={pollDuration} onValueChange={setPollDuration} disabled={submitting}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 Day</SelectItem>
+                      <SelectItem value="3">3 Days</SelectItem>
+                      <SelectItem value="7">7 Days</SelectItem>
+                      <SelectItem value="14">14 Days</SelectItem>
+                      <SelectItem value="30">30 Days</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="eventLocation" className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Location *
-                </Label>
-                <Input id="eventLocation" value={eventLocation} onChange={e => setEventLocation(e.target.value)} placeholder="Event location..." disabled={submitting} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="eventImage">Cover Image URL</Label>
-                <Input id="eventImage" value={eventImage} onChange={e => setEventImage(e.target.value)} placeholder="https://example.com/event-cover.jpg" disabled={submitting} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="rsvpLimit">RSVP Limit (Optional)</Label>
-                <Input id="rsvpLimit" type="number" value={rsvpLimit} onChange={e => setRsvpLimit(e.target.value)} placeholder="Max attendees..." disabled={submitting} min="1" />
-              </div>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!isFormValid || submitting}>
-              {submitting ? <>
+              <TabsContent value="event" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="eventStart">Start Date/Time *</Label>
+                    <Input id="eventStart" type="datetime-local" value={eventStart} onChange={e => setEventStart(e.target.value)} disabled={submitting} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="eventEnd">End Date/Time</Label>
+                    <Input id="eventEnd" type="datetime-local" value={eventEnd} onChange={e => setEventEnd(e.target.value)} disabled={submitting} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="eventLocation" className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Location *
+                  </Label>
+                  <Input id="eventLocation" value={eventLocation} onChange={e => setEventLocation(e.target.value)} placeholder="Event location..." disabled={submitting} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="eventImage">Cover Image URL</Label>
+                  <Input id="eventImage" value={eventImage} onChange={e => setEventImage(e.target.value)} placeholder="https://example.com/event-cover.jpg" disabled={submitting} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="rsvpLimit">RSVP Limit (Optional)</Label>
+                  <Input id="rsvpLimit" type="number" value={rsvpLimit} onChange={e => setRsvpLimit(e.target.value)} placeholder="Max attendees..." disabled={submitting} min="1" />
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!isFormValid || submitting}>
+                {submitting ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating...
                 </> : 'Create Post'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>;
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }

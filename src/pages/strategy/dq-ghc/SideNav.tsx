@@ -1,28 +1,26 @@
 import React, { useEffect, useState } from 'react'
 
-interface Section {
-  id: string
-  label: string
-}
-
 interface SideNavProps {
-  sections?: Section[]
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
 }
 
-// Fallback sections if none provided
-const defaultSections: Section[] = [
-  { id: 'introduction', label: 'Introduction' },
-  { id: 'why-ghc-exists', label: 'Why the GHC Exists' },
-  { id: 'seven-competencies', label: 'The 7 Competencies of the GHC' },
-  { id: 'how-ghc-shapes-you', label: 'How the GHC Shapes You' },
-  { id: 'how-work-flows', label: 'How Work Flows at DQ' },
-  { id: 'your-role-as-qatalyst', label: 'Your Role as a Qatalyst' },
+const sections = [
+  { id: 'overview', label: 'Our Foundation & DNA' },
+  { id: 'what-is-it', label: 'GHC - What is it' },
+  { id: 'why-such-a-framework', label: 'GHC - Why such a framework' },
+  { id: 'dq-vision', label: '01. The DQ Vision (Purpose)' },
+  { id: 'hov-culture', label: '02. HoV (Culture)' },
+  { id: 'persona-identity', label: '03. Persona (Identity)' },
+  { id: 'agile-tms', label: '04. Agile TMS' },
+  { id: 'agile-sos', label: '05. Agile SoS (Governance)' },
+  { id: 'agile-flows', label: '06. Agile Flows (Value Streams)' },
+  { id: 'agile-6xd', label: '07. Agile 6xD (Products)' },
+  { id: 'in-short', label: 'GHC - In Short' },
 ]
 
-export function SideNav({ sections = defaultSections, activeSection, onSectionClick }: SideNavProps) {
-  const [currentSection, setCurrentSection] = useState(activeSection || sections[0]?.id || 'overview')
+export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
+  const [currentSection, setCurrentSection] = useState(activeSection || 'overview')
 
   useEffect(() => {
     const observerOptions = {
@@ -54,7 +52,7 @@ export function SideNav({ sections = defaultSections, activeSection, onSectionCl
     return () => {
       observer.disconnect()
     }
-  }, [sections])
+  }, [])
 
   useEffect(() => {
     if (activeSection) {
@@ -72,12 +70,8 @@ export function SideNav({ sections = defaultSections, activeSection, onSectionCl
     }
   }
 
-  if (sections.length === 0) {
-    return null
-  }
-
   return (
-    <nav className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto filter-sidebar-scroll">
+    <nav className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
       <div className="pr-6">
         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
           Contents

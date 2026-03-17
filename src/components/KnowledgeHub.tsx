@@ -215,30 +215,56 @@ const KnowledgeHubContent = () => {
         // Fetch from Knowledge Hub (Guidelines)
         if (knowledgeHubSupabase) {
           try {
-            const { data: khData, error: khError } = await knowledgeHubSupabase
+            // Try v_media_all view first, fall back to guides table if view doesn't exist
+            let khData: any[] | null = null;
+            let khError: any = null;
+
+            // Try the view first
+            const viewResult = await knowledgeHubSupabase
               .from('v_media_all')
               .select('*')
-              .eq('status', 'Approved') // Only fetch approved items (excludes archived)
+              .eq('status', 'Approved')
               .order('date', { ascending: false })
               .limit(50);
 
+            if (viewResult.error && (viewResult.error.code === 'PGRST204' || viewResult.error.code === 'PGRST205')) {
+              // View doesn't exist, query guides table directly
+              console.log('📊 v_media_all view not found, querying guides table directly');
+              const guidesResult = await knowledgeHubSupabase
+                .from('guides')
+                .select('*')
+                .eq('status', 'Approved')
+                .order('last_updated_at', { ascending: false })
+                .limit(50);
+              
+              khData = guidesResult.data;
+              khError = guidesResult.error;
+            } else {
+              khData = viewResult.data;
+              khError = viewResult.error;
+            }
+
             if (!khError && khData) {
               console.log('📊 Knowledge Hub raw data:', khData.length, 'items');
-              console.log('📊 Sample items:', khData.slice(0, 3).map(i => ({ title: i.title, type: i.type, category: i.category })));
+              console.log('📊 Sample items:', khData.slice(0, 3).map(i => ({ 
+                title: i.title, 
+                type: i.type || i.guide_type, 
+                category: i.category || i.domain 
+              })));
               
               const transformedKH: NewsItem[] = khData.map((item: any) => ({
                 id: item.id,
                 slug: item.slug,
                 title: item.title,
-                excerpt: item.description || '',
-                date: item.date,
-                image: item.image_url,
+                excerpt: item.description || item.summary || item.excerpt || '',
+                date: item.date || item.last_updated_at,
+                image: item.image_url || item.hero_image_url,
                 tags: item.tags || [],
-                type: item.type, // Keep original type, don't default to 'Guidelines'
-                category: item.category || 'Guidelines',
+                type: item.type || item.guide_type || '', // Use type, fall back to guide_type, NO default
+                category: item.category || item.domain || 'Guidelines',
                 newsType: item.news_type,
-                focusArea: item.focus_area,
-                department: item.category,
+                focusArea: item.focus_area || item.domain,
+                department: item.category || item.domain,
                 newsSource: item.source || item.author_name || 'DQ',
                 byline: item.author_name,
                 author: item.author_name,
@@ -248,6 +274,8 @@ const KnowledgeHubContent = () => {
               console.log('📊 Types in data:', [...new Set(transformedKH.map(i => i.type))]);
               
               allContent = [...allContent, ...transformedKH];
+            } else if (khError) {
+              console.error('Knowledge Hub fetch error:', khError);
             }
           } catch (err) {
             console.warn('Knowledge Hub fetch failed:', err);
@@ -321,16 +349,19 @@ const KnowledgeHubContent = () => {
     const newsSource = mediaCenterNews.length > 0 ? mediaCenterNews : newsItems;
     
     console.log('🔍 getGuidelinesData - Total items:', newsSource.length);
+    console.log('🔍 All items with types:', newsSource.map(i => ({ title: i.title, type: i.type })));
     
     const filtered = newsSource.filter((item) => {
-        // Only show items with type: 'Guideline' (case-insensitive)
+        // Check if item is a guideline by looking at type field
+        // The database has guide_type='Guideline' which gets mapped to type='Guideline'
         const itemType = (item.type || '').toLowerCase();
         const isGuideline = itemType === 'guideline' || itemType === 'guidelines';
         
+        console.log(`🔍 Checking item: "${item.title}" - type: "${item.type}" - isGuideline: ${isGuideline}`);
+        
         if (!isGuideline) return false;
         
-        // Exclude archived guidelines (for now, exclude "DQ LEAVE GUIDELINES" by slug)
-        // TODO: Update database to set status='Archived' for leave guidelines
+        // Exclude archived guidelines
         const isArchived = item.slug === 'dq-leave-guidelines';
         
         if (!isArchived) {

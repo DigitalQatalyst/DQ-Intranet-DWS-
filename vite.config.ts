@@ -22,7 +22,7 @@ const PREVIEW_STRICT_PORT = parseBoolEnv(process.env.VITE_PREVIEW_STRICT_PORT, t
 const inferredBase =
   process.env.VERCEL === '1'
     ? '/'
-    : process.env.VITE_BASE_PATH ?? '/dws/'
+    : process.env.VITE_BASE_PATH ?? '/'
 const BASE_PATH = normalizeBasePath(inferredBase)
 
 // https://vitejs.dev/config/

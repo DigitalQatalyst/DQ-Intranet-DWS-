@@ -40,13 +40,13 @@ export const RelatedCourses: React.FC<RelatedCoursesProps> = ({
           ...course,
           tags: course.tags || [course.category, course.deliveryMode]
         };
-        return <CourseCard key={course.id} course={courseWithTags} onClick={() => onCourseSelect(course)} onQuickView={() => setQuickViewCourse(course)} isBookmarked={bookmarkedCourses.includes(course.id)} onToggleBookmark={() => onToggleBookmark(course.id)} onAddToComparison={() => {}} />;
+        return <CourseCard key={course.id} course={courseWithTags} onClick={() => onCourseSelect(course)} onQuickView={() => setQuickViewCourse(course)} isBookmarked={bookmarkedCourses.includes(course.id)} onToggleBookmark={() => onToggleBookmark(course.id)} onAddToComparison={() => undefined} />;
       })}
       </div>
       {/* Quick View Modal */}
       {quickViewCourse && <CourseQuickViewModal course={quickViewCourse} onClose={() => setQuickViewCourse(null)} onViewDetails={() => {
       setQuickViewCourse(null);
       navigate(`/onboarding/${quickViewCourse.id}`);
-    }} isBookmarked={bookmarkedCourses.includes(quickViewCourse.id)} onToggleBookmark={() => onToggleBookmark(quickViewCourse.id)} onAddToComparison={() => {}} />}
+    }} isBookmarked={bookmarkedCourses.includes(quickViewCourse.id)} onToggleBookmark={() => onToggleBookmark(quickViewCourse.id)} onAddToComparison={() => undefined} />}
     </div>;
 };

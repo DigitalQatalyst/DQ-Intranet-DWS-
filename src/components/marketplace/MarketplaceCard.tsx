@@ -176,9 +176,10 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
     return chips;
   }, [item, marketplaceType]);
   
-  // Prefer explicit featuredImageUrl, else mapped image by id/title, else default
+  // Prefer explicit featuredImageUrl or imageUrl, else mapped image by id/title, else default
   const imageSrc =
     item.featuredImageUrl ||
+    item.imageUrl ||
     resolveServiceImage(item.id, item.title) ||
     '/images/services/DTMP.jpg';
   

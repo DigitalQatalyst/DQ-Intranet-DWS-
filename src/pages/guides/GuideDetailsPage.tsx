@@ -4,6 +4,7 @@ import { HomeIcon, ChevronRightIcon, BookOpen, Clock, User } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { supabaseClient } from '../../lib/supabaseClient'
+import { knowledgeHubSupabase } from '../../services/knowledgeHubClient'
 import MarkdownRenderer from '../../components/guides/MarkdownRenderer'
 
 interface Guide {
@@ -89,7 +90,7 @@ function GuideDetailsPage() {
         setLoading(true)
         console.log('🔍 [GuideDetails] Fetching guide with itemId:', itemId)
         
-        const { data, error: fetchError } = await supabaseClient
+        const { data, error: fetchError } = await knowledgeHubSupabase
           .from('guides')
           .select('*')
           .eq('slug', itemId)

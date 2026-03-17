@@ -6,8 +6,7 @@ import { Download, ExternalLink, FileText, BookOpen, Calculator, Play } from 'lu
 export const NewsCard = ({
   content,
   onQuickView,
-  onReadMore = () => {}, // Add default empty function to make it optional in the wrapper
-  ctaLabel,
+  onReadMore = () => undefined, // Add default no-op function to make it optional in the wrapper
   ...props
 }) => {
   const newsItem = {
@@ -32,7 +31,7 @@ export const NewsCard = ({
       ? { text: 'Play', icon: <Play size={12} />, variant: 'info' as const }
       : undefined;
   
-  return <CardsNewsCard item={newsItem} pill={pill} onQuickView={onQuickView} onReadMore={onReadMore} ctaLabel={ctaLabel} {...props} />;
+  return <CardsNewsCard item={newsItem} pill={pill} onQuickView={onQuickView} onReadMore={onReadMore} {...props} />;
 };
 
 // EventCard wrapper
@@ -40,7 +39,7 @@ export const EventCard = ({
   content,
   isUpcoming,
   onQuickView,
-  onRegister = () => {}, // Add default empty function
+  onRegister = () => undefined, // Add default no-op function
   ...props
 }) => {
   const eventItem = {
@@ -67,7 +66,7 @@ export const EventCard = ({
 export const ResourceCard = ({
   content,
   onQuickView,
-  onAccessResource = () => {}, // Add default for required callback
+  onAccessResource = () => undefined, // Add default for required callback
   onDownload,
   ...props
 }) => {

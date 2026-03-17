@@ -26,6 +26,16 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
 
   const filteredItems = useMemo(() => {
     const search = query.q?.toLowerCase() ?? '';
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+
+    const normalizeItemDate = (value: string): number | null => {
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return null;
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    };
+
     return sourceItems
       .filter((item) => UPDATE_TYPES.includes(item.type))
       .filter((item) => {
@@ -42,12 +52,47 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
         const newsType = query.filters?.newsType;
         const newsSource = query.filters?.newsSource;
         const focusArea = query.filters?.focusArea;
+        const channel = query.filters?.channel;
+        const audience = query.filters?.audience;
+        const dateRange = query.filters?.dateRange;
         const okDepartment = matchesSelection(item.department, department);
         const okLocation = matchesSelection(item.location, location);
         const okNewsType = matchesSelection(item.newsType, newsType);
         const okSource = matchesSelection(item.newsSource, newsSource);
         const okFocus = matchesSelection(item.focusArea, focusArea);
-        return okDepartment && okLocation && okNewsType && okSource && okFocus;
+        const okChannel = matchesSelection(item.channel, channel);
+        const okAudience = matchesSelection(item.audience, audience);
+        let okDateRange = true;
+        if (dateRange && dateRange.length) {
+          const itemTime = item.date ? normalizeItemDate(item.date) : null;
+
+          if (itemTime === null) {
+            // If a date filter is active and the item has no valid date, exclude it
+            okDateRange = false;
+          } else {
+            okDateRange = dateRange.some((selection) => {
+              if (selection === 'Last 7 days') {
+                const start = todayStart - 6 * DAY_MS;
+                return itemTime >= start && itemTime <= todayStart;
+              }
+              if (selection === 'Last 30 days') {
+                const start = todayStart - 29 * DAY_MS;
+                return itemTime >= start && itemTime <= todayStart;
+              }
+              if (selection === 'Last 90 days') {
+                const start = todayStart - 89 * DAY_MS;
+                return itemTime >= start && itemTime <= todayStart;
+              }
+              if (selection === 'This year') {
+                const startOfYear = new Date(today.getFullYear(), 0, 1).getTime();
+                return itemTime >= startOfYear && itemTime <= todayStart;
+              }
+              // Unknown option: fall back to including the item
+              return true;
+            });
+          }
+        }
+        return okDepartment && okLocation && okNewsType && okSource && okFocus && okChannel && okAudience && okDateRange;
       })
       .sort((a, b) => {
         // Sort by date descending (newest first)
