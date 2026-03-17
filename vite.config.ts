@@ -19,7 +19,7 @@ const PREVIEW_STRICT_PORT =
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/dws/',
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
