@@ -125,13 +125,13 @@ interface GuideRecord {
   body?: string | null;
 }
 
-type TabId = 'overview' | 'understand' | 'learn-practice' | 'other-materials' | 'purpose' | 'guideline' | 'application' | 'timing';
+type TabId = 'overview' | 'understand' | 'learn-practice' | 'other-materials' | 'purpose' | 'guideline' | 'application' | 'timing' | 'essentials' | 'practice' | 'usage';
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'overview',        label: 'Overview' },
-  { id: 'understand',      label: 'Understand' },
-  { id: 'learn-practice',  label: 'Learn & Practice' },
-  { id: 'other-materials', label: 'Other Materials' },
+  { id: 'purpose',         label: 'Purpose' },
+  { id: 'essentials',      label: 'Essentials' },
+  { id: 'practice',        label: 'Practice' },
+  { id: 'usage',           label: 'Usage' },
 ];
 
 const NON_GHC_TABS: { id: TabId; label: string }[] = [
@@ -209,6 +209,8 @@ export const ServiceDetailPage: React.FC = () => {
       // Set appropriate default tab based on guideline type
       if (isDigitalWorkspaceGuideline(guide)) {
         setActiveTab('purpose');
+      } else if (ghcContent) {
+        setActiveTab('purpose');
       } else {
         setActiveTab('overview');
       }
@@ -216,11 +218,20 @@ export const ServiceDetailPage: React.FC = () => {
     }
   }, [ghcContent, guide]);
 
+  // Scroll to top immediately when itemId changes (for navigation between related competencies)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [itemId]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
       setError(null);
+      
+      // Scroll to top when navigating to a new service
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
       try {
         const key = String(itemId || '');
         
@@ -364,20 +375,25 @@ export const ServiceDetailPage: React.FC = () => {
     if (!isGHC || !itemId) return null;
     
     switch (activeTab) {
-      case 'overview':
+      case 'purpose':
         return {
           text: 'View Details',
           url: `/marketplace/guides/${itemId}/details` // Link to detailed guide page with body content
         };
-      case 'understand':
+      case 'essentials':
         return {
           text: 'Read More in Playbook',
           url: 'https://digital-qatalyst.shorthandstories.com/5e83bb73-0c29-4070-9a92-5ada3c3e6f69/index.html'
         };
-      case 'learn-practice':
+      case 'practice':
         return {
           text: 'View Course',
           url: 'https://dq-intranet-pykepfa4x-digitalqatalysts-projects.vercel.app/lms/ghc-course/lesson/7191832f-d3ac-4577-9eb2-80c9a57e7e28'
+        };
+      case 'usage':
+        return {
+          text: 'View Implementation Guide',
+          url: `/marketplace/guides/${itemId}/details`
         };
       default:
         return {
@@ -660,6 +676,103 @@ export const ServiceDetailPage: React.FC = () => {
                       </div>
                     </div>
                   )}
+                </>
+              )}
+
+              {/* GHC Service Tabs */}
+              {activeTab === 'purpose' && isGHC && ghcContent && (
+                <>
+                  <div className="space-y-6">
+                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                      <p>
+                        {ghcContent.shortOverview.split('\n\n')[0] || 'This competency provides essential frameworks and practices for effective leadership and operational excellence at DQ.'}
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <SubHeading text="Key Benefits" />
+                      <Checklist items={
+                        ghcContent.highlights.slice(0, 4).map(highlight => {
+                          const [title, ...descParts] = highlight.split(':')
+                          const description = descParts.join(':').trim()
+                          return `${title}: ${description}`
+                        })
+                      } />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'essentials' && isGHC && ghcContent && (
+                <>
+                  <div className="space-y-6">
+                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                      <p>
+                        {ghcContent.storybookIntro.split('\n\n')[0] || 'Essential concepts and frameworks you need to understand for this competency.'}
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <SubHeading text="Core Concepts" />
+                      <Checklist items={
+                        ghcContent.whatYouWillLearn.slice(0, 4).map(item => {
+                          const [title, ...descParts] = item.split(':')
+                          const description = descParts.join(':').trim()
+                          return `${title}: ${description}`
+                        })
+                      } />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'practice' && isGHC && ghcContent && (
+                <>
+                  <div className="space-y-6">
+                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                      <p>
+                        {ghcContent.courseIntro?.split('\n\n')[0] || 'Practical exercises and learning opportunities to develop your skills in this competency area.'}
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <SubHeading text="Learning Activities" />
+                      <Checklist items={
+                        ghcContent.whatYouWillPractice?.slice(0, 4).map(item => {
+                          const [title, ...descParts] = item.split(':')
+                          const description = descParts.join(':').trim()
+                          return `${title}: ${description}`
+                        }) || [
+                          "Interactive Learning: Engage with practical scenarios and case studies",
+                          "Skill Development: Build competency through guided exercises",
+                          "Knowledge Application: Apply concepts to real-world situations",
+                          "Progress Tracking: Monitor your learning journey and achievements"
+                        ]
+                      } />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'usage' && isGHC && ghcContent && (
+                <>
+                  <div className="space-y-6">
+                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                      <p>
+                        Apply this competency in your daily work through practical implementation strategies and real-world scenarios that drive operational excellence.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <SubHeading text="Implementation Areas" />
+                      <Checklist items={[
+                        "Daily Operations: Integrate competency principles into routine work processes",
+                        "Team Leadership: Apply frameworks when leading and managing team activities",
+                        "Decision Making: Use competency guidelines for strategic and operational decisions",
+                        "Continuous Improvement: Leverage insights for ongoing process enhancement"
+                      ]} />
+                    </div>
+                  </div>
                 </>
               )}
 
