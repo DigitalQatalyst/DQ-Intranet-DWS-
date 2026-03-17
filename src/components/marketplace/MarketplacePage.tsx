@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { FilterSidebar, FilterConfig } from './FilterSidebar.js';
 import { MarketplaceGrid } from './MarketplaceGrid.js';
 import { SearchBar } from '../SearchBar.js';
@@ -222,28 +222,6 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const [facets, setFacets] = useState<GuidesFacets>({});
   const [queryParams, setQueryParams] = useState(() => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''));
   const searchStartRef = useRef<number | null>(null);
-
-  // Sync queryParams with URL changes
-  const location = useLocation();
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const currentParams = new URLSearchParams(location.search);
-      setQueryParams(currentParams);
-    }
-  }, [location.search]); // Re-sync when URL search changes
-
-  // Listen for browser navigation (back/forward) to sync queryParams
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const handlePopState = () => {
-      const currentParams = new URLSearchParams(window.location.search);
-      setQueryParams(currentParams);
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
 type WorkGuideTab = 'guidelines' | 'strategy' | '6xd' | 'blueprints' | 'testimonials' | 'glossary' | 'faqs';
 type DesignSystemTab = 'cids' | 'vds' | 'cds';
   const getTabFromParams = useCallback((params: URLSearchParams): WorkGuideTab => {
@@ -770,6 +748,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           const strategyFrameworks = parseFilterValues(queryParams, 'strategy_framework');
           const guidelinesCategories = parseFilterValues(queryParams, 'guidelines_category');
           const categorization = parseFilterValues(queryParams, 'categorization');
+          const attachmentsFilter = parseFilterValues(queryParams, 'attachments');
           const blueprintFrameworks = parseFilterValues(queryParams, 'blueprint_framework');
           const blueprintSectors = parseFilterValues(queryParams, 'blueprint_sector');
           // Product-led filters (not used for non-products tabs)
@@ -813,7 +792,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
 
           if (statuses.length) q = q.in('status', statuses); else {
             // For Strategy tab: show Published/Approved AND Draft (but not Archived)
-            // For Guidelines tab: show Approved AND Archived (most guidelines are archived)
             // For other tabs: show only Approved
             if (isStrategyTab) {
               q = q.in('status', ['Approved', 'Published', 'Draft']);
@@ -864,7 +842,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           const needsClientSideFrameworkFilter = (isStrategyTab && strategyFrameworks.length > 0) || 
                                                  (isBlueprintTab && (blueprintFrameworks.length > 0 || blueprintSectors.length > 0 || productTypes.length > 0 || productStages.length > 0 || productSectors.length > 0)) ||
                                                  (isGuidelinesTab && guidelinesCategories.length > 0);
-          const needsClientSideFiltering = needsClientSideUnitFilter || needsClientSideFrameworkFilter || categorization.length > 0;
+          const needsClientSideFiltering = needsClientSideUnitFilter || needsClientSideFrameworkFilter || categorization.length > 0 || attachmentsFilter.length > 0;
           
           const from = (currentPage - 1) * pageSize;
           const to   = from + pageSize - 1;
@@ -883,7 +861,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             facetQ = facetQ.in('status', statuses);
           } else {
             // For Strategy tab: show Published/Approved AND Draft (but not Archived)
-            // For Guidelines tab: show Approved AND Archived (most guidelines are archived)
             // For other tabs: show only Approved
             if (isStrategyTab) {
               facetQ = facetQ.in('status', ['Approved', 'Published', 'Draft']);

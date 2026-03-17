@@ -197,7 +197,7 @@ const STRATEGY_FRAMEWORKS: Facet[] = [
 const ALL_CATEGORIES = [
   'guide_type', 'sub_domain', 'unit', 'location', 'testimonial_category',
   'product_type', 'product_stage', 'guidelines_category',
-  'categorization',
+  'categorization', 'attachments',
   'strategy_framework',
   'glossary_knowledge_system', 'glossary_ghc_dimension', 'glossary_6xd_perspective', 'glossary_letter',
   'faq_category'
@@ -520,6 +520,27 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, active
                 </div>
               )}
             </div>
+          </Section>
+          <Section
+            idPrefix={instanceId}
+            title="Attachments"
+            category="attachments"
+            collapsed={collapsedSet.has('attachments')}
+            onToggle={toggleCollapsed}
+          >
+            <CheckboxList
+              idPrefix={instanceId}
+              name="attachments"
+              options={[
+                { id: 'guidelines', name: 'Guidelines' },
+                { id: 'processes', name: 'Processes' },
+                { id: 'demos', name: 'Demos' },
+                { id: 'procedures', name: 'Procedures' },
+                { id: 'checklists', name: 'Checklists' },
+              ]}
+              query={query}
+              onChange={onChange}
+            />
           </Section>
         </>
       ) : isResourcesSelected ? (
