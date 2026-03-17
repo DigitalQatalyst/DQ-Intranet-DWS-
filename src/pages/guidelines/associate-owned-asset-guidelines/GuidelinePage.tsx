@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { HomeIcon, ChevronRightIcon } from 'lucide-react'
 import { Header } from '../../../components/Header'
 import { Footer } from '../../../components/Footer'
 import { useAuth } from '../../../components/Header/context/AuthContext'
@@ -157,36 +155,6 @@ function GuidelinePage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header toggleSidebar={() => {}} sidebarOpen={false} />
-      
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
-          <nav className="flex" aria-label="Breadcrumb">
-            <ol className="inline-flex items-center space-x-1 md:space-x-2">
-              <li className="inline-flex items-center">
-                <Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center">
-                  <HomeIcon size={16} className="mr-1" />
-                  <span>Home</span>
-                </Link>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <ChevronRightIcon size={16} className="text-gray-400" />
-                  <Link to="/marketplace/guides?tab=guidelines" className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
-                    Guidelines
-                  </Link>
-                </div>
-              </li>
-              <li aria-current="page">
-                <div className="flex items-center">
-                  <ChevronRightIcon size={16} className="text-gray-400" />
-                  <span className="ml-1 text-gray-500 md:ml-2">{guideTitle}</span>
-                </div>
-              </li>
-            </ol>
-          </nav>
-        </div>
-      </div>
       
       {/* Hero Section */}
       <HeroSection title={guideTitle} date={lastUpdated} />
