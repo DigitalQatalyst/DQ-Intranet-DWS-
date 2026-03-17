@@ -14,17 +14,12 @@ RUN npm run build
 ##############################
 FROM nginx:stable-alpine
 
-# Install envsubst (part of gettext)
-RUN apk add --no-cache gettext
-
-# Create non-root user and group
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Install envsubst (part of gettext) and create non-root user and group
+RUN apk add --no-cache gettext && \
+    addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # Copy built assets
 COPY --from=build /app/dist /usr/share/nginx/html/dws
-
-# Remove the default config provided by the image
-RUN rm /etc/nginx/conf.d/default.conf
 
 # Copy runtime template & entrypoint and default nginx config.
 COPY default.conf /etc/nginx/conf.d/default.conf
@@ -32,21 +27,13 @@ COPY env.template.js /usr/share/nginx/html/dws/env.template.js
 COPY entrypoint.sh /entrypoint.sh
 
 
-# Permissions: allow non-root user to read/serve files
-RUN mkdir -p /var/cache/nginx/pids && \
-    chown -R appuser:appgroup /var/cache/nginx && \
-    chown -R appuser:appgroup /usr/share/nginx/html && \
-    chown -R appuser:appgroup /var/log/nginx && \
-    chmod +x /entrypoint.sh
-
-# Change NGINX to run as non-root user
-RUN sed -i 's/user  nginx;/user appuser;/g' /etc/nginx/nginx.conf
-
-# Override NGINX default port (80 requires root)
-#RUN sed -i 's/listen       80;/listen 3000;/g' /etc/nginx/conf.d/default.conf
-
-# Change pid location to one writable by non-root user
-RUN sed -i 's|pid        /run/nginx.pid;|pid        /var/cache/nginx/pids/nginx.pid;|g' /etc/nginx/nginx.conf
+# Permissions and config hardening in a single layer
+RUN rm /etc/nginx/conf.d/default.conf && \
+    mkdir -p /var/cache/nginx/pids && \
+    chown -R appuser:appgroup /var/cache/nginx /usr/share/nginx/html /var/log/nginx && \
+    chmod +x /entrypoint.sh && \
+    sed -i 's/user  nginx;/user appuser;/g' /etc/nginx/nginx.conf && \
+    sed -i 's|pid        /run/nginx.pid;|pid        /var/cache/nginx/pids/nginx.pid;|g' /etc/nginx/nginx.conf
 
 USER appuser
 

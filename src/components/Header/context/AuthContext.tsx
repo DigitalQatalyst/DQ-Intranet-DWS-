@@ -27,43 +27,11 @@ export function AuthProvider({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  // Development bypass check
-  const viteEnv = (import.meta as any).env as Record<string, string | undefined>;
-  const isDevelopment = viteEnv.DEV === true || viteEnv.NODE_ENV === 'development';
-  const azureClientId = viteEnv.VITE_AZURE_CLIENT_ID;
-  const hasValidAzureConfig = azureClientId && azureClientId !== 'your_azure_client_id_here';
-  const shouldBypassAuth = isDevelopment && !hasValidAzureConfig;
-
-  // If bypassing auth, provide a mock user and context
-  if (shouldBypassAuth) {
-    console.log('🔓 AuthProvider: Using development bypass mode');
-    const mockUser: UserProfile = {
-      id: 'dev-user-123',
-      name: 'Development User',
-      email: 'dev@example.com',
-      givenName: 'Development',
-      familyName: 'User',
-      picture: undefined
-    };
-
-    const mockContextValue: AuthContextType = {
-      user: mockUser,
-      isLoading: false,
-      login: () => console.log('🔓 Development mode: Login bypassed'),
-      signup: () => console.log('🔓 Development mode: Signup bypassed'),
-      logout: () => console.log('🔓 Development mode: Logout bypassed')
-    };
-
-    return <AuthContext.Provider value={mockContextValue}>
-      {children}
-    </AuthContext.Provider>;
-  }
-
-  // Original MSAL-based authentication logic
   const { instance, accounts } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const [isLoading, setIsLoading] = useState(true);
   const [emailOverride, setEmailOverride] = useState<string | undefined>(undefined);
+  const viteEnv = (import.meta as any).env as Record<string, string | undefined>;
   const enableGraphFallback = (viteEnv?.VITE_MSAL_ENABLE_GRAPH_FALLBACK || viteEnv?.NEXT_PUBLIC_MSAL_ENABLE_GRAPH_FALLBACK) === 'true';
 
   // Ensure active account is set for convenience

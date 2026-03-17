@@ -6,7 +6,8 @@ export interface RelatedItem {
   title: string;
   description: string;
   category: string;
-  icon?: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
 }
 
 const RelatedItems = ({
@@ -24,7 +25,6 @@ const RelatedItems = ({
 }) => (
   <section className="border-t bg-secondary/30 px-6 py-12">
     <div className="container mx-auto">
-      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-foreground">{title}</h2>
         {browseLabel && (
@@ -36,8 +36,6 @@ const RelatedItems = ({
           </a>
         )}
       </div>
-
-      {/* Content */}
       {items.length === 0 ? (
         <Card className="rounded-2xl border shadow-sm">
           <CardContent className="flex items-center justify-center py-10">
@@ -50,6 +48,7 @@ const RelatedItems = ({
             <Card
               key={i}
               className="group cursor-pointer rounded-2xl border shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+              onClick={item.onClick}
             >
               <CardContent className="p-5">
                 <Badge
@@ -59,11 +58,11 @@ const RelatedItems = ({
                   {item.category}
                 </Badge>
                 <h3 className="mb-1.5 text-sm font-semibold text-foreground">{item.title}</h3>
-                <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+                <p className="mb-3 text-xs leading-relaxed text-muted-foreground line-clamp-2">
                   {item.description}
                 </p>
                 <span className="flex items-center gap-1 text-xs font-medium text-cta">
-                  Read more <ArrowRight className="h-3 w-3" />
+                  View course <ArrowRight className="h-3 w-3" />
                 </span>
               </CardContent>
             </Card>

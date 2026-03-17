@@ -8,7 +8,16 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+# Environment files — NEVER commit secrets
 .env
+.env.*
+.env.local
+.env.development
+.env.development.local
+.env.production
+.env.production.local
+.env.staging
+.env.test
 dist
 dist-ssr
 *.local

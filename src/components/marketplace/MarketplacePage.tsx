@@ -1479,8 +1479,8 @@ const SERVICE_TAB_INFO: Record<string, { title: string; description: string; man
 const DESIGN_SYSTEM_TAB_LABELS: Record<string, string> = { cids: 'CI.DS', vds: 'V.DS', cds: 'CDS' };
 
 const DESIGN_SYSTEM_TAB_DESCRIPTIONS: Record<string, { description: string }> = {
-  cids: { description: 'Defines how DQ produces high-quality content through structured processes, clear guidelines, and review standards.' },
-  vds: { description: 'Defines how DQ produces high-impact video content using structured storytelling, design principles, and production standards to ensure consistency.' },
+  cids: { description: 'Explains how DQ creates and delivers high-quality content with structure, clear guidelines, and review standards, ensuring consistency and impact across platforms.' },
+  vds: { description: 'Guides how DQ creates high-impact video content with storytelling, design, and production standards for consistency and impact.' },
   cds: { description: 'Outlines how DQ designs and delivers marketing campaigns by blending strategy, storytelling, and execution for impactful results.' },
 };
 
