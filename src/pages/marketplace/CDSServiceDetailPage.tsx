@@ -8,23 +8,28 @@ export default function CDSServiceDetailPage() {
   // Scroll spy functionality
   useEffect(() => {
     const handleScroll = () => {
-      const sections = document.querySelectorAll('[id]');
+      const sections = document.querySelectorAll('[id^="introduction"], [id^="campaign-mandate"], [id^="relevant-ecosystem"], [id^="campaign-planning-timeline"], [id^="campaign-planning-tracker"], [id^="purpose"], [id^="implementation-guidelines"]');
       const scrollPosition = window.scrollY + 200;
 
+      let currentSection = '';
       sections.forEach((section) => {
         const element = section as HTMLElement;
         const offsetTop = element.offsetTop;
         const offsetHeight = element.offsetHeight;
 
         if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-          setActiveSection(element.id);
+          currentSection = element.id;
         }
       });
+
+      if (currentSection && currentSection !== activeSection) {
+        setActiveSection(currentSection);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [activeSection]);
 
   const sections = [
     {
@@ -63,17 +68,62 @@ These campaign-producing units include:
 This includes all campaign formats, channels, and marketing touchpoints where DQ campaign content is created or deployed:
 
 • Digital advertising campaigns across all paid media channels
+
 • Email marketing campaigns and automated sequences
+
 • Social media campaigns and organic content initiatives
+
 • Content marketing campaigns and thought leadership series
+
 • Product launch campaigns and solution promotion initiatives
+
 • Event marketing campaigns and webinar promotion content
+
 • Partnership and co-marketing campaign materials
+
 • Internal campaigns and employee engagement initiatives`
     },
     {
+      id: 'campaign-planning-timeline',
+      title: '1.4 Campaign Planning | Timeline & Milestones',
+      content: `Campaign planning within CDS follows a structured approach that ensures strategic alignment, creative excellence, and measurable outcomes. This section outlines the essential timeline and milestone framework for campaign development.
+
+The planning process includes:
+
+• Strategic campaign mapping and target audience analysis
+
+• Campaign calendar development and resource allocation
+
+• Creative development checkpoints and approval milestones
+
+• Media planning and distribution strategy development
+
+• Performance tracking setup and measurement framework
+
+• Stakeholder alignment and campaign approval workflows`
+    },
+    {
+      id: 'campaign-planning-tracker',
+      title: '1.5 Campaign Planning | Tracker',
+      content: `The campaign planning tracker provides a comprehensive system for monitoring campaign development progress, ensuring accountability, and maintaining quality standards throughout the campaign lifecycle.
+
+Key tracking elements include:
+
+• Campaign status and progress indicators
+
+• Creative review checkpoints and approvals
+
+• Budget allocation and timeline management
+
+• Performance metrics and ROI measurement
+
+• Stakeholder feedback and iteration tracking
+
+• Media performance and optimization insights`
+    },
+    {
       id: 'purpose',
-      title: '1.4 CDS | Purpose',
+      title: '1.6 CDS | Purpose',
       content: `CDS defines DQ's unified approach to creating strategic, scalable, high-impact marketing campaigns. The CDS is defined as a strategic system that ensures all campaign content is purposefully planned, professionally executed, and effectively measured to maximize marketing impact and business results.
 
 It provides a unified framework that brings strategic thinking, creative excellence, and performance optimization to the entire campaign development lifecycle.
@@ -81,13 +131,40 @@ It provides a unified framework that brings strategic thinking, creative excelle
 By applying CDS, DQ ensures that every campaign output - whether a digital advertising campaign, email marketing sequence, social media initiative, or integrated marketing program - maintains consistent brand standards, delivers compelling messaging, and achieves measurable performance outcomes.
 
 This leads to stronger brand recognition, improved lead generation, enhanced market positioning, streamlined campaign development processes, and higher return on marketing investment across all channels and initiatives.`
+    },
+    {
+      id: 'implementation-guidelines',
+      title: '1.7 Implementation Guidelines',
+      content: `This section provides comprehensive guidelines for implementing CDS across all DQ campaign development workflows, ensuring consistent application and maximum marketing effectiveness.
+
+Implementation includes:
+
+• Team training and creative capability building programs
+
+• Tool integration and campaign workflow optimization
+
+• Quality assurance processes and creative review protocols
+
+• Performance measurement and campaign optimization strategies
+
+• Change management and adoption strategies across marketing teams
+
+The implementation approach is designed to be scalable, flexible, and adaptable to different campaign types and marketing objectives while maintaining the core principles and brand standards of CDS.`
     }
   ];
 
   const handleSectionClick = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Calculate the exact position accounting for header and padding
+      const headerHeight = 80; // Approximate header height
+      const additionalOffset = 32; // Additional padding for better positioning
+      const elementPosition = element.offsetTop - headerHeight - additionalOffset;
+      
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
     }
     setActiveSection(sectionId);
   };
@@ -153,7 +230,7 @@ This leads to stronger brand recognition, improved lead generation, enhanced mar
               <div className="bg-white rounded-lg shadow-sm border p-8">
                 <div className="space-y-12">
                   {sections.map((section) => (
-                    <div key={section.id} id={section.id} className="scroll-mt-8">
+                    <div key={section.id} id={section.id} className="scroll-mt-32">
                       <h2 className="text-2xl font-bold text-gray-900 mb-6">
                         {section.title}
                       </h2>

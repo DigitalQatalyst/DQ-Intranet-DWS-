@@ -8,23 +8,28 @@ export default function CIDSServiceDetailPage() {
   // Scroll spy functionality
   useEffect(() => {
     const handleScroll = () => {
-      const sections = document.querySelectorAll('[id]');
+      const sections = document.querySelectorAll('[id^="introduction"], [id^="content-mandate"], [id^="relevant-ecosystem"], [id^="content-planning-timeline"], [id^="content-planning-tracker"], [id^="purpose"], [id^="implementation-guidelines"]');
       const scrollPosition = window.scrollY + 200;
 
+      let currentSection = '';
       sections.forEach((section) => {
         const element = section as HTMLElement;
         const offsetTop = element.offsetTop;
         const offsetHeight = element.offsetHeight;
 
         if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-          setActiveSection(element.id);
+          currentSection = element.id;
         }
       });
+
+      if (currentSection && currentSection !== activeSection) {
+        setActiveSection(currentSection);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [activeSection]);
 
   const sections = [
     {
@@ -65,10 +70,15 @@ These content-producing units include:
 This includes all formats, platforms, and touchpoints where DQ content is created or shared:
 
 • Within internal DQ documentation and communications
+
 • In DTMB Papers and formal publications
+
 • In DTMA Course Materials and Learning Assets
+
 • Across DTMI Insights and all social media channels
+
 • Within BD proposals, sales decks, and outreach content
+
 • In client-facing deliverables, reports, and strategic outputs`
     },
     {
@@ -79,9 +89,13 @@ This includes all formats, platforms, and touchpoints where DQ content is create
 The planning process includes:
 
 • Strategic content mapping and audience analysis
+
 • Content calendar development and resource allocation
+
 • Quality checkpoints and review milestones
+
 • Distribution planning and performance tracking
+
 • Stakeholder alignment and approval workflows`
     },
     {
@@ -92,9 +106,13 @@ The planning process includes:
 Key tracking elements include:
 
 • Content status and progress indicators
+
 • Quality assurance checkpoints and approvals
+
 • Resource allocation and timeline management
+
 • Performance metrics and outcome measurement
+
 • Stakeholder feedback and iteration tracking`
     },
     {
@@ -116,9 +134,13 @@ This leads to stronger engagement, greater trust from audiences, streamlined pro
 Implementation includes:
 
 • Team training and capability building programs
+
 • Tool integration and workflow optimization
+
 • Quality assurance processes and review protocols
+
 • Performance measurement and continuous improvement
+
 • Change management and adoption strategies
 
 The implementation approach is designed to be scalable, flexible, and adaptable to different team structures and content requirements while maintaining the core principles and standards of CI.DS.`
@@ -127,7 +149,15 @@ The implementation approach is designed to be scalable, flexible, and adaptable 
   const handleSectionClick = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Calculate the exact position accounting for header and padding
+      const headerHeight = 80; // Approximate header height
+      const additionalOffset = 32; // Additional padding for better positioning
+      const elementPosition = element.offsetTop - headerHeight - additionalOffset;
+      
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
     }
     setActiveSection(sectionId);
   };
@@ -193,7 +223,7 @@ The implementation approach is designed to be scalable, flexible, and adaptable 
               <div className="bg-white rounded-lg shadow-sm border p-8">
                 <div className="space-y-12">
                   {sections.map((section) => (
-                    <div key={section.id} id={section.id} className="scroll-mt-8">
+                    <div key={section.id} id={section.id} className="scroll-mt-32">
                       <h2 className="text-2xl font-bold text-gray-900 mb-6">
                         {section.title}
                       </h2>

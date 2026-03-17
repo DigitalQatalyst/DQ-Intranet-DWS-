@@ -35,7 +35,7 @@ export const DESIGN_SYSTEM_ITEMS: DesignSystemItem[] = [
   {
     id: 'cds-campaigns-design-system',
     title: 'CDS Framework',
-    description: 'CDS defines DQ\'s unified operating system for designing strategic, scalable, high-impact marketing campaigns.',
+    description: 'CDS defines DQ\'s unified approach to creating strategic, scalable, high-impact marketing campaigns.',
     type: 'cds',
     imageUrl: '/images/cds.png',
     tags: ['CDS'],

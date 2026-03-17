@@ -63,12 +63,19 @@ These video-producing units include:
 This includes all video formats, platforms, and distribution channels where DQ video content is created or shared:
 
 • Educational and training video content across all learning platforms
+
 • Marketing and promotional videos for digital campaigns and social media
+
 • Thought leadership and expert interview content for industry positioning
+
 • Product demonstration and solution showcase videos for sales enablement
+
 • Client testimonial and case study videos for business development
+
 • Internal communication and culture videos for employee engagement
+
 • Event and webinar recordings for knowledge sharing and lead generation
+
 • Social media video content across all digital marketing channels`
     },
     {
