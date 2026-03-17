@@ -89,6 +89,10 @@ export function AppRouter() {
         <AuthProvider>
           <CommunitiesAuthProvider>
             <ChatBot />
+            <Routes>
+              {/* Home page is public - no auth required */}
+              <Route path="/*" element={<App />} />
+            </Routes>
             <ProtectedRoute>
               <Routes>
                 <Route path="/discover-dq" element={<DiscoverDQComingSoon />} />
@@ -101,7 +105,6 @@ export function AppRouter() {
                 <Route path="/6xd-products" element={<SixXDProductsLanding />} />
                 <Route path="/knowledge-center/products/digital-accelerators" element={<DigitalAcceleratorsLanding />} />
                 <Route path="/marketplace/*" element={<MarketplaceRouter />} />
-                <Route path="/*" element={<App />} />
                 <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
                 <Route path="/lms" element={<LmsCourses />} />
                 <Route path="/lms/my-learning" element={<MyLearningDashboard />} />
