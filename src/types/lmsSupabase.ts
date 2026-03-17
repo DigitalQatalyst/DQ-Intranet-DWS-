@@ -55,6 +55,7 @@ export interface LmsCourseRow {
   review_count: number;
   image_url: string | null;
   faq: any[]; // JSONB array
+  course_details: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -37,7 +37,6 @@ export type SfiaLevelCode = (typeof SFIA_LEVELS)[number]['code'];
 export const CATEGORY_OPTS = [
   'GHC',
   '6x Digital',
-  'DWS',
   'DXP',
   'Key Tools'
 ] as const;

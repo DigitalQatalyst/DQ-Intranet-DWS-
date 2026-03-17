@@ -43,6 +43,7 @@ export interface LmsCourseProgress {
     total_time_spent_seconds: number;
     certificate_earned: boolean;
     certificate_earned_at: string | null;
+    saved_for_later: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -72,6 +73,7 @@ export interface UpsertCourseProgressInput {
     lessons_completed?: number;
     total_lessons?: number;
     certificate_earned?: boolean;
+    saved_for_later?: boolean;
 }
 
 /**
