@@ -4,12 +4,158 @@
 @import "tailwindcss/utilities";
 /* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --dq-navy: #030F35;
   --dq-coral: #FB5535;
   --dq-white: #FFFFFF;
   --dq-header-gradient: linear-gradient(90deg, var(--dq-navy) 0%, var(--dq-coral) 55%, var(--dq-white) 100%);
   --dq-cta-gradient: linear-gradient(90deg, var(--dq-navy) 0%, var(--dq-coral) 100%);
+  --dq-font: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+  --accent: 11 78% 57%; /* Coral/orange */
+  --accent-foreground: 0 0% 100%;
+
+  --background: 216 33% 98%;
+  --foreground: 224 56% 17%;
+  --primary: 220 65% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 228 100% 25%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 228 40% 93%;
+  --muted-foreground: 220 20% 46%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 56% 17%;
+  --border: 228 40% 93%;
+  --radius: 0.75rem;
+
+  /* Learning Center course detail page tokens */
+  /* Detail page design tokens */
+  --hero: 226 71% 10%;
+  --hero-foreground: 210 40% 98%;
+  --hero-muted: 220 20% 65%;
+  --cta: 340 82% 55%;
+  --cta-foreground: 0 0% 100%;
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 100%;
+  --nav-dark: 226 71% 7%;
+  --nav-dark-foreground: 210 40% 98%;
+  --footer: 226 71% 7%;
+  --footer-foreground: 220 20% 75%;
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, hsl(228 100% 25%) 0%, hsl(14 97% 60%) 100%);
+}
+
+.gradient-subtle {
+  background: linear-gradient(135deg, hsl(228 40% 93% / 0.5) 0%, hsl(216 33% 98%) 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, hsl(228 100% 25%) 0%, hsl(14 97% 60%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-dws {
+  background: linear-gradient(135deg, #0E1446 0%, #6B3E5C 55%, #FB5535 100%);
+}
+
+.gradient-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, hsl(228 100% 25% / 0.2) 50%, transparent 100%);
+}
+
+.gradient-left-border {
+  position: relative;
+}
+
+.gradient-left-border::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, hsl(228 100% 25%) 0%, hsl(14 97% 60%) 100%);
+}
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+.font-display {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.bg-card {
+  background-color: hsl(var(--card));
+}
+
+.bg-background {
+  background-color: hsl(var(--background));
+}
+
+.bg-muted {
+  background-color: hsl(var(--muted));
+}
+
+.bg-section-muted {
+  background-color: hsl(var(--muted));
+}
+
+.text-foreground {
+  color: hsl(var(--foreground));
+}
+
+.text-card-foreground {
+  color: hsl(var(--card-foreground));
+}
+
+.text-primary {
+  color: hsl(var(--primary));
+}
+
+.bg-primary {
+  background-color: hsl(var(--primary));
+}
+
+.border-primary {
+  border-color: hsl(var(--primary));
+}
+
+.border-border {
+  border-color: hsl(var(--border));
+}
+
+.text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Global typography reset to system UI stack */
+body,
+h1, h2, h3, h4, h5, h6,
+p, a, span, label,
+button, input, select, textarea,
+.ghc-font-display {
+  font-family: var(--dq-font);
+}
+
+h1, h2, h3, h4, h5, h6,
+.ghc-font-display {
+  font-weight: 700;
+}
+
+button {
+  font-weight: 600;
 }
 
 /* Guidelines section theme */
@@ -66,6 +212,96 @@
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
   overflow: hidden !important;
+}
+
+@keyframes dqGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.dq-gradient-animated {
+  background-size: 200% 200%;
+  animation: dqGradientShift 16s ease-in-out infinite;
+}
+
+@keyframes dqDigitalDrift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(18px, -12px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes dqLineFlow {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -220;
+  }
+}
+
+@keyframes dqDotPulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+}
+
+.dq-digital-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  animation: dqDigitalDrift 20s ease-in-out infinite;
+}
+
+.dq-digital-bg svg {
+  width: 100%;
+  height: 100%;
+}
+
+.dq-digital-line {
+  stroke: rgba(240, 246, 255, 0.4);
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 6 10;
+  animation: dqLineFlow 9s linear infinite;
+}
+
+.dq-digital-line.alt {
+  stroke: rgba(225, 81, 59, 0.55);
+  animation-duration: 12s;
+}
+
+.dq-digital-dot {
+  fill: rgba(240, 246, 255, 0.8);
+  transform-origin: center;
+  animation: dqDotPulse 4.5s ease-in-out infinite;
+}
+
+.dq-digital-dot.alt {
+  fill: rgba(225, 81, 59, 0.85);
+  animation-delay: 1.2s;
 }
 
 .description-clip {
@@ -418,4 +654,30 @@ textarea:-webkit-autofill {
 /* DQ Products page background */
 .dq-products-bg {
   background-color: #F8FAFC !important;
+}
+
+/* GHC Landing Page – warm editorial design system */
+.ghc-page {
+  --ghc-primary: 32 58% 58%; /* #d4a574 gold/amber */
+  --ghc-primary-foreground: 24 10% 10%;
+  --ghc-secondary: 28 25% 92%;
+  --ghc-accent: 38 45% 50%;
+  --ghc-muted: 30 15% 94%;
+  --ghc-background: 40 20% 98%;
+  --ghc-foreground: 24 10% 10%;
+  --ghc-amber-border: 38 92% 50%;
+  --ghc-green-border: 142 71% 45%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.ghc-page .ghc-font-display {
+  font-family: var(--dq-font);
+}
+
+.ghc-page .scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ghc-page .scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

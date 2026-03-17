@@ -1,7 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+const TARGET_DATE = new Date('2026-02-16T07:00:00');
+
+const calculateTimeLeft = () => {
+    const now = new Date();
+    const difference = TARGET_DATE.getTime() - now.getTime();
+
+    if (difference > 0) {
+        return {
+            days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+            minutes: Math.floor((difference / 1000 / 60) % 60),
+            seconds: Math.floor((difference / 1000) % 60)
+        };
+    }
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+};
 
 export default function ComingSoonLanding() {
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+    const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft());
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -10,24 +27,6 @@ export default function ComingSoonLanding() {
 
         return () => clearInterval(timer);
     }, []);
-
-    function calculateTimeLeft() {
-        // Target date: Feb 16, 2026
-        // Current metadata year is 2026, so this is the correct target.
-        const targetDate = new Date('2026-02-16T07:00:00');
-        const now = new Date();
-        const difference = targetDate.getTime() - now.getTime();
-
-        if (difference > 0) {
-            return {
-                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((difference / 1000 / 60) % 60),
-                seconds: Math.floor((difference / 1000) % 60)
-            };
-        }
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-    }
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden text-white"

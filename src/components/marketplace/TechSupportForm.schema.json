@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TechSupportForm",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "User's email address for contact and follow-up"
+    },
+    "selectedCategory": {
+      "type": "string",
+      "enum": [
+        "Tech - Microsoft Solutions",
+        "Tech - Devices",
+        "Tech - Other Solutions"
+      ],
+      "description": "What the user needs help with"
+    },
+    "issueDescription": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "description": "Detailed description of the issue"
+    },
+    "uploadedFiles": {
+      "type": "array",
+      "description": "Optional list of uploaded files (metadata only)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Original file name"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "File size in bytes"
+          }
+        },
+        "required": ["name", "size"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["email", "selectedCategory", "issueDescription"],
+  "additionalProperties": false
+}
+
