@@ -7,6 +7,7 @@ import { MsalProvider } from "@azure/msal-react";
 import { msalInstance } from "./services/auth/msal";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Clear stale MSAL cache + strip auth code from URL before MSAL runs
 Object.keys(localStorage).filter((k: string) => k.toLowerCase().includes('msal')).forEach((k: string) => localStorage.removeItem(k));
@@ -22,9 +23,21 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+// Create a QueryClient instance for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
 const container = document.getElementById("root");
 if (container) {
   const root = createRoot(container);
+  // Ensure MSAL is initialized and redirect response handled before using any APIs
   msalInstance
     .initialize()
     .then(() => msalInstance.handleRedirectPromise())
@@ -37,21 +50,30 @@ if (container) {
           msalInstance.setActiveAccount(accounts[0]);
         }
       }
+      // If this was an explicit Sign Up flow or a brand new account, route to onboarding
       try {
-        const isSignupState = typeof result?.state === "string" && result.state.includes("ej-signup");
+        const isSignupState =
+          typeof result?.state === "string" &&
+          result.state.includes("ej-signup");
         const claims = (result as any)?.idTokenClaims || {};
-        const isNewUser = claims?.newUser === true || claims?.newUser === "true";
+        const isNewUser =
+          claims?.newUser === true || claims?.newUser === "true";
         if (isSignupState || isNewUser) {
+          // Navigate to onboarding without adding history entry
           window.location.replace("/dashboard/onboarding");
           return;
         }
-      } catch {}
+      } catch (error) {
+        console.warn("Error processing authentication state:", error);
+      }
       root.render(
-        <ApolloProvider client={client}>
-          <MsalProvider instance={msalInstance}>
-            <AppRouter />
-          </MsalProvider>
-        </ApolloProvider>
+        <QueryClientProvider client={queryClient}>
+          <ApolloProvider client={client}>
+            <MsalProvider instance={msalInstance}>
+              <AppRouter />
+            </MsalProvider>
+          </ApolloProvider>
+        </QueryClientProvider>
       );
     })
     .catch((e) => {
