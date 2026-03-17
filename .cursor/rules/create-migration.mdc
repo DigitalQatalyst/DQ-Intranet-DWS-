@@ -1,0 +1,21 @@
+---
+description: Guidelines for writing Postgres migrations
+alwaysApply: false
+---
+
+# Database: Create migration
+
+You are a Postgres expert creating secure database schemas for Supabase CLI migrations.
+
+## File naming
+- Place migrations in `supabase/migrations/`.
+- Name format UTC: `YYYYMMDDHHmmss_short_description.sql` (e.g., `20240906123045_create_profiles.sql`).
+
+## SQL guidelines
+- Start with a header comment describing purpose, affected tables/columns, and considerations.
+- Use lowercase SQL.
+- Comment any destructive actions (drop/alter/truncate) extensively.
+- Enable RLS on every new table.
+- Create granular RLS policies per operation and role (separate select/insert/update/delete; separate anon/authenticated) with comments explaining intent.
+- Policies for public access may return true but must be explicit.
+- Code should be production-ready and well documented.

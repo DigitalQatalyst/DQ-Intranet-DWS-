@@ -1,0 +1,175 @@
+---
+description: Component organization and file structure guidelines
+globs: ['**/*.tsx', '**/*.ts']
+alwaysApply: true
+---
+
+# Component Structure Rules
+
+## File Organization
+
+### Single Component Files
+- One main component per file
+- File name matches component name (PascalCase)
+- Export the component as a named export
+
+### Component Directories
+For complex components with subcomponents:
+```
+ComponentName/
+  ├── ComponentName.tsx      # Main component
+  ├── ComponentName.types.ts  # Types/interfaces
+  ├── ComponentName.utils.ts # Helper functions
+  ├── SubComponent.tsx        # Subcomponents
+  └── index.ts                # Re-exports
+```
+
+## Import Order
+
+Organize imports in this order:
+1. React and React-related imports
+2. Third-party library imports
+3. Internal absolute imports (using `@/` alias)
+4. Relative imports
+5. Type-only imports (use `import type`)
+
+Example:
+```tsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@radix-ui/react-button';
+
+import { supabaseClient } from '@/lib/supabaseClient';
+import { formatDate } from '@/utils/date';
+
+import { LocalComponent } from './LocalComponent';
+import type { UserData } from './types';
+```
+
+## Component Structure Order
+
+Within a component file, organize in this order:
+
+1. **Imports** (as above)
+2. **Type/Interface Definitions**
+   - Component props interface
+   - Other related types
+3. **Constants**
+   - Component-specific constants
+   - Configuration objects
+4. **Main Component**
+   - Component function definition
+   - Hooks (useState, useEffect, etc.)
+   - Event handlers
+   - Computed values (useMemo)
+   - Early returns
+   - JSX return
+5. **Subcomponents** (if any)
+   - Helper components used only by this component
+6. **Helper Functions** (if any)
+   - Pure utility functions
+   - Not React hooks
+7. **Exports**
+   - Named exports
+
+## Component Example
+
+```tsx
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+interface UserCardProps {
+  userId: string;
+  onSelect?: (id: string) => void;
+  showActions?: boolean;
+}
+
+const DEFAULT_AVATAR = '/images/default-avatar.png';
+
+export function UserCard({ userId, onSelect, showActions = true }: UserCardProps) {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUser(userId).then(setUser).finally(() => setIsLoading(false));
+  }, [userId]);
+
+  const handleClick = useCallback(() => {
+    onSelect?.(userId);
+    navigate(`/users/${userId}`);
+  }, [userId, onSelect, navigate]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!user) {
+    return <ErrorMessage message="User not found" />;
+  }
+
+  return (
+    <div className="user-card">
+      {/* JSX content */}
+    </div>
+  );
+}
+
+// Subcomponent (only used by UserCard)
+function UserAvatar({ src, alt }: { src: string; alt: string }) {
+  return <img src={src} alt={alt} className="avatar" />;
+}
+
+// Helper function (pure, not a hook)
+function formatUserName(user: User): string {
+  return `${user.firstName} ${user.lastName}`;
+}
+```
+
+## Component Patterns
+
+### Props Interface
+- Always define a props interface
+- Use descriptive names
+- Mark optional props with `?`
+- Provide default values when appropriate
+
+### State Management
+- Use `useState` for local component state
+- Use `useReducer` for complex state logic
+- Lift state up when multiple components need it
+- Consider context for deeply nested prop drilling
+
+### Event Handlers
+- Name handlers with `handle` prefix
+- Use `useCallback` if passed to memoized children
+- Keep handlers focused and extract complex logic
+
+### Conditional Rendering
+- Use early returns for loading/error states
+- Use ternary for simple conditionals
+- Extract complex conditionals to variables or functions
+
+### Lists and Keys
+- Always provide unique `key` props for list items
+- Use stable identifiers (IDs) when possible
+- Avoid array indices as keys when list can reorder
+
+## Code Splitting
+
+- Use `React.lazy` for route-level code splitting
+- Split large components into smaller, focused components
+- Extract logic into custom hooks when reusable
+
+## Documentation
+
+- Add JSDoc comments for complex components
+- Document prop types in the interface
+- Include usage examples in comments for complex logic
+
+## Testing Considerations
+
+- Keep components testable
+- Extract business logic from components when possible
+- Use data-testid attributes for testing (if needed)
+- Make components pure when possible (same props = same output)

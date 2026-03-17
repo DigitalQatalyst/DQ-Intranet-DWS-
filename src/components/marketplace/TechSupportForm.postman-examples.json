@@ -1,0 +1,154 @@
+{
+  "examples": [
+    {
+      "name": "Minimal Valid Payload (Required Fields Only)",
+      "description": "Minimum required fields for a valid tech support request",
+      "payload": {
+        "email": "user@example.com",
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": "Unable to access Outlook. Getting error message: 'Connection failed' when trying to sync email."
+      }
+    },
+    {
+      "name": "Complete Payload with File Attachments",
+      "description": "Full payload including optional file metadata",
+      "payload": {
+        "email": "john.doe@company.com",
+        "selectedCategory": "Tech - Devices",
+        "issueDescription": "Laptop keyboard is not responding. Started happening after the latest Windows update. Tried restarting but issue persists. Need urgent assistance as this is my primary work device.",
+        "uploadedFiles": [
+          {
+            "name": "error-screenshot.png",
+            "size": 245760
+          },
+          {
+            "name": "device-info.txt",
+            "size": 1024
+          }
+        ]
+      }
+    },
+    {
+      "name": "Microsoft Solutions Issue",
+      "description": "Example for Microsoft-related technical issue",
+      "payload": {
+        "email": "sarah.smith@company.com",
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": "Teams is crashing when I try to join video calls. Error code: 0x80004005. This started happening after updating to the latest version. I've tried reinstalling but the problem continues."
+      }
+    },
+    {
+      "name": "Device Issue with Multiple Files",
+      "description": "Hardware issue with multiple screenshot attachments",
+      "payload": {
+        "email": "mike.jones@company.com",
+        "selectedCategory": "Tech - Devices",
+        "issueDescription": "Monitor display is flickering intermittently. The issue occurs every 5-10 minutes and lasts for a few seconds. I've attached screenshots showing the flickering pattern and the monitor model information.",
+        "uploadedFiles": [
+          {
+            "name": "flickering-pattern.jpg",
+            "size": 1048576
+          },
+          {
+            "name": "monitor-specs.pdf",
+            "size": 512000
+          }
+        ]
+      }
+    },
+    {
+      "name": "Other Solutions Issue",
+      "description": "Example for other technical solutions category",
+      "payload": {
+        "email": "emily.brown@company.com",
+        "selectedCategory": "Tech - Other Solutions",
+        "issueDescription": "Need help setting up VPN access for remote work. I'm using a MacBook Pro and need to configure the company VPN client. The installation completed but I'm unable to connect to the server."
+      }
+    },
+    {
+      "name": "Long Description (Max Length)",
+      "description": "Example with maximum length description (2000 characters)",
+      "payload": {
+        "email": "test.user@company.com",
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": "This is a test description that demonstrates the maximum length allowed for the issue description field. The field accepts up to 2000 characters. " + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(30) + "End of description."
+      }
+    }
+  ],
+  "invalidExamples": [
+    {
+      "name": "Missing Required Email",
+      "description": "Should fail validation - email is required",
+      "payload": {
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": "Test issue description"
+      }
+    },
+    {
+      "name": "Invalid Email Format",
+      "description": "Should fail validation - invalid email format",
+      "payload": {
+        "email": "not-an-email",
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": "Test issue description"
+      }
+    },
+    {
+      "name": "Invalid Category",
+      "description": "Should fail validation - category not in enum",
+      "payload": {
+        "email": "user@example.com",
+        "selectedCategory": "Invalid Category",
+        "issueDescription": "Test issue description"
+      }
+    },
+    {
+      "name": "Empty Description",
+      "description": "Should fail validation - description is required and must have minLength 1",
+      "payload": {
+        "email": "user@example.com",
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": ""
+      }
+    },
+    {
+      "name": "Description Too Long",
+      "description": "Should fail validation - description exceeds maxLength 2000",
+      "payload": {
+        "email": "user@example.com",
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": "A".repeat(2001)
+      }
+    },
+    {
+      "name": "Invalid File Size (Negative)",
+      "description": "Should fail validation - file size must be >= 0",
+      "payload": {
+        "email": "user@example.com",
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": "Test issue description",
+        "uploadedFiles": [
+          {
+            "name": "test.txt",
+            "size": -1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Missing File Name",
+      "description": "Should fail validation - file name is required in uploadedFiles items",
+      "payload": {
+        "email": "user@example.com",
+        "selectedCategory": "Tech - Microsoft Solutions",
+        "issueDescription": "Test issue description",
+        "uploadedFiles": [
+          {
+            "size": 1024
+          }
+        ]
+      }
+    }
+  ]
+}
+

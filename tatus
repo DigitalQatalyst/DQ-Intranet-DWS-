@@ -1,0 +1,159 @@
+[1mdiff --git a/.env.example b/.env.example[m
+[1mdeleted file mode 100644[m
+[1mindex ca10771..0000000[m
+[1m--- a/.env.example[m
+[1m+++ /dev/null[m
+[36m@@ -1,6 +0,0 @@[m
+[31m-# Supabase Configuration[m
+[31m-VITE_SUPABASE_URL=https://your-project.supabase.co[m
+[31m-VITE_SUPABASE_ANON_KEY=your-anon-key-here[m
+[31m-[m
+[31m-# Mapbox (existing)[m
+[31m-VITE_MAPBOX_TOKEN=your-mapbox-token[m
+[1mdiff --git a/DAILY_REPORT_2025-11-12.md b/DAILY_REPORT_2025-11-12.md[m
+[1mnew file mode 100644[m
+[1mindex 0000000..d2f7c7f[m
+[1m--- /dev/null[m
+[1m+++ b/DAILY_REPORT_2025-11-12.md[m
+[36m@@ -0,0 +1,59 @@[m
+[32m+[m[32m# Daily Report - November 12, 2025[m
+[32m+[m
+[32m+[m[32mHi Vishnu Chandran,[m
+[32m+[m
+[32m+[m[32mBelow is what I've been able to achieve for the day.[m
+[32m+[m
+[32m+[m[32m## Completed Tasks[m
+[32m+[m
+[32m+[m[32m- **Filters**[m
+[32m+[m[32m  - Replaced "Service Category" with "Department" filter (IT Support, HR, Finance, Admin)[m
+[32m+[m[32m  - Updated "Delivery Mode" filter (Online, In person, Hybrid)[m
+[32m+[m[32m  - Added "Service Category" filter (Technology, Business, Digital Worker)[m
+[32m+[m[32m  - Added "Location" filter (Dubai, Nairobi, Riyadh)[m
+[32m+[m[32m  - Implemented functional filtering logic[m
+[32m+[m
+[32m+[m[32m- **Tabs**[m
+[32m+[m[32m  - Added navigation tabs: Query, Support, Requisition, Self-Service[m
+[32m+[m[32m  - Implemented dynamic tab descriptions[m
+[32m+[m[32m  - Added "Current Focus" section matching opportunities page design[m
+[32m+[m[32m  - Styled active tabs (`#1A2E6E`) and inactive tabs (`text-gray-700`)[m
+[32m+[m
+[32m+[m[32m- **UI/UX**[m
+[32m+[m[32m  - Updated "Request Service" button color to `#1A2E6E`[m
+[32m+[m[32m  - Updated "View Details" button styling (white bg, `#1A2E6E` text/border)[m
+[32m+[m[32m  - Changed description excerpt to max 2 lines[m
+[32m+[m[32m  - Updated tag colors to grey theme[m
+[32m+[m[32m  - Added featured images for service cards[m
+[32m+[m
+[32m+[m[32m- **Content**[m
+[32m+[m[32m  - Updated service card detail pages[m
+[32m+[m[32m  - Removed all "Khalifa Fund" references and logo[m
+[32m+[m[32m  - Updated service descriptions to DQ services[m
+[32m+[m[32m  - Updated provider info to DQ IT/HR/Finance/Admin Support[m
+[32m+[m
+[32m+[m[32m- **Images**[m
+[32m+[m[32m  - Set up local image hosting in `public/images/services/`[m
+[32m+[m[32m  - Fixed image path matching[m
+[32m+[m
+[32m+[m[32m- **Routing**[m
+[32m+[m[32m  - Fixed breadcrumbs and routing[m
+[32m+[m
+[32m+[m[32m## Next Best Actions (NBAs)[m
+[32m+[m
+[32m+[m[32m- **Backend Integration with Supabase**[m
+[32m+[m[32m  - Replace mock data with Supabase database integration[m
+[32m+[m[32m  - Implement data models for services, filters, categories[m
+[32m+[m[32m  - Set up authentication for service requests[m
+[32m+[m[32m  - Create API endpoints for fetching items, filters, and submitting requests[m
+[32m+[m
+[32m+[m[32m- **Tab Functionality**[m
+[32m+[m[32m  - Implement actual filtering functionality for tabs (currently display only)[m
+[32m+[m[32m  - Connect tabs to backend to filter by `serviceType`[m
+[32m+[m[32m  - Add URL parameter persistence for shareable links[m
+[32m+[m[32m  - Add analytics tracking[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m**Status:** All frontend UI/UX updates completed. Ready for backend integration.[m
+[32m+[m
+[1mdiff --git a/PROMPT_LIBRARY_GUIDE.md b/PROMPT_LIBRARY_GUIDE.md[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0385bcf[m
+[1m--- /dev/null[m
+[1m+++ b/PROMPT_LIBRARY_GUIDE.md[m
+[36m@@ -0,0 +1,434 @@[m
+[32m+[m[32m# Prompt Library Service Card Creation Guide[m
+[32m+[m
+[32m+[m[32m## Overview[m
+[32m+[m[32mThis guide details the complete process of creating a new service card for the Prompt Library in the DQ Service Center. Follow these steps to add AI prompts that users can easily copy and use with their AI coding assistants.[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Step 1: Add Service Card to Mock Data[m
+[32m+[m
+[32m+[m[32m**File:** `src/utils/mockMarketplaceData.ts`[m
+[32m+[m
+[32m+[m[32mAdd a new service object to the `mockNonFinancialServices` array:[m
+[32m+[m
+[32m+[m[32m```typescript[m
+[32m+[m[32m{[m
+[32m+[m[32m  id: '17', // Use next available ID[m
+[32m+[m[32m  title: 'Supabase Full-Stack Development Prompt',[m
+[32m+[m[32m  description: 'Comprehensive development guidelines for building modern full-stack applications with TypeScript, React, Next.js, Expo, Supabase, and related technologies. Includes best practices for code structure, state management, testing, and deployment in monorepo setups.',[m
+[32m+[m[32m  category: 'Prompt Library', // IMPORTANT: Must be 'Prompt Library'[m
+[32m+[m[32m  serviceType: 'Self-Service',[m
+[32m+[m[32m  deliveryMode: 'Online',[m
+[32m+[m[32m  businessStage: 'All Stages',[m
+[32m+[m[32m  promptType: 'dev_prompts', // Options: business, tech, dev_prompts, devops_prompts, ai[m
+[32m+[m[32m  technologies: ['TypeScript', 'React', 'Next.js', 'Expo', 'Supabase', 'Zustand', 'TanStack Query', 'Stripe'],[m
+[32m+[m[32m  provider: {[m
+[32m+[m[32m    name: 'Digital Innovation',[m
+[32m+[m[32m    logoUrl: '/DWS-Logo.png',[m
+[32m+[m[32m    description: 'Digital Innovation team curates and maintains a library of AI prompts and development guidelines to accelerate project delivery and ensure consistent code quality.',[m
+[32m+[m[32m  },[m
+[32m+[m[32m  duration: 'Immediate',[m
+[32m+[m[32m  price: 'Free',[m
+[32m+[m[32m  details: [[m
+[32m+[m[32m    'Complete TypeScript and React development guidelines',[m
+[32m+[m[32m    'Supabase integration best practices',[m
+[32m+[m[32m    'State management with Zustand and TanStack Query',[m
+[32m+[m[32m    'Cross-platform development with Expo and React Native',[m
+[32m+[m[32m    'Stripe payment and subscription model implementation',[m
+[32m+[m[32m    'Monorepo management with Turbo',[m
+[32m+[m[32m    'Testing, performance optimization, and error handling patterns',[m
+[32m+[m[32m  ],[m
+[32m+[m[32m  tags: ['Prompt Library', 'Development', 'Full-Stack', 'TypeScript', 'Supabase'],[m
+[32m+[m[32m  featuredImageUrl: '/images/services/dev-prompt-supabase.jpg',[m
+[32m+[m[32m  sourceUrl: 'https://cursor.directory/rules/supabase', // URL to the original source[m
+[32m+[m[32m}[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m### Key Properties:[m
+[32m+[m[32m- **`category`**: Must be `'Prompt Library'` to trigger special handling[m
+[32m+[m[32m- **`promptType`**: Determines which filter category the prompt appears under:[m
+[32m+[m[32m  - `business` - Business (Admin, HR, Finance, Ops)[m
+[32m+[m[32m  - `tech` - Tech (Hardware, Software)[m
+[32m+[m[32m  - `dev_prompts` - Dev Prompts (Software Development)[m
+[32m+[m[32m  - `devops_prompts` - DevOps Prompts (Deployment)[m
+[32m+[m[32m  - `ai` - AI (Machine Learning)[m
+[32m+[m[32m- **`technologies`**: Array of technologies covered in the prompt[m
+[32m+[m[32m- **`sourceUrl`**: URL to the original source (e.g., cursor.directory, GitHub, documentation)[m
+[32m+[m[32m- **`featuredImageUrl`**: Add corresponding image to `/public/images/services/`[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Step 2: Extend Content Block Type (One-time Setup)[m
+[32m+[m
+[32m+[m[32m**File:** `src/utils/serviceDetailsContent.ts`[m
+[32m+[m
+[32m+[m[32mThe `code` block type has already been added to support prompt display:[m
+[32m+[m
+[32m+[m[32m```typescript[m
+[32m+[m[32mexport type ContentBlock =[m
+[32m+[m[32m  | { type: 'p'; text: string }[m
+[32m+[m[32m  | { type: 'ol'; items: string[] }[m
+[32m+[m[32m  | { type: 'ul'; items: string[] }[m
+[32m+[m[32m  | { type: 'iframe'; src: string; width?: string; height?: string; title?: string }[m
+[32m+[m[32m  | { type: 'code'; code: string; language?: string; title?: string }; // For prompts[m
+[32m+[m[32m```[m
+[32m+[m
+[32

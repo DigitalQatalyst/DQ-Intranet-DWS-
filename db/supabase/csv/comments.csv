@@ -1,0 +1,9 @@
+id,post_id,created_by,content,status,created_at
+c1111111-1111-1111-1111-111111111111,p2222222-2222-2222-2222-222222222222,c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a13,Great topic! I think multimodal AI is going to be huge this year.,active,2024-10-27 10:00:00
+c2222222-2222-2222-2222-222222222222,p2222222-2222-2222-2222-222222222222,d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a14,Agreed! Also seeing a lot of movement in AI agents and autonomous systems.,active,2024-10-27 11:00:00
+c3333333-3333-3333-3333-333333333333,p3333333-3333-3333-3333-333333333333,e4eebc99-9c0b-4ef8-bb6d-6bb9bd380a15,Sent you a DM! Very interested in this opportunity.,active,2024-10-29 10:00:00
+c4444444-4444-4444-4444-444444444444,p4444444-4444-4444-4444-444444444444,a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11,Culture is indeed the hardest part. How did you handle resistance to change?,active,2024-10-25 10:00:00
+c5555555-5555-5555-5555-555555555555,p6666666-6666-6666-6666-666666666666,a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11,We use MLflow for model tracking and deployment. Works great with Docker.,active,2024-10-30 14:00:00
+c6666666-6666-6666-6666-666666666666,p6666666-6666-6666-6666-666666666666,c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a13,Also recommend looking into Kubeflow if you are on Kubernetes.,active,2024-10-30 16:00:00
+c7777777-7777-7777-7777-777777777777,p8888888-8888-8888-8888-888888888888,b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12,Python all the way! The ecosystem is unmatched.,active,2024-10-26 10:00:00
+c8888888-8888-8888-8888-888888888888,p8888888-8888-8888-8888-888888888888,e4eebc99-9c0b-4ef8-bb6d-6bb9bd380a15,I use both depending on the task. R for statistical analysis Python for ML.,active,2024-10-26 11:00:00

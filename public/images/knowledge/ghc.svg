@@ -1,0 +1,12 @@
+<svg width='800' height='600' xmlns='http://www.w3.org/2000/svg'>
+  <rect width='800' height='600' fill='#fef3c7'/>
+  <text x='400' y='50' font-family='Arial' font-size='24' font-weight='bold' text-anchor='middle' fill='#1f2937'>Golden Honeycomb of Competence</text>
+  <text x='400' y='120' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>1. The Vision (Purpose)</text>
+  <text x='400' y='160' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>2. The HoV (Culture)</text>
+  <text x='400' y='200' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>3. The Personas (Identity)</text>
+  <text x='400' y='240' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>4. Agile TMS (Tasks)</text>
+  <text x='400' y='280' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>5. Agile SOS (Governance)</text>
+  <text x='400' y='320' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>6. Agile Flows (Value Streams)</text>
+  <text x='400' y='360' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>7. Agile 6xD (Products)</text>
+  <text x='400' y='550' font-family='Arial' font-size='12' text-anchor='middle' fill='#9ca3af'>Replace with actual diagram image</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg width='800' height='600' xmlns='http://www.w3.org/2000/svg'>
+  <rect width='800' height='600' fill='#f3f4f6'/>
+  <text x='400' y='50' font-family='Arial' font-size='24' font-weight='bold' text-anchor='middle' fill='#1f2937'>Agile 6xD (Products)</text>
+  <text x='400' y='100' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>D1 - Digital Economy</text>
+  <text x='400' y='130' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>D2 - Digital Cognitive Organisation</text>
+  <text x='400' y='160' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>D3 - Digital Business Platform</text>
+  <text x='400' y='190' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>D4 - Digital Transformation</text>
+  <text x='400' y='220' font-family='Arial' font-size='16' text-anchor='middle' fill='#4b5563'>D5 - Digital Worker &amp; Workspace</text>
+  <text x='400' y='280' font-family='Arial' font-size='20' font-weight='bold' text-anchor='middle' fill='#1f2937'>D6 - Digital Accelerators (Tools)</text>
+  <text x='400' y='550' font-family='Arial' font-size='12' text-anchor='middle' fill='#9ca3af'>Replace with actual diagram image</text>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" viewBox="0 0 520 520" fill="none">
+  <!--
+    Honeycomb outline tile for hero backgrounds.
+    Intent: vector-only honeycomb language without embedding SVG elements into the DOM.
+  -->
+  <defs>
+    <linearGradient id="strokeGrad" x1="0" y1="0" x2="520" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="0.55" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.24"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.25" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 0.55 0" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Hexagon geometry: pointy-top -->
+  <!-- Size tuned for a calm, premium pattern density when tiled at ~520px -->
+  <g filter="url(#softGlow)" stroke="url(#strokeGrad)" stroke-width="2">
+    <!-- Row 1 -->
+    <path d="M130 45 L195 82.5 L195 157.5 L130 195 L65 157.5 L65 82.5 Z" opacity="0.55"/>
+    <path d="M260 45 L325 82.5 L325 157.5 L260 195 L195 157.5 L195 82.5 Z" opacity="0.45"/>
+    <path d="M390 45 L455 82.5 L455 157.5 L390 195 L325 157.5 L325 82.5 Z" opacity="0.38"/>
+
+    <!-- Row 2 (offset) -->
+    <path d="M65 157.5 L130 195 L130 270 L65 307.5 L0 270 L0 195 Z" opacity="0.40"/>
+    <path d="M195 157.5 L260 195 L260 270 L195 307.5 L130 270 L130 195 Z" opacity="0.52"/>
+    <path d="M325 157.5 L390 195 L390 270 L325 307.5 L260 270 L260 195 Z" opacity="0.44"/>
+    <path d="M455 157.5 L520 195 L520 270 L455 307.5 L390 270 L390 195 Z" opacity="0.34"/>
+
+    <!-- Row 3 -->
+    <path d="M130 270 L195 307.5 L195 382.5 L130 420 L65 382.5 L65 307.5 Z" opacity="0.48"/>
+    <path d="M260 270 L325 307.5 L325 382.5 L260 420 L195 382.5 L195 307.5 Z" opacity="0.40"/>
+    <path d="M390 270 L455 307.5 L455 382.5 L390 420 L325 382.5 L325 307.5 Z" opacity="0.50"/>
+
+    <!-- Row 4 (offset) -->
+    <path d="M65 382.5 L130 420 L130 495 L65 532.5 L0 495 L0 420 Z" opacity="0.34"/>
+    <path d="M195 382.5 L260 420 L260 495 L195 532.5 L130 495 L130 420 Z" opacity="0.42"/>
+    <path d="M325 382.5 L390 420 L390 495 L325 532.5 L260 495 L260 420 Z" opacity="0.36"/>
+    <path d="M455 382.5 L520 420 L520 495 L455 532.5 L390 495 L390 420 Z" opacity="0.30"/>
+  </g>
+</svg>

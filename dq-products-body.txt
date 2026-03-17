@@ -1,0 +1,90 @@
+﻿[dotenv@17.2.3] injecting env (4) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+# DQ Products
+
+<div class="feature-box">
+
+## DQ: A Product-led Organisation
+
+DQ is transitioning from a service-oriented organization to a product-led organization. Our portfolio includes platforms designed to manage data and analytics, accelerate AI-driven transformation, provide flexible transformation solutions, deliver specialized training, and ensure governance compliance.
+
+Together, these products ensure holistic transformation success, enhancing agility, scalability, and compliance in your organization.
+
+</div>
+
+<div class="feature-box">
+
+## 1. DTMP
+
+**Digital Transformation Management Platform**
+
+DTMP creates a seamless digital ecosystem with a centralized platform to manage data, processes, and analytics.
+
+| Feature | Capability |
+|---------|------------|
+| **Data Storage** | Robust and scalable data storage to keep your organization's data secure and accessible |
+| **Analytics** | Leverage AI for generating advanced insights and driving informed decision-making |
+
+</div>
+
+<div class="feature-box">
+
+## 2. DTO4T
+
+**Digital Twin of Organization for Transformation**
+
+DTO4T is an AI-driven platform for accelerating digital transformation by creating digital twins of organizations.
+
+| Feature | Capability |
+|---------|------------|
+| **AI-Driven Acceleration** | Speeds up transformations through automated processes |
+| **Agile Approach** | Enables flexible workflows for scaling at pace |
+| **Digital Blueprint** | Provides a roadmap for seamless digital transformation |
+
+</div>
+
+<div class="feature-box">
+
+## 3. TMaaS
+
+**Transformation Management as a Service**
+
+TMaaS is a flexible, on-demand service empowering organizations to manage digital transformation with expert assistance at scalable costs.
+
+| Feature | Capability |
+|---------|------------|
+| **Customization Options** | Tailored solutions for unique business needs |
+| **AI-Powered Assistance** | Automated workflows for efficiency and precision |
+| **Subscription Models** | Flexible pricing to scale based on usage |
+
+</div>
+
+<div class="feature-box">
+
+## 4. DTMA
+
+**Digital Transformation Management Academy**
+
+DTMA is designed to upskill teams with tailored training to become digital leaders with expertise, certifications, and innovative tools.
+
+| Feature | Capability |
+|---------|------------|
+| **Specialized Training** | Programs tailored for every level of expertise |
+| **AI Integration** | Integration of cutting-edge tools for enhanced learning |
+
+</div>
+
+<div class="feature-box">
+
+## 5. D2GPRC
+
+**Data-Driven Governance, Performance, Risk, and Compliance**
+
+DGPRC is a data-driven product that empowers governance, risk, and compliance management for smart decision-making.
+
+| Feature | Capability |
+|---------|------------|
+| **RegTech** | Advanced compliance processes and reporting tools |
+| **AI-Powered DataTech** | Data-driven insights for proactive risk management |
+| **Governance** | Align organizational policies with data-driven decisions
+
+</div>
