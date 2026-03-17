@@ -7,7 +7,6 @@ import { MsalProvider } from "@azure/msal-react";
 import { msalInstance } from "./services/auth/msal";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Clear stale MSAL cache + strip auth code from URL before MSAL runs
 Object.keys(localStorage).filter((k: string) => k.toLowerCase().includes('msal')).forEach((k: string) => localStorage.removeItem(k));
@@ -21,16 +20,6 @@ const client = new ApolloClient({
     uri: "https://9609a7336af8.ngrok-free.app/services-api",
   }),
   cache: new InMemoryCache(),
-});
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
 });
 
 const container = document.getElementById("root");
@@ -56,31 +45,16 @@ if (container) {
           window.location.replace("/dashboard/onboarding");
           return;
         }
-      } catch (error) {
-        console.warn("Error processing authentication state:", error);
-      }
+      } catch {}
       root.render(
-        <QueryClientProvider client={queryClient}>
-          <ApolloProvider client={client}>
-            <MsalProvider instance={msalInstance}>
-              <AppRouter />
-            </MsalProvider>
-          </ApolloProvider>
-        </QueryClientProvider>
+        <ApolloProvider client={client}>
+          <MsalProvider instance={msalInstance}>
+            <AppRouter />
+          </MsalProvider>
+        </ApolloProvider>
       );
     })
     .catch((e) => {
       console.error("MSAL initialization failed:", e);
-      // Clear cache and render anyway — don't block the app
-      Object.keys(localStorage).filter((k: string) => k.toLowerCase().includes('msal')).forEach((k: string) => localStorage.removeItem(k));
-      root.render(
-        <QueryClientProvider client={queryClient}>
-          <ApolloProvider client={client}>
-            <MsalProvider instance={msalInstance}>
-              <AppRouter />
-            </MsalProvider>
-          </ApolloProvider>
-        </QueryClientProvider>
-      );
     });
 }
