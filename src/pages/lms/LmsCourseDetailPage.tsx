@@ -466,7 +466,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                     <ul className="space-y-3">
                       {outcomes.map((outcome) => (
                         <li key={outcome} className="flex items-start gap-3">
-                          <CheckCircleIcon size={16} className="mt-0.5 flex-shrink-0" style={{ color: '#FB5535' }} />
+                          <CheckCircleIcon size={16} className="mt-0.5 flex-shrink-0 text-green-500" />
                           <p className="text-sm text-gray-700 leading-relaxed">{outcome}</p>
                         </li>
                       ))}
@@ -499,7 +499,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                             key={highlight}
                             className="flex items-start gap-3"
                           >
-                            <CheckCircleIcon size={16} className="mt-0.5 flex-shrink-0" style={{ color: '#FB5535' }} />
+                            <CheckCircleIcon size={16} className="mt-0.5 flex-shrink-0 text-green-500" />
                             <span className="text-gray-700 text-sm">
                               {highlight.includes(':') ? (
                                 <>
@@ -606,19 +606,19 @@ export const LmsCourseDetailPage: React.FC = () => {
                               <Link
                                 key={item.id}
                                 to={`/lms/${item.courseSlug}`}
-                                className="bg-white border border-gray-200 rounded-lg overflow-hidden block hover:border-[#FB5535] hover:shadow-md transition-all group"
+                                className="bg-white border border-gray-200 rounded-lg overflow-hidden block hover:border-blue-500 hover:shadow-md transition-all group"
                               >
                                 <div className="p-4 flex items-center justify-between">
                                   <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#030F35]/10 text-[#030F35] group-hover:bg-[#030F35] group-hover:text-white transition-colors">
+                                    <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                       <Library size={20} />
                                     </div>
                                     <div>
-                                      <h3 className="font-bold text-gray-900 text-lg group-hover:text-[#030F35] transition-colors">
+                                      <h3 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
                                         {item.title}
                                       </h3>
                                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                                        <span className="font-medium text-[#030F35]">
+                                        <span className="font-medium text-indigo-600">
                                           Course {curriculumIndex + 1}
                                         </span>
                                         {item.duration && (
@@ -638,7 +638,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                                       )}
                                     </div>
                                   </div>
-                                  <ChevronRightIcon size={20} className="text-gray-300 group-hover:text-[#FB5535] transition-colors" />
+                                  <ChevronRightIcon size={20} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
                                 </div>
                               </Link>
                             );
@@ -655,7 +655,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                                 onClick={toggleExpand}
                               >
                                 <div className="flex items-center gap-4">
-                                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${isFinalAssessmentModule ? 'bg-[#030F35]/15 text-[#030F35]' : 'bg-[#030F35]/10 text-[#030F35]'}`}>
+                                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${isFinalAssessmentModule ? 'bg-blue-100 text-blue-600' : 'bg-blue-50 text-blue-600'}`}>
                                     {isFinalAssessmentModule ? <CheckCircleIcon size={20} /> : <FileText size={20} />}
                                   </div>
                                   <div>
@@ -704,10 +704,10 @@ export const LmsCourseDetailPage: React.FC = () => {
                                         onClick={() => !isLocked && navigate(`/lms/${course.slug}/lesson/${lesson.id}`)}
                                         className={`flex items-start p-4 rounded-xl border transition-all ${isLocked
                                           ? 'bg-gray-50 border-gray-100 cursor-not-allowed opacity-70'
-                                          : 'bg-white border-gray-200 hover:border-[#FB5535]/40 hover:shadow-sm cursor-pointer'
+                                          : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm cursor-pointer'
                                           }`}
                                       >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mr-4 ${isLocked ? 'bg-gray-100 text-gray-400' : 'bg-[#FB5535]/10 text-[#FB5535]'
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mr-4 ${isLocked ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600'
                                           }`}>
                                           {isLocked ? <Lock size={18} /> : <LessonIcon size={18} />}
                                         </div>
