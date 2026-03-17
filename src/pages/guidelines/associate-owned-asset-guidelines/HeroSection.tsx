@@ -7,12 +7,10 @@ interface HeroSectionProps {
   author?: string
 }
 
-export function HeroSection({ title = 'DQ Associate Owned Asset Guidelines', date = 'Version 1.8 • December 19, 2025', author = 'HRA' }: HeroSectionProps) {
+export function HeroSection({ title = 'DQ Associate Owned Asset Guidelines' }: HeroSectionProps) {
   return (
     <GlassmorphismHeroSection
       title={title}
-      date={date}
-      author={author}
     />
   )
 }

@@ -492,35 +492,32 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Tab Bar — bottom-line indicator style ── */}
-        <div className="border-b border-gray-200 bg-white">
-          <div className="container mx-auto max-w-7xl px-4 md:px-6">
-            <div className="flex gap-0 overflow-x-auto scrollbar-none">
-              {currentTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className="relative whitespace-nowrap px-5 py-4 text-sm font-medium transition-colors focus:outline-none"
-                  style={{
-                    color: activeTab === tab.id ? '#111827' : '#6B7280',
-                  }}
-                >
-                  {tab.label}
-                  {activeTab === tab.id && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 rounded-t-full" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* ── Main 2-col layout ── */}
         <div className="container mx-auto max-w-7xl px-4 md:px-6 py-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-            {/* Left — Tab content (2 cols) */}
+            {/* Left — Tab bar + content (2 cols) */}
             <div className="lg:col-span-2 space-y-8">
+              {/* Tab Bar — border only spans this column */}
+              <div className="border-b border-gray-200 -mt-2 mb-2">
+                <div className="flex gap-0 overflow-x-auto scrollbar-none">
+                  {currentTabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className="relative whitespace-nowrap px-5 py-4 text-sm font-medium transition-colors focus:outline-none"
+                      style={{
+                        color: activeTab === tab.id ? '#111827' : '#6B7280',
+                      }}
+                    >
+                      {tab.label}
+                      {activeTab === tab.id && (
+                        <span className="absolute bottom-0 left-0 right-0 h-[3px] rounded-t-sm" style={{ backgroundColor: '#030E31' }} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {activeTab === 'overview' && !isDigitalWorkspace && (
                 <>
