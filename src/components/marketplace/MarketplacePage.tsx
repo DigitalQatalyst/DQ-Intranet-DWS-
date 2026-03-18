@@ -2353,7 +2353,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   </div>
                 )}
               </div>
-            </div>
+            </>
           );
         })()}
 
