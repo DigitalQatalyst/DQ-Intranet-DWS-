@@ -19,36 +19,39 @@ export const DesignSystemCard: React.FC<DesignSystemCardProps> = ({
   type
 }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-200 cursor-pointer overflow-hidden" style={{ height: '300px' }}>
-      {/* Hero Image - extends to card edges */}
-      <div className="bg-gradient-to-br from-blue-900 via-blue-700 to-purple-600" style={{ height: '120px' }}>
+    <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer h-[350px] flex flex-col p-3 pb-0">
+      {/* Hero Image */}
+      <div className="rounded-lg overflow-hidden mb-3 bg-gradient-to-br from-blue-900 via-blue-700 to-purple-600">
         <img 
           src={imageUrl} 
           alt={title}
-          className="w-full h-full object-cover"
+          className="w-full h-40 object-cover"
           loading="lazy"
         />
       </div>
 
       {/* Card Body */}
-      <div className="flex flex-col px-5 pt-4 pb-4" style={{ height: '180px' }}>
+      <div className="flex flex-col">
         {/* Title */}
-        <h3 className="font-bold text-gray-900 text-lg mb-3 leading-tight">
+        <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
           {title}
         </h3>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 mb-3 leading-relaxed flex-grow line-clamp-3">
+        <p className="text-sm text-gray-600 line-clamp-3 mb-3">
           {description}
         </p>
 
         {/* Date */}
-        <p className="text-sm text-gray-400 mb-4">March 16, 2026</p>
+        <p className="text-xs text-gray-400 mb-3">March 16, 2026</p>
+
+        {/* Spacer to push button to bottom */}
+        <div className="flex-grow"></div>
 
         {/* View Details Button */}
         <Link
           to={`/marketplace/design-system/${id}`}
-          className="w-full block text-center px-4 py-2 bg-[#0a1628] text-white rounded-full font-bold text-sm hover:bg-[#162238] transition-colors duration-200 mt-auto"
+          className="w-full block text-center px-6 py-2 bg-[#0a1628] text-white rounded-full font-bold text-sm hover:bg-[#162238] transition-colors duration-200 mb-[-12px]"
         >
           View Details
         </Link>
