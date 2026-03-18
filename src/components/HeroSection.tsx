@@ -75,8 +75,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                     <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                      Coming Soon
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                      {" "}Coming Soon
                     </span>
                   </div>
                 </div>
