@@ -1210,8 +1210,18 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               'policy-set-2f-flow': ['policy set 02', '2f', 'flow'],
               'policy-set-2g-product': ['policy set 02', '2g', 'product'],
             } as Record<string, string[]>;
+            // Hardcoded category overrides: slug → list of categories it belongs to
+            const slugCategoryOverrides: Record<string, string[]> = {
+              'dq-associate-owned-asset-guidelines': ['policy-set-2f-flow'],
+            };
             out = out.filter(it => {
-              const haystack = `${it.title || ''} ${it.summary || ''} ${it.subDomain || ''} ${it.slug || ''}`.toLowerCase();
+              const slug = (it.slug || '').toLowerCase();
+              // Check hardcoded overrides first
+              const overrideCategories = slugCategoryOverrides[slug];
+              if (overrideCategories) {
+                return categorization.some(cat => overrideCategories.includes(cat));
+              }
+              const haystack = `${it.title || ''} ${it.summary || ''} ${it.subDomain || ''} ${slug}`.toLowerCase();
               return categorization.some(cat => {
                 const kw = catKeywords[cat] || [cat.replace(/-/g, ' ')];
                 return kw.some(k => haystack.includes(k.toLowerCase()));

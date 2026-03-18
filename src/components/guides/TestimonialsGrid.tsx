@@ -76,20 +76,9 @@ const TestimonialsGrid: React.FC<Props> = ({ items, onClickGuide }) => {
                 
                 {/* Button at bottom */}
                 <div className="pt-2.5 mt-auto border-t border-gray-100 flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (card.testimonialCategory === 'client-feedback') {
-                        navigate('/marketplace/guides/testimonials')
-                      } else {
-                        navigate('/marketplace/guides/associate-testimonials')
-                      }
-                    }}
-                    className="w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2 transition-all focus:outline-none focus:ring-2 bg-[var(--guidelines-primary-solid)] text-white hover:bg-[var(--guidelines-primary-solid-hover)] focus:ring-[var(--guidelines-ring-color)]"
-                    aria-label="View details"
-                  >
-                    View Details
-                  </button>
+                  <div className="w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2 bg-gray-100 text-gray-400 cursor-not-allowed select-none">
+                    Coming Soon
+                  </div>
                 </div>
               </div>
             </div>
