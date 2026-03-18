@@ -178,6 +178,56 @@ const Checklist = ({ items }: { items: string[] }) => (
   </ul>
 );
 
+/* ─────────────────────────────── Data fetching helpers ─────────────────── */
+
+async function fetchGHCGuide(key: string): Promise<{ ghcContent: GuideContent; guide: GuideRecord }> {
+  const contentKey = getGHCContentKey(key);
+  const content = GUIDE_CONTENT[contentKey];
+  if (!content) throw new Error('GHC content not found');
+  const guide: GuideRecord = {
+    id: key, slug: key, title: content.title, summary: content.subtitle,
+    heroImageUrl: null, domain: 'GHC', guideType: 'competency', functionArea: 'All',
+    subDomain: null, unit: 'All Units', location: null, status: 'active',
+    complexityLevel: 'intermediate', skillLevel: 'all', estimatedTimeMin: null,
+    lastUpdatedAt: new Date().toISOString(), authorName: 'DQ Admin',
+    authorOrg: 'Digital Qatalyst', downloadCount: null, documentUrl: null,
+    body: content.shortOverview,
+  };
+  return { ghcContent: content, guide };
+}
+
+async function fetchSupabaseGuide(key: string): Promise<GuideRecord> {
+  const { data: rowBySlug, error: err1 } = await (supabaseClient
+    .from('guides').select('*') as any).eq('slug', key).maybeSingle();
+  let row: any = rowBySlug;
+  if (err1 || !row) {
+    const { data: row2, error: err2 } = await (supabaseClient
+      .from('guides').select('*') as any).eq('id', key).maybeSingle();
+    if (err2) throw err2;
+    row = row2;
+  }
+  if (!row) throw new Error('Not found');
+  return {
+    id: row.id, slug: row.slug, title: row.title,
+    summary: row.summary ?? undefined,
+    heroImageUrl: row.hero_image_url ?? row.heroImageUrl ?? null,
+    domain: row.domain ?? null, guideType: row.guide_type ?? row.guideType ?? null,
+    functionArea: row.function_area ?? null,
+    subDomain: row.sub_domain ?? row.subDomain ?? null,
+    unit: row.unit ?? null, location: row.location ?? null,
+    status: row.status ?? null,
+    complexityLevel: row.complexity_level ?? row.complexityLevel ?? null,
+    skillLevel: row.skill_level ?? row.skillLevel ?? null,
+    estimatedTimeMin: row.estimated_time_min ?? row.estimatedTimeMin ?? null,
+    lastUpdatedAt: row.last_updated_at ?? row.lastUpdatedAt ?? null,
+    authorName: row.author_name ?? row.authorName ?? null,
+    authorOrg: row.author_org ?? row.authorOrg ?? null,
+    downloadCount: row.download_count ?? row.downloadCount ?? null,
+    documentUrl: row.document_url ?? row.documentUrl ?? null,
+    body: row.body ?? null,
+  };
+}
+
 /* ─────────────────────────────── Main Page ─────────────────────────────── */
 
 export const ServiceDetailPage: React.FC = () => {
@@ -228,85 +278,17 @@ export const ServiceDetailPage: React.FC = () => {
     (async () => {
       setLoading(true);
       setError(null);
-      
-      // Scroll to top when navigating to a new service
       globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
-      
       try {
         const key = String(itemId || '');
-        
-        // Check if this is a GHC service
         if (isGHCService(key)) {
-          // Use GUIDE_CONTENT for GHC services
-          const contentKey = getGHCContentKey(key);
-          const content = GUIDE_CONTENT[contentKey];
-          
-          if (!content) {
-            throw new Error('GHC content not found');
-          }
-          
+          const result = await fetchGHCGuide(key);
           if (!cancelled) {
-            setGhcContent(content);
-            // Create a mock guide record for GHC services
-            const mockGuide: GuideRecord = {
-              id: key,
-              slug: key,
-              title: content.title,
-              summary: content.subtitle,
-              heroImageUrl: null,
-              domain: 'GHC',
-              guideType: 'competency',
-              functionArea: 'All',
-              subDomain: null,
-              unit: 'All Units',
-              location: null,
-              status: 'active',
-              complexityLevel: 'intermediate',
-              skillLevel: 'all',
-              estimatedTimeMin: null,
-              lastUpdatedAt: new Date().toISOString(),
-              authorName: 'DQ Admin',
-              authorOrg: 'Digital Qatalyst',
-              downloadCount: null,
-              documentUrl: null,
-              body: content.shortOverview,
-            };
-            setGuide(mockGuide);
+            setGhcContent(result.ghcContent);
+            setGuide(result.guide);
           }
         } else {
-          // Use Supabase for non-GHC services (existing logic)
-          const { data: rowBySlug, error: err1 } = await (supabaseClient
-            .from('guides').select('*') as any).eq('slug', key).maybeSingle();
-
-          let row: any = rowBySlug;
-          if (err1 || !row) {
-            const { data: row2, error: err2 } = await (supabaseClient
-              .from('guides').select('*') as any).eq('id', key).maybeSingle();
-            if (err2) throw err2;
-            row = row2;
-          }
-          if (!row) throw new Error('Not found');
-
-          const mapped: GuideRecord = {
-            id: row.id, slug: row.slug, title: row.title,
-            summary: row.summary ?? undefined,
-            heroImageUrl: row.hero_image_url ?? row.heroImageUrl ?? null,
-            domain: row.domain ?? null,
-            guideType: row.guide_type ?? row.guideType ?? null,
-            functionArea: row.function_area ?? null,
-            subDomain: row.sub_domain ?? row.subDomain ?? null,
-            unit: row.unit ?? null, location: row.location ?? null,
-            status: row.status ?? null,
-            complexityLevel: row.complexity_level ?? row.complexityLevel ?? null,
-            skillLevel: row.skill_level ?? row.skillLevel ?? null,
-            estimatedTimeMin: row.estimated_time_min ?? row.estimatedTimeMin ?? null,
-            lastUpdatedAt: row.last_updated_at ?? row.lastUpdatedAt ?? null,
-            authorName: row.author_name ?? row.authorName ?? null,
-            authorOrg: row.author_org ?? row.authorOrg ?? null,
-            downloadCount: row.download_count ?? row.downloadCount ?? null,
-            documentUrl: row.document_url ?? row.documentUrl ?? null,
-            body: row.body ?? null,
-          };
+          const mapped = await fetchSupabaseGuide(key);
           if (!cancelled) setGuide(mapped);
         }
       } catch {
