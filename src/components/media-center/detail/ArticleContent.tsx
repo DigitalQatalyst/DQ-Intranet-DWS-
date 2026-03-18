@@ -129,57 +129,66 @@ const TabBar = <T extends string>({
 
 // ─── Related items section ─────────────────────────────────────────────────
 
+type ContentKind = 'blog' | 'podcast' | 'announcement';
+
 const RelatedSection = ({
   items,
-  isBlog,
+  kind,
   locationSearch,
 }: {
   items: NewsItem[];
-  isBlog: boolean;
+  kind: ContentKind;
   locationSearch: string;
 }) => {
   if (!items.length) return null;
-  const filtered = isBlog
-    ? items.filter(i => i.type === 'Thought Leadership' && i.format !== 'Podcast')
-    : items;
+
+  const filtered = (() => {
+    if (kind === 'blog') return items.filter(i => i.type === 'Thought Leadership' && i.format !== 'Podcast');
+    if (kind === 'podcast') return items.filter(i => i.format === 'Podcast' || i.tags?.some(t => t.toLowerCase().includes('podcast')));
+    return items.filter(i => i.type !== 'Thought Leadership');
+  })();
+
   const visible = filtered.slice(0, 3);
   if (!visible.length) return null;
+
+  const heading = kind === 'blog' ? 'Related Blogs' : kind === 'podcast' ? 'Related Podcasts' : 'Related Announcements';
+  const browseLabel = kind === 'blog' ? 'Browse all blogs' : kind === 'podcast' ? 'Browse all podcasts' : 'Browse all news';
 
   return (
     <section className="border-t border-border bg-muted/30 px-0 py-12 mt-8">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-foreground">
-          {isBlog ? 'Related Blogs' : 'Related Announcements'}
-        </h2>
+        <h2 className="text-xl font-semibold text-foreground">{heading}</h2>
         <a
           href={`/marketplace/media-center${locationSearch || ''}`}
           className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-          Browse all news <ArrowRight className="h-4 w-4" />
+          {browseLabel} <ArrowRight className="h-4 w-4" />
         </a>
       </div>
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map(item => {
           const typeDisplay = getNewsTypeDisplay(item);
+          const isItemPodcast = item.format === 'Podcast' || item.tags?.some(t => t.toLowerCase().includes('podcast'));
+          const linkLabel = isItemPodcast ? 'Listen now' : 'Read more';
           return (
             <div
               key={item.id}
-              className="group cursor-pointer rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-md p-5 flex flex-col"
+              className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-2 hover:shadow-sm transition-shadow"
             >
-              <span className="mb-3 inline-block rounded-full border border-border px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 {typeDisplay?.label || 'Article'}
               </span>
-              <h3 className="mb-1.5 text-sm font-semibold text-foreground leading-snug">
+              <h3 className="text-sm font-bold text-foreground leading-snug">
                 {item.title || 'Untitled'}
               </h3>
-              <p className="mb-3 text-xs leading-relaxed text-muted-foreground line-clamp-2 flex-grow">
+              <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2 flex-grow">
                 {item.excerpt || 'No description available.'}
               </p>
               <a
                 href={`/marketplace/news/${item.id}${locationSearch || ''}`}
-                className="flex items-center gap-1 text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors mt-auto"
+                className="flex items-center gap-1 text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors mt-1"
               >
-                Read more <ArrowRight className="h-3 w-3" />
+                {linkLabel} <ArrowRight className="h-3 w-3" />
               </a>
             </div>
           );
@@ -271,7 +280,7 @@ export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related
           )}
         </div>
 
-        <RelatedSection items={related} isBlog={true} locationSearch={location.search} />
+        <RelatedSection items={related} kind="blog" locationSearch={location.search} />
       </div>
     );
   }
@@ -310,7 +319,7 @@ export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related
           )}
         </div>
 
-        <RelatedSection items={related} isBlog={false} locationSearch={location.search} />
+        <RelatedSection items={related} kind="podcast" locationSearch={location.search} />
       </div>
     );
   }
@@ -338,7 +347,7 @@ export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related
         {renderStructuredContent(sectionMap[newsTab])}
       </div>
 
-      <RelatedSection items={related} isBlog={false} locationSearch={location.search} />
+      <RelatedSection items={related} kind="announcement" locationSearch={location.search} />
     </div>
   );
 };

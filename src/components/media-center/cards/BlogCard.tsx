@@ -42,9 +42,6 @@ export function BlogCard({ item, href }: BlogCardProps) {
           >
             {categoryLabel}
           </span>
-          {authorName && (
-            <span className="text-xs text-gray-400 font-medium">{authorName}</span>
-          )}
         </div>
 
         {/* Title */}
