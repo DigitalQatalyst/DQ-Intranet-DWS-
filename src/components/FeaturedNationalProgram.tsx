@@ -31,6 +31,12 @@ const fallbackPrograms: FeaturedProgram[] = [
   },
 ];
 
+function getCTALabel(category: FeaturedProgram['category']): string {
+  if (category === 'Jobs') return 'VIEW OPPORTUNITY';
+  if (category === 'Insight') return 'READ INSIGHT';
+  return 'READ STORY';
+}
+
 export const FeaturedNationalProgram: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [programs, setPrograms] = useState<FeaturedProgram[]>([]);
@@ -42,7 +48,7 @@ export const FeaturedNationalProgram: React.FC = () => {
 
     const interval = setInterval(() => {
       setActiveIndex((prevIndex) => (prevIndex + 1) % programs.length);
-    }, 5000); // Change every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [programs]);
@@ -53,7 +59,6 @@ export const FeaturedNationalProgram: React.FC = () => {
 
     async function loadFeatured() {
       try {
-        // Fetch latest news and blogs from Media Center
         const newsData = await fetchAllNews();
 
         if (!isMounted) return;
@@ -64,7 +69,6 @@ export const FeaturedNationalProgram: React.FC = () => {
           return;
         }
 
-        // Transform Media Center news data to FeaturedProgram format
         // Show mix of latest announcements and blogs
         const fallbackImages = [
           'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80',
@@ -97,9 +101,8 @@ export const FeaturedNationalProgram: React.FC = () => {
 
         const transformedPrograms: FeaturedProgram[] = combinedItems
           .map((item: NewsItem) => {
-            // Use the same image resolution logic as Media Center cards
             const imageSrc = getNewsImageSrc(item, fallbackImages, fallbackHero);
-            
+
             return {
               id: item.id,
               partnership: item.author || item.newsSource || 'DQ Communications',
@@ -137,7 +140,7 @@ export const FeaturedNationalProgram: React.FC = () => {
         </h2>
         <div>
           <p className="text-base sm:text-lg text-gray-600 mx-auto text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
-            Catch the latest DQ news, insights, and job opportunities curated for quick scanning, with one click to dive deeper.
+            Explore the latest DQ news, insights, and job opportunities.
           </p>
         </div>
       </FadeInUpOnScroll>
@@ -161,7 +164,6 @@ export const FeaturedNationalProgram: React.FC = () => {
                 }
           }
         >
-
           <div className="flex-1 flex flex-col justify-center text-white relative z-10">
             <h3 className="font-bold mb-4 text-white max-w-3xl leading-tight" style={{ fontSize: '30px' }}>
               {activeProgram.title}
@@ -176,13 +178,9 @@ export const FeaturedNationalProgram: React.FC = () => {
               href={activeProgram.learnMoreHref}
               className="px-6 py-3 bg-white text-[#0F1D4A] font-semibold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg"
             >
-              {activeProgram.ctaLabel || (
-                <>
-                  {activeProgram.category === 'Jobs' && 'VIEW OPPORTUNITY'}
-                  {activeProgram.category === 'News' && 'READ STORY'}
-                  {activeProgram.category === 'Insight' && 'READ INSIGHT'}
-                </>
-              )}
+              <span>
+                {activeProgram.ctaLabel || getCTALabel(activeProgram.category)}
+              </span>
               <ArrowRight size={18} />
             </a>
           </div>
