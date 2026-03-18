@@ -12,16 +12,16 @@ import { EventType, AuthenticationResult, InteractionStatus } from '@azure/msal-
 import { defaultLoginRequest, signupRequest } from '../../../services/auth/msal';
 import { supabaseClient } from '../../../lib/supabaseClient';
 import { azureIdToUuid } from '../../../communities/utils/azureIdToUuid';
-import { buildAbilityFromUserContext, normalizeRole } from '@/auth/ability';
-import { AbilityContext } from '@/auth/AbilityContext';
+import { buildAbilityFromUserContext, normalizeRole } from '../../../auth/ability';
+import { AbilityContext } from '../../../auth/AbilityContext';
 import type {
   UserContext as IamUserContext,
   UserRole,
   EmployeeSegment,
   ContentDomain,
   ResponsibilityRole,
-} from '@/types/iam';
-import type { AppAbility } from '@/auth/ability';
+} from '../../../types/iam';
+import type { AppAbility } from '../../../auth/ability';
 
 interface UserProfile {
   id: string;

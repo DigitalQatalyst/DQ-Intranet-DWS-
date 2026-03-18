@@ -23,6 +23,7 @@
     "@azure/msal-browser": "^4.26.0",
     "@azure/msal-react": "^3.0.21",
     "@azure/storage-blob": "^12.28.0",
+    "@casl/ability": "^6.8.0",
     "@floating-ui/react": "^0.26.28",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
