@@ -25,7 +25,7 @@ const DailyQuoteSection = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 mb-16">
+    <div className="container mx-auto px-4 mb-16 mt-12">
       <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-4 md:p-6 overflow-hidden relative">
         <FadeInUpOnScroll className="text-center mb-4 relative z-10">
           <h2 className="text-3xl font-bold text-gray-900 mb-2 clamp-1">
@@ -84,9 +84,6 @@ const DailyQuoteSection = () => {
                 <div className="flex flex-col justify-center min-w-0 flex-1">
                   <p className="text-base font-semibold text-gray-900 leading-tight truncate">
                     {currentQuote.author}
-                  </p>
-                  <p className="text-sm text-gray-600 leading-tight truncate">
-                    {currentQuote.role}
                   </p>
                 </div>
               </div>

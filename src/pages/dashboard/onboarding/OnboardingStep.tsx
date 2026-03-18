@@ -1,5 +1,5 @@
-import { AlertCircleIcon, InfoIcon, Plus, Trash2 } from 'lucide-react';
-
+import React from 'react';
+import { AlertCircleIcon, InfoIcon } from 'lucide-react';
 export function OnboardingStep({
     stepData,
     formData,
@@ -19,113 +19,10 @@ export function OnboardingStep({
             </div>
         );
     };
-
-    const handleRepeaterChange = (fieldName, index, subFieldName, value) => {
-        const currentList = Array.isArray(formData[fieldName]) ? [...formData[fieldName]] : [{}];
-        if (subFieldName) {
-            currentList[index] = { ...currentList[index], [subFieldName]: value };
-        } else {
-            currentList[index] = value;
-        }
-        onChange(fieldName, currentList);
-    };
-
-    const addRepeaterItem = (fieldName, defaultValue = '') => {
-        const currentList = Array.isArray(formData[fieldName]) ? [...formData[fieldName]] : [];
-        onChange(fieldName, [...currentList, defaultValue]);
-    };
-
-    const removeRepeaterItem = (fieldName, index) => {
-        const currentList = Array.isArray(formData[fieldName]) ? [...formData[fieldName]] : [];
-        if (currentList.length > 1) {
-            currentList.splice(index, 1);
-            onChange(fieldName, currentList);
-        }
-    };
-
     const renderField = (field) => {
         const fieldValue = formData[field.fieldName] || '';
         const hasError = !!errors[field.fieldName];
         const isTouched = !!touchedFields[field.fieldName];
-
-        if (field.type === 'repeater') {
-            const list = Array.isArray(fieldValue) ? fieldValue : (field.itemTemplate ? [{}] : ['']);
-
-            return (
-                <div key={field.id} className="space-y-4 mb-8">
-                    <label className="block text-sm font-semibold text-gray-700 flex items-center justify-between">
-                        <span className="flex items-center">
-                            {field.label}
-                            {field.required && <span className="ml-1 text-red-500">*</span>}
-                        </span>
-                        <button
-                            type="button"
-                            onClick={() => addRepeaterItem(field.fieldName, field.itemTemplate ? {} : '')}
-                            className="text-blue-600 hover:text-blue-700 text-xs flex items-center bg-blue-50 px-2 py-1 rounded"
-                        >
-                            <Plus size={14} className="mr-1" /> Add More
-                        </button>
-                    </label>
-
-                    <div className="space-y-3">
-                        {list.map((item, index) => (
-                            <div key={index} className="flex gap-2 items-start bg-gray-50 p-3 rounded-lg border border-gray-100 relative group">
-                                <div className="flex-1 space-y-3">
-                                    {field.itemTemplate ? (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {field.itemTemplate.map((subField, subIndex) => (
-                                                <div key={subField.fieldName} className="space-y-1">
-                                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">{subField.label}</label>
-                                                    <input
-                                                        type={subField.type || 'text'}
-                                                        value={item[subField.fieldName] || ''}
-                                                        autoFocus={index > 0 && index === list.length - 1 && subIndex === 0}
-                                                        onChange={(e) => handleRepeaterChange(field.fieldName, index, subField.fieldName, e.target.value)}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter') {
-                                                                e.preventDefault();
-                                                                addRepeaterItem(field.fieldName, field.itemTemplate ? {} : '');
-                                                            }
-                                                        }}
-                                                        placeholder={subField.placeholder || ''}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-1 focus:ring-blue-500 outline-none text-sm"
-                                                    />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <input
-                                            type="text"
-                                            value={item || ''}
-                                            autoFocus={index > 0 && index === list.length - 1}
-                                            onChange={(e) => handleRepeaterChange(field.fieldName, index, null, e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    addRepeaterItem(field.fieldName, field.itemTemplate ? {} : '');
-                                                }
-                                            }}
-                                            placeholder={field.placeholder || ''}
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-1 focus:ring-blue-500 outline-none text-sm"
-                                        />
-                                    )}
-                                </div>
-                                {list.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => removeRepeaterItem(field.fieldName, index)}
-                                        className="text-gray-400 hover:text-red-500 p-1"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-
         return (
             <div key={field.id} className="space-y-2 mb-6">
                 <label
@@ -194,25 +91,6 @@ export function OnboardingStep({
             </div>
         );
     };
-    const isFieldVisible = (field) => {
-        if (!field.applicableStudio) return true;
-        return field.applicableStudio === formData.studio;
-    };
-
-    const isSectionVisible = (section) => {
-        if (!section.applicableStudio) {
-            // Check if section fields are all hidden
-            if (section.fields) {
-                return section.fields.some(isFieldVisible);
-            }
-            return true;
-        }
-        return section.applicableStudio === formData.studio;
-    };
-
-    const visibleSections = stepData.sections?.filter(isSectionVisible) || [];
-    const visibleFields = stepData.fields?.filter(isFieldVisible) || [];
-
     return (
         <div className="space-y-8">
             <div className="text-center mb-6">
@@ -225,7 +103,7 @@ export function OnboardingStep({
             </div>
             {stepData.sections ? (
                 <div className="space-y-10">
-                    {visibleSections.map((section, index) => (
+                    {stepData.sections.map((section, index) => (
                         <div key={index} className="space-y-6">
                             <div className="border-b border-gray-200 pb-2">
                                 <h3 className="text-lg font-medium text-gray-800">
@@ -238,14 +116,14 @@ export function OnboardingStep({
                                 )}
                             </div>
                             <div className="grid grid-cols-1 gap-6">
-                                {section.fields.filter(isFieldVisible).map((field) => renderField(field))}
+                                {section.fields.map((field) => renderField(field))}
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6">
-                    {visibleFields.map((field) => renderField(field))}
+                    {stepData.fields.map((field) => renderField(field))}
                 </div>
             )}
         </div>

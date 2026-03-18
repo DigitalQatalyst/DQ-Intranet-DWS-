@@ -1,7 +1,7 @@
 // hooks/useAutoSave.ts
 import { useState, useEffect, useRef } from "react";
 import { useMsal } from "@azure/msal-react";
-import { saveOnboardingData } from "../services/employeeOnboardingService";
+// import { saveOnboardingData } from "../services/employeeOnboardingService";
 
 export function useAutoSave(formData, currentStep) {
   const [autoSaving, setAutoSaving] = useState(false);
@@ -47,17 +47,17 @@ export function useAutoSave(formData, currentStep) {
         email: account.username || ""
       } : undefined;
 
-      // Save to Supabase
-      const result = await saveOnboardingData(employeeId, formData, currentStep, employeeInfo);
+      // Save to Supabase - temporarily disabled
+      // const result = await saveOnboardingData(employeeId, formData, currentStep, employeeInfo);
 
-      if (result.success) {
+      // if (result.success) {
         lastSavedDataRef.current = { ...formData };
         setProgressSaved(true);
-        console.log("✅ Progress auto-saved to Supabase");
+        console.log("✅ Progress auto-saved (local only)");
         setTimeout(() => setProgressSaved(false), 3000);
-      } else {
-        console.error("Auto-save failed:", result.error);
-      }
+      // } else {
+      //   console.error("Auto-save failed:", result.error);
+      // }
     } catch (error) {
       console.error("Error auto-saving progress:", error);
     } finally {

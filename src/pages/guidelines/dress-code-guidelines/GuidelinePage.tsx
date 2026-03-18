@@ -5,6 +5,7 @@ import { Header } from '../../../components/Header'
 import { Footer } from '../../../components/Footer'
 import { useAuth } from '../../../components/Header/context/AuthContext'
 import { supabaseClient } from '../../../lib/supabaseClient'
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 import { HeroSection } from './HeroSection'
 import { SideNav } from './SideNav'
 import { GuidelineSection } from './GuidelineSection'
@@ -20,7 +21,7 @@ function GuidelinePage() {
     let cancelled = false
     ;(async () => {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await knowledgeHubSupabase
           .from('guides')
           .select('title, last_updated_at')
           .eq('slug', 'dq-dress-code-guideline')

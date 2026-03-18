@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { FadeInUpOnScroll } from './AnimationUtils';
-import { fetchAllNews, fetchAllJobs } from '@/services/mediaCenterService';
+import { fetchAllNews } from '@/services/mediaCenterService';
 import type { NewsItem } from '@/data/media/news';
-import type { JobItem } from '@/data/media/jobs';
+import { getNewsImageSrc } from '@/utils/newsUtils';
 
 interface FeaturedProgram {
   id: string;
@@ -14,83 +14,27 @@ interface FeaturedProgram {
   applyNowHref?: string;
   backgroundImage?: string;
   category: 'News' | 'Insight' | 'Jobs';
+  ctaLabel?: string;
 }
 
-function isPodcast(item: NewsItem): boolean {
-  if (item.format === 'Podcast') {
-    return true;
-  }
+const fallbackPrograms: FeaturedProgram[] = [
+  {
+    id: 'fallback-1',
+    partnership: 'Digital Qatalyst',
+    title: 'Welcome to the Digital Workspace',
+    description:
+      'Explore onboarding, services, media, and knowledge resources designed to help every associate start fast and deliver with confidence.',
+    learnMoreHref: '/marketplace/guides?tab=guidelines',
+    backgroundImage:
+      'linear-gradient(90deg, rgba(251, 83, 53, 0.6) 0%, rgba(26, 46, 110, 0.6) 50%, rgba(3, 15, 53, 0.6) 100%), url(/images/honeycomb.png)',
+    category: 'News',
+  },
+];
 
-  if (item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))) {
-    return true;
-  }
-
-  return false;
-}
-
-function isEvent(item: NewsItem): boolean {
-  if (item.newsType === 'Upcoming Events') {
-    return true;
-  }
-
-  if (item.tags?.some((tag) => tag.toLowerCase().includes('event'))) {
-    return true;
-  }
-
-  return false;
-}
-
-function mapNewsToFeatured(item: NewsItem): FeaturedProgram {
-  const isBlog = item.type === 'Thought Leadership' && !isPodcast(item);
-  const partnership = item.byline || item.author || 'DQ Communications';
-  
-  // Use the actual image from the news item
-  const bgImage = item.image || '/images/honeycomb.png';
-  
-  let title: string;
-  let category: 'News' | 'Insight';
-  let learnMoreHref: string;
-  
-  if (isBlog) {
-    title = item.title;
-    category = 'Insight';
-    learnMoreHref = '/marketplace/opportunities?tab=insights';
-  } else if (item.type === 'Announcement') {
-    title = item.title;
-    category = 'News';
-    learnMoreHref = '/marketplace/opportunities?tab=announcements';
-  } else {
-    title = item.title;
-    category = 'News';
-    learnMoreHref = '/marketplace/opportunities?tab=announcements';
-  }
-  
-  return {
-    id: `news-${item.id}`,
-    partnership,
-    title,
-    description: item.excerpt,
-    learnMoreHref,
-    backgroundImage: `url(${bgImage})`,
-    category,
-  };
-}
-
-function mapJobToFeatured(item: JobItem): FeaturedProgram {
-  const partnership = item.department || 'DQ Careers';
-  
-  // Use the actual image from the job item
-  const bgImage = item.image || '/images/honeycomb.png';
-  
-  return {
-    id: `job-${item.id}`,
-    partnership,
-    title: item.title,
-    description: item.description,
-    learnMoreHref: '/marketplace/opportunities?tab=opportunities',
-    backgroundImage: `url(${bgImage})`,
-    category: 'Jobs',
-  };
+function getCTALabel(category: FeaturedProgram['category']): string {
+  if (category === 'Jobs') return 'VIEW OPPORTUNITY';
+  if (category === 'Insight') return 'READ INSIGHT';
+  return 'READ STORY';
 }
 
 export const FeaturedNationalProgram: React.FC = () => {
@@ -104,50 +48,80 @@ export const FeaturedNationalProgram: React.FC = () => {
 
     const interval = setInterval(() => {
       setActiveIndex((prevIndex) => (prevIndex + 1) % programs.length);
-    }, 5000); // Change every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [programs]);
 
-  // Load latest items from DQ Media Center (news, blogs, jobs)
+  // Load latest items from DQ Media Center
   useEffect(() => {
     let isMounted = true;
 
     async function loadFeatured() {
       try {
-        const [newsItems, jobItems] = await Promise.all([
-          fetchAllNews(),
-          fetchAllJobs(),
-        ]);
+        const newsData = await fetchAllNews();
 
         if (!isMounted) return;
 
-        const allNews = newsItems ?? [];
-        const allJobs = jobItems ?? [];
-
-        // Latest articles/blogs/news (excluding events and podcasts)
-        const latestNews = allNews
-          .filter((item) => !isPodcast(item) && !isEvent(item))
-          .slice(0, 5)
-          .map(mapNewsToFeatured);
-
-        // Latest jobs
-        const latestJobs = allJobs
-          .slice(0, 3)
-          .map(mapJobToFeatured);
-
-        // Combine and prioritize: mix news and jobs for variety
-        const combined = [...latestNews, ...latestJobs].slice(0, 8);
-
-        // Only set programs if we have data from the database
-        if (combined.length > 0) {
-          setPrograms(combined);
-          setActiveIndex(0);
+        if (!newsData || newsData.length === 0) {
+          console.warn('No news data available from Media Center');
+          setPrograms(fallbackPrograms);
+          return;
         }
+
+        // Show mix of latest announcements and blogs
+        const fallbackImages = [
+          'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80'
+        ];
+        const fallbackHero = 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1600&q=80';
+
+        // Get 3 latest announcements
+        const announcements = newsData
+          .filter((item: NewsItem) => {
+            const itemType = (item.type || '').toLowerCase();
+            return itemType === 'announcement';
+          })
+          .slice(0, 3);
+
+        // Get 3 latest blogs (Thought Leadership)
+        const blogs = newsData
+          .filter((item: NewsItem) => {
+            const itemType = (item.type || '').toLowerCase();
+            return itemType === 'thought leadership';
+          })
+          .slice(0, 3);
+
+        // Combine and sort by date (newest first)
+        const combinedItems = [...announcements, ...blogs].sort((a, b) => {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+
+        const transformedPrograms: FeaturedProgram[] = combinedItems
+          .map((item: NewsItem) => {
+            const imageSrc = getNewsImageSrc(item, fallbackImages, fallbackHero);
+
+            return {
+              id: item.id,
+              partnership: item.author || item.newsSource || 'DQ Communications',
+              title: item.title,
+              description: item.excerpt || '',
+              learnMoreHref: `/marketplace/news/${item.id}`,
+              backgroundImage: `url("${imageSrc}")`,
+              category: 'News' as const,
+              ctaLabel: 'READ STORY',
+            };
+          });
+
+        setPrograms(transformedPrograms.length > 0 ? transformedPrograms : fallbackPrograms);
+        setActiveIndex(0);
       } catch (error) {
-        console.error('Failed to load featured updates from media center', error);
-        // Don't show fallback - just leave empty if there's an error
-        setPrograms([]);
+        console.error('Failed to load featured updates from Media Center', error);
+        if (isMounted) {
+          setPrograms(fallbackPrograms);
+        }
       }
     }
 
@@ -160,22 +134,19 @@ export const FeaturedNationalProgram: React.FC = () => {
 
   return (
     <div className="w-full py-8 px-4">
-      {/* Only show section if we have programs to display */}
-      {programs.length > 0 && (
-        <>
-          <FadeInUpOnScroll className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-              Latest Updates
-            </h2>
-            <div>
-              <p className="text-base sm:text-lg text-gray-600 mx-auto text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
-                Catch the latest DQ news, insights, and job opportunities curated for quick scanning, with one click to dive deeper.
-              </p>
-            </div>
-          </FadeInUpOnScroll>
+      <FadeInUpOnScroll className="text-center mb-10">
+        <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
+          Latest Updates
+        </h2>
+        <div>
+          <p className="text-base sm:text-lg text-gray-600 mx-auto text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
+            Explore the latest DQ news, insights, and job opportunities.
+          </p>
+        </div>
+      </FadeInUpOnScroll>
 
-          <div className="relative rounded-3xl overflow-hidden shadow-xl w-full max-w-[1506px] mx-auto">
-            {activeProgram && (
+      <div className="relative rounded-3xl overflow-hidden shadow-xl w-full max-w-[1506px] mx-auto">
+        {activeProgram && (
         <div
           key={activeProgram.id}
           className="h-[360px] p-10 flex flex-col justify-between relative bg-cover bg-center transition-all duration-500"
@@ -193,7 +164,6 @@ export const FeaturedNationalProgram: React.FC = () => {
                 }
           }
         >
-
           <div className="flex-1 flex flex-col justify-center text-white relative z-10">
             <h3 className="font-bold mb-4 text-white max-w-3xl leading-tight" style={{ fontSize: '30px' }}>
               {activeProgram.title}
@@ -208,9 +178,9 @@ export const FeaturedNationalProgram: React.FC = () => {
               href={activeProgram.learnMoreHref}
               className="px-6 py-3 bg-white text-[#0F1D4A] font-semibold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg"
             >
-              {activeProgram.category === 'Jobs' && 'VIEW OPPORTUNITY'}
-              {activeProgram.category === 'News' && 'READ STORY'}
-              {activeProgram.category === 'Insight' && 'READ INSIGHT'}
+              <span>
+                {activeProgram.ctaLabel || getCTALabel(activeProgram.category)}
+              </span>
               <ArrowRight size={18} />
             </a>
           </div>
@@ -248,8 +218,6 @@ export const FeaturedNationalProgram: React.FC = () => {
           }
         }
       `}</style>
-        </>
-      )}
     </div>
   );
 };

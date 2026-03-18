@@ -12,6 +12,7 @@ import PodcastSeriesPage from './PodcastSeriesPage';
 import { DQWorkDirectoryPage } from '../DQWorkDirectoryPage';
 import JobDetailPage from './JobDetailPage';
 import JobApplicationPage from './JobApplicationPage';
+import DesignSystemDetailPage from './DesignSystemDetailPage';
 const GrowthAreasPage = React.lazy(() => import('../GrowthAreasPage'));
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
 const GuideDetailsPage = React.lazy(() => import('../guides/GuideDetailsPage'));
@@ -22,9 +23,6 @@ const FAQsPage = React.lazy(() => import('../guides/FAQsPage'));
 const TestimonialsDetailPage = React.lazy(() => import('../guides/TestimonialsDetailPage'));
 const AssociateTestimonialsDetailPage = React.lazy(() => import('../guides/AssociateTestimonialsDetailPage'));
 const ProductDetailPage = React.lazy(() => import('../products/ProductDetailPage'));
-const CIDSServiceDetailPage = React.lazy(() => import('./CIDSServiceDetailPage'));
-const VDSServiceDetailPage = React.lazy(() => import('./VDSServiceDetailPage'));
-const DesignSystemDetailPage = React.lazy(() => import('./DesignSystemDetailPage'));
 // Promo cards for courses marketplace
 const coursePromoCards = [{
   id: 'finance-promo',
@@ -156,10 +154,6 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/guides/:itemId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailPage /></React.Suspense>} />
       <Route path="/guides/:itemId/details" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailsPage /></React.Suspense>} />
       
-      {/* Design System */}
-      <Route path="/design-system" element={<MarketplacePage marketplaceType="design-system" title={designSystemConfig.title} description={designSystemConfig.description} />} />
-      <Route path="/design-system/:cardId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><DesignSystemDetailPage /></React.Suspense>} />
-      
       {/* Products Detail Pages */}
       <Route path="/products/:slug" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><ProductDetailPage /></React.Suspense>} />
       
@@ -169,7 +163,7 @@ export const MarketplaceRouter: React.FC = () => {
       
       {/* Design System Marketplace */}
       <Route path="/design-system" element={<MarketplacePage marketplaceType="design-system" title={designSystemConfig.title} description={designSystemConfig.description} promoCards={[]} />} />
-      <Route path="/design-system/:itemId" element={<MarketplaceDetailsPage marketplaceType="design-system" bookmarkedItems={bookmarkedItems['design-system'] || []} onToggleBookmark={itemId => handleToggleBookmark('design-system', itemId)} />} />
+      <Route path="/design-system/:cardId" element={<DesignSystemDetailPage />} />
       {/* News & Opportunities Marketplace - Redirected to /guides */}
       <Route path="/news" element={<Navigate to="/marketplace/guides" replace />} />
       <Route path="/news/action-solver-podcast" element={<PodcastSeriesPage />} />

@@ -4,6 +4,7 @@ import { getGuide, getGuideTaxonomies } from '../../../services/guides';
 import { createGuide, updateGuide } from '../../../services/adminGuides';
 import { Guide, GuideTaxonomies } from '../../../types/guide';
 import { supabaseClient } from '../../../lib/supabaseClient';
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 
 const empty: Guide = { title: '', status: 'draft', contributors: [], steps: [], attachments: [], templates: [], relatedTools: [] };
 
@@ -37,7 +38,7 @@ const GuideEditor: React.FC = () => {
     if (!currentBody || currentBody.trim().length === 0) return;
     
     try {
-      const { data: allGHCGuides } = await supabaseClient
+      const { data: allGHCGuides } = await knowledgeHubSupabase
         .from('guides')
         .select('id, slug, title, body')
         .in('slug', ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd']);

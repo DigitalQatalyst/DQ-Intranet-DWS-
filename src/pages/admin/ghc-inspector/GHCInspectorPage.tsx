@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabaseClient } from '../../../lib/supabaseClient';
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
 import { useAuth } from '../../../components/Header/context/AuthContext';
@@ -42,7 +43,7 @@ export default function GHCInspectorPage() {
         setLoading(true);
         setDiagnosis('🔍 Fetching guides from Supabase...');
         
-        const { data, error: fetchError } = await supabaseClient
+        const { data, error: fetchError } = await knowledgeHubSupabase
           .from('guides')
           .select('id, slug, title, body, summary, hero_image_url, last_updated_at, status, domain, guide_type')
           .in('slug', GHC_SLUGS)

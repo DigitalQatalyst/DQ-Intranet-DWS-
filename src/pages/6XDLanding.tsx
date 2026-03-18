@@ -159,7 +159,7 @@ const SIXXD_ACTIONS = [
     description: "Plays, perspectives, and templates to help you design and deliver with Agile 6xD.",
     tags: ["Plays", "Templates", "Perspectives"],
     cta: "Go to Knowledge Center",
-    path: "/marketplace/guides/dq-6xd",
+    path: "/marketplace/guides?collapsed=guide_type%2Csub_domain%2Cunit%2Clocation%2Ctestimonial_category%2Cproduct_type%2Cproduct_stage%2Cguidelines_category%2Ccategorization%2Cattachments%2Cstrategy_framework%2Cglossary_knowledge_system%2Cglossary_ghc_dimension%2Cglossary_6xd_perspective%2Cglossary_letter%2Cfaq_category&tab=6xd",
     bg: "bg-[#f0f6ff]",
     accent: "text-[#131e42]",
     badgeColor: "text-[#131e42]",
@@ -189,6 +189,8 @@ export default function SixXDLanding() {
       overrides={{
         heroHeadline: "Digital transformation fails when it stays theoretical.",
         heroHeadlineHighlightWord: "theoretical",
+        heroSingleLine: true,
+        heroSupportingSingleLine: true,
         heroSupporting:
           "Agile 6xD is how DQ turns digital and AI transformation into execution designed, delivered, and sustained through real work.",
         heroCTA: "Read the Agile 6xD Storybook",

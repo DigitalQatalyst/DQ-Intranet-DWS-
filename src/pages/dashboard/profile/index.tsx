@@ -21,7 +21,7 @@ import {
     FileText,
     Clock
 } from 'lucide-react';
-import { getOnboardingData, saveOnboardingData } from '../../../services/employeeOnboardingService';
+// import { getOnboardingData, saveOnboardingData } from '../../../services/employeeOnboardingService';
 import { BurgerMenuButton } from '../../../components/Sidebar';
 
 const ProfilePage: React.FC = () => {
@@ -44,9 +44,10 @@ const ProfilePage: React.FC = () => {
             if (!employeeId) return;
             setLoading(true);
             try {
-                const data = await getOnboardingData(employeeId);
-                setOnboardingData(data || {});
-                setEditData(data || {});
+                // Temporarily disabled - employeeOnboardingService removed
+                // const data = await getOnboardingData(employeeId);
+                setOnboardingData({});
+                setEditData({});
             } catch (error) {
                 console.error("Error loading employee profile:", error);
             } finally {
@@ -60,11 +61,12 @@ const ProfilePage: React.FC = () => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            const result = await saveOnboardingData(employeeId, editData);
-            if (result.success) {
+            // Temporarily disabled - employeeOnboardingService removed
+            // const result = await saveOnboardingData(employeeId, editData);
+            // if (result.success) {
                 setOnboardingData(editData);
                 setIsEditing(false);
-            }
+            // }
         } catch (error) {
             console.error("Error saving profile:", error);
         } finally {

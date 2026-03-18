@@ -306,20 +306,12 @@ export function OnboardingLanding() {
     navigate('/onboarding/journey');
   };
 
-  const handleExploreOrganization = () => { // NOSONAR: reserved for future use
-    navigate('/discover-dq');
-  };
-
   const handleExploreGHC = () => {
     navigate('/ghc');
   };
 
   const handleExplore6XD = () => {
     navigate('/6xd');
-  };
-
-  const handleViewRole = () => { // NOSONAR: reserved for future use
-    navigate('/marketplace/work-directory?tab=positions');
   };
 
   return (
@@ -613,12 +605,12 @@ export function OnboardingLanding() {
                     <span className="text-5xl md:text-6xl font-semibold text-[#F2B9A3] leading-none">03</span>
                     <div className="flex-1">
                       <p className="text-xs font-bold tracking-[0.18em] uppercase text-[#E95139] mb-2">Operational System</p>
-                      <h2 className="text-[34px] md:text-[40px] font-bold text-[#0F1F3F] leading-tight mb-5">DQ 6xD Digitals (6xD)</h2>
+                      <h2 className="text-[34px] md:text-[40px] font-bold text-[#0F1F3F] leading-tight mb-5">DQ 6x Digitals</h2>
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#F2B9A3] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-slate-700 leading-relaxed">
-                          <p>This is how work actually happens at DQ.</p>
-                          <p>6xD connects direction to delivery — showing how teams plan and execute in rhythm.</p>
+                          <p>6xD (6x Digitals) is how work actually happens at DQ.</p>
+                          <p>It connects direction to delivery — showing how teams plan and execute in rhythm.</p>
                           <p>It’s the execution engine that turns vision into real outcomes.</p>
                         </div>
                       </div>

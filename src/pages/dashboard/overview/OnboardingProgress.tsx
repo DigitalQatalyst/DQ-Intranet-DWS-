@@ -1,13 +1,10 @@
 import React from 'react';
-import { Rocket, ShieldCheck, UserCircle, ArrowRight } from 'lucide-react';
-
 interface OnboardingProgressProps {
     profileCompletion: number;
     documentCompletion: number;
     overallCompletion: number;
     isLoading: boolean;
 }
-
 export const OnboardingProgress: React.FC<OnboardingProgressProps> = ({
     profileCompletion,
     documentCompletion,
@@ -15,89 +12,80 @@ export const OnboardingProgress: React.FC<OnboardingProgressProps> = ({
     isLoading,
 }) => {
     return (
-        <div className="bg-white p-6 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                <Rocket size={120} />
-            </div>
-
+        <div className="bg-white rounded-lg p-6 shadow-sm">
             {isLoading ? (
                 <div className="animate-pulse space-y-4">
-                    <div className="h-6 bg-gray-50 rounded-lg w-1/3"></div>
-                    <div className="h-10 bg-gray-50 rounded-lg w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-8 bg-gray-200 rounded"></div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="h-20 bg-gray-50 rounded-xl"></div>
-                        <div className="h-20 bg-gray-50 rounded-xl"></div>
+                        <div className="h-4 bg-gray-200 rounded col-span-1"></div>
+                        <div className="h-4 bg-gray-200 rounded col-span-1"></div>
                     </div>
                 </div>
             ) : (
                 <>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-                                <Rocket size={20} className="text-[#FB5535]" />
-                                Complete Your Setup
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                                Complete your profile and documents to unlock all platform features.
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
-                            <div className="text-right">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Overall Progress</p>
-                                <p className="text-lg font-black text-[#1A2E6E] leading-none">{overallCompletion}%</p>
-                            </div>
-                            <div className="w-10 h-10 rounded-full border-2 border-orange-100 flex items-center justify-center relative">
-                                <div
-                                    className="absolute inset-0 rounded-full border-2 border-[#FB5535]"
-                                    style={{ clipPath: `inset(0 0 ${100 - overallCompletion}% 0)` }}
-                                ></div>
-                                <span className="text-[10px] font-bold text-[#FB5535] italic">Go</span>
-                            </div>
-                        </div>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-800">
+                            Complete Your Setup
+                        </h3>
+                        <span className="text-sm font-medium text-gray-600">
+                            {overallCompletion}% Complete
+                        </span>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-200 transition-all">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
-                                    <UserCircle size={18} />
-                                    Onboarding Profile
-                                </div>
-                                <span className="text-xs font-bold text-gray-400">{profileCompletion}%</span>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Complete your profile and upload required documents to access all
+                        platform features
+                    </p>
+                    <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
+                        <div
+                            className="bg-gradient-to-r from-blue-500 to-teal-400 h-3 rounded-full"
+                            style={{
+                                width: `${overallCompletion}%`,
+                            }}
+                        ></div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="flex flex-col">
+                            <div className="flex justify-between mb-2">
+                                <span className="text-sm text-gray-600">Business Profile</span>
+                                <span className="text-sm font-medium text-gray-700">
+                                    {profileCompletion}%
+                                </span>
                             </div>
-                            <div className="w-full bg-blue-100/50 rounded-full h-2">
+                            <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
-                                    className="bg-blue-600 h-2 rounded-full transition-all duration-1000 shadow-sm shadow-blue-500/20"
-                                    style={{ width: `${profileCompletion}%` }}
+                                    className="bg-gray-500 h-2 rounded-full"
+                                    style={{
+                                        width: `${profileCompletion}%`,
+                                    }}
                                 ></div>
                             </div>
                         </div>
-
-                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-200 transition-all">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
-                                    <ShieldCheck size={18} />
-                                    Document Verification
-                                </div>
-                                <span className="text-xs font-bold text-gray-400">{documentCompletion}%</span>
+                        <div className="flex flex-col">
+                            <div className="flex justify-between mb-2">
+                                <span className="text-sm text-gray-600">
+                                    Required Documents
+                                </span>
+                                <span className="text-sm font-medium text-gray-700">
+                                    {documentCompletion}%
+                                </span>
                             </div>
-                            <div className="w-full bg-indigo-100/50 rounded-full h-2">
+                            <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
-                                    className="bg-indigo-600 h-2 rounded-full transition-all duration-1000 shadow-sm shadow-indigo-500/20"
-                                    style={{ width: `${documentCompletion}%` }}
+                                    className="bg-gray-500 h-2 rounded-full"
+                                    style={{
+                                        width: `${documentCompletion}%`,
+                                    }}
                                 ></div>
                             </div>
                         </div>
                     </div>
-
-                    <div className="flex justify-end pt-2 border-t border-gray-50">
+                    <div className="flex justify-end">
                         <button
                             onClick={() => console.log('Continue setup')}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A2E6E] text-white font-bold rounded-xl 
-                                     hover:bg-[#030F35] hover:shadow-lg transition-all active:scale-95 group"
+                            className="px-4 py-2 text-sm font-medium text-white rounded-md bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                            <span>Resume Onboarding</span>
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            Continue Setup
                         </button>
                     </div>
                 </>

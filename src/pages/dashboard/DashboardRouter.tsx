@@ -68,13 +68,13 @@ const DashboardRouter = () => {
       onboardingComplete &&
       location.pathname.includes("/dashboard/onboarding")
     ) {
-      navigate("/dashboard/overview", { replace: true });
+      navigate("/dashboard/learning", { replace: true });
     }
   }, [onboardingComplete, location.pathname, navigate]);
 
   const handleOnboardingComplete = () => {
     setOnboardingComplete(true);
-    navigate("/dashboard/overview", { replace: true });
+    navigate("/dashboard/learning", { replace: true });
   };
 
   // useEffect(() => {
@@ -100,7 +100,7 @@ const DashboardRouter = () => {
           index
           element={
             <Navigate
-              to={onboardingComplete ? "overview" : "onboarding"}
+              to={onboardingComplete ? "learning" : "onboarding"}
               replace
             />
           }
@@ -221,7 +221,7 @@ const DashboardRouter = () => {
 
 
 
-        <Route path="*" element={<Navigate to="overview" replace />} />
+        <Route path="*" element={<Navigate to={onboardingComplete ? "learning" : "onboarding"} replace />} />
       </Routes>
     </DashboardLayout>
   );

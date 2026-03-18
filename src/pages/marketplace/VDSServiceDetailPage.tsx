@@ -165,11 +165,11 @@ export default function VDSServiceDetailPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="relative w-full h-[500px] overflow-hidden bg-[#030E31]">
+      <div className="relative w-full h-[500px] overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url(/images/vds.png)',
+            backgroundImage: 'url(/images/content.PNG)',
           }}
         />
         <div className="relative z-10 h-full flex flex-col justify-center px-6 md:px-12 lg:px-24 text-white bg-[#030E31]/60">
@@ -280,10 +280,11 @@ export default function VDSServiceDetailPage() {
                           handleNavClick(e, sectionId);
                         }}
                         style={{ outline: 'none', border: 'none' }}
-                        className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${activeSection === '1' || activeSection === 'overview'
+                        className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${
+                          activeSection === '1' || activeSection === 'overview'
                             ? 'bg-blue-200 text-blue-900 font-medium outline-none'
                             : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none active:outline-none'
-                          }`}
+                        }`}
                       >
                         1. Introduction
                       </button>
@@ -327,10 +328,11 @@ export default function VDSServiceDetailPage() {
                               handleNavClick(e, sectionId);
                             }}
                             style={{ outline: 'none', border: 'none' }}
-                            className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${isActive
+                            className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${
+                              isActive
                                 ? 'bg-blue-200 text-blue-900 font-medium outline-none'
                                 : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none active:outline-none'
-                              }`}
+                            }`}
                           >
                             {displayTitle}
                           </button>

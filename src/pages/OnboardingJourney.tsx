@@ -12,7 +12,7 @@ interface JourneyPhase {
   subtitle: string;
   theme: string;
   primaryQuestion: string;
-  whatMonthIsAbout?: string;
+  whatMonthIsAbout?: string[];
   focusAreas: string[];
   whatAssociateIsDoing: string[];
   keyOutcomes: string[];
@@ -40,11 +40,11 @@ const journeyPhases: JourneyPhase[] = [
       'Building confidence in systems and structure'
     ],
     keyOutcomes: [
-      'Clear understanding of DQ structure & towers',
-      'Clear understanding of GHC principles',
-      'Clear understanding of 6x Digitals',
-      'Clear understanding of role expectations',
-      'Associate feels oriented, supported, and grounded'
+      'DQ structure & towers',
+      'GHC principles',
+      '6x Digitals',
+      'Role expectations',
+      'Feeling oriented, supported, and grounded'
     ]
   },
   {
@@ -80,7 +80,12 @@ const journeyPhases: JourneyPhase[] = [
     subtitle: 'Own the Role & Strengthen the System',
     theme: 'Ownership, Impact, Influence',
     primaryQuestion: 'Can I independently own my position and positively impact the DQ system?',
-    whatMonthIsAbout: 'Moving from participant → contributor. Demonstrating ownership without being asked. Influencing outcomes, not just completing tasks. Becoming a net-positive force in the system.',
+    whatMonthIsAbout: [
+      'Moving from participant → contributor',
+      'Demonstrating ownership without being asked',
+      'Influencing outcomes, not just completing tasks',
+      'Becoming a net-positive force in the system'
+    ],
     focusAreas: [
       'Independent ownership of responsibilities',
       'Proactive problem-solving',
@@ -170,8 +175,8 @@ function SideNav({ activeSection, onSectionClick }: SideNavProps) {
   };
 
   return (
-    <nav className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
-      <div className="pr-6">
+    <nav className="sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto bg-white border border-gray-200 shadow-sm rounded-xl p-4">
+      <div className="pr-2">
         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
           Contents
         </h3>
@@ -262,6 +267,11 @@ export function OnboardingJourney() {
       <main className="flex-1">
         <div className="container mx-auto px-4 py-12 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Left Column - Sticky Side Navigation (placed before main content for accessibility) */}
+            <aside className="lg:col-span-1">
+              <SideNav />
+            </aside>
+
             {/* Main Content */}
             <div className="lg:col-span-3 bg-white rounded-lg shadow-sm p-8 md:p-12">
               {/* Overall Philosophy */}
@@ -271,14 +281,14 @@ export function OnboardingJourney() {
                 </p>
                 <ul className="space-y-2 mb-6 text-gray-700 list-disc pl-6">
                   <li>Fully embedded into the DQ system</li>
-                  <li>Aligned to DQ DNA (GHC) and 6x Digitals (6xD))</li>
+                  <li>Aligned to DQ DNA (GHC) and 6x Digitals (6xD)</li>
                   <li>Operationally effective in their specific position</li>
                   <li>Ready to independently contribute and create impact</li>
                 </ul>
               </GuidelineSection>
 
               {/* Journey Phases */}
-              {journeyPhases.map((phase, index) => (
+              {journeyPhases.map((phase) => (
                 <GuidelineSection
                   key={phase.id}
                   id={phase.id}
@@ -297,7 +307,11 @@ export function OnboardingJourney() {
                   {phase.whatMonthIsAbout && (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold text-[#030E31] mb-2">What Month {phase.month} Is Really About:</h3>
-                      <p className="text-gray-700 leading-relaxed">{phase.whatMonthIsAbout}</p>
+                      <ul className="space-y-2 text-gray-700 list-disc pl-6">
+                        {phase.whatMonthIsAbout.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
                     </div>
                   )}
 
@@ -411,11 +425,6 @@ export function OnboardingJourney() {
                 </div>
               </GuidelineSection>
             </div>
-
-            {/* Right Column - Sticky Side Navigation */}
-            <aside className="lg:col-span-1">
-              <SideNav />
-            </aside>
           </div>
         </div>
       </main>

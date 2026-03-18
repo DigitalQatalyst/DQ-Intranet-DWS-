@@ -152,6 +152,7 @@ function transformCourseToLmsDetail(
     audience: parseTextToArray(course.audience) as Array<'Associate' | 'Lead'>,
     status: normalizeStatus(course.status),
     summary: course.description || course.title,
+    courseDetails: course.course_details || undefined,
     highlights: course.highlights || [],
     outcomes: course.outcomes || [],
     courseType: course.course_type || undefined,
@@ -281,7 +282,7 @@ export async function fetchCoursesByFilters(filters: {
   let query = lmsSupabaseClient
     .from('lms_courses')
     .select('*')
-    .eq('status', 'published');
+    .neq('status', 'archived');
 
   // Apply filters
   if (filters.category && filters.category.length > 0) {
@@ -1375,4 +1376,57 @@ export async function saveQuizSubmission(
   }
 
   return data as LmsQuizSubmission;
+}
+
+// ============================================
+// Save for Later Functions
+// ============================================
+
+/**
+ * Toggle saved_for_later for a course. Creates a progress row if one doesn't exist yet.
+ */
+export async function toggleSaveForLater(
+  userId: string,
+  courseId: string,
+  courseSlug: string,
+  currentlySaved: boolean
+): Promise<boolean> {
+  const newValue = !currentlySaved;
+  const { error } = await lmsSupabaseClient
+    .from('lms_course_progress')
+    .upsert(
+      {
+        user_id: userId,
+        course_id: courseId,
+        course_slug: courseSlug,
+        status: 'not_started',
+        saved_for_later: newValue,
+      },
+      { onConflict: 'user_id,course_id' }
+    );
+  if (error) {
+    console.error('Error toggling save for later:', error);
+    throw error;
+  }
+  return newValue;
+}
+
+/**
+ * Get the saved_for_later status for a course.
+ */
+export async function getSaveForLater(
+  userId: string,
+  courseId: string
+): Promise<boolean> {
+  const { data, error } = await lmsSupabaseClient
+    .from('lms_course_progress')
+    .select('saved_for_later')
+    .eq('user_id', userId)
+    .eq('course_id', courseId)
+    .maybeSingle();
+  if (error) {
+    console.error('Error fetching save for later:', error);
+    return false;
+  }
+  return data?.saved_for_later ?? false;
 }

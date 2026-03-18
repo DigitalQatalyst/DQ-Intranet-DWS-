@@ -61,6 +61,7 @@ export type LmsDetail = {
   audience: Array<'Associate' | 'Lead'>;
   status: 'live' | 'coming-soon';
   summary: string;
+  courseDetails?: string;
   excerpt?: string;
   highlights: string[];
   outcomes: string[];
@@ -161,6 +162,7 @@ type DBCourse = {
   review_count: number;
   image_url: string | null;
   faq: any[]; // JSONB array
+  course_details: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -441,6 +443,7 @@ function transformCourseToLmsDetail(
     audience: parseTextToArray(course.audience) as Array<'Associate' | 'Lead'>,
     status: normalizeStatus(course.status),
     summary: course.description || course.title,
+    courseDetails: course.course_details || undefined,
     excerpt: course.excerpt || undefined,
     highlights: course.highlights || [],
     outcomes: course.outcomes || [],

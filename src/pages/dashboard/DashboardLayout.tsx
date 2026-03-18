@@ -32,6 +32,7 @@ const DashboardLayout = ({
   isLoggedIn: boolean;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
 }) => {
+  const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen] = useState(true);
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -74,23 +75,27 @@ const DashboardLayout = ({
     <div className="h-screen flex flex-col overflow-hidden">
       <Header />
       <div className="flex-1 flex overflow-hidden bg-gray-50">
-        <Sidebar
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-          onboardingComplete={onboardingComplete}
-          companies={companies}
-          onCompanyChange={handleCompanyChange}
-          onAddNewEnterprise={handleAddNewEnterprise}
-          isLoggedIn={isLoggedIn}
-        />
+        {!location.pathname.includes("/dashboard/onboarding") && (
+          <Sidebar
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            onboardingComplete={onboardingComplete}
+            companies={companies}
+            onCompanyChange={handleCompanyChange}
+            onAddNewEnterprise={handleAddNewEnterprise}
+            isLoggedIn={isLoggedIn}
+          />
+        )}
 
         <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar bg-gray-50">
           <div className="flex-1 relative">
             <div className="min-h-full">{children}</div>
           </div>
-          <Footer isLoggedIn={isLoggedIn} />
+          {!location.pathname.includes("/dashboard/onboarding") && (
+            <Footer isLoggedIn={isLoggedIn} />
+          )}
         </div>
       </div>
     </div>

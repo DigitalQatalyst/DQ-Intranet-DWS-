@@ -12,13 +12,11 @@ import {
   HelpCircle,
   ExternalLink,
   Menu,
-  MessageCircle,
   Wallet,
   LayoutGrid,
   ShieldCheck,
   Navigation,
   BookOpen,
-  Bell,
   TrendingUp,
   CheckSquare,
   Timer,
@@ -40,6 +38,7 @@ interface MenuItem {
   category?: "category";
   external?: boolean;
   href?: string; // <--- new
+  comingSoon?: boolean;
 }
 interface SidebarProps {
   isOpen?: boolean;
@@ -125,6 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "Overview / Home",
         icon: <Home size={20} />,
         href: onboardingComplete ? "/dashboard/overview" : "/dashboard/onboarding",
+        comingSoon: true,
       }
     );
 
@@ -140,12 +140,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "Profile",
         icon: <User size={20} />,
         href: "/dashboard/profile",
+        comingSoon: true,
       },
       {
         id: "wallet",
         label: "Wallet",
         icon: <Wallet size={20} />,
         href: "/dashboard/documents",
+        comingSoon: true,
       }
     );
 
@@ -161,12 +163,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "My Workspace",
         icon: <LayoutGrid size={20} />,
         href: "/dashboard/workspace",
+        comingSoon: true,
       },
       {
         id: "requests",
         label: "Requests",
         icon: <Send size={20} />,
         href: "/dashboard/requests",
+        comingSoon: true,
       }
     );
 
@@ -182,12 +186,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "Reporting Obligations",
         icon: <BarChart3 size={20} />,
         href: "/dashboard/coming-soon?label=Reporting%20Obligations",
+        comingSoon: true,
       },
       {
         id: "compliance-tasks",
         label: "Compliance Tasks",
         icon: <ShieldCheck size={20} />,
         href: "/dashboard/coming-soon?label=Compliance%20Tasks",
+        comingSoon: true,
       }
     );
 
@@ -203,6 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "Onboarding Journey",
         icon: <Navigation size={20} />,
         href: "/dashboard/coming-soon?label=Onboarding%20Journey",
+        comingSoon: true,
       },
       {
         id: "my-courses",
@@ -212,26 +219,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
     );
 
-    // Communication
-    items.push(
-      {
-        id: "communication-cat",
-        label: "Communication",
-        category: "category",
-      } as MenuItem,
-      {
-        id: "notifications",
-        label: "Notifications",
-        icon: <Bell size={20} />,
-        href: "/dashboard/notifications",
-      },
-      {
-        id: "messages",
-        label: "Messages",
-        icon: <MessageCircle size={20} />,
-        href: "/dashboard/messages",
-      }
-    );
+    // Communication - Removed as per user request
 
     // My Performance
     items.push(
@@ -245,24 +233,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "Performance Overview",
         icon: <TrendingUp size={20} />,
         href: "/dashboard/performance/overview",
+        comingSoon: true,
       },
       {
         id: "task-completion",
         label: "Task Completion",
         icon: <CheckSquare size={20} />,
         href: "/dashboard/performance/tasks",
+        comingSoon: true,
       },
       {
         id: "request-turnaround",
         label: "Request Turnaround",
         icon: <Timer size={20} />,
         href: "/dashboard/performance/turnaround",
+        comingSoon: true,
       },
       {
         id: "activity-timeline",
         label: "Activity Timeline",
         icon: <History size={20} />,
         href: "/dashboard/performance/timeline",
+        comingSoon: true,
       }
     );
 
@@ -278,12 +270,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: "Settings",
         icon: <Settings size={20} />,
         href: "/dashboard/settings",
+        comingSoon: true,
       },
       {
         id: "support",
         label: "Support",
         icon: <HelpCircle size={20} />,
         href: "/dashboard/support",
+        comingSoon: true,
       },
       {
         id: "help-center",
@@ -291,6 +285,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         icon: <ExternalLink size={16} />,
         external: true,
         href: "https://docs.example.com/help",
+        comingSoon: true,
       }
     );
 
@@ -341,20 +336,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
             );
           }
 
-          const isDisabled = !onboardingComplete && item.id !== "onboarding";
+          const isComingSoon = item.comingSoon;
+          const isDisabled = (!onboardingComplete && item.id !== "onboarding") || isComingSoon;
           const isActive = activeSection === item.id;
 
           const baseClasses = `flex items-center px-4 py-3 relative transition-colors ${isActive
             ? "bg-blue-700 text-white"
             : isDisabled
-              ? "text-gray-400 cursor-not-allowed"
+              ? isComingSoon 
+                ? "text-gray-400 cursor-default" 
+                : "text-gray-400 cursor-not-allowed"
               : "text-gray-700 hover:bg-gray-200 cursor-pointer"
             }`;
 
           const content = (
             <>
               <span className="w-8 flex items-center justify-center flex-shrink-0">
-                {isDisabled && !isActive ? (
+                {isDisabled && !isActive && !isComingSoon ? (
                   <div className="relative">
                     {item.icon}
                     <Lock
@@ -367,6 +365,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 )}
               </span>
               <span className="flex-1 ml-3">{item.label}</span>
+              {item.comingSoon && (
+                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-600 rounded uppercase tracking-wider">
+                  Soon
+                </span>
+              )}
               {item.external && !isDisabled && (
                 <ExternalLink
                   size={14}

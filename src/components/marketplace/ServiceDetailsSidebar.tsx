@@ -4,7 +4,7 @@ import { CheckCircleIcon } from 'lucide-react';
 export interface ServiceDetailsSidebarProps {
   detailItems: Array<{ label: string; value: string }>;
   highlights: string[];
-  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding' | 'events';
+  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding';
   primaryAction: string;
   onPrimaryActionClick?: () => void;
   isPromptLibrary?: boolean;

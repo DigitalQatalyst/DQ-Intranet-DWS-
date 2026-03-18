@@ -289,10 +289,11 @@ export default function CDSServiceDetailPage() {
                           handleNavClick(e, sectionId);
                         }}
                         style={{ outline: 'none', border: 'none' }}
-                        className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${activeSection === '1' || activeSection === 'overview'
+                        className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${
+                          activeSection === '1' || activeSection === 'overview'
                             ? 'bg-blue-200 text-blue-900 font-medium outline-none'
                             : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none active:outline-none'
-                          }`}
+                        }`}
                       >
                         1. Introduction
                       </button>
@@ -336,10 +337,11 @@ export default function CDSServiceDetailPage() {
                               handleNavClick(e, sectionId);
                             }}
                             style={{ outline: 'none', border: 'none' }}
-                            className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${isActive
+                            className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${
+                              isActive
                                 ? 'bg-blue-200 text-blue-900 font-medium outline-none'
                                 : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none active:outline-none'
-                              }`}
+                            }`}
                           >
                             {displayTitle}
                           </button>

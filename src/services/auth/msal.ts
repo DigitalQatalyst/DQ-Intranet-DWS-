@@ -7,9 +7,15 @@ import {
 
 // Support both NEXT_PUBLIC_* and VITE_* envs
 const env = (import.meta as any).env as Record<string, string | undefined>;
-console.log(env);
 
-const CLIENT_ID = env.NEXT_PUBLIC_AAD_CLIENT_ID || env.VITE_AZURE_CLIENT_ID || "f996140d-d79b-419d-a64c-f211d23a38ad";
+// Client ID must be provided via environment variable
+const CLIENT_ID = env.NEXT_PUBLIC_AAD_CLIENT_ID || env.VITE_AZURE_CLIENT_ID;
+if (!CLIENT_ID) {
+  throw new Error(
+    "Azure AD Client ID is required. Please set VITE_AZURE_CLIENT_ID or NEXT_PUBLIC_AAD_CLIENT_ID in your .env file.\n\n" +
+    "This application uses Azure Entra ID (not B2C) for authentication."
+  );
+}
 const REDIRECT_URI =
   env.NEXT_PUBLIC_REDIRECT_URI ||
   env.VITE_AZURE_REDIRECT_URI ||
@@ -26,76 +32,107 @@ const API_SCOPES = (env.NEXT_PUBLIC_API_SCOPES || env.VITE_AZURE_SCOPES || "")
 // Always request standard OIDC scopes; include email to avoid UPN-only claims and offline_access for refresh tokens
 const DEFAULT_OIDC_SCOPES = ["openid", "profile", "email", "offline_access"] as const;
 
-// Vite exposes only VITE_* via import.meta.env (not process.env)
-const TENANT_NAME = env.NEXT_PUBLIC_B2C_TENANT_NAME || env.VITE_B2C_TENANT_NAME || "dqproj";
-const POLICY_SIGNUP_SIGNIN =
-  env.NEXT_PUBLIC_B2C_POLICY_SIGNUP_SIGNIN || env.VITE_B2C_POLICY_SIGNUP_SIGNIN || "F1_CustomerSUSILocal_KF";
-// Optional dedicated Sign-Up policy/user flow
-const POLICY_SIGNUP = env.NEXT_PUBLIC_B2C_POLICY_SIGNUP || env.VITE_B2C_POLICY_SIGNUP;
+// Entra ID (Azure AD) Configuration
+// Tenant ID is required for Entra ID authentication
+// Can be provided as either tenant ID (GUID) or verified domain name
+// Tenant ID or Domain must be provided via environment variable
+const TENANT_ID = env.NEXT_PUBLIC_TENANT_ID || env.VITE_AZURE_TENANT_ID;
+const TENANT_DOMAIN = env.NEXT_PUBLIC_TENANT_DOMAIN || env.VITE_AZURE_TENANT_DOMAIN;
 
-// Select correct login host. Prefer explicit host; default to B2C (b2clogin.com).
-// If you are using Entra External Identities (CIAM), set NEXT_PUBLIC_IDENTITY_HOST or VITE_IDENTITY_HOST
-// to e.g. "yourtenant.ciamlogin.com".
+// Custom domain support (optional)
+const CUSTOM_DOMAIN = env.NEXT_PUBLIC_CIAM_CUSTOM_DOMAIN || env.VITE_AZURE_CUSTOM_DOMAIN;
 
-
-
-
-// For external Entra ID (Azure AD), prefer tenant ID or domain
-// const TENANT_ID = env.NEXT_PUBLIC_TENANT_ID || env.VITE_AZURE_TENANT_ID;
-// const CUSTOM_DOMAIN = env.NEXT_PUBLIC_CIAM_CUSTOM_DOMAIN || env.VITE_AZURE_CUSTOM_DOMAIN;
-const SUB = env.NEXT_PUBLIC_CIAM_SUBDOMAIN || env.VITE_AZURE_SUBDOMAIN;
-
-const LOGIN_HOST =
-  env.NEXT_PUBLIC_IDENTITY_HOST ||
-  env.VITE_IDENTITY_HOST ||
-  (SUB ? `${SUB}.ciamlogin.com` : `${TENANT_NAME}.b2clogin.com`);
-const AUTHORITY_SIGNUP_SIGNIN = `https://${LOGIN_HOST}/${TENANT_NAME}.onmicrosoft.com/`;
-const AUTHORITY_SIGNUP = POLICY_SIGNUP
-  ? `https://${LOGIN_HOST}/${TENANT_NAME}.onmicrosoft.com/${POLICY_SIGNUP}`
-  : AUTHORITY_SIGNUP_SIGNIN;
-
-// Compute authority URL:
+// Compute authority URL for Entra ID (Azure AD):
 // Priority:
 // 1. Custom domain + tenant ID (e.g. https://login.example.com/{tenantId})
-// 2. Azure AD tenant (https://login.microsoftonline.com/{tenantId})
-// 3. CIAM subdomain (https://{sub}.ciamlogin.com/)
-// 4. Fallback to common
+// 2. Tenant ID (https://login.microsoftonline.com/{tenantId})
+// 3. Tenant domain (https://login.microsoftonline.com/{domain})
+// 4. Explicit authority from env (if provided)
+// Note: Single-tenant applications require a tenant-specific endpoint
+// The /common endpoint is not supported for single-tenant apps created after 10/15/2018
 let computedAuthority: string;
-// if (CUSTOM_DOMAIN && TENANT_ID) {
-//   computedAuthority = `https://${CUSTOM_DOMAIN}/${TENANT_ID}`;
-// } else if (TENANT_ID) {
-//   computedAuthority = `https://login.microsoftonline.com/${TENANT_ID}`;
-// } else if (SUB) {
-  computedAuthority = `https://${SUB}.ciamlogin.com/`;
-// } else {
-//   computedAuthority = env.VITE_AZURE_AUTHORITY || "https://login.microsoftonline.com/common";
-// }
+if (CUSTOM_DOMAIN && TENANT_ID) {
+  computedAuthority = `https://${CUSTOM_DOMAIN}/${TENANT_ID}`;
+} else if (TENANT_ID) {
+  computedAuthority = `https://login.microsoftonline.com/${TENANT_ID}`;
+} else if (TENANT_DOMAIN) {
+  computedAuthority = `https://login.microsoftonline.com/${TENANT_DOMAIN}`;
+} else if (env.VITE_AZURE_AUTHORITY || env.NEXT_PUBLIC_AZURE_AUTHORITY) {
+  // Allow explicit authority override from env (must be tenant-specific)
+  computedAuthority = env.VITE_AZURE_AUTHORITY || env.NEXT_PUBLIC_AZURE_AUTHORITY || '';
+  
+  // CRITICAL: Reject /common endpoint for single-tenant applications
+  if (computedAuthority.includes('/common')) {
+    throw new Error(
+      `Invalid Azure AD authority configuration: The /common endpoint is not supported for single-tenant applications.\n\n` +
+      `Current authority: ${computedAuthority}\n\n` +
+      `Please use a tenant-specific endpoint instead:\n` +
+      `  - https://login.microsoftonline.com/${TENANT_ID || '{your-tenant-id}'}\n` +
+      `  - https://login.microsoftonline.com/${TENANT_DOMAIN || '{your-tenant-domain}'}\n\n` +
+      `To fix this, either:\n` +
+      `  1. Remove VITE_AZURE_AUTHORITY or NEXT_PUBLIC_AZURE_AUTHORITY from your .env file, OR\n` +
+      `  2. Set it to a tenant-specific endpoint (not /common)\n\n` +
+      `Your tenant ID: ${TENANT_ID || 'not set'}\n` +
+      `Your tenant domain: ${TENANT_DOMAIN || 'not set'}`
+    );
+  }
+} else {
+  // Throw error if tenant is not configured - single-tenant apps require tenant-specific endpoint
+  throw new Error(
+    "Azure AD Tenant configuration is required. Please set one of the following environment variables:\n" +
+    "  - NEXT_PUBLIC_TENANT_ID or VITE_AZURE_TENANT_ID (tenant GUID)\n" +
+    "  - NEXT_PUBLIC_TENANT_DOMAIN or VITE_AZURE_TENANT_DOMAIN (verified domain name)\n" +
+    "  - VITE_AZURE_AUTHORITY (full authority URL, e.g. https://login.microsoftonline.com/{tenantId})\n\n" +
+    "Single-tenant applications cannot use the /common endpoint. " +
+    "You can find your tenant ID in Azure Portal > Azure Active Directory > Overview."
+  );
+}
+
+// Final validation: Ensure authority is tenant-specific (not /common)
+if (computedAuthority.includes('/common')) {
+  throw new Error(
+    `CRITICAL: Azure AD authority must be tenant-specific, not /common.\n\n` +
+    `Detected authority: ${computedAuthority}\n\n` +
+    `This application is configured as single-tenant and cannot use the /common endpoint.\n` +
+    `Please configure a tenant-specific endpoint using:\n` +
+    `  - VITE_AZURE_TENANT_ID=${TENANT_ID || '{your-tenant-id}'}\n` +
+    `  - OR VITE_AZURE_TENANT_DOMAIN=${TENANT_DOMAIN || '{your-tenant-domain}'}\n` +
+    `  - OR VITE_AZURE_AUTHORITY=https://login.microsoftonline.com/${TENANT_ID || '{your-tenant-id}'}`
+  );
+}
+
+// Log the computed authority for debugging (remove in production if needed)
+console.log('🔐 Azure AD Authority:', computedAuthority);
+console.log('🔐 Azure AD Client ID:', CLIENT_ID);
+console.log('🔐 Azure AD Tenant ID:', TENANT_ID);
 
 // Known authorities for MSAL (hostnames only)
-// const knownAuthorities: string[] = (() => {
-//   if (CUSTOM_DOMAIN) return [CUSTOM_DOMAIN];
-//   if (TENANT_ID) {
-//     try {
-//       const url = new URL(computedAuthority);
-//       return [url.host];
-//     } catch {
-//       return [];
-//     }
-//   }
-//   if (SUB) return [`${SUB}.ciamlogin.com`];
-//   try {
-//     const url = new URL(computedAuthority);
-//     return [url.host];
-//   } catch {
-//     return [];
-//   }
-// })();
+const knownAuthorities: string[] = (() => {
+  if (CUSTOM_DOMAIN) {
+    try {
+      const url = new URL(computedAuthority);
+      return [url.hostname];
+    } catch {
+      return [CUSTOM_DOMAIN];
+    }
+  }
+  // For login.microsoftonline.com, we use the hostname
+  try {
+    const url = new URL(computedAuthority);
+    return [url.hostname];
+  } catch {
+    return ["login.microsoftonline.com"];
+  }
+})();
+
+// For Entra ID, login and signup use the same authority (no separate policies like B2C)
+const AUTHORITY = computedAuthority;
 
 export const msalConfig: Configuration = {
   auth: {
     clientId: CLIENT_ID,
-    authority: AUTHORITY_SIGNUP_SIGNIN,
-    knownAuthorities: [LOGIN_HOST],
+    authority: AUTHORITY,
+    knownAuthorities: knownAuthorities,
     redirectUri: REDIRECT_URI,
     postLogoutRedirectUri: POST_LOGOUT_REDIRECT_URI,
     // Stay on the redirectUri after login instead of bouncing back
@@ -122,12 +159,16 @@ export const msalInstance = new PublicClientApplication(msalConfig);
 const ENABLE_GRAPH_USER_READ = (env.VITE_MSAL_ENABLE_GRAPH_FALLBACK || env.NEXT_PUBLIC_MSAL_ENABLE_GRAPH_FALLBACK) === 'true';
 const GRAPH_SCOPES: string[] = ENABLE_GRAPH_USER_READ ? ["User.Read"] : [];
 
+// For Entra ID, login and signup use the same authority and scopes
+// The signup flow is handled by Azure AD's user registration settings
 export const defaultLoginRequest = {
   scopes: Array.from(new Set([...(API_SCOPES.length ? API_SCOPES : []), ...DEFAULT_OIDC_SCOPES, ...GRAPH_SCOPES])),
-  authority: AUTHORITY_SIGNUP_SIGNIN,
+  authority: AUTHORITY,
 };
 
+// Signup uses the same request as login for Entra ID
+// The 'state' parameter is used to identify signup flows for onboarding routing
 export const signupRequest = {
   scopes: Array.from(new Set([...(API_SCOPES.length ? API_SCOPES : []), ...DEFAULT_OIDC_SCOPES, ...GRAPH_SCOPES])),
-  authority: AUTHORITY_SIGNUP,
+  authority: AUTHORITY,
 };

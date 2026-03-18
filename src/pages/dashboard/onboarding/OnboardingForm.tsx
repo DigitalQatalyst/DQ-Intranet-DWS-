@@ -1,3 +1,4 @@
+import React from 'react';
 import { OnboardingStep } from './OnboardingStep';
 
 import { ArrowLeftIcon } from 'lucide-react';
@@ -16,13 +17,17 @@ export function OnboardingForm({ onComplete, isRevisit = false }) {
         formData,
         errors,
         touchedFields,
+        editedFields,
+        isEditingWelcome,
         showStepsDropdown,
         loading,
         setCurrentStep,
         setShowStepsDropdown,
+        setIsEditingWelcome: _setIsEditingWelcome,
         handleInputChange,
         validateCurrentStep,
         validateField,
+        toggleWelcomeEdit,
         handleSubmit: submitForm,
         handleJumpToStep,
         getStepCompletionStatus,
@@ -32,7 +37,7 @@ export function OnboardingForm({ onComplete, isRevisit = false }) {
         autoSaving,
         progressSaved,
         saveProgress,
-    } = useAutoSave(formData, currentStep);
+    } = useAutoSave(formData, currentStep, isEditingWelcome);
 
     const handleNext = async () => {
         if (validateCurrentStep()) {
@@ -69,7 +74,11 @@ export function OnboardingForm({ onComplete, isRevisit = false }) {
                     <WelcomeStep
                         formData={formData}
                         errors={errors}
+                        isEditingWelcome={isEditingWelcome}
+                        editedFields={editedFields}
+                        isRevisit={isRevisit}
                         onInputChange={handleInputChange}
+                        onToggleEdit={toggleWelcomeEdit}
                     />
                 );
 

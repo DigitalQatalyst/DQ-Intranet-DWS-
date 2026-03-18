@@ -11,20 +11,20 @@ import { FullTableModal } from '../../pages/guidelines/wfh-guidelines/FullTableM
 export default function CIDSServiceDetailPage() {
   const { cardId } = useParams<{ cardId: string }>();
   const navigate = useNavigate();
-
+  
   const card = CIDS_SERVICE_CARDS.find(c => c.id === cardId);
-
+  
   // Modal state management for tables
   const [tableModalOpen, setTableModalOpen] = useState<{ [key: string]: boolean }>({});
-
+  
   // Active section tracking
   const [activeSection, setActiveSection] = useState<string>('overview');
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
-
+  
   const openTableModal = (subsectionId: string) => {
     setTableModalOpen(prev => ({ ...prev, [subsectionId]: true }));
   };
-
+  
   const closeTableModal = (subsectionId: string) => {
     setTableModalOpen(prev => ({ ...prev, [subsectionId]: false }));
   };
@@ -55,19 +55,19 @@ export default function CIDSServiceDetailPage() {
       if (visibleEntries.length > 0) {
         const currentEntry = visibleEntries[0];
         const currentId = currentEntry.target.id;
-
+        
         // Check if this is a Stage title itself (e.g., "3" for Stage 01)
         const isStageTitle = card.content.subsections?.some(s => {
           const sectionId = s.id.toLowerCase().replace(/\./g, '-').replace(/\s+/g, '-');
           return sectionId === currentId && s.title.startsWith('Stage');
         });
-
+        
         if (isStageTitle) {
           // If viewing the Stage title itself, highlight it
           setActiveSection(currentId);
           return;
         }
-
+        
         // Check if this is a subsection of a Stage (e.g., "3-1" is a subsection of Stage "3")
         // If so, highlight the Stage title in navigation instead of the subsection
         const stageMatch = currentId.match(/^(\d+)-/);
@@ -78,14 +78,14 @@ export default function CIDSServiceDetailPage() {
             const sectionId = s.id.toLowerCase().replace(/\./g, '-').replace(/\s+/g, '-');
             return sectionId === stageId && s.title.startsWith('Stage');
           });
-
+          
           if (stageSubsection) {
             // Highlight the Stage title when viewing its subsections
             setActiveSection(stageId);
             return;
           }
         }
-
+        
         // For other sections (like "1-1", "1-2", "overview", etc.), highlight them directly
         setActiveSection(currentId);
       }
@@ -132,7 +132,7 @@ export default function CIDSServiceDetailPage() {
   if (!card) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => { }} sidebarOpen={false} />
+        <Header toggleSidebar={() => {}} sidebarOpen={false} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Service Card Not Found</h1>
@@ -152,8 +152,8 @@ export default function CIDSServiceDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 guidelines-theme">
-      <Header toggleSidebar={() => { }} sidebarOpen={false} />
-
+      <Header toggleSidebar={() => {}} sidebarOpen={false} />
+      
       {/* Breadcrumbs - Above Hero Section */}
       <div className="container mx-auto px-4 pt-4 max-w-[90rem]">
         <nav className="flex" aria-label="Breadcrumb">
@@ -189,13 +189,13 @@ export default function CIDSServiceDetailPage() {
           </ol>
         </nav>
       </div>
-
+      
       {/* Hero Section */}
-      <div className="relative w-full h-[500px] overflow-hidden bg-[#030E31]">
+      <div className="relative w-full h-[500px] overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url(/images/cids.PNG)',
+            backgroundImage: 'url(/images/content.PNG)',
           }}
         />
 
@@ -328,10 +328,11 @@ export default function CIDSServiceDetailPage() {
                           handleNavClick(e, 'overview');
                         }}
                         style={{ outline: 'none', border: 'none' }}
-                        className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${activeSection === 'overview'
+                        className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${
+                          activeSection === 'overview'
                             ? 'bg-blue-200 text-blue-900 font-medium outline-none'
                             : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none active:outline-none'
-                          }`}
+                        }`}
                       >
                         1. Introduction
                       </button>
@@ -360,7 +361,7 @@ export default function CIDSServiceDetailPage() {
                           }
                         }
                         // Add number prefix only for Stage titles: 3 for first Stage, 4 for second, etc.
-                        const displayTitle = subsection.title.startsWith('Stage')
+                        const displayTitle = subsection.title.startsWith('Stage') 
                           ? `${stageCount + 2}. ${subsection.title}`
                           : subsection.title;
                         return (
@@ -371,10 +372,11 @@ export default function CIDSServiceDetailPage() {
                               handleNavClick(e, sectionId);
                             }}
                             style={{ outline: 'none', border: 'none' }}
-                            className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${isActive
+                            className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 outline-none ${
+                              isActive
                                 ? 'bg-blue-200 text-blue-900 font-medium outline-none'
                                 : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none active:outline-none'
-                              }`}
+                            }`}
                           >
                             {displayTitle}
                           </button>

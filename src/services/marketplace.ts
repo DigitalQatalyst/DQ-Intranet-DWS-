@@ -4,6 +4,14 @@ import { FilterConfig } from "../components/marketplace/FilterSidebar";
 import { MarketplaceItem } from "../components/marketplace/MarketplaceGrid";
 import { getMarketplaceConfig } from "../utils/marketplaceConfig";
 
+function getMarketplaceQuery(type: string, key: string) {
+  return MARKETPLACE_QUERIES[type as keyof typeof MARKETPLACE_QUERIES]?.[key as keyof (typeof MARKETPLACE_QUERIES)[keyof typeof MARKETPLACE_QUERIES]] ?? null;
+}
+
+function marketplaceOpName(type: string, prefix: string, suffix = '') {
+  return `${prefix}${type.charAt(0).toUpperCase()}${type.slice(1)}${suffix}`;
+}
+
 /**
  * Fetches marketplace items based on marketplace type, filters, and search query
  */
@@ -13,41 +21,17 @@ export const fetchMarketplaceItems = async (
   searchQuery?: string
 ): Promise<any[]> => {
   try {
-    // Get the marketplace config to access query and mapping functions
     const config = getMarketplaceConfig(marketplaceType);
-
-    // Get the appropriate query for this marketplace type
-    const query =
-      MARKETPLACE_QUERIES[marketplaceType as keyof typeof MARKETPLACE_QUERIES]
-        ?.getItems;
-
+    const query = getMarketplaceQuery(marketplaceType, 'getItems');
     if (!query) {
-      // Fall back to config-defined mock items if no query is available
-      if (config.mockData?.items) {
-        console.log(`No query defined for ${marketplaceType}, using mock data from config`);
-        return config.mockData.items;
-      }
-      throw new Error(
-        `No query defined for marketplace type: ${marketplaceType}`
-      );
+      throw new Error(`No query defined for marketplace type: ${marketplaceType}`);
     }
-    // Prepare variables for the query
-    const variables: Record<string, string | undefined> = {
-      search: searchQuery || undefined,
-    };
-    // Add filter variables
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) {
-        variables[key] = value;
-      }
-    });
-    // Execute the query
+    const variables: Record<string, string | undefined> = { search: searchQuery || undefined };
+    Object.entries(filters).forEach(([key, value]) => { if (value) variables[key] = value; });
     const data = (await request(
       query,
       variables,
-      `get${
-        marketplaceType.charAt(0).toUpperCase() + marketplaceType.slice(1)
-      }Items`,
+      marketplaceOpName(marketplaceType, 'get', 'Items'),
       marketplaceType
     )) as any;
     // Transform the data using the mapping function if provided in the config
@@ -57,22 +41,29 @@ export const fetchMarketplaceItems = async (
     return data.items || [];
   } catch (error) {
     console.error(`Error fetching ${marketplaceType} items:`, error);
-
-    // Final fallback to config-defined mock data or specific mock constants
-    const config = getMarketplaceConfig(marketplaceType);
-    if (config.mockData?.items) {
-      return config.mockData.items;
-    }
-
+    
+    // Fall back to mock data for specific marketplace types
     if (marketplaceType === 'non-financial') {
       try {
         const { mockNonFinancialServices } = await import('../utils/mockMarketplaceData');
+        console.log(`Using mock data for ${marketplaceType}`);
         return mockNonFinancialServices;
       } catch (mockError) {
-        // Ignore fallback error
+        console.error(`Error loading mock data for ${marketplaceType}:`, mockError);
       }
     }
-
+    
+    // Fall back to mock data for guides/knowledge-hub
+    if (marketplaceType === 'guides' || marketplaceType === 'knowledge-hub') {
+      try {
+        const { mockKnowledgeHubItems } = await import('../utils/mockMarketplaceData');
+        console.log(`Using mock data for ${marketplaceType}`);
+        return mockKnowledgeHubItems;
+      } catch (mockError) {
+        console.error(`Error loading mock data for ${marketplaceType}:`, mockError);
+      }
+    }
+    
     throw new Error(
       `Failed to load ${marketplaceType} items. Please try again later.`
     );
@@ -85,39 +76,22 @@ export const fetchMarketplaceItems = async (
 export const fetchMarketplaceFilters = async (
   marketplaceType: string
 ): Promise<FilterConfig[]> => {
+  const config = getMarketplaceConfig(marketplaceType);
+  const query = getMarketplaceQuery(marketplaceType, 'getFilterOptions');
+  if (!query) return config.filterCategories;
   try {
-    // Get the marketplace config
-    const config = getMarketplaceConfig(marketplaceType);
-    // Get the appropriate query for this marketplace type
-    const query =
-      MARKETPLACE_QUERIES[marketplaceType as keyof typeof MARKETPLACE_QUERIES]
-        ?.getFilterOptions;
-    if (!query) {
-      // Fall back to config-defined filters if no query is available
-      return config.filterCategories;
-    }
-    // Execute the query
     const data = (await request(
       query,
       {},
-      `get${
-        marketplaceType.charAt(0).toUpperCase() + marketplaceType.slice(1)
-      }FilterOptions`,
+      marketplaceOpName(marketplaceType, 'get', 'FilterOptions'),
       marketplaceType
     )) as any;
-    // Transform the data using the mapping function if provided in the config
     if (config.mapFilterResponse && data.filterOptions) {
       return config.mapFilterResponse(data.filterOptions);
     }
-    // Fall back to config-defined filters if mapping fails
     return config.filterCategories;
   } catch (error) {
-    console.error(
-      `Error fetching filter options for ${marketplaceType}:`,
-      error
-    );
-    // Fall back to config-defined filters on error
-    const config = getMarketplaceConfig(marketplaceType);
+    console.error(`Error fetching filter options for ${marketplaceType}:`, error);
     return config.filterCategories;
   }
 };
@@ -130,29 +104,17 @@ export const fetchMarketplaceItemDetails = async (
   itemId: string
 ): Promise<any> => {
   try {
-    // Get the marketplace config
     const config = getMarketplaceConfig(marketplaceType);
-    // Get the appropriate query for this marketplace type
-    const query =
-      MARKETPLACE_QUERIES[marketplaceType as keyof typeof MARKETPLACE_QUERIES]
-        ?.getItemDetails;
+    const query = getMarketplaceQuery(marketplaceType, 'getItemDetails');
     if (!query) {
-      throw new Error(
-        `No detail query defined for marketplace type: ${marketplaceType}`
-      );
+      throw new Error(`No detail query defined for marketplace type: ${marketplaceType}`);
     }
-    // Execute the query
     const data = (await request(
       query,
-      {
-        id: itemId,
-      },
-      `get${
-        marketplaceType.charAt(0).toUpperCase() + marketplaceType.slice(1)
-      }ItemDetails`,
+      { id: itemId },
+      marketplaceOpName(marketplaceType, 'get', 'ItemDetails'),
       marketplaceType
     )) as any;
-    // Transform the data using the mapping function if provided in the config
     if (config.mapDetailResponse && data.item) {
       return config.mapDetailResponse(data.item);
     }
@@ -173,31 +135,17 @@ export const fetchRelatedMarketplaceItems = async (
   provider: string
 ): Promise<any[]> => {
   try {
-    // Get the marketplace config
     const config = getMarketplaceConfig(marketplaceType);
-    // Get the appropriate query for this marketplace type
-    const query =
-      MARKETPLACE_QUERIES[marketplaceType as keyof typeof MARKETPLACE_QUERIES]
-        ?.getRelatedItems;
+    const query = getMarketplaceQuery(marketplaceType, 'getRelatedItems');
     if (!query) {
-      throw new Error(
-        `No related items query defined for marketplace type: ${marketplaceType}`
-      );
+      throw new Error(`No related items query defined for marketplace type: ${marketplaceType}`);
     }
-    // Execute the query
     const data = (await request(
       query,
-      {
-        id: itemId,
-        category,
-        provider,
-      },
-      `getRelated${
-        marketplaceType.charAt(0).toUpperCase() + marketplaceType.slice(1)
-      }Items`,
+      { id: itemId, category, provider },
+      marketplaceOpName(marketplaceType, 'getRelated', 'Items'),
       marketplaceType
     )) as any;
-    // Transform the data using the mapping function if provided in the config
     if (config.mapListResponse && data.relatedItems) {
       return config.mapListResponse(data.relatedItems);
     }
@@ -215,22 +163,14 @@ export const fetchMarketplaceProviders = async (
   marketplaceType: string
 ): Promise<any[]> => {
   try {
-    // Get the appropriate query for this marketplace type
-    const query =
-      MARKETPLACE_QUERIES[marketplaceType as keyof typeof MARKETPLACE_QUERIES]
-        ?.getProviders;
+    const query = getMarketplaceQuery(marketplaceType, 'getProviders');
     if (!query) {
-      throw new Error(
-        `No providers query defined for marketplace type: ${marketplaceType}`
-      );
+      throw new Error(`No providers query defined for marketplace type: ${marketplaceType}`);
     }
-    // Execute the query
     const data = (await request(
       query,
       {},
-      `get${
-        marketplaceType.charAt(0).toUpperCase() + marketplaceType.slice(1)
-      }Providers`,
+      marketplaceOpName(marketplaceType, 'get', 'Providers'),
       marketplaceType
     )) as any;
     return data.providers || [];
@@ -241,55 +181,51 @@ export const fetchMarketplaceProviders = async (
 };
 
 /**
- * Fetches guides from Supabase for the Latest DQ Developments section
+ * Fetches latest guides from Knowledge Hub Supabase
  */
-export const fetchLatestGuides = async (
-  type: 'ghc' | 'guidelines' | 'learning',
-  limit: number = 6
-): Promise<any[]> => {
+export const fetchLatestGuides = async (filters?: { guide_type?: string; domain?: string; limit?: number }): Promise<any[]> => {
   try {
-    const { supabaseClient } = await import('../lib/supabaseClient');
+    const { knowledgeHubSupabase } = await import('./knowledgeHubClient');
     
-    const excludedSlugs = ['atp-guidelines', 'agile-working-guidelines', 'client-session-guidelines', 'dbp-support-guidelines', 'dq-products'];
-    
-    let query = supabaseClient
-      .from('guides')
-      .select('id, slug, title, summary, image, guide_type, sub_domain, domain, strategy_type, strategy_framework, guidelines_category, created_at, updated_at')
-      .order('updated_at', { ascending: false });
-    
-    // Exclude removed guidelines
-    excludedSlugs.forEach(slug => {
-      query = query.neq('slug', slug);
-    });
-    
-    // Filter based on type
-    if (type === 'ghc') {
-      // GHC: Strategy guides with strategy_type = 'GHC' or strategy_framework containing 'GHC'
-      query = query
-        .eq('guide_type', 'Strategy')
-        .or('strategy_type.eq.GHC,strategy_framework.ilike.%GHC%');
-    } else if (type === 'guidelines') {
-      // Guidelines: guide_type = 'Guidelines'
-      query = query.eq('guide_type', 'Guidelines');
-    } else if (type === 'learning') {
-      // Learning: Strategy guides related to learning/execution
-      query = query
-        .eq('guide_type', 'Strategy')
-        .or('strategy_type.ilike.%Learning%,strategy_type.ilike.%Execution%,title.ilike.%Learning%,title.ilike.%Execution%');
-    }
-    
-    query = query.limit(limit);
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      console.error(`Error fetching ${type} guides:`, error);
+    if (!knowledgeHubSupabase) {
+      console.warn('Knowledge Hub Supabase client not initialized, returning empty array');
       return [];
     }
+
+    let query = knowledgeHubSupabase
+      .from('guides')
+      .select('id, slug, title, summary, hero_image_url, last_updated_at, author_name, guide_type, domain, status')
+      .eq('status', 'Approved')
+      .neq('slug', 'atp-guidelines')
+      .neq('slug', 'agile-working-guidelines')
+      .neq('slug', 'client-session-guidelines')
+      .neq('slug', 'dbp-support-guidelines')
+      .neq('slug', 'dq-products');
+
+    // Apply filters if provided
+    if (filters?.guide_type) {
+      query = query.ilike('guide_type', `%${filters.guide_type}%`);
+    }
     
+    if (filters?.domain) {
+      query = query.ilike('domain', `%${filters.domain}%`);
+    }
+
+    // Order and limit
+    query = query
+      .order('last_updated_at', { ascending: false, nullsLast: true })
+      .limit(filters?.limit || 6);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching guides from Knowledge Hub:', error);
+      return [];
+    }
+
     return data || [];
   } catch (error) {
-    console.error(`Error fetching ${type} guides:`, error);
+    console.error('Error in fetchLatestGuides:', error);
     return [];
   }
 };
