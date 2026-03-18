@@ -11,6 +11,8 @@ import {
     markLessonCompleted as markLessonCompletedSvc,
     updateLessonVideoProgress as updateLessonVideoProgressSvc,
     saveQuizSubmission as saveQuizSubmissionSvc,
+    getSaveForLater,
+    toggleSaveForLater,
 } from '../services/lmsService';
 import type {
     LmsLessonProgress,
@@ -235,4 +237,29 @@ export function useSaveQuizSubmission() {
             queryClient.invalidateQueries({ queryKey: ['lms-lesson-progress', variables.lesson_id] });
         },
     });
+}
+
+/**
+ * Hook to toggle and read the "Save for Later" state for a course.
+ */
+export function useSaveForLater(courseId: string, courseSlug: string) {
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
+    const queryKey = ['lms-saved-for-later', courseId, user?.id];
+
+    const { data: isSaved = false } = useQuery<boolean, Error>({
+        queryKey,
+        queryFn: () => getSaveForLater(user!.id, courseId),
+        enabled: !!user?.id && !!courseId,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const { mutate: toggle, isPending } = useMutation({
+        mutationFn: () => toggleSaveForLater(user!.id, courseId, courseSlug, isSaved),
+        onSuccess: (newValue) => {
+            queryClient.setQueryData(queryKey, newValue);
+        },
+    });
+
+    return { isSaved, toggle, isPending };
 }

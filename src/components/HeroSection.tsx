@@ -43,7 +43,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
       ></div>
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible whitespace-nowrap">
             <AnimatedText text={heroContent.title} gap="1rem" />
           </h1>
           <FadeInUpOnScroll delay={0.8}>
@@ -124,7 +124,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
             to={ctaHref}
             className="px-8 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center border-2 border-gray-200"
           >
-            <span>Start Your Onboarding Journey</span>
+            <span>Start Your Onboarding Journey</span>{' '}
             <ArrowRight
               size={18}
               className="ml-2 transition-transform duration-300 group-hover:translate-x-1"

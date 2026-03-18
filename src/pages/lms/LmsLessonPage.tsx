@@ -343,6 +343,7 @@ export const LmsLessonPage: React.FC = () => {
   useEffect(() => {
     if (lessonId) {
       setQuizLoading(true);
+      setShowQuizOverlay(false);
       setQuizAnswers({});
       setQuizSubmitted(false);
       setQuizScore(null);
