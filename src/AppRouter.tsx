@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "./components/Header";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
 import { CommunitiesRouter } from "./communities/CommunitiesRouter";
 import { App } from './App';
@@ -94,9 +95,9 @@ export function AppRouter() {
             <Route
               path="/dashboard/*"
               element={
-                // <ProtectedRoute>
-                <DashboardRouter />
-                // </ProtectedRoute>
+                <ProtectedRoute>
+                  <DashboardRouter />
+                </ProtectedRoute>
               }
             />
             <Route path="/asset-library" element={<AssetLibraryPage />} />
