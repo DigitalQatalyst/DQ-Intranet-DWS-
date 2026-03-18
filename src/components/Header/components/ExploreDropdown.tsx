@@ -9,6 +9,7 @@ import {
   SparklesIcon,
   LucideProps,
   BookOpen,
+  CreditCardIcon,
 } from 'lucide-react';
 
 interface Marketplace {
