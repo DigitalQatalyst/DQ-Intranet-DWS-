@@ -34,6 +34,16 @@ const queryClient = new QueryClient({
   },
 });
 
+// Clear stale/corrupted MSAL cache before initializing to prevent version mismatch errors
+const msalKeys = Object.keys(localStorage).filter((k) => k.toLowerCase().includes('msal'));
+msalKeys.forEach((k) => localStorage.removeItem(k));
+sessionStorage.clear();
+// Strip auth params from URL to prevent redirect loops on stale state
+const _search = globalThis.location.search;
+if (_search.includes('code=') || _search.includes('error=') || _search.includes('state=')) {
+  globalThis.history.replaceState({}, '', globalThis.location.pathname);
+}
+
 const container = document.getElementById("root");
 if (container) {
   const root = createRoot(container);
