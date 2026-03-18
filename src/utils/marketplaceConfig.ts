@@ -1298,68 +1298,54 @@ export const getTabSpecificFilters = (tabId?: string): FilterCategoryConfig[] =>
 
 // Tab-specific filters for Design System
 export const getDesignSystemTabSpecificFilters = (tabId?: string): FilterCategoryConfig[] => {
-  const locationFilter: FilterCategoryConfig = {
-    id: 'location',
-    title: 'Location',
-    options: [
-      { id: 'DXB', name: 'DXB' },
-      { id: 'KSA', name: 'KSA' },
-      { id: 'NBO', name: 'NBO' }
-    ]
-  };
-
   if (tabId === 'cids') {
     return [
       {
         id: 'cids',
-        title: 'CI.DS',
+        title: 'Category',
         options: [
-          { id: 'cids-framework', name: 'CI.DS Framework' },
-          { id: 'cids-lifecycle', name: 'CI.DS Lifecycle' },
-          { id: 'cids-template', name: 'CI.DS Template' }
+          { id: 'cids-framework', name: 'Framework' },
+          { id: 'cids-lifecycle', name: 'Lifecycle' },
+          { id: 'cids-template', name: 'Template' }
         ]
-      },
-      locationFilter
+      }
     ];
   } else if (tabId === 'vds') {
     return [
       {
         id: 'vds',
-        title: 'V.DS',
+        title: 'Category',
         options: [
-          { id: 'vds-framework', name: 'V.DS Framework' },
-          { id: 'vds-lifecycle', name: 'V.DS Lifecycle' },
-          { id: 'vds-template', name: 'V.DS Template' }
+          { id: 'vds-framework', name: 'Framework' },
+          { id: 'vds-lifecycle', name: 'Lifecycle' },
+          { id: 'vds-template', name: 'Template' }
         ]
-      },
-      locationFilter
+      }
     ];
   } else if (tabId === 'cds') {
     return [
       {
         id: 'cds',
-        title: 'CDS',
+        title: 'Category',
         options: [
-          { id: 'cds-framework', name: 'CDS Framework' },
-          { id: 'cds-lifecycle', name: 'CDS Lifecycle' },
-          { id: 'cds-template', name: 'CDS Template' }
+          { id: 'cds-framework', name: 'Framework' },
+          { id: 'cds-lifecycle', name: 'Lifecycle' },
+          { id: 'cds-template', name: 'Template' }
         ]
-      },
-      locationFilter
+      }
     ];
   }
 
   // Default: return all filters
   return [
     {
-      id: 'cids',
-      title: 'CI.DS',
+      id: 'category',
+      title: 'Category',
       options: [
-        { id: 'cids-framework', name: 'CI.DS Framework' },
-        { id: 'cids-lifecycle', name: 'CI.DS Lifecycle' },
-        { id: 'cids-template', name: 'CI.DS Template' }
+        { id: 'framework', name: 'Framework' },
+        { id: 'lifecycle', name: 'Lifecycle' },
+        { id: 'template', name: 'Template' }
       ]
-    },
-    locationFilter
+    }
   ];
 };

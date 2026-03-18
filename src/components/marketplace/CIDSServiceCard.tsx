@@ -18,8 +18,8 @@ export const CIDSServiceCardComponent: React.FC<CIDSServiceCardProps> = ({ card,
       style={{ width: '100%', maxWidth: '340px' }}
       onClick={onClick}
     >
-      {/* Featured Image */}
-      <div className="relative bg-gray-200 overflow-hidden" style={{ height: '140px' }}>
+      {/* Featured Image - extends to card edges */}
+      <div className="relative bg-gray-200" style={{ height: '140px' }}>
         <img
           src={imageUrl}
           alt={card.title}
@@ -38,7 +38,7 @@ export const CIDSServiceCardComponent: React.FC<CIDSServiceCardProps> = ({ card,
       <div className="px-8 pt-6 pb-4 flex-grow flex flex-col">
         <div className="flex items-start mb-4">
           <div className="flex-grow">
-            <h3 className="font-bold text-gray-900 text-xl leading-tight line-clamp-2 mb-4">
+            <h3 className="font-bold text-gray-900 text-xl leading-tight mb-4">
               {card.title}
             </h3>
           </div>
@@ -46,10 +46,13 @@ export const CIDSServiceCardComponent: React.FC<CIDSServiceCardProps> = ({ card,
 
         {/* Description */}
         <div className="mb-5">
-          <p className="text-base text-gray-500 leading-relaxed line-clamp-3">
+          <p className="text-base text-gray-500 leading-relaxed">
             {card.description}
           </p>
         </div>
+
+        {/* Date */}
+        <p className="text-sm text-gray-400 mb-5">March 16, 2026</p>
 
         {/* CI.DS Tag */}
         <div className="mb-5">
@@ -66,7 +69,7 @@ export const CIDSServiceCardComponent: React.FC<CIDSServiceCardProps> = ({ card,
       </div>
 
       {/* Footer with CTA */}
-      <div className="mt-auto px-8 pt-5 pb-6">
+      <div className="mt-auto px-8 pt-5 pb-8">
         <button
           type="button"
           onClick={(e) => {
