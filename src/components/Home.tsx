@@ -147,7 +147,7 @@ const approvedSections = {
     },
   ],
 
-  // 3) Service Requests & Enablement Hub
+  // 3) Service Requests & Support
   serviceEnablementHub: [
     {
       id: 'technology',
@@ -401,7 +401,7 @@ export const HomePage: React.FC = () => {
   const sectionStyles: Record<string, SectionStyle> = {
     'Learning Center & DQ Knowledge': navySectionStyle,
     'Media & Communications': navySectionStyle,
-    'Service Requests & Enablement': navySectionStyle,
+    'Service Requests & Support': navySectionStyle,
     'Organization, Roles & People': navySectionStyle,
   };
 
@@ -418,7 +418,7 @@ export const HomePage: React.FC = () => {
             </h2>
             <div>
               <p className="text-base sm:text-lg text-gray-600 mx-auto leading-relaxed max-w-4xl whitespace-nowrap">
-                Access tools, learning, and guidelines designed to help you work smarter and act confidently all in one place.
+                Access tools, learning, and guidelines to help you work smarter and act with confidence
               </p>
             </div>
           </FadeInUpOnScroll>
@@ -429,7 +429,7 @@ export const HomePage: React.FC = () => {
               <CategoryHeader
                 icon={<BookOpen size={24} />}
                 title="Learning Center & DQ Knowledge"
-                description="Learn, reference standards, and access knowledge that guides delivery."
+                description="Access learning, standards, and knowledge that guide delivery."
               />
             </FadeInUpOnScroll>
             <ServiceCarousel
@@ -477,13 +477,13 @@ export const HomePage: React.FC = () => {
             />
           </div>
 
-          {/* 3. Service Requests & Enablement Hub */}
+          {/* 3. Service Requests & Support */}
           <div className="mb-10">
             <FadeInUpOnScroll>
               <CategoryHeader
                 icon={<Briefcase size={24} />}
-                title="Service Requests & Enablement"
-                description="Request support and enablement services — tracked and visible."
+                title="Service Requests & Support"
+                description="Request support and enablement services through a clear, trackable process."
               />
             </FadeInUpOnScroll>
             <ServiceCarousel
@@ -494,7 +494,7 @@ export const HomePage: React.FC = () => {
                   <FadeInUpOnScroll key={service.id} delay={index * 0.1}>
                     <ServiceCard
                       service={service}
-                      sectionStyle={sectionStyles['Service Requests & Enablement']}
+                      sectionStyle={sectionStyles['Service Requests & Support']}
                       onClick={() => handleServiceClick(service.path)}
                       isComingSoon={!service.isActive}
                     />

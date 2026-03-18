@@ -7,14 +7,14 @@ import { MsalProvider } from "@azure/msal-react";
 import { msalInstance } from "./services/auth/msal";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
-import {
-  REDIRECT_GUARD_KEY,
-  MAX_REDIRECT_ATTEMPTS,
-  renderErrorUI,
-  initializeMsal,
-  getAuthenticatedAccount,
-  shouldRedirectToOnboarding,
-} from "./services/auth/msalInitializer";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Clear stale MSAL cache + strip auth code from URL before MSAL runs
+Object.keys(localStorage).filter((k: string) => k.toLowerCase().includes('msal')).forEach((k: string) => localStorage.removeItem(k));
+sessionStorage.clear();
+if (window.location.search.includes('code=') || window.location.search.includes('error=') || window.location.search.includes('state=')) {
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
 
 const client = new ApolloClient({
   link: new HttpLink({
@@ -23,163 +23,60 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+// Create a QueryClient instance for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
 const container = document.getElementById("root");
 if (container) {
   const root = createRoot(container);
-  
-  // Development bypass - check if we have proper Azure credentials
-  const azureClientId = import.meta.env.VITE_AZURE_CLIENT_ID;
-  const isDevelopment = import.meta.env.DEV;
-  const hasValidAzureConfig = azureClientId && azureClientId !== 'your_azure_client_id_here';
-  
-  // Skip authentication in development if no valid Azure config
-  if (isDevelopment && !hasValidAzureConfig) {
-    console.log('🚀 Development mode: Bypassing authentication - no valid Azure config found');
-    root.render(
-      <ApolloProvider client={client}>
-        <AppRouter />
-      </ApolloProvider>
-    );
-  } else {
-    // Original authentication flow
-    root.render(<div style={{ display: 'none' }} />);
-    
-    const redirectAttempts = parseInt(sessionStorage.getItem(REDIRECT_GUARD_KEY) || '0', 10);
-    const isRedirectLoop = redirectAttempts >= MAX_REDIRECT_ATTEMPTS;
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasRedirectParams = urlParams.has('code') || urlParams.has('error') || urlParams.has('state');
-    
-    if (isRedirectLoop) {
-      sessionStorage.removeItem(REDIRECT_GUARD_KEY);
-      renderErrorUI(
-        root,
-        "Authentication Error",
-        "Too many redirect attempts. Please clear your browser cache and try again.",
-        "Clear and Retry",
-        () => {
-          sessionStorage.clear();
-          window.location.href = window.location.origin;
+  // Ensure MSAL is initialized and redirect response handled before using any APIs
+  msalInstance
+    .initialize()
+    .then(() => msalInstance.handleRedirectPromise())
+    .then((result) => {
+      if (result?.account) {
+        msalInstance.setActiveAccount(result.account);
+      } else {
+        const accounts = msalInstance.getAllAccounts();
+        if (accounts.length === 1) {
+          msalInstance.setActiveAccount(accounts[0]);
         }
+      }
+      // If this was an explicit Sign Up flow or a brand new account, route to onboarding
+      try {
+        const isSignupState =
+          typeof result?.state === "string" &&
+          result.state.includes("ej-signup");
+        const claims = (result as any)?.idTokenClaims || {};
+        const isNewUser =
+          claims?.newUser === true || claims?.newUser === "true";
+        if (isSignupState || isNewUser) {
+          // Navigate to onboarding without adding history entry
+          window.location.replace("/dashboard/onboarding");
+          return;
+        }
+      } catch (error) {
+        console.warn("Error processing authentication state:", error);
+      }
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <ApolloProvider client={client}>
+            <MsalProvider instance={msalInstance}>
+              <AppRouter />
+            </MsalProvider>
+          </ApolloProvider>
+        </QueryClientProvider>
       );
-    } else {
-      const initializeAndHandleAuth = async () => {
-        try {
-          await initializeMsal();
-          const { authenticatedAccount, result } = await getAuthenticatedAccount();
-          
-          if (hasRedirectParams && !authenticatedAccount) {
-            const error = urlParams.get('error');
-            const errorDescription = urlParams.get('error_description');
-            
-            if (error) {
-              console.error("Authentication error from redirect:", error, errorDescription);
-              renderErrorUI(
-                root,
-                "Authentication Failed",
-                errorDescription || error || "An error occurred during authentication.",
-                "Try Again",
-                () => {
-                  sessionStorage.removeItem(REDIRECT_GUARD_KEY);
-                  window.location.href = window.location.origin;
-                }
-              );
-              return;
-            }
-          }
-          
-          if (!authenticatedAccount) {
-            setTimeout(() => {
-              const delayedAccounts = msalInstance.getAllAccounts();
-              if (delayedAccounts.length > 0) {
-                const account = delayedAccounts[0];
-                msalInstance.setActiveAccount(account);
-                root.render(
-                  <ApolloProvider client={client}>
-                    <MsalProvider instance={msalInstance}>
-                      <AppRouter />
-                    </MsalProvider>
-                  </ApolloProvider>
-                );
-                return;
-              }
-              
-              sessionStorage.setItem(REDIRECT_GUARD_KEY, String(redirectAttempts + 1));
-              
-              msalInstance.loginRedirect({
-                scopes: ["openid", "profile", "email", "offline_access"]
-              }).catch((error) => {
-                console.error("Login redirect failed:", error);
-                sessionStorage.removeItem(REDIRECT_GUARD_KEY);
-                renderErrorUI(
-                  root,
-                  "Authentication Required",
-                  "Please sign in to access this application.",
-                  "Retry Login",
-                  () => {
-                    sessionStorage.removeItem(REDIRECT_GUARD_KEY);
-                    window.location.reload();
-                  }
-                );
-              });
-            }, hasRedirectParams ? 500 : 100);
-            return;
-          }
-          
-          if (shouldRedirectToOnboarding(result)) {
-            window.location.replace("/dashboard/onboarding");
-            return;
-          }
-          
-          root.render(
-            <ApolloProvider client={client}>
-              <MsalProvider instance={msalInstance}>
-                <AppRouter />
-              </MsalProvider>
-            </ApolloProvider>
-          );
-        } catch (e: any) {
-          console.error("MSAL initialization failed:", e);
-          sessionStorage.removeItem(REDIRECT_GUARD_KEY);
-          
-          try {
-            const accounts = msalInstance.getAllAccounts();
-            if (accounts.length > 0) {
-              console.log("Found accounts despite initialization error, proceeding with app render");
-              msalInstance.setActiveAccount(accounts[0]);
-              root.render(
-                <ApolloProvider client={client}>
-                  <MsalProvider instance={msalInstance}>
-                    <AppRouter />
-                  </MsalProvider>
-                </ApolloProvider>
-              );
-              return;
-            }
-          } catch (accountError) {
-            console.warn("Error checking accounts:", accountError);
-          }
-          
-          const errorMessage = e?.message || "Unknown error";
-          const additionalContent = process.env.NODE_ENV === 'development' ? (
-            <p className="text-sm text-gray-500 mb-4 mt-2">Error: {errorMessage}</p>
-          ) : null;
-          
-          renderErrorUI(
-            root,
-            "Authentication Error",
-            "Unable to initialize authentication. Please refresh the page.",
-            "Refresh Page",
-            () => {
-              sessionStorage.removeItem(REDIRECT_GUARD_KEY);
-              window.location.reload();
-            },
-            additionalContent
-          );
-        }
-      };
-
-      initializeAndHandleAuth();
-    }
-  }
+    })
+    .catch((e) => {
+      console.error("MSAL initialization failed:", e);
+    });
 }
