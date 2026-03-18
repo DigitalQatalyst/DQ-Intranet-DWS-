@@ -35,39 +35,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const container = document.getElementById("root");
-if (container) {
-  const root = createRoot(container);
-
-  try {
-    await msalInstance.initialize();
-    const result = await msalInstance.handleRedirectPromise();
-
-    if (result?.account) {
-      msalInstance.setActiveAccount(result.account);
-    } else {
-      const accounts = msalInstance.getAllAccounts();
-      if (accounts.length === 1) {
-        msalInstance.setActiveAccount(accounts[0]);
-      }
-    }
-
-    try {
-      const isSignupState =
-        typeof result?.state === "string" &&
-        result.state.includes("ej-signup");
-      const claims = result?.idTokenClaims ?? {};
-      const isNewUser = (claims as Record<string, unknown>).newUser === true || (claims as Record<string, unknown>).newUser === "true";
-      if (isSignupState || isNewUser) {
-        globalThis.location.replace("/dashboard/onboarding");
-      }
-    } catch (error) {
-      console.warn("Error processing authentication state:", error);
-    }
-  } catch (e) {
-    console.error("MSAL initialization failed:", e);
-  }
-
+function renderApp(root: ReturnType<typeof createRoot>): void {
   root.render(
     <QueryClientProvider client={queryClient}>
       <ApolloProvider client={client}>
@@ -77,4 +45,49 @@ if (container) {
       </ApolloProvider>
     </QueryClientProvider>
   );
+}
+
+const container = document.getElementById("root");
+if (container) {
+  const root = createRoot(container);
+
+  try {
+    await msalInstance.initialize();
+  } catch (e: unknown) {
+    console.error("MSAL initialization failed:", e);
+  }
+
+  let result: Awaited<ReturnType<typeof msalInstance.handleRedirectPromise>> = null;
+  try {
+    result = await msalInstance.handleRedirectPromise();
+  } catch (e: unknown) {
+    console.error("MSAL redirect handling failed:", e);
+  }
+
+  if (result?.account) {
+    msalInstance.setActiveAccount(result.account);
+  } else {
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length === 1) {
+      msalInstance.setActiveAccount(accounts[0]);
+    }
+  }
+
+  let shouldRedirect = false;
+  try {
+    const isSignupState =
+      typeof result?.state === "string" &&
+      result.state.includes("ej-signup");
+    const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
+    const isNewUser = claims.newUser === true || claims.newUser === "true";
+    shouldRedirect = isSignupState || isNewUser;
+  } catch (error) {
+    console.warn("Error processing authentication state:", error);
+  }
+
+  if (shouldRedirect) {
+    globalThis.location.replace("/dashboard/onboarding");
+  } else {
+    renderApp(root);
+  }
 }
