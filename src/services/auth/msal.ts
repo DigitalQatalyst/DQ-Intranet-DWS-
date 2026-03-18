@@ -28,8 +28,6 @@ const DEFAULT_OIDC_SCOPES = ["openid", "profile", "email", "offline_access"] as 
 
 // Vite exposes only VITE_* via import.meta.env (not process.env)
 const TENANT_NAME = env.NEXT_PUBLIC_B2C_TENANT_NAME || env.VITE_B2C_TENANT_NAME || "dqproj";
-const POLICY_SIGNUP_SIGNIN =
-  env.NEXT_PUBLIC_B2C_POLICY_SIGNUP_SIGNIN || env.VITE_B2C_POLICY_SIGNUP_SIGNIN || "F1_CustomerSUSILocal_KF";
 // Optional dedicated Sign-Up policy/user flow
 const POLICY_SIGNUP = env.NEXT_PUBLIC_B2C_POLICY_SIGNUP || env.VITE_B2C_POLICY_SIGNUP;
 
@@ -53,23 +51,6 @@ const AUTHORITY_SIGNUP_SIGNIN = `https://${LOGIN_HOST}/${TENANT_NAME}.onmicrosof
 const AUTHORITY_SIGNUP = POLICY_SIGNUP
   ? `https://${LOGIN_HOST}/${TENANT_NAME}.onmicrosoft.com/${POLICY_SIGNUP}`
   : AUTHORITY_SIGNUP_SIGNIN;
-
-// Compute authority URL:
-// Priority:
-// 1. Custom domain + tenant ID (e.g. https://login.example.com/{tenantId})
-// 2. Azure AD tenant (https://login.microsoftonline.com/{tenantId})
-// 3. CIAM subdomain (https://{sub}.ciamlogin.com/)
-// 4. Fallback to common
-let computedAuthority: string;
-// if (CUSTOM_DOMAIN && TENANT_ID) {
-//   computedAuthority = `https://${CUSTOM_DOMAIN}/${TENANT_ID}`;
-// } else if (TENANT_ID) {
-//   computedAuthority = `https://login.microsoftonline.com/${TENANT_ID}`;
-// } else if (SUB) {
-  computedAuthority = `https://${SUB}.ciamlogin.com/`;
-// } else {
-//   computedAuthority = env.VITE_AZURE_AUTHORITY || "https://login.microsoftonline.com/common";
-// }
 
 // Known authorities for MSAL (hostnames only)
 // const knownAuthorities: string[] = (() => {

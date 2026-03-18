@@ -1182,11 +1182,11 @@ const MOCK_JOBS: JobItem[] = [
     id: 'mock-job-1',
     title: 'Senior Full Stack Developer',
     department: 'Engineering',
-    roleType: 'Technical',
+    roleType: 'Tech',
     location: 'Remote',
     type: 'Full-time',
     seniority: 'Senior',
-    sfiaLevel: 'Level 5',
+    sfiaLevel: 'L5',
     summary: 'Join our engineering team to build scalable solutions for enterprise clients.',
     description: 'We are looking for an experienced Full Stack Developer to join our growing team and work on cutting-edge projects.',
     responsibilities: ['Build scalable web applications', 'Collaborate with cross-functional teams', 'Mentor junior developers'],
@@ -1199,11 +1199,11 @@ const MOCK_JOBS: JobItem[] = [
     id: 'mock-job-2',
     title: 'Product Manager',
     department: 'Product',
-    roleType: 'Management',
-    location: 'Hybrid',
+    roleType: 'Ops',
+    location: 'Dubai',
     type: 'Full-time',
-    seniority: 'Mid-Senior',
-    sfiaLevel: 'Level 4',
+    seniority: 'Mid',
+    sfiaLevel: 'L4',
     summary: 'Lead product strategy and execution for our digital transformation initiatives.',
     description: 'Drive product vision and roadmap for enterprise solutions that impact thousands of users.',
     responsibilities: ['Define product strategy', 'Work with stakeholders', 'Analyze metrics'],
@@ -1247,7 +1247,7 @@ function mapNewsRowToItem(row: any): NewsItem {
  * Returns news sorted by date (newest first)
  */
 export async function fetchAllNews(): Promise<NewsItem[]> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('news_blogs')
     .select('*')
     .order('date', { ascending: false })
@@ -1307,7 +1307,7 @@ function mapJobRowToItem(row: any): JobItem {
  * Returns jobs sorted by posted date (newest first)
  */
 export async function fetchAllJobs(): Promise<JobItem[]> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('jobs')
     .select('*')
     .order('posted_on', { ascending: false })
@@ -1343,7 +1343,7 @@ export async function fetchNewsById(id: string): Promise<NewsItem | null> {
   const mockItem = MOCK_NEWS.find(item => item.id === id)
   if (mockItem) return mockItem
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('news_blogs')
     .select('*')
     .eq('id', id)
@@ -1366,7 +1366,7 @@ export async function fetchNewsById(id: string): Promise<NewsItem | null> {
 export async function incrementListenCount(episodeId: string): Promise<void> {
   try {
     // First get current views count
-    const { data: currentData, error: fetchError } = await supabase
+    const { data: currentData, error: fetchError } = await (supabase as any)
       .from('news_blogs')
       .select('views')
       .eq('id', episodeId)
@@ -1379,7 +1379,7 @@ export async function incrementListenCount(episodeId: string): Promise<void> {
 
     // Increment the views count
     const currentViews = currentData?.views || 0;
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase as any)
       .from('news_blogs')
       .update({ views: currentViews + 1 })
       .eq('id', episodeId);
@@ -1398,7 +1398,7 @@ export async function incrementListenCount(episodeId: string): Promise<void> {
  * Fetch a single job item by ID from Supabase
  */
 export async function fetchJobById(id: string): Promise<JobItem | null> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('jobs')
     .select('*')
     .eq('id', id)

@@ -1,8 +1,3 @@
-import React from 'react';
-
-/**
- * Parse bold text (**text**) into JSX elements
- */
 export const parseBold = (text: string): (string | JSX.Element)[] => {
   if (!text) return [''];
   const parts: (string | JSX.Element)[] = [];

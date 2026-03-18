@@ -20,7 +20,6 @@ interface BlogCardProps {
 export function BlogCard({ item, href }: BlogCardProps) {
   const isPodcast = item.format === 'Podcast' || item.tags?.some(tag => tag.toLowerCase().includes('podcast'));
   const imageSrc = getNewsImageSrc(item, fallbackImages);
-  const authorName = item.byline || item.author || 'DQ Media Team';
   const displayTitle = generateTitle(item);
   const categoryLabel = isPodcast ? 'Podcast' : 'Blog';
   const categoryColor = isPodcast ? PODCAST_COLOR : BLOG_COLOR;

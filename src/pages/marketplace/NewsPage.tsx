@@ -20,30 +20,7 @@ const LOCATION_OPTIONS = [
   { value: 'Riyadh', label: 'KSA' },
   { value: 'Remote', label: 'Remote' },
 ];
-import { markMediaItemSeen, getSeenMediaItems } from '@/utils/mediaTracking';
-
-const PINNED_FACETS: FacetConfig[] = [
-  {
-    key: 'department',
-    label: 'Department',
-    options: [
-      'HRA (People)',
-      'Finance',
-      'Deals',
-      'Stories',
-      'Intelligence',
-      'Solutions',
-      'SecDevOps',
-      'Products',
-      'Delivery — Deploys',
-      'Delivery — Designs',
-      'DCO Operations',
-      'DBP Platform',
-      'DBP Delivery'
-    ]
-  },
-  { key: 'location', label: 'Location', options: LOCATION_OPTIONS }
-];
+import { getSeenMediaItems } from '@/utils/mediaTracking';
 
 const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
   announcements: [
@@ -243,7 +220,6 @@ const NewsPage: React.FC = () => {
   }, []);
   const [filters, setFilters] = useState<FiltersValue>({});
   const [showFilters, setShowFilters] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [newItem, setNewItem] = useState<MediaNotification | null>(null);
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [jobItems, setJobItems] = useState<JobItem[]>([]);
@@ -392,20 +368,6 @@ const NewsPage: React.FC = () => {
 
   const toggleFilters = () => setShowFilters((prev) => !prev);
   const clearFilters = () => setFilters({});
-
-  const handleViewNewItem = () => {
-    if (!newItem) return;
-    markMediaItemSeen(newItem.kind === 'job' ? 'job' : 'news', newItem.id);
-    const target = newItem.href;
-    setNewItem(null);
-    navigate(target);
-  };
-
-  const handleDismissNewItem = () => {
-    if (!newItem) return;
-    markMediaItemSeen(newItem.kind === 'job' ? 'job' : 'news', newItem.id);
-    setNewItem(null);
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
