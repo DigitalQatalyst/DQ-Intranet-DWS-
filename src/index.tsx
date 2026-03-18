@@ -14,7 +14,8 @@ const msalKeys = Object.keys(globalThis.localStorage).filter((k) => k.toLowerCas
 msalKeys.forEach((k) => globalThis.localStorage.removeItem(k));
 globalThis.sessionStorage.clear();
 const search = globalThis.location.search;
-if (search.includes('code=') || search.includes('error=') || search.includes('state=')) {
+const hasAuthParams = ['code=', 'error=', 'state='].some((p) => search.includes(p));
+if (hasAuthParams) {
   globalThis.history.replaceState({}, '', globalThis.location.pathname);
 }
 
@@ -62,20 +63,11 @@ if (result?.account) {
   }
 }
 
-let shouldRedirect = false;
-try {
-  const isSignupState =
-    typeof result?.state === "string" &&
-    result.state.includes("ej-signup");
-  const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
-  const isNewUser = [true, "true"].includes(claims.newUser as boolean | string);
-  // NOSONAR: || is correct here, both operands are boolean (not nullable)
-  shouldRedirect = isSignupState || isNewUser; // NOSONAR
-} catch (error) {
-  console.warn("Error processing authentication state:", error);
-}
+const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
+const isNewUser = [true, "true"].includes(claims.newUser as boolean | string);
+const isSignupState = result?.state?.includes("ej-signup");
 
-if (shouldRedirect) { // NOSONAR: top-level await already used above
+if (isSignupState ?? isNewUser) {
   globalThis.location.replace("/dashboard/onboarding");
 } else {
   root.render(
