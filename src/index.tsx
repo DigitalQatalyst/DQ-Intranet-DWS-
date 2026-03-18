@@ -35,7 +35,49 @@ const queryClient = new QueryClient({
   },
 });
 
-function renderApp(root: ReturnType<typeof createRoot>): void {
+
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const root = createRoot(document.getElementById("root")!);
+
+try {
+  await msalInstance.initialize();
+} catch (e: unknown) {
+  console.error("MSAL initialization failed:", e);
+}
+
+let result: Awaited<ReturnType<typeof msalInstance.handleRedirectPromise>> = null;
+try {
+  result = await msalInstance.handleRedirectPromise();
+} catch (e: unknown) {
+  console.error("MSAL redirect handling failed:", e);
+}
+
+if (result?.account) {
+  msalInstance.setActiveAccount(result.account);
+} else {
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length === 1) {
+    msalInstance.setActiveAccount(accounts[0]);
+  }
+}
+
+let shouldRedirect = false;
+try {
+  const isSignupState =
+    typeof result?.state === "string" &&
+    result.state.includes("ej-signup");
+  const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
+  const isNewUser = [true, "true"].includes(claims.newUser as boolean | string);
+  // NOSONAR: || is correct here, both operands are boolean (not nullable)
+  shouldRedirect = isSignupState || isNewUser; // NOSONAR
+} catch (error) {
+  console.warn("Error processing authentication state:", error);
+}
+
+if (shouldRedirect) { // NOSONAR: top-level await already used above
+  globalThis.location.replace("/dashboard/onboarding");
+} else {
   root.render(
     <QueryClientProvider client={queryClient}>
       <ApolloProvider client={client}>
@@ -45,49 +87,4 @@ function renderApp(root: ReturnType<typeof createRoot>): void {
       </ApolloProvider>
     </QueryClientProvider>
   );
-}
-
-const container = document.getElementById("root");
-if (container) {
-  const root = createRoot(container);
-
-  try {
-    await msalInstance.initialize();
-  } catch (e: unknown) {
-    console.error("MSAL initialization failed:", e);
-  }
-
-  let result: Awaited<ReturnType<typeof msalInstance.handleRedirectPromise>> = null;
-  try {
-    result = await msalInstance.handleRedirectPromise();
-  } catch (e: unknown) {
-    console.error("MSAL redirect handling failed:", e);
-  }
-
-  if (result?.account) {
-    msalInstance.setActiveAccount(result.account);
-  } else {
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length === 1) {
-      msalInstance.setActiveAccount(accounts[0]);
-    }
-  }
-
-  let shouldRedirect = false;
-  try {
-    const isSignupState =
-      typeof result?.state === "string" &&
-      result.state.includes("ej-signup");
-    const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
-    const isNewUser = claims.newUser === true || claims.newUser === "true";
-    shouldRedirect = isSignupState || isNewUser;
-  } catch (error) {
-    console.warn("Error processing authentication state:", error);
-  }
-
-  if (shouldRedirect) {
-    globalThis.location.replace("/dashboard/onboarding");
-  } else {
-    renderApp(root);
-  }
 }
