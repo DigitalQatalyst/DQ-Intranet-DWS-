@@ -89,16 +89,16 @@ export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
       // Calculate offset to account for fixed header and add some padding
       const headerOffset = 120 // Adjust this value to match your navbar height + desired spacing
       const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+      const offsetPosition = elementPosition + globalThis.pageYOffset - headerOffset
 
-      window.scrollTo({
+      globalThis.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
       })
       
       // Update URL hash without triggering scroll
-      if (window.history.replaceState) {
-        window.history.replaceState(null, '', `#${sectionId}`)
+      if (globalThis.history?.replaceState) {
+        globalThis.history.replaceState(null, '', `#${sectionId}`)
       }
     }
   }

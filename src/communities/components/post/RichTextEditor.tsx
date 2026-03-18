@@ -92,7 +92,14 @@ export function RichTextEditor({
         <ToolbarButton onClick={() => editor.chain().focus().toggleCodeBlock().run()} isActive={editor.isActive('codeBlock')} icon={Code} label="Code Block" />
       </div>
       {/* Editor - Scrollable container */}
-      <div className="flex-1 overflow-y-auto cursor-text" onClick={() => editor?.chain().focus().run()}>
+      <div
+        className="flex-1 overflow-y-auto cursor-text"
+        onClick={() => editor?.chain().focus().run()}
+        onKeyDown={(e) => e.key === 'Enter' && editor?.chain().focus().run()}
+        role="button"
+        tabIndex={0}
+        aria-label="Text editor area"
+      >
         <EditorContent editor={editor} className={`max-w-none p-3 focus:outline-none
                      ${currentMode === 'long' ? 'prose prose-lg min-h-[400px]' : 'prose prose-sm min-h-[200px]'}
                      [&_.ProseMirror]:${currentMode === 'long' ? 'min-h-[400px]' : 'min-h-[200px]'} 

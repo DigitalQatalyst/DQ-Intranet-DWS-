@@ -48,7 +48,7 @@ const getGHCContentKey = (serviceId: string): string => {
 
 /* ── Extracted tab content components to reduce cognitive complexity ── */
 
-function GHCTabContent({ ghcContent, activeTab }: { ghcContent: GuideContent; activeTab: string }) {
+function GHCTabContent({ ghcContent, activeTab }: { readonly ghcContent: GuideContent; readonly activeTab: string }) {
   if (activeTab === 'overview') {
     return (
       <div>
@@ -121,7 +121,7 @@ function GHCTabContent({ ghcContent, activeTab }: { ghcContent: GuideContent; ac
   )
 }
 
-function ServiceTabContent({ service, activeTab }: { service: ServiceDetail; activeTab: string }) {
+function ServiceTabContent({ service, activeTab }: { readonly service: ServiceDetail; readonly activeTab: string }) {
   if (activeTab === 'details') {
     return (
       <div>

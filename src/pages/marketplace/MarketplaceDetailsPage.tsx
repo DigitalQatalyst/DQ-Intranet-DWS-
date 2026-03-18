@@ -200,100 +200,75 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   // const rating = (4 + Math.random()).toFixed(1);
   // const reviewCount = Math.floor(Math.random() * 50) + 10;
   useEffect(() => {
+    const loadGHCItem = async (id: string) => {
+      const contentKey = getGHCContentKey(id);
+      const content = GUIDE_CONTENT[contentKey];
+      if (content) {
+        setGhcContent(content);
+        setActiveTab('overview');
+        setRelatedItems(getFallbackItems(marketplaceType));
+      } else {
+        console.error('GHC content not found for itemId:', id);
+        const finalItemData = getFallbackItemDetails(marketplaceType, id || 'fallback-1');
+        setItem(finalItemData);
+        setRelatedItems(getFallbackItems(marketplaceType));
+      }
+    };
+
+    const loadRegularItem = async (id: string) => {
+      let itemData = null;
+      try {
+        itemData = await fetchMarketplaceItemDetails(marketplaceType, id);
+      } catch (fetchError) {
+        console.error(`Error fetching ${marketplaceType} item details:`, fetchError);
+      }
+      const finalItemData = itemData || getFallbackItemDetails(marketplaceType, id || 'fallback-1');
+      if (finalItemData) {
+        setItem(finalItemData);
+        let relatedItemsData: any[] = [];
+        try {
+          relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, finalItemData.category || '', finalItemData.provider?.name || '');
+        } catch (relatedError) {
+          console.error('Error fetching related items:', relatedError);
+        }
+        setRelatedItems(relatedItemsData && relatedItemsData.length > 0 ? relatedItemsData : getFallbackItems(marketplaceType));
+        if (shouldTakeAction) {
+          setTimeout(() => {
+            const actionSection = document.getElementById('action-section');
+            if (actionSection) {
+              actionSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }, 100);
+        }
+      } else {
+        const genericFallback = getFallbackItemDetails(marketplaceType, 'generic-fallback');
+        setItem(genericFallback);
+        setError(null);
+        const timer = setTimeout(() => { navigate(config.route); }, 5000);
+        setRedirectTimer(timer);
+      }
+    };
+
     const fetchItemDetails = async () => {
       if (!itemId) return;
       setLoading(true);
       setError(null);
-      // Clear any existing redirect timer
       if (redirectTimer) {
         clearTimeout(redirectTimer);
         setRedirectTimer(null);
       }
       try {
-        // Check if this is a GHC service first
         if (isGHCService(itemId)) {
-          const contentKey = getGHCContentKey(itemId);
-          const content = GUIDE_CONTENT[contentKey];
-          
-          if (content) {
-            setGhcContent(content);
-            // Set default tab for GHC services
-            setActiveTab('overview');
-            // Set related items for GHC services
-            setRelatedItems(getFallbackItems(marketplaceType));
-          } else {
-            console.error('GHC content not found for itemId:', itemId);
-            // Fall back to regular marketplace logic
-            const finalItemData = getFallbackItemDetails(marketplaceType, itemId || 'fallback-1');
-            setItem(finalItemData);
-            setRelatedItems(getFallbackItems(marketplaceType));
-          }
+          await loadGHCItem(itemId);
         } else {
-          // Regular marketplace item logic
-          // Try to fetch item details
-          let itemData = null;
-          try {
-            itemData = await fetchMarketplaceItemDetails(marketplaceType, itemId);
-          } catch (fetchError) {
-            console.error(`Error fetching ${marketplaceType} item details:`, fetchError);
-            // We'll handle this below by using fallback data
-          }
-          // If item data is available, use it, otherwise use fallback data
-          const finalItemData = itemData || getFallbackItemDetails(marketplaceType, itemId || 'fallback-1');
-          if (finalItemData) {
-            setItem(finalItemData);
-            // setIsBookmarked(bookmarkedItems.includes(finalItemData.id));
-            // Fetch related items
-            let relatedItemsData: any[] = [];
-            try {
-              relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, finalItemData.category || '', finalItemData.provider?.name || '');
-            } catch (relatedError) {
-              console.error('Error fetching related items:', relatedError);
-              // Use fallback related items on error
-            }
-            // Use fetched related items if available, otherwise use fallback
-            setRelatedItems(relatedItemsData && relatedItemsData.length > 0 ? relatedItemsData : getFallbackItems(marketplaceType));
-            if (shouldTakeAction) {
-              setTimeout(() => {
-                const actionSection = document.getElementById('action-section');
-                if (actionSection) {
-                  actionSection.scrollIntoView({
-                    behavior: 'smooth'
-                  });
-                }
-              }, 100);
-
-              // REMOVED: Auto-open Leave Application form
-              // if (finalItemData.id === '13') {
-              //   // Leave application
-              //   setIsRequestFormOpen(true);
-              // }
-
-              // REMOVED: Auto-open TechSupportForm
-              // else if (marketplaceType === 'non-financial' && ['1', '2', '3'].includes(finalItemData.id)) {
-              //   // IT Support Form, Support Charter Template, IT Support Walkthrough
-              //   setIsTechSupportFormOpen(true);
-              // }
-            }
-          } else {
-            // Item not found - use generic fallback
-            const genericFallback = getFallbackItemDetails(marketplaceType, 'generic-fallback');
-            setItem(genericFallback);
-            setError(null); // Clear any error since we're showing fallback data
-            // Set a redirect timer with a longer delay (5 seconds)
-            const timer = setTimeout(() => {
-              navigate(config.route);
-            }, 5000);
-            setRedirectTimer(timer);
-          }
+          await loadRegularItem(itemId);
         }
       } catch (err) {
-        console.error(`Error in marketplace details page:`, err);
-        // Use fallback data even on general errors
+        console.error('Error in marketplace details page:', err);
         const fallbackItem = getFallbackItemDetails(marketplaceType, 'generic-fallback');
         setItem(fallbackItem);
         setRelatedItems(getFallbackItems(marketplaceType));
-        setError(null); // Clear error since we're showing fallback data
+        setError(null);
       } finally {
         setLoading(false);
       }
@@ -392,12 +367,15 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const isDigitalWorker = item.category === 'Digital Worker';
   const isLeaveApplication = item.id === '13';
   const isITSupportService = marketplaceType === 'non-financial' && ['1', '2', '3'].includes(item.id);
-  const primaryAction = isGHC ? 'Explore Competency →'
-    : isLeaveApplication ? 'Apply For Leave'
-    : isPromptLibrary ? 'View Prompt'
-    : isDigitalWorker ? 'View Details'
-    : isAITool ? 'Request Tool'
-    : config.primaryCTA;
+  const getPrimaryAction = (): string => {
+    if (isGHC) return 'Explore Competency →';
+    if (isLeaveApplication) return 'Apply For Leave';
+    if (isPromptLibrary) return 'View Prompt';
+    if (isDigitalWorker) return 'View Details';
+    if (isAITool) return 'Request Tool';
+    return config.primaryCTA;
+  };
+  const primaryAction = getPrimaryAction();
   // const secondaryAction = config.secondaryCTA;
   // Extract details for the sidebar
   const detailItems = isGHC ? [

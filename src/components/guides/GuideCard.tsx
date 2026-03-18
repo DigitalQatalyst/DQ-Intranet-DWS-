@@ -20,7 +20,8 @@ function normalizeTag(value?: string | null): string {
 }
 
 function formatAuthorText(authorName?: string, authorOrg?: string): string | null {
-  const text = `${authorName || ''}${authorOrg ? ` - ${authorOrg}` : ''}`.trim()
+  const orgSuffix = authorOrg ? ` - ${authorOrg}` : ''
+  const text = `${authorName || ''}${orgSuffix}`.trim()
   return (text.toLowerCase() === 'bb' || text.length <= 2) ? null : text
 }
 

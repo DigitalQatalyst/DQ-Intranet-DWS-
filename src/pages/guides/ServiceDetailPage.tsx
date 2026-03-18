@@ -9,7 +9,7 @@ import { GUIDE_CONTENT, GuideContent } from '../../constants/guideContent';
 /* ─────────────────────────────── Types ─────────────────────────────────── */
 
 // GHC service IDs that should use GUIDE_CONTENT instead of Supabase data
-const GHC_SERVICE_IDS = [
+const GHC_SERVICE_IDS = new Set([
   'ghc',
   'dq-ghc', // Alternative URL format
   'dq-vision',
@@ -19,11 +19,11 @@ const GHC_SERVICE_IDS = [
   'dq-agile-sos',
   'dq-agile-flows',
   'dq-agile-6xd'
-];
+]);
 
 // Helper function to detect if itemId is a GHC service
 const isGHCService = (itemId: string): boolean => {
-  return GHC_SERVICE_IDS.includes(itemId);
+  return GHC_SERVICE_IDS.has(itemId);
 };
 
 // Helper function to detect if this is a Digital Workspace guideline
@@ -774,19 +774,19 @@ export const ServiceDetailPage: React.FC = () => {
                   <div className="space-y-6">
                     {/* Storybook Description */}
                     <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
-                      {ghcContent.storybookIntro.split('\n\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
+                      {ghcContent.storybookIntro.split('\n\n').map((paragraph) => (
+                        <p key={paragraph.slice(0, 40)}>{paragraph}</p>
                       ))}
                     </div>
 
                     {/* What You Will Understand Section */}
                     <div className="space-y-5">
                       <SubHeading text="What You'll Understand" />
-                      {ghcContent.whatYouWillLearn.map((item, index) => {
+                      {ghcContent.whatYouWillLearn.map((item) => {
                         const [title, ...descParts] = item.split(':')
                         const description = descParts.join(':').trim()
                         return (
-                          <div key={index} className="flex items-start gap-3">
+                          <div key={item.slice(0, 40)} className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-1">
                               <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -824,19 +824,19 @@ export const ServiceDetailPage: React.FC = () => {
                   <div className="space-y-6">
                     {/* Course Description */}
                     <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
-                      {ghcContent.courseIntro?.split('\n\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
+                      {ghcContent.courseIntro?.split('\n\n').map((paragraph) => (
+                        <p key={paragraph.slice(0, 40)}>{paragraph}</p>
                       ))}
                     </div>
 
                     {/* What You'll Practice & Understand Section */}
                     <div className="space-y-5">
                       <SubHeading text="What You'll Learn & Practice" />
-                      {ghcContent.whatYouWillPractice?.map((item, index) => {
+                      {ghcContent.whatYouWillPractice?.map((item) => {
                         const [title, ...descParts] = item.split(':')
                         const description = descParts.join(':').trim()
                         return (
-                          <div key={index} className="flex items-start gap-3">
+                          <div key={item.slice(0, 40)} className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-1">
                               <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />

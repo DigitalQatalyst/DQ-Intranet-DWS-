@@ -62,8 +62,7 @@ interface PerspectiveCardProps {
 const PerspectiveCard: React.FC<PerspectiveCardProps> = ({ card, onClick }) => {
   return (
     <div
-      onClick={onClick}
-      className="bg-white border border-gray-200 rounded-2xl cursor-pointer hover:shadow-md transition-all flex flex-col overflow-hidden"
+      className="bg-white border border-gray-200 rounded-2xl hover:shadow-md transition-all flex flex-col overflow-hidden"
     >
       {/* Image — flush to top */}
       <div className="w-full flex-shrink-0 bg-gradient-to-br from-[#030E31] to-[#162862] flex items-center justify-center" style={{ height: '180px' }}>

@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { HomeIcon, ChevronRightIcon, BookOpen, Clock, User, Home, ChevronRight } from 'lucide-react'
+import { BookOpen, Home, ChevronRight } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { supabaseClient } from '../../lib/supabaseClient'
 import { knowledgeHubSupabase } from '../../services/knowledgeHubClient'
 import MarkdownRenderer from '../../components/guides/MarkdownRenderer'
-import { AccentHeading } from '../../components/shared/AccentHeading'
 import { GUIDE_CONTENT } from '../../constants/guideContent'
 
 interface Guide {
@@ -351,7 +350,7 @@ function GuideDetailsPage() {
                 {/* Guide Content Sections */}
                 {sections.length > 0 ? (
                   <div className="space-y-8">
-                    {sections.map((section, index) => (
+                    {sections.map((section) => (
                       <section key={section.id} id={section.id} className="scroll-mt-24">
                         {/* Section Content - MarkdownRenderer handles headers */}
                         <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">

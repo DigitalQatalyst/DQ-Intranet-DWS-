@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { FilterSidebar, FilterConfig } from './FilterSidebar.js';
 import { MarketplaceGrid } from './MarketplaceGrid.js';
@@ -194,7 +194,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   }, []);
   const [activeServiceTab, setActiveServiceTab] = useState<string>(() => 
     isServicesCenter 
-      ? getServiceTabFromParams(typeof globalThis.window !== 'undefined' ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams())
+      ? getServiceTabFromParams(globalThis.window !== undefined ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams())
       : 'technology'
   );
   
@@ -205,7 +205,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       const validTabs = ['technology', 'business', 'digital_worker', 'prompt_library', 'ai_tools'];
       if (currentTab && validTabs.includes(currentTab) && currentTab !== activeServiceTab) {
         setActiveServiceTab(currentTab);
-      } else if (!currentTab || !validTabs.includes(currentTab)) {
+      } else if (currentTab === null || !validTabs.includes(currentTab ?? '')) {
         // Set default tab in URL if not present
         const newParams = new URLSearchParams(searchParams);
         newParams.set('tab', activeServiceTab);
@@ -224,13 +224,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
   // Guides facets + URL state
   const [facets, setFacets] = useState<GuidesFacets>({});
-  const [queryParams, setQueryParams] = useState(() => new URLSearchParams(typeof globalThis.window !== 'undefined' ? globalThis.location?.search ?? '' : ''));
+  const [queryParams, setQueryParams] = useState(() => new URLSearchParams(globalThis.window !== undefined ? globalThis.location?.search ?? '' : ''));
   const searchStartRef = useRef<number | null>(null);
 
   // Sync queryParams with URL changes
   const location = useLocation();
   useEffect(() => {
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       const currentParams = new URLSearchParams(location.search);
       setQueryParams(currentParams);
     }
@@ -238,7 +238,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
   // Listen for browser navigation (back/forward) to sync queryParams
   useEffect(() => {
-    if (typeof globalThis.window === 'undefined') return;
+    if (globalThis.window === undefined) return;
     
     const handlePopState = () => {
       const currentParams = new URLSearchParams(globalThis.location?.search ?? "");
@@ -259,12 +259,12 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     return tab === 'vds' || tab === 'cds' ? tab : 'cids';
   }, []);
   const [activeTab, setActiveTab] = useState<WorkGuideTab>(() => {
-    const initParams = typeof globalThis.window !== 'undefined' ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams();
+    const initParams = globalThis.window !== undefined ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams();
     return getTabFromParams(initParams);
   });
   const [activeDesignSystemTab, setActiveDesignSystemTab] = useState<DesignSystemTab>(() => {
     if (!isDesignSystem) return 'cids';
-    const initParams = typeof globalThis.window !== 'undefined' ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams();
+    const initParams = globalThis.window !== undefined ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams();
     return getDesignSystemTabFromParams(initParams);
   });
 
@@ -373,7 +373,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       next.delete('product_sector');
     }
     const qs = next.toString();
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
     }
     setQueryParams(new URLSearchParams(next.toString()));
@@ -439,7 +439,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     });
     if (!changed) return;
     const qs = next.toString();
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
     }
     setQueryParams(new URLSearchParams(next.toString()));
@@ -515,7 +515,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     // SECONDARY FILTER: 6xD Perspective (only when Agile 6xD is selected)
     const sixXdPerspectives = parseFilterValues(queryParams, 'glossary_6xd_perspective');
 
-    // BROWSING FILTER: Alphabetical (Aâ€“Z)
+    // BROWSING FILTER: Alphabetical (A–Z)
     const letters = parseFilterValues(queryParams, 'glossary_letter');
     
     // Search query
@@ -541,7 +541,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         }
       }
       
-      // BROWSING: Letter filter (Aâ€“Z)
+      // BROWSING: Letter filter (A–Z)
       if (letters.length > 0) {
         const termLetter = term.letter.toUpperCase();
         const matchesLetter = letters.some(l => l.toUpperCase() === termLetter);
@@ -772,7 +772,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           const rawSubs     = parseFilterValues(queryParams, 'sub_domain');
           const guideTypes  = parseFilterValues(queryParams, 'guide_type');
           const units       = parseFilterValues(queryParams, 'unit');
-          const locations   = parseFilterValues(queryParams, 'location');
           const statuses    = parseFilterValues(queryParams, 'status');
           const testimonialCategories = parseFilterValues(queryParams, 'testimonial_category');
           const strategyTypes = parseFilterValues(queryParams, 'strategy_type');
@@ -800,9 +799,10 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (!isSpecialTab) {
             domains.forEach(d => (SUBDOMAIN_BY_DOMAIN[d] || []).forEach(s => allowed.add(s)));
           }
-          const subDomains = !isSpecialTab
-            ? (allowed.size ? rawSubs.filter(v => allowed.has(v)) : rawSubs)
-            : [];
+          const subDomains = (() => {
+            if (isSpecialTab) return [];
+            return allowed.size ? rawSubs.filter(v => allowed.has(v)) : rawSubs;
+          })();
 
           const effectiveGuideTypes = isSpecialTab ? [] : guideTypes;
           // Enable unit filtering for all tabs (Strategy, Blueprints, and Guidelines)
@@ -812,7 +812,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             const next = new URLSearchParams(queryParams.toString());
             if (subDomains.length) next.set('sub_domain', subDomains.join(','));
             else next.delete('sub_domain');
-            if (typeof globalThis.window !== 'undefined') {
+            if (globalThis.window !== undefined) {
               globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
             }
             setQueryParams(new URLSearchParams(next.toString()));
@@ -820,15 +820,12 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             return;
           }
 
-          if (statuses.length) q = q.in('status', statuses); else {
-            // For Strategy tab: show Published/Approved AND Draft (but not Archived)
-            // For Guidelines tab: show Approved AND Archived (most guidelines are archived)
-            // For other tabs: show only Approved
-            if (isStrategyTab) {
-              q = q.in('status', ['Approved', 'Published', 'Draft']);
-            } else {
-              q = q.eq('status', 'Approved');
-            }
+          if (statuses.length) {
+            q = q.in('status', statuses);
+          } else if (isStrategyTab) {
+            q = q.in('status', ['Approved', 'Published', 'Draft']);
+          } else {
+            q = q.eq('status', 'Approved');
           }
           if (qStr) q = q.or(`title.ilike.%${qStr}%,summary.ilike.%${qStr}%`);
           if (isStrategyTab) {
@@ -1214,7 +1211,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               'policy-set-2f-flow': ['policy set 02', '2f', 'flow'],
               'policy-set-2g-product': ['policy set 02', '2g', 'product'],
             } as Record<string, string[]>;
-            // Hardcoded category overrides: slug â†’ list of categories it belongs to
+            // Hardcoded category overrides: slug → list of categories it belongs to
             const slugCategoryOverrides: Record<string, string[]> = {
               'dq-associate-owned-asset-guidelines': ['policy-set-2f-flow'],
             };
@@ -1454,7 +1451,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (currentPage > lastPage) {
             const next = new URLSearchParams(queryParams.toString());
             if (lastPage <= 1) next.delete('page'); else next.set('page', '1'); // Always reset to page 1 if invalid
-            if (typeof globalThis.window !== 'undefined') {
+            if (globalThis.window !== undefined) {
               globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
               globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -1666,7 +1663,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 const itemServicesArray = Array.isArray(itemServices) ? itemServices : [itemServices];
                 return services.some(filterService => 
                   itemServicesArray.some(itemSvc => 
-                    itemSvc.toLowerCase().replace(/[\s_]/g, '') === filterService.toLowerCase().replace(/[\s_]/g, '')
+                    itemSvc.toLowerCase().replaceAll(/[\s_]/g, '') === filterService.toLowerCase().replaceAll(/[\s_]/g, '')
                   )
                 );
               });
@@ -1959,7 +1956,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     const next = new URLSearchParams(queryParams.toString());
     if (clamped <= 1) next.delete('page');
     else next.set('page', String(clamped));
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
       globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1970,7 +1967,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     if (loading) {
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-          {[...Array(6)].map((_, idx) => <CourseCardSkeleton key={`skeleton-${idx}`} />)}
+          {(['s1','s2','s3','s4','s5','s6']).map((sk) => <CourseCardSkeleton key={sk} />)}
         </div>
       );
     }
@@ -2410,12 +2407,17 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           <div
             className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-30 transition-opacity duration-300 xl:hidden ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             onClick={toggleFilters}
+            onKeyDown={(e) => e.key === 'Escape' && toggleFilters()}
+            role="button"
+            tabIndex={showFilters ? 0 : -1}
+            aria-label="Close filters overlay"
             aria-hidden={!showFilters}
           >
             <div
               id="filter-sidebar"
               className={`fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}
               onClick={e => e.stopPropagation()}
+              onKeyDown={e => e.stopPropagation()}
               role="dialog"
               aria-modal="true"
               aria-label="Filters"

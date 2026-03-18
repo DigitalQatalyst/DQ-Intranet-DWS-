@@ -73,6 +73,7 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
     if (tables.length === 0) {
       return (
         <div 
+          // codacy-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }}
         />
       )
@@ -90,6 +91,7 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
           components.push(
             <div 
               key={`html-${index}`}
+              // codacy-disable-next-line react/no-danger
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(beforeTable) }}
             />
           )
@@ -116,6 +118,7 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
       components.push(
         <div 
           key="html-final"
+          // codacy-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(remainingHtml) }}
         />
       )

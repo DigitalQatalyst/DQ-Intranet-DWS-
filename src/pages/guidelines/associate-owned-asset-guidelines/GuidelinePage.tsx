@@ -6,7 +6,6 @@ import { supabaseClient } from '../../../lib/supabaseClient'
 import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 import { HeroSection } from './HeroSection'
 import { SideNav } from './SideNav'
-import { AccentHeading } from '../../../components/shared/AccentHeading'
 import { HTMLProcessor } from '../../../components/guidelines/HTMLProcessor'
 
 function GuidelinePage() {
@@ -22,7 +21,7 @@ function GuidelinePage() {
     return text
       .toLowerCase()
       .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replaceAll(' ', '-') // Replace spaces with hyphens (replaceAll preferred)
+      .replaceAll(' ', '-') // Replace spaces with hyphens
       .replaceAll('&nbsp;', '') // Remove &nbsp;
       .trim()
   }
@@ -109,7 +108,7 @@ function GuidelinePage() {
             console.log(`📄 [DATABASE] Content length: ${data.body.length} characters`)
             
             // Replace literal \n with actual line breaks
-            let processedHtml = data.body.replace(/\\n/g, '\n')
+            let processedHtml = data.body.replaceAll('\\n', '\n')
             
             // Add IDs to headings for table of contents navigation
             processedHtml = addIdsToHeadings(processedHtml)

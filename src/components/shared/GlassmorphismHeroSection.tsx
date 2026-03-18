@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom'
 import { Home, ChevronRight } from 'lucide-react'
 
 interface GlassmorphismHeroSectionProps {
-  title: string
-  subtitle?: string
-  date?: string
-  author?: string
-  breadcrumbs?: Array<{
-    label: string
-    href?: string
+  readonly title: string
+  readonly subtitle?: string
+  readonly date?: string
+  readonly author?: string
+  readonly breadcrumbs?: ReadonlyArray<{
+    readonly label: string
+    readonly href?: string
   }>
 }
 
@@ -49,7 +49,7 @@ export function GlassmorphismHeroSection({
         <nav className="flex items-center justify-between pb-6">
           <ol className="flex items-center gap-1 text-sm">
             {breadcrumbs.map((crumb, index) => (
-              <li key={index} className="flex items-center gap-1">
+              <li key={`${index}-${crumb.label}`} className="flex items-center gap-1">
                 {index === 0 && (
                   <Home className="h-3.5 w-3.5" style={{ color: 'hsl(var(--hero-foreground) / 0.5)' }} />
                 )}
