@@ -225,101 +225,104 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
   const isPublished = guide.status === 'Published' || guide.status === 'Approved'
   
   return (
-    <div className="bg-white rounded-lg shadow border border-gray-200 p-3 hover:shadow-md transition-shadow cursor-pointer h-[400px] flex flex-col" onClick={isDraft ? undefined : onClick}>
+    <div className="bg-white rounded-2xl shadow border border-gray-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden" onClick={isDraft ? undefined : onClick}>
+      {/* Image — flush to top, no padding, full width */}
       {imageUrl && (
-        <div className="rounded-lg overflow-hidden mb-2.5 bg-slate-50 flex-shrink-0" style={{ height: '160px', minHeight: '160px', maxHeight: '160px' }}>
-          <img 
-            src={imageUrl} 
-            alt={displayTitle} 
+        <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>
+          <img
+            src={imageUrl}
+            alt={displayTitle}
             className="w-full h-full object-cover"
-            loading="lazy" 
-            decoding="async" 
-            width={640} 
-            height={160}
+            loading="lazy"
+            decoding="async"
+            width={640}
+            height={180}
             onError={handleImageError}
             crossOrigin="anonymous"
           />
         </div>
       )}
-      <h3 className="font-semibold text-gray-900 mb-2 flex-shrink-0" style={{ 
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical',
-        overflow: 'hidden',
-        minHeight: '44px',
-        maxHeight: '44px',
-        lineHeight: '1.375rem'
-      }} title={displayTitle}>{displayTitle}</h3>
-      <p className="text-sm text-gray-600 mb-2.5 flex-shrink-0" style={{
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical',
-        overflow: 'hidden',
-        minHeight: '36px',
-        maxHeight: '36px',
-        lineHeight: '1.125rem'
-      }}>{displayDescription}</p>
-      <div className="flex flex-wrap gap-2 mb-2 flex-shrink-0">
-        {!isBlueprint && (
-          <>
-            {domain && (
-              <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
-                {domainLabel}
-              </span>
-            )}
-            {guide.guideType && !isTestimonial && !isDuplicateTag && !((guide.slug || '').toLowerCase() === 'dq-ghc') && (
-              <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
-                {formatLabel(guide.guideType)}
-              </span>
-            )}
-            {isTestimonial && guide.unit && (
-              <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
-                {formatLabel(guide.unit)}
-              </span>
-            )}
-            {isTestimonial && guide.location && (
-              <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
-                {formatLabel(guide.location)}
-              </span>
-            )}
-          </>
-        )}
-      </div>
-      <div className="flex items-center text-xs text-gray-500 gap-3 mb-2.5 flex-shrink-0">
-        {timeBucket && <span>{timeBucket}</span>}
-        {lastUpdated && <span>{lastUpdated}</span>}
-      </div>
-      {/* Show author info only when provided and not a product or GHC/Strategy guide or Guidelines */}
-      {(!isBlueprint && !isGhcOverview && domain?.toLowerCase() !== 'strategy' && domain?.toLowerCase() !== 'guidelines' && (guide.authorName || guide.authorOrg)) && (
-        <div className="text-xs text-gray-600 mb-2.5 flex-shrink-0">
-          <span
-            className="truncate"
-            title={`${guide.authorName || ""}${guide.authorOrg ? " - " + guide.authorOrg : ""}`}
-          >
-            {formatAuthorText(guide.authorName, guide.authorOrg)}
-          </span>
+
+      {/* Card body */}
+      <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
+        {/* Badge */}
+        <div className="flex flex-wrap gap-2 mb-2 flex-shrink-0">
+          {!isBlueprint && (
+            <>
+              {domain && (
+                <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                  {domainLabel}
+                </span>
+              )}
+              {guide.guideType && !isTestimonial && !isDuplicateTag && !((guide.slug || '').toLowerCase() === 'dq-ghc') && (
+                <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                  {formatLabel(guide.guideType)}
+                </span>
+              )}
+              {isTestimonial && guide.unit && (
+                <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                  {formatLabel(guide.unit)}
+                </span>
+              )}
+              {isTestimonial && guide.location && (
+                <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                  {formatLabel(guide.location)}
+                </span>
+              )}
+            </>
+          )}
         </div>
-      )}
-      {/* Spacer to push button to bottom */}
-      <div className="pt-2 mt-auto border-t border-gray-100 flex-shrink-0">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            if (!isDraft && !isBlueprint) {
-              onClick()
-            }
-          }}
-          disabled={isDraft || isBlueprint}
-          className={`w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2 transition-all focus:outline-none focus:ring-2 ${
-            isDraft || isBlueprint
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-[#030E31] text-white hover:bg-[#020A28] focus:ring-[#030E31]'
-          }`}
-          aria-label={isDraft || isBlueprint ? 'Coming soon' : 'Read more'}
-        >
-          {isDraft || isBlueprint ? 'Coming Soon' : 'Read More'}
-        </button>
+
+        {/* Title */}
+        <h3 className="font-semibold text-gray-900 mb-1.5 flex-shrink-0" style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          lineHeight: '1.375rem'
+        }} title={displayTitle}>{displayTitle}</h3>
+
+        {/* Description */}
+        <p className="text-sm text-gray-600 mb-2 flex-shrink-0" style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          lineHeight: '1.25rem'
+        }}>{displayDescription}</p>
+
+        {/* Date */}
+        <div className="flex items-center text-xs text-gray-400 gap-3 mb-3 flex-shrink-0">
+          {lastUpdated && <span>{lastUpdated}</span>}
+          {timeBucket && <span>{timeBucket}</span>}
+        </div>
+
+        {/* Author */}
+        {(!isBlueprint && !isGhcOverview && domain?.toLowerCase() !== 'strategy' && domain?.toLowerCase() !== 'guidelines' && (guide.authorName || guide.authorOrg)) && (
+          <div className="text-xs text-gray-500 mb-2 flex-shrink-0 truncate">
+            {formatAuthorText(guide.authorName, guide.authorOrg)}
+          </div>
+        )}
+
+        {/* Button — no separator line, pushed to bottom */}
+        <div className="mt-auto flex-shrink-0">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (!isDraft && !isBlueprint) onClick()
+            }}
+            disabled={isDraft || isBlueprint}
+            className={`w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2.5 transition-all focus:outline-none focus:ring-2 ${
+              isDraft || isBlueprint
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-[#030E31] text-white hover:bg-[#020A28] focus:ring-[#030E31]'
+            }`}
+            aria-label={isDraft || isBlueprint ? 'Coming soon' : 'View Details'}
+          >
+            {isDraft || isBlueprint ? 'Coming Soon' : 'View Details'}
+          </button>
+        </div>
       </div>
     </div>
   )

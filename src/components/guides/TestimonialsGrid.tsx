@@ -25,58 +25,54 @@ const TestimonialsGrid: React.FC<Props> = ({ items, onClickGuide }) => {
       {serviceCards.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {serviceCards.map((card) => (
-            <div key={card.id} className="bg-white rounded-lg shadow border border-gray-200 p-3 hover:shadow-md transition-shadow flex flex-col h-[400px]">
-              {/* Hero Image */}
-              <div className="rounded-lg overflow-hidden mb-2 bg-slate-50 flex-shrink-0" style={{ height: '160px', minHeight: '160px', maxHeight: '160px' }}>
-                <img 
-                  src={card.heroImageUrl} 
-                  alt={card.title} 
+            <div key={card.id} className="bg-white rounded-2xl shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+              {/* Image — flush to top */}
+              <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>
+                <img
+                  src={card.heroImageUrl}
+                  alt={card.title}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
               </div>
-              
-              {/* Content */}
-              <div className="flex flex-col flex-1">
+
+              {/* Card body */}
+              <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
+                {/* Badge */}
+                <div className="flex flex-wrap gap-2 mb-2 flex-shrink-0">
+                  <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                    {card.testimonialCategory === 'client-feedback' ? 'Clients' : 'Associates'}
+                  </span>
+                </div>
+
                 {/* Title */}
-                <h3 className="font-semibold text-gray-900 mb-1.5 flex-shrink-0" style={{ 
+                <h3 className="font-semibold text-gray-900 mb-1.5 flex-shrink-0" style={{
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
-                  minHeight: '44px',
-                  maxHeight: '44px',
                   lineHeight: '1.375rem'
                 }}>{card.title}</h3>
-                
+
                 {/* Description */}
                 <p className="text-sm text-gray-600 mb-2 flex-shrink-0" style={{
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
-                  minHeight: '36px',
-                  maxHeight: '36px',
-                  lineHeight: '1.125rem'
+                  lineHeight: '1.25rem'
                 }}>
                   {card.summary}
                 </p>
-                
-                {/* Tag */}
-                <div className="flex flex-wrap gap-2 mb-1.5 flex-shrink-0">
-                  <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
-                    {card.testimonialCategory === 'client-feedback' ? 'Clients' : 'Associates'}
-                  </span>
-                </div>
-                
-                {/* Metadata */}
-                <div className="flex items-center text-xs text-gray-500 gap-3 mb-2 flex-shrink-0">
+
+                {/* Date */}
+                <div className="flex items-center text-xs text-gray-400 gap-3 mb-3 flex-shrink-0">
                   <span>{formatDate(card.lastUpdatedAt)}</span>
                 </div>
-                
-                {/* Button at bottom */}
-                <div className="pt-2.5 mt-auto border-t border-gray-100 flex-shrink-0">
-                  <div className="w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2 bg-gray-100 text-gray-400 cursor-not-allowed select-none">
+
+                {/* Button — no separator */}
+                <div className="mt-auto flex-shrink-0">
+                  <div className="w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2.5 bg-gray-100 text-gray-400 cursor-not-allowed select-none">
                     Coming Soon
                   </div>
                 </div>
