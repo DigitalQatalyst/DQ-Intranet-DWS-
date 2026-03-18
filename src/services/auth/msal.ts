@@ -10,11 +10,20 @@ const env = (import.meta as any).env as Record<string, string | undefined>;
 
 // Client ID must be provided via environment variable
 const CLIENT_ID = env.NEXT_PUBLIC_AAD_CLIENT_ID || env.VITE_AZURE_CLIENT_ID;
-if (!CLIENT_ID) {
-  throw new Error(
-    "Azure AD Client ID is required. Please set VITE_AZURE_CLIENT_ID or NEXT_PUBLIC_AAD_CLIENT_ID in your .env file.\n\n" +
-    "This application uses Azure Entra ID (not B2C) for authentication."
-  );
+
+// Development mode check - allow missing credentials in development
+const isDevelopment = import.meta.env?.DEV;
+const isValidClientId = CLIENT_ID && CLIENT_ID !== 'your_azure_client_id_here';
+
+if (!CLIENT_ID || !isValidClientId) {
+  if (isDevelopment) {
+    console.warn('⚠️ Azure AD Client ID not configured for development - authentication will be bypassed');
+  } else {
+    throw new Error(
+      "Azure AD Client ID is required. Please set VITE_AZURE_CLIENT_ID or NEXT_PUBLIC_AAD_CLIENT_ID in your .env file.\n\n" +
+      "This application uses Azure Entra ID (not B2C) for authentication."
+    );
+  }
 }
 const REDIRECT_URI =
   env.NEXT_PUBLIC_REDIRECT_URI ||
@@ -38,6 +47,16 @@ const DEFAULT_OIDC_SCOPES = ["openid", "profile", "email", "offline_access"] as 
 // Tenant ID or Domain must be provided via environment variable
 const TENANT_ID = env.NEXT_PUBLIC_TENANT_ID || env.VITE_AZURE_TENANT_ID;
 const TENANT_DOMAIN = env.NEXT_PUBLIC_TENANT_DOMAIN || env.VITE_AZURE_TENANT_DOMAIN;
+
+// Skip the rest of configuration in development if credentials are invalid
+const shouldSkipAuth = isDevelopment && (!CLIENT_ID || !isValidClientId);
+
+let msalConfig: any = null;
+let msalInstance: any = null;
+let defaultLoginRequest: any = null;
+let signupRequest: any = null;
+
+if (!shouldSkipAuth) {
 
 // Custom domain support (optional)
 const CUSTOM_DOMAIN = env.NEXT_PUBLIC_CIAM_CUSTOM_DOMAIN || env.VITE_AZURE_CUSTOM_DOMAIN;
@@ -128,7 +147,7 @@ const knownAuthorities: string[] = (() => {
 // For Entra ID, login and signup use the same authority (no separate policies like B2C)
 const AUTHORITY = computedAuthority;
 
-export const msalConfig: Configuration = {
+msalConfig = {
   auth: {
     clientId: CLIENT_ID,
     authority: AUTHORITY,
@@ -153,7 +172,7 @@ export const msalConfig: Configuration = {
   },
 };
 
-export const msalInstance = new PublicClientApplication(msalConfig);
+msalInstance = new PublicClientApplication(msalConfig);
 
 // Optionally include Graph User.Read for email resolution fallback (see AuthContext)
 const ENABLE_GRAPH_USER_READ = (env.VITE_MSAL_ENABLE_GRAPH_FALLBACK || env.NEXT_PUBLIC_MSAL_ENABLE_GRAPH_FALLBACK) === 'true';
@@ -161,14 +180,19 @@ const GRAPH_SCOPES: string[] = ENABLE_GRAPH_USER_READ ? ["User.Read"] : [];
 
 // For Entra ID, login and signup use the same authority and scopes
 // The signup flow is handled by Azure AD's user registration settings
-export const defaultLoginRequest = {
+defaultLoginRequest = {
   scopes: Array.from(new Set([...(API_SCOPES.length ? API_SCOPES : []), ...DEFAULT_OIDC_SCOPES, ...GRAPH_SCOPES])),
   authority: AUTHORITY,
 };
 
 // Signup uses the same request as login for Entra ID
 // The 'state' parameter is used to identify signup flows for onboarding routing
-export const signupRequest = {
+signupRequest = {
   scopes: Array.from(new Set([...(API_SCOPES.length ? API_SCOPES : []), ...DEFAULT_OIDC_SCOPES, ...GRAPH_SCOPES])),
   authority: AUTHORITY,
 };
+
+}
+
+// Export the variables
+export { msalConfig, msalInstance, defaultLoginRequest, signupRequest };
