@@ -1,6 +1,5 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { SIX_XD_PERSPECTIVES } from '../../pages/guides/glossaryFilters';
 
 export interface SixXDPerspectiveCard {
   id: string;

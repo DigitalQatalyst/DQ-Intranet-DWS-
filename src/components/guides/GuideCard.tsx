@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { toTimeBucket } from '../../utils/guides'
 import { getGuideImageUrl } from '../../utils/guideImageMap'
 import { useNavigate } from 'react-router-dom'
@@ -50,8 +50,8 @@ const KNOWN_PRODUCT_NAMES = [
   'Digital Transformation Management Academy (DTMA)',
   'Digital Business Platforms (DBP Assists)',
   'Digital Transformation Management Platform (DTMP)',
-  'DTO4T – Digital Transformation Operating Framework',
-  'TMaaS – Transformation Management as a Service',
+  'DTO4T ΓÇô Digital Transformation Operating Framework',
+  'TMaaS ΓÇô Transformation Management as a Service',
 ]
 
 function hovTitleFromSlug(s: string): string | null {
@@ -226,7 +226,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
   
   return (
     <div className="bg-white rounded-2xl shadow border border-gray-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden" onClick={isDraft ? undefined : onClick}>
-      {/* Image — flush to top, no padding, full width */}
+      {/* Image ΓÇö flush to top, no padding, full width */}
       {imageUrl && (
         <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>
           <img
@@ -304,7 +304,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
           </div>
         )}
 
-        {/* Button — no separator line, pushed to bottom */}
+        {/* Button ΓÇö no separator line, pushed to bottom */}
         <div className="mt-auto flex-shrink-0">
           <button
             type="button"
