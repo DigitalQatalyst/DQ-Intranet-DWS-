@@ -10,10 +10,12 @@ import { ApolloProvider } from "@apollo/client/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Clear stale MSAL cache + strip auth code from URL before MSAL runs
-Object.keys(globalThis.localStorage).filter((k: string) => k.toLowerCase().includes('msal')).forEach((k: string) => globalThis.localStorage.removeItem(k));
+const msalKeys = Object.keys(globalThis.localStorage).filter((k) => k.toLowerCase().includes('msal'));
+msalKeys.forEach((k) => globalThis.localStorage.removeItem(k));
 globalThis.sessionStorage.clear();
-if (globalThis.location.search.includes('code=') || globalThis.location.search.includes('error=') || globalThis.location.search.includes('state=')) {
-  globalThis.history.replaceState({}, document.title, globalThis.location.pathname);
+const search = globalThis.location.search;
+if (search.includes('code=') || search.includes('error=') || search.includes('state=')) {
+  globalThis.history.replaceState({}, '', globalThis.location.pathname);
 }
 
 const client = new ApolloClient({
