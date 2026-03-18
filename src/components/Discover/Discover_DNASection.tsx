@@ -1,67 +1,52 @@
 import React, { useEffect, useState, useRef } from "react";
 import { DiscoverSectionTitle } from "./DiscoverSectionTitle";
 import { fetchDna, DqDnaNode, DqDnaCallout } from "../../services/dq";
-import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
-import { supabaseClient } from "../../lib/supabaseClient";
-import { knowledgeHubSupabase } from '../../services/knowledgeHubClient'
+import SectionCTAButton from "../common/SectionCTAButton";
 
-/* ===== PIXEL-PERFECT CONSTANTS ===== */
-const NAVY = "#162862"; // Exact navy from image
-const STROKE_WIDTH = 2.5; // Match image border width
+/* ===== Visual tokens ===== */
+const NAVY = "#131E42";
+const LINE = NAVY;
+const ORANGE = "#FF6A3D";
 
-/* SVG ViewBox - exact match to reference image dimensions */
-const VIEWBOX = "0 0 900 520";
+/* Hex geometry */
+const HEX_W = 180;
+const HEX_H = Math.round(HEX_W * 0.866);
 
-/* Hexagon Geometry - adapted from Lovable positioning system */
-const HEX_SIZE = 68; // Hexagon size (radius equivalent)
-const CENTER_X = 450; // Center of 900px viewBox
-const CENTER_Y = 260; // Adjusted for 520px height
+/* Connector tuning */
+const EDGE_INSET = 8;
+const H_LEN = 170;
+const V_LEN = 160;
+const PAD_SIDE = 12;
+const PAD_BOTTOM = 26;
 
-/* Positioning offsets - tight honeycomb where hexagons touch/interlock */
-// Inner hexagons (tight cluster with center - touching edges)
-const INNER_OFFSET_X = 68; // Horizontal offset for bottom hexagons (touching center)
-const INNER_OFFSET_Y = 118; // Vertical offset for bottom hexagons (touching center)
+/* Fixed canvas */
+const CANVAS_W = 1200;
+const CANVAS_H = 640;
 
-// Outer hexagons (touching inner hexagons)
-const OUTER_OFFSET_X = 136; // Horizontal offset for side hexagons (2x inner, touching)
-const OUTER_OFFSET_Y = 118; // Vertical offset for top hexagons (touching center)
-const TOP_ROW_OFFSET_X = 68; // Horizontal offset for top row (touching center)
-
-/* Hexagon Positions - using Lovable offset system for accuracy */
-// Layout structure:
-//          [6]        [5]
-//     [7]      [1]      [4]
-//          [2]        [3]
-const HEX_POSITIONS = {
-  center: { x: CENTER_X, y: CENTER_Y }, // [1] The Vision - anchor point
-  leftTop: {
-    x: CENTER_X - TOP_ROW_OFFSET_X,
-    y: CENTER_Y - OUTER_OFFSET_Y,
-  }, // [6] Agile Flows
-  rightTop: {
-    x: CENTER_X + TOP_ROW_OFFSET_X,
-    y: CENTER_Y - OUTER_OFFSET_Y,
-  }, // [5] Agile SOS
-  leftMid: {
-    x: CENTER_X - OUTER_OFFSET_X,
-    y: CENTER_Y,
-  }, // [7] Agile 6xD
-  rightMid: {
-    x: CENTER_X + OUTER_OFFSET_X,
-    y: CENTER_Y,
-  }, // [4] Agile TMS
-  leftBot: {
-    x: CENTER_X - INNER_OFFSET_X,
-    y: CENTER_Y + INNER_OFFSET_Y,
-  }, // [2] The HoV
-  rightBot: {
-    x: CENTER_X + INNER_OFFSET_X,
-    y: CENTER_Y + INNER_OFFSET_Y,
-  }, // [3] The Personas
+/* Honeycomb positions */
+const POS = {
+  leftTop: { x: -95, y: -140 },
+  rightTop: { x: 95, y: -140 },
+  leftMid: { x: -190, y: 0 },
+  center: { x: 0, y: 0 },
+  rightMid: { x: 190, y: 0 },
+  leftBot: { x: -95, y: 140 },
+  rightBot: { x: 95, y: 140 },
 } as const;
 
-type Role = keyof typeof HEX_POSITIONS;
+type Role = keyof typeof POS;
+type Side = "left" | "right" | "bottom";
+
+/* slight per-row slope */
+const DY: Record<Role, number> = {
+  leftTop: -8,
+  rightTop: -8,
+  leftMid: 0,
+  center: 0,
+  rightMid: 0,
+  leftBot: 8,
+  rightBot: 8,
+};
 
 interface Node {
   id: number;
@@ -181,7 +166,7 @@ const GROWTH_DIMENSIONS_CONTENT: Record<number, GrowthDimensionContent> = {
     },
     secondaryCTA: {
       label: "Explore Products in Knowledge Center",
-      href: "/products",
+      href: "/knowledge-center/products",
     },
   },
 };
@@ -197,75 +182,72 @@ const NODES: Node[] = [
   { id: 3, role: "rightBot", title: "The Personas", subtitle: "(Identity)", fill: "navy" },
 ];
 
-const CALLOUTS: { role: Role; text: string; side: "left" | "right" | "bottom" }[] = [
+const CALLOUTS: { role: Role; text: string; side: Side }[] = [
   { role: "leftTop", text: "How we orchestrate", side: "left" },
   { role: "rightTop", text: "How we govern", side: "right" },
   { role: "leftMid", text: "What we offer", side: "left" },
   { role: "rightMid", text: "How we work", side: "right" },
   { role: "leftBot", text: "How we behave", side: "left" },
   { role: "rightBot", text: "Who we are", side: "right" },
+  { role: "center", text: "Why we exist", side: "bottom" },
 ];
 
-/* Generate flat-top hexagon path - matching reference image */
-function hexPath(cx: number, cy: number, size: number): string {
-  const points: string[] = [];
-  // Start at top flat edge (angle = -π/6), then rotate 60° for each point
-  for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 3) * i - Math.PI / 6;
-    const x = cx + size * Math.cos(angle);
-    const y = cy + size * Math.sin(angle);
-    points.push(`${x},${y}`);
+/* ===== Hex (flat-top) ===== */
+function Hex({ fill, id }: { fill: "navy" | "white"; id?: number }) {
+  const w = HEX_W, h = HEX_H;
+  const d = `M${w / 2} 4 L${w - 4} ${h * 0.25} L${w - 4} ${h * 0.75} L${w / 2} ${h - 4} L4 ${h * 0.75} L4 ${h * 0.25} Z`;
+  const uniqueId = id ?? Math.random().toString(36).substr(2, 9);
+
+  if (fill === "white") {
+    // Textured fill: subtle blend of blue, orange, and white
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ display: "block" }}>
+        <defs>
+          <pattern id={`texture-${uniqueId}`} x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <circle cx="10" cy="10" r="2" fill={NAVY} opacity="0.03" />
+            <circle cx="30" cy="20" r="1.5" fill={ORANGE} opacity="0.04" />
+            <circle cx="20" cy="30" r="1.5" fill={NAVY} opacity="0.02" />
+          </pattern>
+          <linearGradient id={`whiteHexGradient-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="50%" stopColor="#f8f9fb" />
+            <stop offset="100%" stopColor="#f0f3f7" />
+          </linearGradient>
+        </defs>
+        <path
+          d={d}
+          fill={`url(#whiteHexGradient-${uniqueId})`}
+          stroke={NAVY}
+          strokeWidth={3}
+        />
+        <path
+          d={d}
+          fill={`url(#texture-${uniqueId})`}
+          stroke="none"
+        />
+      </svg>
+    );
   }
-  return points.join(" ");
+
+  // Solid navy for center hexagons
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ display: "block" }}>
+      <path
+        d={d}
+        fill={NAVY}
+        stroke="none"
+        strokeWidth={0}
+      />
+    </svg>
+  );
 }
 
-/* Calculate connector paths - lines start from hex edges, matching reference */
-function getConnectorPath(role: Role, side: "left" | "right" | "bottom") {
-  const pos = HEX_POSITIONS[role];
-  const connectorLength = 110;
-  
-  // For flat-top hexagons, the horizontal distance from center to edge is HEX_SIZE
-  // The vertical distance from center to top/bottom edge is HEX_SIZE * √3 / 2 ≈ HEX_SIZE * 0.866
-  
-  if (side === "left") {
-    // Line extends horizontally left from left edge of hexagon
-    const startX = pos.x - HEX_SIZE;
-    const startY = pos.y;
-    const endX = startX - connectorLength;
-    const endY = startY;
-    return {
-      path: `M ${startX} ${startY} L ${endX} ${endY}`,
-      dotX: endX,
-      dotY: endY,
-      textX: endX - 8,
-      textY: endY - 6, // Above the line
-      anchor: "end" as const,
-    };
-  } else if (side === "right") {
-    // Line extends horizontally right from right edge of hexagon
-    const startX = pos.x + HEX_SIZE;
-    const startY = pos.y;
-    const endX = startX + connectorLength;
-    const endY = startY;
-    return {
-      path: `M ${startX} ${startY} L ${endX} ${endY}`,
-      dotX: endX,
-      dotY: endY,
-      textX: endX + 8,
-      textY: endY - 6, // Above the line
-      anchor: "start" as const,
-    };
-  } else {
-    // bottom - not used directly, handled separately
-    return {
-      path: "",
-      dotX: 0,
-      dotY: 0,
-      textX: 0,
-      textY: 0,
-      anchor: "middle" as const,
-    };
-  }
+/* Anchors for connectors */
+function anchor(role: Role, side: Side) {
+  const { x, y } = POS[role];
+  if (side === "left") return { x: x - HEX_W / 2 + EDGE_INSET, y };
+  if (side === "right") return { x: x + HEX_W / 2 - EDGE_INSET, y };
+  return { x, y: y + HEX_H / 2 - 4 };
 }
 
 interface Discover_DNASectionProps {
@@ -601,59 +583,15 @@ function DimensionModal({ dimension, isOpen, onClose, onNavigate }: DimensionMod
   );
 }
 
-// Map GHC guide slugs to DNA node IDs
-const GHC_SLUG_TO_NODE_ID: Record<string, number> = {
-  'dq-vision': 1,
-  'dq-hov': 2,
-  'dq-persona': 3,
-  'dq-agile-tms': 4,
-  'dq-agile-sos': 5,
-  'dq-agile-flows': 6,
-  'dq-agile-6xd': 7,
-};
-
-const GHC_SLUGS = ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'];
-
 function Discover_DNASection({}: Discover_DNASectionProps) {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [nodesDb, setNodesDb] = useState<DqDnaNode[] | null>(null);
   const [calloutsDb, setCalloutsDb] = useState<DqDnaCallout[] | null>(null);
-  const [ghcGuides, setGhcGuides] = useState<Record<string, any>>({});
   const [hasAnimated, setHasAnimated] = useState(false);
   const [selectedDimension, setSelectedDimension] = useState<GrowthDimensionContent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
-
-  // Fetch GHC guides from Supabase
-  useEffect(() => {
-    async function fetchGHCGuides() {
-      try {
-        const { data, error } = await knowledgeHubSupabase
-          .from('guides')
-          .select('slug, title, summary, body, hero_image_url')
-          .in('slug', GHC_SLUGS)
-          .eq('status', 'Approved');
-        
-        if (error) {
-          console.error('Error fetching GHC guides:', error);
-          return;
-        }
-        
-        if (data) {
-          const guidesMap: Record<string, any> = {};
-          data.forEach(guide => {
-            guidesMap[guide.slug] = guide;
-          });
-          setGhcGuides(guidesMap);
-        }
-      } catch (err) {
-        console.error('Error fetching GHC guides:', err);
-      }
-    }
-    
-    fetchGHCGuides();
-  }, []);
 
   useEffect(() => {
     fetchDna()
@@ -688,59 +626,23 @@ function Discover_DNASection({}: Discover_DNASectionProps) {
   }, [hasAnimated]);
 
   const nodes: Node[] = nodesDb
-    ? nodesDb.map((n) => {
-        // Try to get title from Supabase guide if available
-        const slug = Object.entries(GHC_SLUG_TO_NODE_ID).find(([_, id]) => id === n.id)?.[0];
-        const guide = slug ? ghcGuides[slug] : null;
-        
-        return {
-          id: n.id,
-          role: n.role as Role,
-          title: guide?.title || n.title,
-          subtitle: n.subtitle,
-          fill: n.fill === "navy" ? "navy" : "outline",
-        };
-      })
-    : NODES.map((n) => {
-        // Try to get title from Supabase guide if available
-        const slug = Object.entries(GHC_SLUG_TO_NODE_ID).find(([_, id]) => id === n.id)?.[0];
-        const guide = slug ? ghcGuides[slug] : null;
-        
-        return {
-          ...n,
-          title: guide?.title || n.title,
-        };
-      });
+    ? nodesDb.map((n) => ({
+      id: n.id,
+      role: n.role as Role,
+      title: n.title,
+      subtitle: n.subtitle,
+      fill: n.fill as "navy" | "white",
+      details: n.details ?? undefined,
+    }))
+    : NODES;
 
   const callouts = calloutsDb ?? CALLOUTS;
 
   const handleHexClick = (nodeId: number) => {
-    // Try to get data from Supabase guides first, fallback to hardcoded
-    const slug = Object.entries(GHC_SLUG_TO_NODE_ID).find(([_, id]) => id === nodeId)?.[0];
-    const guide = slug ? ghcGuides[slug] : null;
-    
-    if (guide) {
-      // Use data from Supabase
-      const dimension: GrowthDimensionContent = {
-        id: nodeId,
-        title: guide.title || GROWTH_DIMENSIONS_CONTENT[nodeId]?.title || '',
-        subtitle: GROWTH_DIMENSIONS_CONTENT[nodeId]?.subtitle || '',
-        description: guide.summary || guide.body?.substring(0, 300) || GROWTH_DIMENSIONS_CONTENT[nodeId]?.description || '',
-        primaryCTA: GROWTH_DIMENSIONS_CONTENT[nodeId]?.primaryCTA || { label: 'Read More', href: '#' },
-        secondaryCTA: {
-          label: 'View in Knowledge Center',
-          href: `/marketplace/guides/${slug}`,
-        },
-      };
+    const dimension = GROWTH_DIMENSIONS_CONTENT[nodeId];
+    if (dimension) {
       setSelectedDimension(dimension);
       setIsModalOpen(true);
-    } else {
-      // Fallback to hardcoded content
-      const dimension = GROWTH_DIMENSIONS_CONTENT[nodeId];
-      if (dimension) {
-        setSelectedDimension(dimension);
-        setIsModalOpen(true);
-      }
     }
   };
 
@@ -806,8 +708,9 @@ function Discover_DNASection({}: Discover_DNASectionProps) {
           }}
         >
           <svg
-            viewBox={VIEWBOX}
-            width="100%"
+            width={CANVAS_W}
+            height={CANVAS_H}
+            viewBox={[-CANVAS_W / 2, -CANVAS_H / 2, CANVAS_W, CANVAS_H].join(" ")}
             preserveAspectRatio="xMidYMid meet"
             style={{ display: "block" }}
           >
@@ -951,141 +854,126 @@ function Discover_DNASection({}: Discover_DNASectionProps) {
               );
             })()}
 
-            {/* Hexagons - using polygon approach from Lovable */}
-            {nodes.map((node) => {
-              const pos = HEX_POSITIONS[node.role];
-              const points = hexPath(pos.x, pos.y, HEX_SIZE);
-              const isHovered = hoveredId === node.id;
-              const isNavy = node.fill === "navy";
-              const isCenter = node.id === 1;
-              const delay = getHexDelay(node.id);
+          {/* Hexes */}
+          {nodes.map((n) => {
+            const left = CANVAS_W / 2 + POS[n.role].x;
+            const top = CANVAS_H / 2 + POS[n.role].y;
 
-              return (
-                <g
-                  key={node.id}
-                  style={{ 
-                    cursor: "pointer",
-                    transform: isHovered 
-                      ? `translate(${pos.x}, ${pos.y}) scale(1.05) translate(${-pos.x}, ${-pos.y})` 
-                      : "",
-                    transition: "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                    transformOrigin: `${pos.x}px ${pos.y}px`,
-                    opacity: hasAnimated ? 1 : (isCenter ? 0 : 0),
-                    animationDelay: hasAnimated ? `${delay}ms` : "0ms",
-                    filter: isHovered ? "url(#hex-glow)" : "none",
-                  }}
-                  onMouseEnter={() => setHoveredId(node.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  onClick={() => handleHexClick(node.id)}
-                >
-                  {/* Hexagon shape - using polygon like Lovable */}
-                  <polygon
-                    points={points}
-                    fill={isNavy ? NAVY : "#FFFFFF"}
-                    stroke={isHovered ? "#0E1F4A" : NAVY}
-                    strokeWidth={isHovered ? STROKE_WIDTH + 0.5 : STROKE_WIDTH}
-                    style={{ 
-                      transition: "stroke 0.2s ease, stroke-width 0.2s ease",
-                    }}
-                  />
-                  
-                  {/* Texture for light hexagons */}
-                  {!isNavy && (
-                    <polygon
-                      points={points}
-                      fill="url(#hex-texture)"
-                      stroke="none"
-                    />
-                  )}
+            return (
+              <button
+                key={n.id}
+                onClick={() => setOpen(n.id)}
+                style={{
+                  position: "absolute",
+                  left, top,
+                  transform: "translate(-50%, -50%)",
+                  background: "transparent", border: 0, padding: 0, cursor: "pointer",
+                  transition: "transform .15s ease, filter .15s ease"
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-50%, -50%) scale(1.03)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translate(-50%, -50%)"; }}
+              >
+                <div style={{ position: "relative" }}>
+                  <Hex fill={n.fill} id={n.id} />
+                  {/* number chip - dark blue circle with white number at top */}
+                  <div style={{
+                    position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)",
+                    width: 32, height: 32, borderRadius: "50%", background: NAVY, color: "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontWeight: 700, fontSize: 14
+                  }}>{n.id}</div>
 
-                  {/* Number badge - inverted style for core hexes (1,2,3), solid for outer (4,5,6,7) */}
-                  {(() => {
-                    const badgeCx = pos.x;
-                    const badgeCy = pos.y - HEX_SIZE + 18;
-                    
-                    return node.id <= 3 ? (
-                      // Core hexes: white badge with navy border and navy number
-                      <>
-                        <circle
-                          cx={badgeCx}
-                          cy={badgeCy}
-                          r={13}
-                          fill="#FFFFFF"
-                          stroke={NAVY}
-                          strokeWidth={STROKE_WIDTH}
-                        />
-                        <text
-                          x={badgeCx}
-                          y={badgeCy}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fontSize={12}
-                          fontWeight={700}
-                          fill={NAVY}
-                          fontFamily="ui-sans-serif, system-ui, sans-serif"
-                        >
-                          {node.id}
-                        </text>
-                      </>
-                    ) : (
-                      // Outer hexes: navy badge with white number
-                      <>
-                        <circle
-                          cx={badgeCx}
-                          cy={badgeCy}
-                          r={13}
-                          fill={NAVY}
-                        />
-                        <text
-                          x={badgeCx}
-                          y={badgeCy}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fontSize={12}
-                          fontWeight={700}
-                          fill="#FFFFFF"
-                          fontFamily="ui-sans-serif, system-ui, sans-serif"
-                        >
-                          {node.id}
-                        </text>
-                      </>
-                    );
-                  })()}
-
-                  {/* Title */}
-                  <text
-                    x={pos.x}
-                    y={pos.y + 5}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fontSize={16}
-                    fontWeight={700}
-                    fill={isNavy ? "#FFFFFF" : NAVY}
-                    fontFamily="ui-sans-serif, system-ui, sans-serif"
-                    style={{ textShadow: isNavy ? "0 1px 2px rgba(0,0,0,0.2)" : "none" }}
-                  >
-                    {node.title}
-                  </text>
-
-                  {/* Subtitle */}
-                  <text
-                    x={pos.x}
-                    y={pos.y + 23}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fontSize={11}
-                    fontWeight={400}
-                    fill={isNavy ? "rgba(255,255,255,0.9)" : "#64748B"}
-                    fontFamily="ui-sans-serif, system-ui, sans-serif"
-                    style={{ textShadow: isNavy ? "0 1px 2px rgba(0,0,0,0.2)" : "none" }}
-                  >
-                    {node.subtitle}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+                  {/* labels - navy text on hex 4,5,6,7 (white hexes), white text on navy hexes */}
+                  <div style={{
+                    position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+                    alignItems: "center", justifyContent: "center", textAlign: "center",
+                    padding: "0 14px", color: n.fill === "white" ? NAVY : "#fff"
+                  }}>
+                    <div style={{
+                      fontWeight: 800,
+                      fontSize: 18,
+                      lineHeight: 1.1,
+                      textShadow: n.fill === "white" ? "none" : "0 1px 2px rgba(0,0,0,0.1)"
+                    }}>{n.title}</div>
+                    <div style={{
+                      marginTop: 4,
+                      fontSize: 13,
+                      opacity: 0.9,
+                      textShadow: n.fill === "white" ? "none" : "0 1px 2px rgba(0,0,0,0.1)"
+                    }}>{n.subtitle}</div>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Marketplace Modal */}
+        {open && (() => {
+          const node = nodes.find((x) => x.id === open)!;
+          return (
+            <div onClick={() => setOpen(null)} style={{
+              position: "fixed", inset: 0, zIndex: 70,
+              background: "rgba(9,12,28,0.45)", backdropFilter: "blur(4px)"
+            }}>
+              <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  position: "absolute", left: "50%", top: "50%",
+                  transform: "translate(-50%,-50%)",
+                  width: 520, maxWidth: "92vw",
+                  borderRadius: 16,
+                  padding: 20,
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.86))",
+                  border: "1px solid rgba(19,30,66,0.12)",
+                  boxShadow: "0 30px 80px rgba(0,0,0,0.25)"
+                }}
+              >
+                {/* header */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 10, background: NAVY, color: "#fff",
+                    display: "grid", placeItems: "center", fontWeight: 800
+                  }}>
+                    {node.id}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 900, color: NAVY, fontSize: 20, lineHeight: 1.1 }}>{node.title}</div>
+                    <div style={{ color: "#4B5563", fontSize: 13 }}>{node.subtitle}</div>
+                  </div>
+                  <button
+                    onClick={() => setOpen(null)}
+                    aria-label="Close"
+                    style={{
+                      marginLeft: "auto", background: "transparent", border: 0, cursor: "pointer",
+                      fontSize: 24, lineHeight: 1, color: "#1F2937"
+                    }}
+                  >×</button>
+                </div>
+
+                {/* body */}
+                <div style={{ color: "#1f2937", fontSize: 14, lineHeight: 1.55, marginBottom: 14 }}>
+                  <p style={{ margin: "6px 0 10px" }}>
+                    Explore resources and hands-on learning tracks related to <strong>{node.title}</strong>.
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {(node.details ?? [
+                      "Key concepts, frameworks, and anchor papers.",
+                      "Practical templates, checklists, and playbooks.",
+                      "Curated LMS paths to skill up quickly."
+                    ]).map((d, i) => <li key={i}>{d}</li>)}
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+          );
+        })()}
+        {onExploreLearningCenter && (
+          <div className="mt-10 flex justify-center">
+            <SectionCTAButton label="Explore DQ Learning Center" onClick={onExploreLearningCenter} />
+          </div>
+        )}
       </div>
 
       {/* Dimension Modal */}

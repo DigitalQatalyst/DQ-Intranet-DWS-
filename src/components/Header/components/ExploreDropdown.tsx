@@ -9,7 +9,6 @@ import {
   SparklesIcon,
   LucideProps,
   BookOpen,
-  Layers,
 } from 'lucide-react';
 
 interface Marketplace {
@@ -24,36 +23,47 @@ interface Marketplace {
 
 const marketplaces: Marketplace[] = [
   {
-    id: 'learning-center',
+    id: 'discover-dq',
+    name: 'Discover DQ',
+    description: 'Tour the digital workspace zones and teams across DQ.',
+    icon: SparklesIcon,
+    href: '/discover-dq',
+  },
+  {
+    id: 'non-financial',
+    name: 'IT & Systems Support',
+    description: 'Helpdesk, access requests, device & app support.',
+    icon: BuildingIcon,
+    href: '/marketplace/non-financial',
+  },
+  {
+    id: 'finance',
+    name: 'HR & Finance Services',
+    description: 'Leave, payroll, benefits, and reimbursements.',
+    icon: CreditCardIcon,
+    href: '/marketplace/financial',
+  },
+  {
+    id: 'media',
+    name: 'Facilities & Logistics',
+    description: 'Office access, seating, travel, and logistics.',
+    icon: NewspaperIcon,
+    href: '/marketplace/media',
+  },
+  {
+    id: 'community',
+    name: 'Associates Directory',
+    description: 'Find people, teams, and contacts across DQ.',
+    icon: UsersIcon,
+    href: '/marketplace/community',
+  },
+  {
+    id: 'course',
     name: 'DQ Learning Center',
-    description: 'Designed for your continuous growth. Access the upskilling and certification tools you need to deliver excellence.',
+    description: '7x GHC, 6x Digital, 12x HoV, 1x Day in DQ, Key Tools.',
     icon: GraduationCapIcon,
     href: '/lms',
-    isComingSoon: false,
-  },
-  {
-    id: 'news-center',
-    name: 'DQ Media Center',
-    description: 'Your starting point for news, stories, podcasts, and career opportunities at DQ.',
-    icon: NewspaperIcon,
-    href: '/marketplace/opportunities?tab=announcements',
-    isComingSoon: false,
-  },
-  {
-    id: 'knowledge-center',
-    name: 'DQ Knowledge Center',
-    description: 'The Knowledge Center is your starting point for understanding how DQ works and how to work effectively within it.',
-    icon: BookOpen,
-    href: '/marketplace/guides?tab=strategy&collapsed=guide_type%2Csub_domain%2Cunit%2Clocation%2Ctestimonial_category%2Cproduct_type%2Cproduct_stage%2Cguidelines_category%2Ccategorization%2Cattachments%2Cstrategy_framework%2Cglossary_knowledge_system%2Cglossary_ghc_dimension%2Cglossary_6xd_perspective%2Cglossary_letter%2Cfaq_category',
-    isComingSoon: false,
-  },
-  {
-    id: 'design-system',
-    name: 'Design System Marketplace',
-    description: 'Explore design system components, patterns, and resources for consistent digital experiences.',
-    icon: Layers,
-    href: '/marketplace/design-system',
-    isComingSoon: false,
+    isComingSoon: true,
   },
   {
     id: 'services-center',
@@ -61,7 +71,6 @@ const marketplaces: Marketplace[] = [
     description: 'Business services, technology services, and digital worker tools.',
     icon: BuildingIcon,
     href: '/marketplace/services-center',
-    isComingSoon: true,
   },
   {
     id: 'work-center',
@@ -80,12 +89,26 @@ const marketplaces: Marketplace[] = [
     isComingSoon: true,
   },
   {
+    id: 'news-center',
+    name: 'DQ Media Center',
+    description: 'View DQ updates, corporate news, blogs, job openings, and essential announcements.',
+    icon: NewspaperIcon,
+    href: '/marketplace/opportunities?tab=announcements',
+  },
+  {
     id: 'work-communities',
     name: 'DQ Work Communities',
     description: 'Discussion rooms, pulse updates, and events.',
     icon: SparklesIcon,
     href: '/dq-work-communities',
     isComingSoon: true,
+  },
+  {
+    id: 'knowledge-center',
+    name: 'DQ Knowledge Center',
+    description: 'Strategy guides, blueprints, libraries, and testimonials.',
+    icon: BookOpen,
+    href: '/marketplace/guides',
   },
 ];
 
@@ -174,9 +197,8 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
     <div className="relative" ref={dropdownRef}>
       <button
         ref={buttonRef}
-        className={`flex items-center text-white hover:text-dq-coral transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 rounded-md px-2 py-1 ${
-          isCompact ? 'text-sm' : ''
-        }`}
+        className={`flex items-center text-white hover:text-dq-coral transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 rounded-md px-2 py-1 ${isCompact ? 'text-sm' : ''
+          }`}
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         aria-expanded={isOpen}
@@ -196,12 +218,6 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
           aria-orientation="vertical"
           aria-labelledby="explore-menu"
         >
-          <div className="px-4 py-2 border-b border-gray-100">
-            <h3 className="text-sm font-semibold text-dq-navy">Explore Marketplaces</h3>
-            <p className="text-xs text-dq-navy/70 mt-1 line-clamp-2">
-              Find tools and resources that help you work smarter.
-            </p>
-          </div>
           <div className="max-h-[480px] overflow-y-auto">
             {marketplaces.map((marketplace, index) => {
               const Icon = marketplace.icon;
@@ -212,11 +228,8 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
                   key={marketplace.id}
                   ref={(el) => (itemRefs.current[index] = el)}
                   href={marketplace.href}
-                  className={`flex items-start px-4 py-3 text-left hover:bg-dq-coral/10 focus:bg-dq-coral/10 focus:outline-none transition-colors duration-150 ${
-                    focusedIndex === index ? 'bg-dq-coral/10' : ''
-                  } ${isActive ? 'border-l-4 border-dq-coral bg-dq-coral/5' : ''} ${
-                    isComingSoon ? 'cursor-not-allowed opacity-60' : ''
-                  }`}
+                  className={`flex items-start px-4 py-3 text-left hover:bg-dq-coral/10 focus:bg-dq-coral/10 focus:outline-none transition-colors duration-150 ${focusedIndex === index ? 'bg-dq-coral/10' : ''
+                    } ${isActive ? 'border-l-4 border-dq-coral bg-dq-coral/5' : ''}`}
                   role="menuitem"
                   tabIndex={-1}
                   aria-current={isActive ? 'page' : undefined}

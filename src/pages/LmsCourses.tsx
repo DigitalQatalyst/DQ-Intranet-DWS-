@@ -584,12 +584,21 @@ export const LmsCourses: React.FC = () => {
           </ol>
         </nav>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">DQ Learning Center</h1>
+<<<<<<< HEAD
         <p className="text-gray-600 mb-8 leading-relaxed max-w-5xl">
           Designed for your continuous growth. Access the upskilling and certification tools you need to deliver excellence.
         </p>
 
         {/* Tabs */}
         <div className="border-b border-gray-100 mb-8" data-tabs-section>
+=======
+        <p className="text-gray-600 mb-6 leading-relaxed">
+          Designed for your continuous growth. Access the upskilling and certification tools you need to deliver excellence.
+        </p>
+
+        {/* Navigation Tabs as Text Links */}
+        <div className="mb-6 border-b border-gray-200">
+>>>>>>> origin/Feature/dq-learning-center
           <div className="flex space-x-8">
             <button
               onClick={() => setActiveTab('courses')}

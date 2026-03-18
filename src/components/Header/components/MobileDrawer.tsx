@@ -17,71 +17,61 @@ interface MobileDrawerProps {
   onSignUp: () => void;
   isSignedIn: boolean;
 }
-
-interface DrawerMarketplace {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  href: string;
-  isComingSoon?: boolean;
-}
-
-const marketplaces: DrawerMarketplace[] = [
-  {
-    id: 'learning-center',
-    name: 'DQ Learning Center',
-    description: 'Courses, learning tracks, and associate reviews.',
-    icon: GraduationCapIcon,
-    href: '/lms',
-    isComingSoon: true,
-  },
-  {
-    id: 'services-center',
-    name: 'DQ Services Center',
-    description: 'Business services, technology services, and digital worker tools.',
-    icon: BuildingIcon,
-    href: '/dq-services-center',
-  },
-  {
-    id: 'work-center',
-    name: 'DQ Work Center',
-    description: 'Daily sessions, project work, and execution trackers.',
-    icon: CalendarIcon,
-    href: '/events',
-    isComingSoon: true,
-  },
-  {
-    id: 'work-directory',
-    name: 'DQ Work Directory',
-    description: 'Units, positions, and associate profiles.',
-    icon: UsersIcon,
-    href: '/marketplace/work-directory',
-    isComingSoon: true,
-  },
-  {
-    id: 'media-center',
-    name: 'DQ Media Center',
-    description: 'News, announcements, job openings, and blogs.',
-    icon: NewspaperIcon,
-    href: '/marketplace/opportunities?tab=announcements',
-  },
-  {
-    id: 'work-communities',
-    name: 'DQ Work Communities',
-    description: 'Discussion rooms, pulse updates, and events.',
-    icon: SparklesIcon,
-    href: '/dq-work-communities',
-    isComingSoon: true,
-  },
-  {
-    id: 'knowledge-center',
-    name: 'DQ Knowledge Center',
-    description: 'Strategy guides, blueprints, libraries, and testimonials.',
-    icon: BookOpen,
-    href: '/marketplace/guides',
-  },
-];
+const marketplaces = [{
+  id: 'non-financial',
+  name: 'IT & Systems Support',
+  description: 'Helpdesk, access requests, device & app support.',
+  icon: BuildingIcon,
+  href: '/marketplace/non-financial'
+}, {
+  id: 'finance',
+  name: 'HR & Finance Services',
+  description: 'Leave, payroll, benefits, and reimbursements.',
+  icon: CreditCardIcon,
+  href: '/marketplace/finance'
+}, {
+  id: 'media',
+  name: 'Facilities & Logistics',
+  description: 'Office access, seating, travel, and logistics.',
+  icon: NewspaperIcon,
+  href: '/marketplace/media'
+}, {
+  id: 'community',
+  name: 'Associates Directory',
+  description: 'Find people, teams, and contacts across DQ.',
+  icon: UsersIcon,
+  href: '/marketplace/community'
+}, {
+  id: 'course',
+  name: 'DQ Learning Center',
+  description: '7x GHC, 6x Digital, 12x HoV, 1x Day in DQ, Key Tools.',
+  icon: GraduationCapIcon,
+  href: '/lms'
+}, {
+  id: 'services-center',
+  name: 'DQ Services Center',
+  description: 'Business services, technology services, and digital worker tools.',
+  icon: BuildingIcon,
+  href: '/dq-services-center'
+}, {
+  id: 'calendar',
+  name: 'Calendar & Events',
+  description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
+  icon: CalendarIcon,
+  href: '/events',
+}, {
+  id: 'opportunity',
+  name: 'News & Announcements',
+  description: 'Company updates and internal notices.',
+  icon: SparklesIcon,
+  href: '/marketplace/opportunities'
+}, {
+  id: 'guides',
+  name: 'Guidelines Marketplace',
+  description: 'Access practical guidelines, templates, and processes.',
+  icon: BookOpen,
+  href: '/marketplace/guides'
+}];
 export function MobileDrawer({
   isCompact = false,
   onSignIn,
