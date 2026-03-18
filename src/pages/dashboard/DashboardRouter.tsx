@@ -17,7 +17,6 @@ import SupportPage from "./support";
 import SettingsPage from "./settings";
 import { ChatInterface } from "../../components/Chat/ChatInterface";
 import ComingSoonPage from "../ComingSoonPage";
-import LearningPage from "./LearningPage";
 import { WorkspacePage } from "./workspace";
 
 // Form imports
@@ -158,7 +157,7 @@ const DashboardRouter = () => {
         <Route path="chat-support" element={<ChatInterface />} />
 
         {/* New Sidebar Routes */}
-        <Route path="learning" element={<LearningPage />} />
+        <Route path="learning" element={<ComingSoonPage />} />
         <Route path="workspace" element={<WorkspacePage />} />
         <Route path="approvals" element={<Navigate to="/dashboard/coming-soon?label=Approvals" replace />} />
         <Route path="compliance-tasks" element={<Navigate to="/dashboard/coming-soon?label=Compliance%20Tasks" replace />} />
