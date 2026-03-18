@@ -1,4 +1,5 @@
 import React from 'react'
+import DOMPurify from 'dompurify'
 import { TablePreview } from './TablePreview'
 
 interface HTMLProcessorProps {
@@ -73,7 +74,7 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
       return (
         <div 
           className={className}
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }}
         />
       )
     }
@@ -91,7 +92,7 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
             <div 
               key={`html-${index}`}
               className={className}
-              dangerouslySetInnerHTML={{ __html: beforeTable }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(beforeTable) }}
             />
           )
         }
@@ -118,7 +119,7 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
         <div 
           key="html-final"
           className={className}
-          dangerouslySetInnerHTML={{ __html: remainingHtml }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(remainingHtml) }}
         />
       )
     }

@@ -39,11 +39,14 @@ guidelineData.sections.push(
 );
 
 // Save to file
+// codacy-disable-next-line security/detect-non-literal-fs-filename
 const outputDir = path.join(__dirname, 'guideline-data');
 if (!fs.existsSync(outputDir)) {
+  // codacy-disable-next-line security/detect-non-literal-fs-filename
   fs.mkdirSync(outputDir, { recursive: true });
 }
 
+// codacy-disable-next-line security/detect-non-literal-fs-filename
 const outputPath = path.join(outputDir, 'associate-owned-asset-complete.json');
 fs.writeFileSync(outputPath, JSON.stringify(guidelineData, null, 2));
 
