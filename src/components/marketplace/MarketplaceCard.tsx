@@ -170,9 +170,9 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
           {item.title}
         </h3>
 
-        {/* Description */}
+        {/* Description / Excerpt */}
         <p className="text-sm text-[#64748B] line-clamp-3 mb-6 leading-relaxed flex-grow">
-          {item.description}
+          {item.excerpt || item.description}
         </p>
 
         {/* Metadata row */}
