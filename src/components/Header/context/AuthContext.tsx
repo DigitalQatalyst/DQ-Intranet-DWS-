@@ -15,7 +15,7 @@ interface UserProfile {
 interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
-  login: () => void;
+  login: (redirectTo?: string) => void;
   signup: () => void;
   logout: () => void;
 }
@@ -129,9 +129,17 @@ export function AuthProvider({
     return () => { cancelled = true; };
   }, [accounts, instance, enableGraphFallback, looksSynthetic]);
 
-  const login = useCallback(() => {
+  const login = useCallback((redirectTo?: string) => {
+    const normalizedRedirect =
+      typeof redirectTo === 'string' && redirectTo.startsWith('/')
+        ? redirectTo
+        : undefined;
+
     instance.loginRedirect({
-      ...defaultLoginRequest
+      ...defaultLoginRequest,
+      ...(normalizedRedirect
+        ? { state: `dq-redirect:${encodeURIComponent(normalizedRedirect)}` }
+        : {})
     });
   }, [instance]);
 

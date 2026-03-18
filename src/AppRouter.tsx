@@ -20,6 +20,7 @@ import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import DiscoverDQ from "./pages/DiscoverDQ";
+import OnboardingLanding from "./pages/OnboardingLanding";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import GrowthSectorsComingSoon from "./pages/GrowthSectorsComingSoon";
 import SixXDProductsLanding from "./pages/6XDProductsLanding";
@@ -65,6 +66,32 @@ export function AppRouter() {
             <Route 
               path="/lms/:slug" 
               element={<LmsCourseDetailPageWrapper />} 
+            />
+            <Route path="/onboarding/welcome" element={<OnboardingLanding />} />
+            <Route path="/onboarding/start" element={<div>HR-style form lives here</div>} />
+            <Route
+              path="/onboarding/profile"
+              element={
+                <div className="p-10 text-center text-lg font-semibold text-[#030F35]">
+                  Profile setup experience will be available shortly.
+                </div>
+              }
+            />
+            <Route
+              path="/onboarding/tools"
+              element={
+                <div className="p-10 text-center text-lg font-semibold text-[#030F35]">
+                  Tool exploration hub is on the way.
+                </div>
+              }
+            />
+            <Route
+              path="/onboarding/first-task"
+              element={
+                <div className="p-10 text-center text-lg font-semibold text-[#030F35]">
+                  Guided first task templates launch soon.
+                </div>
+              }
             />
             <Route
               path="/onboarding/:itemId"
