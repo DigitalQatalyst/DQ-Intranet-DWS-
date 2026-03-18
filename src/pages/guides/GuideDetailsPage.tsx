@@ -7,6 +7,7 @@ import { supabaseClient } from '../../lib/supabaseClient'
 import { knowledgeHubSupabase } from '../../services/knowledgeHubClient'
 import MarkdownRenderer from '../../components/guides/MarkdownRenderer'
 import { AccentHeading } from '../../components/shared/AccentHeading'
+import { GUIDE_CONTENT } from '../../constants/guideContent'
 
 interface Guide {
   id: string
@@ -91,7 +92,8 @@ function GuideDetailsPage() {
         setLoading(true)
         console.log('🔍 [GuideDetails] Fetching guide with itemId:', itemId)
         
-        const { data, error: fetchError } = await knowledgeHubSupabase
+        const client = knowledgeHubSupabase ?? supabaseClient
+        const { data, error: fetchError } = await (client as any)
           .from('guides')
           .select('*')
           .eq('slug', itemId)
@@ -110,8 +112,25 @@ function GuideDetailsPage() {
             setActiveSection(parsedSections[0].id)
           }
         } else {
-          console.error('🔍 [GuideDetails] No guide found for itemId:', itemId)
-          setError('Guide not found')
+          // Fall back to GUIDE_CONTENT for GHC items not in Supabase
+          const ghcKey = (itemId === 'dq-ghc' ? 'ghc' : itemId) as string
+          const ghcContent = GUIDE_CONTENT[ghcKey]
+          if (ghcContent) {
+            const syntheticGuide: Guide = {
+              id: itemId as string,
+              slug: itemId as string,
+              title: ghcContent.title,
+              body: ghcContent.shortOverview,
+              summary: ghcContent.subtitle,
+            }
+            setGuide(syntheticGuide)
+            const parsedSections = parseSections(ghcContent.shortOverview || '')
+            setSections(parsedSections)
+            if (parsedSections.length > 0) setActiveSection(parsedSections[0].id)
+          } else {
+            console.error('🔍 [GuideDetails] No guide found for itemId:', itemId)
+            setError('Guide not found')
+          }
         }
       } catch (err: any) {
         console.error('🔍 [GuideDetails] Error fetching guide:', err)

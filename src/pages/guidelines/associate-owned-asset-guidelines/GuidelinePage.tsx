@@ -22,8 +22,8 @@ function GuidelinePage() {
     return text
       .toLowerCase()
       .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/&nbsp;/g, '') // Remove &nbsp;
+      .replaceAll(' ', '-') // Replace spaces with hyphens (replaceAll preferred)
+      .replaceAll('&nbsp;', '') // Remove &nbsp;
       .trim()
   }
   
@@ -88,7 +88,8 @@ function GuidelinePage() {
     let cancelled = false
     ;(async () => {
       try {
-        const { data, error } = await knowledgeHubSupabase
+        const client = knowledgeHubSupabase ?? supabaseClient
+        const { data, error } = await (client as any)
           .from('guides')
           .select('title, last_updated_at, body')
           .eq('slug', 'dq-associate-owned-asset-guidelines')
@@ -174,17 +175,7 @@ function GuidelinePage() {
               {/* HTML Content with Table Processing */}
               <HTMLProcessor 
                 html={guideHtml}
-                className="prose prose-lg max-w-none accent-headers
-                           prose-headings:font-bold prose-headings:text-gray-900
-                           prose-h1:text-4xl prose-h1:mt-12 prose-h1:mb-6 prose-h1:first:mt-0
-                           prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
-                           prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
-                           prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
-                           prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800
-                           prose-ul:list-disc prose-ul:ml-6 prose-ul:mb-4
-                           prose-ol:list-decimal prose-ol:ml-6 prose-ol:mb-4
-                           prose-li:mb-2
-                           prose-strong:font-semibold prose-strong:text-gray-900"
+                className="guideline-body max-w-none"
               />
             </div>
           </div>

@@ -69,11 +69,10 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
     let lastIndex = 0
     const htmlContent = html
     
-    // If no tables, return original HTML
+    // If no tables, return original HTML in a single wrapper
     if (tables.length === 0) {
       return (
         <div 
-          className={className}
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }}
         />
       )
@@ -91,7 +90,6 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
           components.push(
             <div 
               key={`html-${index}`}
-              className={className}
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(beforeTable) }}
             />
           )
@@ -118,7 +116,6 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
       components.push(
         <div 
           key="html-final"
-          className={className}
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(remainingHtml) }}
         />
       )
@@ -127,5 +124,6 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
     return <>{components}</>
   }
 
-  return <div>{processHTML()}</div>
+  // Outer wrapper carries all the prose/typography classes so they apply uniformly
+  return <div className={className}>{processHTML()}</div>
 }
