@@ -9,6 +9,7 @@ import {
   NewspaperIcon,
   SparklesIcon,
   BookOpen,
+  CreditCardIcon,
 } from 'lucide-react';
 import { scrollToSupport } from '../../../utils/scroll';
 interface MobileDrawerProps {
