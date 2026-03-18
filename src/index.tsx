@@ -10,10 +10,10 @@ import { ApolloProvider } from "@apollo/client/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Clear stale MSAL cache + strip auth code from URL before MSAL runs
-Object.keys(localStorage).filter((k: string) => k.toLowerCase().includes('msal')).forEach((k: string) => localStorage.removeItem(k));
-sessionStorage.clear();
-if (window.location.search.includes('code=') || window.location.search.includes('error=') || window.location.search.includes('state=')) {
-  window.history.replaceState({}, document.title, window.location.pathname);
+Object.keys(globalThis.localStorage).filter((k: string) => k.toLowerCase().includes('msal')).forEach((k: string) => globalThis.localStorage.removeItem(k));
+globalThis.sessionStorage.clear();
+if (globalThis.location.search.includes('code=') || globalThis.location.search.includes('error=') || globalThis.location.search.includes('state=')) {
+  globalThis.history.replaceState({}, document.title, globalThis.location.pathname);
 }
 
 const client = new ApolloClient({
@@ -23,11 +23,10 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-// Create a QueryClient instance for React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
     },
@@ -37,7 +36,6 @@ const queryClient = new QueryClient({
 const container = document.getElementById("root");
 if (container) {
   const root = createRoot(container);
-  // Ensure MSAL is initialized and redirect response handled before using any APIs
   msalInstance
     .initialize()
     .then(() => msalInstance.handleRedirectPromise())
@@ -50,17 +48,16 @@ if (container) {
           msalInstance.setActiveAccount(accounts[0]);
         }
       }
-      // If this was an explicit Sign Up flow or a brand new account, route to onboarding
       try {
         const isSignupState =
           typeof result?.state === "string" &&
           result.state.includes("ej-signup");
-        const claims = (result as any)?.idTokenClaims || {};
+        const claims = result?.idTokenClaims || {};
         const isNewUser =
-          claims?.newUser === true || claims?.newUser === "true";
+          (claims as Record<string, unknown>)?.newUser === true ||
+          (claims as Record<string, unknown>)?.newUser === "true";
         if (isSignupState || isNewUser) {
-          // Navigate to onboarding without adding history entry
-          window.location.replace("/dashboard/onboarding");
+          globalThis.location.replace("/dashboard/onboarding");
           return;
         }
       } catch (error) {
