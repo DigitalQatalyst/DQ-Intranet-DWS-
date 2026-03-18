@@ -124,7 +124,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
             to={ctaHref}
             className="px-8 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center border-2 border-gray-200"
           >
-            <span>Start Your Onboarding Journey</span>
+            <span>Start Your Onboarding Journey</span>{' '}
             <ArrowRight
               size={18}
               className="ml-2 transition-transform duration-300 group-hover:translate-x-1"

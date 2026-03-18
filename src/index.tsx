@@ -54,10 +54,10 @@ if (container) {
         const isSignupState =
           typeof result?.state === "string" &&
           result.state.includes("ej-signup");
-        const claims = result?.idTokenClaims || {};
+        const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
         const isNewUser =
-          (claims as Record<string, unknown>)?.newUser === true ||
-          (claims as Record<string, unknown>)?.newUser === "true";
+          claims.newUser === true ||
+          claims.newUser === "true";
         if (isSignupState || isNewUser) {
           globalThis.location.replace("/dashboard/onboarding");
           return;
