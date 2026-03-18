@@ -513,13 +513,13 @@ export default function PodcastSeriesPage() {
     }
   };
 
-  const skipBackward = (seconds: number = 10) => {
+  const skipBackward = (seconds = 10) => {
     const audio = audioRef.current;
     if (!audio) return;
     audio.currentTime = Math.max(0, audio.currentTime - seconds);
   };
 
-  const skipForward = (seconds: number = 10) => {
+  const skipForward = (seconds = 10) => {
     const audio = audioRef.current;
     if (!audio) return;
     audio.currentTime = Math.min(audio.duration, audio.currentTime + seconds);
@@ -739,7 +739,7 @@ export default function PodcastSeriesPage() {
       const headingMatch = trimmed.match(/^(##+)\s+(.+)$/);
       if (headingMatch) {
         const level = headingMatch[1].length;
-        let headingText = headingMatch[2].trim();
+        const headingText = headingMatch[2].trim();
         
         const normalizedHeading = headingText.toLowerCase();
         const isFocusOfEpisode = normalizedHeading.includes('focus of the episode') || 

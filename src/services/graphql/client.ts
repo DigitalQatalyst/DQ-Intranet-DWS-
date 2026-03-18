@@ -110,7 +110,7 @@ export const getMockResponse = (
 export const request = async <T>(
   query: string,
   variables: any = {},
-  queryName: string = "unknown",
+  queryName = "unknown",
   marketplaceType?: string
 ): Promise<T> => {
   try {

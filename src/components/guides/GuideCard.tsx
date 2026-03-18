@@ -1,14 +1,7 @@
 ﻿import React from 'react'
 import { toTimeBucket } from '../../utils/guides'
 import { getGuideImageUrl } from '../../utils/guideImageMap'
-import { useNavigate } from 'react-router-dom'
-import { supabaseClient } from '../../lib/supabaseClient'
 import { getProductMetadata } from '../../utils/productMetadata'
-
-function formatAuthorText(authorName?: string, authorOrg?: string): string | null {
-  const text = `${authorName || ''}${authorOrg ? ` - ${authorOrg}` : ''}`.trim()
-  return (text.toLowerCase() === 'bb' || text.length <= 2) ? null : text
-}
 
 function formatLabel(value?: string | null): string {
   if (!value) return ''
@@ -24,6 +17,11 @@ function normalizeTag(value?: string | null): string {
   if (!value) return ''
   const cleaned = value.toLowerCase().replace(/[_-]+/g, ' ').trim()
   return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
+}
+
+function formatAuthorText(authorName?: string, authorOrg?: string): string | null {
+  const text = `${authorName || ''}${authorOrg ? ` - ${authorOrg}` : ''}`.trim()
+  return (text.toLowerCase() === 'bb' || text.length <= 2) ? null : text
 }
 
 const GHC_TITLE_BY_SLUG: Record<string, string> = {
@@ -50,8 +48,8 @@ const KNOWN_PRODUCT_NAMES = [
   'Digital Transformation Management Academy (DTMA)',
   'Digital Business Platforms (DBP Assists)',
   'Digital Transformation Management Platform (DTMP)',
-  'DTO4T ΓÇô Digital Transformation Operating Framework',
-  'TMaaS ΓÇô Transformation Management as a Service',
+  'DTO4T - Digital Transformation Operating Framework',
+  'TMaaS - Transformation Management as a Service',
 ]
 
 function hovTitleFromSlug(s: string): string | null {
@@ -111,87 +109,52 @@ export interface GuideCardProps {
 
 export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverrideUrl }) => {
   const timeBucket = toTimeBucket(guide.estimatedTimeMin)
-  const lastUpdated = guide.lastUpdatedAt ? new Date(guide.lastUpdatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''
+  const lastUpdated = guide.lastUpdatedAt
+    ? new Date(guide.lastUpdatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : ''
   const domain = guide.domain as string | undefined
-  const navigate = useNavigate()
-  // Check if this is a product (blueprint or static product)
-  const isBlueprint = ((guide.domain || '').toLowerCase().includes('blueprint')) || 
-                      ((guide.guideType || '').toLowerCase().includes('blueprint')) ||
-                      (guide.domain === 'Product') ||
-                      (guide.productType && guide.productStage)
-  const handleViewGuideline = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    try {
-      const { data, error } = await supabaseClient
-        .from('guides')
-        .select('slug')
-        .eq('status', 'Approved')
-        .ilike('domain', 'guidelines')
-        .eq('title', guide.title)
-        .maybeSingle()
-      if (!error && data?.slug) {
-        navigate(`/marketplace/guides/${encodeURIComponent(data.slug)}`, { state: { fromBlueprint: true } })
-        return
-      }
-    } catch (_) {}
-    // Fallback to Guidelines tab search
-    navigate(`/marketplace/guides?tab=guidelines&q=${encodeURIComponent(guide.title)}`)
-  }
-  // Determine the badge label based on framework for Strategy guides
+
+  const isBlueprint =
+    (guide.domain || '').toLowerCase().includes('blueprint') ||
+    (guide.guideType || '').toLowerCase().includes('blueprint') ||
+    guide.domain === 'Product' ||
+    (guide.productType && guide.productStage)
+
   const getBadgeLabel = (): string => {
     if (isBlueprint) return 'Product'
     if (domain?.toLowerCase() === 'strategy') {
       const slug = (guide.slug || '').toLowerCase()
       const subDomain = (guide.subDomain || (guide as any).sub_domain || '').toLowerCase()
-      
-      // Check for HoV framework first (more specific)
-      // HoV includes: dq-hov and all dq-competencies-* guides
       if (slug === 'dq-hov' || slug.includes('competencies') || subDomain.includes('hov') || subDomain.includes('competencies')) {
         return 'GHC'
       }
-      
-      // Check for GHC framework (but not overview)
-      // GHC includes: dq-vision, dq-persona, dq-agile-* (excluding overview)
-      if (slug === 'dq-vision' || 
-          slug === 'dq-persona' || 
-          slug.includes('agile-') ||
+      if (slug === 'dq-vision' || slug === 'dq-persona' || slug.includes('agile-') ||
           (subDomain.includes('ghc') && !subDomain.includes('competencies'))) {
         return 'GHC'
       }
-      
-      // Default to Strategy if no framework match
       return formatLabel(domain)
     }
     return formatLabel(domain)
   }
-  
+
   const domainLabel = getBadgeLabel()
   const isDuplicateTag = normalizeTag(domain) !== '' && normalizeTag(domain) === normalizeTag(guide.guideType)
-  
-  // Get product metadata if this is a product
-  // Use direct productType/productStage if available (from static products), otherwise look up by title
-  const productMetadata = isBlueprint ? (
-    (guide.productType && guide.productStage) ? {
-      productType: guide.productType,
-      productStage: guide.productStage,
-      description: guide.summary || '',
-      imageUrl: guide.heroImageUrl || ''
-    } : getProductMetadata(guide.title)
-  ) : null
-  
-  // Transform title to remove "Blueprint" and use proper product naming
+
+  const productMetadata = isBlueprint
+    ? (guide.productType && guide.productStage)
+      ? { productType: guide.productType, productStage: guide.productStage, description: guide.summary || '', imageUrl: guide.heroImageUrl || '' }
+      : getProductMetadata(guide.title)
+    : null
+
   const getDisplayTitle = (): string => {
     if (!isBlueprint) return resolveGhcTitle(guide.title || '', (guide.slug || '').toLowerCase())
     return resolveBlueprintTitle(guide.title || '', !!(guide.productType && guide.productStage), productMetadata)
   }
-  
+
   const displayTitle = getDisplayTitle()
-  
-  // Ensure we're using the correct property name - check both camelCase and snake_case
   const heroImage = guide.heroImageUrl || (guide as any).hero_image_url || null
   const subDomain = guide.subDomain || (guide as any).sub_domain || null
 
-  // For products/blueprints, prioritize the product image from metadata (e.g. TMaaS card image)
   const defaultImageUrl = isBlueprint && productMetadata?.imageUrl
     ? productMetadata.imageUrl
     : getGuideImageUrl({
@@ -205,28 +168,26 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
       })
 
   const imageUrl = imageOverrideUrl || defaultImageUrl
-  const isTestimonial = ((guide.domain || '').toLowerCase().includes('testimonial')) || ((guide.guideType || '').toLowerCase().includes('testimonial'))
+  const isTestimonial =
+    (guide.domain || '').toLowerCase().includes('testimonial') ||
+    (guide.guideType || '').toLowerCase().includes('testimonial')
   const isGhcOverview = (guide.slug || '').toLowerCase() === 'dq-ghc'
-  
-  // Use product description if available, otherwise use summary
   const displayDescription = productMetadata?.description || guide.summary || ''
-  
+
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // If image fails to load, try to use a fallback
     const target = e.currentTarget
     if (target.src && !target.src.includes('/image.png')) {
-      // Try fallback image
       target.src = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
     }
   }
-  
-  // Check if guide is in Draft status
+
   const isDraft = guide.status === 'Draft'
-  const isPublished = guide.status === 'Published' || guide.status === 'Approved'
-  
+
   return (
-    <div className="bg-white rounded-2xl shadow border border-gray-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden" onClick={isDraft ? undefined : onClick}>
-      {/* Image ΓÇö flush to top, no padding, full width */}
+    <div
+      className="bg-white rounded-2xl shadow border border-gray-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden"
+      onClick={isDraft ? undefined : onClick}
+    >
       {imageUrl && (
         <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>
           <img
@@ -242,10 +203,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
           />
         </div>
       )}
-
-      {/* Card body */}
       <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
-        {/* Badge */}
         <div className="flex flex-wrap gap-2 mb-2 flex-shrink-0">
           {!isBlueprint && (
             <>
@@ -254,7 +212,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
                   {domainLabel}
                 </span>
               )}
-              {guide.guideType && !isTestimonial && !isDuplicateTag && !((guide.slug || '').toLowerCase() === 'dq-ghc') && (
+              {guide.guideType && !isTestimonial && !isDuplicateTag && (guide.slug || '').toLowerCase() !== 'dq-ghc' && (
                 <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
                   {formatLabel(guide.guideType)}
                 </span>
@@ -272,46 +230,32 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
             </>
           )}
         </div>
-
-        {/* Title */}
-        <h3 className="font-semibold text-gray-900 mb-1.5 flex-shrink-0" style={{
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          lineHeight: '1.375rem'
-        }} title={displayTitle}>{displayTitle}</h3>
-
-        {/* Description */}
-        <p className="text-sm text-gray-600 mb-2 flex-shrink-0" style={{
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          lineHeight: '1.25rem'
-        }}>{displayDescription}</p>
-
-        {/* Date */}
+        <h3
+          className="font-semibold text-gray-900 mb-1.5 flex-shrink-0"
+          title={displayTitle}
+          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.375rem' }}
+        >
+          {displayTitle}
+        </h3>
+        <p
+          className="text-sm text-gray-600 mb-2 flex-shrink-0"
+          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.25rem' }}
+        >
+          {displayDescription}
+        </p>
         <div className="flex items-center text-xs text-gray-400 gap-3 mb-3 flex-shrink-0">
           {lastUpdated && <span>{lastUpdated}</span>}
           {timeBucket && <span>{timeBucket}</span>}
         </div>
-
-        {/* Author */}
-        {(!isBlueprint && !isGhcOverview && domain?.toLowerCase() !== 'strategy' && domain?.toLowerCase() !== 'guidelines' && (guide.authorName || guide.authorOrg)) && (
+        {!isBlueprint && !isGhcOverview && domain?.toLowerCase() !== 'strategy' && domain?.toLowerCase() !== 'guidelines' && (guide.authorName || guide.authorOrg) && (
           <div className="text-xs text-gray-500 mb-2 flex-shrink-0 truncate">
             {formatAuthorText(guide.authorName, guide.authorOrg)}
           </div>
         )}
-
-        {/* Button ΓÇö no separator line, pushed to bottom */}
         <div className="mt-auto flex-shrink-0">
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (!isDraft && !isBlueprint) onClick()
-            }}
+            onClick={(e) => { e.stopPropagation(); if (!isDraft && !isBlueprint) onClick() }}
             disabled={isDraft || isBlueprint}
             className={`w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2.5 transition-all focus:outline-none focus:ring-2 ${
               isDraft || isBlueprint

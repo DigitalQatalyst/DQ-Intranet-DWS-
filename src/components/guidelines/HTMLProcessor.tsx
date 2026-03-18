@@ -66,7 +66,7 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
     
     const components: React.ReactNode[] = []
     let lastIndex = 0
-    let htmlContent = html
+    const htmlContent = html
     
     // If no tables, return original HTML
     if (tables.length === 0) {

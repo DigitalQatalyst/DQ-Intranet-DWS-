@@ -275,7 +275,7 @@ export const ServiceDetailPage: React.FC = () => {
           }
         } else {
           // Use Supabase for non-GHC services (existing logic)
-          let { data: row, error: err1 } = await supabaseClient
+          const { data: row, error: err1 } = await supabaseClient
             .from('guides').select('*').eq('slug', key).maybeSingle();
 
           if (err1 || !row) {
