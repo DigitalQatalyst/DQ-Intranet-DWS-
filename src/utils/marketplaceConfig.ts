@@ -539,9 +539,6 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       options: [{
         id: 'live',
         name: 'Live'
-      }, {
-        id: 'coming-soon',
-        name: 'Coming Soon'
       }]
     }, {
       id: 'courseCategory',

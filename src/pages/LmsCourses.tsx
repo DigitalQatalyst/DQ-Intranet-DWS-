@@ -734,17 +734,17 @@ export const LmsCourses: React.FC = () => {
                     const durationLabel = track.duration || 'N/A';
                     const categoryLabel = track.courseCategory || track.category;
 
-                    const isComingSoon = track.status === 'coming-soon';
+                    const isComingSoon = false; // Removed coming soon functionality
 
                     const CardContent = (
-                      <div className={`flex flex-col h-full ${isComingSoon ? 'opacity-75 grayscale-[0.5]' : ''}`}>
+                      <div className="flex flex-col h-full">
                         {/* Track Image & Overlay Badge */}
                         <div className="relative w-full h-56 bg-gray-100 overflow-hidden">
                           {track.imageUrl ? (
                             <img
                               src={track.imageUrl}
                               alt={track.title}
-                              className={`w-full h-full object-cover transition-transform duration-500 ${!isComingSoon && 'group-hover:scale-105'}`}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = 'none';
                               }}
@@ -763,20 +763,11 @@ export const LmsCourses: React.FC = () => {
                               </span>
                             )}
                           </div>
-
-                          {isComingSoon && (
-                            <div className="absolute top-4 right-4">
-                              <span className="px-2.5 py-1 bg-amber-500 text-white rounded-lg text-[9px] font-bold tracking-widest uppercase shadow-sm">
-                                Coming Soon
-                              </span>
-                            </div>
-                          )}
                         </div>
 
                         <div className="px-5 py-6 flex-grow flex flex-col">
                           {/* Title */}
-                          <h3 className={`text-xl font-bold mb-3 line-clamp-2 leading-tight transition-colors ${isComingSoon ? 'text-gray-500' : 'text-[#1E293B] group-hover:text-blue-600'
-                            }`}>
+                          <h3 className="text-xl font-bold mb-3 line-clamp-2 leading-tight transition-colors text-[#1E293B] group-hover:text-blue-600">
                             {track.title}
                           </h3>
 
@@ -816,25 +807,13 @@ export const LmsCourses: React.FC = () => {
                           </div>
 
                           {/* Footer Button Reinstated */}
-                          <div className={`mt-auto pt-5 border-t border-gray-100 flex items-center justify-between text-sm font-bold transition-colors ${isComingSoon ? 'text-gray-400' : 'text-[#030F35] group-hover:text-blue-600'
-                            }`}>
-                            <span>{isComingSoon ? 'Not Available' : 'View Track Details'}</span>
-                            <ChevronRightIcon size={18} className={`transition-transform ${!isComingSoon && 'group-hover:translate-x-1'}`} />
+                          <div className="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between text-sm font-bold transition-colors text-[#030F35] group-hover:text-blue-600">
+                            <span>View Track Details</span>
+                            <ChevronRightIcon size={18} className="transition-transform group-hover:translate-x-1" />
                           </div>
                         </div>
                       </div>
                     );
-
-                    if (isComingSoon) {
-                      return (
-                        <div
-                          key={track.id}
-                          className="group flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-not-allowed h-full"
-                        >
-                          {CardContent}
-                        </div>
-                      );
-                    }
 
                     return (
                       <Link

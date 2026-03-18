@@ -424,7 +424,7 @@ export const LmsCourseDetailPage: React.FC = () => {
 
   // Compute other values safely
   const HeroIcon = course ? (CARD_ICON_BY_ID[course.id] || DEFAULT_COURSE_ICON) : DEFAULT_COURSE_ICON;
-  const statusLabel = course?.status === 'live' ? 'Live' : 'Coming Soon';
+  const statusLabel = course?.status === 'live' ? 'Live' : 'Live'; // Removed coming soon status
   const statusClass = course?.status === 'live' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200';
   const locationsLabel = formatList(course?.locations);
   const audienceLabel = formatList(course?.audience);
@@ -1169,9 +1169,9 @@ export const LmsCourseDetailPage: React.FC = () => {
                     disabled={!firstLesson || course.status === 'coming-soon'}
                     className={`w-full px-4 py-3 text-white font-semibold rounded-md transition-colors shadow-md ${firstLesson && course.status !== 'coming-soon' ? 'hover:opacity-90' : 'opacity-50 cursor-not-allowed'
                       }`}
-                    style={{ backgroundColor: course.status === 'coming-soon' ? '#9CA3AF' : '#030F35' }}
+                    style={{ backgroundColor: '#030F35' }}
                   >
-                    {course.status === 'coming-soon' ? 'Coming Soon' : (isTrack ? 'Enroll to Curriculum' : 'Start Course')}
+                    {isTrack ? 'Enroll to Curriculum' : 'Start Course'}
                   </button>
                   <button
                     className="w-full px-4 py-2.5 font-medium bg-white border rounded-md hover:bg-gray-50 transition-colors flex items-center justify-center"

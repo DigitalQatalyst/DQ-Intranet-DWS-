@@ -996,7 +996,7 @@ Sign-off Process:
               </h1>
 
               <p className="text-base text-white/80 max-w-xl leading-relaxed">
-                V1.0.1 | 01.11.25 - DQ's strategic, end-to-end system that ensures all content items are intentionally planned, professionally produced, and strategically promoted across all platforms.
+                DQ's strategic, end-to-end system that ensures all content items are intentionally planned, professionally produced, and strategically promoted across all platforms.
               </p>
             </div>
           </div>
