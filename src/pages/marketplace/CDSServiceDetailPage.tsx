@@ -35,121 +35,105 @@ export default function CDSServiceDetailPage() {
     {
       id: 'introduction',
       title: '1.1 Introduction',
-      content: `This section introduces the CDS (Campaign Design System) as DQ's specialized framework for creating consistent, high-impact campaign and marketing materials at scale that drive engagement and deliver measurable business results.
-
-The CDS is designed to embed greater strategic thinking, creative excellence, and performance optimization into the way campaign content is conceptualized, developed, executed, and measured across all DQ marketing channels and initiatives.
-
-By anchoring the CDS within DQ's wider marketing ecosystem - including brand management, content marketing, digital advertising, and lead generation - this introduction highlights how campaign content serves as a strategic driver of brand awareness, lead generation, and business growth.`
+      content: `Marketing at DigitalQatalyst is not just about brand presence-it is a structured practice of shaping the organization's narrative, educating the digital economy, and orchestrating movements across channels and stakeholders. The Marketing Campaigns Design System (CDS) offers a unified operating framework for how campaigns are conceived, planned, designed, deployed, and reviewed-anchored by DQ's five strategic Content Pillars.`
     },
     {
-      id: 'campaign-mandate',
-      title: '1.2 Campaign Content Mandate (DQ Units)',
-      content: `Multiple units across DQ are responsible for producing campaign content that delivers strategic marketing impact - content designed to attract, engage, and convert target audiences across various channels and touchpoints.
-
-These campaign-producing units include:
-
-• DQ Content – Leads integrated marketing campaigns, brand awareness initiatives, and multi-channel promotional content across digital platforms.
-
-• DQ Deals – Develops business development campaigns, client acquisition initiatives, and partnership marketing content.
-
-• DTMI (Digital Transformation Management Insights) – Creates thought leadership campaigns, industry positioning initiatives, and expert-driven marketing content.
-
-• DTMA (Digital Transformation Management Academy) – Produces educational marketing campaigns, course promotion content, and capability-building initiatives.
-
-• DQ Designs – Develops product marketing campaigns, solution promotion content, and technical marketing materials.
-
-• Internal Marketing – Creates employer branding campaigns, recruitment marketing, and internal engagement initiatives.`
+      id: 'who-is-this-for',
+      title: '1.2 Who is this for?',
+      content: `Across DigitalQatalyst, campaigns are how ideas turn into movements-how insight becomes visibility, visibility becomes engagement, and engagement becomes growth. CDS is for the people responsible for making those movements happen. It serves marketing leaders setting strategic direction, campaign specialists designing narratives and journeys, designers and creators shaping visual and multimedia assets, and DevOps and WebOps teams deploying campaigns across platforms. It also supports delivery and product teams who initiate campaigns to generate demand, and data analysts who measure performance and optimize outcomes. For anyone involved in planning, executing, or scaling marketing campaigns at DQ, CDS provides the shared operating system that brings structure and alignment to collective effort.`
     },
     {
-      id: 'relevant-ecosystem',
-      title: '1.3 Relevant Ecosystem',
-      content: `The CDS guidelines apply universally across the DQ campaign ecosystem and must be upheld to maintain consistency, quality, and brand alignment in every campaign output.
-
-This includes all campaign formats, channels, and marketing touchpoints where DQ campaign content is created or deployed:
-
-• Digital advertising campaigns across all paid media channels
-
-• Email marketing campaigns and automated sequences
-
-• Social media campaigns and organic content initiatives
-
-• Content marketing campaigns and thought leadership series
-
-• Product launch campaigns and solution promotion initiatives
-
-• Event marketing campaigns and webinar promotion content
-
-• Partnership and co-marketing campaign materials
-
-• Internal campaigns and employee engagement initiatives`
+      id: 'problem-solved',
+      title: '1.3 What problem does it solve?',
+      content: `Without a unified system, campaigns often evolve as isolated efforts-planned differently by each team, executed with inconsistent standards, and measured unevenly across channels. This leads to fragmented brand expression, slower execution, and missed opportunities to build momentum across the pipeline. CDS transforms campaigns from ad-hoc activities into a disciplined, repeatable practice. It provides a common framework anchored in DQ's content pillars, shared standards, and clear roles, enabling teams to collaborate with confidence and speed. By embedding consistency, quality benchmarks, and performance thinking into every stage of campaign design and delivery, CDS reduces friction, improves effectiveness, and ensures that every campaign contributes coherently to DQ's brand, growth, and market leadership.`
     },
     {
-      id: 'campaign-planning-timeline',
-      title: '1.4 Campaign Planning | Timeline & Milestones',
-      content: `Campaign planning within CDS follows a structured approach that ensures strategic alignment, creative excellence, and measurable outcomes. This section outlines the essential timeline and milestone framework for campaign development.
-
-The planning process includes:
-
-• Strategic campaign mapping and target audience analysis
-
-• Campaign calendar development and resource allocation
-
-• Creative development checkpoints and approval milestones
-
-• Media planning and distribution strategy development
-
-• Performance tracking setup and measurement framework
-
-• Stakeholder alignment and campaign approval workflows`
+      id: 'marcom-mandate',
+      title: '1.4 DQ MarCom | Mandate',
+      content: `The Marketing & Communication (MarCom) Unit in DQ works along with the BD Unit to orchestrate leads, opportunities, and deals for the organisation offerings. The joint mandate of Marketing and BD is "To Accelerate Efficient DCO & DBP Deals Pipeline (Traffic | Contacts | Leads | Opportunities) in DQ". Across the organisation, success is measured in terms of contribution to (1) DQ Insight, (2) DQ Agility, (3) DQ Growth. Marketing campaigns are the primary activities undertaken to build the DQ Brand and generate followership and leads.`
     },
     {
-      id: 'campaign-planning-tracker',
-      title: '1.5 Campaign Planning | Tracker',
-      content: `The campaign planning tracker provides a comprehensive system for monitoring campaign development progress, ensuring accountability, and maintaining quality standards throughout the campaign lifecycle.
+      id: 'marcom-ecosystem',
+      title: '1.5 DQ MarCom | Ecosystem',
+      content: `The DQ MarCom Unit delivers targeted promotional and lead-generation campaigns in collaboration with key units across the organization. Operating as a centralized support function, it ensures each campaign aligns with both the strategic goals of the unit it supports and the broader DQ brand and business objectives.
 
-Key tracking elements include:
+DQ Organisation: Branding positioning.
 
-• Campaign status and progress indicators
+DQ Delivery Units: Leads generation (DQ Designs and Deploys).
 
-• Creative review checkpoints and approvals
-
-• Budget allocation and timeline management
-
-• Performance metrics and ROI measurement
-
-• Stakeholder feedback and iteration tracking
-
-• Media performance and optimization insights`
+DQ Products Units: Leads generation (DQ DT2.0 and DCO offerings).`
     },
     {
       id: 'purpose',
-      title: '1.6 CDS | Purpose',
-      content: `CDS defines DQ's unified approach to creating strategic, scalable, high-impact marketing campaigns. The CDS is defined as a strategic system that ensures all campaign content is purposefully planned, professionally executed, and effectively measured to maximize marketing impact and business results.
+      title: '1.6 DQ CDS | Purpose',
+      content: `At its core, the Campaigns Design System (CDS) is a mechanism for ensuring consistency, quality, and strategic clarity across all outputs. It transforms campaign activity into a disciplined process of storytelling, brand expression, and stakeholder engagement while embedding visual and narrative standards that unify the brand experience. This ensures every campaign is impactful, aligned, repeatable, and reflective of DQ's digital leadership.
 
-It provides a unified framework that brings strategic thinking, creative excellence, and performance optimization to the entire campaign development lifecycle.
+Provide a standardized, high-impact system for managing all marketing campaigns.
 
-By applying CDS, DQ ensures that every campaign output - whether a digital advertising campaign, email marketing sequence, social media initiative, or integrated marketing program - maintains consistent brand standards, delivers compelling messaging, and achieves measurable performance outcomes.
+Empower teams to build campaigns that align with DQ's vision, values, and voice.
 
-This leads to stronger brand recognition, improved lead generation, enhanced market positioning, streamlined campaign development processes, and higher return on marketing investment across all channels and initiatives.`
+Accelerate production, improve consistency, and enhance campaign effectiveness.`
     },
     {
-      id: 'implementation-guidelines',
-      title: '1.7 Implementation Guidelines',
-      content: `This section provides comprehensive guidelines for implementing CDS across all DQ campaign development workflows, ensuring consistent application and maximum marketing effectiveness.
+      id: 'key-stakeholders',
+      title: '1.7 DQ CDS | Key Stakeholders',
+      content: `CDS standardizes campaign execution and enables collaboration across diverse stakeholders, providing a shared system, language, and quality benchmarks to co-create high-quality, brand-aligned campaigns.
 
-Implementation includes:
+Marketing Leadership – Strategic alignment and oversight.
 
-• Team training and creative capability building programs
+Campaign Beneficiaries – All stakeholders across the organisation.
 
-• Tool integration and campaign workflow optimization
+Campaign Specialists – Campaign planning, scripting, and content design.
 
-• Quality assurance processes and creative review protocols
+Designers & Creators – Visual identity, videos, carousels.
 
-• Performance measurement and campaign optimization strategies
+DevOps / WebOps – Programming, deployment, asset integration.
 
-• Change management and adoption strategies across marketing teams
+Campaign Data Analysts – Measurement, reporting, optimization.
 
-The implementation approach is designed to be scalable, flexible, and adaptable to different campaign types and marketing objectives while maintaining the core principles and brand standards of CDS.`
+Delivery / Products Teams – Cross-functional campaign initiators.`
+    },
+    {
+      id: 'campaigns-strategy',
+      title: '2.1 Stage 00 - Campaigns Strategy',
+      content: `This section defines the strategic foundation of DQ campaigns: the Content Pillars, target channels, overall lifecycle, and roles. It establishes the strategic layer of the CDS by clarifying how DQ's core messages, brand presence, and offerings are structured and delivered across multiple campaigns. A unified strategy ensures that all campaigns, regardless of target audience or format, are consistent with DQ's positioning as a leading digital transformation partner.
+
+This consistency is achieved through integration of five clearly defined content pillars, a well-mapped channel distribution logic, a repeatable campaign lifecycle, and the active participation of cross-functional roles. Together, these strategic components enable DQ to operate with clarity, scale campaigns efficiently, and achieve maximum brand and business impact.`
+    },
+    {
+      id: 'content-pillars',
+      title: '2.2 DQ CDS | 5 Content Pillars',
+      content: `The foundation of every DQ marketing campaign is built upon five core content pillars. These pillars are strategic expressions of DQ's value proposition and positioning.
+
+Thought Leadership & Insight: Advance DQ as the brain trust for digital transformation.
+
+Product & Service Value: Showcase the functionality and outcomes of DQ products.
+
+Brand Identity & Culture: Humanize the brand through emotion and values.
+
+Education & Enablement: Teach and enable audiences to take action.
+
+Community & Ecosystem: Highlight DQ's role as a movement, not just a company.
+
+Structuring campaigns around these pillars ensures consistent messaging and measurable outcomes.`
+    },
+    {
+      id: 'dq-story-framework',
+      title: '2.3 DQ CDS | The DQ Story Framework',
+      content: `The DQ Value Proposition and Operating Model is encapsulated in the Golden HoneyComb of Competencies (GHC). The 7th element expands into the research-driven 6xD (6 Primary Dimensions for Digital Success), defining worldview, strategic pillars, and product architecture. These frameworks act as the narrative engine behind all campaign storytelling, providing vocabulary, themes, and structural alignment so every campaign reinforces DQ's identity and positioning.`
+    },
+    {
+      id: 'campaign-lifecycle',
+      title: '2.4 DQ MarCom | Campaign Lifecycle',
+      content: `A repeatable structure that moves from strategic intent to execution with clarity and speed. Four core stages:
+
+Planning – Strategy, objectives, storyboarding.
+
+Design – Scripts, visuals, messaging, prompts.
+
+Execution – Programming, scheduling, deployment.
+
+Governance – Monitoring, review, reporting, retros.`
     }
   ];
 

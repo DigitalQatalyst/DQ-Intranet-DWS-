@@ -45,8 +45,18 @@ The CI.DS is designed to embed greater intentionality, traceability, and perform
 By anchoring the CI.DS within DQ's wider ecosystem - including DTMB (Books), DTMI (Insights), DTMP (Platform), TMaaS (Deliverables), and DTMA (Academy) - this introduction highlights how content is no longer a support function, but a strategic driver of thought leadership, brand credibility, and organizational learning.`
     },
     {
+      id: 'who-is-this-for',
+      title: '1.2 Who is this for?',
+      content: `Across DQ, content is created by many hands and for many purposes - books that define transformation thinking, insights that shape market conversations, learning material that builds capability, proposals that win trust, and deliverables that guide real-world execution. CI.DS is for all of these contributors. It is for the writer shaping an argument, the designer translating complexity into clarity, the subject-matter expert validating accuracy, the marketer preparing content for distribution, and the executive ensuring the message reflects DQ's vision. No matter the format or platform, if someone is responsible for turning ideas into content that represents DQ, CI.DS is the system that supports them.`
+    },
+    {
+      id: 'problem-solved',
+      title: '1.3 What problem does it solve?',
+      content: `Before CI.DS, content often evolved in isolation. Each unit worked with its own assumptions, formats, and review practices. Valuable ideas were expressed inconsistently, quality depended on individual effort, and teams spent time fixing structure and alignment instead of strengthening the message. CI.DS changes this experience. It provides a shared, end-to-end system that brings order to the entire content lifecycle - from intent and planning to creation, review, and publication. By introducing common standards, roles, and checkpoints, CI.DS removes ambiguity, reduces rework, and makes quality repeatable rather than accidental. As a result, teams spend less time correcting and coordinating, and more time creating content that is clear, credible, and impactful - allowing content to function as a strategic asset that consistently advances DQ's thought leadership, brand trust, and learning mission at scale.`
+    },
+    {
       id: 'content-mandate',
-      title: '1.2 Content Mandate (DQ Units)',
+      title: '1.4 Content Mandate (DQ Units)',
       content: `Multiple units across DQ are tasked with producing content that delivers strategic impact - content designed to influence decisions, spark engagement, and drive targeted actions across diverse scenarios.
 
 These content-producing units include:
@@ -67,7 +77,7 @@ These content-producing units include:
     },
     {
       id: 'relevant-ecosystem',
-      title: '1.3 Relevant Ecosystem',
+      title: '1.5 Relevant Ecosystem',
       content: `The CI.DS guidelines apply universally across the DQ content ecosystem and must be upheld to maintain consistency, quality, and brand alignment in every content output.
 
 This includes all formats, platforms, and touchpoints where DQ content is created or shared:
@@ -85,40 +95,6 @@ This includes all formats, platforms, and touchpoints where DQ content is create
 • In client-facing deliverables, reports, and strategic outputs`
     },
     {
-      id: 'content-planning-timeline',
-      title: '1.4 Content Planning | Timeline & Milestones',
-      content: `Content planning within CI.DS follows a structured approach that ensures strategic alignment, quality delivery, and measurable outcomes. This section outlines the essential timeline and milestone framework for content development.
-
-The planning process includes:
-
-• Strategic content mapping and audience analysis
-
-• Content calendar development and resource allocation
-
-• Quality checkpoints and review milestones
-
-• Distribution planning and performance tracking
-
-• Stakeholder alignment and approval workflows`
-    },
-    {
-      id: 'content-planning-tracker',
-      title: '1.5 Content Planning | Tracker',
-      content: `The content planning tracker provides a comprehensive system for monitoring content development progress, ensuring accountability, and maintaining quality standards throughout the production lifecycle.
-
-Key tracking elements include:
-
-• Content status and progress indicators
-
-• Quality assurance checkpoints and approvals
-
-• Resource allocation and timeline management
-
-• Performance metrics and outcome measurement
-
-• Stakeholder feedback and iteration tracking`
-    },
-    {
       id: 'purpose',
       title: '1.6 CI.DS | Purpose',
       content: `The CI.DS is defined as a strategic, end-to-end system that ensures all content items are intentionally planned, professionally produced, and strategically promoted.
@@ -130,23 +106,79 @@ By applying CI.DS, DQ ensures that every output - whether a whitepaper, insight,
 This leads to stronger engagement, greater trust from audiences, streamlined production processes, and higher content ROI across all platforms and channels.`
     },
     {
-      id: 'implementation-guidelines',
-      title: '1.7 Implementation Guidelines',
-      content: `This section provides comprehensive guidelines for implementing CI.DS across all DQ content production workflows, ensuring consistent application and maximum effectiveness.
+      id: 'key-stakeholders',
+      title: '1.7 CI.DS | Key Stakeholders',
+      content: `The success of the CI.DS relies on clear role definition and collaboration across a range of key stakeholders. Each participant in the content lifecycle plays a unique role in ensuring that content meets its intended purpose with clarity, quality, and strategic alignment.
 
-Implementation includes:
+Writers are responsible for shaping narratives that align with DQ's tone, logic, and frameworks, grounding every piece in clarity and purpose.
 
-• Team training and capability building programs
+Editors refine the structure, tone, and coherence of written content, ensuring it meets CI.DS quality standards.
 
-• Tool integration and workflow optimization
+Designers translate ideas into visuals, applying the brand's visual language and layout logic to enhance clarity, engagement, and comprehension.
 
-• Quality assurance processes and review protocols
+Reviewers - often subject matter experts - validate technical accuracy, conceptual integrity, and narrative strength.
 
-• Performance measurement and continuous improvement
+Marketers ensure content visibility and impact by planning distribution strategies, tagging for SEO, and coordinating promotional campaigns.
 
-• Change management and adoption strategies
+Executive Approvers provide final validation, ensuring that each content item supports DQ's strategic vision, brand standards, and ecosystem positioning.
 
-The implementation approach is designed to be scalable, flexible, and adaptable to different team structures and content requirements while maintaining the core principles and standards of CI.DS.`
+Together, these stakeholders uphold a shared commitment to quality and coherence, using CI.DS as the central system that guides planning, creation, validation, and publication.`
+    },
+    {
+      id: 'content-strategy',
+      title: '2.1 Stage 00 – Content Item Strategy (CI.DS)',
+      content: `Stage 00 defines the strategic lens through which all content items are shaped. It ensures that content is not created in isolation but instead anchored in DQ's narrative, frameworks, product positioning, and distribution strategy. This stage provides the foundational logic that ensures content serves a clear business and branding purpose across the organization.`
+    },
+    {
+      id: 'dq-frameworks',
+      title: '2.2 DQ Stories | Frameworks',
+      content: `Every piece of content produced under CI.DS must be grounded in DQ's core narrative: the transformation journey toward Digital Cognitive Organizations (DCOs). This overarching story is more than a backdrop - it is the strategic compass that connects DQ's thought leadership, product philosophy, and transformation agenda.
+
+By embedding the DCO story within content, creators ensure consistency of purpose, relevance to the target audience, and alignment with DQ's global positioning. This storytelling framework provides coherence across diverse content formats and strengthens the organization's intellectual footprint in the digital transformation space.`
+    },
+    {
+      id: 'content-artefact-class',
+      title: '2.3 Content Artefact Class (CAC)',
+      content: `DQ content is generally organized into five Content Artefact Classes (CAC), each representing a strategic category aligned with the intent, audience, and business value of the content produced. These classes provide a high-level framework to ensure that content outputs are not just diverse in format but coherent in purpose.
+
+The five CACs include:
+
+Thought Leadership Artefacts – Designed to shape industry perspectives and establish DQ's intellectual position. Examples include whitepapers, research briefs, anchor papers, and insight decks.
+
+Product & Service Artefacts – Focused on describing, promoting, or enabling adoption of DQ's offerings. This includes solution overviews, proposal decks, use-case templates, and service blueprints.
+
+Brand Identity & Culture Artefacts – These reinforce internal values and external image. Artefacts include culture books, onboarding kits, tone-of-voice guidelines, and brand design manuals.
+
+Education & Enablement Artefacts – Created to build digital capabilities for clients, partners, or internal teams. Includes LMS modules, learning guides, how-to scripts, and certification assessments.
+
+Community & Ecosystem Artefacts – Aimed at engaging the broader market and partner ecosystem. Includes event highlights, partnership announcements, social campaigns, and ecosystem visualizations.
+
+These five CACs act as the backbone of the CI.DS structure and provide direction for the development, review, and strategic use of content across the organization.`
+    },
+    {
+      id: 'content-development-lifecycle',
+      title: '2.4 Content Development Lifecycle (CDL)',
+      content: `The Content Development Lifecycle (CDL) outlines the full journey of a content item - divided into two core stages: Production and Dissemination. This structured lifecycle embeds quality, alignment, and performance at each step of the process, ensuring every content asset is purposeful and impactful.
+
+Production Stage focuses on transforming strategic ideas into high-quality, brand-aligned content:
+
+Ideation & Validation – Define the strategic intent of the content, align it with relevant DQ frameworks, and validate with key stakeholders.
+
+Briefing & Planning – Document objectives, contributors, and milestones in the CI Brief and CI Tracker.
+
+Drafting & Editing – Create content using approved templates, applying tone, structure, and referencing standards.
+
+Design & Formatting – Shape the content visually with compliant layouts, branded visuals, and multimedia.
+
+Review & Approvals – Conduct structured reviews with SMEs and leaders to finalize content for publishing.
+
+Dissemination Stage focuses on delivering the content with maximum reach, visibility, and feedback:
+
+Publication & SEO Tagging – Distribute content to the right channels with proper metadata, SEO, and publishing standards.
+
+Promotion & Feedback Loop – Activate content through campaigns, track performance metrics, and gather insights for future refinement.
+
+This lifecycle ensures traceability, role clarity, and continuous improvement across all CI.DS-driven content activities.`
     }
   ];
   const handleSectionClick = (sectionId: string) => {

@@ -38,57 +38,140 @@ The V.DS is designed to embed greater intentionality, creative excellence, and p
 By anchoring the V.DS within DQ's wider content ecosystem - including DTMB (Books), DTMI (Insights), DTMP (Platform), TMaaS (Deliverables), and DTMA (Academy) - this introduction highlights how video content serves as a strategic driver of brand awareness, thought leadership, and audience engagement.`
     },
     {
+      id: 'who-is-this-for',
+      title: '1.2 Who is this for?',
+      content: `Across DigitalQatalyst, video content is created by diverse teams and for multiple purposes - onboarding videos that introduce DQ's culture, learning modules that build capability, marketing campaigns that generate engagement, thought leadership pieces that establish authority, and strategic narratives that drive transformation. V.DS is for all of these creators. It serves scriptwriters crafting compelling narratives, video editors refining rhythm and flow, video designers producing visuals and motion sequences, video reviewers ensuring quality and accuracy, marketers strategizing distribution and performance, and executive approvers validating brand alignment. Whether someone is filming authentic testimonials, generating AI-powered explainers, or producing cinematic brand stories, V.DS provides the unified framework that guides every stage from ideation to publication, ensuring consistent excellence across all DQ video outputs.`
+    },
+    {
+      id: 'problem-solved',
+      title: '1.3 What problem does it solve?',
+      content: `Before V.DS, video production often evolved inconsistently across teams - each unit working with different standards, formats, and review processes. Videos were created without strategic alignment, quality varied based on individual effort, and teams spent time fixing misalignments instead of enhancing storytelling impact. V.DS transforms this experience by providing a shared, end-to-end system that brings structure and intentionality to the entire video lifecycle - from strategic planning and ideation to scripting, storyboarding, production, review, and distribution. By introducing common standards, clear roles, and quality checkpoints, V.DS removes ambiguity, reduces rework, and makes cinematic excellence repeatable rather than accidental. As a result, teams spend less time correcting and coordinating, and more time creating videos that are visually compelling, narratively coherent, and strategically aligned - allowing video content to function as a powerful asset that consistently advances DQ's thought leadership, brand trust, and audience engagement at scale.`
+    },
+    {
       id: 'video-mandate',
-      title: '1.2 Video Content Mandate (DQ Units)',
-      content: `Multiple units across DQ are responsible for producing video content that delivers strategic impact - content designed to educate, inspire, and drive targeted actions across diverse audiences and platforms.
+      title: '1.4 Video Content Mandate (DQ Units)',
+      content: `Multiple units across DQ contribute to producing exceptional, high-impact video content that shapes perception, influences decisions, and inspires meaningful action. Each unit develops video outputs aligned with its function, audience, and strategic purpose.
 
-These video-producing units include:
+Primary Video-Producing Units:
 
-• DQ Content – Leads video marketing campaigns, brand storytelling initiatives, and multi-platform video content across digital channels.
+• DQ Marketing – Produces campaign, social, and brand videos designed to captivate audiences and strengthen emotional engagement.
 
-• DTMA (Digital Transformation Management Academy) – Produces educational video content, course materials, training modules, and instructional videos for capability building.
+• DQ HRA – Creates onboarding, training, and culture videos that enhance internal alignment, learning, and belonging.
 
-• DTMI (Digital Transformation Management Insights) – Creates thought leadership videos, expert interviews, trend analysis content, and industry positioning videos.
+• DQ DTMA – Develops high-quality eLearning and course videos, merging pedagogical clarity with cinematic execution.
 
-• DQ Deals – Develops client testimonial videos, case study presentations, proposal support videos, and business development content.
-
-• DQ Designs – Produces product demonstration videos, solution explainer content, and technical showcase videos.
-
-• Internal Communications – Creates company culture videos, leadership messages, team spotlights, and employee engagement content.`
+• DQ Stories – Crafts narrative-driven explainers and storytelling videos that simplify complex ideas with visual elegance and impact.`
     },
     {
       id: 'relevant-ecosystem',
-      title: '1.3 Relevant Ecosystem',
-      content: `The V.DS guidelines apply universally across the DQ video ecosystem and must be upheld to maintain consistency, quality, and brand alignment in every video output.
+      title: '1.5 Relevant Ecosystem',
+      content: `The V.DS standards define the creative and technical DNA of every DQ video. They apply universally across the content ecosystem to ensure cinematic consistency, storytelling harmony, and production excellence across all video types and delivery channels.
 
-This includes all video formats, platforms, and distribution channels where DQ video content is created or shared:
+Where V.DS Applies:
 
-• Educational and training video content across all learning platforms
+• Internal communications and executive briefings that require clarity and professionalism
 
-• Marketing and promotional videos for digital campaigns and social media
+• DTMB companion and promotional videos that visually extend DQ's thought leadership
 
-• Thought leadership and expert interview content for industry positioning
+• DTMA learning modules and course materials designed for immersive, high-retention education
 
-• Product demonstration and solution showcase videos for sales enablement
+• DTMI insights and thought-leadership videos that distill ideas with elegance and authority
 
-• Client testimonial and case study videos for business development
+• Business development, proposals, and client presentations that demand credibility and impact
 
-• Internal communication and culture videos for employee engagement
+• DQ brand campaigns and social storytelling assets that build emotional connection and trust
 
-• Event and webinar recordings for knowledge sharing and lead generation
-
-• Social media video content across all digital marketing channels`
+Mandate: Every DQ video - whatever its format, length, or platform - must exemplify cinematic quality, narrative precision, and visual excellence, meeting the highest standard of impact and brand distinction.`
     },
     {
       id: 'purpose',
-      title: '1.4 V.DS | Purpose',
-      content: `The V.DS is defined as a strategic system that ensures all video content is purposefully planned, professionally produced, and effectively distributed to maximize audience engagement and business impact.
+      title: '1.6 V.DS | Purpose',
+      content: `The V.DS is a strategic, end-to-end system that governs how video content is conceptualized, produced, and distributed. It transforms creativity into structured excellence, ensuring every output delivers clarity, emotion, and measurable performance.
 
-It provides a unified framework that brings creative excellence, technical standards, and performance optimization to the entire video production lifecycle.
+Core Outcomes:
 
-By applying V.DS, DQ ensures that every video output - whether an educational course video, marketing campaign content, thought leadership interview, or product demonstration - maintains consistent visual standards, delivers compelling storytelling, and achieves measurable performance outcomes.
+• Cinematic quality that elevates DQ's brand presence and message delivery.
 
-This leads to stronger brand recognition, improved audience engagement, enhanced thought leadership positioning, streamlined production processes, and higher return on video content investment across all platforms and channels.`
+• Narrative coherence ensuring every frame supports the story.
+
+• Seamless collaboration across creative, technical, and strategic teams.
+
+• Optimized viewer engagement through data-driven insights and design.
+
+• Consistent brand expression across every channel and audience touchpoint.`
+    },
+    {
+      id: 'key-stakeholders',
+      title: '1.7 V.DS | Key Stakeholders',
+      content: `Delivering high-impact video excellence requires collaboration among distinct creative and operational roles, each accountable for maintaining DQ's quality standards and production flow.
+
+Scriptwriters design compelling narratives, structure pacing, and maintain message fidelity to DQ's tone and purpose.
+
+Video Editors refine rhythm, transitions, and storytelling flow for maximum clarity and emotional engagement.
+
+Video Designers produce visuals, animation, and motion sequences that enhance storytelling and brand recognition.
+
+Video Reviewers ensure technical soundness, conceptual accuracy, and adherence to production standards.
+
+Marketers strategize distribution, SEO optimization, and performance tracking for amplified reach and ROI.
+
+Executive Approvers guarantee that each video upholds DQ's vision, values, and excellence benchmarks before release.`
+    },
+    {
+      id: 'video-strategy',
+      title: '2.1 Stage 00 – Video Strategy (V.PF)',
+      content: `Stage 00 defines the strategic lens through which all video productions are conceived. It ensures videos are not produced in isolation but anchored in DQ's overarching narrative, frameworks, product positioning, and audience engagement strategy. This stage guarantees that every video serves a clear business, educational, or branding purpose, directly contributing to DQ's strategic and communication objectives.
+
+By establishing this strategic foundation, each video aligns with DQ's transformation philosophy, enhances the quality of visual storytelling, and reinforces thought leadership through cinematic impact, emotional resonance, and narrative clarity.`
+    },
+    {
+      id: 'dq-frameworks',
+      title: '2.2 DQ Stories | Frameworks',
+      content: `Every video created under the V.DS (Video Design System) must align with DQ's master narrative: the transformation journey toward Digital Cognitive Organizations (DCO), serving as the creative compass for all scriptwriting, visual design, and emotional tone. By embedding this DCO story, each video reinforces DQ's transformation mission and intellectual leadership, engages audiences through purposeful storytelling and high-impact visuals, and delivers consistent, cinematic cohesion across DQ's global ecosystem, ultimately strengthening its emotional and visual footprint while elevating brand perception and audience engagement worldwide.`
+    },
+    {
+      id: 'video-artefact-class',
+      title: '2.3 Video Artefact Class (VAC)',
+      content: `DQ video productions are organized into five Video Artefact Classes (VACs) that serve as high-level frameworks guiding creative direction, quality standards, and message coherence. These classes ensure every DQ video remains diverse in form yet unified in purpose, tone, and impact - maintaining full alignment with DQ's strategic vision and cinematic standards of excellence.
+
+The five Video Artefact Classes (VACs) include:
+
+Thought Leadership Videos – Designed to shape perspectives, communicate insight, and establish DQ's authority through powerful storytelling and visual intelligence.
+
+Product & Service Videos – Created to demonstrate, promote, or enable adoption of DQ's offerings through engaging walkthroughs and solution-driven narratives.
+
+Brand & Culture Videos – Developed to strengthen internal identity and external reputation, capturing DQ's essence and people in motion.
+
+Education & Learning Videos – Produced to simplify complex ideas, enhance digital literacy, and foster capability-building through visually engaging learning experiences.
+
+Community & Ecosystem Videos – Crafted to engage markets, partners, and audiences through storytelling that connects and inspires participation in DQ's wider ecosystem.
+
+These VACs form the backbone of the V.DS, ensuring all video content meets DQ's high creative and technical standards - balancing diversity with coherence and consistently delivering visual impact aligned to DQ's vision.`
+    },
+    {
+      id: 'video-development-lifecycle',
+      title: '2.4 Video Development Lifecycle (VDL)',
+      content: `The Video Development Lifecycle (VDL) defines the two interconnected phases of video production - Creation and Distribution - ensuring each project flows through structured creativity, rigorous quality control, and data-driven release strategies.
+
+Creation Phase transforms ideas into visually and emotionally compelling deliverables through a structured creative and technical workflow:
+
+Ideation & Validation – Define the creative vision, storyline, and alignment with DQ's strategy and overarching narrative.
+
+Production Strategy & Planning – Document objectives, contributors, and milestones in the Video Production Tracker, setting schedules, resources, and requirements for both filmed and AI-generated projects.
+
+Scripting & Storyboarding – Convert approved ideas into concise scripts and visual boards, balancing clarity, pacing, and emotional tone.
+
+Video Production & Composition – Execute creation across two paths: filmed videos emphasizing authenticity and emotion, and AI-generated videos offering efficiency and scalability - each aligned to purpose and DQ standards.
+
+Review & Refinement – Perform final reviews to confirm narrative consistency, visual polish, and brand alignment before distribution.
+
+Distribution Phase focuses on maximizing video visibility and measuring viewer impact:
+
+Publishing & Tagging – Upload videos with metadata, subtitles, and SEO alignment.
+
+Promotion & Analytics Loop – Launch campaigns, monitor engagement metrics, and refine strategies for continuous improvement.
+
+Goal: Deliver cinematic-quality videos that consistently reflect DQ's brand excellence and drive emotional and intellectual connection.`
     }
   ];
   const handleSectionClick = (sectionId: string) => {
