@@ -24,7 +24,7 @@ const BlockHeading = ({ text }: { text: string }) => (
 );
 
 /** Body paragraph */
-const BlockParagraph = ({ text }: { text: string }) => (
+const BlockParagraph = ({ text }: { text: React.ReactNode }) => (
   <p className="text-base font-normal leading-[1.75] text-[#475467]">{text}</p>
 );
 
@@ -246,7 +246,7 @@ export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related
                 }
                 return (
                   <div className="space-y-6">
-                    {paragraphs.map((p, i) => <BlockParagraph key={i} text={String(parseBold(p))} />)}
+                    {paragraphs.map((p, i) => <BlockParagraph key={i} text={parseBold(p)} />)}
                     {sections.map((sec, si) => (
                       <div key={si} className="space-y-3">
                         <BlockHeading text={sec.label} />
@@ -266,7 +266,7 @@ export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related
                 );
               })()
             ) : (
-              overview.map((p, i) => p.trim() ? <BlockParagraph key={i} text={String(parseBold(p.trim()))} /> : null)
+              overview.map((p, i) => p.trim() ? <BlockParagraph key={i} text={parseBold(p.trim())} /> : null)
             )
           ) : blogTab === 'highlights' || blogTab === 'impact' || blogTab === 'takeaways' ? (
             (() => {
@@ -307,10 +307,10 @@ export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related
                   return <BlockHeading key={i} text={t.replace(/^#+\s+/, '')} />;
                 if (t.startsWith('- ') || t.startsWith('* '))
                   return <BlockChecklist key={i} items={[t.replace(/^[-*]\s+/, '')]} />;
-                return <BlockParagraph key={i} text={String(parseBold(t))} />;
+                return <BlockParagraph key={i} text={parseBold(t)} />;
               })
             ) : (
-              overview.map((p, i) => p.trim() ? <BlockParagraph key={i} text={String(parseBold(p.trim()))} /> : null)
+              overview.map((p, i) => p.trim() ? <BlockParagraph key={i} text={parseBold(p.trim())} /> : null)
             )
           ) : (
             <p className="text-[#475467] text-base italic">

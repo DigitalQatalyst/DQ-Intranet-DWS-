@@ -1248,7 +1248,7 @@ function mapNewsRowToItem(row: any): NewsItem {
  */
 export async function fetchAllNews(): Promise<NewsItem[]> {
   const { data, error } = await supabase
-    .from('news')
+    .from('news_blogs')
     .select('*')
     .order('date', { ascending: false })
 
@@ -1266,6 +1266,9 @@ export async function fetchAllNews(): Promise<NewsItem[]> {
   }
 
   const rows = (data ?? []) as any[]
+
+  // eslint-disable-next-line no-console
+  console.log('[fetchAllNews] news_blogs raw data:', rows)
 
   // If no data from database, return mock data
   if (rows.length === 0) {
@@ -1336,8 +1339,12 @@ export async function fetchAllJobs(): Promise<JobItem[]> {
  * Fetch a single news item by ID from Supabase
  */
 export async function fetchNewsById(id: string): Promise<NewsItem | null> {
+  // Check MOCK_NEWS first — it has the latest structured content for blogs
+  const mockItem = MOCK_NEWS.find(item => item.id === id)
+  if (mockItem) return mockItem
+
   const { data, error } = await supabase
-    .from('news')
+    .from('news_blogs')
     .select('*')
     .eq('id', id)
     .single()
@@ -1345,17 +1352,11 @@ export async function fetchNewsById(id: string): Promise<NewsItem | null> {
   if (error) {
     // eslint-disable-next-line no-console
     console.error('[fetchNewsById] Supabase error:', error)
-    // Try to find in mock data
-    const mockItem = MOCK_NEWS.find(item => item.id === id)
-    return mockItem || null
+    return null
   }
 
-  if (!data) {
-    // Try to find in mock data
-    const mockItem = MOCK_NEWS.find(item => item.id === id)
-    return mockItem || null
-  }
-  
+  if (!data) return null
+
   return mapNewsRowToItem(data as any)
 }
 
@@ -1366,7 +1367,7 @@ export async function incrementListenCount(episodeId: string): Promise<void> {
   try {
     // First get current views count
     const { data: currentData, error: fetchError } = await supabase
-      .from('news')
+      .from('news_blogs')
       .select('views')
       .eq('id', episodeId)
       .single();
@@ -1379,7 +1380,7 @@ export async function incrementListenCount(episodeId: string): Promise<void> {
     // Increment the views count
     const currentViews = currentData?.views || 0;
     const { error: updateError } = await supabase
-      .from('news')
+      .from('news_blogs')
       .update({ views: currentViews + 1 })
       .eq('id', episodeId);
 
