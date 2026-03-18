@@ -167,7 +167,7 @@ const SubHeading = ({ text }: { text: string }) => (
 const Checklist = ({ items }: { items: string[] }) => (
   <ul className="space-y-3">
     {items.map((item, i) => (
-      <li key={i} className="flex items-start gap-3">
+      <li key={item.slice(0, 40) || i} className="flex items-start gap-3">
         <CheckCircle2
           className="mt-0.5 h-5 w-5 flex-shrink-0"
           style={{ color: 'hsl(var(--success))' }}
@@ -190,7 +190,7 @@ export const ServiceDetailPage: React.FC = () => {
   const [ghcContent, setGhcContent] = useState<GuideContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const [, setForceUpdate] = useState(0);
 
   // Check if this is a GHC service - use ghcContent state for accurate detection
   const isGHC = !!ghcContent;
@@ -220,7 +220,7 @@ export const ServiceDetailPage: React.FC = () => {
 
   // Scroll to top immediately when itemId changes (for navigation between related competencies)
   useEffect(() => {
-    window.scrollTo(0, 0);
+    globalThis.window?.scrollTo(0, 0);
   }, [itemId]);
 
   useEffect(() => {
@@ -230,7 +230,7 @@ export const ServiceDetailPage: React.FC = () => {
       setError(null);
       
       // Scroll to top when navigating to a new service
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
       
       try {
         const key = String(itemId || '');
@@ -275,13 +275,13 @@ export const ServiceDetailPage: React.FC = () => {
           }
         } else {
           // Use Supabase for non-GHC services (existing logic)
-          const { data: rowBySlug, error: err1 } = await supabaseClient
-            .from('guides').select('*').eq('slug', key).maybeSingle();
+          const { data: rowBySlug, error: err1 } = await (supabaseClient
+            .from('guides').select('*') as any).eq('slug', key).maybeSingle();
 
           let row: any = rowBySlug;
           if (err1 || !row) {
-            const { data: row2, error: err2 } = await supabaseClient
-              .from('guides').select('*').eq('id', key).maybeSingle();
+            const { data: row2, error: err2 } = await (supabaseClient
+              .from('guides').select('*') as any).eq('id', key).maybeSingle();
             if (err2) throw err2;
             row = row2;
           }
@@ -365,7 +365,9 @@ export const ServiceDetailPage: React.FC = () => {
 
   // Get the appropriate title and description based on whether it's GHC or not
   const displayTitle = isGHC && ghcContent ? ghcContent.title : guide.title;
-  const displaySubtitle = isGHC && ghcContent ? 'GHC is the operating framework that connects direction, culture, and execution at DQ.' : 'Guidelines for transitioning to an associate-owned device model at DQ';
+  const displaySubtitle = isGHC && ghcContent
+    ? 'GHC is the operating framework that connects direction, culture, and execution at DQ.'
+    : 'Guidelines for transitioning to an associate-owned device model at DQ';
   const summaryTitle = isGHC && ghcContent ? `${ghcContent.title.split('(')[0].trim()} Summary` : 'Guideline summary';
   const relatedSectionTitle = isGHC ? 'Related GHC Components' : 'Related Guidelines';
   const browseAllText = isGHC ? 'Browse all competencies' : 'Browse all guidelines';
@@ -679,99 +681,91 @@ export const ServiceDetailPage: React.FC = () => {
 
               {/* GHC Service Tabs */}
               {activeTab === 'purpose' && isGHC && ghcContent && (
-                <>
-                  <div className="space-y-6">
-                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
-                      <p>
-                        {ghcContent.shortOverview.split('\n\n')[0] || 'This competency provides essential frameworks and practices for effective leadership and operational excellence at DQ.'}
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <SubHeading text="Key Benefits" />
-                      <Checklist items={
-                        ghcContent.highlights.slice(0, 4).map(highlight => {
-                          const [title, ...descParts] = highlight.split(':')
-                          const description = descParts.join(':').trim()
-                          return `${title}: ${description}`
-                        })
-                      } />
-                    </div>
+                <div className="space-y-6">
+                  <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                    <p>
+                      {ghcContent.shortOverview.split('\n\n')[0] || 'This competency provides essential frameworks and practices for effective leadership and operational excellence at DQ.'}
+                    </p>
                   </div>
-                </>
+
+                  <div className="space-y-4">
+                    <SubHeading text="Key Benefits" />
+                    <Checklist items={
+                      ghcContent.highlights.slice(0, 4).map(highlight => {
+                        const [title, ...descParts] = highlight.split(':')
+                        const description = descParts.join(':').trim()
+                        return `${title}: ${description}`
+                      })
+                    } />
+                  </div>
+                </div>
               )}
 
               {activeTab === 'essentials' && isGHC && ghcContent && (
-                <>
-                  <div className="space-y-6">
-                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
-                      <p>
-                        {ghcContent.storybookIntro.split('\n\n')[0] || 'Essential concepts and frameworks you need to understand for this competency.'}
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <SubHeading text="Core Concepts" />
-                      <Checklist items={
-                        ghcContent.whatYouWillLearn.slice(0, 4).map(item => {
-                          const [title, ...descParts] = item.split(':')
-                          const description = descParts.join(':').trim()
-                          return `${title}: ${description}`
-                        })
-                      } />
-                    </div>
+                <div className="space-y-6">
+                  <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                    <p>
+                      {ghcContent.storybookIntro.split('\n\n')[0] || 'Essential concepts and frameworks you need to understand for this competency.'}
+                    </p>
                   </div>
-                </>
+
+                  <div className="space-y-4">
+                    <SubHeading text="Core Concepts" />
+                    <Checklist items={
+                      ghcContent.whatYouWillLearn.slice(0, 4).map(item => {
+                        const [title, ...descParts] = item.split(':')
+                        const description = descParts.join(':').trim()
+                        return `${title}: ${description}`
+                      })
+                    } />
+                  </div>
+                </div>
               )}
 
               {activeTab === 'practice' && isGHC && ghcContent && (
-                <>
-                  <div className="space-y-6">
-                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
-                      <p>
-                        {ghcContent.courseIntro?.split('\n\n')[0] || 'Practical exercises and learning opportunities to develop your skills in this competency area.'}
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <SubHeading text="Learning Activities" />
-                      <Checklist items={
-                        ghcContent.whatYouWillPractice?.slice(0, 4).map(item => {
-                          const [title, ...descParts] = item.split(':')
-                          const description = descParts.join(':').trim()
-                          return `${title}: ${description}`
-                        }) || [
-                          "Interactive Learning: Engage with practical scenarios and case studies",
-                          "Skill Development: Build competency through guided exercises",
-                          "Knowledge Application: Apply concepts to real-world situations",
-                          "Progress Tracking: Monitor your learning journey and achievements"
-                        ]
-                      } />
-                    </div>
+                <div className="space-y-6">
+                  <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                    <p>
+                      {ghcContent.courseIntro?.split('\n\n')[0] || 'Practical exercises and learning opportunities to develop your skills in this competency area.'}
+                    </p>
                   </div>
-                </>
+
+                  <div className="space-y-4">
+                    <SubHeading text="Learning Activities" />
+                    <Checklist items={
+                      ghcContent.whatYouWillPractice?.slice(0, 4).map(item => {
+                        const [title, ...descParts] = item.split(':')
+                        const description = descParts.join(':').trim()
+                        return `${title}: ${description}`
+                      }) || [
+                        "Interactive Learning: Engage with practical scenarios and case studies",
+                        "Skill Development: Build competency through guided exercises",
+                        "Knowledge Application: Apply concepts to real-world situations",
+                        "Progress Tracking: Monitor your learning journey and achievements"
+                      ]
+                    } />
+                  </div>
+                </div>
               )}
 
               {activeTab === 'usage' && isGHC && ghcContent && (
-                <>
-                  <div className="space-y-6">
-                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
-                      <p>
-                        Apply this competency in your daily work through practical implementation strategies and real-world scenarios that drive operational excellence.
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <SubHeading text="Implementation Areas" />
-                      <Checklist items={[
-                        "Daily Operations: Integrate competency principles into routine work processes",
-                        "Team Leadership: Apply frameworks when leading and managing team activities",
-                        "Decision Making: Use competency guidelines for strategic and operational decisions",
-                        "Continuous Improvement: Leverage insights for ongoing process enhancement"
-                      ]} />
-                    </div>
+                <div className="space-y-6">
+                  <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                    <p>
+                      Apply this competency in your daily work through practical implementation strategies and real-world scenarios that drive operational excellence.
+                    </p>
                   </div>
-                </>
+
+                  <div className="space-y-4">
+                    <SubHeading text="Implementation Areas" />
+                    <Checklist items={[
+                      "Daily Operations: Integrate competency principles into routine work processes",
+                      "Team Leadership: Apply frameworks when leading and managing team activities",
+                      "Decision Making: Use competency guidelines for strategic and operational decisions",
+                      "Continuous Improvement: Leverage insights for ongoing process enhancement"
+                    ]} />
+                  </div>
+                </div>
               )}
 
               {activeTab === 'understand' && isGHC && ghcContent && (
@@ -810,7 +804,7 @@ export const ServiceDetailPage: React.FC = () => {
                     {/* Open Storybook Button */}
                     <div className="pt-4">
                       <button
-                        onClick={() => window.location.href = 'https://digital-qatalyst.shorthandstories.com/5e83bb73-0c29-4070-9a92-5ada3c3e6f69/index.html'}
+                        onClick={() => { if (globalThis.location) globalThis.location.href = 'https://digital-qatalyst.shorthandstories.com/5e83bb73-0c29-4070-9a92-5ada3c3e6f69/index.html'; }}
                         className="inline-flex items-center gap-2 px-6 py-3 text-white font-medium rounded-lg transition-colors"
                         style={{ backgroundColor: '#030E31' }}
                         onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#020A28' }}
@@ -860,7 +854,7 @@ export const ServiceDetailPage: React.FC = () => {
                     {/* View Course Button */}
                     <div className="pt-4">
                       <button
-                        onClick={() => window.location.href = 'https://dq-intranet-pykepfa4x-digitalqatalysts-projects.vercel.app/lms/ghc-course/lesson/7191832f-d3ac-4577-9eb2-80c9a57e7e28'}
+                        onClick={() => { if (globalThis.location) globalThis.location.href = 'https://dq-intranet-pykepfa4x-digitalqatalysts-projects.vercel.app/lms/ghc-course/lesson/7191832f-d3ac-4577-9eb2-80c9a57e7e28'; }}
                         className="inline-flex items-center gap-2 px-6 py-3 text-white font-medium rounded-lg transition-colors"
                         style={{ backgroundColor: '#030E31' }}
                         onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#020A28' }}
@@ -891,91 +885,83 @@ export const ServiceDetailPage: React.FC = () => {
 
               {/* Digital Workspace Guideline Tabs */}
               {activeTab === 'purpose' && isDigitalWorkspace && (
-                <>
-                  <div className="space-y-6">
-                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
-                      <p>
-                        These guidelines address critical operational challenges by creating a more efficient, secure, and accountable device management system that reduces asset theft while empowering associates with flexible device ownership options.
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <SubHeading text="Key Benefits" />
-                      <Checklist items={[
-                        "Enhanced Security: Clear ownership reduces risk of asset misappropriation",
-                        "Cost Reduction: Lower procurement and maintenance expenses for the company", 
-                        "Improved Accountability: Associates take direct responsibility for device care",
-                        "Operational Flexibility: Multiple programs accommodate different associate needs"
-                      ]} />
-                    </div>
+                <div className="space-y-6">
+                  <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                    <p>
+                      These guidelines address critical operational challenges by creating a more efficient, secure, and accountable device management system that reduces asset theft while empowering associates with flexible device ownership options.
+                    </p>
                   </div>
-                </>
+
+                  <div className="space-y-4">
+                    <SubHeading text="Key Benefits" />
+                    <Checklist items={[
+                      "Enhanced Security: Clear ownership reduces risk of asset misappropriation",
+                      "Cost Reduction: Lower procurement and maintenance expenses for the company",
+                      "Improved Accountability: Associates take direct responsibility for device care",
+                      "Operational Flexibility: Multiple programs accommodate different associate needs"
+                    ]} />
+                  </div>
+                </div>
               )}
 
               {activeTab === 'guideline' && isDigitalWorkspace && (
-                <>
-                  <div className="space-y-6">
-                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
-                      <p>
-                        The Associate Owned Asset Guidelines establish three core programs (BYOD, FYOD, HYOD) that provide flexible device ownership options while maintaining security and operational standards for all DQ associates.
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <SubHeading text="Available Programs" />
-                      <Checklist items={[
-                        "BYOD Program: Use personal devices that meet DQ technical specifications",
-                        "FYOD Program: Purchase company devices with salary deduction options",
-                        "HYOD Program: Temporary company devices for emergency situations",
-                        "Compliance Standards: All programs ensure security and company policy adherence"
-                      ]} />
-                    </div>
+                <div className="space-y-6">
+                  <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                    <p>
+                      The Associate Owned Asset Guidelines establish three core programs (BYOD, FYOD, HYOD) that provide flexible device ownership options while maintaining security and operational standards for all DQ associates.
+                    </p>
                   </div>
-                </>
+
+                  <div className="space-y-4">
+                    <SubHeading text="Available Programs" />
+                    <Checklist items={[
+                      "BYOD Program: Use personal devices that meet DQ technical specifications",
+                      "FYOD Program: Purchase company devices with salary deduction options",
+                      "HYOD Program: Temporary company devices for emergency situations",
+                      "Compliance Standards: All programs ensure security and company policy adherence"
+                    ]} />
+                  </div>
+                </div>
               )}
 
               {activeTab === 'application' && isDigitalWorkspace && (
-                <>
-                  <div className="space-y-6">
-                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
-                      <p>
-                        Implementation involves assessing your device needs, checking technical requirements, submitting the appropriate program application, and maintaining ongoing compliance with security protocols and company policies.
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <SubHeading text="Implementation Steps" />
-                      <Checklist items={[
-                        "Simple Process: Four-step implementation from assessment to compliance",
-                        "Technical Support: IT assistance for device setup and requirements verification",
-                        "Security Protocols: Clear guidelines for device maintenance and data protection",
-                        "Ongoing Support: Regular compliance reviews and policy updates"
-                      ]} />
-                    </div>
+                <div className="space-y-6">
+                  <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                    <p>
+                      Implementation involves assessing your device needs, checking technical requirements, submitting the appropriate program application, and maintaining ongoing compliance with security protocols and company policies.
+                    </p>
                   </div>
-                </>
+
+                  <div className="space-y-4">
+                    <SubHeading text="Implementation Steps" />
+                    <Checklist items={[
+                      "Simple Process: Four-step implementation from assessment to compliance",
+                      "Technical Support: IT assistance for device setup and requirements verification",
+                      "Security Protocols: Clear guidelines for device maintenance and data protection",
+                      "Ongoing Support: Regular compliance reviews and policy updates"
+                    ]} />
+                  </div>
+                </div>
               )}
 
               {activeTab === 'timing' && isDigitalWorkspace && (
-                <>
-                  <div className="space-y-6">
-                    <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
-                      <p>
-                        Apply these guidelines during new employee onboarding, device replacement needs, emergency situations requiring temporary devices, or role changes that affect device requirements and technical specifications.
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <SubHeading text="Key Scenarios" />
-                      <Checklist items={[
-                        "Onboarding Support: Seamless device setup within first week of employment",
-                        "Emergency Response: Same-day temporary device access for critical situations",
-                        "Planned Transitions: 30-day advance planning for device replacements",
-                        "Role Flexibility: Easy program updates when job requirements change"
-                      ]} />
-                    </div>
+                <div className="space-y-6">
+                  <div className="prose prose-base max-w-none text-gray-700 leading-relaxed">
+                    <p>
+                      Apply these guidelines during new employee onboarding, device replacement needs, emergency situations requiring temporary devices, or role changes that affect device requirements and technical specifications.
+                    </p>
                   </div>
-                </>
+
+                  <div className="space-y-4">
+                    <SubHeading text="Key Scenarios" />
+                    <Checklist items={[
+                      "Onboarding Support: Seamless device setup within first week of employment",
+                      "Emergency Response: Same-day temporary device access for critical situations",
+                      "Planned Transitions: 30-day advance planning for device replacements",
+                      "Role Flexibility: Easy program updates when job requirements change"
+                    ]} />
+                  </div>
+                </div>
               )}
             </div>
 
@@ -1005,7 +991,7 @@ export const ServiceDetailPage: React.FC = () => {
                           // Check if it's an external URL
                           if (ghcButtonConfig.url.startsWith('http')) {
                             // External links navigate in same tab
-                            window.location.href = ghcButtonConfig.url;
+                            if (globalThis.location) globalThis.location.href = ghcButtonConfig.url;
                           } else {
                             // Internal links navigate in same tab
                             navigate(ghcButtonConfig.url);

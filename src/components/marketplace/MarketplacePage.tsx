@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+﻿import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { FilterSidebar, FilterConfig } from './FilterSidebar.js';
 import { MarketplaceGrid } from './MarketplaceGrid.js';
@@ -166,6 +166,10 @@ const parseFilterValues = (params: URLSearchParams, key: string): string[] =>
     .map((value) => value.trim())
     .filter(Boolean);
 
+// Helper: normalize a string for loose comparison (remove spaces, hyphens, underscores)
+const normalizeForCompare = (s: string) => s.toLowerCase().replace(/[\s_&-]/g, '');
+const matchesNormalized = (a: string, b: string) => normalizeForCompare(a) === normalizeForCompare(b);
+
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   marketplaceType,
   title: _title,
@@ -190,7 +194,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   }, []);
   const [activeServiceTab, setActiveServiceTab] = useState<string>(() => 
     isServicesCenter 
-      ? getServiceTabFromParams(typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams())
+      ? getServiceTabFromParams(typeof globalThis.window !== 'undefined' ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams())
       : 'technology'
   );
   
@@ -211,7 +215,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   }, [isServicesCenter, searchParams, activeServiceTab, setSearchParams]);
 
   // Items & filters state
-  const [_items, setItems] = useState<any[]>([]);
+  const [, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -220,13 +224,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
   // Guides facets + URL state
   const [facets, setFacets] = useState<GuidesFacets>({});
-  const [queryParams, setQueryParams] = useState(() => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''));
+  const [queryParams, setQueryParams] = useState(() => new URLSearchParams(typeof globalThis.window !== 'undefined' ? globalThis.location?.search ?? '' : ''));
   const searchStartRef = useRef<number | null>(null);
 
   // Sync queryParams with URL changes
   const location = useLocation();
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof globalThis.window !== 'undefined') {
       const currentParams = new URLSearchParams(location.search);
       setQueryParams(currentParams);
     }
@@ -234,15 +238,15 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
   // Listen for browser navigation (back/forward) to sync queryParams
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof globalThis.window === 'undefined') return;
     
     const handlePopState = () => {
-      const currentParams = new URLSearchParams(window.location.search);
+      const currentParams = new URLSearchParams(globalThis.location?.search ?? "");
       setQueryParams(currentParams);
     };
     
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    globalThis.window.addEventListener('popstate', handlePopState);
+    return () => globalThis.window.removeEventListener('popstate', handlePopState);
   }, []);
 type WorkGuideTab = 'guidelines' | 'strategy' | '6xd' | 'blueprints' | 'testimonials' | 'glossary' | 'faqs';
 type DesignSystemTab = 'cids' | 'vds' | 'cds';
@@ -254,10 +258,15 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     const tab = params.get('tab');
     return tab === 'vds' || tab === 'cds' ? tab : 'cids';
   }, []);
-  const [activeTab, setActiveTab] = useState<WorkGuideTab>(() => getTabFromParams(typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()));
-  const [activeDesignSystemTab, setActiveDesignSystemTab] = useState<DesignSystemTab>(() => 
-    isDesignSystem ? getDesignSystemTabFromParams(typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()) : 'cids'
-  );
+  const [activeTab, setActiveTab] = useState<WorkGuideTab>(() => {
+    const initParams = typeof globalThis.window !== 'undefined' ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams();
+    return getTabFromParams(initParams);
+  });
+  const [activeDesignSystemTab, setActiveDesignSystemTab] = useState<DesignSystemTab>(() => {
+    if (!isDesignSystem) return 'cids';
+    const initParams = typeof globalThis.window !== 'undefined' ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams();
+    return getDesignSystemTabFromParams(initParams);
+  });
 
   const TAB_LABELS: Record<WorkGuideTab, string> = {
     strategy: 'GHC',
@@ -364,8 +373,8 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       next.delete('product_sector');
     }
     const qs = next.toString();
-    if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
+    if (typeof globalThis.window !== 'undefined') {
+      globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
     }
     setQueryParams(new URLSearchParams(next.toString()));
     track('Guides.TabChanged', { tab });
@@ -430,8 +439,8 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     });
     if (!changed) return;
     const qs = next.toString();
-    if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
+    if (typeof globalThis.window !== 'undefined') {
+      globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
     }
     setQueryParams(new URLSearchParams(next.toString()));
   }, [isGuides, activeTab]);
@@ -506,7 +515,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     // SECONDARY FILTER: 6xD Perspective (only when Agile 6xD is selected)
     const sixXdPerspectives = parseFilterValues(queryParams, 'glossary_6xd_perspective');
 
-    // BROWSING FILTER: Alphabetical (A–Z)
+    // BROWSING FILTER: Alphabetical (Aâ€“Z)
     const letters = parseFilterValues(queryParams, 'glossary_letter');
     
     // Search query
@@ -532,7 +541,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         }
       }
       
-      // BROWSING: Letter filter (A–Z)
+      // BROWSING: Letter filter (Aâ€“Z)
       if (letters.length > 0) {
         const termLetter = term.letter.toUpperCase();
         const matchesLetter = letters.some(l => l.toUpperCase() === termLetter);
@@ -628,7 +637,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         filterOptions.forEach(c => { initial[c.id] = ''; });
         setFilters(initial);
       } catch (err) {
-        // Error handled by fallback to default filter config
+        console.warn('[MarketplacePage] Failed to load filter options, using defaults:', err);
         setFilterConfig(config.filterCategories);
         const initial: Record<string, string | string[]> = {};
         config.filterCategories.forEach(c => { initial[c.id] = ''; });
@@ -803,8 +812,8 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             const next = new URLSearchParams(queryParams.toString());
             if (subDomains.length) next.set('sub_domain', subDomains.join(','));
             else next.delete('sub_domain');
-            if (typeof window !== 'undefined') {
-              window.history.replaceState(null, '', `${window.location.pathname}${next.toString() ? '?' + next.toString() : ''}`);
+            if (typeof globalThis.window !== 'undefined') {
+              globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
             }
             setQueryParams(new URLSearchParams(next.toString()));
             setLoading(false);
@@ -881,15 +890,10 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           // Apply same status filter as main query for facets
           if (statuses.length) {
             facetQ = facetQ.in('status', statuses);
+          } else if (isStrategyTab) {
+            facetQ = facetQ.in('status', ['Approved', 'Published', 'Draft']);
           } else {
-            // For Strategy tab: show Published/Approved AND Draft (but not Archived)
-            // For Guidelines tab: show Approved AND Archived (most guidelines are archived)
-            // For other tabs: show only Approved
-            if (isStrategyTab) {
-              facetQ = facetQ.in('status', ['Approved', 'Published', 'Draft']);
-            } else {
-              facetQ = facetQ.eq('status', 'Approved');
-            }
+            facetQ = facetQ.eq('status', 'Approved');
           }
           
           excludedSlugs.forEach(slug => {
@@ -980,7 +984,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             ];
             
             // Canonical GHC slugs - only these should be shown
-            const canonicalGHCSlugs = [
+            const canonicalGHCSlugs = new Set([
               'dq-ghc',
               'dq-vision',
               'dq-hov',
@@ -989,7 +993,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               'dq-agile-sos',
               'dq-agile-flows',
               'dq-agile-6xd'
-            ];
+            ]);
             
             out = out.filter(it => {
               const slug = (it.slug || '').toLowerCase();
@@ -1018,7 +1022,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                                    slug.includes('agile');
               
               // If it looks like a GHC guide but doesn't have a canonical slug, exclude it
-              if (looksLikeGHC && !canonicalGHCSlugs.includes(slug)) {
+              if (looksLikeGHC && !canonicalGHCSlugs.has(slug)) {
                 // Exception: allow if it's explicitly not a duplicate (doesn't match canonical titles)
                 const canonicalTitles = [
                   'ghc overview',
@@ -1210,7 +1214,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               'policy-set-2f-flow': ['policy set 02', '2f', 'flow'],
               'policy-set-2g-product': ['policy set 02', '2g', 'product'],
             } as Record<string, string[]>;
-            // Hardcoded category overrides: slug → list of categories it belongs to
+            // Hardcoded category overrides: slug â†’ list of categories it belongs to
             const slugCategoryOverrides: Record<string, string[]> = {
               'dq-associate-owned-asset-guidelines': ['policy-set-2f-flow'],
             };
@@ -1222,10 +1226,11 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 return categorization.some(cat => overrideCategories.includes(cat));
               }
               const haystack = `${it.title || ''} ${it.summary || ''} ${it.subDomain || ''} ${slug}`.toLowerCase();
-              return categorization.some(cat => {
+              const matchesCat = (cat: string) => {
                 const kw = catKeywords[cat] || [cat.replace(/-/g, ' ')];
                 return kw.some(k => haystack.includes(k.toLowerCase()));
-              });
+              };
+              return categorization.some(matchesCat);
             });
           }
           // Attachments filter skipped (attachments not fetched in select)
@@ -1401,7 +1406,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               const summary = (it.summary || '').toLowerCase();
               const allText = `${subDomain} ${domain} ${guideType} ${title} ${slug} ${summary}`.toLowerCase();
               
-              return testimonialCategories.some(selectedCategory => {
+              const matchesTestimonialCategory = (selectedCategory: string) => {
                 const categoryKeywords: Record<string, string[]> = {
                   'client-feedback': ['client feedback', 'client', 'clients'],
                   'associates': ['associates feedback', 'associate', 'associates', 'employee'],
@@ -1409,10 +1414,10 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   'team-employee-experience': ['employee experience', 'team experience', 'employee', 'team'],
                   'milestone-achievement': ['milestone', 'achievement', 'accomplishment']
                 };
-                
                 const keywords = categoryKeywords[selectedCategory] || [selectedCategory.replace(/-/g, ' ')];
                 return keywords.some(keyword => allText.includes(keyword));
-              });
+              };
+              return testimonialCategories.some(matchesTestimonialCategory);
             });
           }
           // Location filtering removed - all guides should be available for all locations (DXB, KSA, NBO)
@@ -1449,9 +1454,9 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (currentPage > lastPage) {
             const next = new URLSearchParams(queryParams.toString());
             if (lastPage <= 1) next.delete('page'); else next.set('page', '1'); // Always reset to page 1 if invalid
-            if (typeof window !== 'undefined') {
-              window.history.replaceState(null, '', `${window.location.pathname}${next.toString() ? '?' + next.toString() : ''}`);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (typeof globalThis.window !== 'undefined') {
+              globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
+              globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
             }
             setQueryParams(new URLSearchParams(next.toString()));
             setLoading(false);
@@ -1630,9 +1635,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 const itemTechnicalCategories = item.technicalCategory || [];
                 const itemTechnicalCategoriesArray = Array.isArray(itemTechnicalCategories) ? itemTechnicalCategories : [itemTechnicalCategories];
                 return technicalCategories.some(filterCategory => 
-                  itemTechnicalCategoriesArray.some(itemCat => 
-                    itemCat.toLowerCase() === filterCategory.toLowerCase()
-                  )
+                  itemTechnicalCategoriesArray.some(itemCat => matchesNormalized(itemCat, filterCategory))
                 );
               });
             }
@@ -1647,9 +1650,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 const itemDeviceOwnerships = item.deviceOwnership || [];
                 const itemDeviceOwnershipsArray = Array.isArray(itemDeviceOwnerships) ? itemDeviceOwnerships : [itemDeviceOwnerships];
                 return deviceOwnerships.some(filterOwnership => 
-                  itemDeviceOwnershipsArray.some(itemOwn => 
-                    itemOwn.toLowerCase().replace(/[\s-]/g, '') === filterOwnership.toLowerCase().replace(/[\s-]/g, '')
-                  )
+                  itemDeviceOwnershipsArray.some(itemOwn => matchesNormalized(itemOwn, filterOwnership))
                 );
               });
             }
@@ -1698,9 +1699,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 const itemServiceDomains = item.serviceDomains || [];
                 const itemServiceDomainsArray = Array.isArray(itemServiceDomains) ? itemServiceDomains : [itemServiceDomains];
                 return serviceDomains.some(filterDomain => 
-                  itemServiceDomainsArray.some(itemDomain => 
-                    itemDomain.toLowerCase().replace(/[\s_&]/g, '') === filterDomain.toLowerCase().replace(/[\s_&]/g, '')
-                  )
+                  itemServiceDomainsArray.some(itemDomain => matchesNormalized(itemDomain, filterDomain))
                 );
               });
             }
@@ -1715,9 +1714,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 const itemMaturityLevel = item.aiMaturityLevel || '';
                 const itemMaturityLevelArray = Array.isArray(itemMaturityLevel) ? itemMaturityLevel : [itemMaturityLevel];
                 return aiMaturityLevels.some(filterLevel => 
-                  itemMaturityLevelArray.some(itemLevel => 
-                    itemLevel.toLowerCase().replace(/[\s_()]/g, '') === filterLevel.toLowerCase().replace(/[\s_()]/g, '')
-                  )
+                  itemMaturityLevelArray.some(itemLevel => matchesNormalized(itemLevel, filterLevel))
                 );
               });
             }
@@ -1731,7 +1728,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               filtered = filtered.filter(item => {
                 const itemToolCategory = item.toolCategory || '';
                 return toolCategories.some(filterCategory => 
-                  itemToolCategory.toLowerCase().replace(/[\s_]/g, '') === filterCategory.toLowerCase().replace(/[\s_]/g, '')
+                  matchesNormalized(itemToolCategory, filterCategory)
                 );
               });
             }
@@ -1828,10 +1825,10 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               return searchableText.includes(query);
             });
           }
-        } else {
+        } else if (searchQuery) {
           // For other marketplaces, apply search query if provided
-          if (searchQuery) {
-            const query = searchQuery.toLowerCase();
+          {
+          const query = searchQuery.toLowerCase();
             filtered = filtered.filter(item => {
               const searchableText = [
                 item.title,
@@ -1848,6 +1845,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         setFilteredItems(filtered);
         setTotalCount(filtered.length);
       } catch (err) {
+        console.error(`[MarketplacePage] Failed to load ${marketplaceType}:`, err);
         setError(`Failed to load ${marketplaceType}`);
         const fallbackItems = getFallbackItems(marketplaceType);
         setItems(fallbackItems);
@@ -1916,7 +1914,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     } else if (isGuides) {
       const newParams = new URLSearchParams();
       const qs = newParams.toString();
-      window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
+      globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
       setQueryParams(newParams);
       setSearchQuery('');
     } else {
@@ -1961,12 +1959,170 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     const next = new URLSearchParams(queryParams.toString());
     if (clamped <= 1) next.delete('page');
     else next.set('page', String(clamped));
-    if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', `${window.location.pathname}${next.toString() ? '?' + next.toString() : ''}`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof globalThis.window !== 'undefined') {
+      globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
+      globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
     }
     setQueryParams(new URLSearchParams(next.toString()));
   }, [queryParams, totalPages]);
+
+  const renderMainContent = () => {
+    if (loading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {[...Array(6)].map((_, idx) => <CourseCardSkeleton key={`skeleton-${idx}`} />)}
+        </div>
+      );
+    }
+    if (error && !isGuides && !isKnowledgeHub) {
+      return <ErrorDisplay message={error} onRetry={retryFetch} />;
+    }
+    if (isKnowledgeHub) {
+      return (
+        <KnowledgeHubGrid
+          bookmarkedItems={bookmarkedItems}
+          onToggleBookmark={toggleBookmark}
+          onAddToComparison={handleAddToComparison}
+          searchQuery={searchQuery}
+          activeFilters={activeFilters}
+          onFilterChange={handleKnowledgeHubFilterChange}
+          onClearFilters={clearKnowledgeHubFilters}
+        />
+      );
+    }
+    if (isDesignSystem) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories CI.DS</h3>
+            <p className="text-gray-600 text-sm mb-4">Component Integration Design System - Explore reusable components and integration patterns.</p>
+            <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories V.DS</h3>
+            <p className="text-gray-600 text-sm mb-4">Visual Design System - Discover design tokens, typography, and visual guidelines.</p>
+            <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories CDS</h3>
+            <p className="text-gray-600 text-sm mb-4">Content Design System - Access content patterns and writing guidelines.</p>
+            <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
+          </div>
+        </div>
+      );
+    }
+    if (isGuides) {
+      const showGuidesGrid = activeTab !== 'faqs' && activeTab !== '6xd' && activeTab !== 'glossary' && activeTab !== 'testimonials';
+      return (
+        <div>
+          {activeTab === 'faqs' && (
+            <div className="flex items-center justify-center py-20">
+              <div className="bg-gray-100 rounded-lg p-12 text-center max-w-md">
+                <div className="text-gray-400 mb-4">
+                  <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">Coming Soon</h3>
+                <p className="text-gray-500">FAQs content is currently being prepared and will be available soon.</p>
+              </div>
+            </div>
+          )}
+          {activeTab === '6xd' && <SixXDComingSoonCards />}
+          {activeTab === 'glossary' && (
+            <div className="flex items-center justify-center py-20">
+              <div className="bg-gray-100 rounded-lg p-12 text-center max-w-md">
+                <div className="text-gray-400 mb-4">
+                  <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">Coming Soon</h3>
+                <p className="text-gray-500">Glossary content is currently being prepared and will be available soon.</p>
+              </div>
+            </div>
+          )}
+          {activeTab === 'testimonials' && (
+            <TestimonialsGrid
+              items={filteredItems}
+              onClickGuide={(g) => {
+                const qs = queryParams.toString();
+                navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`, {
+                  state: { fromQuery: qs, activeTab }
+                });
+              }}
+            />
+          )}
+          {showGuidesGrid && (
+            <div>
+              <GuidesGrid
+                items={filteredItems}
+                hideEmptyState={false}
+                emptyStateTitle={activeTab === 'blueprints' ? 'No products found' : 'No guides found'}
+                emptyStateMessage={activeTab === 'blueprints' ? 'Try adjusting your filters or search' : 'Try adjusting your filters or search'}
+                onClickGuide={(g) => {
+                  const qs = queryParams.toString();
+                  const isProduct = (g.domain === 'Product') || (g.productType && g.productStage);
+                  if (isProduct) {
+                    navigate(`/marketplace/products/${encodeURIComponent(g.slug || g.id)}`, {
+                      state: { fromQuery: qs, activeTab }
+                    });
+                  } else {
+                    navigate(`/marketplace/guides/service/${encodeURIComponent(g.slug || g.id)}`, {
+                      state: { fromQuery: qs, activeTab }
+                    });
+                  }
+                }}
+              />
+              {totalPages > 1 && (
+                <div className="mt-6 flex items-center justify-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage >= totalPages}
+                    className="px-4 py-2 rounded border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+    return (
+      <MarketplaceGrid
+        items={isCourses ? searchFilteredItems.map(course => {
+          const allowedSet = new Set<string>(LOCATION_ALLOW as readonly string[]);
+          const safeLocations = (course.locations || []).filter(loc => allowedSet.has(loc));
+          return {
+            ...course,
+            locations: safeLocations.length ? safeLocations : ['Global'],
+            provider: { name: course.provider, logoUrl: '/DWS-Logo.png' },
+            description: course.summary
+          };
+        }) : filteredItems}
+        marketplaceType={marketplaceType}
+        bookmarkedItems={bookmarkedItems}
+        onToggleBookmark={toggleBookmark}
+        onAddToComparison={handleAddToComparison}
+        promoCards={promoCards}
+        activeServiceTab={activeServiceTab}
+      />
+    );
+  };
 
   return (
     <div className={`min-h-screen flex flex-col bg-gray-50 ${isGuides ? 'guidelines-theme' : ''}`}>
@@ -2099,38 +2255,36 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
 
         {/* Guides Tabs Section */}
         {isGuides && (
-          <>
-            <div className="mb-6 border-b border-gray-200">
-              <nav className="flex space-x-8" aria-label="Guides navigation">
-                {/* Main tabs rendered as buttons */}
-                {(['strategy', 'guidelines', '6xd', 'blueprints', 'testimonials', 'glossary', 'faqs'] as WorkGuideTab[]).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => handleGuidesTabChange(tab)}
-                    className={`
-                      py-4 px-1 border-b-2 font-medium text-sm transition-colors focus:outline-none
-                      ${
-                        activeTab === tab
-                          ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }
-                    `}
-                    aria-current={activeTab === tab ? 'page' : undefined}
-                  >
-                    {TAB_LABELS[tab]}
-                  </button>
-                ))}
-              </nav>
-              {/* Tab Description - Integrated with tabs */}
-              {activeTab && TAB_DESCRIPTIONS[activeTab] && (
-                <div className="pt-2 pb-2 mt-3 border border-gray-200 rounded-lg bg-white p-3 shadow-sm">
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {TAB_DESCRIPTIONS[activeTab].description}
-                  </p>
-                </div>
-              )}
-            </div>
-          </>
+          <div className="mb-6 border-b border-gray-200">
+            <nav className="flex space-x-8" aria-label="Guides navigation">
+              {/* Main tabs rendered as buttons */}
+              {(['strategy', 'guidelines', '6xd', 'blueprints', 'testimonials', 'glossary', 'faqs'] as WorkGuideTab[]).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => handleGuidesTabChange(tab)}
+                  className={`
+                    py-4 px-1 border-b-2 font-medium text-sm transition-colors focus:outline-none
+                    ${
+                      activeTab === tab
+                        ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }
+                  `}
+                  aria-current={activeTab === tab ? 'page' : undefined}
+                >
+                  {TAB_LABELS[tab]}
+                </button>
+              ))}
+            </nav>
+            {/* Tab Description - Integrated with tabs */}
+            {activeTab && TAB_DESCRIPTIONS[activeTab] && (
+              <div className="pt-2 pb-2 mt-3 border border-gray-200 rounded-lg bg-white p-3 shadow-sm">
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {TAB_DESCRIPTIONS[activeTab].description}
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Design System Tabs Section */}
@@ -2199,7 +2353,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   </div>
                 )}
               </div>
-            </>
+            </div>
           );
         })()}
 
@@ -2217,7 +2371,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                     next.delete('page');
                     if (q) next.set('q', q); else next.delete('q');
                     const qs = next.toString();
-                    window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
+                    globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
                     setQueryParams(new URLSearchParams(next.toString()));
                   } else {
                     setSearchQuery(q);
@@ -2275,7 +2429,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 </div>
                 <div className="p-4">
                   {isGuides ? (
-                    <GuidesFilters activeTab={activeTab} facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
+                    <GuidesFilters activeTab={activeTab} facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
                   ) : (
                     <FilterSidebar
                       filters={isCourses ? urlBasedFilters : (Object.fromEntries(Object.entries(filters).map(([k, v]) => [k, Array.isArray(v) ? v : (v ? [v] : [])])) as Record<string, string[]>)}
@@ -2293,7 +2447,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           {/* Filter sidebar - desktop */}
           <div className="hidden xl:block xl:w-1/4">
             {isGuides ? (
-              <GuidesFilters activeTab={activeTab} facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
+              <GuidesFilters activeTab={activeTab} facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
             ) : (
               <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto filter-sidebar-scroll">
                 <div className="flex justify-between items-center mb-4">
@@ -2331,150 +2485,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
 
           {/* Main content */}
           <div className="xl:w-3/4">
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                {[...Array(6)].map((_, idx) => <CourseCardSkeleton key={idx} />)}
-              </div>
-            ) : error && !isGuides && !isKnowledgeHub ? (
-              <ErrorDisplay message={error} onRetry={retryFetch} />
-            ) : isKnowledgeHub ? (
-              <KnowledgeHubGrid
-                bookmarkedItems={bookmarkedItems}
-                onToggleBookmark={toggleBookmark}
-                onAddToComparison={handleAddToComparison}
-                searchQuery={searchQuery}
-                activeFilters={activeFilters}
-                onFilterChange={handleKnowledgeHubFilterChange}
-                onClearFilters={clearKnowledgeHubFilters}
-              />
-            ) : isDesignSystem ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories CI.DS</h3>
-                  <p className="text-gray-600 text-sm mb-4">Component Integration Design System - Explore reusable components and integration patterns.</p>
-                  <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
-                </div>
-                <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories V.DS</h3>
-                  <p className="text-gray-600 text-sm mb-4">Visual Design System - Discover design tokens, typography, and visual guidelines.</p>
-                  <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
-                </div>
-                <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories CDS</h3>
-                  <p className="text-gray-600 text-sm mb-4">Content Design System - Access content patterns and writing guidelines.</p>
-                  <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
-                </div>
-              </div>
-            ) : isGuides ? (
-              <>
-                {activeTab === 'faqs' ? (
-                  <div className="flex items-center justify-center py-20">
-                    <div className="bg-gray-100 rounded-lg p-12 text-center max-w-md">
-                      <div className="text-gray-400 mb-4">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-700 mb-2">Coming Soon</h3>
-                      <p className="text-gray-500">FAQs content is currently being prepared and will be available soon.</p>
-                    </div>
-                  </div>
-                ) : activeTab === '6xd' ? (
-                  <SixXDComingSoonCards />
-                ) : activeTab === 'glossary' ? (
-                  <div className="flex items-center justify-center py-20">
-                    <div className="bg-gray-100 rounded-lg p-12 text-center max-w-md">
-                      <div className="text-gray-400 mb-4">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-700 mb-2">Coming Soon</h3>
-                      <p className="text-gray-500">Glossary content is currently being prepared and will be available soon.</p>
-                    </div>
-                  </div>
-                ) : activeTab === 'testimonials' ? (
-                  <TestimonialsGrid
-                    items={filteredItems}
-                    onClickGuide={(g) => {
-                      const qs = queryParams.toString();
-                      navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`, {
-                        state: { fromQuery: qs, activeTab }
-                      });
-                    }}
-                  />
-                ) : (
-                  <>
-                    <GuidesGrid
-                      items={filteredItems}
-                      hideEmptyState={false}
-                      emptyStateTitle={activeTab === 'blueprints' ? 'No products found' : 'No guides found'}
-                      emptyStateMessage={activeTab === 'blueprints' ? 'Try adjusting your filters or search' : 'Try adjusting your filters or search'}
-                      onClickGuide={(g) => {
-                        const qs = queryParams.toString();
-                        // Check if this is a product (has productType and productStage, or domain is 'Product')
-                        const isProduct = (g.domain === 'Product') || (g.productType && g.productStage);
-                        
-                        // Treat all non-product guidelines as "services" that should show the Service Detail Page first
-                        if (isProduct) {
-                          // Navigate to product details page
-                          navigate(`/marketplace/products/${encodeURIComponent(g.slug || g.id)}`, {
-                            state: { fromQuery: qs, activeTab }
-                          });
-                        } else {
-                          // Navigate to service details page as an intermediate summary screen
-                          navigate(`/marketplace/guides/service/${encodeURIComponent(g.slug || g.id)}`, {
-                            state: { fromQuery: qs, activeTab }
-                          });
-                        }
-                      }}
-                    />
-                    {totalPages > 1 && (
-                      <div className="mt-6 flex items-center justify-center gap-4">
-                    <button
-                      type="button"
-                      onClick={() => goToPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 rounded border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Previous
-                    </button>
-                    <span className="text-sm text-gray-600">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => goToPage(currentPage + 1)}
-                      disabled={currentPage >= totalPages}
-                      className="px-4 py-2 rounded border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next
-                    </button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </>
-            ) : (
-              <MarketplaceGrid
-                items={isCourses ? searchFilteredItems.map(course => {
-                  const allowedSet = new Set<string>(LOCATION_ALLOW as readonly string[]);
-                  const safeLocations = (course.locations || []).filter(loc => allowedSet.has(loc));
-                  return {
-                    ...course,
-                    locations: safeLocations.length ? safeLocations : ['Global'],
-                    provider: { name: course.provider, logoUrl: '/DWS-Logo.png' },
-                    description: course.summary
-                  };
-                }) : filteredItems}
-                marketplaceType={marketplaceType}
-                bookmarkedItems={bookmarkedItems}
-                onToggleBookmark={toggleBookmark}
-                onAddToComparison={handleAddToComparison}
-                promoCards={promoCards}
-                activeServiceTab={activeServiceTab}
-              />
-            )}
+            {renderMainContent()}
           </div>
         </div>
 
@@ -2494,3 +2505,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
 };
 
 export default MarketplacePage;
+
+
+

@@ -591,7 +591,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Highlights</h3>
                   <div className="space-y-3">
                     {ghcContent.highlights.map((highlight, index) => (
-                      <div key={index} className="flex items-start gap-3">
+                      <div key={highlight.slice(0, 40) || index} className="flex items-start gap-3">
                         <CheckCircleIcon className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
                         <span className="text-gray-700">{highlight}</span>
                       </div>
@@ -615,7 +615,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Learn</h4>
                   <div className="space-y-3">
                     {ghcContent.whatYouWillLearn.map((item, index) => (
-                      <div key={index} className="flex items-start gap-3">
+                      <div key={item.slice(0, 40) || index} className="flex items-start gap-3">
                         <CheckCircleIcon className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
                         <span className="text-gray-700">{item}</span>
                       </div>
@@ -2019,7 +2019,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                         {relatedItem.description}
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {(relatedItem.tags || []).slice(0, 2).map((tag, idx) => <span key={idx} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
+                        {(relatedItem.tags || []).slice(0, 2).map((tag, idx) => <span key={tag || idx} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
                               {tag}
                             </span>)}
                       </div>

@@ -46,6 +46,189 @@ const getGHCContentKey = (serviceId: string): string => {
   return serviceId
 }
 
+/* ── Extracted tab content components to reduce cognitive complexity ── */
+
+function GHCTabContent({ ghcContent, activeTab }: { ghcContent: GuideContent; activeTab: string }) {
+  if (activeTab === 'overview') {
+    return (
+      <div>
+        <p className="text-gray-700 leading-relaxed mb-6">{ghcContent.shortOverview}</p>
+        {ghcContent.highlights && ghcContent.highlights.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Highlights</h3>
+            <div className="space-y-3">
+              {ghcContent.highlights.map((highlight, index) => (
+                <div key={highlight.slice(0, 40) || index} className="flex items-start gap-3">
+                  <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                  <span className="text-gray-700">{highlight}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+  if (activeTab === 'understand') {
+    return (
+      <div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Understanding This Competency</h3>
+        <p className="text-gray-700 leading-relaxed mb-6">{ghcContent.storybookIntro}</p>
+        {ghcContent.whatYouWillLearn && ghcContent.whatYouWillLearn.length > 0 && (
+          <div className="mt-8">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Learn</h4>
+            <div className="space-y-3">
+              {ghcContent.whatYouWillLearn.map((item, index) => (
+                <div key={item.slice(0, 40) || index} className="flex items-start gap-3">
+                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
+                  <span className="text-gray-700">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+  if (activeTab === 'practice') {
+    return (
+      <div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Learn & Practice</h3>
+        {ghcContent.courseIntro && (
+          <p className="text-gray-700 leading-relaxed mb-6">{ghcContent.courseIntro}</p>
+        )}
+        {ghcContent.whatYouWillPractice && ghcContent.whatYouWillPractice.length > 0 && (
+          <div className="mt-8">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Practice</h4>
+            <div className="space-y-3">
+              {ghcContent.whatYouWillPractice.map((item, index) => (
+                <div key={item.slice(0, 40) || index} className="flex items-start gap-3">
+                  <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />
+                  <span className="text-gray-700">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+  return (
+    <div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-6">Other Materials</h3>
+      <p className="text-gray-600">Additional resources and materials for this competency will be available here soon.</p>
+    </div>
+  )
+}
+
+function ServiceTabContent({ service, activeTab }: { service: ServiceDetail; activeTab: string }) {
+  if (activeTab === 'details') {
+    return (
+      <div>
+        <p className="text-gray-700 leading-relaxed mb-6">{service.description}</p>
+        {service.highlights && service.highlights.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Service Highlights</h3>
+            <div className="space-y-3">
+              {service.highlights.map((highlight, index) => (
+                <div key={highlight.slice(0, 40) || index} className="flex items-start gap-3">
+                  <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                  <span className="text-gray-700">{highlight}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+  if (activeTab === 'request') {
+    return (
+      <div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Request Process</h3>
+        <p className="text-gray-700 mb-6">Follow these steps to request this service:</p>
+        {service.request_process?.steps ? (
+          <ol className="list-decimal list-inside space-y-3 text-gray-700">
+            {service.request_process.steps.map((step: string, index: number) => (
+              <li key={step.slice(0, 40) || index}>{step}</li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-gray-600">Click the "Request Service" button to submit your request. Our team will get back to you shortly.</p>
+        )}
+      </div>
+    )
+  }
+  if (activeTab === 'faq') {
+    return (
+      <div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-6">Frequently Asked Questions</h3>
+        {service.faqs && service.faqs.length > 0 ? (
+          <div className="space-y-6">
+            {service.faqs.map((faq: any, index: number) => (
+              <div key={faq.question?.slice(0, 40) || index}>
+                <h4 className="font-semibold text-gray-900 mb-2">{faq.question}</h4>
+                <p className="text-gray-700">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600">No FAQs available for this service yet. Please contact the service provider for more information.</p>
+        )}
+      </div>
+    )
+  }
+  // contact tab
+  return (
+    <div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-6">Contact Information</h3>
+      <div className="space-y-4">
+        <div>
+          <p className="text-sm font-medium text-gray-500 mb-1">Department</p>
+          <p className="text-gray-900">{service.provider}</p>
+        </div>
+        {service.contact_info?.email && (
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Email</p>
+            <p className="text-gray-900">{service.contact_info.email}</p>
+          </div>
+        )}
+        {service.response_time && (
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Response Time</p>
+            <p className="text-gray-900">{service.response_time}</p>
+          </div>
+        )}
+      </div>
+      {service.sla_details && (
+        <div className="mt-8">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Service Level Agreement</h4>
+          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+            {service.sla_details.responseTime && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Response Time:</span>
+                <span className="font-medium text-gray-900">{service.sla_details.responseTime}</span>
+              </div>
+            )}
+            {service.sla_details.resolutionTime && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Resolution Time:</span>
+                <span className="font-medium text-gray-900">{service.sla_details.resolutionTime}</span>
+              </div>
+            )}
+            {service.sla_details.availability && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Availability:</span>
+                <span className="font-medium text-gray-900">{service.sla_details.availability}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ServiceDetailPage() {
   const { serviceId } = useParams<{ serviceId: string }>()
   const navigate = useNavigate()
@@ -74,14 +257,14 @@ export default function ServiceDetailPage() {
           }
         } else {
           // For non-GHC services, fetch from Supabase as before
-          const { data, error } = await supabaseClient
+          const { data, error } = await (supabaseClient
             .from('services')
-            .select('*')
+            .select('*') as any)
             .eq('id', serviceId)
             .single()
 
           if (error) throw error
-          setService(data)
+          setService(data as ServiceDetail)
         }
       } catch (error) {
         console.error('Error fetching service:', error)
@@ -361,204 +544,10 @@ export default function ServiceDetailPage() {
 
                 {/* Tab Content */}
                 <div className="p-8">
-                  {isGHC ? (
-                    // GHC service content
-                    <>
-                      {activeTab === 'overview' && (
-                        <div>
-                          <p className="text-gray-700 leading-relaxed mb-6">
-                            {ghcContent!.shortOverview}
-                          </p>
-
-                          {ghcContent!.highlights && ghcContent!.highlights.length > 0 && (
-                            <div className="mt-8">
-                              <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Highlights</h3>
-                              <div className="space-y-3">
-                                {ghcContent!.highlights.map((highlight, index) => (
-                                  <div key={index} className="flex items-start gap-3">
-                                    <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
-                                    <span className="text-gray-700">{highlight}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {activeTab === 'understand' && (
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-4">Understanding This Competency</h3>
-                          <p className="text-gray-700 leading-relaxed mb-6">
-                            {ghcContent!.storybookIntro}
-                          </p>
-
-                          {ghcContent!.whatYouWillLearn && ghcContent!.whatYouWillLearn.length > 0 && (
-                            <div className="mt-8">
-                              <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Learn</h4>
-                              <div className="space-y-3">
-                                {ghcContent!.whatYouWillLearn.map((item, index) => (
-                                  <div key={index} className="flex items-start gap-3">
-                                    <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
-                                    <span className="text-gray-700">{item}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {activeTab === 'practice' && (
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-4">Learn & Practice</h3>
-                          {ghcContent!.courseIntro && (
-                            <p className="text-gray-700 leading-relaxed mb-6">
-                              {ghcContent!.courseIntro}
-                            </p>
-                          )}
-
-                          {ghcContent!.whatYouWillPractice && ghcContent!.whatYouWillPractice.length > 0 && (
-                            <div className="mt-8">
-                              <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Practice</h4>
-                              <div className="space-y-3">
-                                {ghcContent!.whatYouWillPractice.map((item, index) => (
-                                  <div key={index} className="flex items-start gap-3">
-                                    <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />
-                                    <span className="text-gray-700">{item}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {activeTab === 'materials' && (
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-6">Other Materials</h3>
-                          <p className="text-gray-600">
-                            Additional resources and materials for this competency will be available here soon.
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    // Non-GHC service content (existing logic)
-                    <>
-                      {activeTab === 'details' && (
-                        <div>
-                          <p className="text-gray-700 leading-relaxed mb-6">
-                            {service!.description}
-                          </p>
-
-                          {service!.highlights && service!.highlights.length > 0 && (
-                            <div className="mt-8">
-                              <h3 className="text-xl font-semibold text-gray-900 mb-4">Service Highlights</h3>
-                              <div className="space-y-3">
-                                {service!.highlights.map((highlight, index) => (
-                                  <div key={index} className="flex items-start gap-3">
-                                    <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
-                                    <span className="text-gray-700">{highlight}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {activeTab === 'request' && (
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-4">Request Process</h3>
-                          <p className="text-gray-700 mb-6">
-                            Follow these steps to request this service:
-                          </p>
-                          {service!.request_process?.steps ? (
-                            <ol className="list-decimal list-inside space-y-3 text-gray-700">
-                              {service!.request_process.steps.map((step: string, index: number) => (
-                                <li key={index}>{step}</li>
-                              ))}
-                            </ol>
-                          ) : (
-                            <p className="text-gray-600">
-                              Click the "Request Service" button to submit your request. Our team will get back to you shortly.
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {activeTab === 'faq' && (
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-6">Frequently Asked Questions</h3>
-                          {service!.faqs && service!.faqs.length > 0 ? (
-                            <div className="space-y-6">
-                              {service!.faqs.map((faq: any, index: number) => (
-                                <div key={index}>
-                                  <h4 className="font-semibold text-gray-900 mb-2">{faq.question}</h4>
-                                  <p className="text-gray-700">{faq.answer}</p>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-gray-600">
-                              No FAQs available for this service yet. Please contact the service provider for more information.
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {activeTab === 'contact' && (
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-6">Contact Information</h3>
-                          <div className="space-y-4">
-                            <div>
-                              <p className="text-sm font-medium text-gray-500 mb-1">Department</p>
-                              <p className="text-gray-900">{service!.provider}</p>
-                            </div>
-                            {service!.contact_info?.email && (
-                              <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">Email</p>
-                                <p className="text-gray-900">{service!.contact_info.email}</p>
-                              </div>
-                            )}
-                            {service!.response_time && (
-                              <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">Response Time</p>
-                                <p className="text-gray-900">{service!.response_time}</p>
-                              </div>
-                            )}
-                          </div>
-
-                          {service!.sla_details && (
-                            <div className="mt-8">
-                              <h4 className="text-lg font-semibold text-gray-900 mb-4">Service Level Agreement</h4>
-                              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                                {service!.sla_details.responseTime && (
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">Response Time:</span>
-                                    <span className="font-medium text-gray-900">{service!.sla_details.responseTime}</span>
-                                  </div>
-                                )}
-                                {service!.sla_details.resolutionTime && (
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">Resolution Time:</span>
-                                    <span className="font-medium text-gray-900">{service!.sla_details.resolutionTime}</span>
-                                  </div>
-                                )}
-                                {service!.sla_details.availability && (
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">Availability:</span>
-                                    <span className="font-medium text-gray-900">{service!.sla_details.availability}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  )}
+                  {isGHC
+                    ? <GHCTabContent ghcContent={ghcContent!} activeTab={activeTab} />
+                    : <ServiceTabContent service={service!} activeTab={activeTab} />
+                  }
                 </div>
               </div>
             </div>
@@ -621,7 +610,7 @@ export default function ServiceDetailPage() {
                       <button
                         className="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-3"
                         onClick={() => {
-                          // TODO: Implement explore competency functionality
+                          // Explore competency functionality to be implemented
                           alert('Explore competency functionality to be implemented')
                         }}
                       >
@@ -631,7 +620,7 @@ export default function ServiceDetailPage() {
                       <button
                         className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                         onClick={() => {
-                          // TODO: Implement save for later functionality
+                          // Save for later functionality to be implemented
                           alert('Save for later functionality to be implemented')
                         }}
                       >
@@ -647,7 +636,7 @@ export default function ServiceDetailPage() {
                       <button
                         className="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-3"
                         onClick={() => {
-                          // TODO: Implement request service functionality
+                          // Request service functionality to be implemented
                           alert('Request service functionality to be implemented')
                         }}
                       >
@@ -657,7 +646,7 @@ export default function ServiceDetailPage() {
                       <button
                         className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                         onClick={() => {
-                          // TODO: Implement save for later functionality
+                          // Save for later functionality to be implemented
                           alert('Save for later functionality to be implemented')
                         }}
                       >
