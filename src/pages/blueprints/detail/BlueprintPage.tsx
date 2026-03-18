@@ -5,6 +5,7 @@ import { Header } from '../../../components/Header'
 import { Footer } from '../../../components/Footer'
 import { useAuth } from '../../../components/Header/context/AuthContext'
 import { supabaseClient } from '../../../lib/supabaseClient'
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 import { getGuideImageUrl } from '../../../utils/guideImageMap'
 import { HeroSection } from './HeroSection'
 import { SideNav } from './SideNav'
@@ -139,7 +140,7 @@ function BlueprintPage() {
     let overview = ''
     let inTable = false
     let tableHeaders: string[] = []
-    let tableRows: Record<string, string>[] = []
+    const tableRows: Record<string, string>[] = []
     let foundFirstTableRow = false
 
     for (let i = 0; i < lines.length; i++) {
@@ -263,7 +264,7 @@ function BlueprintPage() {
         // Fallback to direct Supabase query
         const key = String(itemId || '')
         console.log('BlueprintPage: Trying Supabase query with key:', key)
-        let { data: row, error: err1 } = await supabaseClient
+        const { data: initialRow, error: err1 } = await knowledgeHubSupabase
           .from('guides')
           .select('*')
           .eq('slug', key)
@@ -274,9 +275,10 @@ function BlueprintPage() {
           throw err1
         }
         
+        let row = initialRow
         if (!row) {
           console.log('BlueprintPage: No result by slug, trying by id')
-          const { data: row2, error: err2 } = await supabaseClient
+          const { data: row2, error: err2 } = await knowledgeHubSupabase
             .from('guides')
             .select('*')
             .eq('id', key)
@@ -407,7 +409,7 @@ function BlueprintPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => {}} sidebarOpen={false} />
+        <Header toggleSidebar={() => undefined} sidebarOpen={false} />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[300px] flex-grow">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
@@ -422,7 +424,7 @@ function BlueprintPage() {
   if (!guide) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => {}} sidebarOpen={false} />
+        <Header toggleSidebar={() => undefined} sidebarOpen={false} />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[300px] flex-grow">
           <div className="text-center">
             <h2 className="text-xl font-medium text-gray-900 mb-2">Blueprint Not Found</h2>
@@ -448,7 +450,7 @@ function BlueprintPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header toggleSidebar={() => {}} sidebarOpen={false} />
+      <Header toggleSidebar={() => undefined} sidebarOpen={false} />
       
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">

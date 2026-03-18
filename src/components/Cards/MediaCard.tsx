@@ -265,7 +265,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({
               'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=400&h=225&fit=crop'
             }
             alt={title}
-            className={`absolute inset-0 w-full h-full object-cover transition-transform duration-300 ${isHovered ? 'scale-105' : 'scale-100'}`}
+            className={`absolute inset-0 w-full h-full object-cover object-top transition-transform duration-300 ${isHovered ? 'scale-105' : 'scale-100'}`}
           />
           {/* Video Element (if videoUrl provided and type is video) */}
           {videoUrl && type === 'video' && (
@@ -367,7 +367,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({
           <img
             src={image}
             alt={title}
-            className={`w-full h-full object-cover transition-transform duration-300 ${isHovered ? 'scale-105' : 'scale-100'}`}
+            className={`w-full h-full object-cover object-top transition-transform duration-300 ${isHovered ? 'scale-105' : 'scale-100'}`}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -530,19 +530,6 @@ export const MediaCard: React.FC<MediaCardProps> = ({
                 {metadata.updated && <span>Updated {metadata.updated}</span>}
               </div>
             )}
-          </div>
-        )}
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
-            {tags.map((tag, index) => (
-              <span
-                key={index}
-                className={`inline-flex items-center ${designTokens.spacing.pill.padding} rounded-full text-xs font-medium truncate ${tagVariants[tag.variant || 'primary']}`}
-              >
-                {tag.text}
-              </span>
-            ))}
           </div>
         )}
         {/* CTA Buttons - Pinned to bottom */}

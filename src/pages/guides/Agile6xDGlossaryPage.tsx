@@ -16,7 +16,7 @@ const Agile6xDGlossaryPage: React.FC = () => {
 
   const allLetters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
   const lettersWithTerms = useMemo(
-    () => Array.from(new Set(agile6xdTerms.map(t => t.term.charAt(0).toUpperCase()))).sort(),
+    () => Array.from(new Set(agile6xdTerms.map(t => t.term.charAt(0).toUpperCase()))).sort((a, b) => a.localeCompare(b)),
     []
   )
 

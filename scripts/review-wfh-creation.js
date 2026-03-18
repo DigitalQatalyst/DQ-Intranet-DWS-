@@ -13,115 +13,105 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function reviewWFHCreation() {
-  console.log('🔍 Reviewing WFH Guidelines creation...\n');
+function countMatches(text, pattern) {
+  return (text?.match(pattern) || []).length;
+}
 
-  // Get Forum Guidelines as reference
-  const { data: forumGuide } = await supabase
-    .from('guides')
-    .select('slug, title, body')
-    .eq('slug', 'forum-guidelines')
-    .maybeSingle();
+function analyzeStructure(body) {
+  const featureBoxes = countMatches(body, /<div class="feature-box">/g);
+  const sections = countMatches(body, /##\s+[^\n]+/g);
+  const tables = countMatches(body, /\|.*\|/g);
+  const bulletPoints = countMatches(body, /^-\s+/gm);
+  
+  return { featureBoxes, sections, tables, bulletPoints };
+}
 
-  // Get WFH Guidelines
-  const { data: wfhGuide } = await supabase
-    .from('guides')
-    .select('*')
-    .eq('slug', 'dq-wfh-guidelines')
-    .maybeSingle();
+function extractSections(body) {
+  return body?.match(/##\s+([^\n]+)/g) || [];
+}
 
-  if (!wfhGuide) {
-    console.log('❌ WFH Guidelines not found');
-    return;
-  }
+function checkTables(body) {
+  const hasCoreComponentsTable = body?.includes('| # | Program | Description |');
+  const hasRolesTable = body?.includes('| Key Steps | Description |');
+  return { hasCoreComponentsTable, hasRolesTable };
+}
 
-  console.log('='.repeat(80));
-  console.log('WFH GUIDELINES - FULL CONTENT');
-  console.log('='.repeat(80));
-  console.log(wfhGuide.body);
-  console.log('\n' + '='.repeat(80));
-
-  // Analyze structure
+function printStructureAnalysis(analysis) {
   console.log('\n📊 STRUCTURE ANALYSIS');
   console.log('='.repeat(80));
+  console.log(`\n📦 Feature Boxes: ${analysis.featureBoxes}`);
+  console.log(`📑 Sections (H2): ${analysis.sections}`);
+  console.log(`📊 Table rows: ${Math.floor(analysis.tables / 3)} (estimated)`);
+  console.log(`• Bullet points: ${analysis.bulletPoints}`);
+}
 
-  const featureBoxes = (wfhGuide.body?.match(/<div class="feature-box">/g) || []).length;
-  const sections = (wfhGuide.body?.match(/##\s+[^\n]+/g) || []).length;
-  const tables = (wfhGuide.body?.match(/\|.*\|/g) || []).length;
-  const bulletPoints = (wfhGuide.body?.match(/^-\s+/gm) || []).length;
-
-  console.log(`\n📦 Feature Boxes: ${featureBoxes}`);
-  console.log(`📑 Sections (H2): ${sections}`);
-  console.log(`📊 Table rows: ${Math.floor(tables / 3)} (estimated)`);
-  console.log(`• Bullet points: ${bulletPoints}`);
-
-  // Extract sections
-  const sectionMatches = wfhGuide.body?.match(/##\s+([^\n]+)/g) || [];
+function printSectionsList(sectionMatches) {
   console.log(`\n📋 Sections List:`);
   sectionMatches.forEach((s, i) => {
     console.log(`   ${i + 1}. ${s.replace('## ', '').trim()}`);
   });
+}
 
-  // Check for tables
-  const hasCoreComponentsTable = wfhGuide.body?.includes('| # | Program | Description |');
-  const hasRolesTable = wfhGuide.body?.includes('| Key Steps | Description |');
-
+function printTablesCheck(tables) {
   console.log(`\n📊 Tables:`);
-  console.log(`   Core Components: ${hasCoreComponentsTable ? '✅' : '❌'}`);
-  console.log(`   Roles & Responsibilities: ${hasRolesTable ? '✅' : '❌'}`);
+  console.log(`   Core Components: ${tables.hasCoreComponentsTable ? '✅' : '❌'}`);
+  console.log(`   Roles & Responsibilities: ${tables.hasRolesTable ? '✅' : '❌'}`);
+}
 
-  // Compare with Forum Guidelines format
-  if (forumGuide) {
-    console.log('\n' + '='.repeat(80));
-    console.log('COMPARISON WITH FORUM GUIDELINES');
-    console.log('='.repeat(80));
+function compareWithForum(forumGuide, wfhGuide, wfhAnalysis) {
+  console.log('\n' + '='.repeat(80));
+  console.log('COMPARISON WITH FORUM GUIDELINES');
+  console.log('='.repeat(80));
 
-    const forumBoxes = (forumGuide.body?.match(/<div class="feature-box">/g) || []).length;
-    const forumSections = (forumGuide.body?.match(/##\s+[^\n]+/g) || []).length;
-    const forumBullets = (forumGuide.body?.match(/^-\s+/gm) || []).length;
+  const forumAnalysis = analyzeStructure(forumGuide.body);
 
-    console.log(`\nFeature Boxes:`);
-    console.log(`   Forum: ${forumBoxes}`);
-    console.log(`   WFH: ${featureBoxes}`);
-    console.log(`   Match: ${featureBoxes > 0 ? '✅' : '❌'}`);
+  console.log(`\nFeature Boxes:`);
+  console.log(`   Forum: ${forumAnalysis.featureBoxes}`);
+  console.log(`   WFH: ${wfhAnalysis.featureBoxes}`);
+  console.log(`   Match: ${wfhAnalysis.featureBoxes > 0 ? '✅' : '❌'}`);
 
-    console.log(`\nSections:`);
-    console.log(`   Forum: ${forumSections}`);
-    console.log(`   WFH: ${sections}`);
-    console.log(`   Match: ${sections > 0 ? '✅' : '❌'}`);
+  console.log(`\nSections:`);
+  console.log(`   Forum: ${forumAnalysis.sections}`);
+  console.log(`   WFH: ${wfhAnalysis.sections}`);
+  console.log(`   Match: ${wfhAnalysis.sections > 0 ? '✅' : '❌'}`);
 
-    console.log(`\nBullet Points:`);
-    console.log(`   Forum: ${forumBullets}`);
-    console.log(`   WFH: ${bulletPoints}`);
-    console.log(`   Match: ${bulletPoints > 0 ? '✅' : '❌'}`);
+  console.log(`\nBullet Points:`);
+  console.log(`   Forum: ${forumAnalysis.bulletPoints}`);
+  console.log(`   WFH: ${wfhAnalysis.bulletPoints}`);
+  console.log(`   Match: ${wfhAnalysis.bulletPoints > 0 ? '✅' : '❌'}`);
 
-    // Check format style
-    console.log(`\n📐 Format Style Check:`);
-    const wfhHasLongParagraphs = (wfhGuide.body?.match(/[^.\n]{200,}/g) || []).length;
-    const forumHasLongParagraphs = (forumGuide.body?.match(/[^.\n]{200,}/g) || []).length;
-    
-    console.log(`   Long paragraphs (>200 chars):`);
-    console.log(`   Forum: ${forumHasLongParagraphs}`);
-    console.log(`   WFH: ${wfhHasLongParagraphs}`);
-    console.log(`   Issue: ${wfhHasLongParagraphs > forumHasLongParagraphs ? '⚠️ WFH has more long paragraphs' : '✅'}`);
+  checkFormatStyle(forumGuide, wfhGuide);
+  checkContextSections(wfhGuide);
+}
 
-    // Check for context/overview sections (should be minimal)
-    const hasContext = wfhGuide.body?.includes('Context') || wfhGuide.body?.includes('context');
-    const hasOverview = wfhGuide.body?.includes('Overview') || wfhGuide.body?.includes('overview');
-    
-    console.log(`\n⚠️  Potential Issues:`);
-    if (hasContext) {
-      console.log(`   ❌ Has "Context" section - Forum Guidelines don't have this`);
-    }
-    if (hasOverview) {
-      console.log(`   ⚠️  Has "Overview" section - Forum Guidelines don't have this`);
-    }
-    if (!hasContext && !hasOverview) {
-      console.log(`   ✅ No Context/Overview sections - matches Forum format`);
-    }
+function checkFormatStyle(forumGuide, wfhGuide) {
+  console.log(`\n📐 Format Style Check:`);
+  const wfhHasLongParagraphs = countMatches(wfhGuide.body, /[^.\n]{200,}/g);
+  const forumHasLongParagraphs = countMatches(forumGuide.body, /[^.\n]{200,}/g);
+  
+  console.log(`   Long paragraphs (>200 chars):`);
+  console.log(`   Forum: ${forumHasLongParagraphs}`);
+  console.log(`   WFH: ${wfhHasLongParagraphs}`);
+  console.log(`   Issue: ${wfhHasLongParagraphs > forumHasLongParagraphs ? '⚠️ WFH has more long paragraphs' : '✅'}`);
+}
+
+function checkContextSections(wfhGuide) {
+  const hasContext = wfhGuide.body?.includes('Context') || wfhGuide.body?.includes('context');
+  const hasOverview = wfhGuide.body?.includes('Overview') || wfhGuide.body?.includes('overview');
+  
+  console.log(`\n⚠️  Potential Issues:`);
+  if (hasContext) {
+    console.log(`   ❌ Has "Context" section - Forum Guidelines don't have this`);
   }
+  if (hasOverview) {
+    console.log(`   ⚠️  Has "Overview" section - Forum Guidelines don't have this`);
+  }
+  if (hasContext === false && hasOverview === false) {
+    console.log(`   ✅ No Context/Overview sections - matches Forum format`);
+  }
+}
 
-  // Check content length per section
+function printContentLengthPerSection(body) {
   console.log('\n' + '='.repeat(80));
   console.log('CONTENT LENGTH PER SECTION');
   console.log('='.repeat(80));
@@ -130,27 +120,27 @@ async function reviewWFHCreation() {
   let match;
   let sectionNum = 1;
   
-  while ((match = featureBoxRegex.exec(wfhGuide.body || '')) !== null) {
+  while ((match = featureBoxRegex.exec(body || '')) !== null) {
     const sectionContent = match[1].trim();
     const headingMatch = sectionContent.match(/^##\s+(.+)$/m);
     const heading = headingMatch ? headingMatch[1] : 'No heading';
     const contentLength = sectionContent.length;
     const hasTable = sectionContent.includes('|');
-    const bulletCount = (sectionContent.match(/^-\s+/gm) || []).length;
+    const bulletCount = countMatches(sectionContent, /^-\s+/gm);
     
     console.log(`\nSection ${sectionNum}: ${heading}`);
     console.log(`   Length: ${contentLength} chars`);
     console.log(`   Has table: ${hasTable ? '✅' : '❌'}`);
     console.log(`   Bullet points: ${bulletCount}`);
     
-    // Show first 150 chars
     const preview = sectionContent.replace(/##\s+[^\n]+\n/, '').trim().substring(0, 150);
     console.log(`   Preview: ${preview}${preview.length >= 150 ? '...' : ''}`);
     
     sectionNum++;
   }
+}
 
-  // Final assessment
+function performFinalAssessment(analysis, tables) {
   console.log('\n' + '='.repeat(80));
   console.log('FINAL ASSESSMENT');
   console.log('='.repeat(80));
@@ -158,28 +148,28 @@ async function reviewWFHCreation() {
   const issues = [];
   const good = [];
 
-  if (featureBoxes < 5) {
+  if (analysis.featureBoxes < 5) {
     issues.push('Too few feature boxes');
   } else {
-    good.push(`Has ${featureBoxes} feature boxes`);
+    good.push(`Has ${analysis.featureBoxes} feature boxes`);
   }
 
-  if (!hasCoreComponentsTable || !hasRolesTable) {
+  if (tables.hasCoreComponentsTable === false || tables.hasRolesTable === false) {
     issues.push('Missing required tables');
   } else {
     good.push('Has both required tables');
   }
 
-  if (sections < 5) {
+  if (analysis.sections < 5) {
     issues.push('Too few sections');
   } else {
-    good.push(`Has ${sections} sections`);
+    good.push(`Has ${analysis.sections} sections`);
   }
 
-  if (bulletPoints < 5) {
+  if (analysis.bulletPoints < 5) {
     issues.push('Too few bullet points');
   } else {
-    good.push(`Has ${bulletPoints} bullet points`);
+    good.push(`Has ${analysis.bulletPoints} bullet points`);
   }
 
   console.log(`\n✅ Good:`);
@@ -195,6 +185,49 @@ async function reviewWFHCreation() {
   console.log(`\n📋 Overall: ${issues.length === 0 ? '✅ Format looks correct!' : '⚠️  Some issues to address'}`);
 }
 
-reviewWFHCreation().catch(console.error);
+async function reviewWFHCreation() {
+  console.log('🔍 Reviewing WFH Guidelines creation...\n');
+
+  const { data: forumGuide } = await supabase
+    .from('guides')
+    .select('slug, title, body')
+    .eq('slug', 'forum-guidelines')
+    .maybeSingle();
+
+  const { data: wfhGuide } = await supabase
+    .from('guides')
+    .select('*')
+    .eq('slug', 'dq-wfh-guidelines')
+    .maybeSingle();
+
+  if (wfhGuide === null) {
+    console.log('❌ WFH Guidelines not found');
+    return;
+  }
+
+  console.log('='.repeat(80));
+  console.log('WFH GUIDELINES - FULL CONTENT');
+  console.log('='.repeat(80));
+  console.log(wfhGuide.body);
+  console.log('\n' + '='.repeat(80));
+
+  const analysis = analyzeStructure(wfhGuide.body);
+  printStructureAnalysis(analysis);
+
+  const sectionMatches = extractSections(wfhGuide.body);
+  printSectionsList(sectionMatches);
+
+  const tables = checkTables(wfhGuide.body);
+  printTablesCheck(tables);
+
+  if (forumGuide) {
+    compareWithForum(forumGuide, wfhGuide, analysis);
+  }
+
+  printContentLengthPerSection(wfhGuide.body);
+  performFinalAssessment(analysis, tables);
+}
+
+await reviewWFHCreation();
 
 

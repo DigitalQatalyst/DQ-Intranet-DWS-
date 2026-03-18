@@ -32,25 +32,24 @@ export const dwsStages: DwsStage[] = [
   {
     id: "starting",
     order: 1,
-    level: "L0",
-    title: "Starting (Learning)",
-    subtitle: "Build your DQ foundation with essential onboarding, tools, and starter learning needed to begin contributing.",
+    level: "L00",
+    title: "Level 00 (Foundation)",
+    subtitle: "Work with close guidance to learn DQ basics, follow routines, and build confidence before SFIA Level 1.",
     about:
-      "Lay the groundwork for your DQ journey with guided onboarding resources and curated starter courses that help you understand the workspace quickly.",
-    keyBenefits: ["Onboarding guides", "LMS starter courses", "Knowledge Hub access"],
-    levelSummary: "Build DQ foundations and understand the workspace environment.",
+      "At this level you will complete onboarding essentials and learn DQ ways of working, use core tools correctly and ask early when blocked, and contribute small tasks reliably while sharing progress frequently.",
+    keyBenefits: [
+      "Complete onboarding essentials and learn DQ ways of working",
+      "Use core tools correctly and ask early when blocked",
+      "Contribute small tasks reliably and share progress frequently"
+    ],
+    levelSummary: "Work with close guidance to learn DQ basics and build confidence.",
     growthExpectations: [
-      "Complete onboarding guides and LMS starter courses",
-      "Learn core DQ tools and daily workflows",
-      "Understand team structure, roles, and responsibilities",
-      "Follow guidance from mentors and buddies"
+      "Complete onboarding essentials and learn DQ ways of working",
+      "Use core tools correctly and ask early when blocked",
+      "Contribute small tasks reliably and share progress frequently"
     ],
-    whatGoodLooksLike: [
-      "You understand basic tools and processes",
-      "You ask questions early and often",
-      "You complete assigned starter tasks successfully"
-    ],
-    ctaLabel: "Start Learning",
+    whatGoodLooksLike: [],
+    ctaLabel: "Learn More",
     ctaHref: "#",
     services: [
       {
@@ -104,24 +103,23 @@ export const dwsStages: DwsStage[] = [
     id: "follow",
     order: 2,
     level: "L1",
-    title: "Follow (Self Aware)",
-    subtitle: "Practice guided tasks, build confidence in daily routines, and understand how your work supports team goals.",
+    title: "Level 1 (Follow)",
+    subtitle: "Follow instructions and learn the basics with close guidance. Build confidence through routine tasks and clear feedback.",
     about:
-      "Strengthen awareness of DQ rhythms by pairing with mentors, applying daily rituals, and observing high-performing squads.",
-    keyBenefits: ["Daily checklists", "Buddy system", "Workspace orientation"],
-    levelSummary: "Practice with guidance and begin contributing to simple tasks.",
+      "At this level you will complete guided tasks and learn DQ ways of working, communicate progress early and ask for support, and build foundational knowledge and good habits.",
+    keyBenefits: [
+      "Complete guided tasks and learn DQ ways of working",
+      "Communicate progress early and ask for support",
+      "Build foundational knowledge and good habits"
+    ],
+    levelSummary: "Follow instructions and learn the basics with close guidance.",
     growthExpectations: [
-      "Follow daily checklists and work routines",
-      "Seek guidance proactively from the team",
-      "Complete assigned tasks with accuracy",
-      "Learn how your work contributes to team goals"
+      "Complete guided tasks and learn DQ ways of working",
+      "Communicate progress early and ask for support",
+      "Build foundational knowledge and good habits"
     ],
-    whatGoodLooksLike: [
-      "You finish tasks on time with minimal rework",
-      "You use team processes consistently",
-      "You collaborate respectfully and communicate clearly"
-    ],
-    ctaLabel: "Follow the Path",
+    whatGoodLooksLike: [],
+    ctaLabel: "Learn More",
     ctaHref: "#",
     services: [
       {
@@ -166,24 +164,23 @@ export const dwsStages: DwsStage[] = [
     id: "assist",
     order: 3,
     level: "L2",
-    title: "Assist (Self Lead)",
-    subtitle: "Contribute independently to small tasks, collaborate with your squad, and communicate clearly to keep work moving.",
+    title: "Level 2 (Assist)",
+    subtitle: "Support defined tasks under routine direction. Contribute reliably, improve consistency, and collaborate with your immediate team.",
     about:
-      "Own small deliverables, collaborate with your squad, and practice structured communication to unblock teammates.",
-    keyBenefits: ["Agile boards", "Services & Requests", "Team deliverables"],
-    levelSummary: "Contribute independently and collaborate actively.",
+      "At this level you will deliver assigned tasks with regular review, work confidently within a defined routine, and strengthen communication and execution discipline.",
+    keyBenefits: [
+      "Deliver assigned tasks with regular review",
+      "Work confidently within a defined routine",
+      "Strengthen communication and execution discipline"
+    ],
+    levelSummary: "Support defined tasks under routine direction.",
     growthExpectations: [
-      "Handle basic tasks end-to-end",
-      "Communicate progress clearly",
-      "Participate in team deliverables",
-      "Use Agile tools and work boards correctly"
+      "Deliver assigned tasks with regular review",
+      "Work confidently within a defined routine",
+      "Strengthen communication and execution discipline"
     ],
-    whatGoodLooksLike: [
-      "You require less supervision",
-      "You take responsibility for your deliverables",
-      "You help teammates when needed"
-    ],
-    ctaLabel: "Assist Your Team",
+    whatGoodLooksLike: [],
+    ctaLabel: "Learn More",
     ctaHref: "#",
     services: [
       {
@@ -237,30 +234,29 @@ export const dwsStages: DwsStage[] = [
     id: "apply",
     order: 4,
     level: "L3",
-    title: "Apply (Drive Squad)",
-    subtitle: "Own outcomes within your squad, deliver consistent work, and play an active role in cross-team collaboration.",
+    title: "Level 3 (Apply)",
+    subtitle: "Work under general direction to complete assigned tasks. Use judgment on non-routine work and share progress at milestones.",
     about:
-      "Lead sprint rituals, track performance signals, and coach peers to deliver predictable squad outcomes.",
-    keyBenefits: ["Productivity dashboards", "Specialized LMS", "Cross-unit projects"],
-    levelSummary: "Own outcomes and drive value within your squad.",
+      "At this level you will own standard deliverables end-to-end, solve familiar problems and escalate smartly, and collaborate across the squad to keep work moving.",
+    keyBenefits: [
+      "Own standard deliverables end-to-end",
+      "Solve familiar problems and escalate smartly",
+      "Collaborate across the squad and keep work moving"
+    ],
+    levelSummary: "Work under general direction to complete assigned tasks.",
     growthExpectations: [
-      "Deliver tasks and features independently",
-      "Solve non-routine problems using judgment",
-      "Collaborate across squads",
-      "Support sprint planning and retros"
+      "Own standard deliverables end-to-end",
+      "Solve familiar problems and escalate smartly",
+      "Collaborate across the squad and keep work moving"
     ],
-    whatGoodLooksLike: [
-      "You deliver consistent, high-quality outcomes",
-      "You anticipate blockers and escalate effectively",
-      "You contribute to team alignment"
-    ],
-    ctaLabel: "Apply Your Skills",
+    whatGoodLooksLike: [],
+    ctaLabel: "Learn More",
     ctaHref: "#",
     services: [
       {
         id: "apply-projects-tasks",
         name: "Projects & Tasks",
-        description: "Own your squad’s work execution and delivery.",
+        description: "Own your squad's work execution and delivery.",
         provider: "Delivery Ops",
         type: "Service",
         href: "#",
@@ -299,24 +295,23 @@ export const dwsStages: DwsStage[] = [
     id: "enable",
     order: 5,
     level: "L4",
-    title: "Enable (Drive Team)",
-    subtitle: "Support multi-squad alignment, improve workflows, and guide teammates through shared delivery processes.",
+    title: "Level 4 (Enable)",
+    subtitle: "Operate with general direction within clear accountability, exercising autonomy to plan, coordinate work, and occasionally delegate tasks to others.",
     about:
-      "Coordinate multiple squads, build shared rituals, and scale best practices that keep teams aligned.",
-    keyBenefits: ["Team sync playbook", "Scaling ceremonies", "Coaching guides"],
-    levelSummary: "Enable multi-squad alignment and drive team coordination.",
+      "At this level you will take responsibility for outcomes and quality, coordinate tasks, timelines, and dependencies, and improve how the team delivers (not just what).",
+    keyBenefits: [
+      "Take responsibility for outcomes and quality",
+      "Coordinate tasks, timelines, and dependencies",
+      "Improve how the team delivers (not just what)"
+    ],
+    levelSummary: "Operate with general direction within clear accountability, exercising autonomy to plan, coordinate work, and occasionally delegate tasks to others.",
     growthExpectations: [
-      "Guide others through work processes",
-      "Facilitate team syncs and ceremonies",
-      "Coordinate cross-squad dependencies",
-      "Mentor juniors where needed"
+      "Take responsibility for outcomes and quality",
+      "Coordinate tasks, timelines, and dependencies",
+      "Improve how the team delivers (not just what)"
     ],
-    whatGoodLooksLike: [
-      "You improve team workflows",
-      "Teams rely on you for clarity and direction",
-      "You help resolve blockers across squads"
-    ],
-    ctaLabel: "Enable Your Teams",
+    whatGoodLooksLike: [],
+    ctaLabel: "Learn More",
     ctaHref: "#",
     services: [
       {
@@ -370,24 +365,23 @@ export const dwsStages: DwsStage[] = [
     id: "ensure",
     order: 6,
     level: "L5",
-    title: "Ensure (Steer Org)",
-    subtitle: "Strengthen organization-level outcomes by applying governance, risk controls, and disciplined release management.",
+    title: "Level 5 (Ensure, advise)",
+    subtitle: "Work under broad direction and lead through expertise. Ensure effective practices and advise others to raise delivery standards.",
     about:
-      "Orchestrate releases, manage risk, and ensure compliance by connecting delivery signals to governance frameworks.",
-    keyBenefits: ["Governance playbooks", "Release discipline", "Risk & compliance flows"],
-    levelSummary: "Steer organizational outcomes and maintain delivery discipline.",
+      "At this level you will guide others and strengthen delivery consistency, make sound decisions across risk, quality, and value, and promote good working practices and culture.",
+    keyBenefits: [
+      "Guide others and strengthen delivery consistency",
+      "Make sound decisions across risk, quality, and value",
+      "Promote good working practices and culture"
+    ],
+    levelSummary: "Work under broad direction and lead through expertise.",
     growthExpectations: [
-      "Apply governance playbooks and frameworks",
-      "Ensure compliance and risk controls",
-      "Manage release cycles and approval flows",
-      "Provide leadership guidance to teams"
+      "Guide others and strengthen delivery consistency",
+      "Make sound decisions across risk, quality, and value",
+      "Promote good working practices and culture"
     ],
-    whatGoodLooksLike: [
-      "You bring structure and stability",
-      "You foresee organizational risks early",
-      "Your decisions improve delivery outcomes"
-    ],
-    ctaLabel: "Ensure at Org Level",
+    whatGoodLooksLike: [],
+    ctaLabel: "Learn More",
     ctaHref: "#",
     services: [
       {
@@ -432,24 +426,23 @@ export const dwsStages: DwsStage[] = [
     id: "influence",
     order: 7,
     level: "L6",
-    title: "Influence (Steer Cross)",
-    subtitle: "Scale best practices across units, lead change initiatives, and elevate quality through cross-organization influence.",
+    title: "Level 6 (Initiate, influence)",
+    subtitle: "Own a significant area of work with defined authority and accountability. Influence strategy and drive cross-organisation initiatives.",
     about:
-      "Establish communities of practice, design change programs, and share patterns across business units.",
-    keyBenefits: ["Cross-unit playbooks", "Communities of practice", "Change toolkits"],
-    levelSummary: "Scale good practices across units and teams.",
+      "At this level you will lead major initiatives and shape direction, influence decisions, priorities, and resource choices, and drive transformation outcomes across teams.",
+    keyBenefits: [
+      "Lead major initiatives and shape direction",
+      "Influence decisions, priorities, and resource choices",
+      "Drive transformation outcomes across teams"
+    ],
+    levelSummary: "Own a significant area of work with defined authority.",
     growthExpectations: [
-      "Create cross-unit playbooks",
-      "Build communities of practice",
-      "Lead change-management activities",
-      "Influence decision-making across groups"
+      "Lead major initiatives and shape direction",
+      "Influence decisions, priorities, and resource choices",
+      "Drive transformation outcomes across teams"
     ],
-    whatGoodLooksLike: [
-      "You uplift work quality across teams",
-      "You introduce scalable processes",
-      "You drive cross-unit alignment"
-    ],
-    ctaLabel: "Influence at Scale",
+    whatGoodLooksLike: [],
+    ctaLabel: "Learn More",
     ctaHref: "#",
     services: [
       {
@@ -503,24 +496,23 @@ export const dwsStages: DwsStage[] = [
     id: "inspire",
     order: 8,
     level: "L7",
-    title: "Inspire (Inspire Market)",
-    subtitle: "Shape strategic direction, promote innovation, and inspire the wider ecosystem through thought leadership.",
+    title: "Level 7 (Set strategy, inspire, mobilise)",
+    subtitle: "Set organisational strategy and mobilise the system to deliver it. Inspire leadership alignment and authorise resources at scale.",
     about:
-      "Drive market influence by sharing thought leadership, showcasing innovation, and cultivating external partnerships.",
-    keyBenefits: ["Strategy hubs", "Innovation forums", "Thought leadership"],
-    levelSummary: "Shape the ecosystem and inspire strategic direction.",
+      "At this level you will define strategic direction and long-range outcomes, inspire and align leaders across the organisation, and mobilise resources to execute at scale.",
+    keyBenefits: [
+      "Define strategic direction and long-range outcomes",
+      "Inspire and align leaders across the organisation",
+      "Mobilise resources to execute at scale"
+    ],
+    levelSummary: "Set organisational strategy and mobilise the system.",
     growthExpectations: [
-      "Lead strategy discussions and forums",
-      "Promote innovation and thought leadership",
-      "Influence the wider market and ecosystem",
-      "Inspire teams toward long-term vision"
+      "Define strategic direction and long-range outcomes",
+      "Inspire and align leaders across the organisation",
+      "Mobilise resources to execute at scale"
     ],
-    whatGoodLooksLike: [
-      "You shape strategic direction",
-      "You champion innovation at scale",
-      "Teams look to you for guidance and inspiration"
-    ],
-    ctaLabel: "Inspire the Market",
+    whatGoodLooksLike: [],
+    ctaLabel: "Learn More",
     ctaHref: "#",
     services: [
       {

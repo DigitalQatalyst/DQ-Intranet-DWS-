@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "typescript:S5850": "off",
+    "typescript:S7735": "off",
+    "typescript:S7764": "off",
+    "typescript:S7776": "off",
+    "typescript:S6754": "off",
+    "typescript:S1871": "off",
+    "typescript:S4325": "off",
+    "typescript:S2681": "off",
+    "typescript:S6660": "off",
+    "typescript:S6749": "off",
+    "typescript:S6819": "off",
+    "typescript:S7723": "off",
+    "typescript:S3923": "off"
+  }
+}

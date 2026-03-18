@@ -1,12 +1,12 @@
 import React from 'react';
 import { NewsCard as CardsNewsCard, ResourceCard as CardsResourceCard, EventCard as CardsEventCard, ServiceHighlightCard } from './Cards';
-import { Download, ExternalLink, FileText, BookOpen, Calculator } from 'lucide-react';
+import { Download, ExternalLink, FileText, BookOpen, Calculator, Play } from 'lucide-react';
 
 // NewsCard wrapper
 export const NewsCard = ({
   content,
   onQuickView,
-  onReadMore = () => {}, // Add default empty function to make it optional in the wrapper
+  onReadMore = () => undefined, // Add default no-op function to make it optional in the wrapper
   ...props
 }) => {
   const newsItem = {
@@ -21,8 +21,17 @@ export const NewsCard = ({
     source: content.source || 'TechNews Daily',
     sourceLogoUrl: content.sourceLogoUrl
   };
+
+  const pill =
+    (content.tags || []).some((tag) =>
+      typeof tag === 'string'
+        ? tag.toLowerCase().includes('podcast')
+        : false
+    )
+      ? { text: 'Play', icon: <Play size={12} />, variant: 'info' as const }
+      : undefined;
   
-  return <CardsNewsCard item={newsItem} onQuickView={onQuickView} onReadMore={onReadMore} {...props} />;
+  return <CardsNewsCard item={newsItem} pill={pill} onQuickView={onQuickView} onReadMore={onReadMore} {...props} />;
 };
 
 // EventCard wrapper
@@ -30,7 +39,7 @@ export const EventCard = ({
   content,
   isUpcoming,
   onQuickView,
-  onRegister = () => {}, // Add default empty function
+  onRegister = () => undefined, // Add default no-op function
   ...props
 }) => {
   const eventItem = {
@@ -57,7 +66,7 @@ export const EventCard = ({
 export const ResourceCard = ({
   content,
   onQuickView,
-  onAccessResource = () => {}, // Add default for required callback
+  onAccessResource = () => undefined, // Add default for required callback
   onDownload,
   ...props
 }) => {

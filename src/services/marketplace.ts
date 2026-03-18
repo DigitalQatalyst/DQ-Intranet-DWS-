@@ -53,6 +53,17 @@ export const fetchMarketplaceItems = async (
       }
     }
     
+    // Fall back to mock data for guides/knowledge-hub
+    if (marketplaceType === 'guides' || marketplaceType === 'knowledge-hub') {
+      try {
+        const { mockKnowledgeHubItems } = await import('../utils/mockMarketplaceData');
+        console.log(`Using mock data for ${marketplaceType}`);
+        return mockKnowledgeHubItems;
+      } catch (mockError) {
+        console.error(`Error loading mock data for ${marketplaceType}:`, mockError);
+      }
+    }
+    
     throw new Error(
       `Failed to load ${marketplaceType} items. Please try again later.`
     );
@@ -166,5 +177,55 @@ export const fetchMarketplaceProviders = async (
   } catch (error) {
     console.error(`Error fetching ${marketplaceType} providers:`, error);
     throw new Error(`Failed to load providers. Please try again later.`);
+  }
+};
+
+/**
+ * Fetches latest guides from Knowledge Hub Supabase
+ */
+export const fetchLatestGuides = async (filters?: { guide_type?: string; domain?: string; limit?: number }): Promise<any[]> => {
+  try {
+    const { knowledgeHubSupabase } = await import('./knowledgeHubClient');
+    
+    if (!knowledgeHubSupabase) {
+      console.warn('Knowledge Hub Supabase client not initialized, returning empty array');
+      return [];
+    }
+
+    let query = knowledgeHubSupabase
+      .from('guides')
+      .select('id, slug, title, summary, hero_image_url, last_updated_at, author_name, guide_type, domain, status')
+      .eq('status', 'Approved')
+      .neq('slug', 'atp-guidelines')
+      .neq('slug', 'agile-working-guidelines')
+      .neq('slug', 'client-session-guidelines')
+      .neq('slug', 'dbp-support-guidelines')
+      .neq('slug', 'dq-products');
+
+    // Apply filters if provided
+    if (filters?.guide_type) {
+      query = query.ilike('guide_type', `%${filters.guide_type}%`);
+    }
+    
+    if (filters?.domain) {
+      query = query.ilike('domain', `%${filters.domain}%`);
+    }
+
+    // Order and limit
+    query = query
+      .order('last_updated_at', { ascending: false, nullsLast: true })
+      .limit(filters?.limit || 6);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching guides from Knowledge Hub:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in fetchLatestGuides:', error);
+    return [];
   }
 };

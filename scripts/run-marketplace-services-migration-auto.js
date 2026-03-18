@@ -13,7 +13,11 @@ const __dirname = dirname(__filename);
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Use provided credentials or fallback to env variable
-const dbPassword = process.env.SUPABASE_DB_PASSWORD || 'Dws.clouddb123';
+const dbPassword = process.env.SUPABASE_DB_PASSWORD;
+if (!dbPassword) {
+  console.error('❌ Missing SUPABASE_DB_PASSWORD environment variable.');
+  process.exit(1);
+}
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
@@ -66,11 +70,11 @@ async function executeMigrationViaPostgres() {
       // Alternative pooler format
       `postgresql://postgres.${projectRef}:${encodeURIComponent(dbPassword)}@${projectRef}.pooler.supabase.com:6543/postgres`,
     ];
-    
+
     console.log('🔌 Connecting to database...');
     let client;
     let lastError;
-    
+
     // Try each connection string
     for (let i = 0; i < connectionStrings.length; i++) {
       try {
@@ -89,7 +93,7 @@ async function executeMigrationViaPostgres() {
         }
       }
     }
-    
+
     if (!client || !client._connected) {
       console.error('❌ All connection methods failed');
       console.error('   Last error:', lastError?.message);
@@ -127,11 +131,11 @@ async function executeMigrationViaPostgres() {
 
     if (result.rows[0].exists) {
       console.log('✅ Table "marketplace_services" exists!\n');
-      
+
       // Check row count
       const countResult = await client.query('SELECT COUNT(*) FROM marketplace_services');
       console.log(`📊 Current row count: ${countResult.rows[0].count}\n`);
-      
+
       console.log('🎉 Migration complete! You can now seed the services:');
       console.log('   npm run db:seed-services\n');
     } else {
@@ -173,22 +177,22 @@ async function checkTableExists() {
 
 async function main() {
   console.log('🚀 Marketplace Services Migration (Automatic)\n');
-  console.log('=' .repeat(50));
+  console.log('='.repeat(50));
 
   // Check if table already exists
   console.log('\n🔍 Checking if table already exists...');
   const exists = await checkTableExists();
-  
+
   if (exists) {
     console.log('✅ Table "marketplace_services" already exists!');
-    
+
     // Get count
     const { count } = await supabase
       .from('marketplace_services')
       .select('*', { count: 'exact', head: true });
-    
+
     console.log(`   Current row count: ${count || 0}\n`);
-    
+
     const readline = await import('readline');
     const rl = readline.createInterface({
       input: process.stdin,

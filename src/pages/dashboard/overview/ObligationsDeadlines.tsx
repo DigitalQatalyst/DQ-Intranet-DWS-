@@ -1,115 +1,92 @@
 import React from 'react';
-import { CalendarIcon, AlertTriangleIcon, FileClockIcon } from 'lucide-react';
+import { Calendar, AlertCircle, Clock, ChevronRight } from 'lucide-react';
+
 interface ObligationsDeadlinesProps {
     isLoading: boolean;
 }
-// Mock obligations data
+
 const obligations = [
     {
         id: 1,
-        title: 'Annual Financial Report',
-        dueDate: '2023-12-15',
+        title: 'Submit Visa Documents',
+        dueDate: 'Jan 05, 2026',
         status: 'overdue',
         type: 'reporting',
     },
     {
         id: 2,
-        title: 'Quarterly Performance Review',
-        dueDate: '2023-12-30',
+        title: 'Complete Onboarding Modules',
+        dueDate: 'Jan 15, 2026',
         status: 'upcoming',
         type: 'review',
     },
     {
         id: 3,
-        title: 'Business License Renewal',
-        dueDate: '2024-01-10',
+        title: 'Upload Degree Certificate',
+        dueDate: 'Jan 20, 2026',
         status: 'upcoming',
         type: 'license',
     },
 ];
+
 export const ObligationsDeadlines: React.FC<ObligationsDeadlinesProps> = ({
     isLoading,
 }) => {
-    const getStatusIcon = (status: string) => {
-        if (status === 'overdue') {
-            return <AlertTriangleIcon className="h-5 w-5 text-red-500" />;
-        }
-        return <CalendarIcon className="h-5 w-5 text-gray-400" />;
-    };
     if (isLoading) {
         return (
             <div className="animate-pulse space-y-4">
                 {[1, 2, 3].map((item) => (
-                    <div key={item} className="h-16 bg-gray-200 rounded-lg"></div>
+                    <div key={item} className="h-14 bg-gray-50 rounded-xl w-full"></div>
                 ))}
             </div>
         );
     }
+
     return (
-        <div>
-            <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                    <tr>
-                        <th
-                            scope="col"
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Obligation
+        <div className="overflow-x-auto">
+            <table className="min-w-full">
+                <thead>
+                    <tr className="border-b border-gray-50">
+                        <th className="px-4 py-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                            Task Name
                         </th>
-                        <th
-                            scope="col"
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Due Date
+                        <th className="px-4 py-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                            By When
                         </th>
-                        <th
-                            scope="col"
-                            className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Action
+                        <th className="px-4 py-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                            Next Steps
                         </th>
                     </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-50">
                     {obligations.map((obligation) => (
-                        <tr key={obligation.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div className="flex-shrink-0 mr-2">
-                                        {getStatusIcon(obligation.status)}
+                        <tr key={obligation.id} className="hover:bg-gray-50/50 transition-colors group">
+                            <td className="px-4 py-4 whitespace-nowrap">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-lg ${obligation.status === 'overdue' ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'}`}>
+                                        {obligation.status === 'overdue' ? <AlertCircle size={16} /> : <Clock size={16} />}
                                     </div>
-                                    <span
-                                        className={`text-sm font-medium ${obligation.status === 'overdue' ? 'text-red-600' : 'text-gray-700'}`}
-                                    >
+                                    <span className={`text-sm font-bold ${obligation.status === 'overdue' ? 'text-red-700' : 'text-gray-900'}`}>
                                         {obligation.title}
                                     </span>
                                 </div>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <FileClockIcon className="h-4 w-4 text-gray-400 mr-1" />
-                                    <span className="text-sm text-gray-500">
-                                        {obligation.dueDate}
-                                    </span>
+                            <td className="px-4 py-4 whitespace-nowrap">
+                                <div className="flex items-center gap-2 text-gray-500 font-medium">
+                                    <Calendar size={14} />
+                                    <span className="text-sm">{obligation.dueDate}</span>
                                 </div>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
-                                <button className="px-3 py-1 border border-gray-300 rounded-md text-xs text-gray-600 hover:text-blue-600 hover:border-blue-300">
-                                    Take Action
+                            <td className="px-4 py-4 whitespace-nowrap text-right">
+                                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 text-xs font-bold rounded-lg hover:bg-[#1A2E6E] hover:text-white transition-all">
+                                    Continue
+                                    <ChevronRight size={12} />
                                 </button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            <div className="mt-4 text-right">
-                <a
-                    href="#"
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                    View All Obligations
-                </a>
-            </div>
         </div>
     );
 };

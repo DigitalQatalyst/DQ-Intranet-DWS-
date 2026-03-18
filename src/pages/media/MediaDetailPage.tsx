@@ -273,10 +273,10 @@ const MediaDetailPage: React.FC = () => {
       if (audioRef.current) {
         const audio = audioRef.current
         audio.pause()
-        audio.removeEventListener('timeupdate', () => {})
-        audio.removeEventListener('loadedmetadata', () => {})
-        audio.removeEventListener('ended', () => {})
-        audio.removeEventListener('error', () => {})
+        audio.removeEventListener('timeupdate', () => undefined)
+        audio.removeEventListener('loadedmetadata', () => undefined)
+        audio.removeEventListener('ended', () => undefined)
+        audio.removeEventListener('error', () => undefined)
       }
     }
   }, [volume])

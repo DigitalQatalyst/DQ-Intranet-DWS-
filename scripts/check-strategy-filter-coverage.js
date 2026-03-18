@@ -31,79 +31,118 @@ const STRATEGY_FRAMEWORKS = [
 
 function matchesStrategyType(guide, typeId) {
   const subDomain = (guide.sub_domain || '').toLowerCase()
-  const id = typeId.toLowerCase()
-  return subDomain.includes(id) || subDomain === id
+  return subDomain.includes(typeId.toLowerCase()) || subDomain === typeId.toLowerCase()
 }
 
 function matchesFramework(guide, frameworkId) {
-  const allText = `${guide.sub_domain || ''} ${guide.domain || ''} ${guide.guide_type || ''}`.toLowerCase()
-  if (frameworkId === '6xd') return allText.includes('6xd') || allText.includes('digital-framework') || allText.includes('digital framework')
-  if (frameworkId === 'ghc') return allText.includes('ghc') || allText.includes('golden honeycomb')
+  const subDomain = (guide.sub_domain || '').toLowerCase()
+  const domain = (guide.domain || '').toLowerCase()
+  const guideType = (guide.guide_type || '').toLowerCase()
+  const allText = `${subDomain} ${domain} ${guideType}`.toLowerCase()
+  
+  if (frameworkId === '6xd') {
+    return allText.includes('6xd') || 
+           allText.includes('digital-framework') ||
+           allText.includes('digital framework')
+  }
+  if (frameworkId === 'ghc') {
+    return allText.includes('ghc') || allText.includes('golden honeycomb')
+  }
   return false
 }
 
-function printMatchingSample(matching) {
-  if (matching.length === 0) return
-  const sample = matching.length <= 5 ? matching : matching.slice(0, 3)
-  sample.forEach(g => console.log(`   - ${g.title} (${g.slug})`))
-  if (matching.length > 5) console.log(`   ... and ${matching.length - 3} more`)
+function printGuideList(guides, maxDisplay = 5) {
+  if (guides.length === 0) return
+  
+  if (guides.length <= maxDisplay) {
+    guides.forEach(g => console.log(`   - ${g.title} (${g.slug})`))
+  } else {
+    guides.slice(0, 3).forEach(g => console.log(`   - ${g.title} (${g.slug})`))
+    console.log(`   ... and ${guides.length - 3} more`)
+  }
 }
 
-function printCoverageSection(label, items, guides, matchFn) {
-  console.log(label)
-  console.log('─'.repeat(50))
-  for (const item of items) {
-    const matching = (guides || []).filter(g => matchFn(g, item.id))
-    const status = matching.length > 0 ? '✅' : '❌'
-    console.log(`${status} ${item.name} (${item.id}): ${matching.length} guides`)
-    printMatchingSample(matching)
-  }
+function checkFilterCoverage(guides, filters, matchFn) {
+  return filters.map(filter => {
+    const matching = guides?.filter(g => matchFn(g, filter.id)) || []
+    return { filter, matching, hasCards: matching.length > 0 }
+  })
 }
 
 async function checkStrategyFilters() {
   console.log('🔍 Checking strategy filter coverage...\n')
-
+  
+  // Fetch all strategy guides
   const { data: guides, error } = await supabase
     .from('guides')
     .select('id, title, slug, sub_domain, domain, guide_type')
     .or('domain.ilike.%Strategy%,guide_type.ilike.%Strategy%')
     .eq('status', 'Approved')
-
-  if (error) { console.error('❌ Error fetching guides:', error); return }
-
+  
+  if (error) {
+    console.error('❌ Error fetching guides:', error)
+    return
+  }
+  
   console.log(`📊 Total Strategy Guides: ${guides?.length || 0}\n`)
-
-  printCoverageSection('📋 Strategy Type Filter Coverage:', STRATEGY_TYPES, guides, matchesStrategyType)
+  
+  // Check Strategy Type coverage
+  console.log('📋 Strategy Type Filter Coverage:')
+  console.log('─'.repeat(50))
+  
+  const typeResults = checkFilterCoverage(guides, STRATEGY_TYPES, matchesStrategyType)
+  typeResults.forEach(({ filter, matching, hasCards }) => {
+    const status = hasCards ? '✅' : '❌'
+    console.log(`${status} ${filter.name} (${filter.id}): ${matching.length} guides`)
+    printGuideList(matching)
+  })
+  
   console.log('\n')
-  printCoverageSection('🔧 Framework/Program Filter Coverage:', STRATEGY_FRAMEWORKS, guides, matchesFramework)
+  
+  // Check Framework/Program coverage
+  console.log('🔧 Framework/Program Filter Coverage:')
+  console.log('─'.repeat(50))
+  
+  const frameworkResults = checkFilterCoverage(guides, STRATEGY_FRAMEWORKS, matchesFramework)
+  frameworkResults.forEach(({ filter, matching, hasCards }) => {
+    const status = hasCards ? '✅' : '❌'
+    console.log(`${status} ${filter.name} (${filter.id}): ${matching.length} guides`)
+    printGuideList(matching)
+  })
+  
   console.log('\n')
-
+  
   // Summary
   console.log('📈 Summary:')
   console.log('─'.repeat(50))
-  const typesWithCards = STRATEGY_TYPES.filter(t => (guides || []).some(g => matchesStrategyType(g, t.id)))
-  const frameworksWithCards = STRATEGY_FRAMEWORKS.filter(f => (guides || []).some(g => matchesFramework(g, f.id)))
-  console.log(`Strategy Types with cards: ${typesWithCards.length}/${STRATEGY_TYPES.length}`)
-  console.log(`Frameworks with cards: ${frameworksWithCards.length}/${STRATEGY_FRAMEWORKS.length}`)
-
+  
+  const typesWithCards = typeResults.filter(r => r.hasCards).length
+  const frameworksWithCards = frameworkResults.filter(r => r.hasCards).length
+  
+  console.log(`Strategy Types with cards: ${typesWithCards}/${STRATEGY_TYPES.length}`)
+  console.log(`Frameworks with cards: ${frameworksWithCards}/${STRATEGY_FRAMEWORKS.length}`)
+  
   // Recommendations
   console.log('\n💡 Recommendations:')
   console.log('─'.repeat(50))
-  const typesWithoutCards = STRATEGY_TYPES.filter(t => !(guides || []).some(g => matchesStrategyType(g, t.id)))
-  const frameworksWithoutCards = STRATEGY_FRAMEWORKS.filter(f => !(guides || []).some(g => matchesFramework(g, f.id)))
-
+  
+  const typesWithoutCards = typeResults.filter(r => r.hasCards === false)
+  const frameworksWithoutCards = frameworkResults.filter(r => r.hasCards === false)
+  
   if (typesWithoutCards.length > 0) {
     console.log(`⚠️  Remove Strategy Types without cards:`)
-    typesWithoutCards.forEach(t => console.log(`   - ${t.name} (${t.id})`))
+    typesWithoutCards.forEach(({ filter }) => console.log(`   - ${filter.name} (${filter.id})`))
   }
+  
   if (frameworksWithoutCards.length > 0) {
     console.log(`⚠️  Remove Frameworks without cards:`)
-    frameworksWithoutCards.forEach(f => console.log(`   - ${f.name} (${f.id})`))
+    frameworksWithoutCards.forEach(({ filter }) => console.log(`   - ${filter.name} (${filter.id})`))
   }
+  
   if (typesWithoutCards.length === 0 && frameworksWithoutCards.length === 0) {
     console.log('✅ All filter options have matching guides!')
   }
 }
 
-checkStrategyFilters().catch(console.error)
+await checkStrategyFilters()
 

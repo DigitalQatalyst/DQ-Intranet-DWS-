@@ -67,7 +67,7 @@ export function Footer({
   ];
   // Minimal App Footer (Post-login)
   if (isLoggedIn) {
-    return <footer data-id={dataId} className="bg-gray-50 border-t border-gray-100 w-full h-10">
+    return <footer data-id={dataId} className="bg-gray-50 border-t border-gray-100 w-full h-10 relative z-[200]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
           <div className="flex items-center space-x-3 text-xs text-gray-500">
             <span>© 2025 DQ | Digital Workspace. All rights reserved.</span>
@@ -80,7 +80,7 @@ export function Footer({
       </footer>;
   }
   // Full Website Footer (Pre-login)
-  return <footer data-id={dataId} className="bg-dq-navy text-white w-full">
+  return <footer data-id={dataId} className="bg-dq-navy text-white w-full relative z-[200]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Mobile Layout */}
         <div className="block lg:hidden">

@@ -1,4 +1,4 @@
-type EventName =
+export type EventName =
   | 'Guides.ViewList'
   | 'Guides.Search'
   | 'Guides.FilterChanged'
@@ -12,6 +12,7 @@ type EventName =
   | 'Guides.Share'
   | 'Guides.Print'
   | 'Guides.TabChanged'
+  | 'Marketplace.6xDPerspectiveSelected'
 
 export const track = (name: EventName, payload: Record<string, any>) => {
   try {

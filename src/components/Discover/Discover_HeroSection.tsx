@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatedText, FadeInUpOnScroll, StaggeredFadeIn } from '../AnimationUtils';
 
 const stats = [
-  { value: '126+', label: 'Active Users' },
-  { value: '120+', label: 'Ongoing Projects' },
-  { value: '90%', label: 'Collaboration Satisfaction' },
+  { value: '100+', label: 'Active Employees' },
+  { value: '2015', label: 'Founded in UAE' },
 ];
 
 // EJP-style layered hero with background image and mountain layers
@@ -187,12 +186,12 @@ export const Discover_HeroSection: React.FC = () => {
           <h1 
             className="discover-hero-title text-white text-center"
             style={{
-              fontFamily: 'Palatino, serif',
+              fontFamily: 'inherit',
               fontSize: '72px',
               fontWeight: 700,
               fontStyle: 'normal',
               color: '#FFFFFF',
-              letterSpacing: '0.03em',
+              letterSpacing: 'normal',
               lineHeight: '1.15',
               marginBottom: '40px',
               marginTop: 0,
@@ -209,12 +208,12 @@ export const Discover_HeroSection: React.FC = () => {
             .discover-hero-title,
             .discover-hero-title span,
             .discover-hero-title span span {
-              font-family: Palatino, serif !important;
+              font-family: inherit !important;
               font-size: 72px !important;
               font-weight: 700 !important;
               font-style: normal !important;
               color: #FFFFFF !important;
-              letter-spacing: 0.03em !important;
+              letter-spacing: normal !important;
               line-height: 1.15 !important;
             }
           `}</style>
@@ -235,7 +234,7 @@ export const Discover_HeroSection: React.FC = () => {
                 padding: 0,
               }}
             >
-              A unified workspace where teams connect, co-work, and grow through purpose-driven collaboration.
+              This page helps you understand how DQ drives digital transformation with strategic frameworks and expert services.
             </p>
           </FadeInUpOnScroll>
 
@@ -275,17 +274,9 @@ export const Discover_HeroSection: React.FC = () => {
               }}
               className="group inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#030F35] shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition-all duration-300 hover:bg-white/95 hover:shadow-[0_12px_32px_rgba(0,0,0,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#030F35]"
             >
-              Explore Work Zones
+              Explore DQ GHC
               <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">→</span>
             </a>
-            <button
-              type="button"
-              onClick={() => navigate('/coming-soon?label=Strategy%20Center')}
-              className="group inline-flex items-center justify-center rounded-full border border-white/40 bg-transparent px-6 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-all duration-300 hover:border-white/60 hover:bg-white/10 hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#030F35]"
-            >
-              Explore Strategy Center
-              <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">→</span>
-            </button>
           </StaggeredFadeIn>
         </div>
       </div>

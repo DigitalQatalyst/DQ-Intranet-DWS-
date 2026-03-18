@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const target =
     typeof preferredRedirect === "string" && preferredRedirect.startsWith("/")
       ? preferredRedirect
-      : "/onboarding/start";
+      : "/onboarding/welcome";
 
   res.setHeader("Set-Cookie", [
     "ms_state=; Path=/; Max-Age=0",

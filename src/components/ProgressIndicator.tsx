@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { CheckIcon, ChevronRightIcon, ChevronDownIcon, XIcon, CheckCircleIcon } from 'lucide-react';
 
 export function ProgressIndicator({
@@ -113,71 +113,85 @@ export function ProgressIndicator({
         </div>
     );
 
-    const DesktopStepper = () => (
-        <div className="hidden md:block mb-10">
-            <div className="grid grid-cols-7 gap-1">
-                {steps.map((step, index) => (
-                    <div key={index} className="flex flex-col items-center relative">
-                        <div
-                            className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full ${index < currentStep
-                                ? 'bg-blue-500 text-white'
-                                : index === currentStep
-                                    ? 'bg-white border-2 border-blue-500 text-blue-500'
-                                    : 'bg-gray-200 text-gray-500'
-                                }`}
-                        >
-                            {index < currentStep ? (
-                                <CheckIcon size={18} />
-                            ) : (
-                                step.icon || <span>{index + 1}</span>
-                            )}
-                        </div>
-                        {index < steps.length - 1 && (
-                            <div className="hidden sm:block absolute h-[2px] bg-gray-200 top-6 w-full left-1/2 -z-10">
+    const DesktopStepper = () => {
+        return (
+            <div className="hidden md:block mb-10">
+                {/* Scrollable Step Icons */}
+                <div
+                    className="overflow-x-auto pb-4 custom-scrollbar"
+                >
+                    <div className="flex items-start min-w-max px-2 py-2">
+                        {steps.map((step, index) => (
+                            <div
+                                key={index}
+                                className="flex flex-col items-center relative px-4 w-36 shrink-0"
+                            >
                                 <div
-                                    className="h-full bg-blue-500 transition-all duration-300"
-                                    style={{ width: index < currentStep ? '100%' : '0%' }}
-                                />
+                                    className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full z-10 transition-all duration-300 ${index < currentStep
+                                        ? 'bg-blue-500 text-white'
+                                        : index === currentStep
+                                            ? 'bg-white border-2 border-blue-500 text-blue-500 shadow-lg scale-110'
+                                            : 'bg-gray-200 text-gray-500'
+                                        }`}
+                                >
+                                    {index < currentStep ? (
+                                        <CheckIcon size={18} />
+                                    ) : (
+                                        step.icon || <span>{index + 1}</span>
+                                    )}
+                                </div>
+                                {index < steps.length - 1 && (
+                                    <div className="absolute h-[2px] bg-gray-200 top-5 sm:top-6 w-full left-1/2 -z-0">
+                                        <div
+                                            className="h-full bg-blue-500 transition-all duration-300"
+                                            style={{ width: index < currentStep ? '100%' : '0%' }}
+                                        />
+                                    </div>
+                                )}
+                                <span className={`text-[10px] sm:text-xs mt-3 font-medium text-center leading-tight h-8 flex items-center justify-center ${index === currentStep ? 'text-blue-600 font-bold' : 'text-gray-600'
+                                    }`}>
+                                    {step.title}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Fixed Progress Bar and Info */}
+                <div className="mt-2 space-y-4">
+                    <div className="relative">
+                        <div className="h-1.5 bg-gray-200 rounded-full">
+                            <div
+                                className="h-1.5 bg-blue-500 rounded-full transition-all duration-300 shadow-sm"
+                                style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                            Step {currentStep + 1} of {steps.length}
+                        </span>
+                        {(autoSaving || progressSaved) && (
+                            <div className={`flex items-center font-medium ${progressSaved ? 'text-green-600' : 'text-gray-500'}`}>
+                                {autoSaving ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-gray-400 border-t-transparent mr-2" />
+                                        Auto-saving...
+                                    </>
+                                ) : progressSaved ? (
+                                    <>
+                                        <CheckCircleIcon size={16} className="mr-1.5" />
+                                        Progress synced
+                                    </>
+                                ) : null}
                             </div>
                         )}
-                        <span className="text-xs mt-2 font-medium text-gray-600 text-center">
-                            {step.title}
-                        </span>
                     </div>
-                ))}
-            </div>
-
-            <div className="relative mt-3">
-                <div className="h-1.5 bg-gray-200 rounded-full">
-                    <div
-                        className="h-1.5 bg-blue-500 rounded-full transition-all duration-300"
-                        style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-                    />
                 </div>
             </div>
-
-            <div className="flex justify-between items-center mt-4">
-                <span className="text-sm text-gray-600">
-                    Step {currentStep + 1} of {steps.length}
-                </span>
-                {(autoSaving || progressSaved) && (
-                    <div className={`flex items-center text-sm ${progressSaved ? 'text-green-600' : 'text-gray-500'}`}>
-                        {autoSaving ? (
-                            <>
-                                <div className="animate-spin rounded-full h-3 w-3 border-2 border-gray-500 border-t-transparent mr-1.5" />
-                                Auto-saving...
-                            </>
-                        ) : progressSaved ? (
-                            <>
-                                <CheckCircleIcon size={14} className="mr-1" />
-                                Progress saved
-                            </>
-                        ) : null}
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <>

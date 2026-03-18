@@ -6,7 +6,7 @@ import React from 'react';
 export const parseBold = (text: string): (string | JSX.Element)[] => {
   if (!text) return [''];
   const parts: (string | JSX.Element)[] = [];
-  const regex = /\*\*(.+?)\*\*/g;
+  const regex = /\*\*([^*\n]+?)\*\*/g;
   let lastIndex = 0;
   let match;
   let key = 0;

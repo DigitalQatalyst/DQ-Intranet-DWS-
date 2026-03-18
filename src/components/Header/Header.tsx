@@ -8,6 +8,7 @@ import { mockNotifications } from './utils/mockNotifications';
 import { useAuth } from './context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { scrollToSupport } from '../../utils/scroll';
+import { assetPath } from '../../utils/assetPath';
 
 interface HeaderProps {
   toggleSidebar?: () => void;
@@ -25,7 +26,7 @@ export function Header({
   const [isSticky, setIsSticky] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
-  const onboardingPath = '/onboarding/start';
+  const onboardingPath = '/onboarding/welcome';
 
   // Count unread notifications
   const unreadCount = mockNotifications.filter(notif => !notif.read).length;
@@ -89,7 +90,7 @@ export function Header({
           }`}
         >
           <img
-            src="/dq_logo8.png"
+            src={assetPath('dq_logo8.png')}
             alt="DQ"
             className={`transition-all duration-300 ${isSticky ? 'h-10' : 'h-12'}`}
           />
@@ -125,14 +126,6 @@ export function Header({
               <>
                 {/* Desktop CTAs */}
                 <div className="hidden lg:flex items-center space-x-3">
-                  <Link
-                    to="/scrum-master-space"
-                    className={`px-4 py-2 text-white border border-white/40 rounded-md hover:bg-white/10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
-                      isSticky ? 'text-sm px-3 py-1.5' : ''
-                    }`}
-                  >
-                    Scrum Master Space
-                  </Link>
                   <button
                     className={`px-4 py-2 bg-white text-[#030F35] font-medium rounded-md hover:bg-white/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
                       isSticky ? 'text-sm px-3 py-1.5' : ''

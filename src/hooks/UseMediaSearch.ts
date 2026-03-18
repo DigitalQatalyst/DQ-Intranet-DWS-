@@ -1,3 +1,5 @@
+export * from './UseMediaSearch'
+
 import { useState, useEffect, useCallback } from 'react'
 import { getFallbackKnowledgeHubItems } from '../utils/fallbackData'
 import { mapApiItemToCardProps } from '../utils/mediaMappers'
@@ -8,7 +10,7 @@ export interface MediaSearchParams {
   cursor?: string
 }
 export interface MediaSearchResult {
-  items: any[]
+  items: unknown[]
   isLoading: boolean
   error: Error | null
   hasMore: boolean
@@ -25,15 +27,15 @@ export function useMediaSearch({
   pageSize = 10,
   cursor = null,
 }: MediaSearchParams = {}): MediaSearchResult {
-  const [items, setItems] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [items, setItems] = useState<unknown[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const [hasMore, setHasMore] = useState<boolean>(true)
+  const [hasMore, setHasMore] = useState(true)
   const [nextCursor, setNextCursor] = useState<string | null>(cursor)
-  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentPage, setCurrentPage] = useState(1)
   // Simulated API call with pagination, search, and filtering
   const fetchItems = useCallback(
-    async (reset: boolean = false) => {
+    async (reset = false) => {
       try {
         // Start loading
         setIsLoading(true)

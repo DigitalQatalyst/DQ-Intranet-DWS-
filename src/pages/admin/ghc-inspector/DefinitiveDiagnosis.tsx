@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabaseClient } from '../../../lib/supabaseClient';
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 
 const GHC_SLUGS = [
   'dq-vision',
@@ -26,7 +27,7 @@ export function DefinitiveDiagnosis() {
     async function diagnose() {
       try {
         // Fetch all GHC guides
-        const { data: guides, error } = await supabaseClient
+        const { data: guides, error } = await knowledgeHubSupabase
           .from('guides')
           .select('id, slug, title, body')
           .in('slug', GHC_SLUGS)

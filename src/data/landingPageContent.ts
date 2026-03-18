@@ -3,13 +3,14 @@ import {
   Landmark,
   Network,
   Users2,
-  Users,
-  Clock,
-  BookOpen,
-  Award,
-  Briefcase,
+  Zap,
+  Target,
+  TrendingUp,
+  Rocket,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
+import { assetPath } from '../utils/assetPath';
 
 // ============================================
 // TYPE DEFINITIONS
@@ -18,6 +19,8 @@ import {
 export interface Testimonial {
   id: string;
   name: string;
+  context?: string;
+  role?: string;
   position: string;
   company: string;
   companyLogo: string;
@@ -29,7 +32,12 @@ export interface Testimonial {
   videoUrl: string;
   metric: string;
   metricLabel: string;
-  metricColor: 'green' | 'blue' | 'orange';
+  metricColor: 'green' | 'blue' | 'orange' | 'red';
+  modalTitle?: string;
+  mediaType?: 'video' | 'image';
+  imageUrl?: string;
+  impactDescription?: string;
+  note?: string;
 }
 
 export interface PartnerCategory {
@@ -53,6 +61,7 @@ export interface ImpactStat {
   value: number;
   prefix?: string;
   suffix?: string;
+  description?: string;
   iconComponent: LucideIcon;
   iconSize?: number;
   iconClassName?: string;
@@ -75,6 +84,7 @@ export interface LeadApplyCard {
   onClick: () => void;
   ariaLabel?: string;
   testId?: string;
+  comingSoon?: boolean;
 }
 
 // ============================================
@@ -82,44 +92,47 @@ export interface LeadApplyCard {
 // ============================================
 export const testimonials: Testimonial[] = [
   {
-    id: "1",
-    name: "Salem Wasike",
-    position: "Product Owner - DQ Deploys",
+    id: "4",
+    name: "Jerry Ashie",
+    position: "Accounts Manager & Scrum Master",
     company: "Digital Qatalyst",
     companyLogo:
       "https://image2url.com/images/1760524231537-47b810dd-94eb-4571-a6a9-0a9c6fbfb390.jpg",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    avatar: "https://randomuser.me/api/portraits/men/52.jpg",
     quote:
-      "Agile Essentials and DTMF learning paths reduced blockers by 40% and sped up feature delivery.",
+      "Digital Qatalyst’s values encouraged continuous learning, ownership, and resilience—helping me grow professionally and personally.",
     fullQuote:
-      "Through the DQ LMS, our teams completed Agile Essentials and DTMF learning paths. The shared practices cut delivery blockers by 40% and improved flow, which helped us ship features faster and with clearer ownership.",
+      "Digital Qatalyst’s values encouraged continuous learning, ownership, and resilience—helping me grow professionally and personally. That growth mindset made me more confident in navigating change, collaborating, and taking the lead when it counts.",
     rating: 5,
+    modalTitle: "Growth Mindset in Action",
     videoThumbnail:
-      "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    videoUrl: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-    metric: "40%",
-    metricLabel: "Faster Task Completion",
-    metricColor: "green",
+      "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1200&auto=format&fit=crop",
+    videoUrl:
+      "https://image2url.com/r2/default/videos/1769501439433-33dd5a03-3a45-426d-b9ac-3576c139cde4.mp4",
+    metric: "5/5",
+    metricLabel: "Growth Mindset Impact",
+    metricColor: "blue",
   },
   {
     id: "2",
-    name: "Sharavi Chander",
-    position: "Head of DQ Deploys",
+    name: "Vishnu Chandran",
+    position: "CoE Analyst",
     company: "Digital Qatalyst",
     companyLogo:
       "https://image2url.com/images/1760524231537-47b810dd-94eb-4571-a6a9-0a9c6fbfb390.jpg",
     avatar: "https://randomuser.me/api/portraits/women/44.jpg",
     quote:
-      "80+ team certifications built a learning culture that lifted consistency across releases.",
+      "DigitalQatalyst’s values helped me focus on creating real impact, not just completing tasks.",
     fullQuote:
-      "The LMS pathways and peer sessions led to 80+ certifications across Deploys. That shared foundation in tooling and governance raised our consistency and confidence from planning through release.",
+      "DigitalQatalyst’s values helped me focus on creating real impact, not just completing tasks. They pushed me to take ownership, think clearly about outcomes, and stay open to continuous learning. Over time, this shifted how I approach my work: I plan with intent, communicate with purpose, and follow through with accountability. I’ve become more confident in making decisions, raising risks early, and supporting the team when challenges come up. These values also shaped me personally, helping me stay disciplined, curious, and responsible every day.",
     rating: 5,
+    modalTitle: "How Digital Qatalyst Builds Real Impact Through Values",
     videoThumbnail:
       "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    videoUrl: "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-    metric: "80+",
-    metricLabel: "Team Certifications",
-    metricColor: "orange",
+    videoUrl: "https://image2url.com/r2/default/videos/1769504724502-2c4a3377-abd5-4c9e-ae26-a887beb46de8.mp4",
+    metric: "",
+    metricLabel: "",
+    metricColor: "blue",
   },
   {
     id: "3",
@@ -138,7 +151,33 @@ export const testimonials: Testimonial[] = [
     videoUrl: "https://samplelib.com/lib/preview/mp4/sample-15s.mp4",
     metric: "3x",
     metricLabel: "Collaboration Growth",
-    metricColor: "red",
+    metricColor: "orange",
+  },
+  {
+    id: "5",
+    name: "Vishnu Chandran",
+    position: "CoE Analyst",
+    company: "Digital Qatalyst",
+    companyLogo:
+      "https://image2url.com/images/1760524231537-47b810dd-94eb-4571-a6a9-0a9c6fbfb390.jpg",
+    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+    quote:
+      "DigitalQatalyst’s values helped me focus on creating real impact, not just completing tasks.",
+    fullQuote:
+      "DigitalQatalyst’s values helped me focus on creating real impact, not just completing tasks. They pushed me to take ownership, think clearly about outcomes, and stay open to continuous learning. Over time, this shifted how I approach my work: I plan with intent, communicate with purpose, and follow through with accountability. I’ve become more confident in making decisions, raising risks early, and supporting the team when challenges come up. These values also shaped me personally, helping me stay disciplined, curious, and responsible every day.",
+    rating: 5,
+    modalTitle: "Real Impact Through Ownership",
+    videoThumbnail:
+      "https://i.ibb.co/XkGXwk4Z/Screenshot-2026-01-27-at-3-39-28-PM.png",
+    videoUrl: "",
+    metric: "5/5",
+    metricLabel: "Growth Through Ownership and Accountability",
+    metricColor: "blue",
+    mediaType: "image",
+    imageUrl:
+      "https://i.ibb.co/XkGXwk4Z/Screenshot-2026-01-27-at-3-39-28-PM.png",
+    impactDescription:
+      "Impact achieved through DQ values and ways of working",
   },
 ];
 
@@ -148,9 +187,9 @@ export const testimonials: Testimonial[] = [
 export const partnerCategories: PartnerCategory[] = [
   {
     id: "government",
-    title: "Governance Sector",
+    title: "Governance",
     subtitle:
-      "Leadership, strategy, and value management for enterprise alignment",
+      "Direction, priorities, and decision-making that keep work aligned.",
     iconComponent: Building2,
     iconSize: 28,
     metric: "4+",
@@ -158,9 +197,9 @@ export const partnerCategories: PartnerCategory[] = [
   },
   {
     id: "financial",
-    title: "Operations Sector",
+    title: "Operations",
     subtitle:
-      "HR, Finance, and Deals support factories for day-to-day enablement",
+      "HR, Finance, and enablement that remove friction day to day.",
     iconComponent: Landmark,
     iconSize: 28,
     metric: "5+",
@@ -168,9 +207,9 @@ export const partnerCategories: PartnerCategory[] = [
   },
   {
     id: "service",
-    title: "Platform Sector",
+    title: "Platform",
     subtitle:
-      "Intelligence, Solutions, Security, and Products driving digital platforms",
+      "Products, security, and solutions that power digital execution.",
     iconComponent: Users2,
     iconSize: 28,
     metric: "6+",
@@ -178,9 +217,9 @@ export const partnerCategories: PartnerCategory[] = [
   },
   {
     id: "network",
-    title: "Delivery Sector",
+    title: "Delivery",
     subtitle:
-      "Design, Deploys, and Accounts teams ensuring outcomes and engagements",
+      "Design, deployments, and accounts that deliver outcomes.",
     iconComponent: Network,
     iconSize: 28,
     metric: "3+",
@@ -192,11 +231,11 @@ export const partnerCategories: PartnerCategory[] = [
 // FEATURED SECTORS
 // ============================================
 export const featuredSectors: FeaturedSector[] = [
-  { id: 'ce', name: 'CE', logo: '/logo/prodev.png' },
-  { id: 'soldev', name: 'Soldev', logo: '/logo/soldev.png' },
-  { id: 'finance', name: 'Finance', logo: '/logo/finance.png' },
-  { id: 'hra', name: 'HRA', logo: '/logo/hra.png' },
-  { id: 'inteldev', name: 'IntelDev', logo: '/logo/inteldev.png' },
+  { id: 'ce', name: 'CE', logo: assetPath('logo/prodev.png') },
+  { id: 'soldev', name: 'Soldev', logo: assetPath('logo/soldev.png') },
+  { id: 'finance', name: 'Finance', logo: assetPath('logo/finance.png') },
+  { id: 'hra', name: 'HRA', logo: assetPath('logo/hra.png') },
+  { id: 'inteldev', name: 'IntelDev', logo: assetPath('logo/inteldev.png') },
 ];
 
 // ============================================
@@ -204,36 +243,26 @@ export const featuredSectors: FeaturedSector[] = [
 // ============================================
 export const impactStats: ImpactStat[] = [
   {
-    label: 'Faster Task Closure',
-    value: 80,
-    prefix: 'Over',
-    suffix: '%',
-    iconComponent: Users,
+    label: 'Fast Delivery',
+    value: 0,
+    description: 'Short cycles, fewer blockers.',
+    iconComponent: Zap,
     iconSize: 20,
     iconClassName: "text-[#FB5535]",
   },
   {
-    label: 'Focus Time Saved',
-    value: 6,
-    prefix: '+',
-    suffix: 'hrs',
-    iconComponent: Clock,
+    label: 'Clear Alignment',
+    value: 0,
+    description: 'Everyone knows what matters now.',
+    iconComponent: Target,
     iconSize: 20,
     iconClassName: "text-[#FB5535]",
   },
   {
-    label: 'Concepts Learned Daily',
-    value: 5,
-    suffix: '+',
-    iconComponent: BookOpen,
-    iconSize: 20,
-    iconClassName: "text-[#FB5535]",
-  },
-  {
-    label: 'Collaboration Growth Rate',
-    value: 87,
-    suffix: '%',
-    iconComponent: Award,
+    label: 'Continuous Improvement',
+    value: 0,
+    description: 'Learn, reflect, and get better weekly.',
+    iconComponent: TrendingUp,
     iconSize: 20,
     iconClassName: "text-[#FB5535]",
   },
@@ -243,8 +272,9 @@ export const impactStats: ImpactStat[] = [
 // HERO CONTENT
 // ============================================
 export const heroContent: HeroContent = {
-  title: "Your Digital Workspace",
-  subtitle: "One trusted hub for tools, requests, learning, and collaboration so every Qatalyst can move work forward, fast.",
+  title: "Welcome to Digital Workspace",
+  subtitle:
+    "Your starting point for tools, updates, and key actions. Search or choose a path below.",
   suggestionPills: [
     "Open an IT service request",
     "Where's the HR leave policy?",
@@ -258,28 +288,30 @@ export const heroContent: HeroContent = {
 // ============================================
 export const getLeadApplyCards = (navigate: (path: string) => void): LeadApplyCard[] => [
   {
-    id: "card-1",
-    iconComponent: Users,
+    id: "card-2",
+    iconComponent: Rocket,
     iconSize: 28,
     iconClassName: "text-[#FB5535]",
-    title: "Open DQ Workspace",
+    title: "Start Your DQ Journey",
     description:
-      "Lead — access the right tools, services, and dashboards to drive progress every day.",
-    cta: "Open Now →",
-    onClick: () => navigate("/workspace"),
-    ariaLabel: "Open DQ Workspace",
-    testId: "open-dq-workspace-cta",
+      "Discover how DQ works, what we build, and how the Digital Workspace supports your role from day one.",
+    cta: "Begin Onboarding →",
+    onClick: () => navigate("/onboarding/welcome"),
+    ariaLabel: "Start Your DQ Journey",
+    testId: "start-dq-journey-cta",
   },
   {
-    id: "card-2",
-    iconComponent: Briefcase,
+    id: "card-4",
+    iconComponent: Sparkles,
     iconSize: 28,
     iconClassName: "text-[#FB5535]",
-    title: "Become a Scrum Master",
+    title: "AI Prompting Page",
     description:
-      "Co-work — take the next step in your DQ journey. Apply for a Scrum Master role, facilitate agile practices, and help teams deliver value effectively.",
-    cta: "Apply Now →",
-    onClick: () => navigate('/scrum-master-space'),
+      "Learn how AI prompting is used across DQ to improve thinking, delivery, and everyday digital work.",
+    cta: "Coming Soon",
+    onClick: () => {}, // Disabled for coming soon
+    ariaLabel: "AI Prompting Page - Coming Soon",
+    testId: "ai-prompting-cta",
+    comingSoon: true,
   },
 ];
-

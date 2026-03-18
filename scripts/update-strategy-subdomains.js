@@ -13,43 +13,113 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const VISION_MISSION_SLUGS = [
-  'dq-vision-and-mission', 'dq-vision-mission', 'dq-vision',
-  'dq-mission', 'vision-and-mission', 'vision-mission'
-];
+/**
+ * Update guides to categorize them under "journey" or "history" sub_domain
+ * 
+ * Journey: Vision and Mission related guides
+ * History: Guides about where DQ began, DQ origin, DQ history
+ */
+// Helper function to fetch guides by slug
+async function fetchGuidesBySlug(slugs) {
+  const { data, error } = await supabase
+    .from('guides')
+    .select('id, slug, title, sub_domain, domain')
+    .in('slug', slugs);
 
-const VISION_MISSION_TITLES = ['vision', 'mission', 'dq vision', 'dq mission'];
-
-const HISTORY_KEYWORDS = [
-  'where dq began', 'dq began', 'dq origin', 'dq history',
-  'dq founding', 'dq started', 'dq beginning', 'how dq started',
-  'dq story', 'dq evolution'
-];
-
-function deduplicateById(guides) {
-  return guides.filter((g, i, self) => i === self.findIndex(x => x.id === g.id));
+  if (error) {
+    console.error('Error fetching by slug:', error);
+    return [];
+  }
+  return data || [];
 }
 
-async function addSubDomainTag(guide, tag) {
-  const subDomains = (guide.sub_domain || '').split(',').map(s => s.trim()).filter(Boolean);
-  if (subDomains.includes(tag)) {
-    console.log(`   ⏭️  ${guide.title} already has "${tag}" in sub_domain`);
-    return;
+// Helper function to fetch guides by title keywords
+async function fetchGuidesByTitle(keywords) {
+  const { data, error } = await supabase
+    .from('guides')
+    .select('id, slug, title, sub_domain, domain')
+    .or(keywords.map(title => `title.ilike.%${title}%`).join(','));
+
+  if (error) {
+    console.error('Error fetching by title:', error);
+    return [];
   }
-  subDomains.push(tag);
-  const newSubDomain = subDomains.join(',');
-  const { error } = await supabase.from('guides').update({ sub_domain: newSubDomain }).eq('id', guide.id);
+  return data || [];
+}
+
+// Helper function to fetch guides by keywords in title and summary
+async function fetchGuidesByKeywords(keywords) {
+  const { data, error } = await supabase
+    .from('guides')
+    .select('id, slug, title, sub_domain, domain, summary')
+    .or(keywords.map(keyword =>
+      `title.ilike.%${keyword}%,summary.ilike.%${keyword}%`
+    ).join(','));
+
+  if (error) {
+    console.error('Error fetching by keywords:', error);
+    return [];
+  }
+  return data || [];
+}
+
+// Helper function to fetch guides by slug pattern
+async function fetchGuidesBySlugPattern(pattern) {
+  const { data, error } = await supabase
+    .from('guides')
+    .select('id, slug, title, sub_domain, domain')
+    .ilike('slug', pattern);
+
+  if (error) {
+    console.error('Error fetching by slug pattern:', error);
+    return [];
+  }
+  return data || [];
+}
+
+// Helper function to deduplicate guides by ID
+function deduplicateGuides(guides) {
+  return guides.filter((guide, index, self) =>
+    index === self.findIndex(g => g.id === guide.id)
+  );
+}
+
+// Helper function to update guide sub_domain
+async function updateGuideSubDomain(guide, newSubDomain) {
+  const { error } = await supabase
+    .from('guides')
+    .update({ sub_domain: newSubDomain })
+    .eq('id', guide.id);
+
   if (error) {
     console.error(`   ❌ Failed to update ${guide.title}:`, error);
+    return false;
   } else {
     console.log(`   ✅ Updated ${guide.title}: sub_domain = "${newSubDomain}"`);
+    return true;
   }
 }
 
-async function applySubDomainTag(guides, tag) {
+// Helper function to process guides for a specific sub_domain
+async function processGuidesForSubDomain(guides, subDomainName) {
+  let updatedCount = 0;
+
   for (const guide of guides) {
-    await addSubDomainTag(guide, tag);
+    const currentSubDomain = guide.sub_domain || '';
+    const subDomains = currentSubDomain.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (subDomains.includes(subDomainName)) {
+      console.log(`   ⏭️  ${guide.title} already has "${subDomainName}" in sub_domain`);
+    } else {
+      subDomains.push(subDomainName);
+      const newSubDomain = subDomains.join(',');
+
+      const success = await updateGuideSubDomain(guide, newSubDomain);
+      if (success) updatedCount++;
+    }
   }
+
+  return updatedCount;
 }
 
 /**
@@ -62,34 +132,49 @@ async function updateStrategySubdomains() {
   console.log('🔍 Searching for guides to categorize...\n');
 
   try {
+    // 1. Find Vision and Mission guides - categorize as "journey"
     console.log('📋 Step 1: Finding Vision & Mission guides for "journey" category...');
-    const [{ data: bySlug, error: e1 }, { data: byTitle, error: e2 }] = await Promise.all([
-      supabase.from('guides').select('id, slug, title, sub_domain, domain').in('slug', VISION_MISSION_SLUGS),
-      supabase.from('guides').select('id, slug, title, sub_domain, domain').or(VISION_MISSION_TITLES.map(t => `title.ilike.%${t}%`).join(',')),
-    ]);
-    if (e1) console.error('Error fetching by slug:', e1);
-    if (e2) console.error('Error fetching by title:', e2);
-    const allVisionMissionGuides = deduplicateById([...(bySlug || []), ...(byTitle || [])]);
-    console.log(`   Found ${allVisionMissionGuides.length} Vision/Mission guide(s):`);
-    allVisionMissionGuides.forEach(g => console.log(`   - ${g.title} (${g.slug})`));
-    await applySubDomainTag(allVisionMissionGuides, 'journey');
 
+    const visionMissionSlugs = [
+      'dq-vision-and-mission', 'dq-vision-mission', 'dq-vision',
+      'dq-mission', 'vision-and-mission', 'vision-mission'
+    ];
+    const visionMissionTitles = ['vision', 'mission', 'dq vision', 'dq mission'];
+
+    const guidesBySlug = await fetchGuidesBySlug(visionMissionSlugs);
+    const guidesByTitle = await fetchGuidesByTitle(visionMissionTitles);
+    const allVisionMissionGuides = deduplicateGuides([...guidesBySlug, ...guidesByTitle]);
+
+    console.log(`   Found ${allVisionMissionGuides.length} Vision/Mission guide(s):`);
+    allVisionMissionGuides.forEach(guide => {
+      console.log(`   - ${guide.title} (${guide.slug})`);
+    });
+
+    const journeyUpdatedCount = await processGuidesForSubDomain(allVisionMissionGuides, 'journey');
+
+    // 2. Find History guides - categorize as "history"
     console.log('\n📋 Step 2: Finding History guides for "history" category...');
-    const [{ data: byKeyword, error: e3 }, { data: byHistorySlug, error: e4 }] = await Promise.all([
-      supabase.from('guides').select('id, slug, title, sub_domain, domain, summary').or(HISTORY_KEYWORDS.map(k => `title.ilike.%${k}%,summary.ilike.%${k}%`).join(',')),
-      supabase.from('guides').select('id, slug, title, sub_domain, domain').ilike('slug', '%history%'),
-    ]);
-    if (e3) console.error('Error fetching history guides:', e3);
-    if (e4) console.error('Error fetching history guides by slug:', e4);
-    const allHistoryGuides = deduplicateById([...(byKeyword || []), ...(byHistorySlug || [])]);
+
+    const historyKeywords = [
+      'where dq began', 'dq began', 'dq origin', 'dq history', 'dq founding',
+      'dq started', 'dq beginning', 'how dq started', 'dq story', 'dq evolution'
+    ];
+
+    const historyGuides = await fetchGuidesByKeywords(historyKeywords);
+    const historyBySlug = await fetchGuidesBySlugPattern('%history%');
+    const allHistoryGuides = deduplicateGuides([...historyGuides, ...historyBySlug]);
+
     console.log(`   Found ${allHistoryGuides.length} History guide(s):`);
-    allHistoryGuides.forEach(g => console.log(`   - ${g.title} (${g.slug})`));
-    await applySubDomainTag(allHistoryGuides, 'history');
+    allHistoryGuides.forEach(guide => {
+      console.log(`   - ${guide.title} (${guide.slug})`);
+    });
+
+    const historyUpdatedCount = await processGuidesForSubDomain(allHistoryGuides, 'history');
 
     console.log('\n✅ Update complete!');
     console.log(`\n📊 Summary:`);
-    console.log(`   - Vision/Mission guides updated: ${allVisionMissionGuides.length}`);
-    console.log(`   - History guides updated: ${allHistoryGuides.length}`);
+    console.log(`   - Vision/Mission guides updated: ${journeyUpdatedCount}`);
+    console.log(`   - History guides updated: ${historyUpdatedCount}`);
 
   } catch (error) {
     console.error('❌ Error updating guides:', error);
@@ -98,5 +183,5 @@ async function updateStrategySubdomains() {
 }
 
 // Run the update
-updateStrategySubdomains();
+await updateStrategySubdomains();
 

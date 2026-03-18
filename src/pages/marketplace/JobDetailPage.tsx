@@ -53,9 +53,7 @@ const JobDetailPage: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const getImageSrc = (item: JobItem) => {
-    if (item.image) return item.image;
-    const hash = Math.abs(item.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0));
-    return fallbackImages[hash % fallbackImages.length] || fallbackHero;
+    return '/job openings.jpg';
   };
 
   useEffect(() => {
@@ -95,7 +93,7 @@ const JobDetailPage: React.FC = () => {
   if (!job) {
     return (
       <div className="flex min-h-screen flex-col bg-gray-50">
-        <Header toggleSidebar={() => {}} sidebarOpen={false} />
+        <Header toggleSidebar={() => undefined} sidebarOpen={false} />
         <main className="flex flex-1 flex-col items-center justify-center px-4 text-center">
           <h1 className="mb-2 text-2xl font-semibold text-gray-900">
             {isLoading ? 'Loading role' : 'Role not found'}
@@ -109,7 +107,13 @@ const JobDetailPage: React.FC = () => {
             <p className="mb-4 text-sm text-red-600">{loadError}</p>
           )}
           <button
-            onClick={() => navigate('/marketplace/opportunities')}
+            onClick={() => {
+              // Preserve the tab parameter from the current location
+              const params = new URLSearchParams(location.search);
+              const tab = params.get('tab');
+              const backUrl = tab ? `/marketplace/opportunities?tab=${tab}` : '/marketplace/opportunities';
+              navigate(backUrl);
+            }}
                 className="rounded-lg bg-[#030f35] px-6 py-3 text-sm font-semibold text-white"
           >
             Back to Opportunities
@@ -137,7 +141,7 @@ const JobDetailPage: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F3F6FB]">
-      <Header toggleSidebar={() => {}} sidebarOpen={false} />
+      <Header toggleSidebar={() => undefined} sidebarOpen={false} />
       <main className="flex-1">
         <section className="border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
@@ -147,11 +151,19 @@ const JobDetailPage: React.FC = () => {
                 Home
               </Link>
               <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
-              <Link to={`/marketplace/guides${location.search || ''}`} className="hover:text-[#1A2E6E]">
+              <Link to={(() => {
+                const params = new URLSearchParams(location.search);
+                const tab = params.get('tab') || 'opportunities';
+                return `/marketplace/opportunities?tab=${tab}`;
+              })()} className="hover:text-[#1A2E6E]">
                 DQ Media Center
               </Link>
               <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
-              <Link to={`/marketplace/opportunities${location.search || ''}`} className="hover:text-[#1A2E6E]">
+              <Link to={(() => {
+                const params = new URLSearchParams(location.search);
+                const tab = params.get('tab') || 'opportunities';
+                return `/marketplace/opportunities?tab=${tab}`;
+              })()} className="hover:text-[#1A2E6E]">
                 Opportunities & Openings
               </Link>
               <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
@@ -173,33 +185,70 @@ const JobDetailPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="bg-white">
-          <div className="mx-auto max-w-6xl px-6 py-10">
+        {/* Hero Section with Blurred Background - Matching Other Tabs */}
+        <section className="relative min-h-[320px] md:min-h-[400px] flex items-center" aria-labelledby="job-title">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url("${getImageSrc(job)}")`,
+              filter: 'blur(2px)',
+            }}
+          />
+          {/* Dark Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/90 via-slate-800/85 to-slate-900/90" />
+          
+          {/* Content */}
+          <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 md:py-24 w-full">
+            <div className="max-w-4xl">
+              {/* Category Tag */}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white mb-4">
+                {job.roleType} role · Internal Mobility
+              </span>
+              
+              {/* Posted Date */}
+              <div className="text-white/90 text-sm mb-4">
+                Posted {formatDate(job.postedOn)}
+              </div>
+
+              {/* Title */}
+              <h1 id="job-title" className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">
+                {job.title}
+              </h1>
+
+              {/* Summary */}
+              <p className="text-white/90 text-lg mb-6">
+                {job.summary}
+              </p>
+
+              {/* Metadata */}
+              <div className="flex flex-wrap items-center gap-6 text-white/90 text-sm">
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} />
+                  <span>{job.location}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Briefcase size={16} />
+                  <span>{job.department}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock size={16} />
+                  <span>{job.type}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-gray-50 py-8">
+          <div className="mx-auto max-w-6xl px-6">
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div>
-                <div className="mb-8 rounded-2xl bg-gray-100">
-                  <img
-                    src={getImageSrc(job)}
-                    alt={job.title}
-                    className="h-[420px] w-full rounded-2xl object-cover"
-                    loading="lazy"
-                  />
-                </div>
                 <div className="space-y-4">
-                  <div className="inline-flex items-center gap-3">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-[#1A2E6E]">
-                      {job.roleType} role
-                    </span>
-                    <div className="inline-flex items-center rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-[#1A2E6E]">
-                      Internal Mobility · Current associates only
-                    </div>
-                  </div>
-                  <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
-                  <p className="text-lg text-gray-700">{job.summary}</p>
-                  <div className="grid gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-6 sm:grid-cols-2">
+                  <div className="grid gap-4 rounded-2xl border border-gray-200 bg-white p-6 sm:grid-cols-2">
                     {metaRows.map((row) => (
                       <div key={row.label} className="flex items-center gap-3">
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-50 shadow-sm">
                           {row.icon}
                         </span>
                         <div>
@@ -265,7 +314,13 @@ const JobDetailPage: React.FC = () => {
                     </a>
                   )}
                   <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => {
+                      // Preserve the tab parameter from the current location
+                      const params = new URLSearchParams(location.search);
+                      const tab = params.get('tab');
+                      const backUrl = tab ? `/marketplace/opportunities?tab=${tab}` : '/marketplace/opportunities';
+                      navigate(backUrl);
+                    }}
                     className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
                   >
                     Back

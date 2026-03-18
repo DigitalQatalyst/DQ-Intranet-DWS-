@@ -5,6 +5,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Lock,
 } from 'lucide-react';
 import {
   AnimatedCounter,
@@ -21,15 +22,60 @@ import {
   type Testimonial,
 } from '../data/landingPageContent';
 
+interface AssociateFeedback {
+  id: string;
+  name: string;
+  role: string;
+  imageUrl: string;
+  rating?: number;
+  feedback: string;
+}
+
+const associateFeedbacks: AssociateFeedback[] = [
+  {
+    id: 'vishnu',
+    name: 'Vishnu Chandran',
+    role: 'CoE Analyst, Digital Qatalyst',
+    imageUrl:
+      'https://i.ibb.co/XkGXwk4Z/Screenshot-2026-01-27-at-3-39-28-PM.png',
+    rating: 5,
+    feedback:
+      'DigitalQatalyst\'s values shifted my focus from completing tasks to creating measurable impact. They strengthened my ownership, decision-making, and accountability both professionally and personally.',
+  },
+  {
+    id: 'jerry',
+    name: 'Jerry Ashie',
+    role: 'Accounts Manager & Scrum Master, Digital Qatalyst',
+    imageUrl:
+      'https://i.ibb.co/XMPk1nQ/Whats-App-Image-2026-01-23-at-11-20-35-AM-1.jpg',
+    rating: 5,
+    feedback:
+      'DigitalQatalyst\'s values drive me to learn continuously, adapt quickly, and take real ownership of outcomes. They\'ve strengthened my problem-solving, confidence, and resilience helping me deliver value, not just activity.',
+  },
+  {
+    id: 'sharon',
+    name: 'Sharon Adhiambo',
+    role: 'HR Analyst, Digital Qatalyst',
+    imageUrl:
+      'https://images.pexels.com/photos/3760853/pexels-photo-3760853.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    rating: 5,
+    feedback:
+      'DQ taught me the value of collaboration — I now ask for feedback early and share progress openly. This helps me deliver work that is better aligned, more efficient, and truly impactful.',
+  },
+  {
+    id: 'fadil',
+    name: 'Fadil Alli',
+    role: 'CoE Analyst',
+    imageUrl:
+      'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    rating: 5,
+    feedback:
+      'One key value at DQ that shaped my growth is ownership — I\'m learning to take full responsibility for challenges, not just tasks. As a Scrum Master, this mindset has improved collaboration, accountability, and the way our team works together.',
+  },
+];
+
 const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
-  const disclaimer = '(not approved for external publication)'
-  const initials =
-    testimonial.name
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part.charAt(0).toUpperCase())
-      .join("") || "?";
+  const disclaimer = '(not approved for external publication)';
 
   return (
     <div className="h-full rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md flex flex-col">
@@ -74,7 +120,70 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
   );
 };
 
-const TestimonialsShowcase = () => {
+const AssociateFeedbackCard = ({ feedback }: { feedback: AssociateFeedback }) => {
+  // Get initials from name
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  return (
+    <div
+      className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 mx-auto flex flex-col overflow-hidden"
+      style={{
+        width: '100%',
+        maxWidth: '1030px',
+        minHeight: 'auto'
+      }}
+    >
+      {/* Large quote mark */}
+      <div className="mb-4 flex-shrink-0">
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          className="text-coral-500"
+          style={{ color: 'rgba(251, 85, 53, 0.4)' }}
+        >
+          <path
+            d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+
+      {/* Testimonial text */}
+      <div className="mb-4 flex-1 min-h-0">
+        <p className="text-gray-700 leading-relaxed italic font-medium" style={{ fontSize: '17px' }}>
+          {feedback.feedback}
+        </p>
+      </div>
+
+      {/* Author info - contained within card */}
+      <div className="flex items-center gap-4 flex-shrink-0 w-full">
+        {/* Avatar with initials */}
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0"
+          style={{ backgroundColor: 'rgba(251, 85, 53, 0.4)' }}
+        >
+          {getInitials(feedback.name)}
+        </div>
+
+        {/* Name and role - properly contained */}
+        <div className="flex flex-col justify-center min-w-0 flex-1">
+          <p className="text-base font-semibold text-gray-900 leading-tight truncate">
+            {feedback.name}
+          </p>
+          <p className="text-sm text-gray-600 leading-tight truncate">
+            {feedback.role}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const TestimonialsShowcase = () => {
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -105,8 +214,12 @@ const VideoTestimonialCard = ({
 }) => {
   const [isHovering, setIsHovering] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isImageOnly = testimonial.mediaType === "image";
 
   useEffect(() => {
+    if (isImageOnly) {
+      return;
+    }
     if (videoRef.current) {
       if (isHovering) {
         videoRef.current
@@ -129,22 +242,24 @@ const VideoTestimonialCard = ({
       {/* Video/Thumbnail Background */}
       <div className="absolute inset-0 bg-gray-900 overflow-hidden">
         <img
-          src={testimonial.videoThumbnail}
+          src={testimonial.imageUrl || testimonial.videoThumbnail}
           alt={`${testimonial.name} from ${testimonial.company}`}
           className={`w-full h-full object-cover transition-opacity duration-300 ${
-            isHovering ? "opacity-0" : "opacity-100"
+            !isImageOnly && isHovering ? "opacity-0" : "opacity-100"
           }`}
         />
-        <video
-          ref={videoRef}
-          src={testimonial.videoUrl}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-            isHovering ? "opacity-100" : "opacity-0"
-          }`}
-          muted
-          playsInline
-          loop
-        />
+        {!isImageOnly && (
+          <video
+            ref={videoRef}
+            src={testimonial.videoUrl}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+              isHovering ? "opacity-100" : "opacity-0"
+            }`}
+            muted
+            playsInline
+            loop
+          />
+        )}
       </div>
 
       {/* Overlay with content */}
@@ -251,12 +366,20 @@ const TestimonialModal = ({
       >
         <div className="relative flex-shrink-0">
           <div className="w-full aspect-video bg-gray-900">
-            <video
-              src={testimonial.videoUrl}
-              controls
-              autoPlay
-              className="w-full h-full object-cover"
-            />
+            {testimonial.mediaType === "image" || !testimonial.videoUrl ? (
+              <img
+                src={testimonial.imageUrl || testimonial.videoThumbnail}
+                alt={testimonial.modalTitle || testimonial.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <video
+                src={testimonial.videoUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
           <button
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-all"
@@ -275,7 +398,7 @@ const TestimonialModal = ({
             />
             <div>
               <h3 className="text-xl font-bold text-gray-900">
-                How {testimonial.company} scaled with Enterprise Journey
+                {testimonial.modalTitle || `How ${testimonial.company} scaled with Enterprise Journey`}
               </h3>
               <div className="flex items-center mt-1">
                 {[...Array(5)].map((_, i) => (
@@ -313,16 +436,19 @@ const TestimonialModal = ({
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-gray-900">
-                  {testimonial.metric} {testimonial.metricLabel}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Impact achieved through DQ Workspace
-                </p>
+            {testimonial.metric && testimonial.metricLabel && (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {testimonial.metric} {testimonial.metricLabel}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {testimonial.impactDescription ||
+                      "Impact achieved through DQ Workspace"}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -330,7 +456,7 @@ const TestimonialModal = ({
   );
 };
 
-const VideoTestimonialCarousel = () => {
+export const VideoTestimonialCarousel = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedTestimonial, setSelectedTestimonial] =
     useState<Testimonial | null>(null);
@@ -433,6 +559,120 @@ const VideoTestimonialCarousel = () => {
   );
 };
 
+const AssociateFeedbackCarousel = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % associateFeedbacks.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
+  useEffect(() => {
+    if (carouselRef.current) {
+      const cardWidth =
+        carouselRef.current.scrollWidth / associateFeedbacks.length;
+      const scrollAmount = activeIndex * cardWidth;
+      carouselRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+    }
+  }, [activeIndex]);
+
+  const handlePrev = () =>
+    setActiveIndex(
+      (prev) => (prev - 1 + associateFeedbacks.length) % associateFeedbacks.length
+    );
+  const handleNext = () =>
+    setActiveIndex((prev) => (prev + 1) % associateFeedbacks.length);
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX.current == null) {
+      setIsPaused(false);
+      return;
+    }
+    const deltaX = event.changedTouches[0]?.clientX - touchStartX.current;
+    const threshold = 40;
+    if (deltaX > threshold) {
+      handlePrev();
+    } else if (deltaX < -threshold) {
+      handleNext();
+    }
+    touchStartX.current = null;
+    setIsPaused(false);
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <div
+        ref={carouselRef}
+        className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth gap-6 pb-6"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {associateFeedbacks.map((feedback, index) => (
+          <div
+            key={feedback.id}
+            className="min-w-full flex-shrink-0 snap-center"
+          >
+            <FadeInUpOnScroll delay={index * 0.1}>
+              <AssociateFeedbackCard feedback={feedback} />
+            </FadeInUpOnScroll>
+          </div>
+        ))}
+      </div>
+
+      {/* Arrows */}
+      <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center transform -translate-y-1/2 pointer-events-none px-2">
+        <button
+          className="w-8 h-8 rounded-full bg-white/90 shadow-md flex items-center justify-center text-gray-700 hover:bg-white transition-all pointer-events-auto"
+          onClick={handlePrev}
+          aria-label="Previous associate reflection"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <button
+          className="w-8 h-8 rounded-full bg-white/90 shadow-md flex items-center justify-center text-gray-700 hover:bg-white transition-all pointer-events-auto"
+          onClick={handleNext}
+          aria-label="Next associate reflection"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      {/* Dots */}
+      <div className="flex justify-center mt-6 gap-2">
+        {associateFeedbacks.map((item, index) => (
+          <button
+            key={item.id}
+            className={`h-2 rounded-full transition-all ${
+              activeIndex === index
+                ? 'w-6 bg-coral-500'
+                : 'w-2 bg-gray-300 hover:bg-gray-400'
+            }`}
+            style={activeIndex === index ? { backgroundColor: '#FB5535' } : {}}
+            onClick={() => setActiveIndex(index)}
+            aria-label={`Go to associate reflection ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Partner Category Card component
 const PartnerCategoryCard = ({ category }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -446,14 +686,9 @@ const PartnerCategoryCard = ({ category }) => {
   return (
     <div
       ref={ref}
-      className={`relative overflow-hidden rounded-xl p-6 transition-all duration-500 ease-out transform ${
+      className={`relative overflow-hidden rounded-2xl bg-[#F6F7F9] p-6 md:p-8 transition-all duration-500 ease-out transform min-h-[220px] h-full flex flex-col ${
         isHovered ? "shadow-md scale-[1.02]" : "shadow-sm"
       }`}
-      style={{
-        background: isHovered
-          ? `linear-gradient(to bottom right, #f9fafb, #ffffff)`
-          : "#ffffff",
-      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -475,20 +710,10 @@ const PartnerCategoryCard = ({ category }) => {
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
         {category.title}
       </h3>
-      <p className="text-sm text-gray-600 mb-4">{category.subtitle}</p>
-
-      <div
-        className={`text-3xl font-bold transition-all duration-300 ${
-          isHovered ? `text-${category.color}` : `text-${category.color}`
-        }`}
-      >
-        {hasAnimated && <AnimatedCounter value={parseInt(category.metric)} />}
-        {!hasAnimated && "0"}
-        {category.metric.includes("+") && "+"}
-      </div>
+      <p className="text-sm text-gray-600 mb-4 flex-grow">{category.subtitle}</p>
     </div>
   );
 };
@@ -498,7 +723,7 @@ const PartnerLogo = ({ sector }) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
     <div
-      className={`relative mx-4 my-1 transition-all duration-300 ease-out transform ${
+      className={`relative mx-5 my-2 transition-all duration-300 ease-out transform ${
         isHovered ? 'scale-110' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
@@ -507,12 +732,12 @@ const PartnerLogo = ({ sector }) => {
       <img
         src={sector.logo}
         alt={sector.name}
-        className="h-12 object-contain transition-all duration-500"
+        className="h-16 md:h-20 object-contain transition-all duration-500"
         style={{
           filter: isHovered ? "none" : "grayscale(100%)",
           opacity: isHovered ? 1 : 0.7,
           width: "auto",
-          maxWidth: "120px",
+          maxWidth: "160px",
         }}
       />
     </div>
@@ -559,12 +784,12 @@ const FeaturedPartnersCarousel = () => {
   };
 
   return (
-    <div className="relative h-auto pt-6 pb-2 md:pt-8 md:pb-3">
-      <FadeInUpOnScroll className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+    <div className="relative h-auto pt-8 pb-4 md:pt-10 md:pb-6">
+      <FadeInUpOnScroll className="text-center mb-8">
+        <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           Featured Sectors
         </h3>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-base md:text-lg">
           Trusted core factories and streams across DQ
         </p>
       </FadeInUpOnScroll>
@@ -572,7 +797,7 @@ const FeaturedPartnersCarousel = () => {
       <div className="relative h-auto overflow-visible">
         <div
           ref={carouselRef}
-          className="flex overflow-x-auto py-2 scrollbar-hide gap-6"
+          className="flex overflow-x-auto py-6 md:py-8 scrollbar-hide gap-8"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {[...sectors, ...sectors].map((sector, index) => (
@@ -607,24 +832,23 @@ const FeaturedPartnersCarousel = () => {
 
 const ProofAndTrust: React.FC = () => {
   return (
-    <div className="bg-white py-16">
+    <div className="bg-white pt-16 pb-8">
       <div className="container mx-auto px-4">
         {/* Why Abu Dhabi / Platform Impact */}
         <div className="mb-16">
           <FadeInUpOnScroll className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-              Why Agile Working Accelerates Growth
+              Experience the Future of Work in DQ
             </h2>
             <div>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8 text-balance clamp-2">
-                Agile working empowers teams to adapt, collaborate, and grow
-                faster together.
+              <p className="text-base sm:text-lg text-gray-600 mx-auto mb-8 text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
+                DQ brings Agile to life through GHC and 7S ways of working—driving alignment, feedback, and continuous improvement.
               </p>
             </div>
           </FadeInUpOnScroll>
 
           <StaggeredFadeIn
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto"
             staggerDelay={0.15}
           >
             {impactStats.map((stat, index) => {
@@ -642,65 +866,88 @@ const ProofAndTrust: React.FC = () => {
                       })}
                     </span>
                   </div>
-                  <div className="text-3xl font-bold text-dq-navy mb-1 flex items-baseline justify-center">
-                    {stat.prefix && <span className="mr-1">{stat.prefix}</span>}
-                    <span className="inline-flex items-baseline tabular-nums">
-                      <AnimatedCounter value={stat.value} />{stat.suffix ? (
-                        <span>{stat.suffix}</span>
-                      ) : null}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-600 text-center leading-tight mt-1 whitespace-normal break-words [text-overflow:clip] [overflow:visible] [display:block]">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
                     {stat.label}
-                  </div>
+                  </h3>
+                  <p className="text-sm text-gray-600 text-center leading-tight">
+                    {stat.description}
+                  </p>
                 </div>
               );
             })}
           </StaggeredFadeIn>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+            <a
+              href="/ghc"
+              className="px-6 py-3 bg-[#FB5535] hover:bg-[#E64A2E] text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
+            >
+              Explore DQ GHC
+            </a>
+          </div>
         </div>
 
         {/* Success Stories */}
-        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 md:p-12 overflow-hidden relative">
-          <FadeInUpOnScroll className="text-center mb-10 relative z-10">
+        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 overflow-hidden relative">
+          <FadeInUpOnScroll className="text-center mb-8 relative z-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-              Success Stories from DQ Employees
+              Qatalyst Perspectives
             </h2>
             <div>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto clamp-2">
-                Discover how DQ teams work smarter and collaborate better every
-                day.
+              <p className="text-base sm:text-lg text-gray-600 mx-auto leading-tight whitespace-nowrap text-center overflow-hidden text-ellipsis">
+                Short reflections from Qatalysts on how DQ DNA helps them collaborate better, learn faster, and deliver more impact.
               </p>
             </div>
           </FadeInUpOnScroll>
-            <VideoTestimonialCarousel />
+
+          <div className="relative z-10 max-w-6xl mx-auto mb-8">
+            <AssociateFeedbackCarousel />
           </div>
 
-        {/* Powered by Strategic Partnerships - NEW SECTION */}
-        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 md:p-12 overflow-visible relative">
-          <HorizontalScrollReveal
-            direction="left"
-            className="text-center mb-10 relative z-10"
-          >
+          {/* CTA */}
+          <div className="flex justify-center relative z-10">
+            <a
+              href="/marketplace/guides/associate-testimonials"
+              className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center border-2 border-gray-200"
+            >
+              Read More Associate Stories
+            </a>
+          </div>
+        </div>
+
+        {/* Our Four Pillars of Success */}
+        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 overflow-hidden relative">
+          <FadeInUpOnScroll className="text-center mb-8 relative z-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-              Our Four Pillars of Success
+              Primary Work Sectors in DQ
             </h2>
-            <div className="relative">
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto clamp-2">
-                Governance, Operations, Platforms, and Delivery — the four
-                pillars driving DQ’s success.
+            <div>
+              <p className="text-base sm:text-lg text-gray-600 mx-auto mb-8 leading-tight text-center whitespace-nowrap">
+                GHC sets the direction, and Agile Flows turn it into execution. These sectors show how ownership, governance, and delivery work together across DQ.
               </p>
             </div>
-          </HorizontalScrollReveal>
+          </FadeInUpOnScroll>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {partnerCategories.map((category, index) => (
-              <FadeInUpOnScroll key={category.id} delay={index * 0.15}>
-                <PartnerCategoryCard category={category} />
-              </FadeInUpOnScroll>
+          <StaggeredFadeIn
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto relative z-10 mb-8"
+            staggerDelay={0.15}
+          >
+            {partnerCategories.map((category) => (
+              <PartnerCategoryCard key={category.id} category={category} />
             ))}
-          </div>
+          </StaggeredFadeIn>
 
-          <FeaturedPartnersCarousel />
+          {/* CTA */}
+          <div className="flex justify-center relative z-10">
+            <button
+              disabled
+              className="px-6 py-3 bg-gray-400 text-gray-200 font-bold rounded-lg shadow-lg cursor-not-allowed text-center flex items-center justify-center gap-2 opacity-60"
+            >
+              <Lock size={18} />
+              Explore the Work Directory
+            </button>
+          </div>
         </div>
 
         {/* Animations + CSS vars */}

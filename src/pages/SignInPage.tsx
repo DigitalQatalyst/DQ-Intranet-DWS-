@@ -16,7 +16,7 @@ type SignInPageProps = {
  *   GET  /api/auth/microsoft        (redirects to Microsoft OAuth)
  */
 
-export default function SignInPage({ redirectTo = "/onboarding/start" }: SignInPageProps = {}) {
+export default function SignInPage({ redirectTo = "/onboarding/welcome" }: SignInPageProps = {}) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();

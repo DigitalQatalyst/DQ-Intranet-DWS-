@@ -18,7 +18,7 @@ if [[ "$CURRENT_BRANCH" = "$BRANCH" ]]; then
 fi
 
 # Remove the problematic file if it exists (case-insensitive filesystem issue)
-if [[ -f "src/pages/guides/GhcGlossaryPage.tsx" || -f "src/pages/guides/GHCGlossaryPage.tsx" ]]; then
+if [[ -f "src/pages/guides/GhcGlossaryPage.tsx" ]] || [[ -f "src/pages/guides/GHCGlossaryPage.tsx" ]]; then
     echo "Cleaning up case-sensitivity conflict..."
     rm -f src/pages/guides/GhcGlossaryPage.tsx src/pages/guides/GHCGlossaryPage.tsx
 fi

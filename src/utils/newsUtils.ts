@@ -76,9 +76,23 @@ export const toTitleCase = (text: string): string => {
  * Generate an appropriate title for news items that don't have one
  */
 export const generateTitle = (item: NewsItem): string => {
+  // Explicit overrides for specific items where we want a custom display title
+  const titleOverrides: Record<string, string> = {
+    'dq-scrum-master-structure-update': 'Updated Scrum Master Structure',
+    'company-wide-lunch-break-schedule': 'Company-wide Lunch Break Schedule',
+    'grading-review-program-grp': 'Grading Review Program (GRP)',
+    'dq-storybook-latest-links': 'DQ Storybook (Latest Version and Links)',
+    'dq-storybook-live': 'The DQ Storybook Goes Live!',
+    'riyadh-horizon-hub': 'Riyadh Horizon Hub Opens',
+  };
+
+  if (item.id && titleOverrides[item.id]) {
+    return titleOverrides[item.id];
+  }
+
   // If title exists and is not empty, return it
   if (item.title?.trim()) {
-    return item.title;
+    return toTitleCase(item.title.trim());
   }
 
   // Generate title based on available information
@@ -113,7 +127,8 @@ export const generateTitle = (item: NewsItem): string => {
       // Take first 8 words and capitalize
       const titleFromExcerpt = excerptWords.slice(0, 8).join(' ');
       if (titleFromExcerpt.length > 20) {
-        return parts.length > 0 ? `${parts.join(' | ')} | ${titleFromExcerpt}` : titleFromExcerpt;
+        const generated = parts.length > 0 ? `${parts.join(' | ')} | ${titleFromExcerpt}` : titleFromExcerpt;
+        return toTitleCase(generated);
       }
     }
   }
@@ -124,7 +139,8 @@ export const generateTitle = (item: NewsItem): string => {
     if (firstLine) {
       const cleanLine = firstLine.trim().replace(/^#+\s+/, '').replace(/\*\*/g, '').substring(0, 60);
       if (cleanLine.length > 15) {
-        return parts.length > 0 ? `${parts.join(' | ')} | ${cleanLine}` : cleanLine;
+        const generated = parts.length > 0 ? `${parts.join(' | ')} | ${cleanLine}` : cleanLine;
+        return toTitleCase(generated);
       }
     }
   }
@@ -138,13 +154,15 @@ export const generateTitle = (item: NewsItem): string => {
     
     if (meaningfulParts.length > 0) {
       const idTitle = meaningfulParts.join(' ');
-      return parts.length > 0 ? `${parts.join(' | ')} | ${idTitle}` : idTitle;
+      const generated = parts.length > 0 ? `${parts.join(' | ')} | ${idTitle}` : idTitle;
+      return toTitleCase(generated);
     }
   }
 
   // Final fallback
   const typeLabel = item.type === 'Thought Leadership' ? 'Blog' : (item.newsType || item.type || 'Announcement');
-  return parts.length > 0 ? `${parts.join(' | ')} | ${typeLabel}` : typeLabel;
+  const generated = parts.length > 0 ? `${parts.join(' | ')} | ${typeLabel}` : typeLabel;
+  return toTitleCase(generated);
 };
 
 /**
@@ -195,7 +213,14 @@ export const getNewsTypeDisplay = (item: NewsItem): { label: string; color: stri
     Notice: { label: 'Holidays', color: '#16A34A' },                  // Green
     'Thought Leadership': { label: 'Blog', color: '#14B8A6' }         // Teal for blogs
   };
-  return typeFallback[item.type];
+  
+  // Return fallback if type exists, otherwise return default
+  if (item.type && typeFallback[item.type]) {
+    return typeFallback[item.type];
+  }
+  
+  // Default fallback for any missing types
+  return { label: 'Company News', color: '#0EA5E9' };
 };
 
 /**
@@ -243,5 +268,56 @@ export const formatListens = (views: number): string => {
     return `${kValue.replace(/\.0$/, '')}k listens`;
   }
   return `${views} listens`;
+};
+
+/**
+ * Get the image source for a news item based on type, format, and newsType
+ * This ensures cards and detail pages use the same images
+ */
+export const getNewsImageSrc = (
+  item: NewsItem,
+  fallbackImages: string[],
+  fallbackHero?: string
+): string => {
+  // Use /image (7).jpg for blog articles (Thought Leadership)
+  if (item.type === 'Thought Leadership') {
+    return '/image (7).jpg';
+  }
+  // Use a single series image for all podcast articles (both series)
+  if (item.format === 'Podcast' || item.tags?.some(tag => tag.toLowerCase().includes('podcast'))) {
+    return '/image (12).png';
+  }
+  // Use a dedicated image for all announcement-style items shown in the
+  // News & Announcements tab (Announcements, Guidelines, Notices)
+  if (item.type === 'Announcement' || item.type === 'Guidelines' || item.type === 'Notice') {
+    return '/image (6).jpg';
+  }
+  // Use specific images based on newsType
+  if (item.newsType === 'Policy Update') {
+    return '/policy update.png';
+  }
+  if (item.newsType === 'Upcoming Events') {
+    return '/upcoming events.jpg';
+  }
+  if (item.newsType === 'Company News') {
+    return '/company news.jpg';
+  }
+  if (item.newsType === 'Holidays') {
+    // Holidays - use company news as fallback since no holidays image exists
+    return '/company news.jpg';
+  }
+  // Fallback to type field if newsType is not set
+  if (item.type === 'Guidelines') {
+    return '/policy update.png';
+  }
+  if (item.type === 'Announcement') {
+    return '/company news.jpg';
+  }
+  if (item.type === 'Notice') {
+    return '/company news.jpg'; // Notice maps to Holidays, use company news
+  }
+  // Final fallback to item.image or getFallbackImage
+  if (item.image) return item.image;
+  return getFallbackImage(item.id, fallbackImages) || fallbackHero || '';
 };
 

@@ -1,61 +1,69 @@
 import React from 'react';
 import {
-    FileUpIcon,
-    FileTextIcon,
-    UserIcon,
-    HelpCircleIcon,
+    FileUp,
+    FileText,
+    PieChart,
+    MessageSquare,
+    ChevronRight
 } from 'lucide-react';
+
 export const QuickActions: React.FC = () => {
     const actions = [
         {
             id: 'submit-request',
-            label: 'Create Request',
-            icon: <FileTextIcon className="h-5 w-5" />,
+            label: 'New Request',
+            icon: FileText,
+            color: "text-orange-600",
+            bg: "bg-orange-50",
             onClick: () => console.log('Submit Request clicked'),
-            primary: true,
         },
         {
             id: 'upload-documents',
-            label: 'Upload Document',
-            icon: <FileUpIcon className="h-5 w-5" />,
+            label: 'Add Document',
+            icon: FileUp,
+            color: "text-blue-600",
+            bg: "bg-blue-50",
             onClick: () => console.log('Upload Documents clicked'),
-            primary: false,
         },
         {
             id: 'view-reports',
-            label: 'View Reports',
-            icon: <UserIcon className="h-5 w-5" />,
+            label: 'Analytics',
+            icon: PieChart,
+            color: "text-purple-600",
+            bg: "bg-purple-50",
             onClick: () => console.log('View Reports clicked'),
-            primary: false,
         },
         {
             id: 'contact-support',
-            label: 'Contact Support',
-            icon: <HelpCircleIcon className="h-5 w-5" />,
+            label: 'Help Center',
+            icon: MessageSquare,
+            color: "text-emerald-600",
+            bg: "bg-emerald-50",
             onClick: () => console.log('Contact Support clicked'),
-            primary: false,
         },
     ];
+
     return (
-        <div className="grid grid-cols-2 gap-3">
-            {actions.map((action) => (
-                <button
-                    key={action.id}
-                    onClick={action.onClick}
-                    className={`flex flex-col items-center justify-center p-4 rounded-lg transition-colors ${action.primary ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white border border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
-                >
-                    <div
-                        className={`p-2 rounded-full mb-3 ${action.primary ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'}`}
+        <div className="grid grid-cols-1 gap-3">
+            {actions.map((action) => {
+                const Icon = action.icon;
+                return (
+                    <button
+                        key={action.id}
+                        onClick={action.onClick}
+                        className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 bg-white 
+                                 hover:border-blue-200 hover:shadow-md transition-all group"
                     >
-                        {action.icon}
-                    </div>
-                    <span
-                        className={`text-sm font-medium ${action.primary ? 'text-white' : 'text-gray-700'}`}
-                    >
-                        {action.label}
-                    </span>
-                </button>
-            ))}
+                        <div className={`p-3 rounded-xl ${action.bg} ${action.color} group-hover:scale-110 transition-transform`}>
+                            <Icon size={20} />
+                        </div>
+                        <div className="flex-1 text-left">
+                            <span className="text-sm font-bold text-gray-800">{action.label}</span>
+                        </div>
+                        <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                    </button>
+                );
+            })}
         </div>
     );
 };

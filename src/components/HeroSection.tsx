@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Send, ChevronDown, ArrowRight, Users } from 'lucide-react';
+import React from 'react';
+import { ArrowRight, Sparkles, Lock } from 'lucide-react';
 import {
   AnimatedText,
   FadeInUpOnScroll,
@@ -8,83 +8,20 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './Header';
 import { heroContent } from '../data/landingPageContent';
-import { getSearchMatches } from '@/utils/searchRouter';
+
 interface HeroSectionProps {
   "data-id"?: string;
 }
+
 const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
   const { user } = useAuth();
   const isAuthenticated = Boolean(user);
-  const onboardingPath = "/onboarding/start";
+  const onboardingPath = "/onboarding/welcome";
   const ctaHref = isAuthenticated
     ? onboardingPath
     : `/signin?redirect=${encodeURIComponent(onboardingPath)}`;
-  const [prompt, setPrompt] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmed = prompt.trim();
-    if (!trimmed) return;
-
-    // 1) If Voiceflow chatbot is available, send the query there and open the assistant
-    const vfChat = window.voiceflow?.chat;
-    if (vfChat?.interact) {
-      try {
-        // Pass the user's question into the AI assistant
-        vfChat.interact({
-          type: 'text',
-          payload: {
-            message: trimmed,
-            // Optional metadata the bot can use to understand DWS context
-            metadata: {
-              source: 'dq-hero-search',
-              // High-level hint: treat this as help navigating the DWS platform
-              intent_hint: 'dws_navigation_help',
-            },
-          },
-        });
-        // Most Voiceflow widgets auto-open when they receive a message; if not,
-        // the widget configuration can be adjusted in the Voiceflow project.
-        setPrompt('');
-        return;
-      } catch {
-        // If something goes wrong, fall through to search hub routing
-      }
-    }
-
-    // 2) Fallback: if chatbot is not ready, route using our DWS search router
-    const matches = getSearchMatches(trimmed);
-    if (matches.length === 1) {
-      navigate(matches[0].href);
-    } else {
-      navigate(`/search?query=${encodeURIComponent(trimmed)}`);
-    }
-    setPrompt('');
-  };
-  const scrollToMarketplaces = () => {
-    const marketplacesSection = document.getElementById("marketplaces-section");
-    if (marketplacesSection) {
-      marketplacesSection.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
-  };
-  // Show suggestion pills with delay after focus
-  useEffect(() => {
-    let timer;
-    if (isSearchFocused) {
-      timer = setTimeout(() => {
-        setShowSuggestions(true);
-      }, 500);
-    } else {
-      setShowSuggestions(false);
-    }
-    return () => clearTimeout(timer);
-  }, [isSearchFocused]);
-  const suggestionPills = heroContent.suggestionPills;
   return (
     <div
       className="relative w-full bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 overflow-hidden"
@@ -106,7 +43,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
       ></div>
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible whitespace-nowrap">
             <AnimatedText text={heroContent.title} gap="1rem" />
           </h1>
           <FadeInUpOnScroll delay={0.8}>
@@ -115,79 +52,45 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
             </p>
           </FadeInUpOnScroll>
         </div>
-        {/* AI Prompt Interface with animation */}
+        {/* Coming Soon AI Search Bar */}
         <FadeInUpOnScroll delay={1.2} className="w-full max-w-3xl mb-10">
-          <div
-            className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 ${
-              isSearchFocused ? "shadow-xl transform scale-105" : ""
-            }`}
-          >
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            {/* Search input row */}
             <div className="p-2 md:p-3">
-              <form className="flex items-center" onSubmit={handleSubmit}>
+              <div className="flex items-center gap-2">
                 {/* Input field */}
                 <div className="flex-grow relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <Sparkles className="w-5 h-5 text-gray-300" />
+                  </div>
                   <input
                     type="text"
-                    placeholder="Find tools, policies, or service requests…"
-                    className={`w-full py-3 px-4 outline-none text-gray-700 rounded-lg bg-gray-50 transition-all duration-300 ${
-                      isSearchFocused ? 'bg-white' : ''
-                    }`}
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    onFocus={() => setIsSearchFocused(true)}
-                    onBlur={() =>
-                      setTimeout(() => setIsSearchFocused(false), 200)
+                    disabled
+                    placeholder={
+                      isAuthenticated
+                        ? `Hi ${user?.firstName ?? 'there'}, your AI assistant is coming soon...`
+                        : 'AI-powered search — coming soon...'
                     }
+                    className="w-full py-3 pl-12 pr-4 outline-none text-gray-400 rounded-lg bg-gray-50 cursor-not-allowed select-none"
                   />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                      {" "}Coming Soon
+                    </span>
+                  </div>
                 </div>
-                {/* Submit button */}
+                {/* Disabled submit button */}
                 <button
-                  type="submit"
-                  aria-label="Search"
-                  disabled={!prompt.trim()}
-                  className={`ml-2 p-3 rounded-lg flex items-center justify-center transition-all ${
-                    !prompt.trim()
-                      ? 'bg-gray-200 cursor-not-allowed text-gray-400'
-                      : 'bg-[image:var(--dq-cta-gradient)] hover:brightness-105 text-white'
-                  }`}
+                  type="button"
+                  disabled
+                  className="ml-1 p-3 rounded-lg bg-gray-100 cursor-not-allowed text-gray-300 flex items-center justify-center"
                 >
-                  <Send size={20} />
+                  <Lock className="w-5 h-5" />
                 </button>
-              </form>
-            </div>
-            {/* Example prompts with staggered animation */}
-            <div
-              className={`bg-gray-50 px-4 py-3 border-t border-gray-100 transition-all duration-500 ease-in-out ${
-                showSuggestions
-                  ? "opacity-100 max-h-24"
-                  : "opacity-0 max-h-0 overflow-hidden"
-              }`}
-            >
-              <p className="text-xs text-gray-500 mb-2">Try asking:</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestionPills.map((pill, index) => (
-                  <button
-                    key={index}
-                    className="text-xs bg-white border border-gray-200 rounded-full px-3 py-1 text-gray-600 hover:bg-gray-100 transition-colors"
-                    style={{
-                      opacity: showSuggestions ? 1 : 0,
-                      transform: showSuggestions
-                        ? "translateY(0)"
-                        : "translateY(10px)",
-                      transition:
-                        "opacity 0.3s ease-out, transform 0.3s ease-out",
-                      transitionDelay: `${0.1 + index * 0.1}s`,
-                    }}
-                    onClick={() => {
-                      setPrompt(pill);
-                      setIsSearchFocused(true);
-                    }}
-                  >
-                    {pill}
-                  </button>
-                ))}
               </div>
             </div>
+
           </div>
         </FadeInUpOnScroll>
         {/* Call to Action Buttons with animations */}
@@ -195,12 +98,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
           staggerDelay={0.2}
           className="flex flex-col sm:flex-row gap-4 mt-2"
         >
-          <Link
-            to={ctaHref}
+          <button
+            onClick={() => {
+              const section = document.getElementById('tools-resources-services');
+              section?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }}
             className="px-8 py-3 bg-[linear-gradient(135deg,_#FB5535_0%,_#1A2E6E_50%,_#030F35_100%)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group"
           >
             <span className="relative z-10">
-              Start Your Digital Workspace Journey
+              Browse Marketplaces
             </span>
             <ArrowRight
               size={18}
@@ -210,31 +119,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
             <span className="absolute inset-0 overflow-hidden rounded-lg">
               <span className="absolute inset-0 bg-white/20 transform scale-0 opacity-0 group-hover:scale-[2.5] group-hover:opacity-100 rounded-full transition-all duration-700 origin-center"></span>
             </span>
-          </Link>
+          </button>
           <Link
-            to="/scrum-master-space"
-            className="group px-8 py-3 rounded-lg border border-[#1A2E6E] bg-white text-[#1A2E6E] font-semibold shadow-lg inline-flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-[#1A2E6E] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#FB5535]"
+            to={ctaHref}
+            className="px-8 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center border-2 border-gray-200"
           >
-            Scrum Master Space
-            <Users
+            <span>Start Your Onboarding Journey</span>{' '}
+            <ArrowRight
               size={18}
-              className="text-[#1A2E6E] transition-colors duration-300 group-hover:text-white"
+              className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
             />
           </Link>
         </StaggeredFadeIn>
-      </div>
-      {/* Scroll indicator with animation */}
-      <div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer"
-        onClick={() => {
-          const nextSection = document.querySelector("main > div:nth-child(2)");
-          nextSection?.scrollIntoView({
-            behavior: "smooth",
-          });
-        }}
-      >
-        <ChevronDown size={24} className="text-white" />
-        <span className="sr-only">Scroll down</span>
       </div>
       {/* Add keyframes for gradient animation */}
       <style>{`
@@ -253,4 +149,5 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
     </div>
   );
 };
+
 export default HeroSection;

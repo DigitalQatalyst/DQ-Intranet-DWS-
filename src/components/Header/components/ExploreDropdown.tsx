@@ -26,10 +26,34 @@ const marketplaces: Marketplace[] = [
   {
     id: 'learning-center',
     name: 'DQ Learning Center',
-    description: 'Explore LMS courses, onboarding tracks, and learning resources across GHC, 6xD, DWS, and DXP.',
+    description: 'Designed for your continuous growth. Access the upskilling and certification tools you need to deliver excellence.',
     icon: GraduationCapIcon,
     href: '/lms',
-    isComingSoon: true,
+    isComingSoon: false,
+  },
+  {
+    id: 'news-center',
+    name: 'DQ Media Center',
+    description: 'Your starting point for news, stories, podcasts, and career opportunities at DQ.',
+    icon: NewspaperIcon,
+    href: '/marketplace/opportunities?tab=announcements',
+    isComingSoon: false,
+  },
+  {
+    id: 'knowledge-center',
+    name: 'DQ Knowledge Center',
+    description: 'The Knowledge Center is your starting point for understanding how DQ works and how to work effectively within it.',
+    icon: BookOpen,
+    href: '/marketplace/guides?tab=strategy&collapsed=guide_type%2Csub_domain%2Cunit%2Clocation%2Ctestimonial_category%2Cproduct_type%2Cproduct_stage%2Cguidelines_category%2Ccategorization%2Cattachments%2Cstrategy_framework%2Cglossary_knowledge_system%2Cglossary_ghc_dimension%2Cglossary_6xd_perspective%2Cglossary_letter%2Cfaq_category',
+    isComingSoon: false,
+  },
+  {
+    id: 'design-system',
+    name: 'Design System Marketplace',
+    description: 'Explore design system components, patterns, and resources for consistent digital experiences.',
+    icon: Layers,
+    href: '/marketplace/design-system',
+    isComingSoon: false,
   },
   {
     id: 'services-center',
@@ -37,6 +61,7 @@ const marketplaces: Marketplace[] = [
     description: 'Business services, technology services, and digital worker tools.',
     icon: BuildingIcon,
     href: '/marketplace/services-center',
+    isComingSoon: true,
   },
   {
     id: 'work-center',
@@ -55,33 +80,12 @@ const marketplaces: Marketplace[] = [
     isComingSoon: true,
   },
   {
-    id: 'news-center',
-    name: 'DQ Media Center',
-    description: 'View DQ updates, corporate news, blogs, job openings, and essential announcements.',
-    icon: NewspaperIcon,
-    href: '/marketplace/opportunities?tab=announcements',
-  },
-  {
     id: 'work-communities',
     name: 'DQ Work Communities',
     description: 'Discussion rooms, pulse updates, and events.',
     icon: SparklesIcon,
     href: '/dq-work-communities',
     isComingSoon: true,
-  },
-  {
-    id: 'knowledge-center',
-    name: 'DQ Knowledge Center',
-    description: 'Strategy guides, blueprints, libraries, and testimonials.',
-    icon: BookOpen,
-    href: '/marketplace/guides',
-  },
-  {
-    id: 'design-system',
-    name: 'Design System Marketplace',
-    description: 'Explore design system components, patterns, and resources (CI.DS, V.DS, CDS).',
-    icon: Layers,
-    href: '/marketplace/design-system',
   },
 ];
 
@@ -192,6 +196,12 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
           aria-orientation="vertical"
           aria-labelledby="explore-menu"
         >
+          <div className="px-4 py-2 border-b border-gray-100">
+            <h3 className="text-sm font-semibold text-dq-navy">Explore Marketplaces</h3>
+            <p className="text-xs text-dq-navy/70 mt-1 line-clamp-2">
+              Find tools and resources that help you work smarter.
+            </p>
+          </div>
           <div className="max-h-[480px] overflow-y-auto">
             {marketplaces.map((marketplace, index) => {
               const Icon = marketplace.icon;
