@@ -3,19 +3,20 @@ import React, { useEffect, useState } from 'react'
 interface SideNavProps {
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
+  guideHtml?: string
 }
 
-export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
+export function SideNav({ activeSection, onSectionClick, guideHtml }: SideNavProps) {
   const [currentSection, setCurrentSection] = useState(activeSection || '')
   const [sections, setSections] = useState<{ id: string; label: string }[]>([])
 
   // Extract H1 headings from the page
   useEffect(() => {
     const extractH1Sections = () => {
-      const h1Elements = document.querySelectorAll('.prose h1[id]')
+      const h1Elements = document.querySelectorAll('.guideline-body h1[id]')
       const extractedSections = Array.from(h1Elements).map((h1) => ({
         id: h1.getAttribute('id') || '',
-        label: h1.textContent || '',
+        label: h1.textContent?.replace(/^\s*\|\s*/, '').trim() || '',
       }))
       setSections(extractedSections)
       
@@ -26,9 +27,9 @@ export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
     }
 
     // Wait for content to be rendered
-    const timer = setTimeout(extractH1Sections, 200)
+    const timer = setTimeout(extractH1Sections, 300)
     return () => clearTimeout(timer)
-  }, [])
+  }, [guideHtml])
 
   useEffect(() => {
     if (sections.length === 0) return

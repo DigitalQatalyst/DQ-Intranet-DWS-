@@ -110,6 +110,9 @@ function GuidelinePage() {
             // Replace literal \n with actual line breaks
             let processedHtml = data.body.replaceAll('\\n', '\n')
             
+            // Strip leading pipe characters from headings (artifact from database content)
+            processedHtml = processedHtml.replace(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')
+            
             // Add IDs to headings for table of contents navigation
             processedHtml = addIdsToHeadings(processedHtml)
             console.log('🔧 [DATABASE] Added IDs to headings for navigation')
@@ -166,7 +169,7 @@ function GuidelinePage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Left Column - Sidebar Navigation */}
             <div className="lg:col-span-1">
-              <SideNav />
+              <SideNav guideHtml={guideHtml} />
             </div>
 
             {/* Right Column - Content Area */}
