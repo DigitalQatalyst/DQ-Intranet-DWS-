@@ -38,44 +38,43 @@ const queryClient = new QueryClient({
 const container = document.getElementById("root");
 if (container) {
   const root = createRoot(container);
-  msalInstance
-    .initialize()
-    .then(() => msalInstance.handleRedirectPromise())
-    .then((result) => {
-      if (result?.account) {
-        msalInstance.setActiveAccount(result.account);
-      } else {
-        const accounts = msalInstance.getAllAccounts();
-        if (accounts.length === 1) {
-          msalInstance.setActiveAccount(accounts[0]);
-        }
+
+  try {
+    await msalInstance.initialize();
+    const result = await msalInstance.handleRedirectPromise();
+
+    if (result?.account) {
+      msalInstance.setActiveAccount(result.account);
+    } else {
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts.length === 1) {
+        msalInstance.setActiveAccount(accounts[0]);
       }
-      try {
-        const isSignupState =
-          typeof result?.state === "string" &&
-          result.state.includes("ej-signup");
-        const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
-        const isNewUser =
-          claims.newUser === true ||
-          claims.newUser === "true";
-        if (isSignupState || isNewUser) {
-          globalThis.location.replace("/dashboard/onboarding");
-          return;
-        }
-      } catch (error) {
-        console.warn("Error processing authentication state:", error);
+    }
+
+    try {
+      const isSignupState =
+        typeof result?.state === "string" &&
+        result.state.includes("ej-signup");
+      const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
+      const isNewUser = claims.newUser === true || claims.newUser === "true";
+      if (isSignupState || isNewUser) {
+        globalThis.location.replace("/dashboard/onboarding");
       }
-      root.render(
-        <QueryClientProvider client={queryClient}>
-          <ApolloProvider client={client}>
-            <MsalProvider instance={msalInstance}>
-              <AppRouter />
-            </MsalProvider>
-          </ApolloProvider>
-        </QueryClientProvider>
-      );
-    })
-    .catch((e) => {
-      console.error("MSAL initialization failed:", e);
-    });
+    } catch (error) {
+      console.warn("Error processing authentication state:", error);
+    }
+  } catch (e) {
+    console.error("MSAL initialization failed:", e);
+  }
+
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <ApolloProvider client={client}>
+        <MsalProvider instance={msalInstance}>
+          <AppRouter />
+        </MsalProvider>
+      </ApolloProvider>
+    </QueryClientProvider>
+  );
 }
