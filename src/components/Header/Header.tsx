@@ -24,7 +24,7 @@ export function Header({
   const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
   const onboardingPath = '/onboarding/welcome';
 
@@ -55,7 +55,7 @@ export function Header({
       navigate(onboardingPath);
       return;
     }
-    navigate(`/signin?redirect=${encodeURIComponent(onboardingPath)}`);
+    login(onboardingPath);
   };
   const handleSignUp = () => console.log('Sign up clicked');
   const handleRequestSupport = () => {
