@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "./components/Header";
+import { RequireAuth } from "./components/RequireAuth";
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
 import { CommunitiesRouter } from "./communities/CommunitiesRouter";
 import { App } from './App';
@@ -37,6 +38,8 @@ import UnitProfilePage from "./pages/UnitProfilePage";
 import WorkPositionProfilePage from "./pages/WorkPositionProfilePage";
 import RoleProfilePage from "./pages/RoleProfilePage";
 import WomenEntrepreneursPage from "./pages/WomenEntrepreneursPage";
+import GHCLanding from "./pages/GHCLanding";
+import SixXDLanding from "./pages/6XDLanding";
 
 export function AppRouter() {
 
@@ -51,14 +54,19 @@ export function AppRouter() {
     <ApolloProvider client={client}>
       <BrowserRouter>
         <AuthProvider>
+          <RequireAuth>
           <DWSChatProvider>
             <Routes>
-            <Route path="/discover-dq" element={<DiscoverDQ />} />
+            <Route path="/discover-dq" element={<ComingSoonPage />} />
             <Route path="/coming-soon" element={<ComingSoonPage />} />
             <Route path="/growth-sectors-coming-soon" element={<GrowthSectorsComingSoon />} />
             <Route path="/products" element={<SixXDProductsLanding />} />
             <Route path="/dq-products" element={<SixXDProductsLanding />} />
             <Route path="/knowledge-center/products" element={<SixXDProductsLanding />} />
+            {/* Strategy pages - must be before the App catch-all */}
+            <Route path="/ghc" element={<GHCLanding />} />
+            <Route path="/6xd" element={<SixXDLanding />} />
+            <Route path="/6xd-products" element={<SixXDProductsLanding />} />
             <Route path="/*" element={<App />} />
             <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
             <Route path="/lms" element={<LmsCourses />} />
@@ -134,7 +142,7 @@ export function AppRouter() {
               element={<BlueprintsPage />}
             />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
-            <Route path="/discover-dq" element={<DiscoverDQ />} />
+            <Route path="/discover-dq" element={<ComingSoonPage />} />
             <Route path="/thank-you" element={<ThankYou />} />
             {/* Redirect encoded leading-space path to canonical route */}
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
@@ -154,6 +162,7 @@ export function AppRouter() {
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
           </DWSChatProvider>
+          </RequireAuth>
         </AuthProvider>
       </BrowserRouter>
     </ApolloProvider>
