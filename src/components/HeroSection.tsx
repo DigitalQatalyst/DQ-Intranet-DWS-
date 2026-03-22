@@ -19,12 +19,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
   const onboardingPath = "/onboarding/welcome";
   const navigate = useNavigate();
   const handleOnboardingCta = () => {
-    if (isAuthenticated) {
-      navigate(onboardingPath);
-      return;
-    }
-
-    login(onboardingPath);
+    navigate(onboardingPath);
   };
 
   return (
