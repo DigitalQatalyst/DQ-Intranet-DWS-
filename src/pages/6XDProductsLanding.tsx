@@ -393,7 +393,7 @@ export default function SixXDProductsLanding() {
                 className="!bg-white font-semibold !text-primary hover:!bg-white/90 rounded-xl"
                 asChild
               >
-                <a href="/marketplace/directory/products">
+                <a href="/marketplace/guides?tab=blueprints&collapsed=guide_type%2Csub_domain%2Cunit%2Clocation%2Ctestimonial_category%2Cproduct_type%2Cproduct_stage%2Cguidelines_category%2Ccategorization%2Cattachments%2Cstrategy_framework%2Cglossary_knowledge_system%2Cglossary_ghc_dimension%2Cglossary_6xd_perspective%2Cglossary_letter%2Cfaq_category">
                   Explore Product Marketplace
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
