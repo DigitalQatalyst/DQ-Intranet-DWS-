@@ -1,4 +1,4 @@
-export type MediaCenterTabKey = 'announcements' | 'insights' | 'opportunities';
+export type MediaCenterTabKey = 'announcements' | 'insights' | 'podcasts' | 'opportunities';
 
 export type FacetOption = string | { value: string; label: string; description?: string };
 

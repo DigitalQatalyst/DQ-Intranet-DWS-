@@ -4,6 +4,7 @@ import { Header } from '../../../components/Header'
 import { Footer } from '../../../components/Footer'
 import { useAuth } from '../../../components/Header/context/AuthContext'
 import { supabaseClient } from '../../../lib/supabaseClient'
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 import { VisionMissionHeroSection } from './VisionMissionHeroSection'
 import { VisionMissionSideNav } from './VisionMissionSideNav'
 import { GuidelineSection } from '../l24-working-rooms/GuidelineSection'
@@ -38,7 +39,7 @@ function VisionMissionPage() {
     let cancelled = false
     ;(async () => {
       try {
-        const { data: guideData, error } = await supabaseClient
+        const { data: guideData, error } = await knowledgeHubSupabase
           .from('guides')
           .select('domain, guide_type, last_updated_at')
           .eq('slug', currentSlug)
@@ -78,7 +79,7 @@ function VisionMissionPage() {
         let first: any[] = []
         
         if (currentGuide.domain) {
-          const { data: rows } = await supabaseClient
+          const { data: rows } = await knowledgeHubSupabase
             .from('guides')
             .select(selectCols)
             .eq('domain', currentGuide.domain)
@@ -94,7 +95,7 @@ function VisionMissionPage() {
         let results = first
         
         if ((results?.length || 0) < 6 && currentGuide.guideType) {
-          const { data: rows2 } = await supabaseClient
+          const { data: rows2 } = await knowledgeHubSupabase
             .from('guides')
             .select(selectCols)
             .eq('guide_type', currentGuide.guideType)

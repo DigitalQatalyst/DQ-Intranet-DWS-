@@ -1,31 +1,31 @@
 import * as React from 'react';
-import { ReactNode, ElementType } from 'react';
-import { DollarSign, Calendar, Clock, Users, MapPin, CheckCircle, BarChart, Award, FileText, Info, BookOpen, ClipboardList, Building, FileType, Bookmark, TrendingUp, Compass } from 'lucide-react';
+import { ReactNode } from 'react';
+import { DollarSign, Calendar, Clock, Users, MapPin, CheckCircle, BarChart, Award, FileText, Info, BookOpen, ClipboardList, Building, FileType, Bookmark, TrendingUp, Compass, Layers } from 'lucide-react';
 import { mockCourses, providers, mockOnboardingFlowsData } from './mockData';
 import { mockFinancialServices, mockNonFinancialServices, mockKnowledgeHubItems, mockKnowledgeHubFilterOptions } from './mockMarketplaceData';
 // Define a Tab type for consistency across marketplace pages
 export interface MarketplaceTab {
   id: string;
   label: string;
-  icon?: ElementType;
+  icon?: any;
   iconBgColor?: string;
   iconColor?: string;
-  renderContent?: (item: Record<string, unknown>, marketplaceType: string) => React.ReactNode;
+  renderContent?: (item: any, marketplaceType: string) => React.ReactNode;
 }
 // Configuration type definitions
 export interface AttributeConfig {
   key: string;
   label: string;
   icon: ReactNode;
-  formatter?: (value: unknown) => string;
+  formatter?: (value: any) => string;
 }
 export interface TabConfig {
   id: string;
   label: string;
-  icon?: ElementType;
+  icon?: any;
   iconBgColor?: string;
   iconColor?: string;
-  renderContent?: (item: Record<string, unknown>, marketplaceType: string) => React.ReactNode;
+  renderContent?: (item: any, marketplaceType: string) => React.ReactNode;
 }
 export interface FilterCategoryConfig {
   id: string;
@@ -50,14 +50,14 @@ export interface MarketplaceConfig {
   summarySticky?: boolean;
   filterCategories: FilterCategoryConfig[];
   // New fields for GraphQL integration
-  mapListResponse?: (data: Record<string, any>[]) => Record<string, any>[];
-  mapDetailResponse?: (data: Record<string, any>) => Record<string, any>;
-  mapFilterResponse?: (data: Record<string, any>) => FilterCategoryConfig[];
+  mapListResponse?: (data: any[]) => any[];
+  mapDetailResponse?: (data: any) => any;
+  mapFilterResponse?: (data: any) => FilterCategoryConfig[];
   // Mock data for fallback and schema reference
   mockData?: {
-    items: unknown[];
-    filterOptions: Record<string, unknown>;
-    providers: unknown[];
+    items: any[];
+    filterOptions: any;
+    providers: any[];
   };
 }
 // Mock data for financial services
@@ -228,7 +228,7 @@ const knowledgeHubBaseConfig: MarketplaceConfig = {
     options: [{ id: 'latest', name: 'Latest' }, { id: 'trending', name: 'Trending' }, { id: 'downloaded', name: 'Most Downloaded' }, { id: 'editors', name: "Editor's Pick" }]
   }],
   mapListResponse: data => {
-    return data.map((item: Record<string, unknown>) => ({
+    return data.map((item: any) => ({
       ...item,
       tags: item.tags || [item.mediaType, item.domain].filter(Boolean)
     }));
@@ -384,7 +384,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
       }]
     }],
     mapListResponse: data => {
-      return data.map((item: Record<string, unknown>) => ({
+      return data.map((item: any) => ({
         ...item,
         tags: item.tags || [item.category || item.journeyPhase, item.deliveryMode].filter(Boolean)
       }));
@@ -603,7 +603,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     }],
     // Data mapping functions
     mapListResponse: data => {
-      return data.map((item: Record<string, unknown>) => ({
+      return data.map((item: any) => ({
         ...item,
         // Transform any fields if needed
         tags: item.tags || [item.category, item.deliveryMode].filter(Boolean)
@@ -716,7 +716,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     }],
     // Data mapping functions
     mapListResponse: data => {
-      return data.map((item: Record<string, unknown>) => ({
+      return data.map((item: any) => ({
         ...item,
         // Transform any fields if needed
         tags: item.tags || [item.category].filter(Boolean)
@@ -854,7 +854,7 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     }],
     // Data mapping functions
     mapListResponse: data => {
-      return data.map((item: Record<string, unknown>) => ({
+      return data.map((item: any) => ({
         ...item,
         // Transform any fields if needed
         tags: item.tags || [item.category, item.deliveryMode].filter(Boolean)
@@ -896,7 +896,92 @@ export const marketplaceConfig: Record<string, MarketplaceConfig> = {
     id: 'guides',
     route: '/marketplace/guides',
     title: 'DQ Knowledge Center',
-    description: 'Access practical guidelines, templates, and processes to support everyday delivery and collaboration.'
+    description: 'The Knowledge Center is your starting point for understanding how DQ works and how to work effectively within it.'
+  },
+  'design-system': {
+    id: 'design-system',
+    title: 'Design System Marketplace',
+    description: 'Explore design system components, patterns, and resources for consistent digital experiences.',
+    route: '/marketplace/design-system',
+    primaryCTA: 'Access Now',
+    secondaryCTA: 'View Details',
+    itemName: 'Design System',
+    itemNamePlural: 'Design Systems',
+    attributes: [{
+      key: 'type',
+      label: 'Type',
+      icon: React.createElement(Layers, { size: 18, className: "mr-2" })
+    }, {
+      key: 'category',
+      label: 'Category',
+      icon: React.createElement(Bookmark, { size: 18, className: "mr-2" })
+    }, {
+      key: 'version',
+      label: 'Version',
+      icon: React.createElement(FileText, { size: 18, className: "mr-2" })
+    }],
+    detailSections: ['description', 'components', 'resources', 'related'],
+    tabs: [{
+      id: 'about',
+      label: 'About This Design System',
+      icon: Info,
+      iconBgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600'
+    }, {
+      id: 'components',
+      label: 'Components',
+      icon: Layers,
+      iconBgColor: 'bg-green-50',
+      iconColor: 'text-green-600'
+    }, {
+      id: 'resources',
+      label: 'Resources',
+      icon: BookOpen,
+      iconBgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600'
+    }],
+    summarySticky: true,
+    filterCategories: [{
+      id: 'cids',
+      title: 'CI.DS',
+      options: [
+        { id: 'cids-framework', name: 'CI.DS Framework' },
+        { id: 'cids-lifecycle', name: 'CI.DS Lifecycle' },
+        { id: 'cids-template', name: 'CI.DS Template' }
+      ]
+    }, {
+      id: 'vds',
+      title: 'V.DS',
+      options: [
+        { id: 'vds-framework', name: 'V.DS Framework' },
+        { id: 'vds-lifecycle', name: 'V.DS Lifecycle' },
+        { id: 'vds-template', name: 'V.DS Template' }
+      ]
+    }, {
+      id: 'cds',
+      title: 'CDS',
+      options: [
+        { id: 'cds-framework', name: 'CDS Framework' },
+        { id: 'cds-lifecycle', name: 'CDS Lifecycle' },
+        { id: 'cds-template', name: 'CDS Template' }
+      ]
+    }, {
+      id: 'location',
+      title: 'Location',
+      options: [
+        { id: 'DXB', name: 'DXB' },
+        { id: 'KSA', name: 'KSA' },
+        { id: 'NBO', name: 'NBO' }
+      ]
+    }],
+    mapListResponse: data => data,
+    mapDetailResponse: data => data,
+    mapFilterResponse: data => [],
+    mockData: {
+      items: [],
+      filterOptions: {},
+      providers: []
+    }
   }
 };
 // Helper to get config by marketplace type
@@ -1209,3 +1294,72 @@ export const getTabSpecificFilters = (tabId?: string): FilterCategoryConfig[] =>
     ]
   };
 */
+
+
+// Tab-specific filters for Design System
+export const getDesignSystemTabSpecificFilters = (tabId?: string): FilterCategoryConfig[] => {
+  const locationFilter: FilterCategoryConfig = {
+    id: 'location',
+    title: 'Location',
+    options: [
+      { id: 'DXB', name: 'DXB' },
+      { id: 'KSA', name: 'KSA' },
+      { id: 'NBO', name: 'NBO' }
+    ]
+  };
+
+  if (tabId === 'cids') {
+    return [
+      {
+        id: 'cids',
+        title: 'CI.DS',
+        options: [
+          { id: 'cids-framework', name: 'CI.DS Framework' },
+          { id: 'cids-lifecycle', name: 'CI.DS Lifecycle' },
+          { id: 'cids-template', name: 'CI.DS Template' }
+        ]
+      },
+      locationFilter
+    ];
+  } else if (tabId === 'vds') {
+    return [
+      {
+        id: 'vds',
+        title: 'V.DS',
+        options: [
+          { id: 'vds-framework', name: 'V.DS Framework' },
+          { id: 'vds-lifecycle', name: 'V.DS Lifecycle' },
+          { id: 'vds-template', name: 'V.DS Template' }
+        ]
+      },
+      locationFilter
+    ];
+  } else if (tabId === 'cds') {
+    return [
+      {
+        id: 'cds',
+        title: 'CDS',
+        options: [
+          { id: 'cds-framework', name: 'CDS Framework' },
+          { id: 'cds-lifecycle', name: 'CDS Lifecycle' },
+          { id: 'cds-template', name: 'CDS Template' }
+        ]
+      },
+      locationFilter
+    ];
+  }
+
+  // Default: return all filters
+  return [
+    {
+      id: 'cids',
+      title: 'CI.DS',
+      options: [
+        { id: 'cids-framework', name: 'CI.DS Framework' },
+        { id: 'cids-lifecycle', name: 'CI.DS Lifecycle' },
+        { id: 'cids-template', name: 'CI.DS Template' }
+      ]
+    },
+    locationFilter
+  ];
+};

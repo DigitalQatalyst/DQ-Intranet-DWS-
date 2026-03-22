@@ -5,20 +5,20 @@ import { SubmittedReports } from './SubmittedReports';
 import { ReceivedReports } from './ReceivedReports';
 import { DocumentWalletPanel } from './DocumentWalletPanel';
 import { mockReportData } from './mockReportsData';
-import { ChevronRightIcon, FilterIcon } from 'lucide-react';
+import { HomeIcon, ChevronRightIcon, FilterIcon } from 'lucide-react';
 import { ServiceRequestsFilters } from '../../../components/ServiceRequestsFilters';
 export function ReportsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [reportData, setReportData] = useState(null);
-    const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>({
+    const [dateRange, setDateRange] = useState({
         startDate: null,
         endDate: null,
     });
     const [reportTypeFilter, setReportTypeFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [showFilters, setShowFilters] = useState(false);
-    const [_sidebarOpen, _setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     // Fetch report data
     useEffect(() => {
         const fetchData = async () => {
@@ -40,7 +40,7 @@ export function ReportsPage() {
     // Breadcrumbs component
 
     // Filter controls
-    const _FilterControls = () => (
+    const FilterControls = () => (
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 col-span-12">
             <div className="flex flex-col space-y-4">
                 <button
@@ -76,7 +76,7 @@ export function ReportsPage() {
                                 searchQuery={searchQuery}
                                 onSearchChange={setSearchQuery}
                                 dateRange={dateRange}
-                                onDateRangeChange={setDateRange}
+                                onDateRangeChange={setDateRange as any}
                             />
                         </div>
                     </div>

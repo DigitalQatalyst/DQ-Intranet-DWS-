@@ -15,7 +15,6 @@ import { MediaUploader } from '@/communities/components/post/MediaUploader';
 import { Calendar, Image as ImageIcon, Link as LinkIcon, Eye, Send, X, MapPin, Tag, FileText, Lightbulb, Plus, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { sanitizeHtml } from '@/utils/sanitizeHtml';
 type PostType = 'text' | 'media' | 'poll' | 'event';
 interface Community {
   id: string;
@@ -718,7 +717,7 @@ export default function CreatePost() {
                       </div>}
                     
                     {contentHtml ? <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{
-                  __html: sanitizeHtml(contentHtml)
+                  __html: contentHtml
                 }} /> : <p className="text-sm text-gray-500">No content yet...</p>}
                     
                     {postType === 'media' && uploadedFiles.length > 0 && <div className="mt-4 space-y-2">

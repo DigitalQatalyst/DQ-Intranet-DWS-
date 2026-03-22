@@ -16,7 +16,7 @@ const GlossaryBrowsePage: React.FC = () => {
   // Get all available letters
   const allLetters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
   const lettersWithTerms = useMemo(() => {
-    return Array.from(new Set(glossaryTerms.map(t => t.term.charAt(0).toUpperCase()))).sort()
+    return Array.from(new Set(glossaryTerms.map(t => t.term.charAt(0).toUpperCase()))).sort((a, b) => a.localeCompare(b))
   }, [])
 
   // Filter terms based on selected GHC dimensions, A–Z letter, and search
@@ -68,7 +68,7 @@ const GlossaryBrowsePage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white guidelines-theme">
-      <Header toggleSidebar={() => undefined} sidebarOpen={false} />
+      <Header toggleSidebar={() => {}} sidebarOpen={false} />
       <main className="container mx-auto px-4 py-8 flex-grow max-w-7xl">
         {/* Breadcrumbs */}
         <nav className="flex mb-6" aria-label="Breadcrumb">

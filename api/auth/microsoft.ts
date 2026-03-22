@@ -1,20 +1,10 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import crypto from "crypto";
 
-const getEnv = (key: string): string | null => {
-  const value = process.env[key];
-  return value && value.length > 0 ? value : null;
-};
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const tenant = getEnv("AZURE_AD_TENANT_ID");
-  const clientId = getEnv("AZURE_AD_CLIENT_ID");
-  const redirectUri = getEnv("OAUTH_REDIRECT_URL");
-
-  if (!tenant || !clientId || !redirectUri) {
-    res.status(500).json({ error: "Missing Azure AD environment configuration" });
-    return;
-  }
+  const tenant = process.env.AZURE_AD_TENANT_ID!;
+  const clientId = process.env.AZURE_AD_CLIENT_ID!;
+  const redirectUri = process.env.OAUTH_REDIRECT_URL!;
   const authorize = `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize`;
 
   const state = crypto.randomBytes(16).toString("hex");

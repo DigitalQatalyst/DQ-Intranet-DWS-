@@ -16,8 +16,8 @@ import type {
  */
 export async function fetchNewsArticles(
   filters: NewsFilters = {},
-  page = 1,
-  limit = 12
+  page: number = 1,
+  limit: number = 12
 ): Promise<NewsListResponse> {
   let query = supabase
     .from('news_articles_with_details')
@@ -134,7 +134,7 @@ export async function incrementArticleViews(articleId: string): Promise<void> {
 export async function fetchRelatedArticles(
   articleId: string,
   categoryId?: string,
-  limit = 3
+  limit: number = 3
 ): Promise<NewsArticleWithDetails[]> {
   let query = supabase
     .from('news_articles_with_details')

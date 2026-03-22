@@ -1,5 +1,7 @@
+import { Sidebar, HomeIcon, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
-import { AuthProvider } from '../../../components/Header';
+import { Footer } from '../../../components/Footer';
+import { AuthProvider, Header } from '../../../components/Header';
 import { PageLayout, PageSection, SectionHeader, SectionContent } from '../../../components/PageLayout';
 import IntegrationsBillingTab from '../../../components/settings/IntegrationsBillingTab';
 import PreferencesNotificationsTab from '../../../components/settings/PreferencesNotificationsTab';
@@ -7,7 +9,7 @@ import SecurityComplianceTab from '../../../components/settings/SecurityComplian
 import UserRolesTab from '../../../components/settings/UserRolesTab';
 
 export default function SettingsPage() {
-    const [_sidebarOpen, _setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeTabIndex, setActiveTabIndex] = useState(0);
     const tabs = [{
         id: 'users-roles',

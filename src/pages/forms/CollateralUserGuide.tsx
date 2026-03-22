@@ -4,13 +4,13 @@ import { collateralGuideSchema } from "../../components/Forms/form-schemas/Colla
 
 
 function BookConsultationForEntrepreneurship() {
-  const [formData, setFormData] = useState<Record<string, unknown>>({});
+  const [formData, setFormData] = useState<any>({});
 
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: any) => {
     console.log("Form submitted:", data);
     alert("Form submitted successfully!");
   };
-  const handleSave = async (data: Record<string, unknown>) => {
+  const handleSave = async (data: any) => {
     console.log("Form saved:", data);
     setFormData(data);
     alert("Form saved successfully!");

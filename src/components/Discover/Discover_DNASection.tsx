@@ -3,6 +3,8 @@ import { DiscoverSectionTitle } from "./DiscoverSectionTitle";
 import { fetchDna, DqDnaNode, DqDnaCallout } from "../../services/dq";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import { supabaseClient } from "../../lib/supabaseClient";
+import { knowledgeHubSupabase } from '../../services/knowledgeHubClient'
 
 /* ===== PIXEL-PERFECT CONSTANTS ===== */
 const NAVY = "#162862"; // Exact navy from image
@@ -179,7 +181,7 @@ const GROWTH_DIMENSIONS_CONTENT: Record<number, GrowthDimensionContent> = {
     },
     secondaryCTA: {
       label: "Explore Products in Knowledge Center",
-      href: "/knowledge-center/products",
+      href: "/products",
     },
   },
 };
@@ -599,15 +601,59 @@ function DimensionModal({ dimension, isOpen, onClose, onNavigate }: DimensionMod
   );
 }
 
-function Discover_DNASection(_props: Discover_DNASectionProps) {
+// Map GHC guide slugs to DNA node IDs
+const GHC_SLUG_TO_NODE_ID: Record<string, number> = {
+  'dq-vision': 1,
+  'dq-hov': 2,
+  'dq-persona': 3,
+  'dq-agile-tms': 4,
+  'dq-agile-sos': 5,
+  'dq-agile-flows': 6,
+  'dq-agile-6xd': 7,
+};
+
+const GHC_SLUGS = ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'];
+
+function Discover_DNASection({}: Discover_DNASectionProps) {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [nodesDb, setNodesDb] = useState<DqDnaNode[] | null>(null);
   const [calloutsDb, setCalloutsDb] = useState<DqDnaCallout[] | null>(null);
+  const [ghcGuides, setGhcGuides] = useState<Record<string, any>>({});
   const [hasAnimated, setHasAnimated] = useState(false);
   const [selectedDimension, setSelectedDimension] = useState<GrowthDimensionContent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
+
+  // Fetch GHC guides from Supabase
+  useEffect(() => {
+    async function fetchGHCGuides() {
+      try {
+        const { data, error } = await knowledgeHubSupabase
+          .from('guides')
+          .select('slug, title, summary, body, hero_image_url')
+          .in('slug', GHC_SLUGS)
+          .eq('status', 'Approved');
+        
+        if (error) {
+          console.error('Error fetching GHC guides:', error);
+          return;
+        }
+        
+        if (data) {
+          const guidesMap: Record<string, any> = {};
+          data.forEach(guide => {
+            guidesMap[guide.slug] = guide;
+          });
+          setGhcGuides(guidesMap);
+        }
+      } catch (err) {
+        console.error('Error fetching GHC guides:', err);
+      }
+    }
+    
+    fetchGHCGuides();
+  }, []);
 
   useEffect(() => {
     fetchDna()
@@ -642,22 +688,59 @@ function Discover_DNASection(_props: Discover_DNASectionProps) {
   }, [hasAnimated]);
 
   const nodes: Node[] = nodesDb
-    ? nodesDb.map((n) => ({
-        id: n.id,
-        role: n.role as Role,
-        title: n.title,
-        subtitle: n.subtitle,
-        fill: n.fill === "navy" ? "navy" : "outline",
-      }))
-    : NODES;
+    ? nodesDb.map((n) => {
+        // Try to get title from Supabase guide if available
+        const slug = Object.entries(GHC_SLUG_TO_NODE_ID).find(([_, id]) => id === n.id)?.[0];
+        const guide = slug ? ghcGuides[slug] : null;
+        
+        return {
+          id: n.id,
+          role: n.role as Role,
+          title: guide?.title || n.title,
+          subtitle: n.subtitle,
+          fill: n.fill === "navy" ? "navy" : "outline",
+        };
+      })
+    : NODES.map((n) => {
+        // Try to get title from Supabase guide if available
+        const slug = Object.entries(GHC_SLUG_TO_NODE_ID).find(([_, id]) => id === n.id)?.[0];
+        const guide = slug ? ghcGuides[slug] : null;
+        
+        return {
+          ...n,
+          title: guide?.title || n.title,
+        };
+      });
 
   const callouts = calloutsDb ?? CALLOUTS;
 
   const handleHexClick = (nodeId: number) => {
-    const dimension = GROWTH_DIMENSIONS_CONTENT[nodeId];
-    if (dimension) {
+    // Try to get data from Supabase guides first, fallback to hardcoded
+    const slug = Object.entries(GHC_SLUG_TO_NODE_ID).find(([_, id]) => id === nodeId)?.[0];
+    const guide = slug ? ghcGuides[slug] : null;
+    
+    if (guide) {
+      // Use data from Supabase
+      const dimension: GrowthDimensionContent = {
+        id: nodeId,
+        title: guide.title || GROWTH_DIMENSIONS_CONTENT[nodeId]?.title || '',
+        subtitle: GROWTH_DIMENSIONS_CONTENT[nodeId]?.subtitle || '',
+        description: guide.summary || guide.body?.substring(0, 300) || GROWTH_DIMENSIONS_CONTENT[nodeId]?.description || '',
+        primaryCTA: GROWTH_DIMENSIONS_CONTENT[nodeId]?.primaryCTA || { label: 'Read More', href: '#' },
+        secondaryCTA: {
+          label: 'View in Knowledge Center',
+          href: `/marketplace/guides/${slug}`,
+        },
+      };
       setSelectedDimension(dimension);
       setIsModalOpen(true);
+    } else {
+      // Fallback to hardcoded content
+      const dimension = GROWTH_DIMENSIONS_CONTENT[nodeId];
+      if (dimension) {
+        setSelectedDimension(dimension);
+        setIsModalOpen(true);
+      }
     }
   };
 

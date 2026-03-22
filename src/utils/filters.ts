@@ -84,7 +84,7 @@ export const filterCourses = (items: LmsCard[], f: Facets): LmsCard[] =>
       // Location: treat empty as "Global"
       hasAny(it.locations?.length ? it.locations.map(l => l.toLowerCase()) : ["global"], lowerArray(f.location)) &&
       hasAny(it.audience?.map(lower), lowerArray(f.audience)) &&
-      hasAny((it as Record<string, unknown>).department ? ((it as Record<string, unknown>).department as string[]).map(lower) : undefined, lowerArray(f.dept)) &&
+      hasAny((it as any).department?.map(lower), lowerArray(f.dept)) &&
       inOne(lower(it.status), lowerArray(f.status))
     );
   });

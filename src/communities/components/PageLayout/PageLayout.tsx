@@ -135,7 +135,7 @@ export function PageLayout({
     segments.forEach((seg, idx) => {
       cumulative += `/${seg}`;
       const isLast = idx === segments.length - 1;
-      const isIdLike = /^(\d+|[a-f0-9-]{6,})$/i.test(seg);
+      const isIdLike = /^(\d+|[a-f0-9\-]{6,})$/i.test(seg);
       const label = labelMap[seg] || (isIdLike ? seg : (seg.charAt(0).toUpperCase() + seg.slice(1)));
       parts.push({ label, href: isLast ? undefined : cumulative, current: isLast });
     });

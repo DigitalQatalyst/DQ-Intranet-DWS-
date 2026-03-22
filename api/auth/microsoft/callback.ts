@@ -16,17 +16,13 @@ function parseCookies(header?: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { code, error, error_description } = req.query as Record<string, string | undefined>;
+  const { code, state: _state, error, error_description } = req.query as Record<string, string | undefined>;
   if (error) return res.status(400).send(`Microsoft OAuth error: ${error_description || error}`);
 
-  const tenant = process.env.AZURE_AD_TENANT_ID;
-  const clientId = process.env.AZURE_AD_CLIENT_ID;
-  const clientSecret = process.env.AZURE_AD_CLIENT_SECRET;
-  const redirectUri = process.env.OAUTH_REDIRECT_URL;
-
-  if (!tenant || !clientId || !clientSecret || !redirectUri) {
-    return res.status(500).send("Missing Azure AD environment configuration");
-  }
+  const tenant = process.env.AZURE_AD_TENANT_ID!;
+  const clientId = process.env.AZURE_AD_CLIENT_ID!;
+  const clientSecret = process.env.AZURE_AD_CLIENT_SECRET!;
+  const redirectUri = process.env.OAUTH_REDIRECT_URL!;
 
   // Exchange code for tokens
   const tokenEndpoint = `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`;
@@ -62,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const target =
     typeof preferredRedirect === "string" && preferredRedirect.startsWith("/")
       ? preferredRedirect
-      : "/onboarding/start";
+      : "/onboarding/welcome";
 
   res.setHeader("Set-Cookie", [
     "ms_state=; Path=/; Max-Age=0",

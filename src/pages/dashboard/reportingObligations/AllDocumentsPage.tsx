@@ -4,6 +4,7 @@ import { Sidebar } from '../AppSidebar';
 import { ServiceRequestsFilters } from '../ServiceRequestsFilters';
 import { mockReportData } from './mockReportsData';
 import {
+    HomeIcon,
     ChevronRightIcon,
     EyeIcon,
     DownloadIcon,
@@ -85,7 +86,7 @@ export function AllDocumentsPage() {
     );
     const totalPages = Math.ceil(filteredDocuments.length / documentsPerPage);
     // File type icon
-    const getFileTypeIcon = (_fileType: string) => {
+    const getFileTypeIcon = (fileType) => {
         return <FileTextIcon size={16} className="text-gray-400" />;
     };
     // Breadcrumbs

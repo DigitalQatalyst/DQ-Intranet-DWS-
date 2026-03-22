@@ -18,13 +18,13 @@ const perspectiveRoutes: Record<Perspective['illustration'], string> = {
 };
 
 type SixPerspectivesCarouselProps = {
-  readonly id?: string;
-  readonly badge?: string;
-  readonly title: string;
-  readonly subtitle: string;
-  readonly titleFontSize?: string;
-  readonly subtitleFontSize?: string;
-  readonly perspectives?: Perspective[];
+  id?: string;
+  badge?: string;
+  title: string;
+  subtitle: string;
+  titleFontSize?: string;
+  subtitleFontSize?: string;
+  perspectives?: Perspective[];
 };
 
 export default function SixPerspectivesCarousel({
@@ -62,10 +62,10 @@ export default function SixPerspectivesCarousel({
   useEffect(() => {
     if (!emblaApi) return;
     if (isPaused) return;
-    const timerId = globalThis.setInterval(() => {
+    const id = window.setInterval(() => {
       emblaApi.scrollNext();
     }, AUTO_ROTATE_MS);
-    return () => globalThis.clearInterval(timerId);
+    return () => window.clearInterval(id);
   }, [emblaApi, isPaused]);
 
   const scrollTo = useCallback(
@@ -111,11 +111,6 @@ export default function SixPerspectivesCarousel({
             className="mt-10 grid grid-cols-1 lg:grid-cols-[34%_66%] gap-8 lg:gap-10 items-start"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            onFocus={() => setIsPaused(true)}
-            onBlur={() => setIsPaused(false)}
-            role="group"
-            tabIndex={0}
-            aria-label="Perspective carousel"
           >
             <PerspectiveNav
               perspectives={perspectives}
@@ -145,18 +140,18 @@ export default function SixPerspectivesCarousel({
               {/* Dot indicators (mobile) */}
               {scrollSnaps.length > 1 ? (
                 <div className="flex justify-center gap-2 mt-5 lg:hidden" aria-label="Perspective progress">
-                  {scrollSnaps.map((snap) => (
+                  {scrollSnaps.map((_, i) => (
                     <button
-                      key={`dot-${snap}`}
+                      key={i}
                       type="button"
-                      onClick={() => scrollTo(scrollSnaps.indexOf(snap))}
+                      onClick={() => scrollTo(i)}
                       className={[
                         'transition-all duration-300 rounded-full',
-                        scrollSnaps.indexOf(snap) === selectedIndex
+                        i === selectedIndex
                           ? 'w-6 h-2 bg-[hsl(var(--accent))]'
                           : 'w-2 h-2 bg-[#131e42]/40 hover:bg-[#131e42]/60',
                       ].join(' ')}
-                      aria-label={`Go to perspective ${scrollSnaps.indexOf(snap) + 1}`}
+                      aria-label={`Go to perspective ${i + 1}`}
                     />
                   ))}
                 </div>
@@ -168,3 +163,4 @@ export default function SixPerspectivesCarousel({
     </section>
   );
 }
+

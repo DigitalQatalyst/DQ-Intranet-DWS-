@@ -69,7 +69,11 @@ const JobApplicationPage: React.FC = () => {
             <p className="mb-4 text-sm text-red-600">{loadError}</p>
           )}
           <button
-            onClick={() => navigate(`/marketplace/opportunities${location.search || '?tab=opportunities'}`)}
+            onClick={() => {
+              const params = new URLSearchParams(location.search);
+              const tab = params.get('tab') || 'opportunities';
+              navigate(`/marketplace/opportunities?tab=${tab}`);
+            }}
             className="rounded-lg bg-[#030f35] px-6 py-3 text-sm font-semibold text-white"
           >
             Back to Opportunities
@@ -145,7 +149,11 @@ const JobApplicationPage: React.FC = () => {
                 DQ Media Center
               </Link>
               <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
-              <Link to={`/marketplace/opportunities${location.search || ''}`} className="hover:text-[#1A2E6E]">
+              <Link to={(() => {
+                const params = new URLSearchParams(location.search);
+                const tab = params.get('tab') || 'opportunities';
+                return `/marketplace/opportunities?tab=${tab}`;
+              })()} className="hover:text-[#1A2E6E]">
                 Opportunities &amp; Openings
               </Link>
               <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
@@ -308,8 +316,9 @@ const JobApplicationPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        const tab = (location.state as { tab?: string } | null)?.tab || 'opportunities';
-                        navigate(`/marketplace/opportunities/${job.id}`, { state: { tab } });
+                        const params = new URLSearchParams(location.search);
+                        const tab = params.get('tab') || 'opportunities';
+                        navigate(`/marketplace/opportunities/${job.id}?tab=${tab}`);
                       }}
                       disabled={isSubmitting}
                       className="inline-flex flex-1 items-center justify-center rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-70"

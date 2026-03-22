@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Search, ChevronDown, ChevronUp } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 interface FAQ {
   id: string
@@ -131,10 +131,31 @@ const FAQS_DATA: FAQ[] = [
   }
 ]
 
-const FAQsPageContent: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+const FAQ_CATEGORY_LABELS: Record<string, string> = {
+  'dt2.0': 'DT2.0',
+  'general': 'General',
+  'process': 'Process',
+  'resources': 'Resources'
+}
+
+interface FAQsPageContentProps {
+  categoryFilter?: string | null
+}
+
+const FAQsPageContent: React.FC<FAQsPageContentProps> = ({ categoryFilter }) => {
+  const [searchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryFilter ?? null)
   const [openFAQs, setOpenFAQs] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (typeof categoryFilter === 'undefined') return
+    if (!categoryFilter) {
+      setSelectedCategory(null)
+      return
+    }
+    const normalized = FAQ_CATEGORY_LABELS[categoryFilter.toLowerCase()] || null
+    setSelectedCategory(normalized)
+  }, [categoryFilter])
 
   const toggleFAQ = (id: string) => {
     setOpenFAQs(prev => {
@@ -157,62 +178,8 @@ const FAQsPageContent: React.FC = () => {
     return matchesSearch && matchesCategory
   })
 
-  // Get all available categories
-  const categories = Array.from(new Set(FAQS_DATA.map(faq => faq.category))).sort()
-
   return (
     <div>
-      {/* Main Title - Centered */}
-      <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          The DQ FAQs
-        </h1>
-        <p className="text-base text-gray-800 max-w-3xl mx-auto leading-relaxed">
-          Frequently asked questions about DQ processes, tools, workflows, and best practices with detailed answers and guidance.
-        </p>
-      </div>
-
-      {/* Search Bar */}
-      <div className="mb-6 max-w-2xl mx-auto">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Search FAQs..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-primary)]"
-          />
-        </div>
-      </div>
-
-      {/* Category Navigation - Theme colors */}
-      <div className="mb-8 flex flex-wrap justify-center gap-2">
-        <button
-          onClick={() => setSelectedCategory(null)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-            selectedCategory === null
-              ? 'bg-[var(--guidelines-primary-surface)] border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
-              : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          All
-        </button>
-        {categories.map(category => (
-          <button
-            key={category}
-            onClick={() => setSelectedCategory(category)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-              selectedCategory === category
-                ? 'bg-[var(--guidelines-primary-surface)] border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
-                : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-
       {/* FAQs Content - Card sections */}
       <div className="bg-white">
         {filteredFAQs.length === 0 ? (
@@ -221,12 +188,12 @@ const FAQsPageContent: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredFAQs.map((faq) => {
+            {filteredFAQs.map((faq, idx) => {
               const isOpen = openFAQs.has(faq.id)
               return (
                 <div 
                   key={faq.id} 
-                  className="bg-slate-50 rounded-lg border border-gray-200 shadow-sm overflow-hidden"
+                  className={`bg-slate-50 rounded-lg border border-gray-200 shadow-sm overflow-hidden ${idx > 0 ? 'border-t border-gray-200' : ''}`}
                 >
                   {/* Question - Clickable header */}
                   <button
@@ -234,7 +201,7 @@ const FAQsPageContent: React.FC = () => {
                     className="w-full text-left p-6 flex items-start justify-between hover:bg-slate-100 transition-colors"
                     aria-expanded={isOpen}
                   >
-                    <h3 className="text-lg font-bold text-[var(--guidelines-primary)] pr-4 flex-1">
+                    <h3 className="text-base font-semibold leading-snug text-[var(--guidelines-primary)] pr-4 flex-1">
                       {faq.question}
                     </h3>
                     {isOpen ? (

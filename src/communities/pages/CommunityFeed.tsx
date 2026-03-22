@@ -43,8 +43,8 @@ export default function CommunityFeed() {
   const [myLoading, setMyLoading] = useState(false);
   const [globalLoading, setGlobalLoading] = useState(false);
   const [trendingLoading, setTrendingLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('my_communities');
-  const [currentSort, setCurrentSort] = useState('recent');
+  const [activeTab, setActiveTab] = useState<string>('my_communities');
+  const [currentSort, setCurrentSort] = useState<string>('recent');
   const filterTag = searchParams.get('tag');
   useEffect(() => {
     if (!loading && !user) {
@@ -58,7 +58,7 @@ export default function CommunityFeed() {
       fetchTrendingPosts(currentSort, 0);
     }
   }, [user, filterTag]);
-  const fetchMyPosts = async (sortBy = 'recent', offset = 0) => {
+  const fetchMyPosts = async (sortBy: string = 'recent', offset: number = 0) => {
     if (!user) return;
     setMyLoading(true);
     // Build query - moderators/admins see all posts, regular users see only active
@@ -95,7 +95,7 @@ export default function CommunityFeed() {
     }
     setMyLoading(false);
   };
-  const fetchGlobalPosts = async (sortBy = 'recent', offset = 0) => {
+  const fetchGlobalPosts = async (sortBy: string = 'recent', offset: number = 0) => {
     if (!user) return;
     setGlobalLoading(true);
     // Build query - moderators/admins see all posts, regular users see only active
@@ -132,7 +132,7 @@ export default function CommunityFeed() {
     }
     setGlobalLoading(false);
   };
-  const fetchTrendingPosts = async (sortBy = 'recent', offset = 0) => {
+  const fetchTrendingPosts = async (sortBy: string = 'recent', offset: number = 0) => {
     setTrendingLoading(true);
     const {
       data,

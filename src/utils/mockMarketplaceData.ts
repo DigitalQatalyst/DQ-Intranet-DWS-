@@ -680,7 +680,7 @@ export const mockNonFinancialServices = [
       'Track support request progress',
       'Get timely assistance from our technical team',
     ],
-    tags: [ 'Hybrid', 'Technology'],
+    tags: ['Hybrid', 'Technology'],
     featuredImageUrl: '/images/services/IT-support.jpg',
     //requestUrl: 'https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl',
   },
@@ -1350,4 +1350,307 @@ export const mockNonFinancialServices = [
     featuredImageUrl: '/images/services/design-automation.jpg',
     requestUrl: 'https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl',
   },
+  {
+    id: 'ghc-tmaas',
+    title: 'GHC Transformation Management',
+    description: 'Comprehensive transformation management service that provides expertise and tools to design and deploy a formidable Digital Business Platform (DBP) effectively, making the journey clear and streamlined for organizations evolving into Digital Cognitive Organizations.',
+    category: 'Business',
+    serviceType: 'Consulting',
+    deliveryMode: 'Hybrid',
+    businessStage: 'All Stages',
+    userCategory: ['Employee', 'Manager', 'Leadership'],
+    technicalCategory: ['Strategy', 'Transformation', 'Digital Platform'],
+    deviceOwnership: ['Company Device'],
+    provider: {
+      name: 'GHC Transformation Team',
+      logoUrl: '/DWS-Logo.png',
+      description: 'Golden Honeycomb Transformation team provides expert guidance and tools for digital transformation and DBP implementation.',
+    },
+    duration: '3-12 months',
+    price: 'Custom Quote',
+    details: [
+      'Design and deploy Digital Business Platform (DBP)',
+      'Expert guidance on transformation journey',
+      'Integrated suite of advanced technologies implementation',
+      'Industry pinnacle positioning strategies',
+      'Clear and streamlined transformation roadmap',
+      'Comprehensive change management support',
+      'Technology stack optimization and integration',
+      'Organizational capability development'
+    ],
+    tags: ['GHC', 'Transformation', 'Digital Platform', 'Consulting', 'Hybrid'],
+    featuredImageUrl: '/images/guidelines-content.PNG',
+    requestUrl: 'https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl',
+  },
 ]
+
+export const mockEvents = [
+  {
+    id: "evt-1",
+    title: "Abu Dhabi Business Forum 2025",
+    description:
+      "Join the largest business networking event in Abu Dhabi with industry leaders and government officials. Connect with potential partners, investors, and clients.",
+    category: "Networking",
+    eventType: "Conference",
+    businessStage: "All Stages",
+    provider: {
+      name: "Abu Dhabi Chamber of Commerce",
+      logoUrl:
+        "https://www.abudhabichamber.ae/-/media/Project/ADCCIV2/ADCCI/Home-Page---General/logo-en.svg",
+      description:
+        "Supporting business growth and economic development in Abu Dhabi.",
+    },
+    date: "December 15-16, 2025",
+    time: "9:00 AM - 6:00 PM",
+    location: "Abu Dhabi National Exhibition Centre",
+    price: "Free",
+    capacity: "500 attendees",
+    details: [
+      "Keynote speeches from industry leaders",
+      "Panel discussions on business growth strategies",
+      "Networking sessions with potential partners",
+      "Exhibition of products and services",
+      "Complimentary refreshments and lunch",
+    ],
+    tags: ["Networking", "Conference", "All Stages"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: "evt-2",
+    title: "Innovation Workshop Series",
+    description:
+      "Interactive workshop series focused on fostering innovation and creative problem-solving in your business. Learn practical techniques to drive innovation.",
+    category: "Workshop",
+    eventType: "Training",
+    businessStage: "Growth",
+    provider: {
+      name: "Hub71",
+      logoUrl: "https://images.squarespace-cdn.com/content/v1/5fff0c99a2d4904d72abb20d/1625579236225-0MJMS8XUPQT0T6GMLWJ4/Hub71-Logo-Membership.png?format=500w",
+      description: "Abu Dhabi's global tech ecosystem for startups.",
+    },
+    date: "November 20, 2025",
+    time: "2:00 PM - 5:00 PM",
+    location: "Hub71, Al Khatem Tower",
+    price: "AED 200",
+    capacity: "50 attendees",
+    details: [
+      "Hands-on innovation exercises",
+      "Design thinking methodologies",
+      "Case studies from successful startups",
+      "Networking with fellow entrepreneurs",
+      "Certificate of completion",
+    ],
+    tags: ["Workshop", "Training", "Growth"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: "evt-3",
+    title: "Digital Marketing Masterclass",
+    description:
+      "Comprehensive masterclass on digital marketing strategies for SMEs. Learn SEO, social media marketing, content strategy, and analytics.",
+    category: "Masterclass",
+    eventType: "Training",
+    businessStage: "Growth",
+    provider: {
+      name: "Google for Startups",
+      logoUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/8/8f/Logo_for_Google_for_Startups_page.png?20190214000754",
+      description:
+        "Google's program to help startups thrive across every corner of the world.",
+    },
+    date: "October 25, 2025",
+    time: "10:00 AM - 4:00 PM",
+    location: "Google Office, Abu Dhabi",
+    price: "AED 500",
+    capacity: "30 attendees",
+    details: [
+      "SEO and SEM best practices",
+      "Social media marketing strategies",
+      "Content creation and distribution",
+      "Analytics and performance tracking",
+      "Lunch and refreshments included",
+    ],
+    tags: ["Masterclass", "Training", "Growth"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: "evt-4",
+    title: "Startup Pitch Competition",
+    description:
+      "Pitch your startup idea to a panel of investors and win funding. Top 3 startups will receive seed funding and mentorship opportunities.",
+    category: "Competition",
+    eventType: "Pitch Event",
+    businessStage: "Conception",
+    provider: {
+      name: "Khalifa Fund",
+      logoUrl:
+        "https://media.licdn.com/dms/image/v2/D4D0BAQEm7hh-vPHtNg/company-logo_200_200/B4DZj1W_mTIgAM-/0/1756463104605/khalifa_fund_logo?e=2147483647&v=beta&t=AtpC5HexpPIneFytzHCc6-wjOCF9u0ShL3s5GXPW8K8",
+      description: "Supporting entrepreneurs and SMEs in Abu Dhabi.",
+    },
+    date: "November 5, 2025",
+    time: "6:00 PM - 9:00 PM",
+    location: "Khalifa Fund Headquarters",
+    price: "Free",
+    capacity: "100 attendees",
+    details: [
+      "Pitch to experienced investors",
+      "Prize pool of AED 500,000",
+      "Mentorship from industry experts",
+      "Media coverage for winners",
+      "Networking with investors and entrepreneurs",
+    ],
+    tags: ["Competition", "Pitch Event", "Conception"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1559223607-a43c990c2e3a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: "evt-5",
+    title: "Financial Planning for SMEs",
+    description:
+      "Learn essential financial planning and management skills for your business. Topics include budgeting, forecasting, and financial reporting.",
+    category: "Seminar",
+    eventType: "Training",
+    businessStage: "All Stages",
+    provider: {
+      name: "ADGM Academy",
+      logoUrl:
+        "https://pbs.twimg.com/profile_images/1923014879880867840/7gwy4szr_400x400.jpg",
+      description: "The knowledge arm of Abu Dhabi Global Market.",
+    },
+    date: "October 30, 2025",
+    time: "1:00 PM - 4:00 PM",
+    location: "ADGM, Al Maryah Island",
+    price: "AED 300",
+    capacity: "40 attendees",
+    details: [
+      "Financial planning fundamentals",
+      "Budgeting and forecasting techniques",
+      "Cash flow management",
+      "Financial reporting and analysis",
+      "Q&A session with financial experts",
+    ],
+    tags: ["Seminar", "Training", "All Stages"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: "evt-6",
+    title: "Tech Startup Expo 2025",
+    description:
+      "Showcase your tech startup at Abu Dhabi's premier technology exhibition. Connect with investors, customers, and partners.",
+    category: "Exhibition",
+    eventType: "Expo",
+    businessStage: "Growth",
+    provider: {
+      name: "Hub71",
+      logoUrl: "https://images.squarespace-cdn.com/content/v1/5fff0c99a2d4904d72abb20d/1625579236225-0MJMS8XUPQT0T6GMLWJ4/Hub71-Logo-Membership.png?format=500w",
+      description: "Abu Dhabi's global tech ecosystem for startups.",
+    },
+    date: "December 1-3, 2025",
+    time: "10:00 AM - 7:00 PM",
+    location: "Abu Dhabi National Exhibition Centre",
+    price: "AED 1,000 (Exhibitor)",
+    capacity: "200 exhibitors",
+    details: [
+      "Exhibition booth for your startup",
+      "Access to investor meetings",
+      "Media coverage and PR opportunities",
+      "Networking events and receptions",
+      "Demo sessions and product launches",
+    ],
+    tags: ["Exhibition", "Expo", "Growth"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: "evt-7",
+    title: "Export Readiness Workshop",
+    description:
+      "Prepare your business for international markets. Learn about export regulations, market entry strategies, and logistics.",
+    category: "Workshop",
+    eventType: "Training",
+    businessStage: "Maturity",
+    provider: {
+      name: "Abu Dhabi Export Office",
+      logoUrl: "https://s3-us-west-2.amazonaws.com/cbi-image-service-prd/modified/547f46e0-7e04-4593-bf55-94a77011b377.png?w=256",
+      description:
+        "Supporting Abu Dhabi-based companies to export their products globally.",
+    },
+    date: "November 12, 2025",
+    time: "9:00 AM - 1:00 PM",
+    location: "Abu Dhabi Chamber of Commerce",
+    price: "Free",
+    capacity: "60 attendees",
+    details: [
+      "Export regulations and compliance",
+      "Market entry strategies",
+      "International logistics and shipping",
+      "Export financing options",
+      "Success stories from exporters",
+    ],
+    tags: ["Workshop", "Training", "Maturity"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1578575437130-527eed3abbec?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+  {
+    id: "evt-8",
+    title: "Women in Business Summit",
+    description:
+      "Empowering women entrepreneurs in Abu Dhabi. Join us for inspiring talks, networking, and workshops focused on women-led businesses.",
+    category: "Summit",
+    eventType: "Conference",
+    businessStage: "All Stages",
+    provider: {
+      name: "Abu Dhabi Chamber of Commerce",
+      logoUrl:
+        "https://www.abudhabichamber.ae/-/media/Project/ADCCIV2/ADCCI/Home-Page---General/logo-en.svg",
+      description:
+        "Supporting business growth and economic development in Abu Dhabi.",
+    },
+    date: "October 20, 2025",
+    time: "9:00 AM - 5:00 PM",
+    location: "Emirates Palace",
+    price: "AED 400",
+    capacity: "300 attendees",
+    details: [
+      "Keynote from successful women entrepreneurs",
+      "Panel discussions on challenges and opportunities",
+      "Networking sessions",
+      "Workshops on leadership and business growth",
+      "Gala dinner included",
+    ],
+    tags: ["Summit", "Conference", "All Stages"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+  },
+];
+
+export const mockEventsFilterOptions = {
+  categories: [
+    { id: "networking", name: "Networking" },
+    { id: "workshop", name: "Workshop" },
+    { id: "masterclass", name: "Masterclass" },
+    { id: "competition", name: "Competition" },
+    { id: "seminar", name: "Seminar" },
+    { id: "exhibition", name: "Exhibition" },
+    { id: "summit", name: "Summit" },
+  ],
+  locations: [
+    { id: "abudhabi", name: "Abu Dhabi" },
+    { id: "dubai", name: "Dubai" },
+    { id: "online", name: "Online" },
+    { id: "hybrid", name: "Hybrid" },
+  ],
+  prices: [
+    { id: "free", name: "Free" },
+    { id: "paid", name: "Paid" },
+  ],
+  sessions: [
+    { id: "upcoming", name: "Upcoming" },
+    { id: "ongoing", name: "Ongoing" },
+    { id: "past", name: "Past" },
+  ],
+};

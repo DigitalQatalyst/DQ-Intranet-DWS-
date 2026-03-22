@@ -5,7 +5,6 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { Blueprint, getAllBlueprints } from "../utils/blueprintsData";
 import clsx from "clsx";
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 const formatDate = (value?: string) => {
   if (!value) return "Updated recently";
@@ -231,7 +230,7 @@ const BlueprintDetailPage: React.FC = () => {
                   {activeContent ? (
                     <div
                       className="prose prose-sm max-w-none prose-ul:list-disc prose-li:marker:text-slate-500"
-                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(activeContent) }}
+                      dangerouslySetInnerHTML={{ __html: activeContent }}
                     />
                   ) : (
                     <p className="text-slate-500 italic">No content provided for this section yet.</p>

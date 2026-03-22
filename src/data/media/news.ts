@@ -14,14 +14,157 @@ export type NewsItem = {
   theme?: 'Leadership' | 'Delivery' | 'Culture' | 'DTMF';
   tags?: string[];
   readingTime?: '<5' | '5–10' | '10–20' | '20+';
-  newsType?: 'Corporate Announcements' | 'Product / Project Updates' | 'Events & Campaigns' | 'Digital Tech News';
+  newsType?: 'Policy Update' | 'Upcoming Events' | 'Company News' | 'Holidays';
   newsSource?: 'DQ Leadership' | 'DQ Operations' | 'DQ Communications';
   focusArea?: 'GHC' | 'DWS' | 'Culture & People';
   content?: string; // Full article content for detail pages
+  format?: 'Blog' | 'Article' | 'Research Report' | 'Podcast'; // Format type for blogs and podcasts
+  source?: string; // Source/provider name (e.g., DigitalQatalyst, ADGM Academy)
+  audioUrl?: string; // Audio file URL for podcasts
 };
 
+/*
+ * Legacy hardcoded news data (now replaced by Supabase-backed public.news).
+ * Keeping this block commented out for reference and potential future seeding.
+ *
 export const NEWS: NewsItem[] = [
-  /*
+  {
+    id: 'dxb-eoy-event-postponement',
+    title: 'DXB EoY Event Postponement',
+    type: 'Announcement',
+    date: '2025-12-19',
+    author: 'Fadil A',
+    byline: 'DQ Operations',
+    views: 0,
+    excerpt:
+      'Due to unfavourable weather conditions, the DQ Studios Y/E Annual Gathering scheduled for 19.12.2025 has been rescheduled for everyone\'s safety.',
+    image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Operations',
+    location: 'Dubai',
+    domain: 'Operations',
+    tags: ['event', 'postponement', 'annual gathering', 'weather'],
+    readingTime: '<5',
+    newsType: 'Company News',
+    newsSource: 'DQ Operations',
+    focusArea: 'Culture & People',
+    content: `# DXB EoY Event Postponement
+
+Due to unfavourable weather conditions, the DQ Studios Y/E Annual Gathering scheduled for 19.12.2025 has been rescheduled for everyone's safety.
+
+We sincerely apologise for the inconvenience and appreciate your understanding.
+
+To ensure the date chosen is convenient for DXB Associates. I will be sharing a poll shortly to confirm a date. Once confirmed, details regarding the rescheduled date will be shared after.`
+  },
+  {
+    id: 'dq-dxb-ksa-christmas-new-year-schedule',
+    title: 'DQ DXB & KSA | CHRISTMAS & NEW YEAR SCHEDULE AND WFH ARRANGEMENT',
+    type: 'Announcement',
+    date: '2025-12-15',
+    author: 'Irene M',
+    byline: 'DQ Operations',
+    views: 0,
+    excerpt:
+      'In observance of the Christmas and New Year season, please note the work arrangements and holiday schedule for DXB and KSA associates, including official holidays and mandatory WFH days.',
+    image: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Operations',
+    location: 'Dubai',
+    domain: 'Operations',
+    tags: ['holiday', 'christmas', 'new year', 'WFH', 'schedule'],
+    readingTime: '5–10',
+    newsType: 'Company News',
+    newsSource: 'DQ Operations',
+    focusArea: 'Culture & People',
+    content: `# Christmas & New Year Schedule
+
+In observance of the Christmas and New Year season, please note the work arrangements and holiday schedule for DXB and KSA associates, including official holidays and mandatory WFH days.
+
+## | Official Holidays
+
+The following days are designated as official holidays:
+
+- Thursday, 25th December 2025 – Christmas Day
+- Thursday, 1st January 2026 – New Year's Day
+
+## | Mandatory Work-From-Home (WFH) Days
+
+All DXB and KSA associates are required to work from home on the following days:
+
+- Friday, 26th December 2025
+- Wednesday, 31st December 2025
+- Friday, 2nd January 2026
+
+## | WFH Daily Requirements
+
+To ensure productivity and visibility, please adhere to these daily requirements:
+
+- Log in to DQ Live.
+- Join your designated working rooms.
+- Share your morning activity.
+- Submit a clear end-of-day report.
+
+**Failure to comply will result in the day being treated as unpaid work day.**
+
+## | Office Work Resumption
+
+All other weekdays outside the dates listed above will follow the standard office work policy.
+
+We wish everyone a safe, joyful, and restful festive season.`
+  },
+  {
+    id: 'dq-nbo-christmas-new-year-schedule',
+    title: 'DQ NBO | CHRISTMAS & NEW YEAR SCHEDULE AND WFH ARRANGEMENT',
+    type: 'Announcement',
+    date: '2025-12-15',
+    author: 'Irene M',
+    byline: 'DQ Operations',
+    views: 0,
+    excerpt:
+      'In observance of the Christmas and New Year season, please note the work arrangements and holiday schedule for NBO associates, including WFH period, official holidays, and additional holidays.',
+    image: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Operations',
+    location: 'Nairobi',
+    domain: 'Operations',
+    tags: ['holiday', 'christmas', 'new year', 'WFH', 'schedule', 'NBO'],
+    readingTime: '5–10',
+    newsType: 'Company News',
+    newsSource: 'DQ Operations',
+    focusArea: 'Culture & People',
+    content: `# Christmas & New Year Schedule
+
+In observance of the Christmas and New Year season, please note the work arrangements and holiday schedule for NBO associates, including the mandatory WFH period and requirements.
+
+## | Work-From-Home (WFH) Period
+
+All associates will work from home from Wednesday, 24th December 2025 through Friday, 2nd January 2026. To ensure productivity and collaboration during this period, please adhere to the following requirements:
+
+- Log in to DQ Live each working day.
+- Log in to your designated working rooms.
+- Share your morning daily activity.
+- Submit a clear end-of-day report.
+
+Please note that non-compliance with these requirements will be considered unpaid.
+
+## | Official Paid Holidays
+
+The following days are designated as official paid holidays:
+
+- Thursday, 25th December 2025 – Christmas Day
+- Thursday, 1st January 2026 – New Year's Day
+
+## | Rescue Work & Compensation
+
+Associates required to work on the official paid holidays (25th December and/or 1st January) will receive rescue pay for those days, in addition to their standard daily compensation.
+
+## | Additional Holidays
+
+NBO associates will also observe the following additional holiday observed as Utamaduni Day in Kenya:
+
+- Friday, 26th December 2025
+
+NBO team members will not be required to work on this date. Those who are required to work will receive additional compensation for this day.
+
+We wish everyone a safe and joyful festive season.`
+  },
   {
     id: 'dq-townhall-meeting-agenda',
     title: 'DQ Townhall Meeting Agenda',
@@ -38,10 +181,12 @@ export const NEWS: NewsItem[] = [
     domain: 'Operations',
     tags: ['townhall', 'meeting', 'agenda', 'framework'],
     readingTime: '5–10',
-    newsType: 'Corporate Announcements',
+    newsType: 'Upcoming Events',
     newsSource: 'DQ Operations',
     focusArea: 'Culture & People',
     content: `# DQ Townhall Meeting Agenda
+
+Join us for the upcoming DQ Townhall meeting featuring working room guidelines, Scrum Master framework discussions, and important organizational updates.
 
 ## Welcome & Introduction
 
@@ -98,10 +243,12 @@ This townhall aims to:
     domain: 'People',
     tags: ['leave', 'guidelines', 'policy', 'HRA'],
     readingTime: '5–10',
-    newsType: 'Corporate Announcements',
+    newsType: 'Policy Update',
     newsSource: 'DQ Operations',
     focusArea: 'Culture & People',
     content: `# DQ Leave Process Guideline
+
+Complete guide to the leave approval process, including required steps, notification procedures, and consequences for non-compliance.
 
 ## Leave Process
 
@@ -139,131 +286,210 @@ Three violations may result in termination of employment.
 ## Important Reminder
 **Approval Requirement**: All leave must be approved by HRA and Management to ensure fairness and compliance with company policies.`
   },
+  // Blog and Article items from screenshots
   {
-    id: 'leadership-principles',
-    title: "Leadership Principles | What’s Your Leadership Superpower?",
+    id: 'compute-nationalism-rise',
+    title: 'Are We Watching the Rise of Compute Nationalism?',
     type: 'Thought Leadership',
-    date: '2024-08-19',
-    author: 'Leads',
-    byline: 'Stephanie Kioko',
-    views: 47,
-    excerpt:
-      'Researchers have identified more than 1,000 leadership traits, but only a handful consistently drive real impact…',
-    department: 'Stories',
-    location: 'Remote',
-    theme: 'Leadership',
-    tags: ['Playbook', 'EJP'],
+    date: '2025-12-15',
+    author: 'Dr. Stéphane Niango',
+    byline: 'Dr. Stéphane Niango',
+    views: 124,
+    excerpt: 'As nations race to control AI infrastructure and computing resources, we explore how geopolitical tensions are reshaping the global technology landscape and what it means for businesses.',
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
+    format: 'Blog',
+    source: 'DigitalQatalyst',
     readingTime: '10–20',
-    newsType: 'Digital Tech News',
+    newsType: 'Company News',
     newsSource: 'DQ Leadership',
-    focusArea: 'Culture & People',
-    content: `# Leadership Principles | What's Your Leadership Superpower?
+    focusArea: 'GHC',
+    tags: ['Geopolitics & Technology'],
+    content: `# Are We Watching the Rise of Compute Nationalism?
 
-## The Research Behind Leadership Excellence
+Geopolitics & Technology
 
-Researchers have identified more than **1,000 leadership traits**, but only a handful consistently drive real impact. This deep dive explores the core leadership principles that separate high-performing teams from the rest.
+As nations race to control AI infrastructure and computing resources, we explore how geopolitical tensions are reshaping the global technology landscape and what it means for businesses.
 
-## The Five Core Leadership Superpowers
+There's a strange new tension shaping the world right now—one that feels familiar, yet entirely new. We once competed over oil fields, shipping routes, and manufacturing dominance. Today, the new territory everyone is scrambling to control is invisible, humming quietly inside massive concrete buildings packed with GPUs, fiber, cooling pipes, and backup generators.
 
-### 1. Visionary Thinking
-- **What it is**: The ability to see beyond current constraints and articulate a compelling future
-- **Why it matters**: Teams need direction and purpose to perform at their best
-- **How to develop**: Practice scenario planning, engage in strategic conversations, and regularly communicate the "why" behind decisions
+**Compute.**
 
-### 2. Adaptive Resilience
-- **What it is**: Maintaining effectiveness while navigating uncertainty and change
-- **Why it matters**: Modern organizations face constant disruption and complexity
-- **How to develop**: Embrace experimentation, learn from failures quickly, and build systems that can evolve
+Raw compute.
 
-### 3. Empathetic Intelligence
-- **What it is**: Understanding and responding to the emotional and motivational needs of your team
-- **Why it matters**: People perform best when they feel understood and valued
-- **How to develop**: Practice active listening, seek to understand before being understood, and invest in one-on-one relationships
+The fuel of the AI economy.
 
-### 4. Decision Velocity
-- **What it is**: Making quality decisions quickly with incomplete information
-- **Why it matters**: Speed of decision-making often determines competitive advantage
-- **How to develop**: Establish decision frameworks, delegate appropriately, and accept that perfect information rarely exists
+And the latest U.S. government push under President Trump to dramatically expand national datacenter capacity raises a powerful question:
 
-### 5. Growth Catalyst
-- **What it is**: Actively developing others and creating opportunities for team growth
-- **Why it matters**: Sustainable success requires building capability in others
-- **How to develop**: Mentor regularly, provide stretch assignments, and celebrate learning over perfection
+**Are we witnessing the birth of "compute nationalism"?**
 
-## The DQ Leadership Framework
+A new era where countries no longer fight to control land or resources—but processing power?
 
-At DQ, we've integrated these superpowers into our **Everyday Journey Playbook (EJP)**:
+Let's break down what's really happening, why it matters, and what the rest of the world should be paying close attention to.
 
-### **Morning Rituals**
-- **Vision Check**: Start each day by connecting work to larger purpose
-- **Team Pulse**: Quick emotional intelligence check-in with your squad
-- **Priority Clarity**: Use decision velocity to focus on what matters most
+## The New Power Source Isn't Oil — It's Compute
 
-### **Throughout the Day**
-- **Adaptive Responses**: When plans change, model resilience and help others navigate
-- **Growth Moments**: Look for opportunities to coach and develop team members
-- **Empathetic Leadership**: Practice understanding before directing
+Every major breakthrough in AI over the past decade has been the direct result of one thing: more compute.
 
-### **Evening Reflection**
-- **Impact Assessment**: What leadership superpower did you use most today?
-- **Growth Planning**: How can you develop your weaker superpowers tomorrow?
-- **Team Development**: What growth opportunities can you create for others?
+- Bigger models
+- More training cycles
+- Larger datasets
+- Faster experimentation
+- Cheaper inference
 
-## Measuring Leadership Impact
+Almost all of this depends on having access to massive, industrial-scale datacenters—many of which are now as energy-hungry as small cities.
 
-### **Individual Metrics**
-- **Decision Speed**: Time from problem identification to resolution
-- **Team Engagement**: Regular pulse surveys and feedback sessions
-- **Growth Outcomes**: Number of team members promoted or developed
+The U.S. understands this.
 
-### **Team Metrics**
-- **Delivery Velocity**: Consistent improvement in team output quality and speed
-- **Innovation Rate**: Number of new ideas generated and implemented
-- **Retention**: Team members choosing to stay and grow with the organization
+China understands this.
 
-## Your Leadership Development Plan
+The EU is scrambling to understand this.
 
-### **Week 1-2: Assessment**
-1. Take the DQ Leadership Superpower Assessment
-2. Gather 360-degree feedback from peers and team members
-3. Identify your strongest and weakest superpowers
+And Trump's administration appears to be taking the position that AI supremacy requires compute supremacy—and compute supremacy requires state-level intervention.
 
-### **Week 3-4: Focus Area Selection**
-1. Choose one superpower to develop intensively
-2. Create specific, measurable development goals
-3. Find an accountability partner or mentor
+This is a shift.
 
-### **Month 2-3: Practice and Application**
-1. Apply your chosen superpower daily
-2. Track progress and gather feedback
-3. Adjust approach based on results
+For years, datacenters were a Silicon Valley problem.
 
-### **Month 4+: Integration and Expansion**
-1. Integrate the developed superpower into your natural leadership style
-2. Begin developing the next superpower
-3. Start mentoring others in leadership development
+Now they are a national strategic asset, treated with the same seriousness as manufacturing, defense infrastructure, or energy security.
 
-## Resources for Continued Growth
+## Why the Trump Administration Is Making Datacenters a National Priority
 
-### **DQ Internal Resources**
-- **Leadership Guild**: Monthly sessions with senior leaders
-- **EJP Toolkit**: Practical exercises and frameworks
-- **Mentorship Program**: Pairing with experienced leaders
+Three big forces are driving this shift:
 
-### **External Learning**
-- **Recommended Reading**: Curated list of leadership books and articles
-- **Conference Attendance**: Support for relevant leadership conferences
-- **Executive Coaching**: Access to professional development coaching
+### 1. The fear of falling behind China
 
-## The Ripple Effect
+China has the advantage of:
 
-Remember: **Leadership is not about being perfect—it's about being intentional**. Every interaction is an opportunity to model the behaviors you want to see in your team and organization.
+- vertically integrated supply chains
+- state-directed investment
+- massive domestic talent pools
+- and a history of building infrastructure at unprecedented speed
 
-When you develop your leadership superpowers, you don't just improve your own effectiveness—you create a ripple effect that elevates everyone around you.
+If China decides to deploy 200 gigawatts of AI-ready datacenters, it can do so without a political fight.
 
----
+The U.S. can't. So Trump's administration is moving preemptively—essentially saying:
 
-*What's your leadership superpower? Take the assessment and start your development journey today.*`
+"If compute is the foundation of the future economy, the government must secure it."
+
+### 2. The private sector alone cannot build fast enough
+
+Big Tech—OpenAI, Microsoft, Google, Meta—already has enormous datacenter roadmaps. But they face:
+
+- land shortages
+- power rationing
+- regulatory delays
+- grid constraints
+- escalating costs
+- supply chain bottlenecks
+
+At some point, the government needs to step in to accelerate, subsidize, or directly orchestrate national compute capacity.
+
+### 3. AI is becoming a national security issue
+
+If intelligence, defence systems, cyber capability, and economic competitiveness all depend on access to compute…
+
+then compute is no longer optional.
+
+It is a sovereignty resource.
+
+Just like oil in the 20th century.
+
+## What Exactly Is "Compute Nationalism"?
+
+It's the idea that nations must:
+
+- own,
+- control, or
+- prioritize domestic access to
+
+high-performance compute to ensure economic and geopolitical dominance.
+
+In other words:
+
+"If you don't own the servers, you don't own the future."
+
+Compute nationalism may include:
+
+- government-backed datacenter megaprojects
+- tax incentives for GPU manufacturers
+- export controls on AI chips
+- restrictions on foreign cloud dependency
+- public–private AI infrastructure partnerships
+- national AI research clouds
+- sovereign compute reserves (yes, this is already being discussed)
+
+It's the new form of industrial policy.
+
+Some call it smart.
+
+Some call it dangerous.
+
+Most agree it is inevitable.
+
+## What This Means for the Rest of the World
+
+For emerging economies, this trend is both an opportunity and a threat.
+
+**Threat because:**
+
+- AI power may centralize into a few countries with massive compute
+- Innovation could become gated
+- Access to training-grade compute may become prohibitively expensive
+- Nations without compute risk becoming digital consumers, not producers
+
+**Opportunity because:**
+
+- countries can specialize in green datacenters
+- renewable-energy-based compute hubs are in demand
+- AI "free zones" and compute-friendly regulatory regimes are becoming attractive
+- sovereign compute clusters could become regional economic engines
+
+Think of countries like:
+
+- UAE (where I happen to reside)
+- Saudi Arabia
+- Norway
+- Kenya (geothermal)
+- Iceland
+- Canada
+- Singapore
+
+All of them could position themselves as neutral global compute hubs. The world is not doomed to a two-player game—unless it chooses to be.
+
+## The Real Question We Should Be Asking
+
+The Trump administration's datacenter push will shape global AI power dynamics—but the deeper question sits beneath the politics:
+
+**Should compute be treated like a national asset—or a global public good?**
+
+If compute becomes concentrated in the hands of a few states, we risk creating:
+
+- AI monopolies
+- digital colonialism
+- technological dependence
+- unequal access to intelligence
+
+But if compute infrastructure is shared, federated, or regionally co-developed, we create:
+
+- innovation ecosystems
+- competitive diversity
+- more equitable AI development
+
+So which future are we building?
+
+Right now, the U.S. is choosing a defensive path: secure compute first, debate governance later.
+
+## Final Thought
+
+Whether you admire or criticize Trump's approach, one thing is undeniable:
+
+**The AI economy will be shaped by those who control compute.**
+
+And today, for the first time in history, we are watching nations fight not for land, not for oil, but for processing power.
+
+Compute nationalism has arrived.
+
+The question now is: Who gets left behind?`
   },
   {
     id: 'dq-storybook-live',
@@ -276,104 +502,943 @@ When you develop your leadership superpowers, you don't just improve your own ef
     department: 'Products',
     location: 'Dubai',
     domain: 'Business',
-    newsType: 'Corporate Announcements',
+    newsType: 'Company News',
     newsSource: 'DQ Communications',
     focusArea: 'GHC'
   },
   {
-    id: 'dq-persona-mindset',
-    title: 'DQ Persona | Not Just a Role – It’s a Qatalyst Mindset',
+    id: 'beijing-ai-superstate',
+    title: "Is Beijing Building the World's First AI Superstate?",
     type: 'Thought Leadership',
-    date: '2024-08-12',
-    author: 'DQ Associates',
-    byline: 'Stephanie Kioko',
-    views: 55,
-    excerpt:
-      'Culture eats strategy for breakfast—why a Qatalyst mindset matters for how we work and deliver…',
-    department: 'Stories',
-    location: 'Remote',
-    theme: 'Culture',
-    tags: ['QMS'],
+    date: '2025-12-12',
+    author: 'Dr. Stéphane Niango',
+    byline: 'Dr. Stéphane Niango',
+    views: 98,
+    excerpt: 'While the U.S. pushes a loud "compute nationalism" agenda, China is quietly executing a parallel strategy that is more coordinated, vertically integrated, and harder to track.',
+    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
+    format: 'Blog',
+    source: 'DigitalQatalyst',
     readingTime: '5–10',
-    newsType: 'Events & Campaigns',
+    newsType: 'Company News',
     newsSource: 'DQ Leadership',
-    focusArea: 'Culture & People'
+    focusArea: 'GHC',
+    tags: ['Geopolitics & Technology'],
+    content: `# Is Beijing Building the World's First AI Superstate?
+
+While the U.S. pushes a loud "compute nationalism" agenda, China is quietly executing a parallel strategy that is more coordinated, vertically integrated, and harder to track.
+
+There is a strange calm around China's AI strategy right now. No loud announcements. No flashy political statements. No weekly executive orders.
+
+**Just… quiet expansion.**
+
+But behind that silence, something massive is unfolding: China is building compute capacity at a speed the world has never seen before.
+
+While the U.S. under Trump is pushing a loud and public "compute nationalism" agenda, China is executing a parallel strategy—one that is arguably more coordinated, more vertically integrated, and far harder for the outside world to track.
+
+So the question is worth asking:
+
+**Is China quietly building the world's first AI superstate?**
+
+Let's unpack what's actually happening.
+
+## China Doesn't Announce the Plan — It Already Builds It
+
+Unlike the U.S., China does not debate infrastructure at length.
+
+**It activates.**
+
+Here's what gives China a structural advantage in the AI infrastructure race:
+
+### 1. State-directed industrial capacity
+
+China can mobilize:
+
+- land
+- labour
+- energy
+- construction
+- logistics
+
+at national scale without hitting the political bottlenecks Western countries face.
+
+### 2. Full-stack control of hardware supply chains
+
+From raw materials → to wafer fabrication → to packaging → to datacenter rack assembly
+
+China has built more of the chain internally than any other nation.
+
+### 3. Rapid build cycles
+
+A hyperscale datacenter in the U.S. may take 24–36 months to complete.
+
+In China, it can be done in 10–14 months—sometimes less.
+
+And while export controls limit China's access to the newest Nvidia chips, it still produces:
+
+- competitive domestic GPUs
+- specialized AI ASICs
+- custom accelerators
+- and enormous distributed compute clusters
+
+China is not slowing down—it is diversifying.
+
+## The World's Largest Compute Clusters—You've Never Heard Of
+
+China already operates some of the largest AI training clusters on the planet.
+
+But unlike the U.S., where companies overshare, China keeps its systems in semi-opacity.
+
+If the U.S. is building for global visibility, China is building for strategic advantage.
+
+Their bet is simple:
+
+**If you control compute, you control intelligence. If you control intelligence, you control global influence.**
+
+This is why China's approach is so unsettling for Western policymakers—it is not noisy, reactive, or political. It is engineered.
+
+## Will China Overtake the U.S.?
+
+Not immediately.
+
+But the long-term risk is real.
+
+**China's strengths:**
+
+- speed of execution
+- government coordination
+- infrastructure discipline
+- manufacturing dominance
+- AI engineering talent
+
+**U.S. strengths:**
+
+- frontier models
+- world-leading chips
+- massive private-sector R&D
+- deep capital markets
+
+The AI race is no longer about who builds the best model—it's about who builds the most infrastructure.
+
+In that contest, China is not behind. It's simply quiet.
+
+**The world should pay attention.**`
   },
   {
-    id: 'growth-emotional-intelligence',
-    title: 'Grounded in Growth and Emotional Intelligence',
+    id: 'europe-ethical-ai-compute',
+    title: "Europe Wants Ethical AI. But Without Compute, Can It Compete?",
     type: 'Thought Leadership',
-    date: '2024-08-08',
-    author: 'Leads',
-    byline: 'Stephanie Kioko',
-    views: 79,
-    excerpt:
-      'People with a Growth Mindset are twice as likely to take on challenges and push through obstacles…',
-    department: 'Intelligence',
-    location: 'Dubai',
-    theme: 'Leadership',
-    tags: ['EJP', 'Playbook'],
-    readingTime: '10–20',
-    newsType: 'Digital Tech News',
-    newsSource: 'DQ Leadership',
-    focusArea: 'Culture & People'
-  },
-  {
-    id: 'one-vision',
-    title: 'The One Vision We All Build Toward',
-    type: 'Thought Leadership',
-    date: '2024-08-04',
-    author: 'Partners',
-    byline: 'Stephanie Kioko',
-    views: 50,
-    excerpt:
-      'At DQ, we all share a single powerful vision that guides how we build and deliver value…',
-    department: 'Solutions',
-    location: 'Remote',
-    theme: 'Delivery',
-    tags: ['Playbook', 'QMS'],
+    date: '2025-12-10',
+    author: 'Dr. Stéphane Niango',
+    byline: 'Dr. Stéphane Niango',
+    views: 89,
+    excerpt: 'The European Union has positioned itself as the global moral compass on AI, but ethical leadership doesn\'t matter if you don\'t have compute leadership.',
+    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+    format: 'Blog',
+    source: 'DigitalQatalyst',
     readingTime: '5–10',
-    newsType: 'Product / Project Updates',
+    newsType: 'Company News',
     newsSource: 'DQ Leadership',
-    focusArea: 'GHC'
+    focusArea: 'GHC',
+    tags: ['Geopolitics & Technology'],
+    content: `# Europe Wants Ethical AI. But Without Compute, Can It Compete?
+
+The European Union has positioned itself as the global moral compass on AI—privacy, ethics, regulation, digital rights, and responsible innovation.
+
+It's admirable.
+
+It's important.
+
+But there's a problem no one in Brussels wants to say out loud:
+
+**Ethical leadership doesn't matter if you don't have compute leadership.**
+
+This is harsh, but it's true.
+
+AI power is increasingly determined by:
+
+- compute availability
+- datacenter density
+- energy supply
+- access to GPUs
+- the cost of experimentation
+
+Europe is struggling on all of these fronts.
+
+## The EU's Compute Challenge
+
+### 1. Energy costs are too high
+
+Running training-grade datacenters is insanely expensive in Europe compared to the U.S., China, or UAE.
+
+### 2. Regulatory barriers slow everything down
+
+Permits, environmental assessments, public consultations—important, but slow.
+
+### 3. No equivalent of Big Tech hyperscale backing
+
+The EU does not have homegrown platforms comparable to:
+
+- Google
+- Microsoft
+- Amazon
+- Meta
+
+This means the EU is dependent on external compute.
+
+### 4. The AI Act may raise compliance costs
+
+While globally praised, it risks pushing European startups to:
+
+- train models in the U.S.
+- deploy infrastructure outside Europe
+- avoid building frontier models entirely
+
+Ethics without infrastructure becomes philosophy—not power.
+
+## The EU's Hope: Sovereign Compute Initiatives
+
+To be fair, Europe is trying.
+
+Initiatives like:
+
+- GAIA-X
+- European Alliance for Industrial Data & Cloud
+- National AI supercomputers
+- EU Chips Act
+- Public–private compute partnerships
+
+are steps in the right direction.
+
+But they are fragmented.
+
+Underfunded.
+
+And painfully slow.
+
+Meanwhile, the U.S. is building megawatt-scale clusters every quarter.
+
+China is building them every month.
+
+The UAE is building them every week.
+
+Europe cannot regulate its way into AI relevance.
+
+**It needs steel, concrete, silicon, and energy.**
+
+Not more declarations.
+
+## The Hard Truth
+
+If Europe does not solve its compute deficit by 2030:
+
+- the best AI talent will migrate
+- startups will off-shore training
+- innovation will lag
+- AI applications will depend on foreign clouds
+- sovereignty will erode
+
+Europe will become a consumer economy in the AI age—not a producer.
+
+Leadership in ethics is noble.
+
+But leadership in compute is necessary.
+
+Until Europe builds the latter, the former will not shape the future.`
   },
   {
-    id: 'life-transactions',
-    title: 'DQ’s Path to Perfect Life Transactions',
+    id: 'ai-without-compute-global-south',
+    title: 'AI Without Compute: Is the Global South Being Left Out of the New Digital Economy?',
     type: 'Thought Leadership',
-    date: '2024-08-01',
-    author: 'Leads',
-    byline: 'Stephanie Kioko',
-    views: 49,
-    excerpt:
-      'Every day we make thousands of transactions—here’s how we design for clarity and flow…',
-    department: 'Delivery — Deploys',
-    location: 'Remote',
-    theme: 'DTMF',
-    tags: ['QMS', 'EJP'],
+    date: '2025-12-08',
+    author: 'Dr. Stéphane Niango',
+    byline: 'Dr. Stéphane Niango',
+    views: 203,
+    excerpt: "There's a growing fear across Africa, Southeast Asia, and parts of Latin America: Is the AI revolution about to leave the Global South behind?",
+    image: 'https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1200&q=80',
+    format: 'Blog',
+    source: 'DigitalQatalyst',
     readingTime: '10–20',
-    newsType: 'Product / Project Updates',
-    newsSource: 'DQ Operations',
-    focusArea: 'GHC'
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'GHC',
+    tags: ['Geopolitics & Technology'],
+    content: `# AI Without Compute: Is the Global South Being Left Out of the New Digital Economy?
+
+There's a growing fear across Africa, Southeast Asia, and parts of Latin America: Is the AI revolution about to leave the Global South behind?
+
+Not because of talent.
+
+Not because of ambition.
+
+Not because of ideas.
+
+But because of one brutally simple factor:
+
+**Compute. Access to it. Cost of it.**
+
+Or the absence of it.
+
+## The Harsh Reality: AI Is Becoming Compute-Gated
+
+A university in Nairobi with brilliant engineers cannot train a frontier model without:
+
+- GPU clusters
+- massive energy throughput
+- reliable cooling
+- stable grid access
+- capital investment
+
+And even if they rent compute from U.S. clouds, the costs are astronomical.
+
+As AI models become larger, the barrier becomes higher.
+
+This is creating a two-tier world:
+
+**Tier 1: Nations with compute**
+
+They innovate, train, compete, own IP.
+
+**Tier 2: Nations without compute**
+
+They consume, license, depend, adapt.
+
+This is the new digital divide.
+
+## But the Global South Has Unique Leverage
+
+Here's the twist: the Global South also has opportunities the West doesn't.
+
+### 1. Cheap renewable energy
+
+Kenya (geothermal), Ethiopia (hydro), Morocco (solar), South Africa (wind), Brazil (hydro), Chile (solar)
+
+—prime land for sustainable datacenters.
+
+### 2. Fast-growing digital-native populations
+
+Millions of young developers, analysts, AI engineers.
+
+### 3. Lower land and infrastructure costs
+
+A hyperscale datacenter is dramatically cheaper to build in Nairobi or Lagos than in London.
+
+### 4. Regional compute hubs are emerging
+
+- Kenya
+- Rwanda
+- South Africa
+- Morocco
+- UAE as a gateway
+
+These regions could become neutral AI innovation zones where compute is more affordable and accessible.
+
+## The Real Danger: Dependence
+
+If the Global South depends on foreign clouds to:
+
+- train models
+- run inference
+- store data
+- operate AI systems
+
+then sovereignty weakens.
+
+Countries lose:
+
+- data control
+- economic value
+- innovation capability
+- talent retention
+
+Digital dependency becomes the new colonialism—not imposed by force, but by GPU.
+
+## What Must Happen Now
+
+The Global South needs to:
+
+- invest in shared regional datacenters
+- create sovereign compute clusters
+- incentivize AI startups
+- attract hyperscale partnerships
+- build training pipelines for AI engineers
+- establish renewable-energy-based AI zones
+
+AI does not have to be a Western monopoly.
+
+But without local compute, the Global South risks becoming a mere importer of intelligence.
+
+And once that happens, global inequality will widen—not shrink.
+
+## Final Reflection
+
+The world is entering a new era where prosperity, power, and innovation are defined by access to compute.
+
+If the Global South wants to shape its own digital destiny, it must build the infrastructure now—not later.
+
+Because in the AI age:
+
+**If you don't control compute, you don't control your future.**`
   },
   {
-    id: 'agile-way-week',
-    title: 'Your Week, the Agile Way',
+    id: 'nations-weaponize-attention',
+    title: 'How Nations Weaponize Attention Before Missiles',
     type: 'Thought Leadership',
-    date: '2024-07-28',
-    author: 'DQ Associates',
-    byline: 'Stephanie Kioko',
-    views: 69,
-    excerpt:
-      'Practical ways to plan your week with agile habits—focus, alignment, and iterative delivery…',
-    department: 'Delivery — Designs',
-    location: 'Nairobi',
-    theme: 'Delivery',
-    tags: ['Playbook'],
-    readingTime: '<5',
-    newsType: 'Events & Campaigns',
-    newsSource: 'DQ Operations',
-    focusArea: 'DWS'
+    date: '2025-12-03',
+    author: 'Kaylynn Océanne',
+    byline: 'Kaylynn Océanne',
+    views: 145,
+    excerpt: 'When influence campaigns, coordinated misinformation, and AI-generated narratives shape public sentiment and global alliances before any physical conflict begins.',
+    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
+    format: 'Blog',
+    source: 'DigitalQatalyst',
+    readingTime: '10–20',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'GHC',
+    tags: ['Digital Warfare'],
+    content: `# How Nations Weaponize Attention Before Missiles
+
+When influence campaigns, coordinated misinformation, and AI-generated narratives shape public sentiment and global alliances before any physical conflict begins.
+
+Long before tanks roll or sanctions land, long before diplomats gather or alliances form, something else shifts first — quietly and at extraordinary speed:
+
+**Attention.**
+
+In modern geopolitics, the battle for attention now precedes the battle for territory. Front lines stretch across timelines, comment sections, WhatsApp groups, trending tabs, livestreams, and short-form videos.
+
+Nations now compete for influence in the public mind well before they confront each other on the ground.
+
+And the world is only just waking up to the scale of this disruption.
+
+## The Weaponized Narrative
+
+Historically, wars were gathered momentum through speeches and staged rhetoric.
+
+Now, they ignite through hashtags.
+
+A single strategic narrative can reach millions in seconds. A rumor can cross continents before a fact-check even loads. A staged video can mobilize anger faster than any press conference.
+
+War used to shape narratives.
+
+Today, narratives shape wars.
+
+And because those narratives live on digital platforms, the platforms themselves function as geopolitical battlegrounds; where influence strikes long before conflict does.
+
+## Influence Campaigns as State Strategy
+
+The playbook is clear:
+
+- Micro-targeted political messaging
+- Bot-amplified outrage
+- Fake accounts
+- Emotionally charged videos
+- Manufactured virality
+
+These tactics are deliberate. Their goal is simple: shift public sentiment.
+
+And this isn't something happening only in obscure corners of the internet.
+
+It has moved into the highest levels of state communication.
+
+A clear illustration is how the White House now uses Instagram and X to shape political sentiment; not through formal statements, but through trend-aligned, algorithm-friendly content.
+
+During the ICE deportation rollout, for example, the administration circulated upbeat, meme-styled videos overlaid with viral music and edits. These weren't designed to inform as much as to capture attention, ride trends, and speak directly to younger digital audiences whose political perceptions are increasingly shaped by feed aesthetics.
+
+It's a reminder that influence campaigns are now woven into mainstream state communication.
+
+And the effects are powerful. Influence efforts can:
+
+- Destabilize trust
+- Divide communities
+- Erode institutional credibility
+- Amplify social tension
+- Shape global narratives
+
+The battlefield of influence is no longer hidden.
+
+It is public, viral, aesthetic, and optimized for engagement, shaping belief long before policy does.
+
+## Misinformation Moves Faster Than Truth
+
+In a hyper-stimulated digital world, emotional content spreads more easily than facts; a dynamic nations constantly exploit.
+
+A shocking claim outperforms a verified update.
+
+A dramatic video outruns a neutral report.
+
+An emotional meme defeats a policy brief.
+
+This isn't just a glitch in our information systems.
+
+It's the availability heuristic in action: people remember, trust, and act on what is most vivid, dramatic, and memorable; not necessarily what is true.
+
+By the time misinformation is corrected, if it ever is, the emotional impact has already landed. Certainty is seeded. Fear is activated. People remember the first story they hear, not the correction that follows.
+
+In the digital battlefield, speed outguns accuracy and emotional resonance defeats evidence every time.
+
+## Enter AI: The New Propaganda Engine
+
+If misinformation was a problem before, AI has turned it into geopolitical wildfire.
+
+Generative AI now allows nations, and non-state actors, to create:
+
+- Deepfake political speeches
+- Fabricated evidence
+- Synthetic media "captures"
+- Simulated citizen opinions
+- Automated content farms
+- Persuasive AI influencers
+- Multilingual propaganda at scale
+
+What used to take teams of people now takes seconds.
+
+AI gives influence campaigns precision, speed, scale, and emotional resonance.
+
+And because AI-generated content blends into real content, the average digital citizen can no longer tell the difference.
+
+In the age of AI, perception becomes programmable.
+
+## When Public Sentiment Shapes Foreign Policy
+
+The most striking change in this new era is not the technology, but it's the power shift.
+
+Public opinion now moves faster than institutions.
+
+People form positions before leaders issue statements.
+
+Social media sentiment often pressures governments into action.
+
+This means influence campaigns don't just shape narratives.
+
+They shape:
+
+- Election outcomes
+- Diplomatic positions
+- Trade negotiations
+- Military alliances
+- Public pressure to intervene (or not)
+
+The battlefield is psychological before it is physical.
+
+Alliance building begins in the feed before it begins in the parliament.
+
+## The Path Forward: Cognitive Resilience as National Infrastructure
+
+To navigate the digital war, nations must treat public cognition as a strategic asset.
+
+This means:
+
+- Educating citizens on digital literacy
+- Building AI systems to detect and counter misinformation
+- Elevating fact-based narratives quickly
+- Strengthening platform accountability
+- Investing in national "attention infrastructure"
+- Promoting resilience, not censorship
+- Ensuring the public has access to reliable, contextualized information
+
+Most importantly, societies must cultivate a culture where critical thinking is as normal as scrolling; where citizens learn to shield their attention, question emotional triggers, and recognize when the attention economy is trying to steer their beliefs.
+
+The future of geopolitical stability depends not only on military power or economic strength but on the cognitive resilience of citizens.
+
+Because the digital war is not coming.
+
+It's here.
+
+And the battlefield is us.`
+  },
+  {
+    id: 'half-attention-worker',
+    title: 'The Rise of the Half-Attention Worker',
+    type: 'Thought Leadership',
+    date: '2025-12-05',
+    author: 'Kaylynn Océanne',
+    byline: 'Kaylynn Océanne',
+    views: 167,
+    excerpt: 'Why digital environments hardwire workers into split-attention behaviors that harm quality, and how Digital Cognitive Organizations can reclaim the conditions for full attention.',
+    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+    format: 'Blog',
+    source: 'DigitalQatalyst',
+    readingTime: '10–20',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    tags: ['Digital Worker'],
+    content: `# The Rise of the Half-Attention Worker
+
+Why digital environments hardwire workers into split-attention behaviors that harm quality, and how Digital Cognitive Organizations can reclaim the conditions for full attention.
+
+You can see it in every modern workplace.
+
+People nodding in a meeting while typing a reply in Teams, listening to a colleague while checking an email, and trying to review a document whilst five new notifications pop up; each one demanding immediate attention.
+
+It's not that we don't want to focus.
+
+It's that the system doesn't let us.
+
+Welcome to the era of the Half-Attention Worker; the digital professional who is physically present, partially listening, somewhat thinking, occasionally absorbing, and constantly switching.
+
+Not because they're careless, but because this is what digital work now demands for survival.
+
+We didn't design it this way on purpose either.
+
+We drifted into it through a thousand micro-interruptions, until distraction became the default and focus became the exception.
+
+## How Half-Attention Became the Norm
+
+Somewhere along the way, productivity became synonymous with responsiveness:
+
+- Reply fast.
+- Update now.
+- Join the call.
+- "Quick sync?"
+- "Can we hop on a call?"
+- "Saw this yet?"
+
+In this environment, we learn quickly that attention is a currency we don't own.
+
+To keep up and survive:
+
+We keep one eye on the task, one eye on notifications, one ear on the meeting, and one hand floating over the keyboard waiting to respond.
+
+This is the illusion of productive multitasking.
+
+It's micro-survival in a system built on speed.
+
+## The Cognitive Cost No One Sees
+
+The human brain evolved for depth, continuity, and sequential focus.
+
+Yet, digital environments operate on:
+
+- Fragmentation
+- Micro-alerts
+- Parallel demands
+- Context switching
+- Constant sensory overstimulation
+
+We ask the brain to read, write, listen, plan, decide, and socialize — all while negotiating an endless stream of digital prompts.
+
+When workers say, "I feel like I can't think properly anymore," we're not exaggerating.
+
+We're describing the neurological overload caused by perpetual surface-level attention.
+
+The result? Predictable and evident.
+
+- Shallow thinking becomes the norm
+- Deep thinking becomes a luxury
+- Quality declines
+- Rework increases
+- Decisions become reactive
+
+The Half-Attention Worker isn't less capable.
+
+We're simply stretched beyond what the mind was built to handle.
+
+## When Work Suffers, So Do We
+
+Here's the strange thing:
+
+Digital workplaces celebrate multitasking as if it's a strength; the heroic ability to juggle 10 things at once.
+
+But in reality, what looks like multitasking is often:
+
+- exhaustion,
+- overload,
+- fear of missing something important,
+- pressure to appear available,
+- and constant vigilance.
+
+In a hyper-reactive culture, the person who focuses deeply risks being the person who "didn't see the message," "didn't respond fast enough," or "missed the call."
+
+Half-attention becomes a defensive posture.
+
+Yet, Half-attention does more than harm output — it erodes wellbeing.
+
+It creates:
+
+- Persistent micro-anxiety ("What did I miss?")
+- Cognitive fatigue ("Why is everything mentally tiring?")
+- Emotional fragmentation ("I'm always in a rush, never in control")
+- Lower confidence ("Why can't I concentrate like I used to?")
+- Mental fragmentation ("My mind feels scattered")
+
+It becomes impossible to feel proud of work when the cognitive state required for excellence is rarely accessed.
+
+Over time, we forget what real focus feels like.
+
+## The DCO Response: Reclaiming the Conditions for Full Attention
+
+If attention is the foundation of all intelligent work, then organizations must treat it as a protected asset.
+
+A Digital Cognitive Organization (DCO) doesn't ask workers to be superhuman multitaskers. It redesigns the environment so human attention can actually perform at its best.
+
+This means:
+
+- Protecting deep work windows
+- Filtering noise through AI and automation
+- Structuring communication flows
+- Minimizing unnecessary meetings
+- Designing platforms that orchestrate clarity
+
+The real productivity unlock isn't doing more.
+
+It's doing fewer tasks with full attention.
+
+When organizations protect attention, workers reclaim:
+
+- the quality of their thought
+- the integrity of their work
+- the calm of their mind
+- and the confidence that comes from depth, not speed
+
+This is the foundation of DCO performance.
+
+## Rebuilding Attention in a Fast-Paced World
+
+Although organizations play a central role in the current state of attention deficit, workers must also reclaim their cognitive space through intentional habits.
+
+### 1. Single-tasking as a default
+
+Choose one window, one task, one objective.
+
+### 2. Silent periods
+
+Turn off notifications for deep-focus blocks (even 30 minutes makes a difference).
+
+### 3. Reduce open loops
+
+Close or minimize tabs that trigger mental fragmentation.
+
+### 4. Practice mental stillness
+
+Short pauses, even 20–30 seconds, resets the brain's processing load.
+
+### 5. Protect boundaries
+
+Be explicit about focus times; it signals professionalism, not unavailability.
+
+### 6. Prioritize clarity over speed
+
+A slower, well-thought-out response often prevents ten follow-up messages.
+
+In a world engineered for distraction, rebuilding attention becomes a personal act of power.
+
+## The Future Belongs to Full-Attention Work
+
+The era of the Half-Attention Worker is not sustainable.
+
+The organizations that will lead the next decade are those that:
+
+- restore cognitive space,
+- respect human attention,
+- deploy machine workers to reduce noise,
+- and elevate humans into deep, meaningful thinking.
+
+In a world drowning in digital noise, focus becomes a competitive advantage; both for organizations and individuals.
+
+The workers and workplaces that learn to protect human attention will unlock levels of performance the Half-Attention environment could never produce.`
+  },
+  {
+    id: 'architecture-addiction',
+    title: 'The Architecture of Addiction: How Interface Design Creates Digital Habits',
+    type: 'Thought Leadership',
+    date: '2025-12-01',
+    author: 'Kaylynn Océanne',
+    byline: 'Kaylynn Océanne',
+    views: 198,
+    excerpt: 'Small triggers, frictionless actions, and micro-gratifications engineered into UI patterns — and why they matter in the Digital Cognitive era.',
+    image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80',
+    format: 'Blog',
+    source: 'DigitalQatalyst',
+    readingTime: '10–20',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    tags: ['Social Media & Behavioral Design'],
+    content: `# The Architecture of Addiction: How Interface Design Creates Digital Habits
+
+Small triggers, frictionless actions, and micro-gratifications engineered into UI patterns — and why they matter in the Digital Cognitive era.
+
+Most people believe they choose how they use social media.
+
+But spend five minutes on any platform and you'll notice something unsettling:
+
+**The platform is choosing how we behave.**
+
+Every tap, swipe, pause, scroll, refresh, and notification is carefully engineered to pull attention, reward micro-behaviors, and build habits that become almost automatic.
+
+This isn't accidental design.
+
+It's strategic behavioral architecture.
+
+And the more time we spend "engaged", the more invisible it becomes.
+
+## The Economics of Attention
+
+Social platforms look like communication tools.
+
+But at scale, they operate as advertising engines wrapped in UI. Their survival depends on:
+
+- Keeping us engaged
+- Learning our patterns
+- Predicting our emotions
+- Personalizing content
+- Maximizing daily active minutes
+
+The longer we stay, the more data we generate. The more data we generate, the more accurately the platform can target ads and predict behavior.
+
+And that accuracy is what makes the platform profitable.
+
+In other words:
+
+**Human attention is the product being sold.**
+
+This is the foundation of the modern attention economy.
+
+Understanding this explains why platforms evolved the way they did:
+
+- Infinite scroll → infinite ad inventory
+- Autoplay → no decision friction
+- Notifications → reliable reactivation
+- Like counts → emotional feedback loops
+- Personalized feeds → dopamine-driven relevance
+
+These choices aren't value judgments; they are the logical outcomes of an incentive system built around engagement.
+
+But necessary economics can still create unintended cognitive consequences.
+
+## How Platform Design Feed Addiction
+
+Once the model was established, platforms began engineering experiences that keep attention inside their ecosystem.
+
+### 1. Micro-triggers
+
+Red badges, vibration patterns, unread counts: tiny cues that activate curiosity and micro-anxiety.
+
+### 2. Frictionless actions
+
+When everything is effortless, nothing interrupts the habit loop.
+
+We scroll not because we chose to, but because the feed never ends.
+
+### 3. Variable rewards
+
+Likes, views, new content, emotional hits: unpredictable rewards keep the brain repeating and craving the behavior.
+
+### 4. Emotional sequencing
+
+Humor → outrage → nostalgia → shock → affirmation. Emotions arranged to maintain engagement, not wellbeing.
+
+The result?
+
+Social media habits become reflexes.
+
+And the psychological effects are increasingly visible:
+
+- Declining attention span
+- Compulsive checking
+- Difficulty focusing offline
+- Anxiety tied to notification patterns
+- Emotional volatility driven by content mood swings
+- Erosion of identity through algorithmic comparison
+
+We have created ecosystems that overstimulate the mind while undernourishing cognition.
+
+But the solution is not abandoning digital platforms.
+
+It's redesigning the relationship between humans and technology.
+
+## Designing for Attention, not Addiction
+
+In the Digital Cognitive era, digital platforms play a crucial role in human capability.
+
+They can strengthen creativity, accelerate learning, and democratize access to information.
+
+But to unlock this potential, platforms must evolve from:
+
+**Attention extraction → Attention protection**
+
+This means designing:
+
+### 1. Interfaces that reinforce agency
+
+- Clear stopping points
+- Signals that encourage reflection
+- Visible boundaries within the experience
+
+### 2. Healthy defaults
+
+- Limited notifications
+- Autoplay off
+- Gentle usage prompts
+
+### 3. Transparent algorithms
+
+Users should understand why they see what they see.
+
+### 4. Friction for unhealthy loops
+
+Small pauses that help reintroduce choice.
+
+### 5. Wellbeing-oriented emotional design
+
+Sequencing that supports mental wellbeing rather than destabilizing it.
+
+A human-centered digital future demands platforms to augment human capability, not erode it.
+
+## Reclaiming Our Attention as Digital Citizens
+
+We live in a time where social media is woven into our digital lives, and we are not going back.
+
+Human agency must evolve alongside digital architecture within the attention economy.
+
+### At an educational level
+
+Teach digital literacy like math and reading:
+
+- Why we scroll
+- How design influences behavior
+- How algorithms work
+
+### At a governmental level
+
+Policies that protect cognitive wellbeing:
+
+- Clear design standards
+- Algorithmic transparency
+- Restrictions on manipulative UI
+- Age-appropriate experiences
+
+### At a personal level
+
+Small habits bring back autonomy:
+
+- Turn off non-essential notifications
+- Remove addictive apps from home screens
+- Schedule intentional usage windows
+- Ask, "Did I choose this action or did the design choose it for me?"
+
+A single pause disrupts the loop. Consistent pauses reclaim control.
+
+## The Future of Social Media
+
+The next era must reverse direction.
+
+We need platforms designed for:
+
+- Meaningful connection
+- Cognitive preservation
+- Emotional balance
+- Informed engagement
+- Intentional participation
+
+Because our attention is more than a metric. It is the foundation of our autonomy, our cognition, and our humanity.
+
+The question isn't whether technology will shape us.
+
+It already has.
+
+The real question is whether we'll sculpt technology into a tool of clarity; or will we let it continue to blur the edges of our humanity?`
   },
   {
     id: 'riyadh-horizon-hub',
@@ -387,7 +1452,7 @@ When you develop your leadership superpowers, you don't just improve your own ef
     department: 'Delivery — Deploys',
     location: 'Riyadh',
     domain: 'Business',
-    newsType: 'Corporate Announcements',
+    newsType: 'Company News',
     newsSource: 'DQ Leadership',
     focusArea: 'GHC'
   },
@@ -405,7 +1470,7 @@ When you develop your leadership superpowers, you don't just improve your own ef
     domain: 'People',
     tags: ['shifts', 'allocation', 'scheduling', 'guidelines'],
     readingTime: '5–10',
-    newsType: 'Corporate Announcements',
+    newsType: 'Policy Update',
     newsSource: 'DQ Operations',
     focusArea: 'DWS'
   },
@@ -421,7 +1486,7 @@ When you develop your leadership superpowers, you don't just improve your own ef
     department: 'HRA (People)',
     location: 'Dubai',
     domain: 'People',
-    newsType: 'Events & Campaigns',
+    newsType: 'Holidays',
     newsSource: 'DQ Communications',
     focusArea: 'Culture & People'
   },
@@ -437,7 +1502,7 @@ When you develop your leadership superpowers, you don't just improve your own ef
     department: 'Products',
     location: 'Remote',
     domain: 'Technology',
-    newsType: 'Corporate Announcements',
+    newsType: 'Company News',
     newsSource: 'DQ Communications',
     focusArea: 'DWS'
   },
@@ -453,28 +1518,9 @@ When you develop your leadership superpowers, you don't just improve your own ef
     department: 'DBP Delivery',
     location: 'Dubai',
     domain: 'Operations',
-    newsType: 'Product / Project Updates',
+    newsType: 'Policy Update',
     newsSource: 'DQ Operations',
     focusArea: 'DWS'
-  },
-  {
-    id: 'riyadh-designing-at-scale',
-    title: 'Designing at Scale for Riyadh Citizen Services',
-    type: 'Thought Leadership',
-    date: '2024-06-15',
-    author: 'Leads',
-    byline: 'Yara Al Harthy',
-    views: 52,
-    excerpt:
-      'How the Riyadh studio co-created digital citizen services with local regulators—pairing delivery playbooks with cultural fluency.',
-    department: 'Delivery — Designs',
-    location: 'Riyadh',
-    theme: 'Delivery',
-    tags: ['Playbook', 'EJP'],
-    readingTime: '10–20',
-    newsType: 'Product / Project Updates',
-    newsSource: 'DQ Operations',
-    focusArea: 'GHC'
   },
   {
     id: 'azure-devops-task-guidelines',
@@ -488,7 +1534,7 @@ When you develop your leadership superpowers, you don't just improve your own ef
     department: 'SecDevOps',
     location: 'Remote',
     domain: 'Technology',
-    newsType: 'Digital Tech News',
+    newsType: 'Policy Update',
     newsSource: 'DQ Operations',
     focusArea: 'DWS'
   },
@@ -504,7 +1550,7 @@ When you develop your leadership superpowers, you don't just improve your own ef
     department: 'HRA (People)',
     location: 'Nairobi',
     domain: 'People',
-    newsType: 'Events & Campaigns',
+    newsType: 'Holidays',
     newsSource: 'DQ Communications',
     focusArea: 'Culture & People'
   }
@@ -523,13 +1569,14 @@ When you develop your leadership superpowers, you don't just improve your own ef
     location: 'Dubai',
     tags: ['policy', 'schedule', 'collaboration'],
     readingTime: '5–10',
-    newsType: 'Corporate Announcements',
+    newsType: 'Policy Update',
     newsSource: 'DQ Communications',
     focusArea: 'Culture & People',
     content: `# Enhancing Collaboration Through Unified Scheduling
 
-## Overview
 To enhance collaboration and synchronize workflows across all studios, we are implementing a unified company-wide lunch break schedule.
+
+## Overview
 
 ## New Schedule Details
 **Effective immediately**, the designated lunch break for all associates will be:
@@ -573,13 +1620,14 @@ Thank you for your cooperation in helping us build a more synchronized and effic
     image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80',
     tags: ['SFIA', 'grading', 'capability'],
     readingTime: '10–20',
-    newsType: 'Corporate Announcements',
+    newsType: 'Company News',
     newsSource: 'DQ Communications',
     focusArea: 'Culture & People',
     content: `# DQ Associate Grade Review Program Launch
 
-## Program Overview
 We are pleased to announce the launch of the **DQ Associate Grade Review Program (GRP)**. This comprehensive initiative aims to ensure all associates are aligned to the DQ SFIA-based grading scale, reflecting both their competence levels and scope of responsibility.
+
+## Program Overview This comprehensive initiative aims to ensure all associates are aligned to the DQ SFIA-based grading scale, reflecting both their competence levels and scope of responsibility.
 
 ## Leadership Team
 The review will be led by:
@@ -661,10 +1709,12 @@ We are committed to maintaining transparent, fair, and consistent grading standa
     domain: 'People',
     tags: ['WFH', 'guidelines', 'policy'],
     readingTime: '10–20',
-    newsType: 'Corporate Announcements',
+    newsType: 'Policy Update',
     newsSource: 'DQ Operations',
     focusArea: 'Culture & People',
     content: `# DQ Work From Home (WFH) Guidelines
+
+Work From Home (WFH) guidelines outlining purpose, roles, processes, tools, KPIs, and compliance for remote work across DQ.
 
 ## WFH Guideline Overview
 The **Work From Home (WFH) Guidelines** provide a clear framework for how remote work is requested, approved, executed, and monitored across DQ. Each section below is designed to keep productivity, accountability, and culture intact while associates are working remotely.
@@ -778,10 +1828,12 @@ The **Work From Home (WFH) Guidelines** provide a clear framework for how remote
     domain: 'People',
     tags: ['dress code', 'guidelines', 'policy'],
     readingTime: '10–20',
-    newsType: 'Corporate Announcements',
+    newsType: 'Policy Update',
     newsSource: 'DQ Operations',
     focusArea: 'Culture & People',
     content: `# DQ Dress Code Guideline (Version 1.0)
+
+Professional appearance guidelines that set expectations for attire at DigitalQatalyst, balancing professionalism with comfort and supporting our brand perception.
 
 ## Context
 At **DigitalQatalyst (DQ)**, professional appearance shapes how our brand is perceived, supports personal confidence, and creates an environment where associates feel comfortable and productive. This guideline sets expectations for attire so we strike the right balance between professionalism and comfort.
@@ -895,10 +1947,12 @@ Where in doubt, associates should choose the more professional option and consul
     domain: 'Business',
     tags: ['story', 'GHC', 'references'],
     readingTime: '5–10',
-    newsType: 'Corporate Announcements',
+    newsType: 'Company News',
     newsSource: 'DQ Communications',
     focusArea: 'GHC',
     content: `# DQ Storybook — Latest Version and Quick Reference Links
+
+Explore the latest DQ Storybook and quick links to GHC elements including Vision, HoV, Persona, Agile TMS/SoS/Flows, and 6xD.
 
 ## Introduction
 Here's the latest version of the **DQ Storybook** — our evolving narrative that brings the Golden Honeycomb of Competencies (GHC) to life. We're continuing to shape and refine this Storybook, so keep an eye out for new updates and deep dives in the coming weeks.
@@ -990,6 +2044,704 @@ For questions about any of these resources or to request additional documentatio
 ---
 
 *Keep this reference handy for quick access to all DQ frameworks and methodologies. Together, we continue to build excellence through shared knowledge and consistent application of our proven approaches.*`
+  },
+  {
+    id: 'dq-scrum-master-structure-update',
+    title: 'DQ Changes: Updated Scrum Master Structure',
+    type: 'Announcement',
+    date: '2025-11-27',
+    author: 'Felicia Araba',
+    views: 0,
+    excerpt:
+      'As part of our organizational optimization, we are updating the Scrum Master structure to better align with our delivery framework and enhance team effectiveness.',
+    department: 'Operations',
+    location: 'Remote',
+    domain: 'Operations',
+    theme: 'Delivery',
+    tags: ['Scrum Master', 'Organizational Structure', 'Leadership'],
+    readingTime: '10–20',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    content: `# DQ Changes: Updated Scrum Master Structure
+
+As part of our organizational optimization, we are updating the leadership structure across functions to streamline responsibilities and enhance ownership.
+
+Previously, our leadership structure included Sector Leads, Factory Leads, Tower Leads, and Scrum Masters. These have now been streamlined into 4 unified Scrum Master framework.
+
+## | Updated Scrum Master Structure
+
+DQ will now operate under four defined Scrum Master categories:
+
+### COE Scrum Masters
+(Existing position) – Supporting enterprise-wide capability excellence.
+
+### Delivery Scrum Masters
+(New role) – Driving end-to-end delivery flow, ensuring teams progress predictably from brief to outcome.
+
+### Working Room Scrum Masters
+(New role) – Managing daily execution within working rooms, resolving blockers, and ensuring day-to-day operational throughput.
+
+### Unit Scrum Masters
+(Updated position) – The former Sector, Factory, and Tower Lead positions redefined as:
+
+- Sector Scrum Master
+- Factory Scrum Master
+- Tower Scrum Master
+
+## | Purpose
+
+To maintain a streamlined, transparent, and consistent leadership structure that strengthens delivery ownership, enhances blocker resolution, and drives teams toward clear, measurable outcomes.
+
+## | Role Expectation
+
+All Scrum Masters are expected to take full ownership of their unit, delivery area, or working room proactively identifying blockers, facilitating progress, and ensuring achievement of defined delivery targets.`
+  },
+  {
+    id: 'why-execution-beats-intelligence',
+    title: 'Why Execution Beats Intelligence: The Real Driver of Growth in DQ',
+    type: 'Thought Leadership',
+    date: '2024-12-01',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Explore how execution and consistent action drive real growth at DQ, and why intelligence alone isn\'t enough to achieve organizational success.',
+    image: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'Business',
+    theme: 'Leadership',
+    tags: ['podcast', 'execution', 'growth', 'leadership', 'strategy'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Execution_Beats_Intelligence__Why_Action_Wins.m4a',
+    content: `# Why Execution Beats Intelligence: The Real Driver of Growth in DQ
+
+## Focus of the Episode
+
+Promoting execution over intelligence, stressing why getting things done is more powerful than just knowing the best approach. Advocates for consistent, purposeful action and momentum over waiting for the perfect strategy or plan, emphasizing the importance of learning and refining by doing.
+
+## Intended Impact
+
+The episode aims to inspire listeners to take action, encouraging them to "take that next step, start that project, or refine that idea in action", which means prioritizing progress over staying stuck in analysis paralysis.
+
+The intended impact is to compel listeners to shift their focus from developing the "perfect strategy" to creating momentum through consistent, purposeful action.
+
+The ultimate goal is to reinforce the core belief that Execution beats intelligence every single time, making execution the core element of DQ's identity and the driver of real, sustainable growth and impact within the company.`
+  },
+  {
+    id: 'why-we-misdiagnose-problems',
+    title: 'Why We Misdiagnose Problems — And How to Stop It',
+    type: 'Thought Leadership',
+    date: '2024-12-02',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Learn why teams often misdiagnose problems and discover practical frameworks to identify root causes and implement effective solutions.',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'Business',
+    theme: 'Delivery',
+    tags: ['podcast', 'problem-solving', 'diagnosis', 'root-cause', 'analysis'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Why We Misdiagnose Problems — And How to Stop It.m4a',
+    content: `# Why We Misdiagnose Problems — And How to Stop It
+
+## Goal of This Episode
+
+Help us recognise when we're reacting to symptoms instead of diagnosing the real issue. Improve the quality of action, not reduce action. Encourage clearer problem framing before fixes are introduced. Reinforce simple, practical questions (e.g. "What does 'done' actually mean here?") that can be used immediately in day-to-day work.
+
+## Intended Impact
+
+Shift teams from activity-driven responses to problem-driven action. Reinforce solver behaviour as diagnose → act → learn, rather than act → adjust → repeat. Shorten feedback loops by catching misdiagnosis earlier, before effort compounds in the wrong direction. Strengthen individual and collective solver behaviour—spotting, naming, and addressing the real blocker rather than defaulting to familiar fixes.`
+  },
+  {
+    id: 'turning-conversations-into-action',
+    title: 'Turning Every Conversation Into Action',
+    type: 'Thought Leadership',
+    date: '2024-12-03',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Discover how to transform meetings and discussions into concrete actions that drive progress and deliver results.',
+    image: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'Business',
+    theme: 'Delivery',
+    tags: ['podcast', 'conversation', 'action', 'meetings', 'productivity'],
+    readingTime: '10–20',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Turning_Every_Conversation _Into _Action.m4a',
+    content: `# Turning Every Conversation Into Action
+
+## Focus of the Episode
+
+Why conversations feel satisfying even when nothing moves (the psychological reward of clarity and alignment). The role of active listening in turning updates and narratives into signals that shape direction. Shifting from "what we should do" to "what has already started" as the trigger for momentum.
+
+## Intended Impact
+
+Shift mindset from "good conversations" to "conversations that move work". Encourage sharper listening and questioning that surfaces what actually matters for progress. Make momentum and visible movement the default expectation after discussions. Reinforce the idea that conversations are most valuable when they set direction and immediately enable the next move.`
+  },
+  {
+    id: 'why-tasks-dont-close-at-dq',
+    title: 'Why Tasks Don\'t Close at DQ — And How to Fix It',
+    type: 'Thought Leadership',
+    date: '2024-12-04',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'An in-depth analysis of why tasks remain open and practical solutions to improve task completion rates across DQ teams.',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'Operations',
+    theme: 'Delivery',
+    tags: ['podcast', 'tasks', 'productivity', 'project-management', 'execution'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Why_Smart_Teams_Fail_To_Finish.m4a',
+    content: `# Why Tasks Don't Close at DQ — And How to Fix It
+
+## Focus of the Episode
+
+This episode examines the systemic reasons why tasks remain open and provides actionable strategies to improve closure rates. It explores root causes of task stagnation, the impact of open tasks on team performance, strategies for improving task completion, tools and processes that work, and building a culture of task completion.
+
+## Intended Impact
+
+Listeners will understand the challenges and learn proven methods to ensure tasks get completed on time. The episode aims to help teams identify why tasks remain open and implement practical solutions to improve closure rates and overall productivity.`
+  },
+  {
+    id: 'happy-talkers-why-talking-feels-productive',
+    title: 'Happy Talkers: Why Talking Feels Productive but Isn\'t',
+    type: 'Thought Leadership',
+    date: '2024-12-05',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Explore the phenomenon of "happy talking" and why excessive discussion can create an illusion of productivity without delivering real results.',
+    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'Business',
+    theme: 'Culture',
+    tags: ['podcast', 'communication', 'productivity', 'meetings', 'culture'],
+    readingTime: '10–20',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Stop_Happy_Talk_and_Start_Executing.m4a',
+    content: `# Happy Talkers: Why Talking Feels Productive but Isn't
+
+## Focus of the Episode
+
+Identifying and examining "happy talk," which feels energizing but is low consequence because they give the feeling of progress without requiring commitment, decisions, or accountability. Exploring the negative consequences of this behavior (such as the erosion of trust and stalled innovation) and offering practical strategies for moving from discussion to action.
+
+## Intended Impact
+
+To encourage listeners to assess whether their conversations and meetings produce clarity—or just comfort, helping them identify and unpack "happy talk," which consists of high-energy, low-consequence discussions that feel productive but ultimately fail to move work forward. To equip listeners with practical strategies for breaking the habit of avoiding commitment, such as ending conversations with decisions and naming an owner and a timeline, thereby ensuring that conversations lead somewhere and mitigate the negative costs associated with stalled execution and the erosion of trust.`
+  },
+  {
+    id: 'execution-styles-why-teams-work-differently',
+    title: 'Execution Styles: Why Teams Work Differently and How to Align Them',
+    type: 'Thought Leadership',
+    date: '2024-12-06',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Understand different execution styles across teams and learn how to align diverse approaches for maximum effectiveness.',
+    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'People',
+    theme: 'Leadership',
+    tags: ['podcast', 'execution', 'teams', 'collaboration', 'alignment'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Stop_Judging_Intent_Coordinate_Work_Styles.m4a',
+    content: `# Execution Styles: Why Teams Work Differently and How to Align Them
+
+## Focus of the Episode
+
+Establishing tasks as the fundamental "heartbeat" and smallest unit of value. Defining the practical requirements for successful task management.
+
+## Intended Impact
+
+Shift the organizational mindset from performing Agile "rituals" to achieving actual work "flow". Increase team momentum and psychological safety through transparency and trust. Drive daily operational discipline and clarity by encouraging staff to break work into small, actionable pieces and maintain honest communication.`
+  },
+  {
+    id: 'agile-the-dq-way-tasks-core-work-system',
+    title: 'Agile the DQ Way: Why Tasks Are the Core of Our Work System',
+    type: 'Thought Leadership',
+    date: '2024-12-07',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Learn how DQ implements Agile principles with tasks as the fundamental unit of work, driving clarity and accountability.',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'Operations',
+    theme: 'Delivery',
+    tags: ['podcast', 'agile', 'tasks', 'work-system', 'methodology'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Agile_is_Task_Movement_Not_Ceremony.m4a',
+    content: `# Agile the DQ Way: Why Tasks Are the Core of Our Work System
+
+## Focus of the Episode
+
+Establishing tasks as the fundamental "heartbeat" and smallest unit of value. Defining the practical requirements for successful task management.
+
+## Intended Impact
+
+Shift the organizational mindset from performing Agile "rituals" to achieving actual work "flow". Increase team momentum and psychological safety through transparency and trust. Drive daily operational discipline and clarity by encouraging staff to break work into small, actionable pieces and maintain honest communication.`
+  },
+  {
+    id: 'leaders-as-multipliers-accelerate-execution',
+    title: 'Leaders as Multipliers: How to Accelerate Team Execution',
+    type: 'Thought Leadership',
+    date: '2024-12-08',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Discover how leaders can act as multipliers, accelerating team execution and amplifying results through effective leadership practices.',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'People',
+    theme: 'Leadership',
+    tags: ['podcast', 'leadership', 'multipliers', 'execution', 'team-performance'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Execution_Beats_Intelligence__Why_Action_Wins (1).m4a',
+    content: `# Leaders as Multipliers: How to Accelerate Team Execution
+
+## Focus of the Episode
+
+The podcast highlights that workplace conflict is often stylistic rather than personal, arising when teams misinterpret different ways of working, such as speed being seen as reckless or caution as slow. The discussion emphasizes that alignment does not mean forcing everyone to work the same way, but rather agreeing on how to move together by making individual styles explicit.
+
+## Intended Impact
+
+By making execution styles explicit, the episode aims to stop team members from judging one another and misinterpreting different approaches—such as viewing speed as reckless or caution as slow. The episode seeks to move teams away from the assumption that everyone works the same way and toward a model of agreeing on "how we move together". Rather than forcing uniformity, the episode intends to show how different styles—like Sprinters and Architects—can coexist and support one another. When goals, timelines, and the definition of "done" are clear, these different execution methods can work in harmony to move a project forward without unnecessary friction.`
+  },
+  {
+    id: 'energy-management-for-high-action-days',
+    title: 'How to Manage Your Energy for High-Action Days',
+    type: 'Thought Leadership',
+    date: '2024-12-19',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Learn how managing usable mental, emotional, and physical energy—not just time blocks—creates sustainable high-action days and reduces invisible stress.',
+    image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'People',
+    theme: 'Leadership',
+    tags: ['podcast', 'energy', 'performance', 'productivity', 'stress'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/Stop_Clock_Watching_Start_Managing_Energy.m4a',
+    content: `# Energy Beats Time: Designing High-Action Days
+
+## Focus of the Episode
+
+Prioritizing energy management over time management by recognizing that execution fails not because of a lack of time, but due to a lack of usable mental, emotional, and physical energy.
+
+Designing high-action days through intentional practices such as limiting execution priorities, protecting peak energy windows from administrative tasks, and closing mental loops to prevent invisible stress and preserve future energy.
+
+## Intended Impact
+
+Transform intention into execution by shifting the mindset from managing time blocks to strategically managing and protecting usable energy, which is the true constraint of high-action days.
+
+Reduce "invisible stress" and mental fatigue by training listeners to identify and eliminate hidden drains, such as unclear tasks, constant re-prioritization, and the lack of recovery between meetings.
+
+Empower sustainable high performance through actionable rules, such as building momentum with early wins and closing mental loops to ensure energy is not just spent, but sustained for the following day.`
+  },
+  {
+    id: 'execution-metrics-that-drive-movement',
+    title: 'Execution Metrics: How to Measure the Only Things That Matter',
+    type: 'Thought Leadership',
+    date: '2024-12-20',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt: 'Explore how to replace vanity metrics with execution metrics like Task Closure Rate, Time to First Action, and Blocker Age to drive real movement, unblock teams, and build a culture of improvement.',
+    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+    department: 'DQ Leadership',
+    domain: 'Operations',
+    theme: 'Delivery',
+    tags: ['podcast', 'metrics', 'execution', 'performance', 'blockers'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl: '/Podcasts/The_Four_Metrics_That_Drive_Execution_Speed.m4a',
+    content: `# Execution Metrics That Actually Move Work
+
+## Focus of the Episode
+
+Distinguishing execution metrics from mere activity or vanity metrics by focusing on tangible movement.
+
+Utilizing specific metrics such as Task Closure Rate, Time to First Action, and Blocker Age to identify bottlenecks and foster a culture of continuous improvement rather than fear.
+
+## Intended Impact
+
+Shift the organizational focus from mere "activity" to "tangible progress" by encouraging the use of metrics that drive actual movement.
+
+Foster a culture of improvement and transparency over fear and defense, by making metrics visible to the people doing the work.
+
+Refine the role of leadership to prioritize "unblocking" over "micromanagement". The impact is to empower leaders to use execution data—like "Blocker Age"—to know exactly when to step in to simplify decisions or reduce scope, ensuring that the metrics used align with and signal a core value for execution.`
+  },
+  {
+    id: 'ownership-mindset-single-driver',
+    title: 'Ownership Mindset: Why Every Task Needs a Single Driver',
+    type: 'Thought Leadership',
+    date: '2025-01-10',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'Explore why every task needs a single, clearly named owner and how ownership mindset accelerates execution across teams.',
+    department: 'DQ Leadership',
+    domain: 'People',
+    theme: 'Leadership',
+    tags: ['podcast', 'execution mindset', 'ownership', 'series-2'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Ep 1_Ownership Mindset - Why Every Task Needs a Single Driver.m4a',
+    content: `# Ownership Mindset: Why Every Task Needs a Single Driver
+
+## Focus of the Episode
+
+Why tasks without a clearly named owner stall, and how single-point ownership creates momentum, accountability, and cleaner handoffs.
+
+## Intended Impact
+
+Help listeners adopt an ownership mindset for every task and initiative, making it obvious who is responsible for moving work forward at any given time.`
+  },
+  {
+    id: 'psychology-of-follow-through',
+    title: 'The Psychology of Follow-through: How to Finish What You Start',
+    type: 'Thought Leadership',
+    date: '2025-01-11',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'Understand the mental barriers that stop us from finishing and learn simple tools to close the loop on commitments.',
+    department: 'DQ Leadership',
+    domain: 'People',
+    theme: 'Leadership',
+    tags: ['podcast', 'execution mindset', 'follow-through', 'series-2'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Ep 2_The Psychology of Follow-through - How to Finish What You Start.m4a',
+    content: `# The Psychology of Follow-through: How to Finish What You Start
+
+## Focus of the Episode
+
+Why good intentions fade after the first burst of energy, and what practical routines help you close loops consistently.
+
+## Intended Impact
+
+Equip listeners with simple mental models and habits that make finishing work feel natural, not exceptional.`
+  },
+  {
+    id: 'dont-mistake-motion-for-progress',
+    title: "Don't Mistake Motion for Progress", 
+    type: 'Thought Leadership',
+    date: '2025-01-12',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'Learn to separate activity from real movement so you can stop spinning and start advancing meaningful work.',
+    department: 'DQ Leadership',
+    domain: 'Business',
+    theme: 'Delivery',
+    tags: ['podcast', 'execution mindset', 'focus', 'series-2'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      "/02. Series 02 - The Execution Mindset/Don_t_Mistake_Motion_For_Progress (2).m4a",
+    content: `# Don't Mistake Motion for Progress
+
+## Focus of the Episode
+
+Why constant updates, meetings, and activity can hide the fact that nothing important is actually moving.
+
+## Intended Impact
+
+Help teams and individuals develop a sharper radar for progress, reducing wasted motion and redirecting effort to what really moves the needle.`
+  },
+  {
+    id: 'cutting-the-noise-focus-habits',
+    title: 'Cutting the Noise: Focus Habits for Digital Workers',
+    type: 'Thought Leadership',
+    date: '2025-01-13',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'Practical focus habits for digital workers who are overwhelmed by pings, channels, and constant micro-requests.',
+    department: 'DQ Leadership',
+    domain: 'People',
+    theme: 'Delivery',
+    tags: ['podcast', 'execution mindset', 'focus', 'digital workers', 'series-2'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Ep 8_Cutting the Noise - Focus Habits for Digital Workers.m4a',
+    content: `# Cutting the Noise: Focus Habits for Digital Workers
+
+## Focus of the Episode
+
+How to design focus blocks, reduce digital noise, and protect execution time in high-notification environments.
+
+## Intended Impact
+
+Help listeners create conditions where deep work is possible, even inside chatty, fast-moving teams.`
+  },
+  {
+    id: 'build-high-velocity-team-culture',
+    title: 'How to Build a High-Velocity Team Culture',
+    type: 'Thought Leadership',
+    date: '2025-01-14',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'Explore the cultural rules and rituals that separate high-velocity teams from well-intentioned but slow ones.',
+    department: 'DQ Leadership',
+    domain: 'Operations',
+    theme: 'Leadership',
+    tags: ['podcast', 'execution mindset', 'team culture', 'series-2'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Ep 9_How to Build a High-Velocity Team Culture.m4a',
+    content: `# How to Build a High-Velocity Team Culture
+
+## Focus of the Episode
+
+What behaviours, norms, and rituals create teams that move quickly without burning out or dropping quality.
+
+## Intended Impact
+
+Give leaders and teams a practical picture of what a high-velocity culture looks like day to day, so they can start building it intentionally.`
+  },
+  {
+    id: 'micro-actions-beat-big-plans',
+    title: 'Micro Actions Beat Big Plans',
+    type: 'Thought Leadership',
+    date: '2025-01-15',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'Why tiny, well-chosen moves out-perform grand plans that never quite get off the ground.',
+    department: 'DQ Leadership',
+    domain: 'Business',
+    theme: 'Delivery',
+    tags: ['podcast', 'execution mindset', 'micro actions', 'series-2'],
+    readingTime: '10–20',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Micro_Actions_Beat_Big_Plans (1).m4a',
+    content: `# Micro Actions Beat Big Plans
+
+## Focus of the Episode
+
+Why large, complex plans often stall while small, well-targeted moves quietly change reality.
+
+## Intended Impact
+
+Encourage listeners to bias toward the next small, concrete move rather than designing the perfect masterplan.`
+  },
+  {
+    id: 'micro-actions-convert-intention-into-traction',
+    title: 'Micro-Actions: Converting Intention into Traction',
+    type: 'Thought Leadership',
+    date: '2025-01-16',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'A practical walkthrough of how to turn vague intentions into small, trackable movements that compound.',
+    department: 'DQ Leadership',
+    domain: 'Business',
+    theme: 'Delivery',
+    tags: ['podcast', 'execution mindset', 'traction', 'series-2'],
+    readingTime: '10–20',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Micro-Actions_Convert_Intention_Into_Traction.m4a',
+    content: `# Micro-Actions: Converting Intention into Traction
+
+## Focus of the Episode
+
+How to break fuzzy goals into micro-actions you can actually see on your board and calendar.
+
+## Intended Impact
+
+Help listeners design a simple pipeline from intention → task → visible movement.`
+  },
+  {
+    id: 'stop-discussion-start-action-clarity',
+    title: 'Stop Discussion, Start Action Through Clarity',
+    type: 'Thought Leadership',
+    date: '2025-01-17',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'Why unclear ownership, fuzzy outcomes, and vague next steps keep teams in discussion loops instead of decisive action.',
+    department: 'DQ Leadership',
+    domain: 'Business',
+    theme: 'Leadership',
+    tags: ['podcast', 'execution mindset', 'clarity', 'series-2'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Stop_Discussion_Start_Action_Through_Clarity.m4a',
+    content: `# Stop Discussion, Start Action Through Clarity
+
+## Focus of the Episode
+
+Why many conversations never produce real movement, and how clarity on owner, outcome, and first step flips talk into action.
+
+## Intended Impact
+
+Equip listeners with a simple checklist to exit meetings with decisions, named owners, and a clear first task so work can move immediately.`
+  },
+  {
+    id: 'cutting-the-noise-focus-habits-alt',
+    title: 'Cutting the Noise - Focus Habits for Digital Workers',
+    type: 'Thought Leadership',
+    date: '2025-01-18',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'An additional recording of "Cutting the Noise - Focus Habits for Digital Workers" for digital workers who want more options for how they listen and learn.',
+    department: 'DQ Leadership',
+    domain: 'People',
+    theme: 'Delivery',
+    tags: ['podcast', 'execution mindset', 'focus', 'digital workers', 'series-2'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Cutting the Noise - Focus Habits for Digital Workers.m4a',
+    content: `# Cutting the Noise: Focus Habits for Digital Workers (Alternate Recording)
+
+## Focus of the Episode
+
+How to design focus blocks, reduce digital noise, and protect execution time in high-notification environments.
+
+## Intended Impact
+
+Help listeners create conditions where deep work is possible, even inside chatty, fast-moving teams.`
+  },
+  {
+    id: 'cutting-the-noise-focus-habits-alt-1',
+    title: 'Cutting the Noise - Focus Habits for Digital Workers (1)',
+    type: 'Thought Leadership',
+    date: '2025-01-19',
+    author: 'DQ Leadership',
+    byline: 'DQ Leadership',
+    views: 0,
+    excerpt:
+      'Another alternate recording of "Cutting the Noise - Focus Habits for Digital Workers" so teams can choose the version that suits their context.',
+    department: 'DQ Leadership',
+    domain: 'People',
+    theme: 'Delivery',
+    tags: ['podcast', 'execution mindset', 'focus', 'digital workers', 'series-2'],
+    readingTime: '20+',
+    newsType: 'Company News',
+    newsSource: 'DQ Leadership',
+    focusArea: 'Culture & People',
+    format: 'Podcast',
+    source: 'DigitalQatalyst',
+    audioUrl:
+      '/02. Series 02 - The Execution Mindset/Cutting the Noise - Focus Habits for Digital Workers (1).m4a',
+    content: `# Cutting the Noise: Focus Habits for Digital Workers (Alternate Recording 2)
+
+## Focus of the Episode
+
+How to design focus blocks, reduce digital noise, and protect execution time in high-notification environments.
+
+## Intended Impact
+
+Help listeners create conditions where deep work is possible, even inside chatty, fast-moving teams.`
   }
-  */
 ];
+*/

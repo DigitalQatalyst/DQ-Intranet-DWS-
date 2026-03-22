@@ -31,7 +31,7 @@ export interface NewsArticle {
   views_count: number;
   is_featured: boolean;
   is_pinned: boolean;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
 }

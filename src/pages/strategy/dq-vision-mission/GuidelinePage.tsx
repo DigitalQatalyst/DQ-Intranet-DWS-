@@ -1,175 +1,18 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { HomeIcon, ChevronRightIcon, ExternalLink } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { HomeIcon, ChevronRightIcon } from 'lucide-react'
 import { Header } from '../../../components/Header'
 import { Footer } from '../../../components/Footer'
 import { useAuth } from '../../../components/Header/context/AuthContext'
-import { supabaseClient } from '../../../lib/supabaseClient'
 import { HeroSection } from './HeroSection'
 import { SideNav } from './SideNav'
 import { GuidelineSection } from './GuidelineSection'
-import { GuideCard } from '../../../components/guides/GuideCard'
-
-interface RelatedGuide {
-  id: string
-  slug?: string
-  title: string
-  summary?: string
-  heroImageUrl?: string | null
-  domain?: string | null
-  guideType?: string | null
-  lastUpdatedAt?: string | null
-  downloadCount?: number | null
-  isEditorsPick?: boolean | null
-  estimatedTimeMin?: number | null
-}
 
 function GuidelinePage() {
   const { user } = useAuth()
-  const navigate = useNavigate()
-  const currentSlug = 'dq-vision-and-mission'
-  
-  // Related guides state
-  const [relatedGuides, setRelatedGuides] = useState<RelatedGuide[]>([])
-  const [relatedGuidesLoading, setRelatedGuidesLoading] = useState(true)
-  const [currentGuide, setCurrentGuide] = useState<{ domain?: string | null; guideType?: string | null } | null>(null)
-
-  // Fetch current guide data
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const { data: guideData, error } = await supabaseClient
-          .from('guides')
-          .select('domain, guide_type')
-          .eq('slug', currentSlug)
-          .maybeSingle()
-        
-        if (error) throw error
-        if (!cancelled) {
-          if (guideData) {
-            setCurrentGuide({
-              domain: guideData.domain,
-              guideType: guideData.guide_type
-            })
-          } else {
-            setCurrentGuide({ domain: null, guideType: null })
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching current guide:', error)
-        if (!cancelled) {
-          setCurrentGuide({ domain: null, guideType: null })
-        }
-      }
-    })()
-    return () => { cancelled = true }
-  }, [currentSlug])
-
-  // Fetch related guides
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      if (currentGuide === null) return
-      
-      setRelatedGuidesLoading(true)
-      try {
-        const selectCols = 'id,slug,title,summary,hero_image_url,guide_type,domain,last_updated_at,download_count,is_editors_pick,estimated_time_min'
-        let first: any[] = []
-        
-        if (currentGuide.domain) {
-          const { data: rows } = await supabaseClient
-            .from('guides')
-            .select(selectCols)
-            .eq('domain', currentGuide.domain)
-            .neq('slug', currentSlug)
-            .eq('status', 'Approved')
-            .order('is_editors_pick', { ascending: false, nullsFirst: false })
-            .order('download_count', { ascending: false, nullsFirst: false })
-            .order('last_updated_at', { ascending: false, nullsFirst: false })
-            .limit(6)
-          first = rows || []
-        }
-        
-        let results = first
-        
-        if ((results?.length || 0) < 6 && currentGuide.guideType) {
-          const { data: rows2 } = await supabaseClient
-            .from('guides')
-            .select(selectCols)
-            .eq('guide_type', currentGuide.guideType)
-            .neq('slug', currentSlug)
-            .eq('status', 'Approved')
-            .order('is_editors_pick', { ascending: false, nullsFirst: false })
-            .order('download_count', { ascending: false, nullsFirst: false })
-            .order('last_updated_at', { ascending: false, nullsFirst: false })
-            .limit(6)
-          
-          const map = new Map<string, any>()
-          for (const r of (first || [])) map.set(r.slug || r.id, r)
-          for (const r of (rows2 || [])) {
-            const k = r.slug || r.id
-            if (!map.has(k)) map.set(k, r)
-          }
-          results = Array.from(map.values()).slice(0, 6)
-        }
-        
-        if ((results?.length || 0) < 6 && !currentGuide.domain && !currentGuide.guideType) {
-          const { data: rows3 } = await supabaseClient
-            .from('guides')
-            .select(selectCols)
-            .ilike('domain', '%strategy%')
-            .neq('slug', currentSlug)
-            .eq('status', 'Approved')
-            .order('is_editors_pick', { ascending: false, nullsFirst: false })
-            .order('download_count', { ascending: false, nullsFirst: false })
-            .order('last_updated_at', { ascending: false, nullsFirst: false })
-            .limit(6)
-          
-          const map = new Map<string, any>()
-          for (const r of (results || [])) map.set(r.slug || r.id, r)
-          for (const r of (rows3 || [])) {
-            const k = r.slug || r.id
-            if (!map.has(k)) map.set(k, r)
-          }
-          results = Array.from(map.values()).slice(0, 6)
-        }
-        
-        if (!cancelled) {
-          setRelatedGuides((results || []).map((r: any) => ({
-            id: r.id,
-            slug: r.slug,
-            title: r.title,
-            summary: r.summary,
-            heroImageUrl: r.hero_image_url,
-            domain: r.domain,
-            guideType: r.guide_type,
-            lastUpdatedAt: r.last_updated_at,
-            downloadCount: r.download_count,
-            isEditorsPick: r.is_editors_pick,
-            estimatedTimeMin: r.estimated_time_min,
-          })))
-          setRelatedGuidesLoading(false)
-        }
-      } catch (error) {
-        console.error('Error fetching related guides:', error)
-        if (!cancelled) {
-          setRelatedGuides([])
-          setRelatedGuidesLoading(false)
-        }
-      }
-    })()
-    return () => { cancelled = true }
-  }, [currentGuide, currentSlug])
-
-  const handleGuideClick = (guide: RelatedGuide) => {
-    const slug = guide.slug || guide.id
-    navigate(`/marketplace/guides/${encodeURIComponent(slug)}`)
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header toggleSidebar={() => undefined} sidebarOpen={false} />
+      <Header toggleSidebar={() => {}} sidebarOpen={false} />
       
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
@@ -186,7 +29,7 @@ function GuidelinePage() {
                 <div className="flex items-center">
                   <ChevronRightIcon size={16} className="text-gray-400" />
                   <Link to="/marketplace/guides?tab=strategy" className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
-                    Strategy
+                    GHC
                   </Link>
                 </div>
               </li>

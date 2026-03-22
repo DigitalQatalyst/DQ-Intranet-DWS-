@@ -58,7 +58,7 @@ export function SideNav({ sections, activeSection, onSectionClick }: SideNavProp
   }
 
   return (
-    <nav className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
+    <nav className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto filter-sidebar-scroll">
       <div className="pr-6">
         <ul className="space-y-2">
           {sections.map((section) => (

@@ -7,20 +7,66 @@ interface JobCardProps {
   search?: string;
 }
 
-const fallbackImages = [
-  'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?auto=format&fit=crop&w=1200&q=80'
-];
+// Appropriate job-related images for different role types
+const getJobImage = (job: JobItem): string => {
+  // If job has an explicit image, use it
+  if (job.image) {
+    return job.image;
+  }
+  
+  // Otherwise, select appropriate image based on role type
+  const roleTypeImages: Record<JobItem['roleType'], string[]> = {
+    'HR': [
+      'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80'
+    ],
+    'Tech': [
+      'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80'
+    ],
+    'Design': [
+      'https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1200&q=80'
+    ],
+    'Ops': [
+      'https://images.unsplash.com/photo-1525182008055-f88b95ff7980?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1454165205744-3b78555e5572?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80'
+    ],
+    'Finance': [
+      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80'
+    ]
+  };
+  
+  const images = roleTypeImages[job.roleType] || [
+    'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?auto=format&fit=crop&w=1200&q=80'
+  ];
+  
+  // Use job ID to consistently select the same image for the same job
+  const index = Math.abs(job.id.split('').reduce((sum, c) => sum + c.charCodeAt(0), 0)) % images.length;
+  return images[index];
+};
 
 export function JobCard({ job, href, search }: JobCardProps) {
-  const imageSrc = job.image || fallbackImages[Math.abs(job.id.split('').reduce((sum, c) => sum + c.charCodeAt(0), 0)) % fallbackImages.length];
+  const imageSrc = '/job openings.jpg';
   const sfia = SFIA_LEVELS[job.sfiaLevel];
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="relative">
-        <img src={imageSrc} alt={job.title} className="h-40 w-full object-cover" loading="lazy" />
+        <img 
+          src={imageSrc} 
+          alt={job.title} 
+          className="h-40 w-full object-cover" 
+          loading="lazy"
+        />
         <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/80 px-3 py-1 text-xs font-medium text-gray-700 backdrop-blur">
           <span className="h-2 w-2 rounded-full bg-orange-500" />
           {job.type}

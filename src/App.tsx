@@ -21,7 +21,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/courses" element={<HomePage />} />
-        <Route path="/signin" element={<SignInPage redirectTo="/onboarding/start" />} />
+        <Route path="/signin" element={<SignInPage redirectTo="/onboarding/welcome" />} />
         <Route path="/signup" element={<CreateAccountPage />} />
         <Route path="/onboarding" element={<OnboardingMarketplacePage />} />
         <Route path="/onboarding-flows" element={<Navigate to="/onboarding" replace />} />

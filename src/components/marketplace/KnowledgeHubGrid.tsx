@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { KnowledgeHubCard } from './KnowledgeHubCard'
 import { useMediaSearch } from '../../hooks/UseMediaSearch'
 interface KnowledgeHubGridProps {

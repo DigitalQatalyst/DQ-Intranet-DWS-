@@ -38,8 +38,9 @@ export interface GlossaryTerm {
   knowledgeSystem?: 'ghc' | '6xd' // PRIMARY: GHC or 6xD (optional for backward compatibility)
   ghcDimension?: string // GHC Dimension (if knowledgeSystem === 'ghc')
   ghcTermType?: string // GHC Term Type (if knowledgeSystem === 'ghc')
-  sixXdDimension?: string // 6xD Dimension (if knowledgeSystem === '6xd')
+  sixXdDimension?: string // 6xD Dimension (if knowledgeSystem === '6xd') - lifecycle stages
   sixXdTermType?: string // 6xD Term Type (if knowledgeSystem === '6xd')
+  sixXdPerspective?: string // 6xD Perspective (if knowledgeSystem === '6xd') - the six essential perspectives
   // Shared filters
   termOrigin?: 'dq-term' | 'market-standard' // DQ Term or Market/Standard Term
   usedIn?: string[] // Context filter: DWS, QDBP, etc.

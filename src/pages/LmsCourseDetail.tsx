@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
@@ -137,7 +137,7 @@ export const LmsCourseDetail: React.FC = () => {
   }
 
   const HeroIcon = ICON_BY_ID[detail.id] || BookOpenCheck;
-  const chipData = detail ? formatChips(detail) : [];
+  const chipData = useMemo(() => formatChips(detail), [detail]);
   const statusLabel = detail.status === "live" ? "Live" : "Coming Soon";
   const statusClass =
     detail.status === "live"

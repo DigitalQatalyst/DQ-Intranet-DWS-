@@ -1,6 +1,7 @@
-import { ChevronRightIcon, LifeBuoyIcon, ChevronLeftIcon } from 'lucide-react';
+import { Sidebar, HomeIcon, ChevronRightIcon, LifeBuoyIcon, ChevronLeftIcon } from 'lucide-react';
 import React, { useEffect, useState, useRef } from 'react';
-import { AuthProvider } from '../../../components/Header';
+import { Footer } from '../../../components/Footer';
+import { AuthProvider, Header } from '../../../components/Header';
 import { PageLayout, PageSection, SectionHeader, PrimaryButton, SectionContent } from '../../../components/PageLayout';
 import ContactSupportTab from '../../../components/support/ContactSupportTab';
 import DocumentationTab from '../../../components/support/DocumentationTab';
@@ -8,7 +9,7 @@ import FAQsTab from '../../../components/support/FAQsTab';
 import TicketHistoryTab from '../../../components/support/TicketHistoryTab';
 
 export default function SupportPage() {
-    const [_sidebarOpen, _setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeResourceTab, setActiveResourceTab] = useState('faqs');
     const [activeContactTab, setActiveContactTab] = useState('contact');
     const [showTabControls, setShowTabControls] = useState(false);

@@ -16,7 +16,7 @@ const Agile6xDGlossaryPage: React.FC = () => {
 
   const allLetters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
   const lettersWithTerms = useMemo(
-    () => Array.from(new Set(agile6xdTerms.map(t => t.term.charAt(0).toUpperCase()))).sort(),
+    () => Array.from(new Set(agile6xdTerms.map(t => t.term.charAt(0).toUpperCase()))).sort((a, b) => a.localeCompare(b)),
     []
   )
 
@@ -58,7 +58,7 @@ const Agile6xDGlossaryPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white guidelines-theme">
-      <Header toggleSidebar={() => undefined} sidebarOpen={false} />
+      <Header toggleSidebar={() => {}} sidebarOpen={false} />
       <main className="container mx-auto px-4 py-8 flex-grow max-w-7xl">
         {/* Breadcrumbs */}
         <nav className="flex mb-6" aria-label="Breadcrumb">

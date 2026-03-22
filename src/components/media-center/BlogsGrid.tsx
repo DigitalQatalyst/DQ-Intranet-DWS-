@@ -26,6 +26,11 @@ export default function BlogsGrid({ query, items }: GridProps) {
     return sourceItems
       .filter((item) => item.type === 'Thought Leadership')
       .filter((item) => {
+        // Exclude podcasts - they should only appear in the Podcasts tab
+        const isPodcast = item.format === 'Podcast' || item.tags?.some(tag => tag.toLowerCase().includes('podcast'));
+        return !isPodcast;
+      })
+      .filter((item) => {
         if (!search) return true;
         return (
           item.title.toLowerCase().includes(search) ||
@@ -34,6 +39,8 @@ export default function BlogsGrid({ query, items }: GridProps) {
         );
       })
       .filter((item) => {
+        const format = query.filters?.format;
+        const source = query.filters?.source;
         const department = query.filters?.department;
         const location = query.filters?.location;
         const domain = query.filters?.domain;
@@ -42,6 +49,8 @@ export default function BlogsGrid({ query, items }: GridProps) {
 
         const matches = (val?: string, sel?: string[]) => !sel?.length || (val && sel.includes(val));
         return (
+          matches(item.format, format) &&
+          matches(item.source, source) &&
           matches(item.department, department) &&
           matches(item.location, location) &&
           matches(item.domain, domain) &&

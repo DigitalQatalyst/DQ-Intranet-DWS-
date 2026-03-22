@@ -57,7 +57,7 @@ export interface Step {
  * Represents the collected form data as a dynamic key-value object
  */
 export interface FormData {
-  [key: string]: unknown; // Dynamic object with string keys and unknown values
+  [key: string]: any; // Dynamic object with string keys and any values
   tradeName?: string;
   industry?: string;
   companyStage?: string;
@@ -119,8 +119,8 @@ export interface StepProps {
   formData: FormData; // Current form data
   errors: ErrorsState; // Current validation errors
   touchedFields: TouchedFields; // Fields that have been touched
-  onChange: (fieldName: string, value: unknown) => void; // Handler for field changes
-  validateField: (fieldName: string, value: unknown) => boolean | null; // Field validation function
+  onChange: (fieldName: string, value: any) => void; // Handler for field changes
+  validateField: (fieldName: string, value: any) => boolean | null; // Field validation function
 }
 /**
  * OnboardingFormProps Interface

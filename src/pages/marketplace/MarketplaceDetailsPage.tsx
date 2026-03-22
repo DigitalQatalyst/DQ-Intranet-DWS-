@@ -1,13 +1,6 @@
-// NOTE: This file uses array indices as keys in several places for static content rendering.
-// This is acceptable because these lists (accordion items, feature lists, requirement lists, etc.)
-// are static and will not be reordered, added to, or removed during runtime.
-// All array.map() calls with index keys are for display-only static content from the data layer.
-// NOSONAR comments are added where appropriate to suppress false positive warnings.
-// NOSONAR
-
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, Plus, Minus } from 'lucide-react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, XIcon, Plus, Minus } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
@@ -15,147 +8,31 @@ import { getServiceTabContent, getCustomTabs } from '../../utils/serviceDetailsC
 import type { ContentBlock } from '../../utils/serviceDetailsContent';
 import { fetchMarketplaceItemDetails, fetchRelatedMarketplaceItems } from '../../services/marketplace';
 import { ErrorDisplay } from '../../components/SkeletonLoader';
+import { Link } from 'react-router-dom';
 import { getFallbackItemDetails, getFallbackItems } from '../../utils/fallbackData';
 import { getAIToolDataById } from '../../utils/aiToolsData';
 import { getDigitalWorkerServiceById } from '../../utils/digitalWorkerData';
 import { ProcedureStages, procedureStagesConfigs } from '../../components/ProcedureStages';
-import { sanitizeHtml } from '@/utils/sanitizeHtml';
 import LeaveRequestForm from '../../components/marketplace/LeaveRequestForm';
 import { TechSupportForm } from '../../components/marketplace/TechSupportForm';
 import { INITIAL_APPROVERS } from '../../utils/mockApprovers';
-import { ServiceHeroSection, ServiceHeroSectionProps } from '../../components/marketplace/ServiceHeroSection';
+import { ServiceHeroSection } from '../../components/marketplace/ServiceHeroSection';
 import { ServiceDetailsSidebar } from '../../components/marketplace/ServiceDetailsSidebar';
-
-// Code block component with copy functionality
-const CodeBlock: React.FC<{ code: string; language?: string; title?: string }> = ({ code, language, title }) => {
-  const [copied, setCopied] = React.useState(false);
-  
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="mb-6 relative">
-      {title && (
-        <div className="bg-gray-100 px-4 py-2 rounded-t-lg border-b border-gray-300">
-          <h4 className="text-sm font-semibold text-gray-700">{title}</h4>
-        </div>
-      )}
-      <div className="relative">
-        <pre className="bg-gray-900 text-gray-100 p-6 rounded-b-lg overflow-x-auto text-sm leading-relaxed">
-          <code className={language ? `language-${language}` : ''}>{code}</code>
-        </pre>
-        <button
-          onClick={handleCopy}
-          className="absolute top-3 right-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors duration-200 flex items-center gap-1.5"
-        >
-          {copied ? (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Copied!
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              Copy
-            </>
-          )}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Accordion component for FAQs
-const AccordionBlock: React.FC<{ items: Array<{ question: string; answer: string }> }> = ({ items }) => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  const toggleAccordion = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
-
-  return (
-    <div className="space-y-4 mb-6">
-      {items.map((item, index) => { // NOSONAR: static accordion items, order is stable
-        const isOpen = openIndex === index;
-        return (
-          <div
-            key={index} // NOSONAR: static accordion items
-            className="rounded-lg overflow-hidden transition-all duration-300 ease-in border-2"
-            style={{ 
-              borderColor: isOpen ? '#030F35' : '#E5E7EB',
-              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
-            }}
-          >
-            <button
-              onClick={() => toggleAccordion(index)}
-              className="w-full flex items-center justify-between p-5 text-left transition-all duration-300 ease-in"
-              style={isOpen ? { 
-                backgroundColor: '#030F35',
-                color: 'white'
-              } : { 
-                backgroundColor: 'white',
-                color: '#374151' 
-              }}
-              onMouseEnter={(e) => {
-                if (!isOpen) {
-                  e.currentTarget.style.backgroundColor = '#F9FAFB';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isOpen) {
-                  e.currentTarget.style.backgroundColor = 'white';
-                }
-              }}
-            >
-              <span className="text-base font-medium pr-4">
-                {item.question}
-              </span>
-              <div 
-                className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ease-in"
-                style={isOpen ? { backgroundColor: 'white' } : { backgroundColor: '#E5E7EB' }}
-              >
-                {isOpen ? (
-                  <Minus className="w-4 h-4" style={{ color: '#030F35' }} />
-                ) : (
-                  <Plus className="w-4 h-4 text-gray-600" />
-                )}
-              </div>
-            </button>
-            <div
-              className={`transition-all duration-300 ease-in ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}
-              style={{
-                overflow: 'hidden'
-              }}
-            >
-              <div className="px-5 pb-5 pt-2.5 bg-white">
-                <p className="text-gray-600 text-base leading-relaxed">{item.answer}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
 interface MarketplaceDetailsPageProps {
   marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding';
   bookmarkedItems?: string[];
   onToggleBookmark?: (itemId: string) => void;
   onAddToComparison?: (item: any) => void;
 }
-const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSONAR: complex component composed of many UI states
+const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   marketplaceType,
   bookmarkedItems = [],
-  onToggleBookmark: _onToggleBookmark = () => undefined,
-  onAddToComparison: _onAddToComparison = () => undefined
+  onToggleBookmark: _onToggleBookmark = (item) => {
+    console.log('Toggle bookmark:', item)
+  },
+  onAddToComparison: _onAddToComparison = (item) => {
+    console.log('Add to comparison:', item)
+  }
 }) => {
   const {
     itemId
@@ -188,8 +65,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
     }
     return config.route;
   };
-  const [item, setItem] = useState<Record<string, any> | null>(null);
+  const [item, setItem] = useState<any | null>(null);
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
+  const [_isBookmarked, _setIsBookmarked] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -310,25 +188,20 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
           // We'll handle this below by using fallback data
         }
         // If item data is available, use it, otherwise use fallback data
-        const finalItemData = (itemData ?? getFallbackItemDetails(marketplaceType, itemId ?? 'fallback-1')) as Record<string, any>;
+        const finalItemData = itemData || getFallbackItemDetails(marketplaceType, itemId || 'fallback-1');
         if (finalItemData) {
           setItem(finalItemData);
           // setIsBookmarked(bookmarkedItems.includes(finalItemData.id));
           // Fetch related items
           let relatedItemsData: any[] = [];
           try {
-            relatedItemsData = await fetchRelatedMarketplaceItems(
-              marketplaceType, 
-              finalItemData.id as string, 
-              (finalItemData.category as string) ?? '', 
-              ((finalItemData.provider as Record<string, any>)?.name as string) ?? ''
-            );
+            relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, finalItemData.category || '', finalItemData.provider?.name || '');
           } catch (relatedError) {
             console.error('Error fetching related items:', relatedError);
             // Use fallback related items on error
           }
           // Use fetched related items if available, otherwise use fallback
-          setRelatedItems(relatedItemsData?.length > 0 ? relatedItemsData : getFallbackItems(marketplaceType));
+          setRelatedItems(relatedItemsData && relatedItemsData.length > 0 ? relatedItemsData : getFallbackItems(marketplaceType));
           if (shouldTakeAction) {
             setTimeout(() => {
               const actionSection = document.getElementById('action-section');
@@ -353,7 +226,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
           }
         } else {
           // Item not found - use generic fallback
-          const genericFallback = getFallbackItemDetails(marketplaceType, 'generic-fallback') as Record<string, any>;
+          const genericFallback = getFallbackItemDetails(marketplaceType, 'generic-fallback');
           setItem(genericFallback);
           setError(null); // Clear any error since we're showing fallback data
           // Set a redirect timer with a longer delay (5 seconds)
@@ -365,7 +238,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
       } catch (err) {
         console.error(`Error in marketplace details page:`, err);
         // Use fallback data even on general errors
-        const fallbackItem = getFallbackItemDetails(marketplaceType, 'generic-fallback') as Record<string, any>;
+        const fallbackItem = getFallbackItemDetails(marketplaceType, 'generic-fallback');
         setItem(fallbackItem);
         setRelatedItems(getFallbackItems(marketplaceType));
         setError(null); // Clear error since we're showing fallback data
@@ -467,17 +340,12 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
   const isDigitalWorker = item.category === 'Digital Worker';
   const isLeaveApplication = item.id === '13';
   const isITSupportService = marketplaceType === 'non-financial' && ['1', '2', '3'].includes(item.id);
-  
-  // Determine primary action based on item type
-  const getPrimaryAction = (): string => {
-    if (isLeaveApplication) return 'Apply For Leave';
-    if (isPromptLibrary) return 'View Prompt';
-    if (isDigitalWorker) return 'View Details';
-    if (isAITool) return 'Request Tool';
-    return config.primaryCTA;
-  };
-  const primaryAction = getPrimaryAction();
-  
+  const primaryAction =
+    isLeaveApplication ? 'Apply For Leave'
+    : isPromptLibrary ? 'View Prompt'
+    : isDigitalWorker ? 'View Details'
+    : isAITool ? 'Request Tool'
+    : config.primaryCTA;
   // const secondaryAction = config.secondaryCTA;
   // Extract details for the sidebar
   const detailItems = config.attributes.map(attr => ({
@@ -486,31 +354,150 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
   })).filter(detail => detail.value !== 'N/A');
   // Extract highlights/features based on marketplace type
   const highlights = marketplaceType === 'courses' ? item.learningOutcomes || [] : item.details || [];
-  
   // Render tab content with consistent styling
+  // Code block component with copy functionality
+  const CodeBlock: React.FC<{ code: string; language?: string; title?: string }> = ({ code, language, title }) => {
+    const [copied, setCopied] = React.useState(false);
+    
+    const handleCopy = () => {
+      navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+      <div className="mb-6 relative">
+        {title && (
+          <div className="bg-gray-100 px-4 py-2 rounded-t-lg border-b border-gray-300">
+            <h4 className="text-sm font-semibold text-gray-700">{title}</h4>
+          </div>
+        )}
+        <div className="relative">
+          <pre className="bg-gray-900 text-gray-100 p-6 rounded-b-lg overflow-x-auto text-sm leading-relaxed">
+            <code className={language ? `language-${language}` : ''}>{code}</code>
+          </pre>
+          <button
+            onClick={handleCopy}
+            className="absolute top-3 right-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors duration-200 flex items-center gap-1.5"
+          >
+            {copied ? (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Copied!
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Copy
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Accordion component for FAQs
+  const AccordionBlock: React.FC<{ items: Array<{ question: string; answer: string }> }> = ({ items }) => {
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const toggleAccordion = (index: number) => {
+      setOpenIndex(openIndex === index ? null : index);
+    };
+
+    return (
+      <div className="space-y-4 mb-6">
+        {items.map((item, index) => {
+          const isOpen = openIndex === index;
+          return (
+            <div
+              key={index}
+              className="rounded-lg overflow-hidden transition-all duration-300 ease-in border-2"
+              style={{ 
+                borderColor: isOpen ? '#030F35' : '#E5E7EB',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+              }}
+            >
+              <button
+                onClick={() => toggleAccordion(index)}
+                className="w-full flex items-center justify-between p-5 text-left transition-all duration-300 ease-in"
+                style={isOpen ? { 
+                  backgroundColor: '#030F35',
+                  color: 'white'
+                } : { 
+                  backgroundColor: 'white',
+                  color: '#374151' 
+                }}
+                onMouseEnter={(e) => {
+                  if (!isOpen) {
+                    e.currentTarget.style.backgroundColor = '#F9FAFB';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isOpen) {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }
+                }}
+              >
+                <span className="text-base font-medium pr-4">
+                  {item.question}
+                </span>
+                <div 
+                  className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ease-in"
+                  style={isOpen ? { backgroundColor: 'white' } : { backgroundColor: '#E5E7EB' }}
+                >
+                  {isOpen ? (
+                    <Minus className="w-4 h-4" style={{ color: '#030F35' }} />
+                  ) : (
+                    <Plus className="w-4 h-4 text-gray-600" />
+                  )}
+                </div>
+              </button>
+              <div
+                className="overflow-hidden transition-all duration-300 ease-in"
+                style={{
+                  maxHeight: isOpen ? '500px' : '0px',
+                  opacity: isOpen ? 1 : 0,
+                }}
+              >
+                <div className="px-5 pb-5 pt-2.5 bg-white">
+                  <p className="text-gray-600 text-base leading-relaxed">{item.answer}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderBlocks = (blocks: ContentBlock[]) => {
-    // NOSONAR: Array indices used as keys for static content blocks that won't be reordered
-    return (blocks || []).map((block, idx) => { // NOSONAR: static content blocks
+    return (blocks || []).map((block, idx) => {
       if (block.type === 'p') {
-        return <p key={idx} className="text-gray-700 text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.text) }}></p>; // NOSONAR: static block
+        return <p key={idx} className="text-gray-700 text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: block.text }}></p>;
       }
       if (block.type === 'ol') {
-        return <ol key={idx} className="list-decimal pl-6 space-y-3 text-gray-700 mb-4 text-base"> {/* NOSONAR: static block */}
-            {block.items.map((it, i) => <li key={i} className="pl-2 leading-relaxed">{it}</li>)} {/* NOSONAR: static list items */}
+        return <ol key={idx} className="list-decimal pl-6 space-y-3 text-gray-700 mb-4 text-base">
+            {block.items.map((it, i) => <li key={i} className="pl-2 leading-relaxed">{it}</li>)}
           </ol>;
       }
       if (block.type === 'ul') {
-        return <ul key={idx} className="list-disc pl-6 space-y-3 text-gray-700 mb-4 text-base"> {/* NOSONAR: static block */}
-            {block.items.map((it, i) => <li key={i} className="pl-2 leading-relaxed">{it}</li>)} {/* NOSONAR: static list items */}
+        return <ul key={idx} className="list-disc pl-6 space-y-3 text-gray-700 mb-4 text-base">
+            {block.items.map((it, i) => <li key={i} className="pl-2 leading-relaxed">{it}</li>)}
           </ul>;
       }
       if (block.type === 'iframe') {
-        return <div key={idx} className="mb-6"> {/* NOSONAR: static block */}
+        return <div key={idx} className="mb-6">
             <iframe
               src={block.src}
               width={block.width || '640'}
               height={block.height || '360'}
-              style={{ border: 0, overflow: 'hidden' }}
+              frameBorder="0"
+              scrolling="no"
               allowFullScreen
               title={block.title || 'Embedded video'}
               className="rounded-lg shadow-md"
@@ -518,22 +505,22 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
           </div>;
       }
       if (block.type === 'accordion') {
-        return <AccordionBlock key={idx} items={block.items || []} />; // NOSONAR: static block
+        return <AccordionBlock key={idx} items={block.items || []} />;
       }
       if (block.type === 'code') {
-        return <CodeBlock key={idx} code={block.code} language={block.language} title={block.title} />; // NOSONAR: static block
+        return <CodeBlock key={idx} code={block.code} language={block.language} title={block.title} />;
       }
       if (block.type === 'procedure_stages') {
         const config = procedureStagesConfigs[block.configKey as keyof typeof procedureStagesConfigs];
         if (config) {
-          return <ProcedureStages key={idx} config={{ ...config, title: '' }} className="my-6" />; // NOSONAR: static block
+          return <ProcedureStages key={idx} config={{ ...config, title: '' }} className="my-6" />;
         }
         return null;
       }
       return null;
     });
   };
-  const renderTabContent = (tabId: string) => { // NOSONAR: acceptable complexity for comprehensive tab rendering logic
+  const renderTabContent = (tabId: string) => {
     const tab = tabsToUse.find(t => t.id === tabId);
     if (!tab) return null;
     
@@ -562,8 +549,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 </div>
                 
                 <div className="grid gap-3 md:grid-cols-2">
-                  {toolData.features.keyFeatures.map((feature, index) => ( // NOSONAR: static feature list
-                    <div key={index} /* NOSONAR */ className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
+                  {toolData.features.keyFeatures.map((feature, index) => (
+                    <div key={index} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
                       <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
                         <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -598,7 +585,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                   {Object.entries(requirements.minimum).map(([key, value]) => (
                     <li key={key} className="flex items-start gap-3">
                       <span className="text-xs font-semibold text-gray-500 uppercase w-24 flex-shrink-0 pt-0.5">
-                        {key.replaceAll(/([A-Z])/g, ' $1').trim()}:
+                        {key.replace(/([A-Z])/g, ' $1').trim()}:
                       </span>
                       <span className="text-sm text-gray-700 flex-1">{value}</span>
                     </li>
@@ -613,7 +600,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                   {Object.entries(requirements.recommended).map(([key, value]) => (
                     <li key={key} className="flex items-start gap-3">
                       <span className="text-xs font-semibold text-gray-500 uppercase w-24 flex-shrink-0 pt-0.5">
-                        {key.replaceAll(/([A-Z])/g, ' $1').trim()}:
+                        {key.replace(/([A-Z])/g, ' $1').trim()}:
                       </span>
                       <span className="text-sm text-gray-700 flex-1">{value}</span>
                     </li>
@@ -626,8 +613,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 <div className="border-l-4 border-gray-400 bg-white p-5 rounded-r-lg shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Additional Notes</h3>
                   <ul className="space-y-2">
-                    {requirements.additionalNotes.map((note, index) => ( // NOSONAR: static notes list
-                      <li key={index} /* NOSONAR */ className="flex items-start gap-2">
+                    {requirements.additionalNotes.map((note, index) => (
+                      <li key={index} className="flex items-start gap-2">
                         <span className="text-gray-400 mt-0.5">•</span>
                         <span className="text-sm text-gray-700">{note}</span>
                       </li>
@@ -741,7 +728,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
         if (tabId === 'visit_site') {
           const content = getServiceTabContent(marketplaceType, item?.id, tabId);
           const urlField = content?.action?.urlField;
-          const computedUrl = (urlField && item?.[urlField]) || content?.action?.fallbackUrl || toolData.homepage || '#';
+          const computedUrl = (urlField && item && item[urlField]) || content?.action?.fallbackUrl || toolData.homepage || '#';
           
           return <div className="space-y-8">
               {/* Hero Section */}
@@ -797,7 +784,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
       // Special handling for visit_site tab
       if (tabId === 'visit_site') {
         const urlField = content.action?.urlField;
-        const computedUrl = (urlField && item?.[urlField]) || content.action?.fallbackUrl || '#';
+        const computedUrl = (urlField && item && item[urlField]) || content.action?.fallbackUrl || '#';
         
         return <div className="space-y-8">
             <div className="prose max-w-none">
@@ -841,7 +828,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
           {content.action && content.action.label !== 'Apply For Leave' && <div className="pt-4">
               <button id="action-section" className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')} onClick={() => {
               const urlField = content.action?.urlField;
-              const computedUrl = (urlField && item?.[urlField]) || content.action?.fallbackUrl || '#';
+              const computedUrl = (urlField && item && item[urlField]) || content.action?.fallbackUrl || '#';
               window.open(computedUrl, '_blank', 'noopener');
           }}>
                 {content.action.label}
@@ -875,8 +862,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 </div>
                 
                 <div className="grid gap-3 md:grid-cols-2">
-                  {dwService.keyHighlights.map((highlight, index) => ( // NOSONAR: static highlights list
-                    <div key={index} /* NOSONAR */ className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
+                  {dwService.keyHighlights.map((highlight, index) => (
+                    <div key={index} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
                       <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
                         <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -905,8 +892,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
               {/* Requirements List */}
               <div className="border-l-4 bg-white p-6 rounded-r-lg shadow-sm" style={{ borderLeftColor: '#030F35' }}>
                 <ul className="space-y-4">
-                  {dwService.requirements.map((requirement, index) => ( // NOSONAR: static requirements list
-                    <li key={index} /* NOSONAR */ className="flex items-start gap-4">
+                  {dwService.requirements.map((requirement, index) => (
+                    <li key={index} className="flex items-start gap-4">
                       <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md mt-0.5" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
                         <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -935,8 +922,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
 
               {/* Tools Grid */}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {dwService.tools.map((tool, index) => ( // NOSONAR: static tools list
-                  <div key={index} /* NOSONAR */ className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-5 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-blue-300">
+                {dwService.tools.map((tool, index) => (
+                  <div key={index} className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-5 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-blue-300">
                     <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-blue-400/10 blur-2xl"></div>
                     
                     <div className="relative flex items-center gap-3">
@@ -968,8 +955,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
 
               {/* Use Case Steps */}
               <div className="space-y-4">
-                {dwService.sampleUseCase.steps.map((step, index) => ( // NOSONAR: static steps list
-                  <div key={index} /* NOSONAR */ className="flex gap-4">
+                {dwService.sampleUseCase.steps.map((step, index) => (
+                  <div key={index} className="flex gap-4">
                     <div className="flex-shrink-0">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full font-bold text-white" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
                         {index + 1}
@@ -1143,8 +1130,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                   </div>
                   
                   <div className="grid gap-3 md:grid-cols-2">
-                    {toolData.features.keyFeatures.map((feature, index) => ( // NOSONAR: static feature list
-                      <div key={index} /* NOSONAR */ className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
+                    {toolData.features.keyFeatures.map((feature, index) => (
+                      <div key={index} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
                         <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
                           <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -1183,7 +1170,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
       case 'submit_request': {
         const content = getServiceTabContent(marketplaceType, item?.id, tabId);
         const urlField = content?.action?.urlField;
-        const computedUrl = (urlField && item?.[urlField]) || content?.action?.fallbackUrl || '#';
+        const computedUrl = (urlField && item && item[urlField]) || content?.action?.fallbackUrl || '#';
         
         // Check if this is a prompt library item (service 17)
         const isPromptLibrary = item?.id === '17' || item?.category === 'Prompt Library';
@@ -1213,7 +1200,15 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
               </div>}
           </div>;
       }
-      case 'self_service_faq':
+      case 'self_service_faq': {
+        const content = getServiceTabContent(marketplaceType, item?.id, tabId);
+        return <div className="space-y-6">
+            <div className="prose max-w-none">
+              {content?.heading && <h3 className="text-xl font-bold text-gray-900 mb-2">{content.heading}</h3>}
+              {renderBlocks(content?.blocks || [])}
+            </div>
+          </div>;
+      }
       case 'contact_sla': {
         const content = getServiceTabContent(marketplaceType, item?.id, tabId);
         return <div className="space-y-6">
@@ -1262,7 +1257,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
               </h3>
               {/* Features/Highlights list - Consistent for all types */}
               <ul className="space-y-2">
-                {highlights.map((highlight, index) => <li key={index} className="flex items-start"> {/* NOSONAR: static highlights */}
+                {highlights.map((highlight, index) => <li key={index} className="flex items-start">
                     <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
                     <span className="text-gray-700">{highlight}</span>
                   </li>)}
@@ -1348,7 +1343,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 Core Learning Outcomes
               </h3>
               <ol className="space-y-3">
-                {highlights.map((outcome, index) => <li key={index} className="pl-2"> {/* NOSONAR: static outcomes */}
+                {highlights.map((outcome, index) => <li key={index} className="pl-2">
                     <div className="flex items-start gap-3">
                       <span className="text-gray-500 font-medium">
                         {index + 1}.
@@ -1364,7 +1359,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 Skills You'll Gain
               </h3>
               <div className="grid md:grid-cols-2 gap-2">
-                {['Strategic thinking and planning', 'Problem-solving techniques', 'Implementation best practices', 'Performance measurement', 'Risk assessment and mitigation', 'Communication and presentation'].map((skill, index) => <div key={index} className="flex items-center"> {/* NOSONAR: static skills list */}
+                {['Strategic thinking and planning', 'Problem-solving techniques', 'Implementation best practices', 'Performance measurement', 'Risk assessment and mitigation', 'Communication and presentation'].map((skill, index) => <div key={index} className="flex items-center">
                     <CheckCircleIcon size={16} className="text-dqYellow mr-2 flex-shrink-0" />
                     <span className="text-gray-700">{skill}</span>
                   </div>)}
@@ -1398,7 +1393,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 Eligibility Requirements
               </h3>
               <ul className="space-y-2">
-                {item.eligibilityCriteria ? item.eligibilityCriteria.map((criteria, index) => <li key={index} className="flex items-start"> {/* NOSONAR: static criteria */}
+                {item.eligibilityCriteria ? item.eligibilityCriteria.map((criteria, index) => <li key={index} className="flex items-start">
                       <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
                       <span className="text-gray-700">{criteria}</span>
                     </li>) : <li className="flex items-start">
@@ -1437,7 +1432,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 Additional Terms
               </h4>
               <ul className="space-y-2">
-                {item.additionalTerms ? item.additionalTerms.map((term, index) => <li key={index} className="flex items-start"> {/* NOSONAR: static terms */}
+                {item.additionalTerms ? item.additionalTerms.map((term, index) => <li key={index} className="flex items-start">
                       <span className="text-gray-400 mr-2">•</span>
                       <span className="text-gray-700">{term}</span>
                     </li>) : <>
@@ -1479,7 +1474,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
             </p>
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="space-y-3">
-                {item.applicationProcess ? item.applicationProcess.map((step, index) => <div key={index} className="flex items-start gap-3"> {/* NOSONAR: static process steps */}
+                {item.applicationProcess ? item.applicationProcess.map((step, index) => <div key={index} className="flex items-start gap-3">
                       <span className="text-gray-500 font-medium">
                         {index + 1}.
                       </span>
@@ -1543,7 +1538,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 Required Documents
               </h3>
               <div className="grid md:grid-cols-2 gap-3">
-                {item.requiredDocuments ? item.requiredDocuments.map((doc, index) => <div key={index} className="flex items-start"> {/* NOSONAR: static documents */}
+                {item.requiredDocuments ? item.requiredDocuments.map((doc, index) => <div key={index} className="flex items-start">
                       <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{doc}</span>
                     </div>) : <>
@@ -1592,11 +1587,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                     {provider.name}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    {(() => {
-                      if (marketplaceType === 'courses') return 'Leading provider of business education';
-                      if (marketplaceType === 'financial') return 'Trusted financial services provider';
-                      return 'Expert business services provider';
-                    })()}
+                    {marketplaceType === 'courses' ? 'Leading provider of business education' : marketplaceType === 'financial' ? 'Trusted financial services provider' : 'Expert business services provider'}
                   </p>
                 </div>
                 <div className="md:ml-auto flex flex-col md:items-end">
@@ -1614,7 +1605,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                 Areas of Expertise
               </h4>
               <div className="flex flex-wrap gap-2 mb-6">
-                {item.providerExpertise ? item.providerExpertise.map((expertise, index) => <span key={index} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium"> {/* NOSONAR: static expertise */}
+                {item.providerExpertise ? item.providerExpertise.map((expertise, index) => <span key={index} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
                       {expertise}
                     </span>) : <>
                     <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
@@ -1759,11 +1750,9 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
 
         {/* Hero Section - full-width background */}
         <div ref={heroRef} className="w-full bg-gray-50">
-          {item && (
-            <ServiceHeroSection 
-              item={item as ServiceHeroSectionProps['item']}
-            />
-          )}
+          <ServiceHeroSection 
+            item={item}
+          />
         </div>
         {/* Tabs Navigation */}
         <div className="border-b border-gray-200 w-full bg-white">
@@ -1867,7 +1856,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                   {relatedItems.map(relatedItem => <Link key={relatedItem.id} to={`${config.route}/${relatedItem.id}`} className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow block">
                       <div className="flex items-center mb-3">
                         <span className="text-sm text-gray-600">
-                          {relatedItem.provider.name}
+                          {relatedItem.provider?.name || 'DQ Workspace'}
                         </span>
                       </div>
                       <h3 className="font-semibold text-gray-900 mb-2">
@@ -1877,7 +1866,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
                         {relatedItem.description}
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {(relatedItem.tags || []).slice(0, 2).map((tag, idx) => <span key={idx} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"> {/* NOSONAR: static tags */}
+                        {(relatedItem.tags || []).slice(0, 2).map((tag, idx) => <span key={idx} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
                               {tag}
                             </span>)}
                       </div>
@@ -1895,11 +1884,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
             <div className="flex items-center justify-between max-w-sm mx-auto">
               <div className="mr-3">
                 <div className="text-gray-900 font-bold">
-                  {(() => {
-                    if (marketplaceType === 'courses') return item.price || 'Free';
-                    if (marketplaceType === 'financial') return item.amount || 'Apply Now';
-                    return 'Request Now';
-                  })()}
+                  {marketplaceType === 'courses' ? item.price || 'Free' : marketplaceType === 'financial' ? item.amount || 'Apply Now' : 'Request Now'}
                 </div>
                 <div className="text-sm text-gray-600">
                   {item.duration || item.serviceType || ''}
@@ -1954,3 +1939,4 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({ // NOSO
     </div>;
 };
 export default MarketplaceDetailsPage;
+

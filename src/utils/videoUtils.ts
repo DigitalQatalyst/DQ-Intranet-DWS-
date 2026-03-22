@@ -24,21 +24,6 @@ export interface VideoDurationInfo {
   formatted: string
   available: boolean
 }
-
-type VideoItem = {
-  duration?: number | string | null;
-  processedVideoMetadata?: {
-    duration?: string | null;
-    poster?: string | null;
-    preview?: string | null;
-    snapshot?: string | null;
-  };
-  videoMetadata?: { thumbnailUrl?: string | null };
-  imageUrl?: string | null;
-  thumbnailUrl?: string | null;
-  videoUrl?: string | null;
-  processedVideoUrl?: string | null;
-};
 /**
  * Get the primary video poster URL following a consistent resolution order:
  * 1. Poster/thumbnail extracted from the video asset itself
@@ -49,7 +34,7 @@ type VideoItem = {
  * @param item - The media item
  * @returns The resolved poster URL
  */
-export const getVideoPosterUrl = (item: VideoItem | null | undefined): string => {
+export const getVideoPosterUrl = (item: any): string => {
   // Fallback placeholder to use if no poster is found
   const fallbackPosterUrl =
     'https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
@@ -88,7 +73,7 @@ export const getVideoPosterUrl = (item: VideoItem | null | undefined): string =>
  * @returns Object containing seconds, formatted duration and availability flag
  */
 export const getVideoDuration = (
-  item: VideoItem | null | undefined,
+  item: any,
   videoElement?: HTMLVideoElement | null,
 ): VideoDurationInfo => {
   // Default return when duration is unavailable

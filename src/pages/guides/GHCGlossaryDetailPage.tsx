@@ -243,14 +243,17 @@ function GlossarySideNav({ term }: { term: GlossaryTerm }) {
 
 // Hero Section for Glossary
 function GlossaryHeroSection({ term, levelColor }: { term: GlossaryTerm; levelColor: string }) {
-  const imageUrl = term.imageUrl || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920';
+  const imageUrl = term.imageUrl || '/images/guidelines-content.PNG';
+  
+  // Force refresh by adding timestamp
+  const timestampedImageUrl = imageUrl.includes('?') ? imageUrl : `${imageUrl}?t=${Date.now()}`;
   
   return (
     <div className="relative w-full h-[500px] overflow-hidden">
       {/* Background Image with Dark Navy Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${imageUrl})` }}
+        style={{ backgroundImage: `url(${timestampedImageUrl})` }}
       >
         <div className="absolute inset-0 bg-[#030E31] bg-opacity-80"></div>
       </div>
@@ -308,7 +311,7 @@ export function GHCGlossaryDetailPage() {
   if (!term) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header toggleSidebar={() => undefined} sidebarOpen={false} />
+        <Header toggleSidebar={() => {}} sidebarOpen={false} />
         <main className="container mx-auto px-4 py-8 flex-grow max-w-7xl">
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Term Not Found</h1>
@@ -330,7 +333,7 @@ export function GHCGlossaryDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header toggleSidebar={() => undefined} sidebarOpen={false} />
+      <Header toggleSidebar={() => {}} sidebarOpen={false} />
       
       {/* Hero Section */}
       <GlossaryHeroSection term={term} levelColor={levelColor} />

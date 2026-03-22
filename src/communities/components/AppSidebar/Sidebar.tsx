@@ -55,6 +55,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isLoggedIn = true,
   'data-id': dataId
 }) => {
+  // Don't render sidebar if user is not logged in
+  if (!isLoggedIn) {
+    return null;
+  }
   const [tooltipItem, setTooltipItem] = useState<string | null>(null);
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
   const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
@@ -206,9 +210,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onAddNewEnterprise?.();
     setCompanyDropdownOpen(false);
   };
-  if (!isLoggedIn) {
-    return null;
-  }
   const activeCompany = companies.find(c => c.isActive) || companies[0];
   return <div className={`fixed lg:sticky inset-y-0 left-0 z-30 w-64 lg:w-60 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 overflow-y-auto h-screen lg:top-0`}>
       {/* Header with Company Switcher */}

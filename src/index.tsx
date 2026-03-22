@@ -16,60 +16,75 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-// Create a QueryClient instance for React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
     },
   },
 });
 
-const container = document.getElementById("root");
-if (container) {
-  const root = createRoot(container);
-  // Ensure MSAL is initialized and redirect response handled before using any APIs
-  msalInstance
-    .initialize()
-    .then(() => msalInstance.handleRedirectPromise())
-    .then((result) => {
-      if (result?.account) {
-        msalInstance.setActiveAccount(result.account);
-      } else {
-        const accounts = msalInstance.getAllAccounts();
-        if (accounts.length === 1) {
-          msalInstance.setActiveAccount(accounts[0]);
-        }
-      }
-      // If this was an explicit Sign Up flow or a brand new account, route to onboarding
-      try {
-        const isSignupState =
-          typeof result?.state === "string" &&
-          result.state.includes("ej-signup");
-        const claims = (result as any)?.idTokenClaims || {};
-        const isNewUser =
-          claims?.newUser === true || claims?.newUser === "true";
-        if (isSignupState || isNewUser) {
-          // Navigate to onboarding without adding history entry
-          window.location.replace("/dashboard/onboarding");
-          return;
-        }
-      } catch (error) {
-        console.warn("Error processing authentication state:", error);
-      }
-      root.render(
-        <QueryClientProvider client={queryClient}>
-          <ApolloProvider client={client}>
-            <MsalProvider instance={msalInstance}>
-              <AppRouter />
-            </MsalProvider>
-          </ApolloProvider>
-        </QueryClientProvider>
-      );
-    })
-    .catch((e) => {
-      console.error("MSAL initialization failed:", e);
-    });
+
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const root = createRoot(document.getElementById("root")!);
+
+try {
+  await msalInstance.initialize();
+} catch (e: unknown) {
+  console.error("MSAL initialization failed:", e);
+}
+
+let result: Awaited<ReturnType<typeof msalInstance.handleRedirectPromise>> = null;
+try {
+  result = await msalInstance.handleRedirectPromise();
+} catch (e: unknown) {
+  console.error("MSAL redirect handling failed:", e);
+}
+
+if (result?.account) {
+  msalInstance.setActiveAccount(result.account);
+} else {
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length === 1) {
+    msalInstance.setActiveAccount(accounts[0]);
+  }
+}
+
+const claims = (result?.idTokenClaims ?? {}) as Record<string, unknown>;
+const isNewUser = [true, "true"].includes(claims.newUser as boolean | string);
+const isSignupState = result?.state?.includes("ej-signup");
+const redirectStatePrefix = "dq-redirect:";
+const redirectTarget = (() => {
+  const userState = result?.state?.split("|").pop() ?? null;
+  if (!userState?.startsWith(redirectStatePrefix)) return null;
+
+  try {
+    const decoded = decodeURIComponent(userState.slice(redirectStatePrefix.length));
+    return decoded.startsWith("/") ? decoded : null;
+  } catch {
+    return null;
+  }
+})();
+
+if (isSignupState || isNewUser) {
+  globalThis.location.replace("/dashboard/onboarding");
+} else if (redirectTarget) {
+  globalThis.location.replace(redirectTarget);
+} else {
+  if (result || globalThis.location.hash || globalThis.location.search) {
+    globalThis.history.replaceState({}, "", globalThis.location.pathname);
+  }
+
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <ApolloProvider client={client}>
+        <MsalProvider instance={msalInstance}>
+          <AppRouter />
+        </MsalProvider>
+      </ApolloProvider>
+    </QueryClientProvider>
+  );
 }

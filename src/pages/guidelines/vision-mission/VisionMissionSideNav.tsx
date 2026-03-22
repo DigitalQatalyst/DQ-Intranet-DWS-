@@ -64,7 +64,7 @@ export function VisionMissionSideNav({ activeSection, onSectionClick }: VisionMi
   }
 
   return (
-    <nav className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
+    <nav className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto filter-sidebar-scroll">
       <div className="pr-6">
         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
           Contents

@@ -10,6 +10,8 @@ import {
 import {
   fetchAllReviews,
   createReview,
+  fetchAllLearningPaths,
+  fetchLearningPathBySlug,
 } from '../services/lmsService';
 import type { LmsCard, LmsDetail } from '../data/lmsCourseDetails';
 
@@ -59,11 +61,20 @@ export function useLmsCourse(slug: string) {
         }
       }
       
+      // If still not found, try learning paths
       if (!found) {
-        console.warn('[LMS] useLmsCourse: Course not found with slug:', searchSlug);
+        console.log('[LMS] useLmsCourse: Course not found, checking learning paths...');
+        found = await fetchLearningPathBySlug(searchSlug);
+        if (found) {
+          console.log('[LMS] useLmsCourse: Found learning path:', { slug: found.slug, title: found.title });
+        }
+      }
+      
+      if (!found) {
+        console.warn('[LMS] useLmsCourse: Course or learning path not found with slug:', searchSlug);
         console.warn('[LMS] useLmsCourse: Available slugs:', courses.map(c => ({ slug: c.slug, title: c.title })));
       } else {
-        console.log('[LMS] useLmsCourse: Found course:', { slug: found.slug, title: found.title });
+        console.log('[LMS] useLmsCourse: Found:', { slug: found.slug, title: found.title });
       }
       
       return found;
@@ -188,6 +199,17 @@ export function useCreateReview() {
       queryClient.invalidateQueries({ queryKey: ['lms', 'courses', variables.courseId] });
       queryClient.invalidateQueries({ queryKey: ['lms', 'reviews'] });
     },
+  });
+}
+
+/**
+ * Hook to fetch all learning paths
+ */
+export function useLmsLearningPaths() {
+  return useQuery<LmsCard[], Error>({
+    queryKey: ['lms', 'learning-paths'],
+    queryFn: fetchAllLearningPaths,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 

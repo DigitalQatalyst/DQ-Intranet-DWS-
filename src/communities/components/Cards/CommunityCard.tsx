@@ -126,7 +126,7 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
       </div>
       <CardFooter isMember={isMember} primaryCTA={isMember ? {
       text: 'Explore Community',
-      onClick: handleViewDetails || (() => undefined),
+      onClick: handleViewDetails || (() => {}),
       variant: 'member'
     } : {
       text: item.isPrivate ? 'Request to Join' : 'Join Community',

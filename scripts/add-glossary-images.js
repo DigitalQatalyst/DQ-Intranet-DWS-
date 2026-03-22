@@ -52,4 +52,3 @@ if (allFound) {
   console.log('2. Save the Golden Honeycomb diagram as: public/images/knowledge/ghc.png');
 }
 console.log('='.repeat(50));
-

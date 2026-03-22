@@ -17,7 +17,7 @@ export interface MarketplaceItem {
   };
   [key: string]: any; // For additional fields specific to each marketplace type
 }
-export interface PromoCardData {
+interface PromoCardData {
   id: string;
   title: string;
   description: string;

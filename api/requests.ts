@@ -2,7 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { supabaseAdmin } from './_supabase';
 
 type RequestType = 'workspace' | 'access' | 'demo' | 'support';
-const allowedTypes = new Set<RequestType>(['workspace', 'access', 'demo', 'support']);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -13,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { type, name, email, message, metadata } = req.body ?? {};
 
   const errors: string[] = [];
-  if (!type || !allowedTypes.has(type)) errors.push('Invalid type');
+  if (!type || !['workspace', 'access', 'demo', 'support'].includes(type)) errors.push('Invalid type');
   if (!name || typeof name !== 'string') errors.push('Name is required');
   if (!email || typeof email !== 'string') errors.push('Email is required');
   if (message && typeof message !== 'string') errors.push('Message must be a string');

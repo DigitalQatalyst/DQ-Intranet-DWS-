@@ -7,7 +7,7 @@
  */
 import { graphqlClient } from './graphql/client';
 import { GET_COURSES, GET_COURSE_DETAILS, GET_RELATED_COURSES, GET_CATEGORIES, GET_DELIVERY_MODES, GET_BUSINESS_STAGES, GET_PROVIDERS } from './graphql/queries';
-import { CourseType, FilterOptions } from '../types/course';
+import { CourseType, ProviderType, FilterOptions } from '../types/course';
 /**
  * Fetches courses based on filter criteria and search query
  *

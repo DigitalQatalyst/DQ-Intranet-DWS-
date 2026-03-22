@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/communities/integrations/supabase/client';
 import { toast } from 'sonner';
-export interface User {
+interface User {
   id: string;
   email: string;
   username: string | null;

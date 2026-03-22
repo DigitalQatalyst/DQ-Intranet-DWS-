@@ -5,49 +5,28 @@ type AnyRequest = {
   method?: string;
   headers: Record<string, string | undefined> & { host?: string; 'x-forwarded-proto'?: string };
   url?: string;
-  body?: unknown;
-  [key: string]: unknown;
+  body?: any;
+  [key: string]: any;
 };
 
 type AnyResponse = {
   status?: (code: number) => AnyResponse;
-  json?: (body: unknown) => void;
+  json?: (body: any) => void;
   setHeader?: (k: string, v: string) => void;
-  end?: (body?: unknown) => void;
-  [key: string]: unknown;
+  end?: (body?: any) => void;
+  [key: string]: any;
 };
 
-type GuideRow = {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string | null;
-  hero_image_url?: string | null;
-  heroImageUrl?: string | null;
-  skill_level?: string | null;
-  skillLevel?: string | null;
-  estimated_time_min?: number | null;
-  estimatedTimeMin?: number | null;
-  last_updated_at?: string | null;
-  lastUpdatedAt?: string | null;
-  status?: string | null;
-  author_name?: string | null;
-  authorName?: string | null;
-  author_org?: string | null;
-  authorOrg?: string | null;
-  is_editors_pick?: boolean | null;
-  isEditorsPick?: boolean | null;
-  download_count?: number | null;
-  downloadCount?: number | null;
-  guide_type?: string | null;
-  guideType?: string | null;
-  domain?: string | null;
-  function_area?: string | null;
-  complexity_level?: string | null;
-  document_url?: string | null;
-  documentUrl?: string | null;
-  body?: string | null;
-};
+function parseJSONBody(req: AnyRequest): Promise<any> {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', (chunk: any) => (data += chunk));
+    req.on('end', () => {
+      try { resolve(data ? JSON.parse(data) : {}); } catch (e) { reject(e); }
+    });
+    req.on('error', reject);
+  });
+}
 
 export default async function handler(req: AnyRequest, res: AnyResponse) {
   try {
@@ -66,7 +45,7 @@ export default async function handler(req: AnyRequest, res: AnyResponse) {
       const gq = isUuid
         ? supabaseAdmin.from('guides').select(select).eq('id', id).maybeSingle()
         : supabaseAdmin.from('guides').select(select).eq('slug', id).maybeSingle()
-      const { data: row, error } = await gq as unknown as { data: GuideRow | null; error: unknown };
+      const { data: row, error } = await gq
       if (error) throw error
       if (!row) { res.status?.(404); res.json?.({ error: 'Not found' }); return }
       // Map to API shape
@@ -90,13 +69,32 @@ export default async function handler(req: AnyRequest, res: AnyResponse) {
         complexityLevel: row.complexity_level ?? null,
         documentUrl: row.document_url ?? row.documentUrl ?? null,
         body: includeBody ? (row.body ?? null) : null,
+      } as any
+      // Fetch sub-content (still supported) - handle errors gracefully
+      let steps: any[] = []
+      let attachments: any[] = []
+      let templates: any[] = []
+      
+      try {
+        const [stepsResult, attachmentsResult, templatesResult] = await Promise.allSettled([
+          supabaseAdmin.from('guide_steps').select('id,position,title,body').eq('guide_id', guide.id).order('position', { ascending: true }),
+          supabaseAdmin.from('guide_attachments').select('id,kind,title,url,size').eq('guide_id', guide.id),
+          supabaseAdmin.from('guide_templates').select('id,title,url,size').eq('guide_id', guide.id),
+        ])
+        
+        if (stepsResult.status === 'fulfilled' && !stepsResult.value.error) {
+          steps = stepsResult.value.data || []
+        }
+        if (attachmentsResult.status === 'fulfilled' && !attachmentsResult.value.error) {
+          attachments = attachmentsResult.value.data || []
+        }
+        if (templatesResult.status === 'fulfilled' && !templatesResult.value.error) {
+          templates = templatesResult.value.data || []
+        }
+      } catch (err) {
+        // If related tables don't exist or have errors, continue without them
+        console.warn('api/guides/[id] warning: Error fetching sub-content:', err)
       }
-      // Fetch sub-content (still supported)
-      const [{ data: steps }, { data: attachments }, { data: templates }] = await Promise.all([
-        supabaseAdmin.from('guide_steps').select('id,position,title,body').eq('guide_id', guide.id).order('position', { ascending: true }),
-        supabaseAdmin.from('guide_attachments').select('id,kind,title,url,size').eq('guide_id', guide.id),
-        supabaseAdmin.from('guide_templates').select('id,title,url,size').eq('guide_id', guide.id),
-      ])
       const out = {
         ...guide,
         steps: (steps || []).map(s => ({ id: s.id, position: s.position, title: s.title, content: s.body })),
@@ -113,9 +111,8 @@ export default async function handler(req: AnyRequest, res: AnyResponse) {
     }
 
     res.status?.(405); res.json?.({ error: 'Method not allowed' });
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error('api/guides/[id] error:', err);
-    const message = err instanceof Error ? err.message : 'Server error';
-    res.status?.(500); res.json?.({ error: message });
+    res.status?.(500); res.json?.({ error: err?.message || 'Server error' });
   }
 }

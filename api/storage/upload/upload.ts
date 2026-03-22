@@ -13,10 +13,9 @@
  * - Keep AZURE_STORAGE_ACCOUNT_KEY secret (do NOT expose to the browser)
  */
 
-import formidable, { File as FormidableFile, Fields, Files } from 'formidable';
-import type { IncomingMessage } from 'node:http';
-import fs from 'node:fs/promises';
-import { Buffer } from 'node:buffer';
+import formidable, { File as FormidableFile } from 'formidable';
+import fs from 'fs/promises';
+import { Buffer } from 'buffer';
 import {
   StorageSharedKeyCredential,
   BlobServiceClient
@@ -50,9 +49,9 @@ const uploadBufferToBlob = async (buffer: Buffer, blobName: string, contentType?
   }
 
   if (STORAGE_ACCOUNT_KEY) {
-    const credential = new StorageSharedKeyCredential(STORAGE_ACCOUNT_NAME, STORAGE_ACCOUNT_KEY);
+    const credential = new StorageSharedKeyCredential(STORAGE_ACCOUNT_NAME!, STORAGE_ACCOUNT_KEY);
     const serviceClient = new BlobServiceClient(`https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net`, credential);
-    const containerClient = serviceClient.getContainerClient(CONTAINER_NAME);
+    const containerClient = serviceClient.getContainerClient(CONTAINER_NAME!);
 
     try {
       await containerClient.createIfNotExists();
@@ -96,19 +95,18 @@ type AnyRequest = {
   headers: Record<string, string | undefined> & { host?: string; 'x-forwarded-proto'?: string };
   url?: string;
   // Node request is async iterable for the body
-  [key: string]: unknown;
+  [key: string]: any;
 };
 
 type AnyResponse = {
   status?: (code: number) => AnyResponse;
-  json?: (body: unknown) => void;
+  json?: (body: any) => void;
   setHeader?: (k: string, v: string) => void;
-  end?: (body?: unknown) => void;
-  [key: string]: unknown;
+  end?: (body?: any) => void;
+  [key: string]: any;
 };
 
-// NOSONAR: Cognitive complexity acceptable for upload handler - handles multiple upload scenarios
-export default async function handler(req: AnyRequest, res: AnyResponse): Promise<void> { // NOSONAR typescript:S3776
+export default async function handler(req: AnyRequest, res: AnyResponse): Promise<void> {
   try {
     if (req.method !== 'POST') {
       res.status?.(405);
@@ -122,21 +120,19 @@ export default async function handler(req: AnyRequest, res: AnyResponse): Promis
     if (contentType.startsWith('multipart/form-data')) {
       const form = formidable({ multiples: true, keepExtensions: true });
 
-      const { files } = await new Promise<{ fields: Fields; files: Files }>(
-        (resolve, reject) => {
-          form.parse(req as unknown as IncomingMessage, (err: Error | null, fields: Fields, parsedFiles: Files) => {
-            if (err) return reject(err);
-            resolve({ fields, files: parsedFiles });
-          });
-        },
-      );
+      const { files } = await new Promise<{ fields: Record<string, any>; files: Record<string, FormidableFile | FormidableFile[]> }>((resolve, reject) => {
+        form.parse(req as any, (err, fields, files) => {
+          if (err) return reject(err);
+          resolve({ fields, files });
+        });
+      });
 
       // Normalize files into array
       const flatFiles: FormidableFile[] = [];
       for (const key of Object.keys(files || {})) {
         const entry = files[key];
         if (Array.isArray(entry)) flatFiles.push(...entry);
-        else if (entry) flatFiles.push(entry as FormidableFile);
+        else flatFiles.push(entry as FormidableFile);
       }
 
       if (flatFiles.length === 0) {
@@ -148,15 +144,14 @@ export default async function handler(req: AnyRequest, res: AnyResponse): Promis
       const urls: string[] = [];
       for (const f of flatFiles) {
         // formidable v3 stores the path in f.filepath
-        const legacyFile = f as FormidableFile & { file?: string; path?: string };
-        const pathKey = legacyFile.filepath || legacyFile.file || legacyFile.path;
+        const pathKey = (f as any).filepath || (f as any).file || (f as any).path;
         if (!pathKey) continue;
         const buffer = await fs.readFile(pathKey);
         const blobName = f.originalFilename || f.newFilename || `upload-${Date.now()}`;
         const url = await uploadBufferToBlob(buffer, blobName, f.mimetype || 'application/octet-stream');
         urls.push(url);
         // cleanup temp file
-        await fs.unlink(pathKey).catch(() => null);
+        await fs.unlink(pathKey).catch(() => {});
       }
 
       res.status?.(201);
@@ -176,12 +171,11 @@ export default async function handler(req: AnyRequest, res: AnyResponse): Promis
       res.json?.({ error: 'blobName required (query or x-blob-name header) for raw uploads' });
       return;
     }
-    const resolvedBlobName = typeof blobName === 'string' ? blobName : String(blobName);
 
     // Read raw body from async iterable request
     const chunks: Buffer[] = [];
-    for await (const chunk of req as unknown as AsyncIterable<Buffer | string>) {
-      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+    for await (const chunk of req as any) {
+      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : Buffer.from(chunk));
     }
     const buffer = Buffer.concat(chunks);
     console.log('buffer', buffer);
@@ -192,16 +186,15 @@ export default async function handler(req: AnyRequest, res: AnyResponse): Promis
     }
 
     const uploadContentType = req.headers['x-upload-content-type'] || req.headers['content-type'] || 'application/octet-stream';
-    const blobUrl = await uploadBufferToBlob(buffer, resolvedBlobName, uploadContentType);
+    const blobUrl = await uploadBufferToBlob(buffer, blobName as string, uploadContentType);
     res.status?.(201);
     res.json?.({ url: blobUrl });
     return;
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error('api/storage/upload error:', err);
     try {
       res.status?.(500);
-      const message = err instanceof Error ? err.message : 'Upload error';
-      res.json?.({ error: message });
+      res.json?.({ error: err?.message || 'Upload error' });
     } catch {
       // swallow
     }

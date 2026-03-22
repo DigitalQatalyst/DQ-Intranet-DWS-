@@ -36,8 +36,8 @@ export const maybeFlip = (
   lng?: number,
   country?: string,
 ): { lat: number; lng: number } | null => {
-  if (isValidLatLng(lat, lng, country) && lat != null && lng != null) return { lat, lng };
-  if (isValidLatLng(lng, lat, country) && lng != null && lat != null) return { lat: lng, lng: lat };
+  if (isValidLatLng(lat, lng, country)) return { lat: lat!, lng: lng! };
+  if (isValidLatLng(lng, lat, country)) return { lat: lng!, lng: lat! };
   return null;
 };
 

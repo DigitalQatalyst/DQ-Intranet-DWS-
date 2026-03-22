@@ -103,12 +103,10 @@ export const KnowledgeHubCard: React.FC<KnowledgeHubItemProps> = ({
       }
     }
   }, [videoRef.current, item])
-  // Runtime check for valid href
+  // Runtime check for valid href (development only)
   useEffect(() => {
-    if (!detailsHref || detailsHref === '#' || detailsHref === 'about:blank') {
-      console.warn(
-        `Warning: Invalid href for item ${item.id}: "${detailsHref}"`,
-      )
+    if (import.meta.env.DEV && (!detailsHref || detailsHref === '#' || detailsHref === 'about:blank')) {
+      // Invalid href detected in development mode
     }
   }, [detailsHref, item.id])
   // Format date to display as "Jan 12, 2024"
@@ -294,7 +292,7 @@ export const KnowledgeHubCard: React.FC<KnowledgeHubItemProps> = ({
         metadata.icon = getContentTypeIcon()
         metadata.videoUrl = getVideoUrl(item)
         break
-      case 'podcast': {
+      case 'podcast':
         // Use the getDuration selector for consistent duration display
         const audioDuration = getDuration(item)
         if (audioDuration.available) {
@@ -309,7 +307,6 @@ export const KnowledgeHubCard: React.FC<KnowledgeHubItemProps> = ({
         // Resolve the audio URL using the selector
         metadata.audioUrl = getAudioUrl(item)
         break
-      }
       case 'resource':
         metadata.resourceType = item.mediaType
         if (item.downloadCount) {

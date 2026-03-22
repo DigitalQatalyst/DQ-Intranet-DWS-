@@ -26,7 +26,7 @@ class ChatService {
   private messageListeners: MessageListener[] = [];
   private typingStatusListeners: TypingStatusListener[] = [];
   private connectionStatusListeners: ConnectionStatusListener[] = [];
-  private isAdvisorTyping = false;
+  private isAdvisorTyping: boolean = false;
   private connectionStatus: ConnectionStatus = ConnectionStatus.IDLE;
   private typingTimeout: NodeJS.Timeout | null = null;
   private connectionTimeout: NodeJS.Timeout | null = null;
@@ -155,9 +155,9 @@ class ChatService {
       replyTo: replyToId,
       voiceMessage: voiceMessage
         ? {
-            duration: voiceMessage.duration,
-            audioUrl: voiceMessage.audioUrl,
-          }
+          duration: voiceMessage.duration,
+          audioUrl: voiceMessage.audioUrl,
+        }
         : undefined,
     };
     // Add message to local storage
@@ -191,7 +191,7 @@ class ChatService {
   // Simulate advisor response
   private simulateAdvisorResponse(
     replyToId?: string,
-    withVoice = false
+    withVoice: boolean = false
   ): void {
     // 30% chance to reply to the message
     const shouldReply = Math.random() < 0.3 && replyToId;
@@ -220,9 +220,9 @@ class ChatService {
       replyTo: shouldReply ? replyToId : undefined,
       voiceMessage: shouldReplyWithVoice
         ? {
-            duration: 5 + Math.floor(Math.random() * 25),
-            audioUrl,
-          }
+          duration: 5 + Math.floor(Math.random() * 25),
+          audioUrl,
+        }
         : undefined,
     };
     // Add message to storage
@@ -283,10 +283,10 @@ class ChatService {
       this.messages = this.messages.map((msg) =>
         msg.id === messageId
           ? {
-              ...msg,
-              content: "This message was deleted",
-              isDeletedForMe: true,
-            }
+            ...msg,
+            content: "This message was deleted",
+            isDeletedForMe: true,
+          }
           : msg
       );
     }

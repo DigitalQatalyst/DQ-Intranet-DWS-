@@ -16,6 +16,11 @@ export interface ServiceCardProps {
     featuredImageUrl?: string;
     requestUrl?: string;
   };
+  // Clean up specific duplicate tagline the user asked to remove
+  const sanitizedDescription = (item.description || '')
+    .replace('Purpose gives meaning to every action, and direction to every choice.', '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
   type: string;
   isBookmarked: boolean;
   onToggleBookmark: () => void;
@@ -84,7 +89,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     resolveServiceImage(item.id, item.title) ||
     '/images/services/DTMP.jpg';
   
-  return <div className="flex flex-col min-h-[340px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200" onClick={onQuickView}>
+  return <div className="flex flex-col h-[400px] bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200" onClick={onQuickView}>
       {/* Featured Image */}
       <div className="relative h-48 bg-gray-200 overflow-hidden">
         <img 
@@ -102,33 +107,28 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         />
       </div>
       
-      {/* Card Header with fixed height for title and provider */}
-      <div className="px-4 pt-3 pb-2 flex-grow flex flex-col">
-        <div className="flex items-start mb-1">
-          <div className="flex-grow flex flex-col">
-            <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight" style={{ margin: 0, lineHeight: 1.15 }}>
-              {item.title}
-            </h3>
-            <p className="text-sm text-gray-500 mt-0.5" style={{ marginTop: 2, marginBottom: 0 }}>
-              {item.provider.name}
-            </p>
-          </div>
+      {/* Card Content with fixed heights */}
+      <div className="px-4 pt-3 pb-2 flex flex-col" style={{ height: '140px' }}>
+        {/* Title and Provider - fixed height */}
+        <div style={{ height: '60px' }}>
+          <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight" style={{ margin: 0, lineHeight: 1.2, fontSize: '14px' }}>
+            {item.title}
+          </h3>
+          <p className="text-sm text-gray-500" style={{ marginTop: 4, marginBottom: 0, fontSize: '12px' }}>
+            {item.provider.name}
+          </p>
         </div>
-        {/* Description with consistent height */}
-        <div className="mb-2" style={{ marginTop: 4 }}>
-          <p className="text-sm text-gray-600 line-clamp-2 leading-snug" style={{ margin: 0 }}>
-            {item.description}
+        {/* Description - fixed height */}
+        <div style={{ height: '60px', marginTop: '8px' }}>
+          <p className="text-sm text-gray-600 line-clamp-3 leading-snug" style={{ margin: 0, fontSize: '12px', lineHeight: 1.4 }}>
+            {sanitizedDescription || item.description}
           </p>
         </div>
       </div>
     
-      <div className="mt-auto border-t border-gray-100 px-4 py-2.5">
-        <div className="flex justify-between gap-2">
-          {/* View Details button - HIDDEN */}
-          {/* <button onClick={handleViewDetails} className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap min-w-[120px] flex-1 ${type === 'non-financial' ? 'bg-white border' : 'text-blue-600 bg-white border border-blue-600 hover:bg-blue-50'}`} style={type === 'non-financial' ? { color: '#030F35', borderColor: '#030F35' } : {}} onMouseEnter={(e) => { if (type === 'non-financial') e.currentTarget.style.backgroundColor = '#f0f4f8'; }} onMouseLeave={(e) => { if (type === 'non-financial') e.currentTarget.style.backgroundColor = 'white'; }}>
-            View Details
-          </button> */}
-          <button onClick={handlePrimaryAction} className="px-4 py-2 text-sm font-bold text-white rounded-md transition-colors whitespace-nowrap flex-1" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#020a23'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030F35'}>
+      <div className="border-t border-gray-100 px-4 py-3" style={{ height: '60px' }}>
+        <div className="flex justify-between gap-2 h-full">
+          <button onClick={handlePrimaryAction} className="px-4 py-2 text-sm font-bold text-white rounded-md transition-colors whitespace-nowrap flex-1 h-full" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#020a23'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030F35'}>
             {getPrimaryCTAText()}
           </button>
         </div>

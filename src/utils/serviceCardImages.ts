@@ -12,8 +12,9 @@ export const SERVICE_CARD_IMAGES: Record<string, string> = {
   '8': '/images/services/governance.jpg',
   '9': '/images/services/proposal.jpg',
 
-
-
+  // GHC Services
+  'ghc-tmaas': '/images/guidelines-content.PNG',
+  'GHC Transformation Management': '/images/guidelines-content.PNG',
 };
 
 // Helper to resolve a mapped image by id or title (case-insensitive for titles)

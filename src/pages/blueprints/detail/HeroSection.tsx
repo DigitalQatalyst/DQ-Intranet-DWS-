@@ -24,7 +24,7 @@ export function HeroSection({
     : authorName || authorOrg || 'Digital Qatalyst'
 
   return (
-    <div className="relative w-full h-[500px] overflow-hidden">
+    <div className="relative w-full h-[325px] overflow-hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{
@@ -44,7 +44,7 @@ export function HeroSection({
             Last Updated: {formattedDate}
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight font-inter">
+          <h1 className="text-[40px] font-bold mb-8 leading-tight font-inter">
             {title}
           </h1>
 

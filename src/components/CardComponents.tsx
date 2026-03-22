@@ -1,6 +1,6 @@
 import React from 'react';
 import { NewsCard as CardsNewsCard, ResourceCard as CardsResourceCard, EventCard as CardsEventCard, ServiceHighlightCard } from './Cards';
-import { Download, ExternalLink, FileText, BookOpen, Calculator } from 'lucide-react';
+import { Download, ExternalLink, FileText, BookOpen, Calculator, Play } from 'lucide-react';
 
 // NewsCard wrapper
 export const NewsCard = ({
@@ -21,8 +21,17 @@ export const NewsCard = ({
     source: content.source || 'TechNews Daily',
     sourceLogoUrl: content.sourceLogoUrl
   };
+
+  const pill =
+    (content.tags || []).some((tag) =>
+      typeof tag === 'string'
+        ? tag.toLowerCase().includes('podcast')
+        : false
+    )
+      ? { text: 'Play', icon: <Play size={12} />, variant: 'info' as const }
+      : undefined;
   
-  return <CardsNewsCard item={newsItem} onQuickView={onQuickView} onReadMore={onReadMore} {...props} />;
+  return <CardsNewsCard item={newsItem} pill={pill} onQuickView={onQuickView} onReadMore={onReadMore} {...props} />;
 };
 
 // EventCard wrapper

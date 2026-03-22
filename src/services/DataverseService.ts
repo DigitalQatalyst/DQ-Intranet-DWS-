@@ -1,17 +1,15 @@
 /**
  * Service for interacting with Microsoft Dataverse Web API
  */
-// Configuration placeholders for a real Dataverse setup (unused in mock)
-// const DATAVERSE_API_URL = "https://your-org.api.crm.dynamics.com/api/data/v9.2";
-// const DOCUMENT_ENTITY_NAME = "cr123_document"; // Replace with your actual entity name
-// const getAuthToken = async () => "dummy-token";
-type SectionFields = Record<string, string>;
-type SectionData = { fields?: SectionFields };
-type ProfileSections = Record<string, SectionData>;
-type ProfileData = {
-  companyStage?: string;
-  sections?: ProfileSections;
-  [key: string]: unknown;
+// Configuration values - in a real implementation, these would come from environment variables
+// For demo purposes, we'll use placeholder values
+const DATAVERSE_API_URL = "https://your-org.api.crm.dynamics.com/api/data/v9.2";
+const DOCUMENT_ENTITY_NAME = "cr123_document"; // Replace with your actual entity name
+// Get the authentication token (this would be handled by your auth provider)
+const getAuthToken = async () => {
+  // In a real implementation, this would get a token from your auth provider
+  // For example, using MSAL.js, Azure AD, etc.
+  return "dummy-token";
 };
 /**
  * Interface for document metadata
@@ -325,7 +323,7 @@ export const getDocumentVersions = async (documentId: string) => {
 // Mock implementation of Dataverse API service
 // In a real implementation, this would make actual API calls to Dataverse
 // Mock cache to simulate API data
-let dataCache: ProfileData | null = null;
+let dataCache = null;
 // Simulate API call to fetch business profile data
 export const fetchBusinessProfileData = async () => {
   // Simulate API latency
@@ -344,14 +342,7 @@ export const fetchBusinessProfileData = async () => {
   return mockData;
 };
 // Save profile data to Dataverse
-const mergeSections = (current?: ProfileSections, incoming?: ProfileSections) => {
-  const merged: ProfileSections = {};
-  if (current) Object.assign(merged, current);
-  if (incoming) Object.assign(merged, incoming);
-  return merged;
-};
-
-export const saveProfileData = async (profileData: ProfileData) => {
+export const saveProfileData = async (profileData) => {
   // Simulate API latency
   await new Promise((resolve) => setTimeout(resolve, 800));
   // In a real implementation, this would be:
@@ -364,36 +355,37 @@ export const saveProfileData = async (profileData: ProfileData) => {
   // });
   // const data = await response.json();
   // For now, we'll just update our cache
-  const cachedSections = dataCache?.sections;
-  const incomingSections = profileData.sections;
-  const baseCache = dataCache ? { ...dataCache } : undefined;
-  dataCache = baseCache
-    ? {
-        ...baseCache,
-        ...profileData,
-        sections: mergeSections(cachedSections, incomingSections),
-      }
-    : {
-        ...profileData,
-        sections: mergeSections(cachedSections, incomingSections),
-      };
+  dataCache = {
+    ...dataCache,
+    ...profileData,
+    // Merge sections rather than replacing them
+    sections: {
+      ...(dataCache?.sections || {}),
+      ...profileData.sections,
+    },
+  };
   // Store in localStorage for persistence across page reloads
   localStorage.setItem("profileData", JSON.stringify(dataCache));
   return dataCache;
 };
 // Calculate completion percentage for a section based on field values
-export const calculateSectionCompletion = (sectionData?: SectionData | null) => {
-  const fields = sectionData?.fields;
-  if (!fields || Object.keys(fields).length === 0) {
+export const calculateSectionCompletion = (sectionData) => {
+  if (
+    !sectionData ||
+    !sectionData.fields ||
+    Object.keys(sectionData.fields).length === 0
+  ) {
     return 0;
   }
   let completedFields = 0;
   let totalFields = 0;
   // Count completed fields across all groups
-  Object.keys(fields).forEach((fieldKey) => {
+  Object.keys(sectionData.fields).forEach((fieldKey) => {
     totalFields++;
-    const value = fields[fieldKey];
-    if (value?.trim()) {
+    if (
+      sectionData.fields[fieldKey] &&
+      sectionData.fields[fieldKey].trim() !== ""
+    ) {
       completedFields++;
     }
   });
@@ -401,13 +393,12 @@ export const calculateSectionCompletion = (sectionData?: SectionData | null) => 
 };
 // Calculate mandatory fields completion for a section based on company stage
 export const calculateMandatoryCompletion = (
-  sectionData: SectionData | null | undefined,
-  sectionId: string,
-  companyStage: string,
-  config: { tabs: Array<{ id: string; groups: Array<{ fields: Array<{ fieldName: string; mandatory?: string[] }> }> }> }
+  sectionData,
+  sectionId,
+  companyStage,
+  config
 ) => {
-  const fields = sectionData?.fields;
-  if (!fields || !config) {
+  if (!sectionData || !sectionData.fields || !config) {
     return { completed: 0, total: 0, percentage: 0 };
   }
   const sectionConfig = config.tabs.find((tab) => tab.id === sectionId);
@@ -416,13 +407,15 @@ export const calculateMandatoryCompletion = (
   let completedMandatory = 0;
   sectionConfig.groups.forEach((group) => {
     group.fields.forEach((field) => {
-        if (field.mandatory?.includes(companyStage)) {
-          mandatoryFields++;
-          const value = fields[field.fieldName];
-          if (value?.trim()) {
-            completedMandatory++;
-          }
+      if (field.mandatory && field.mandatory.includes(companyStage)) {
+        mandatoryFields++;
+        if (
+          sectionData.fields[field.fieldName] &&
+          sectionData.fields[field.fieldName].trim() !== ""
+        ) {
+          completedMandatory++;
         }
+      }
     });
   });
   return {
@@ -435,17 +428,24 @@ export const calculateMandatoryCompletion = (
   };
 };
 // Check if onboarding has been completed
-export const isOnboardingCompleted = () => {
-  const hasBasicFields = (sections?: ProfileSections) => {
-    const basicFields = sections?.basic?.fields;
-    return !!basicFields && Object.keys(basicFields).length > 0;
-  };
+// Check if onboarding has been completed
+export const isOnboardingCompleted = async () => {
   // Check localStorage first
   const onboardingStatus = localStorage.getItem("onboardingComplete");
   if (onboardingStatus === "true") {
     return true;
   }
-  // Check if we have profile data in the cache
+
+  // If we don't have cached data, try to fetch it
+  if (!dataCache) {
+    try {
+      await fetchBusinessProfileData();
+    } catch (error) {
+      console.error("Error fetching business profile during onboarding check:", error);
+    }
+  }
+
+  // Check if we have profile data in the cache (possibly just fetched)
   if (dataCache) {
     // Check if mandatory fields are filled
     const { companyStage, sections } = dataCache;
@@ -453,8 +453,11 @@ export const isOnboardingCompleted = () => {
       return false;
     }
     // For simplicity, we'll consider onboarding complete if basic section exists
-    return hasBasicFields(sections);
+    return (
+      sections.basic && Object.keys(sections.basic.fields || {}).length > 0
+    );
   }
+
   // Check localStorage for profile data
   const storedData = localStorage.getItem("profileData");
   if (storedData) {
@@ -462,11 +465,13 @@ export const isOnboardingCompleted = () => {
       const parsedData = JSON.parse(storedData);
       dataCache = parsedData; // Update cache
       // Same check as above
-      const { companyStage, sections } = parsedData as ProfileData;
+      const { companyStage, sections } = parsedData;
       if (!companyStage || !sections) {
         return false;
       }
-      return hasBasicFields(sections);
+      return (
+        sections.basic && Object.keys(sections.basic.fields || {}).length > 0
+      );
     } catch (error) {
       console.error("Error parsing stored profile data:", error);
       return false;

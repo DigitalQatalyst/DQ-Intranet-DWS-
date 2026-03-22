@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { mockReportData } from './mockReportsData';
-import { ChevronRightIcon, EyeIcon, DownloadIcon, ArchiveIcon, ChevronLeftIcon, ChevronRightIcon as ChevronRightPaginationIcon } from 'lucide-react';
+import { HomeIcon, ChevronRightIcon, EyeIcon, DownloadIcon, ArchiveIcon, ChevronLeftIcon, ChevronRightIcon as ChevronRightPaginationIcon } from 'lucide-react';
 import { ServiceRequestsFilters } from '../../../components/ServiceRequestsFilters';
 export function AllReceivedReportsPage() {
     const [isLoading, setIsLoading] = useState(true);
@@ -8,12 +8,12 @@ export function AllReceivedReportsPage() {
     const [reports, setReports] = useState([]);
     const [filteredReports, setFilteredReports] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>({
+    const [dateRange, setDateRange] = useState({
         startDate: null,
         endDate: null
     });
-    const [reportTypeFilter, _setReportTypeFilter] = useState('all');
-    const [_sidebarOpen, _setSidebarOpen] = useState(false);
+    const [reportTypeFilter, setReportTypeFilter] = useState('all');
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const reportsPerPage = 10;
     // Fetch data
@@ -60,7 +60,7 @@ export function AllReceivedReportsPage() {
     const currentReports = filteredReports.slice(indexOfFirstReport, indexOfLastReport);
     const totalPages = Math.ceil(filteredReports.length / reportsPerPage);
     // Priority badge component
-    const getPriorityBadge = (priority: string) => {
+    const getPriorityBadge = priority => {
         switch (priority.toLowerCase()) {
             case 'high':
                 return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -138,7 +138,7 @@ export function AllReceivedReportsPage() {
                     {/* Filters Card */}
                     <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <ServiceRequestsFilters searchQuery={searchQuery} onSearchChange={setSearchQuery} dateRange={dateRange} onDateRangeChange={setDateRange} />
+                            <ServiceRequestsFilters searchQuery={searchQuery} onSearchChange={setSearchQuery} dateRange={dateRange} onDateRangeChange={setDateRange as any} />
                         </div>
                     </div>
                     {/* Data Table Card */}

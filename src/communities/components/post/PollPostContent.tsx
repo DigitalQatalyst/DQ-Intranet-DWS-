@@ -6,7 +6,6 @@ import { BarChart3, Check, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/communities/components/ui/button';
 import { Progress } from '@/communities/components/ui/progress';
 import { addDays, format, isPast } from 'date-fns';
-import { sanitizeHtml } from '@/utils/sanitizeHtml';
 interface PollOption {
   id: string;
   option_text: string;
@@ -153,7 +152,7 @@ export function PollPostContent({
       {/* Poll Question/Context */}
       {(content || content_html) && <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600">
           {content_html ? <div dangerouslySetInnerHTML={{
-        __html: sanitizeHtml(content_html)
+        __html: content_html
       }} /> : <p className="whitespace-pre-wrap leading-relaxed">{content}</p>}
         </div>}
 

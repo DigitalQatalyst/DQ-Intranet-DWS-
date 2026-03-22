@@ -64,7 +64,7 @@ const marketplaces: DrawerMarketplace[] = [
     name: 'DQ Media Center',
     description: 'News, announcements, job openings, and blogs.',
     icon: NewspaperIcon,
-    href: '/marketplace/opportunities',
+    href: '/marketplace/opportunities?tab=announcements',
   },
   {
     id: 'work-communities',

@@ -131,12 +131,11 @@ class AnalyticsAPIService {
           case 'daily':
             key = date.toISOString().split('T')[0];
             break;
-          case 'weekly': {
+          case 'weekly':
             const weekStart = new Date(date);
             weekStart.setDate(date.getDate() - date.getDay());
             key = weekStart.toISOString().split('T')[0];
             break;
-          }
           case 'monthly':
           default:
             key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;

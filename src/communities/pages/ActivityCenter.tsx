@@ -211,7 +211,7 @@ export default function ActivityCenter() {
                     <Bell className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm text-gray-500">No notifications yet</p>
                   </div> : <div className="space-y-3">
-                    {notifications.map(notification => <NotificationCard key={notification.id} notification={notification} onMarkAsRead={handleMarkAsRead} onDelete={handleDelete} onClose={() => undefined} />)}
+                    {notifications.map(notification => <NotificationCard key={notification.id} notification={notification} onMarkAsRead={handleMarkAsRead} onDelete={handleDelete} onClose={() => {}} />)}
                   </div>}
               </TabsContent>
 
@@ -219,7 +219,7 @@ export default function ActivityCenter() {
                 <div className="space-y-3">
                   {filterByType('mention').length === 0 ? <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
                       <p className="text-sm text-gray-500">No mentions</p>
-                    </div> : filterByType('mention').map(notification => <NotificationCard key={notification.id} notification={notification} onMarkAsRead={handleMarkAsRead} onDelete={handleDelete} onClose={() => undefined} />)}
+                    </div> : filterByType('mention').map(notification => <NotificationCard key={notification.id} notification={notification} onMarkAsRead={handleMarkAsRead} onDelete={handleDelete} onClose={() => {}} />)}
                 </div>
               </TabsContent>
 
@@ -227,7 +227,7 @@ export default function ActivityCenter() {
                 <div className="space-y-3">
                   {filterByType('moderation_alert').length === 0 ? <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
                       <p className="text-sm text-gray-500">No moderation alerts</p>
-                    </div> : filterByType('moderation_alert').map(notification => <NotificationCard key={notification.id} notification={notification} onMarkAsRead={handleMarkAsRead} onDelete={handleDelete} onClose={() => undefined} />)}
+                    </div> : filterByType('moderation_alert').map(notification => <NotificationCard key={notification.id} notification={notification} onMarkAsRead={handleMarkAsRead} onDelete={handleDelete} onClose={() => {}} />)}
                 </div>
               </TabsContent>
 
@@ -235,7 +235,7 @@ export default function ActivityCenter() {
                 <div className="space-y-3">
                   {filterByType('system').length === 0 ? <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
                       <p className="text-sm text-gray-500">No system notifications</p>
-                    </div> : filterByType('system').map(notification => <NotificationCard key={notification.id} notification={notification} onMarkAsRead={handleMarkAsRead} onDelete={handleDelete} onClose={() => undefined} />)}
+                    </div> : filterByType('system').map(notification => <NotificationCard key={notification.id} notification={notification} onMarkAsRead={handleMarkAsRead} onDelete={handleDelete} onClose={() => {}} />)}
                 </div>
               </TabsContent>
             </Tabs>

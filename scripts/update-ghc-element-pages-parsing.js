@@ -79,12 +79,10 @@ elements.forEach((slug) => {
   let content = fs.readFileSync(filePath, 'utf8');
   
   // Replace the parseSections function
-  // eslint-disable-next-line no-regex-spaces
   const parseSectionsRegex = /  \/\/ Parse markdown body into sections[\s\S]*?const navSections = sections\.map\(s => \(\{ id: s\.id, label: s\.title \}\)\)/;
   content = content.replace(parseSectionsRegex, updatedParsingCode);
   
   // Replace the render section
-  // eslint-disable-next-line no-regex-spaces
   const renderRegex = /            <div className="lg:col-span-3 bg-white rounded-lg shadow-sm p-8 md:p-12">[\s\S]*?              \}\)\}/;
   content = content.replace(renderRegex, updatedRenderCode);
   
@@ -93,3 +91,4 @@ elements.forEach((slug) => {
 });
 
 console.log('\n✅ All pages updated successfully!');
+

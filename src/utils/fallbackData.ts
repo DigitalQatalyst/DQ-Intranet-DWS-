@@ -1,28 +1,28 @@
-import { mockCourses, mockOnboardingFlows } from './mockData';
+import { mockCourses, mockOnboardingFlows } from './mockData'
 import {
   mockFinancialServices,
   mockNonFinancialServices,
   mockKnowledgeHubItems,
-} from './mockMarketplaceData';
+} from './mockMarketplaceData'
 
 /**
  * Get fallback items for a specific marketplace type when API calls fail
  */
-export const getFallbackItems = <T = unknown>(marketplaceType: string): T[] => {
+export const getFallbackItems = (marketplaceType: string): any[] => {
   switch (marketplaceType) {
     case 'courses':
-      return mockCourses as T[]
+      return mockCourses
     case 'financial':
-      return mockFinancialServices as T[]
+      return mockFinancialServices
     case 'non-financial':
-      return mockNonFinancialServices as T[]
+      return mockNonFinancialServices
     case 'guides':
     case 'knowledge-hub':
-      return mockKnowledgeHubItems as T[]
+      return mockKnowledgeHubItems
     case 'onboarding':
-      return mockOnboardingFlows as T[]
+      return mockOnboardingFlows
     default:
-      return [] as T[]
+      return []
   }
 }
 
@@ -32,10 +32,10 @@ export const getFallbackItems = <T = unknown>(marketplaceType: string): T[] => {
 export const getFallbackItemDetails = (
   marketplaceType: string,
   itemId: string,
-): unknown => {
-  const items = getFallbackItems<Record<string, unknown>>(marketplaceType)
+): any => {
+  const items = getFallbackItems(marketplaceType)
   // Try to find the item with the matching ID
-  const item = items.find((entry) => entry.id === itemId)
+  const item = items.find((item) => item.id === itemId)
   // If item is found, return it
   if (item) {
     return item
@@ -86,7 +86,7 @@ export const getFallbackKnowledgeHubItems = () => {
 /**
  * Get Knowledge Hub item details by ID directly from the fallback dataset
  */
-export const getFallbackKnowledgeHubItemDetails = (itemId: string): unknown => {
+export const getFallbackKnowledgeHubItemDetails = (itemId: string): any => {
   const item = mockKnowledgeHubItems.find((item) => item.id === itemId)
   return (
     item || (mockKnowledgeHubItems.length > 0 ? mockKnowledgeHubItems[0] : null)

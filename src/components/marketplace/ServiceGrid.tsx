@@ -103,7 +103,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
           {services.length} Items Available
         </h2>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
         {itemsWithPromos.map((item, idx) => {
         if (item.type === 'service') {
           const service = item.data as ServiceItem;

@@ -5,6 +5,7 @@ import { Header } from '../../../components/Header'
 import { Footer } from '../../../components/Footer'
 import { useAuth } from '../../../components/Header/context/AuthContext'
 import { supabaseClient } from '../../../lib/supabaseClient'
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 import { getGuideImageUrl } from '../../../utils/guideImageMap'
 import { HeroSection } from './HeroSection'
 import { SideNav } from './SideNav'
@@ -263,7 +264,7 @@ function BlueprintPage() {
         // Fallback to direct Supabase query
         const key = String(itemId || '')
         console.log('BlueprintPage: Trying Supabase query with key:', key)
-        const { data: initialRow, error: err1 } = await supabaseClient
+        const { data: initialRow, error: err1 } = await knowledgeHubSupabase
           .from('guides')
           .select('*')
           .eq('slug', key)
@@ -277,7 +278,7 @@ function BlueprintPage() {
         let row = initialRow
         if (!row) {
           console.log('BlueprintPage: No result by slug, trying by id')
-          const { data: row2, error: err2 } = await supabaseClient
+          const { data: row2, error: err2 } = await knowledgeHubSupabase
             .from('guides')
             .select('*')
             .eq('id', key)

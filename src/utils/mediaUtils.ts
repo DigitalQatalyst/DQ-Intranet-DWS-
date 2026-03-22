@@ -40,27 +40,26 @@ export const initializeLocalMedia = async (
       throw new Error("No audio track found in the media stream");
     }
     return stream;
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("Error accessing media devices:", error);
-    const err = error as { name?: string; message?: string } | undefined;
     // Provide more specific error messages based on the error type
     if (
-      err?.name === "NotAllowedError" ||
-      err?.name === "PermissionDeniedError"
+      error.name === "NotAllowedError" ||
+      error.name === "PermissionDeniedError"
     ) {
       throw new Error(
         `Microphone access was denied. Please check your browser permissions and ensure your microphone is enabled.`
       );
     } else if (
-      err?.name === "NotFoundError" ||
-      err?.name === "DevicesNotFoundError"
+      error.name === "NotFoundError" ||
+      error.name === "DevicesNotFoundError"
     ) {
       throw new Error(
         `No microphone found. Please connect a microphone and try again.`
       );
     } else if (
-      err?.name === "NotReadableError" ||
-      err?.name === "TrackStartError"
+      error.name === "NotReadableError" ||
+      error.name === "TrackStartError"
     ) {
       throw new Error(
         `Your microphone is in use by another application. Please close other applications that might be using your microphone.`
@@ -69,7 +68,7 @@ export const initializeLocalMedia = async (
       throw new Error(
         `Could not access ${
           video ? "camera and microphone" : "microphone"
-        }. Error: ${err?.message || err?.name || "Unknown error"}`
+        }. Error: ${error.message || error.name || "Unknown error"}`
       );
     }
   }
@@ -412,10 +411,14 @@ export const createDummyRemoteStream = async (): Promise<MediaStream> => {
     const ctx = canvas.getContext("2d");
 
     // Create a media stream from the canvas
-    const captureStream = (canvas as HTMLCanvasElement & {
+    const stream = (canvas as HTMLCanvasElement & {
       captureStream?: (fps?: number) => MediaStream;
-    }).captureStream;
-    const stream = captureStream ? captureStream.call(canvas, 30) : new MediaStream();
+    }).captureStream
+      ? // Some browsers may not support captureStream; guard usage
+        (canvas as HTMLCanvasElement & {
+          captureStream: (fps?: number) => MediaStream;
+        }).captureStream(30)
+      : new MediaStream();
 
     // Add audio track if needed
     try {
@@ -455,11 +458,11 @@ export const createDummyRemoteStream = async (): Promise<MediaStream> => {
  * @param peerConnection WebRTC peer connection
  */
 export const handleIncomingOffer = async (
-  offer: RTCSessionDescriptionInit,
+  offer: RTCSessionDescription,
   peerConnection: RTCPeerConnection
 ) => {
   // Set remote description (received offer)
-  await peerConnection.setRemoteDescription(offer);
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
   // Create and send answer
   const answer = await peerConnection.createAnswer();
@@ -475,11 +478,11 @@ export const handleIncomingOffer = async (
  * @param peerConnection WebRTC peer connection
  */
 export const handleIncomingAnswer = async (
-  answer: RTCSessionDescriptionInit,
+  answer: RTCSessionDescription,
   peerConnection: RTCPeerConnection
 ) => {
   // Set remote description (received answer)
-  await peerConnection.setRemoteDescription(answer);
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
 };
 
 /**
@@ -496,7 +499,7 @@ export const sendIceCandidate = (candidate: RTCIceCandidate) => {
  * Send the offer to the remote peer
  * @param offer The SDP offer
  */
-export const sendOffer = (offer: RTCSessionDescriptionInit) => {
+export const sendOffer = (offer: RTCSessionDescription) => {
   // Send the offer via signaling server
   // signalingChannel.send({ type: 'offer', offer });
   console.log("Sending offer:", offer);
@@ -506,7 +509,7 @@ export const sendOffer = (offer: RTCSessionDescriptionInit) => {
  * Send the answer to the remote peer
  * @param answer The SDP answer
  */
-export const sendAnswer = (answer: RTCSessionDescriptionInit) => {
+export const sendAnswer = (answer: RTCSessionDescription) => {
   // Send the answer via signaling server
   // signalingChannel.send({ type: 'answer', answer });
   console.log("Sending answer:", answer);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 /* ===== Visual tokens ===== */
 const NAVY = "#131E42";
@@ -45,16 +45,16 @@ const DY: Record<Role, number> = {
 };
 
 interface Node {
-  readonly id: number;
-  readonly role: Role;
-  readonly title: string;
-  readonly subtitle: string;
-  readonly fill: "navy" | "white";
-  readonly growthIndex: number;
+  id: number;
+  role: Role;
+  title: string;
+  subtitle: string;
+  fill: "navy" | "white";
+  growthIndex: number;
 }
 
 interface HexagonDiagramProps {
-  readonly nodes: Node[];
+  nodes: Node[];
 }
 
 const CALLOUTS: { role: Role; text: string; side: Side }[] = [
@@ -68,10 +68,10 @@ const CALLOUTS: { role: Role; text: string; side: Side }[] = [
 ];
 
 /* ===== Hex (flat-top) ===== */
-function Hex({ fill, id }: { readonly fill: "navy" | "white"; readonly id?: number }) {
+function Hex({ fill, id }: { fill: "navy" | "white"; id?: number }) {
   const w = HEX_W, h = HEX_H;
   const d = `M${w/2} 4 L${w-4} ${h*0.25} L${w-4} ${h*0.75} L${w/2} ${h-4} L4 ${h*0.75} L4 ${h*0.25} Z`;
-  const uniqueId = id ?? Math.random().toString(36).slice(2, 11);
+  const uniqueId = id ?? Math.random().toString(36).substr(2, 9);
   
   if (fill === "white") {
     return (
@@ -124,6 +124,8 @@ function anchor(role: Role, side: Side) {
 }
 
 export const DNAHexagonDiagram: React.FC<HexagonDiagramProps> = ({ nodes }) => {
+  const [open, setOpen] = useState<number | null>(null);
+
   return (
     <div style={{ position: "relative", width: CANVAS_W, height: CANVAS_H, margin: "0 auto", maxWidth: "100%" }}>
       {/* Connectors */}
@@ -134,44 +136,29 @@ export const DNAHexagonDiagram: React.FC<HexagonDiagramProps> = ({ nodes }) => {
         preserveAspectRatio="xMidYMid meet"
         style={{ position: "absolute", left: 0, top: 0 }}
       >
-            {CALLOUTS.map((c) => {
-              const s = anchor(c.role, c.side);
-              const yAnchor = c.side === "bottom" ? s.y : s.y + DY[c.role];
+        {CALLOUTS.map((c, i) => {
+          const s = anchor(c.role, c.side);
+          const yAnchor = c.side === "bottom" ? s.y : s.y + DY[c.role];
 
-              const x1 = s.x;
-              const y1 = yAnchor;
+          let x1 = s.x, y1 = yAnchor, x2 = s.x, y2 = yAnchor, tx = x2, ty = y2;
+          let ta: "start" | "end" | "middle" = "middle";
 
-              let x2: number;
-              let y2: number;
-              let tx: number;
-              let ty: number;
-              let ta: "start" | "end" | "middle";
+          if (c.side === "left") {
+            x2 = x1 - H_LEN; y2 = y1;
+            tx = x2 - PAD_SIDE; ty = y2 - 10; ta = "end";
+          } else if (c.side === "right") {
+            x2 = x1 + H_LEN; y2 = y1;
+            tx = x2 + PAD_SIDE; ty = y2 - 10; ta = "start";
+          } else {
+            x2 = x1; y2 = s.y + V_LEN;
+            tx = x2; ty = y2 + PAD_BOTTOM; ta = "middle";
+          }
 
-              if (c.side === "left") {
-                x2 = x1 - H_LEN;
-                y2 = y1;
-                tx = x2 - PAD_SIDE;
-                ty = y2 - 10;
-                ta = "end";
-              } else if (c.side === "right") {
-                x2 = x1 + H_LEN;
-                y2 = y1;
-                tx = x2 + PAD_SIDE;
-                ty = y2 - 10;
-                ta = "start";
-              } else {
-                x2 = x1;
-                y2 = s.y + V_LEN;
-                tx = x2;
-                ty = y2 + PAD_BOTTOM;
-                ta = "middle";
-              }
-
-              return (
-                <g key={c.role}>
-                  <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={LINE} strokeWidth={2} strokeLinecap="round" />
-                  <circle cx={x2} cy={y2} r={5} fill={LINE} />
-                  <text x={tx} y={ty} textAnchor={ta} fontSize={14} fontWeight={700} fill={NAVY}>
+          return (
+            <g key={i}>
+              <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={LINE} strokeWidth={2} strokeLinecap="round" />
+              <circle cx={x2} cy={y2} r={5} fill={LINE} />
+              <text x={tx} y={ty} textAnchor={ta} fontSize={14} fontWeight={700} fill={NAVY}>
                 {c.text}
               </text>
             </g>
@@ -185,18 +172,25 @@ export const DNAHexagonDiagram: React.FC<HexagonDiagramProps> = ({ nodes }) => {
         const top  = CANVAS_H / 2 + POS[n.role].y;
 
         return (
-          <div
+          <button
             key={n.id}
+            onClick={() => setOpen(n.id)}
             style={{
               position: "absolute",
-              left,
-              top,
+              left: left,
+              top: top,
               transform: "translate(-50%, -50%)",
-              background: "transparent",
-              border: 0,
-              padding: 0,
-              cursor: "default",
+              background: "transparent", 
+              border: 0, 
+              padding: 0, 
+              cursor: "pointer",
               transition: "transform .15s ease, filter .15s ease"
+            }}
+            onMouseEnter={(e) => { 
+              (e.currentTarget as HTMLButtonElement).style.transform = "translate(-50%, -50%) scale(1.03)"; 
+            }}
+            onMouseLeave={(e) => { 
+              (e.currentTarget as HTMLButtonElement).style.transform = "translate(-50%, -50%)"; 
             }}
           >
             <div style={{ position: "relative" }}>
@@ -237,7 +231,7 @@ export const DNAHexagonDiagram: React.FC<HexagonDiagramProps> = ({ nodes }) => {
                 }}>{n.growthIndex}</div>
               </div>
             </div>
-          </div>
+          </button>
         );
       })}
     </div>
@@ -245,3 +239,4 @@ export const DNAHexagonDiagram: React.FC<HexagonDiagramProps> = ({ nodes }) => {
 };
 
 export default DNAHexagonDiagram;
+

@@ -6,7 +6,7 @@
  * for secure SAS token generation in production environments.
  */
 // Configuration values - in a real implementation, these would come from environment variables
-const STORAGE_ACCOUNT_NAME = "example-storage-account";
+const STORAGE_ACCOUNT_NAME = "your-storage-account";
 const CONTAINER_NAME = "documents";
 
 /**
@@ -20,13 +20,13 @@ const CONTAINER_NAME = "documents";
 export const generateUploadSasUrl = async (
   blobName: string,
   contentType: string,
-  _expiryMinutes = 15
+  expiryMinutes: number = 15
 ): Promise<string> => {
   // For demo purposes, return a placeholder URL
   console.log("Generating upload SAS URL for:", blobName, contentType);
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return `https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${blobName}`;
+  return `https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${blobName}?sv=demo&sig=demo`;
 };
 
 /**
@@ -37,13 +37,13 @@ export const generateUploadSasUrl = async (
  */
 export const generateDownloadSasUrl = async (
   blobName: string,
-  _expiryMinutes = 60
+  expiryMinutes: number = 60
 ): Promise<string> => {
   // For demo purposes, return a placeholder URL
   console.log("Generating download SAS URL for:", blobName);
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return `https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${blobName}`;
+  return `https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${blobName}?sv=demo&sig=demo`;
 };
 
 /**

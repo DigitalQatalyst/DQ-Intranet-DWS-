@@ -39,6 +39,17 @@ export const SIX_XD_DIMENSIONS: FilterOption[] = [
   { id: 'decide', name: 'Decide' },
 ]
 
+// 6xD Perspective (Secondary - shown when 6xD selected)
+// The six essential perspectives of the Agile 6xD framework
+export const SIX_XD_PERSPECTIVES: FilterOption[] = [
+  { id: 'digital-economy', name: 'Digital Economy (DE)' },
+  { id: 'dco', name: 'Digital Cognitive Organisation (DCO)' },
+  { id: 'dbp', name: 'Digital Business Platforms (DBP)' },
+  { id: 'dt2-0', name: 'Digital Transformation 2.0 (DT2.0)' },
+  { id: 'dw-ws', name: 'Digital Worker & Workspace (DW:WS)' },
+  { id: 'digital-accelerators', name: 'Digital Accelerators (Tools)' },
+]
+
 // 6xD Term Type (Secondary - shown when 6xD selected)
 export const SIX_XD_TERM_TYPES: FilterOption[] = [
   { id: 'platform-product', name: 'Platform / Product' },

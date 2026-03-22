@@ -5,6 +5,7 @@ import { Header } from '../../../components/Header'
 import { Footer } from '../../../components/Footer'
 import { useAuth } from '../../../components/Header/context/AuthContext'
 import { supabaseClient } from '../../../lib/supabaseClient'
+import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 import { HeroSection } from './HeroSection'
 import { SideNav } from './SideNav'
 import { GuidelineSection } from './GuidelineSection'
@@ -49,7 +50,7 @@ function GuidelinePage() {
     let cancelled = false
     ;(async () => {
       try {
-        const { data: guideData, error } = await supabaseClient
+        const { data: guideData, error } = await knowledgeHubSupabase
           .from('guides')
           .select('domain, guide_type')
           .eq('slug', currentSlug)
@@ -88,7 +89,7 @@ function GuidelinePage() {
         let first: any[] = []
         
         if (currentGuide.domain) {
-          const { data: rows } = await supabaseClient
+          const { data: rows } = await knowledgeHubSupabase
             .from('guides')
             .select(selectCols)
             .eq('domain', currentGuide.domain)
@@ -104,7 +105,7 @@ function GuidelinePage() {
         let results = first
         
         if ((results?.length || 0) < 6 && currentGuide.guideType) {
-          const { data: rows2 } = await supabaseClient
+          const { data: rows2 } = await knowledgeHubSupabase
             .from('guides')
             .select(selectCols)
             .eq('guide_type', currentGuide.guideType)
@@ -125,7 +126,7 @@ function GuidelinePage() {
         }
         
         if ((results?.length || 0) < 6 && !currentGuide.domain && !currentGuide.guideType) {
-          const { data: rows3 } = await supabaseClient
+          const { data: rows3 } = await knowledgeHubSupabase
             .from('guides')
             .select(selectCols)
             .ilike('domain', '%guideline%')

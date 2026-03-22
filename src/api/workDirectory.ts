@@ -1,6 +1,8 @@
 import { supabaseClient } from '@/lib/supabaseClient';
 import type { WorkPosition } from '@/data/workDirectoryTypes';
 
+//kjsbvafdnval 
+
 // Helper function to map database row to WorkPosition
 function mapPositionRow(row: any): WorkPosition {
   // Handle responsibilities - can be JSONB array or text array

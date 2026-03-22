@@ -253,7 +253,7 @@ export function getAllBlueprints(): Blueprint[] {
 /**
  * Convert a blueprint to a guide-like format for display in guides marketplace
  */
-export function blueprintToGuide(blueprint: Blueprint): Record<string, unknown> {
+export function blueprintToGuide(blueprint: Blueprint): any {
   return {
     id: blueprint.id,
     slug: blueprint.id,
@@ -284,7 +284,7 @@ export function blueprintToGuide(blueprint: Blueprint): Record<string, unknown> 
 /**
  * Get all blueprints converted to guide format
  */
-export function getBlueprintsAsGuides(): Record<string, unknown>[] {
+export function getBlueprintsAsGuides(): any[] {
   return getAllBlueprints().map(blueprintToGuide);
 }
 

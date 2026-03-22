@@ -32,7 +32,7 @@ export interface ServiceItem {
   interestRate?: string;
   location?: string;
   tags?: string[];
-  [key: string]: unknown; // For dynamic properties
+  [key: string]: any; // For dynamic properties
 }
 /**
  * Filter configuration for different marketplace types
