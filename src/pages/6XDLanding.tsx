@@ -187,9 +187,10 @@ export default function SixXDLanding() {
     <GHCLanding
       badgeLabel="The Agile 6xD"
       overrides={{
-        heroHeadline: "Digital transformation fails when it stays theoretical.",
+        heroHeadline: "Digital transformation fails|when it stays theoretical.",
         heroHeadlineHighlightWord: "theoretical",
-        heroSingleLine: true,
+        heroHeadlineFontSize: "clamp(40px, 5.5vw, 72px)",
+        heroSingleLine: false,
         heroSupportingSingleLine: true,
         heroSupporting:
           "Agile 6xD is how DQ turns digital and AI transformation into execution designed, delivered, and sustained through real work.",

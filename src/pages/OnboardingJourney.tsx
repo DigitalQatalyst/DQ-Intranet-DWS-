@@ -204,51 +204,32 @@ function SideNav({ activeSection, onSectionClick }: SideNavProps) {
 // Simplified Hero Section matching Guidelines style
 function HeroSection() {
   return (
-    <div className="relative w-full min-h-[600px] overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.15
-        }}
-      />
-      {/* Gradient Overlay */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(135deg, #030F35 0%, #1A2E6E 40%, #2A3F7F 70%, #1A2E6E 100%)'
-        }}
-      />
-      <div className="relative z-10 h-full flex items-center px-6 md:px-12 lg:px-16 xl:px-24 py-20">
-        <div className="w-full max-w-7xl mx-auto">
-          {/* Main Content */}
-          <div className="text-white max-w-4xl">
-            {/* Eyebrow Label */}
-            <div className="text-sm font-medium text-white/70 mb-6 tracking-wider uppercase">
-              DQ Onboarding Framework
-      </div>
-
-            {/* Primary Headline */}
-            <h1 className="text-[72px] font-bold mb-8 leading-[1.05] font-inter text-white">
-              Your First 3 Months at DQ
-          </h1>
-
-            {/* Supporting Description */}
-            <p className="text-[23px] text-white/90 mb-8 leading-relaxed font-inter max-w-3xl">
-              This page will guide you through what is expected of you during your first three months at DQ from integration and learning to execution and ownership.
-            </p>
-
-            {/* Minimal Metadata */}
-            <div className="text-sm text-white/60 font-inter">
-              Updated {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · DQ Onboarding
-            </div>
+    <div
+      className="relative w-full overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #030F35 0%, #1A2E6E 60%, #2A3F7F 100%)' }}
+    >
+      <div className="relative z-10 px-6 md:px-12 lg:px-16 xl:px-24 py-16 md:py-20">
+        <div className="w-full max-w-5xl mx-auto">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
+            <span>Home</span>
+            <span>›</span>
+            <span>Onboarding</span>
+            <span>›</span>
+            <span className="text-white/80">3-Month Onboarding Guide</span>
           </div>
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+            Your First 3 Months at DQ
+          </h1>
+          {/* Subtitle */}
+          <p className="text-lg text-white/75 max-w-2xl">
+            A guided journey through integration, execution, and ownership — designed to help you succeed from day one.
+          </p>
         </div>
       </div>
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-50 to-transparent" />
     </div>
   );
 }

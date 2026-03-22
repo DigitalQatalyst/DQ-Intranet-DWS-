@@ -522,19 +522,44 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
           const highlight = heroHeadline.slice(startIndex, startIndex + heroHeadlineHighlightWord.length);
           const after = heroHeadline.slice(startIndex + heroHeadlineHighlightWord.length);
 
+          // Split on | to force line breaks
+          const renderPart = (text: string) =>
+            text.split('|').map((part, i) => (
+              <span key={i}>{part}{i < text.split('|').length - 1 && <br />}</span>
+            ));
+
+          const fullBefore = before.replace('|', '');
+          const fullAfter = after.replace('|', '');
+          const parts = (before + highlight + after).split('|');
+
           return (
             <span className="ghc-font-display font-bold text-white" style={baseStyle}>
-              {before}
-              <span className={highlightClass}>{highlight}</span>
-              {after}
+              {parts.map((part, i) => {
+                const lowerPart = part.toLowerCase();
+                const hIdx = lowerPart.indexOf(lowerHighlight);
+                if (hIdx !== -1) {
+                  return (
+                    <span key={i}>
+                      {part.slice(0, hIdx)}
+                      <span className={highlightClass}>{part.slice(hIdx, hIdx + heroHeadlineHighlightWord.length)}</span>
+                      {part.slice(hIdx + heroHeadlineHighlightWord.length)}
+                      {i < parts.length - 1 && <br />}
+                    </span>
+                  );
+                }
+                return <span key={i}>{part}{i < parts.length - 1 && <br />}</span>;
+              })}
             </span>
           );
         }
       }
 
+      const parts = heroHeadline.split('|');
       return (
         <span className="ghc-font-display font-bold text-white" style={baseStyle}>
-          <span className={highlightClass}>{heroHeadline}</span>
+          {parts.map((part, i) => (
+            <span key={i}><span className={highlightClass}>{part}</span>{i < parts.length - 1 && <br />}</span>
+          ))}
         </span>
       );
     }
@@ -574,7 +599,7 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
         </div>
         <FloatingOrbs />
 
-        <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 text-center max-w-4xl">
+        <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 text-center max-w-6xl">
           <motion.div
             className="inline-flex items-center gap-2 rounded-full bg-[#f0f6ff]/20 border border-[#e1513b]/50 shadow-sm px-4 py-1.5 text-sm text-[#e1513b] backdrop-blur mb-6"
             initial={{ opacity: 0, y: 10 }}
@@ -585,7 +610,7 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
             <span>{badgeLabel ?? 'The Golden Honeycomb of Competencies (GHC)'}</span>
           </motion.div>
           <motion.div
-            className="mx-auto flex flex-col items-center justify-center text-center gap-4"
+            className="flex flex-col items-center justify-center text-center gap-6"
             style={{ maxWidth: '100%' }}
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -593,13 +618,14 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
           >
             {renderHeroHeadline()}
             <span
-              className="text-white/85 inline-block text-center"
+              className="text-white/85 inline-block text-center w-full"
               style={{
                 fontSize: 'clamp(16px, 2.6vw, 20px)',
-                lineHeight: 1.1,
-                maxWidth: heroSupportingSingleLine ? '100%' : '900px',
+                lineHeight: 1.6,
+                maxWidth: heroSupportingSingleLine ? '100%' : '680px',
                 margin: '0 auto',
                 whiteSpace: heroSupportingSingleLine ? 'nowrap' : 'normal',
+                textAlign: 'center',
               }}
             >
               {heroSupporting}
@@ -1799,7 +1825,7 @@ function SectionTakeAction({ navigate, content }: { navigate: (path: string) => 
   const takeActionTitleFontSize = content?.takeActionTitleFontSize;
   const takeActionSubtitleFontSize = content?.takeActionSubtitleFontSize;
   const takeActionLayout = content?.takeActionLayout ?? 'grid';
-  const isActionLocked = (card: ActionCard) => /knowledge center/i.test(card.title);
+  const isActionLocked = (_card: ActionCard) => false;
   const handleNavigate = (path: string) => {
     if (path.startsWith('http')) {
       window.open(path, '_blank', 'noopener,noreferrer');
@@ -2077,8 +2103,10 @@ function SectionTakeAction({ navigate, content }: { navigate: (path: string) => 
                       type="button"
                       onClick={isActionLocked(item) ? undefined : () => handleNavigate(item.path)}
                       aria-disabled={isActionLocked(item)}
-                      className={`inline-flex items-center gap-1 text-sm font-semibold mt-6 ${
-                        isActionLocked(item) ? 'text-[#9aa4c6] cursor-not-allowed' : `${item.accent} group-hover:underline`
+                      className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold mt-6 border transition-colors ${
+                        isActionLocked(item)
+                          ? 'text-[#9aa4c6] cursor-not-allowed border-[#e6eaf5]'
+                          : 'border-[#d5dbea] text-[#131e42] bg-white hover:bg-[#f5f7ff]'
                       }`}
                     >
                       {isActionLocked(item) ? <Lock className="h-4 w-4" /> : null}
