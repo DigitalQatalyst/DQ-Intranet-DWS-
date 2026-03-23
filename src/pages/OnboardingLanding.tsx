@@ -609,9 +609,9 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#F2B9A3] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-slate-700 leading-relaxed">
-                          <p>6xD (6x Digitals) is how work actually happens at DQ.</p>
-                          <p>It connects direction to delivery — showing how teams plan and execute in rhythm.</p>
-                          <p>It’s the execution engine that turns vision into real outcomes.</p>
+                          <p>6xD is the product expression of how DQ thinks, designs, and delivers transformation.</p>
+                          <p>It connects strategy, systems, and execution into one coherent framework that helps organisations move with clarity, discipline, and speed.</p>
+                          <p>This is how DQ turns transformation vision into scalable solutions, guided action, and measurable outcomes.</p>
                         </div>
                       </div>
                       <button
