@@ -609,15 +609,13 @@ const NewsPage: React.FC = () => {
                 <div className="mb-2 flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Filters</h2>
                 </div>
-                {!sidebarCollapsed && (
-                  <FiltersPanel
-                    facets={facets}
-                    values={filters}
-                    onChange={setFilters}
-                    onClear={hasActiveFilters ? clearFilters : undefined}
-                    groupOrder={{ pinned: ['department', 'location'] }}
-                  />
-                )}
+                <FiltersPanel
+                  facets={facets}
+                  values={filters}
+                  onChange={setFilters}
+                  onClear={hasActiveFilters ? clearFilters : undefined}
+                  groupOrder={{ pinned: ['department', 'location'] }}
+                />
               </div>
             </aside>
 

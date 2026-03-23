@@ -17,10 +17,6 @@ interface GridProps {
 export default function PodcastsGrid({ query, items }: GridProps) {
   const location = useLocation();
 
-  if (query.tab !== 'podcasts') {
-    return null;
-  }
-
   // Get all podcast episodes
   const podcastEpisodes = useMemo(() => {
     return items.filter(
@@ -81,6 +77,10 @@ export default function PodcastsGrid({ query, items }: GridProps) {
 
     return true;
   }, [query.filters, podcastEpisodes]);
+
+  if (query.tab !== 'podcasts') {
+    return null;
+  }
 
   if (!shouldShowSeries) {
     return (

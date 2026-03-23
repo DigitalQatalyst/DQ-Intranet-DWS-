@@ -1,5 +1,8 @@
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+
 // Debug script to check Supabase environment and connection
-require('dotenv').config();
+dotenv.config();
 
 console.log('=== Supabase Environment Variables Debug ===');
 console.log('VITE_SUPABASE_URL:', process.env.VITE_SUPABASE_URL ? 'SET' : 'NOT SET');
@@ -10,7 +13,6 @@ console.log('REACT_APP_SUPABASE_ANON_KEY:', process.env.REACT_APP_SUPABASE_ANON_
 // Test Supabase connection
 if (process.env.VITE_SUPABASE_URL && process.env.VITE_SUPABASE_ANON_KEY) {
   try {
-    const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY);
     
     console.log('\n=== Testing Supabase Connection ===');
