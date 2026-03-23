@@ -88,7 +88,7 @@ function GuidelinePage() {
     ;(async () => {
       try {
         const client = knowledgeHubSupabase ?? supabaseClient
-        const { data, error } = await (client as any)
+        const { data, error } = await client
           .from('guides')
           .select('title, last_updated_at, body')
           .eq('slug', 'dq-associate-owned-asset-guidelines')
@@ -104,18 +104,14 @@ function GuidelinePage() {
           
           // Store HTML directly (no JSON parsing)
           if (data.body) {
-            console.log('✅ [DATABASE] Loaded HTML content from database')
-            console.log(`📄 [DATABASE] Content length: ${data.body.length} characters`)
-            
             // Replace literal \n with actual line breaks
-            let processedHtml = data.body.replaceAll('\\n', '\n')
+            let processedHtml = (data.body as string).replaceAll('\\n', '\n')
             
             // Strip leading pipe characters from headings (artifact from database content)
             processedHtml = processedHtml.replace(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')
             
             // Add IDs to headings for table of contents navigation
             processedHtml = addIdsToHeadings(processedHtml)
-            console.log('🔧 [DATABASE] Added IDs to headings for navigation')
             
             setGuideHtml(processedHtml)
           }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface SideNavProps {
   activeSection?: string
@@ -9,6 +9,7 @@ interface SideNavProps {
 export function SideNav({ activeSection, onSectionClick, guideHtml }: SideNavProps) {
   const [currentSection, setCurrentSection] = useState(activeSection || '')
   const [sections, setSections] = useState<{ id: string; label: string }[]>([])
+  const initializedRef = useRef(false)
 
   // Extract H1 headings from the page
   useEffect(() => {
@@ -20,9 +21,10 @@ export function SideNav({ activeSection, onSectionClick, guideHtml }: SideNavPro
       }))
       setSections(extractedSections)
       
-      // Set first section as active if none is set
-      if (extractedSections.length > 0 && !currentSection) {
+      // Set first section as active only on first load
+      if (extractedSections.length > 0 && !initializedRef.current) {
         setCurrentSection(extractedSections[0].id)
+        initializedRef.current = true
       }
     }
 
