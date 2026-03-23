@@ -14,6 +14,7 @@ import { ChevronRightIcon, HomeIcon, CheckCircle, Download, AlertTriangle, Exter
 import { supabaseClient } from '../../lib/supabaseClient'
 import { getGuideImageUrl } from '../../utils/guideImageMap'
 import { track } from '../../utils/analytics'
+import { fetchGuideFromApi, fetchGuideBodyFromApi } from '../../utils/guideApi'
 import { useAuth } from '../../components/Header/context/AuthContext'
 // CODEx: import new preview component
 import { DocumentPreview } from '../../components/guides/DocumentPreview'
@@ -486,10 +487,7 @@ const useGuideLoader = (
         try {
           // Validate itemId is a safe slug (alphanumeric, hyphens, underscores only)
           if (!/^[\w-]+$/.test(itemId || '')) throw new Error('Invalid guide id')
-          const encodedId = encodeURIComponent(itemId ?? '')
-          // Internal API only — relative path, no external host. Slug is regex-validated above.
-          // codacy-disable-next-line javascript-security/detect-non-literal-regexp
-          const res = await fetch(`/api/guides/${encodedId}`)
+          const res = await fetchGuideFromApi(itemId ?? '')
           const ct = res.headers.get('content-type') || ''
           if (res.ok && ct.includes('application/json')) {
             const data = await res.json()
@@ -574,9 +572,7 @@ const useProgressiveBodyFetch = (
       if (!guide) return
       if (guide.body) return
       try {
-        // Internal API only — guide.slug/id comes from Supabase, not user input
-        // codacy-disable-next-line javascript-security/detect-non-literal-regexp
-        const res = await fetch(`/api/guides/${encodeURIComponent(guide.slug || guide.id)}?include=body`)
+        const res = await fetchGuideBodyFromApi(guide.slug || guide.id)
         const ct = res.headers.get('content-type') || ''
         if (res.ok && ct.includes('application/json')) {
           const full = await res.json()

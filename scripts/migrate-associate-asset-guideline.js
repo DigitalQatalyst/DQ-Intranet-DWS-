@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+
+// Hardcoded path — no dynamic construction
+const DATA_FILE = './scripts/guideline-data/associate-owned-asset-data.json';
 
 dotenv.config();
 
@@ -19,11 +20,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function migrate() {
   console.log('📝 Migrating Associate Owned Asset Guidelines...\n');
 
-  // Read the JSON data file — path is fixed relative to this script
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  // codacy-disable-next-line security/detect-non-literal-fs-filename
-  const dataPath = path.join(__dirname, 'guideline-data', 'associate-owned-asset-data.json');
-  const guidelineData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+  // Read the JSON data file — hardcoded path, no dynamic construction
+  const guidelineData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 
   try {
     // Check if guide exists

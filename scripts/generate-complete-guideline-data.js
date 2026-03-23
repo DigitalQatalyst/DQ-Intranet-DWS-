@@ -1,6 +1,8 @@
 import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+
+// Output paths — hardcoded relative to repo root (script always runs from project root via npm)
+const OUTPUT_DIR = './scripts/guideline-data';
+const OUTPUT_FILE = './scripts/guideline-data/associate-owned-asset-complete.json';
 
 // Complete guideline data structure
 const guidelineData = {
@@ -35,15 +37,9 @@ guidelineData.sections.push(
   }
 );
 
-// Save to file — path is relative to this script's directory
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// codacy-disable-next-line security/detect-non-literal-fs-filename
-const outputDir = path.join(__dirname, 'guideline-data');
-fs.mkdirSync(outputDir, { recursive: true });
+// Save to file — hardcoded paths, no dynamic construction
+fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+fs.writeFileSync(OUTPUT_FILE, JSON.stringify(guidelineData, null, 2));
 
-// codacy-disable-next-line security/detect-non-literal-fs-filename
-const outputPath = path.join(outputDir, 'associate-owned-asset-complete.json');
-fs.writeFileSync(outputPath, JSON.stringify(guidelineData, null, 2));
-
-console.log(`✅ Generated complete guideline data at: ${outputPath}`);
+console.log(`✅ Generated complete guideline data at: ${OUTPUT_FILE}`);
 console.log(`📊 Total sections: ${guidelineData.sections.length}`);
