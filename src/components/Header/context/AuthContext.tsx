@@ -175,7 +175,6 @@ export function AuthProvider({
             name: userData.name,
             username,
             azure_id: userData.azureId,
-            password: 'AZURE_AD_AUTHENTICATED',
             role: 'member',
             segment: 'employee',
             updated_at: new Date().toISOString(),
