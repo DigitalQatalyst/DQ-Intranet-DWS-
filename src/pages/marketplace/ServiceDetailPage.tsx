@@ -285,6 +285,111 @@ function ServiceTabContent({ service, activeTab }: { readonly service: ServiceDe
   )
 }
 
+function ServiceSidebarSummary({ isGHC, service, displayTitle, onPrimaryAction, onSaveAction }: {
+  readonly isGHC: boolean
+  readonly service: ServiceDetail | null
+  readonly displayTitle: string
+  readonly onPrimaryAction: () => void
+  readonly onSaveAction: () => void
+}) {
+  const summaryTitle = isGHC
+    ? `${displayTitle.replaceAll(' (Purpose)', '').replaceAll(' (Culture)', '').replaceAll(' (Identity)', '').replaceAll(' (Tasks)', '').replaceAll(' (Governance)', '').replaceAll(' (Value Streams)', '').replaceAll(' (Products)', '').replace('The ', '')} Summary`
+    : 'Service Summary'
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">{summaryTitle}</h3>
+      <div className="space-y-4 mb-6">
+        {isGHC ? (
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Competency Type</p>
+            <p className="text-gray-900 font-medium">Golden Honeycomb</p>
+          </div>
+        ) : (
+          <>
+            {service?.service_type && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Service Type</p>
+                <p className="text-gray-900 font-medium">{getServiceTypeLabel(service.service_type)}</p>
+              </div>
+            )}
+            {service?.delivery_mode && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Delivery Mode</p>
+                <p className="text-gray-900 font-medium">{getDeliveryModeLabel(service.delivery_mode)}</p>
+              </div>
+            )}
+            {service?.response_time && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Response Time</p>
+                <p className="text-gray-900 font-medium">{service.response_time}</p>
+              </div>
+            )}
+            {service?.provider && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Department</p>
+                <p className="text-gray-900 font-medium">{service.provider}</p>
+              </div>
+            )}
+            {service?.location && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Location</p>
+                <p className="text-gray-900 font-medium">{service.location}</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      <button
+        className="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-3"
+        onClick={onPrimaryAction}
+      >
+        {isGHC ? 'Explore Competency →' : 'Request Service →'}
+      </button>
+      <button
+        className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+        onClick={onSaveAction}
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+        Save for Later
+      </button>
+    </div>
+  )
+}
+
+type ServiceTabId = 'details' | 'request' | 'faq' | 'contact' | 'overview' | 'understand' | 'practice' | 'materials'
+
+function ServiceTabNav({ isGHC, activeTab, onTabChange }: {
+  readonly isGHC: boolean
+  readonly activeTab: ServiceTabId
+  readonly onTabChange: (tab: ServiceTabId) => void
+}) {
+  const tabClass = (tab: ServiceTabId) =>
+    `px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+      activeTab === tab
+        ? 'border-pink-600 text-pink-600'
+        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+    }`
+  if (isGHC) {
+    return (
+      <>
+        <button onClick={() => onTabChange('overview')} className={tabClass('overview')}>Overview</button>
+        <button onClick={() => onTabChange('understand')} className={tabClass('understand')}>Understand</button>
+        <button onClick={() => onTabChange('practice')} className={tabClass('practice')}>Learn & Practice</button>
+        <button onClick={() => onTabChange('materials')} className={tabClass('materials')}>Other Materials</button>
+      </>
+    )
+  }
+  return (
+    <>
+      <button onClick={() => onTabChange('details')} className={tabClass('details')}>Service Details</button>
+      <button onClick={() => onTabChange('request')} className={tabClass('request')}>How to Request</button>
+      <button onClick={() => onTabChange('faq')} className={tabClass('faq')}>FAQ</button>
+      <button onClick={() => onTabChange('contact')} className={tabClass('contact')}>Contact & SLA</button>
+    </>
+  )
+}
 export default function ServiceDetailPage() {
   const { serviceId } = useParams<{ serviceId: string }>()
   const navigate = useNavigate()
@@ -292,7 +397,7 @@ export default function ServiceDetailPage() {
   const [service, setService] = useState<ServiceDetail | null>(null)
   const [ghcContent, setGhcContent] = useState<GuideContent | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'details' | 'request' | 'faq' | 'contact' | 'overview' | 'understand' | 'practice' | 'materials'>('details')
+  const [activeTab, setActiveTab] = useState<ServiceTabId>('details')
 
   useEffect(() => {
     if (!serviceId) return
@@ -442,95 +547,7 @@ export default function ServiceDetailPage() {
               <div className="bg-white rounded-lg shadow-sm mb-6">
                 <div className="border-b border-gray-200">
                   <nav className="flex -mb-px">
-                    {isGHC ? (
-                      // GHC service tabs
-                      <>
-                        <button
-                          onClick={() => setActiveTab('overview')}
-                          className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === 'overview'
-                              ? 'border-pink-600 text-pink-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                          }`}
-                        >
-                          Overview
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('understand')}
-                          className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === 'understand'
-                              ? 'border-pink-600 text-pink-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                          }`}
-                        >
-                          Understand
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('practice')}
-                          className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === 'practice'
-                              ? 'border-pink-600 text-pink-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                          }`}
-                        >
-                          Learn & Practice
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('materials')}
-                          className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === 'materials'
-                              ? 'border-pink-600 text-pink-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                          }`}
-                        >
-                          Other Materials
-                        </button>
-                      </>
-                    ) : (
-                      // Non-GHC service tabs
-                      <>
-                        <button
-                          onClick={() => setActiveTab('details')}
-                          className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === 'details'
-                              ? 'border-pink-600 text-pink-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                          }`}
-                        >
-                          Service Details
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('request')}
-                          className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === 'request'
-                              ? 'border-pink-600 text-pink-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                          }`}
-                        >
-                          How to Request
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('faq')}
-                          className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === 'faq'
-                              ? 'border-pink-600 text-pink-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                          }`}
-                        >
-                          FAQ
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('contact')}
-                          className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === 'contact'
-                              ? 'border-pink-600 text-pink-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                          }`}
-                        >
-                          Contact & SLA
-                        </button>
-                      </>
-                    )}
+                    <ServiceTabNav isGHC={isGHC} activeTab={activeTab} onTabChange={setActiveTab} />
                   </nav>
                 </div>
 
@@ -547,109 +564,13 @@ export default function ServiceDetailPage() {
             {/* Right Column - Sticky Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-24">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    {isGHC ? `${displayTitle.replace('The ', '').replace(' (Purpose)', '').replace(' (Culture)', '').replace(' (Identity)', '').replace(' (Tasks)', '').replace(' (Governance)', '').replace(' (Value Streams)', '').replace(' (Products)', '')} Summary` : 'Service Summary'}
-                  </h3>
-                  
-                  <div className="space-y-4 mb-6">
-                    {isGHC ? (
-                      // GHC service summary
-                      <div>
-                        <p className="text-sm text-gray-500 mb-1">Competency Type</p>
-                        <p className="text-gray-900 font-medium">Golden Honeycomb</p>
-                      </div>
-                    ) : (
-                      // Non-GHC service summary
-                      <>
-                        {service?.service_type && (
-                          <div>
-                            <p className="text-sm text-gray-500 mb-1">Service Type</p>
-                            <p className="text-gray-900 font-medium">{getServiceTypeLabel(service.service_type)}</p>
-                          </div>
-                        )}
-                        {service?.delivery_mode && (
-                          <div>
-                            <p className="text-sm text-gray-500 mb-1">Delivery Mode</p>
-                            <p className="text-gray-900 font-medium">{getDeliveryModeLabel(service.delivery_mode)}</p>
-                          </div>
-                        )}
-                        {service?.response_time && (
-                          <div>
-                            <p className="text-sm text-gray-500 mb-1">Response Time</p>
-                            <p className="text-gray-900 font-medium">{service.response_time}</p>
-                          </div>
-                        )}
-                        {service?.provider && (
-                          <div>
-                            <p className="text-sm text-gray-500 mb-1">Department</p>
-                            <p className="text-gray-900 font-medium">{service.provider}</p>
-                          </div>
-                        )}
-                        {service?.location && (
-                          <div>
-                            <p className="text-sm text-gray-500 mb-1">Location</p>
-                            <p className="text-gray-900 font-medium">{service.location}</p>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-
-                  {isGHC ? (
-                    // GHC service buttons
-                    <>
-                      <button
-                        className="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-3"
-                        onClick={() => {
-                          // Explore competency functionality to be implemented
-                          alert('Explore competency functionality to be implemented')
-                        }}
-                      >
-                        Explore Competency →
-                      </button>
-
-                      <button
-                        className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-                        onClick={() => {
-                          // Save for later functionality to be implemented
-                          alert('Save for later functionality to be implemented')
-                        }}
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                        </svg>
-                        Save for Later
-                      </button>
-                    </>
-                  ) : (
-                    // Non-GHC service buttons
-                    <>
-                      <button
-                        className="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-3"
-                        onClick={() => {
-                          // Request service functionality to be implemented
-                          alert('Request service functionality to be implemented')
-                        }}
-                      >
-                        Request Service →
-                      </button>
-
-                      <button
-                        className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-                        onClick={() => {
-                          // Save for later functionality to be implemented
-                          alert('Save for later functionality to be implemented')
-                        }}
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                        </svg>
-                        Save for Later
-                      </button>
-                    </>
-                  )}
-                </div>
+                <ServiceSidebarSummary
+                  isGHC={isGHC}
+                  service={service}
+                  displayTitle={displayTitle}
+                  onPrimaryAction={() => { alert('Explore competency functionality to be implemented') }}
+                  onSaveAction={() => { alert('Save for later functionality to be implemented') }}
+                />
               </div>
             </div>
           </div>
