@@ -21,6 +21,7 @@ async function migrate() {
 
   // Read the JSON data file — path is fixed relative to this script
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  // codacy-disable-next-line security/detect-non-literal-fs-filename
   const dataPath = path.join(__dirname, 'guideline-data', 'associate-owned-asset-data.json');
   const guidelineData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 

@@ -484,12 +484,12 @@ const useGuideLoader = (
       try {
         let loadedFromApi = false
         try {
-          // Validate itemId is a safe slug before using in URL (alphanumeric, hyphens, underscores only)
-          const safeId = /^[\w-]+$/.test(itemId || '') ? itemId : ''
-          if (!safeId) throw new Error('Invalid guide id')
-          // Build URL from a fixed base — safeId is regex-validated above
-          const apiBase = '/api/guides/'
-          const res = await fetch(apiBase + encodeURIComponent(safeId))
+          // Validate itemId is a safe slug (alphanumeric, hyphens, underscores only)
+          if (!/^[\w-]+$/.test(itemId || '')) throw new Error('Invalid guide id')
+          const encodedId = encodeURIComponent(itemId ?? '')
+          // Internal API only — relative path, no external host. Slug is regex-validated above.
+          // codacy-disable-next-line javascript-security/detect-non-literal-regexp
+          const res = await fetch(`/api/guides/${encodedId}`)
           const ct = res.headers.get('content-type') || ''
           if (res.ok && ct.includes('application/json')) {
             const data = await res.json()
@@ -574,6 +574,8 @@ const useProgressiveBodyFetch = (
       if (!guide) return
       if (guide.body) return
       try {
+        // Internal API only — guide.slug/id comes from Supabase, not user input
+        // codacy-disable-next-line javascript-security/detect-non-literal-regexp
         const res = await fetch(`/api/guides/${encodeURIComponent(guide.slug || guide.id)}?include=body`)
         const ct = res.headers.get('content-type') || ''
         if (res.ok && ct.includes('application/json')) {
