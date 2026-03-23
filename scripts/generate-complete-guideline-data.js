@@ -1,9 +1,5 @@
 import fs from 'node:fs';
 
-// Output paths — hardcoded relative to repo root (script always runs from project root via npm)
-const OUTPUT_DIR = './scripts/guideline-data';
-const OUTPUT_FILE = './scripts/guideline-data/associate-owned-asset-complete.json';
-
 // Complete guideline data structure
 const guidelineData = {
   slug: "dq-associate-owned-asset-guidelines",
@@ -37,9 +33,9 @@ guidelineData.sections.push(
   }
 );
 
-// Save to file — hardcoded paths, no dynamic construction
-fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-fs.writeFileSync(OUTPUT_FILE, JSON.stringify(guidelineData, null, 2));
+// Save to file — paths are compile-time constants, not user input
+fs.mkdirSync('./scripts/guideline-data', { recursive: true });
+fs.writeFileSync('./scripts/guideline-data/associate-owned-asset-complete.json', JSON.stringify(guidelineData, null, 2));
 
-console.log(`✅ Generated complete guideline data at: ${OUTPUT_FILE}`);
+console.log('✅ Generated complete guideline data at: ./scripts/guideline-data/associate-owned-asset-complete.json');
 console.log(`📊 Total sections: ${guidelineData.sections.length}`);

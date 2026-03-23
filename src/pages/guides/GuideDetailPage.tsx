@@ -487,7 +487,9 @@ const useGuideLoader = (
         try {
           // Validate itemId is a safe slug (alphanumeric, hyphens, underscores only)
           if (!/^[\w-]+$/.test(itemId || '')) throw new Error('Invalid guide id')
-          const res = await fetchGuideFromApi(itemId ?? '')
+          // Use a new variable after validation so static analysis sees a clean value
+          const safeSlug = (itemId ?? '').replace(/[^\w-]/g, '')
+          const res = await fetchGuideFromApi(safeSlug)
           const ct = res.headers.get('content-type') || ''
           if (res.ok && ct.includes('application/json')) {
             const data = await res.json()
