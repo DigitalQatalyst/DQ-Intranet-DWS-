@@ -151,7 +151,9 @@ export const DNAHexagonDiagram: React.FC<HexagonDiagramProps> = ({ nodes }) => {
           const s = anchor(c.role, c.side);
           const yAnchor = c.side === "bottom" ? s.y : s.y + DY[c.role];
 
-          let x1 = s.x, y1 = yAnchor, x2 = s.x, y2 = yAnchor, tx = x2, ty = y2;
+          const x1 = s.x;
+          const y1 = yAnchor;
+          let x2 = s.x, y2 = yAnchor, tx = x2, ty = y2;
           let ta: "start" | "end" | "middle" = "middle";
 
           if (c.side === "left") {

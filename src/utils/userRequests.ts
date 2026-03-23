@@ -13,12 +13,12 @@ export interface UserRequestsData {
   // reimbursementRequests: StoredReimbursementRequest[];
 }
 
-const STORAGE_KEY = 'dq_user_requests';
+const STORAGE_IDENTIFIER = 'dq_user_requests';
 
 // Initialize or get existing requests from localStorage
 export function getUserRequests(): UserRequestsData {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(STORAGE_IDENTIFIER);
     if (stored) {
       return JSON.parse(stored);
     }
@@ -35,7 +35,7 @@ export function getUserRequests(): UserRequestsData {
 // Save requests to localStorage
 function saveUserRequests(requests: UserRequestsData): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
+    localStorage.setItem(STORAGE_IDENTIFIER, JSON.stringify(requests));
   } catch (error) {
     console.error('Error saving user requests:', error);
   }
@@ -99,7 +99,7 @@ export function updateLeaveRequestStatus(
 
 // Clear all requests (useful for testing)
 export function clearAllRequests(): void {
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(STORAGE_IDENTIFIER);
 }
 
 // Export requests as JSON (for debugging or export feature)
