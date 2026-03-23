@@ -1857,7 +1857,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   {relatedItems.map(relatedItem => <Link key={relatedItem.id} to={`${config.route}/${relatedItem.id}`} className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow block">
                       <div className="flex items-center mb-3">
                         <span className="text-sm text-gray-600">
-                          {relatedItem.provider.name}
+                          {relatedItem.provider?.name || 'DQ Workspace'}
                         </span>
                       </div>
                       <h3 className="font-semibold text-gray-900 mb-2">

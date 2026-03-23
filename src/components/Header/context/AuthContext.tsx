@@ -47,7 +47,7 @@ interface AuthContextType {
   isModerator: boolean;
   isDirectoryMaintainer: boolean;
   isSystemAdmin: boolean;
-  login: () => void;
+  login: (redirectTo?: string) => void;
   signup: () => void;
   logout: () => void;
 }
@@ -375,12 +375,17 @@ export function AuthProvider({
     };
   }, [accounts, instance, enableGraphFallback, looksSynthetic]);
 
-  const login = useCallback(() => {
+  const login = useCallback((redirectTo?: string) => {
     // Prevent multiple simultaneous login attempts
     if (inProgress !== InteractionStatus.None) {
       console.warn('⚠️ MSAL interaction already in progress. Skipping new login call.');
       return;
     }
+
+    const normalizedRedirect =
+      typeof redirectTo === 'string' && redirectTo.startsWith('/')
+        ? redirectTo
+        : undefined;
 
     try {
       console.log('🔐 Initiating MSAL login redirect...', {
@@ -389,9 +394,12 @@ export function AuthProvider({
         clientId: instance.getConfiguration()?.auth?.clientId,
       });
       
-      // loginRedirect immediately redirects the browser - no promise to await
-      // This will cause a full page redirect to Microsoft login
-      instance.loginRedirect(defaultLoginRequest);
+      instance.loginRedirect({
+        ...defaultLoginRequest,
+        ...(normalizedRedirect
+          ? { state: `dq-redirect:${encodeURIComponent(normalizedRedirect)}` }
+          : {})
+      });
       
       console.log('🔐 Login redirect called - page should redirect now');
     } catch (error) {

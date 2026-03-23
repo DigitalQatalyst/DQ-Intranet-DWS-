@@ -9,15 +9,14 @@ type SignInPageProps = {
 /**
  * SignInPage (Microsoft SSO)
  * - Email "Next" triggers your magic link/OTP endpoint
- * - "Sign in with Microsoft" redirects to your OAuth start route
+ * - "Sign in with Microsoft" uses the app MSAL configuration
  * - Brand: #030F35 (navy), #FB5535 (accent)
- * Wire these endpoints:
+ * Legacy endpoint still referenced by the email flow:
  *   POST /api/auth/request-access   { email }
- *   GET  /api/auth/microsoft        (redirects to Microsoft OAuth)
  */
 
 export default function SignInPage({ redirectTo = "/onboarding/welcome" }: SignInPageProps = {}) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, login } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const redirectTarget = useMemo(() => {
@@ -43,17 +42,17 @@ export default function SignInPage({ redirectTo = "/onboarding/welcome" }: SignI
       }}
     >
       <div className="w-full max-w-md">
-        <SignInCard redirectTarget={redirectTarget} />
+        <SignInCard onMicrosoftSignIn={() => login(redirectTarget)} />
       </div>
     </div>
   );
 }
 
 type SignInCardProps = {
-  redirectTarget: string;
+  onMicrosoftSignIn: () => void;
 };
 
-function SignInCard({ redirectTarget }: SignInCardProps) {
+function SignInCard({ onMicrosoftSignIn }: SignInCardProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -80,12 +79,6 @@ function SignInCard({ redirectTarget }: SignInCardProps) {
     } finally {
       setLoading(false);
     }
-  }
-
-  function microsoftSignIn() {
-    // Your server should start the OAuth flow here and redirect to Microsoft
-    const params = new URLSearchParams({ redirect: redirectTarget });
-    window.location.href = `/api/auth/microsoft?${params.toString()}`;
   }
 
   return (
@@ -138,7 +131,7 @@ function SignInCard({ redirectTarget }: SignInCardProps) {
       <div className="px-6 sm:px-8 pb-6">
         <button
           type="button"
-          onClick={microsoftSignIn}
+          onClick={onMicrosoftSignIn}
           className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-md bg-white py-2 hover:bg-gray-50"
         >
           <MicrosoftLogo className="h-5 w-5" />

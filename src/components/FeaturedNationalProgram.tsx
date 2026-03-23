@@ -31,6 +31,12 @@ const fallbackPrograms: FeaturedProgram[] = [
   },
 ];
 
+function getCTALabel(category: FeaturedProgram['category']): string {
+  if (category === 'Jobs') return 'VIEW OPPORTUNITY';
+  if (category === 'Insight') return 'READ INSIGHT';
+  return 'READ STORY';
+}
+
 export const FeaturedNationalProgram: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [programs, setPrograms] = useState<FeaturedProgram[]>([]);
@@ -172,13 +178,9 @@ export const FeaturedNationalProgram: React.FC = () => {
               href={activeProgram.learnMoreHref}
               className="px-6 py-3 bg-white text-[#0F1D4A] font-semibold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg"
             >
-              {activeProgram.ctaLabel || (
-                <>
-                  {activeProgram.category === 'Jobs' && 'VIEW OPPORTUNITY'}
-                  {activeProgram.category === 'News' && 'READ STORY'}
-                  {activeProgram.category === 'Insight' && 'READ INSIGHT'}
-                </>
-              )}
+              <span>
+                {activeProgram.ctaLabel || getCTALabel(activeProgram.category)}
+              </span>
               <ArrowRight size={18} />
             </a>
           </div>
