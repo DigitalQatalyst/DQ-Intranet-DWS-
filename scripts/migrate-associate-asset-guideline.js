@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 dotenv.config();
 
@@ -18,7 +20,8 @@ async function migrate() {
   console.log('📝 Migrating Associate Owned Asset Guidelines...\n');
 
   // Read the JSON data file — path is fixed relative to this script
-  const dataPath = new URL('./guideline-data/associate-owned-asset-data.json', import.meta.url).pathname;
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const dataPath = path.join(__dirname, 'guideline-data', 'associate-owned-asset-data.json');
   const guidelineData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
   try {

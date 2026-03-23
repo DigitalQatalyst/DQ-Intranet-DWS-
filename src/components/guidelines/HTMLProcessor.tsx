@@ -12,9 +12,9 @@ function SafeHTMLBlock({ html, htmlKey }: SafeHTMLBlockProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.innerHTML = DOMPurify.sanitize(html)
-    }
+    if (!ref.current) return
+    const clean = DOMPurify.sanitize(html, { RETURN_DOM_FRAGMENT: true })
+    ref.current.replaceChildren(clean)
   }, [html])
 
   return <div key={htmlKey} ref={ref} />
