@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { FilterSidebar, FilterConfig } from './FilterSidebar.js';
 import { MarketplaceGrid } from './MarketplaceGrid.js';
 import { SearchBar } from '../SearchBar.js';
-import { FilterIcon, XIcon, HomeIcon, ChevronRightIcon, InfoIcon } from 'lucide-react';
+import { FilterIcon, XIcon, HomeIcon, ChevronRightIcon } from 'lucide-react';
 import { ErrorDisplay, CourseCardSkeleton } from '../SkeletonLoader.js';
 import { fetchMarketplaceItems, fetchMarketplaceFilters } from '../../services/marketplace.js';
 import { getMarketplaceConfig, getTabSpecificFilters } from '../../utils/marketplaceConfig.js';
@@ -24,13 +24,10 @@ import {
 import GuidesFilters, { GuidesFacets } from '../guides/GuidesFilters';
 import GuidesGrid from '../guides/GuidesGrid';
 import TestimonialsGrid from '../guides/TestimonialsGrid';
-import GlossaryGrid from '../guides/GlossaryGrid';
-import { SixXDPerspectiveCards } from '../guides/SixXDPerspectiveCards';
 import { SixXDComingSoonCards } from '../guides/SixXDComingSoonCards';
 import { supabaseClient } from '../../lib/supabaseClient';
 import { track } from '../../utils/analytics';
-import FAQsPageContent from '../../pages/guides/FAQsPageContent';
-import { glossaryTerms, GlossaryTerm, CATEGORIES } from '../../pages/guides/glossaryData';
+
 import { STATIC_PRODUCTS } from '../../utils/staticProducts';
 const LEARNING_TYPE_FILTER: FilterConfig = {
   id: 'learningType',
@@ -223,7 +220,6 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   }, [isServicesCenter, searchParams, activeServiceTab, setSearchParams]);
 
   // Items & filters state
-  const [items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -502,68 +498,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       })
     : lmsFilteredItems;
   
-  // Filter glossary terms based on two-level filter structure
-  const filteredGlossaryTerms = useMemo(() => {
-    if (!isGuides || activeTab !== 'glossary') {
-      return [];
-    }
-    
-    // PRIMARY FILTER: Knowledge System (e.g., GHC, Agile 6xD)
-    const knowledgeSystems = parseFilterValues(queryParams, 'glossary_knowledge_system');
-    
-    // SECONDARY FILTER: GHC Dimension (only when GHC is selected)
-    const ghcDimensions = parseFilterValues(queryParams, 'glossary_ghc_dimension');
-    
-    // SECONDARY FILTER: 6xD Perspective (only when Agile 6xD is selected)
-    const sixXdPerspectives = parseFilterValues(queryParams, 'glossary_6xd_perspective');
 
-    // BROWSING FILTER: Alphabetical (A–Z)
-    const letters = parseFilterValues(queryParams, 'glossary_letter');
-    
-    // Search query
-    const searchQuery = queryParams.get('q') || '';
-    
-    return glossaryTerms.filter(term => {
-      // PRIMARY: Knowledge System filter
-      if (knowledgeSystems.length > 0) {
-        if (!term.knowledgeSystem || !knowledgeSystems.includes(term.knowledgeSystem)) return false;
-      }
-      
-      // SECONDARY: GHC Dimension filter (only for GHC terms)
-      if (term.knowledgeSystem === 'ghc') {
-        if (ghcDimensions.length > 0) {
-          if (!term.ghcDimension || !ghcDimensions.includes(term.ghcDimension)) return false;
-        }
-      }
-      
-      // SECONDARY: 6xD Perspective filter (only for 6xD terms)
-      if (term.knowledgeSystem === '6xd') {
-        if (sixXdPerspectives.length > 0) {
-          if (!term.sixXdPerspective || !sixXdPerspectives.includes(term.sixXdPerspective)) return false;
-        }
-      }
-      
-      // BROWSING: Letter filter (A–Z)
-      if (letters.length > 0) {
-        const termLetter = term.letter.toUpperCase();
-        const matchesLetter = letters.some(l => l.toUpperCase() === termLetter);
-        if (!matchesLetter) return false;
-      }
-      
-      // Search filter (works across all terms, no category needed)
-      if (searchQuery) {
-        const searchLower = searchQuery.toLowerCase();
-        const matchesSearch = 
-          term.term.toLowerCase().includes(searchLower) ||
-          (term.shortIntro && term.shortIntro.toLowerCase().includes(searchLower)) ||
-          term.explanation.toLowerCase().includes(searchLower) ||
-          term.tags.some(tag => tag.toLowerCase().includes(searchLower));
-        if (!matchesSearch) return false;
-      }
-      
-      return true;
-    });
-  }, [isGuides, activeTab, queryParams]);
   
   // Compute filters from URL for courses
   const urlBasedFilters: Record<string, string[]> = isCourses
@@ -658,7 +593,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         setError(null);
         // optional: reflect count in state for pager/UI
         setTotalCount(searchFilteredItems.length);
-        setItems([]);               // not used in render for courses
         setFilteredItems([]);       // render uses searchFilteredItems when isCourses
         return;
       }
@@ -666,7 +600,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       // KNOWLEDGE HUB: use fallback data (no API)
       if (isKnowledgeHub) {
         const fallbackItems = getFallbackItems(marketplaceType);
-        setItems(fallbackItems);
         setFilteredItems(fallbackItems);
         setTotalCount(fallbackItems.length);
         setLoading(false);
@@ -677,7 +610,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       if (isGuides) {
         if (activeTab === 'glossary' || activeTab === 'faqs') {
           setLoading(false);
-          setItems([]);
           setFilteredItems([]);
           setTotalCount(0);
           return;
@@ -744,7 +676,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               });
             }
 
-            setItems(out);
             setFilteredItems(out);
             setTotalCount(out.length);
             setLoading(false);
@@ -752,7 +683,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           } catch (error) {
             console.error('Error loading products:', error);
             setLoading(false);
-            setItems([]);
             setFilteredItems([]);
             setTotalCount(0);
             return;
@@ -1222,7 +1152,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               }
               const haystack = `${it.title || ''} ${it.summary || ''} ${it.subDomain || ''} ${slug}`.toLowerCase();
               const matchesCat = (cat: string) => {
-                const kw = catKeywords[cat] || [cat.replace(/-/g, ' ')];
+                const kw = catKeywords[cat] || [cat.replaceAll('-', ' ')];
                 return kw.some(k => haystack.includes(k.toLowerCase()));
               };
               return categorization.some(matchesCat);
@@ -1409,7 +1339,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   'team-employee-experience': ['employee experience', 'team experience', 'employee', 'team'],
                   'milestone-achievement': ['milestone', 'achievement', 'accomplishment']
                 };
-                const keywords = categoryKeywords[selectedCategory] || [selectedCategory.replace(/-/g, ' ')];
+                const keywords = categoryKeywords[selectedCategory] || [selectedCategory.replaceAll('-', ' ')];
                 return keywords.some(keyword => allText.includes(keyword));
               };
               return testimonialCategories.some(matchesTestimonialCategory);
@@ -1526,7 +1456,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             out = [...out].sort((a, b) => orderIndex(a) - orderIndex(b));
           }
 
-          setItems(out);
           setFilteredItems(out);
           setTotalCount(total);
           setFacets({
@@ -1543,7 +1472,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           track('Guides.ViewList', { q: qStr, sort, page: String(currentPage) });
         } catch (e) {
           setError('Failed to load guides. Please try again.');
-          setItems([]); setFilteredItems([]); setFacets({}); setTotalCount(0);
+          setFilteredItems([]); setFacets({}); setTotalCount(0);
         } finally {
           setLoading(false);
         }
@@ -1560,7 +1489,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           searchQuery
         );
         const finalItems = itemsData?.length ? itemsData : getFallbackItems(marketplaceType);
-        setItems(finalItems);
         
         // Apply filters for non-financial services
         let filtered = finalItems;
@@ -1839,7 +1767,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         console.error(`[MarketplacePage] Failed to load ${marketplaceType}:`, err);
         setError(`Failed to load ${marketplaceType}`);
         const fallbackItems = getFallbackItems(marketplaceType);
-        setItems(fallbackItems);
         
         // Apply filters to fallback items for Services Center
         let filteredFallback = fallbackItems;
