@@ -40,7 +40,7 @@ const StageCard: React.FC<StageCardProps> = ({
           </div>
           {/* Stage number badge */}
           <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${isActive ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}>
-            {index + 1}
+            {String(index).padStart(2, '0')}
           </div>
         </div>
         

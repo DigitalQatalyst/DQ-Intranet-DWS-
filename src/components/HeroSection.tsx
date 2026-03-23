@@ -5,7 +5,7 @@ import {
   FadeInUpOnScroll,
   StaggeredFadeIn,
 } from './AnimationUtils';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './Header';
 import { heroContent } from '../data/landingPageContent';
 
@@ -14,13 +14,13 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const isAuthenticated = Boolean(user);
   const onboardingPath = "/onboarding/welcome";
-  const ctaHref = isAuthenticated
-    ? onboardingPath
-    : `/signin?redirect=${encodeURIComponent(onboardingPath)}`;
   const navigate = useNavigate();
+  const handleOnboardingCta = () => {
+    navigate(onboardingPath);
+  };
 
   return (
     <div
@@ -120,8 +120,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
               <span className="absolute inset-0 bg-white/20 transform scale-0 opacity-0 group-hover:scale-[2.5] group-hover:opacity-100 rounded-full transition-all duration-700 origin-center"></span>
             </span>
           </button>
-          <Link
-            to={ctaHref}
+          <button
+            type="button"
+            onClick={handleOnboardingCta}
             className="px-8 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center border-2 border-gray-200"
           >
             <span>Start Your Onboarding Journey</span>{' '}
@@ -129,7 +130,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
               size={18}
               className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
             />
-          </Link>
+          </button>
         </StaggeredFadeIn>
       </div>
       {/* Add keyframes for gradient animation */}

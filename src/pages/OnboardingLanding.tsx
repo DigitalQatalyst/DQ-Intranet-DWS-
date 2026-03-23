@@ -461,7 +461,7 @@ export function OnboardingLanding() {
                     Welcome to DQ Onboarding
                 </h1>
                 <p className="text-white/95 mb-6 font-normal leading-relaxed text-center max-w-4xl mx-auto" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '18px' }}>
-                  Your 3-month onboarding journey helps you integrate into DQ, adopt our DNA, and gain confidence in your role.
+                  Over the next three months, you will discover how DQ works, connect with our shared DNA, and grow into your role with clarity and confidence.
                 </p>
               </FadeInUpOnScroll>
 
@@ -514,9 +514,9 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#F2B9A3] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-slate-700 leading-relaxed">
-                          <p>Before you dive in, get grounded in the organisation you’ve joined.</p>
-                          <p>DQ is built for execution, not hierarchy — with clear units, roles, and decision paths.</p>
-                          <p>Use this as your internal map to understand how work flows and who to involve.</p>
+                          <p>Before you dive in, understand the organisation behind the work.</p>
+                          <p>DQ is designed to move with clarity — connecting teams, roles, and decision paths so work flows with purpose and pace.</p>
+                          <p>Use this as your internal map to see how DQ fits together, where work moves, and who to engage along the way.</p>
                         </div>
                       </div>
                       <button
@@ -609,9 +609,9 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#F2B9A3] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-slate-700 leading-relaxed">
-                          <p>6xD (6x Digitals) is how work actually happens at DQ.</p>
-                          <p>It connects direction to delivery — showing how teams plan and execute in rhythm.</p>
-                          <p>It’s the execution engine that turns vision into real outcomes.</p>
+                          <p>6xD is the product expression of how DQ thinks, designs, and delivers transformation.</p>
+                          <p>It connects strategy, systems, and execution into one coherent framework that helps organisations move with clarity, discipline, and speed.</p>
+                          <p>This is how DQ turns transformation vision into scalable solutions, guided action, and measurable outcomes.</p>
                         </div>
                       </div>
                       <button
@@ -668,13 +668,13 @@ export function OnboardingLanding() {
                     <span className="text-5xl md:text-6xl font-semibold text-[#C27555] leading-none">04</span>
                     <div className="flex-1">
                       <p className="text-xs font-bold tracking-[0.18em] uppercase text-[#E95139] mb-2">Your Impact</p>
-                      <h2 className="text-[34px] md:text-[40px] font-bold text-[#151c2e] leading-tight mb-5">You Are the Qatalyst</h2>
+                      <h2 className="text-[34px] md:text-[40px] font-bold text-[#151c2e] leading-tight mb-5">DQ Position</h2>
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#C27555] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-[#676f7e] leading-relaxed">
-                          <p>Your role isn’t just a title — it’s your lane in the system that moves execution forward.</p>
-                          <p>At DQ, you’re empowered to take ownership of your work, collaborate with intent, and drive meaningful change from day one.</p>
-                          <p>This is where your journey becomes uniquely yours — make it count.</p>
+                          <p>Your role is more than a title — it is your part in the system that turns intent into execution.</p>
+                          <p>At DQ, you are empowered to own your work, contribute with purpose, and help move delivery forward with others.</p>
+                          <p>This is where your journey becomes uniquely yours — and where your impact starts to matter.</p>
                         </div>
                       </div>
                       <button
