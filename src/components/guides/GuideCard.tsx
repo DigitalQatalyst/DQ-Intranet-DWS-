@@ -120,9 +120,53 @@ function getBadgeLabel(isBlueprint: boolean, domain: string | undefined, guide: 
   }
   return formatLabel(domain)
 }
+
+function resolveProductMetadata(isBlueprint: boolean, guide: any): Record<string, string> | null {
+  if (!isBlueprint) return null
+  if (guide.productType && guide.productStage) {
+    return { productType: guide.productType, productStage: guide.productStage, description: guide.summary || '', imageUrl: guide.heroImageUrl || '' }
+  }
+  return getProductMetadata(guide.title)
+}
+
+function resolveDisplayTitle(isBlueprint: boolean, guide: any, productMetadata: any): string {
+  if (!isBlueprint) return resolveGhcTitle(guide.title || '', (guide.slug || '').toLowerCase())
+  return resolveBlueprintTitle(guide.title || '', !!(guide.productType && guide.productStage), productMetadata)
+}
+
+function handleImageError(e: React.SyntheticEvent<HTMLImageElement, Event>): void {
+  const target = e.currentTarget
+  if (target.src && !target.src.includes('/image.png')) {
+    target.src = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+  }
+}
+
+function resolveIsBlueprint(guide: any): boolean {
+  return (guide.domain || '').toLowerCase().includes('blueprint') ||
+    (guide.guideType || '').toLowerCase().includes('blueprint') ||
+    guide.domain === 'Product' ||
+    !!(guide.productType && guide.productStage)
+}
+
+function resolveIsTestimonial(guide: any): boolean {
+  return (guide.domain || '').toLowerCase().includes('testimonial') ||
+    (guide.guideType || '').toLowerCase().includes('testimonial')
+}
+
+function resolveHeroImage(guide: any): string | null {
+  return guide.heroImageUrl || guide.hero_image_url || null
+}
+
+interface GuideCardProps {
   guide: any
   onClick: () => void
   imageOverrideUrl?: string
+}
+
+function handleCardKeyDown(onClick: () => void, isDraft: boolean) {
+  return (e: React.KeyboardEvent) => {
+    if (!isDraft && (e.key === 'Enter' || e.key === ' ')) onClick()
+  }
 }
 
 export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverrideUrl }) => {
@@ -132,31 +176,17 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
     : ''
   const domain: string | undefined = guide.domain
 
-  const isBlueprint =
-    (guide.domain || '').toLowerCase().includes('blueprint') ||
-    (guide.guideType || '').toLowerCase().includes('blueprint') ||
-    guide.domain === 'Product' ||
-    (guide.productType && guide.productStage)
+  const isBlueprint = resolveIsBlueprint(guide)
+  const isTestimonial = resolveIsTestimonial(guide)
 
 
   const domainLabel = getBadgeLabel(isBlueprint, domain, guide)
   const isDuplicateTag = normalizeTag(domain) !== '' && normalizeTag(domain) === normalizeTag(guide.guideType)
 
-  const productMetadata = (() => {
-    if (!isBlueprint) return null
-    if (guide.productType && guide.productStage) {
-      return { productType: guide.productType, productStage: guide.productStage, description: guide.summary || '', imageUrl: guide.heroImageUrl || '' }
-    }
-    return getProductMetadata(guide.title)
-  })()
+  const productMetadata = resolveProductMetadata(isBlueprint, guide)
 
-  const getDisplayTitle = (): string => {
-    if (!isBlueprint) return resolveGhcTitle(guide.title || '', (guide.slug || '').toLowerCase())
-    return resolveBlueprintTitle(guide.title || '', !!(guide.productType && guide.productStage), productMetadata)
-  }
-
-  const displayTitle = getDisplayTitle()
-  const heroImage = guide.heroImageUrl || guide.hero_image_url || null
+  const displayTitle = resolveDisplayTitle(isBlueprint, guide, productMetadata)
+  const heroImage = resolveHeroImage(guide)
   const subDomain = guide.subDomain || guide.sub_domain || null
 
   const defaultImageUrl = isBlueprint && productMetadata?.imageUrl
@@ -172,18 +202,8 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
       })
 
   const imageUrl = imageOverrideUrl || defaultImageUrl
-  const isTestimonial =
-    (guide.domain || '').toLowerCase().includes('testimonial') ||
-    (guide.guideType || '').toLowerCase().includes('testimonial')
   const isGhcOverview = (guide.slug || '').toLowerCase() === 'dq-ghc'
   const displayDescription = productMetadata?.description || guide.summary || ''
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.currentTarget
-    if (target.src && !target.src.includes('/image.png')) {
-      target.src = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-    }
-  }
 
   const isDraft = guide.status === 'Draft'
 
@@ -193,7 +213,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
       role={isDraft ? undefined : 'button'}
       tabIndex={isDraft ? undefined : 0}
       onClick={isDraft ? undefined : onClick}
-      onKeyDown={isDraft ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() }}
+      onKeyDown={isDraft ? undefined : handleCardKeyDown(onClick, isDraft)}
     >
       {imageUrl && (
         <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>
