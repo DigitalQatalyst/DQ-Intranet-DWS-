@@ -668,13 +668,13 @@ export function OnboardingLanding() {
                     <span className="text-5xl md:text-6xl font-semibold text-[#C27555] leading-none">04</span>
                     <div className="flex-1">
                       <p className="text-xs font-bold tracking-[0.18em] uppercase text-[#E95139] mb-2">Your Impact</p>
-                      <h2 className="text-[34px] md:text-[40px] font-bold text-[#151c2e] leading-tight mb-5">You Are the Qatalyst</h2>
+                      <h2 className="text-[34px] md:text-[40px] font-bold text-[#151c2e] leading-tight mb-5">DQ Position</h2>
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#C27555] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-[#676f7e] leading-relaxed">
-                          <p>Your role isn’t just a title — it’s your lane in the system that moves execution forward.</p>
-                          <p>At DQ, you’re empowered to take ownership of your work, collaborate with intent, and drive meaningful change from day one.</p>
-                          <p>This is where your journey becomes uniquely yours — make it count.</p>
+                          <p>Your role is more than a title — it is your part in the system that turns intent into execution.</p>
+                          <p>At DQ, you are empowered to own your work, contribute with purpose, and help move delivery forward with others.</p>
+                          <p>This is where your journey becomes uniquely yours — and where your impact starts to matter.</p>
                         </div>
                       </div>
                       <button
