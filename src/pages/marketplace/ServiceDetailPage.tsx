@@ -46,6 +46,62 @@ const getGHCContentKey = (serviceId: string): string => {
   return serviceId
 }
 
+const getCategoryBadge = (isGHC: boolean, category?: string): string => {
+  if (isGHC) return 'GHC COMPETENCY'
+  const categoryMap: Record<string, string> = {
+    technology: 'TECHNOLOGY SERVICE',
+    business: 'BUSINESS SERVICE',
+    digital_worker: 'DIGITAL WORKER SERVICE',
+    prompt_library: 'PROMPT LIBRARY',
+    ai_tools: 'AI TOOLS'
+  }
+  return categoryMap[category ?? ''] || 'SERVICE'
+}
+
+const getServiceTypeLabel = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    query: 'Query',
+    support: 'Support',
+    requisition: 'Requisition',
+    'self-service': 'Self-Service'
+  }
+  return typeMap[type] || type
+}
+
+const getDeliveryModeLabel = (mode: string): string => {
+  const modeMap: Record<string, string> = {
+    online: 'Online',
+    inperson: 'In Person',
+    hybrid: 'Hybrid'
+  }
+  return modeMap[mode] || mode
+}
+
+async function loadServiceData(
+  serviceId: string,
+  setGhcContent: (c: GuideContent) => void,
+  setService: (s: ServiceDetail) => void,
+  setActiveTab: (t: 'overview') => void
+): Promise<void> {
+  if (isGHCService(serviceId)) {
+    const content = GUIDE_CONTENT[getGHCContentKey(serviceId)]
+    if (content) {
+      setGhcContent(content)
+      setActiveTab('overview')
+    } else {
+      console.error('GHC content not found for serviceId:', serviceId)
+    }
+    return
+  }
+  const { data, error } = await (supabaseClient
+    .from('services')
+    .select('*') as any)
+    .eq('id', serviceId)
+    .single()
+  if (error) throw error
+  setService(data as ServiceDetail)
+}
+
 /* ── Extracted tab content components to reduce cognitive complexity ── */
 
 function GHCTabContent({ ghcContent, activeTab }: { readonly ghcContent: GuideContent; readonly activeTab: string }) {
@@ -239,41 +295,11 @@ export default function ServiceDetailPage() {
   const [activeTab, setActiveTab] = useState<'details' | 'request' | 'faq' | 'contact' | 'overview' | 'understand' | 'practice' | 'materials'>('details')
 
   useEffect(() => {
-    const fetchService = async () => {
-      if (!serviceId) return
-
-      try {
-        // Check if this is a GHC service
-        if (isGHCService(serviceId)) {
-          const contentKey = getGHCContentKey(serviceId)
-          const content = GUIDE_CONTENT[contentKey]
-          
-          if (content) {
-            setGhcContent(content)
-            // Set default tab for GHC services
-            setActiveTab('overview')
-          } else {
-            console.error('GHC content not found for serviceId:', serviceId)
-          }
-        } else {
-          // For non-GHC services, fetch from Supabase as before
-          const { data, error } = await (supabaseClient
-            .from('services')
-            .select('*') as any)
-            .eq('id', serviceId)
-            .single()
-
-          if (error) throw error
-          setService(data as ServiceDetail)
-        }
-      } catch (error) {
-        console.error('Error fetching service:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchService()
+    if (!serviceId) return
+    setLoading(true)
+    loadServiceData(serviceId, setGhcContent, setService, setActiveTab)
+      .catch(err => console.error('Error fetching service:', err))
+      .finally(() => setLoading(false))
   }, [serviceId])
 
   if (loading) {
@@ -313,40 +339,6 @@ export default function ServiceDetailPage() {
   const isGHC = ghcContent !== null
   const displayTitle = isGHC ? (ghcContent?.title ?? '') : (service?.title ?? '')
   const displayDescription = isGHC ? (ghcContent?.subtitle ?? '') : (service?.description ?? '')
-
-  const getCategoryBadge = () => {
-    if (isGHC) {
-      return 'GHC COMPETENCY'
-    }
-    
-    const categoryMap: Record<string, string> = {
-      technology: 'TECHNOLOGY SERVICE',
-      business: 'BUSINESS SERVICE',
-      digital_worker: 'DIGITAL WORKER SERVICE',
-      prompt_library: 'PROMPT LIBRARY',
-      ai_tools: 'AI TOOLS'
-    }
-    return categoryMap[service?.category ?? ''] || 'SERVICE'
-  }
-
-  const getServiceTypeLabel = (type: string) => {
-    const typeMap: Record<string, string> = {
-      query: 'Query',
-      support: 'Support',
-      requisition: 'Requisition',
-      'self-service': 'Self-Service'
-    }
-    return typeMap[type] || type
-  }
-
-  const getDeliveryModeLabel = (mode: string) => {
-    const modeMap: Record<string, string> = {
-      online: 'Online',
-      inperson: 'In Person',
-      hybrid: 'Hybrid'
-    }
-    return modeMap[mode] || mode
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -392,7 +384,7 @@ export default function ServiceDetailPage() {
           {/* Service Badge */}
           <div className="mb-4">
             <span className="inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wide bg-white/20 rounded-full">
-              {getCategoryBadge()}
+              {getCategoryBadge(isGHC, service?.category)}
             </span>
           </div>
 
