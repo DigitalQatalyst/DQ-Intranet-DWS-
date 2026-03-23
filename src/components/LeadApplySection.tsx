@@ -51,7 +51,7 @@ const LeadApplySection = () => {
 
               {/* Supporting sentence */}
               <p className="text-white/55 text-base md:text-lg leading-relaxed">
-                Explore 6xD to see how DQ products turn strategy into action.
+                Explore 6xD to discover how DQ transforms strategy into systems, solutions, and real-world delivery.
               </p>
             </FadeInUpOnScroll>
           </div>
