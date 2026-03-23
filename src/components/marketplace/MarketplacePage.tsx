@@ -173,7 +173,70 @@ const countBy = (arr: any[] | null | undefined, key: string) => {
 
 // Helper: normalize a string for loose comparison (remove spaces, hyphens, underscores, ampersands)
 const normalizeForCompare = (s: string) => s.toLowerCase().replaceAll(' ', '').replaceAll('_', '').replaceAll('&', '').replaceAll('-', '');
-const matchesNormalized = (a: string, b: string) => normalizeForCompare(a) === normalizeForCompare(b);
+
+// Module-level filter predicates — extracted to reduce cognitive complexity of run()
+const matchesStrategyType = (it: any, selectedType: string, slugifyFn: (s: string) => string): boolean => {
+  const subDomain = (it.subDomain || '').toLowerCase();
+  const slug = (it.slug || '').toLowerCase();
+  const title = (it.title || '').toLowerCase();
+  const summary = (it.summary || '').toLowerCase();
+  const allText = `${subDomain} ${slug} ${title} ${summary}`;
+  const normalizedSelected = slugifyFn(selectedType);
+  const normalizedSubDomain = slugifyFn(subDomain);
+  if (normalizedSubDomain === normalizedSelected || subDomain.includes(selectedType.toLowerCase()) || selectedType.toLowerCase().includes(subDomain)) return true;
+  if (selectedType.toLowerCase() === 'journey') {
+    return ['vision', 'mission', 'dq-vision', 'dq-mission', 'vision-and-mission', 'vision-mission'].some(kw => slug.includes(kw) || title.includes(kw) || allText.includes(kw));
+  }
+  if (selectedType.toLowerCase() === 'history') {
+    return ['history', 'origin', 'began', 'founding', 'started', 'beginning', 'evolution', 'story'].some(kw => slug.includes(kw) || title.includes(kw) || allText.includes(kw));
+  }
+  return false;
+};
+
+const matchesStrategyFramework = (it: any, selected: string): boolean => {
+  const subDomain = (it.subDomain || '').toLowerCase();
+  const domain = (it.domain || '').toLowerCase();
+  const guideType = (it.guideType || '').toLowerCase();
+  const title = (it.title || '').toLowerCase();
+  const slug = (it.slug || '').toLowerCase();
+  const allText = `${subDomain} ${domain} ${guideType} ${title} ${slug}`;
+  const frameworkKeywords: Record<string, string[]> = {
+    'ghc1': ['vision'], 'ghc2': ['dq-hov', 'house of values'], 'ghc3': ['persona'],
+    'ghc4': ['agile tms', 'tms'], 'ghc5': ['agile sos', 'sos'],
+    'ghc6': ['agile flows', 'flows'], 'ghc7': ['agile 6xd', '6xd'],
+  };
+  if (selected === 'ghc2') {
+    if (slug === 'dq-hov') return true;
+    return title.includes('house of values') && !title.includes('competencies');
+  }
+  const keywords = frameworkKeywords[selected] || [selected];
+  return keywords.some(kw => allText.includes(kw));
+};
+
+const matchesTestimonialCategory = (it: any, selectedCategory: string): boolean => {
+  if (it.testimonialType === 'service-card') return it.testimonialCategory === selectedCategory;
+  const allText = `${it.subDomain || ''} ${it.domain || ''} ${it.guideType || ''} ${it.title || ''} ${it.slug || ''} ${it.summary || ''}`.toLowerCase();
+  const categoryKeywords: Record<string, string[]> = {
+    'client-feedback': ['client feedback', 'client', 'clients'],
+    'associates': ['associates feedback', 'associate', 'associates', 'employee'],
+    'client-partner-reference': ['partner reference', 'partner', 'reference'],
+    'team-employee-experience': ['employee experience', 'team experience', 'employee', 'team'],
+    'milestone-achievement': ['milestone', 'achievement', 'accomplishment'],
+  };
+  const keywords = categoryKeywords[selectedCategory] || [selectedCategory.replaceAll('-', ' ')];
+  return keywords.some(kw => allText.includes(kw));
+};
+
+const matchesArrayFilter = (itemValues: any, filterValues: string[], normalizeFn?: (s: string) => string): boolean => {
+  const arr = Array.isArray(itemValues) ? itemValues : [itemValues || ''];
+  return filterValues.some(fv =>
+    arr.some((iv: string) => {
+      const a = normalizeFn ? normalizeFn(iv) : iv.toLowerCase();
+      const b = normalizeFn ? normalizeFn(fv) : fv.toLowerCase();
+      return a === b;
+    })
+  );
+};
 
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   marketplaceType,
@@ -1162,78 +1225,10 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           // Strategy-specific filters: Strategy Type and Framework/Program
           // These filters check sub_domain field (which stores these categories)
           if (isStrategyTab && strategyTypes.length) {
-            out = out.filter(it => {
-              const subDomain = (it.subDomain || '').toLowerCase();
-              const slug = (it.slug || '').toLowerCase();
-              const title = (it.title || '').toLowerCase();
-              const summary = (it.summary || '').toLowerCase();
-              const allText = `${subDomain} ${slug} ${title} ${summary}`.toLowerCase();
-              
-              return strategyTypes.some(selectedType => {
-                const normalizedSelected = slugify(selectedType);
-                const normalizedSubDomain = slugify(subDomain);
-                
-                // Direct sub_domain match
-                if (normalizedSubDomain === normalizedSelected || 
-                    subDomain.includes(selectedType.toLowerCase()) ||
-                    selectedType.toLowerCase().includes(subDomain)) {
-                  return true;
-                }
-                
-                // For "journey" type: match vision/mission guides
-                if (selectedType.toLowerCase() === 'journey') {
-                  const journeyKeywords = ['vision', 'mission', 'dq-vision', 'dq-mission', 'vision-and-mission', 'vision-mission'];
-                  return journeyKeywords.some(keyword => 
-                    slug.includes(keyword) || 
-                    title.includes(keyword) ||
-                    allText.includes(keyword)
-                  );
-                }
-                
-                // For "history" type: match history/origin guides
-                if (selectedType.toLowerCase() === 'history') {
-                  const historyKeywords = ['history', 'origin', 'began', 'founding', 'started', 'beginning', 'evolution', 'story'];
-                  return historyKeywords.some(keyword => 
-                    slug.includes(keyword) || 
-                    title.includes(keyword) ||
-                    allText.includes(keyword)
-                  );
-                }
-                
-                return false;
-              });
-            });
+            out = out.filter(it => strategyTypes.some(selectedType => matchesStrategyType(it, selectedType, slugify)));
           }
           if (isStrategyTab && strategyFrameworks.length) {
-            out = out.filter(it => {
-              const subDomain = (it.subDomain || '').toLowerCase();
-              const domain = (it.domain || '').toLowerCase();
-              const guideType = (it.guideType || '').toLowerCase();
-              const title = (it.title || '').toLowerCase();
-              const slug = (it.slug || '').toLowerCase();
-              const allText = `${subDomain} ${domain} ${guideType} ${title} ${slug}`.toLowerCase();
-
-              const frameworkKeywords: Record<string, string[]> = {
-                'ghc1': ['vision'],
-                'ghc2': ['dq-hov', 'house of values'],
-                'ghc3': ['persona'],
-                'ghc4': ['agile tms', 'tms'],
-                'ghc5': ['agile sos', 'sos'],
-                'ghc6': ['agile flows', 'flows'],
-                'ghc7': ['agile 6xd', '6xd'],
-              };
-
-              return strategyFrameworks.some(selected => {
-                // Special case: GHC 2 should only show the main HoV card
-                if (selected === 'ghc2') {
-                  if (slug === 'dq-hov') return true;
-                  const isHoVTitle = title.includes('house of values') && !title.includes('competencies');
-                  return isHoVTitle;
-                }
-                const keywords = frameworkKeywords[selected] || [selected];
-                return keywords.some(kw => allText.includes(kw));
-              });
-            });
+            out = out.filter(it => strategyFrameworks.some(selected => matchesStrategyFramework(it, selected)));
           }
           // Guidelines-specific filter: Category (Resources, Policies, xDS)
           if (isGuidelinesTab && guidelinesCategories.length) {
@@ -1316,34 +1311,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           }
           // Testimonials-specific filter: Story Type (Client Feedback, Associates Feedback, etc.)
           if (isTestimonialsTab && testimonialCategories.length) {
-            out = out.filter(it => {
-              // For static service cards, use the testimonialCategory property
-              if (it.testimonialType === 'service-card') {
-                return testimonialCategories.includes(it.testimonialCategory);
-              }
-              
-              // For database testimonials, use the existing keyword-based filtering
-              const subDomain = (it.subDomain || '').toLowerCase();
-              const domain = (it.domain || '').toLowerCase();
-              const guideType = (it.guideType || '').toLowerCase();
-              const title = (it.title || '').toLowerCase();
-              const slug = (it.slug || '').toLowerCase();
-              const summary = (it.summary || '').toLowerCase();
-              const allText = `${subDomain} ${domain} ${guideType} ${title} ${slug} ${summary}`.toLowerCase();
-              
-              const matchesTestimonialCategory = (selectedCategory: string) => {
-                const categoryKeywords: Record<string, string[]> = {
-                  'client-feedback': ['client feedback', 'client', 'clients'],
-                  'associates': ['associates feedback', 'associate', 'associates', 'employee'],
-                  'client-partner-reference': ['partner reference', 'partner', 'reference'],
-                  'team-employee-experience': ['employee experience', 'team experience', 'employee', 'team'],
-                  'milestone-achievement': ['milestone', 'achievement', 'accomplishment']
-                };
-                const keywords = categoryKeywords[selectedCategory] || [selectedCategory.replaceAll('-', ' ')];
-                return keywords.some(keyword => allText.includes(keyword));
-              };
-              return testimonialCategories.some(matchesTestimonialCategory);
-            });
+            out = out.filter(it => testimonialCategories.some(cat => matchesTestimonialCategory(it, cat)));
           }
           // Location filtering removed - all guides should be available for all locations (DXB, KSA, NBO)
           if (statuses.length)   out = out.filter(it => it.status && statuses.includes(it.status));
@@ -1535,15 +1503,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (userCategoryFilter) {
             const userCategories = Array.isArray(userCategoryFilter) ? userCategoryFilter : [userCategoryFilter];
             if (userCategories.length > 0) {
-              filtered = filtered.filter(item => {
-                const itemUserCategories = item.userCategory || [];
-                const itemUserCategoriesArray = Array.isArray(itemUserCategories) ? itemUserCategories : [itemUserCategories];
-                return userCategories.some(filterCategory => 
-                  itemUserCategoriesArray.some(itemCat => 
-                    itemCat.toLowerCase() === filterCategory.toLowerCase()
-                  )
-                );
-              });
+              filtered = filtered.filter(item => matchesArrayFilter(item.userCategory, userCategories));
             }
           }
           
@@ -1552,13 +1512,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (technicalCategoryFilter) {
             const technicalCategories = Array.isArray(technicalCategoryFilter) ? technicalCategoryFilter : [technicalCategoryFilter];
             if (technicalCategories.length > 0) {
-              filtered = filtered.filter(item => {
-                const itemTechnicalCategories = item.technicalCategory || [];
-                const itemTechnicalCategoriesArray = Array.isArray(itemTechnicalCategories) ? itemTechnicalCategories : [itemTechnicalCategories];
-                return technicalCategories.some(filterCategory => 
-                  itemTechnicalCategoriesArray.some(itemCat => matchesNormalized(itemCat, filterCategory))
-                );
-              });
+              filtered = filtered.filter(item => matchesArrayFilter(item.technicalCategory, technicalCategories, normalizeForCompare));
             }
           }
           
@@ -1567,13 +1521,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (deviceOwnershipFilter) {
             const deviceOwnerships = Array.isArray(deviceOwnershipFilter) ? deviceOwnershipFilter : [deviceOwnershipFilter];
             if (deviceOwnerships.length > 0) {
-              filtered = filtered.filter(item => {
-                const itemDeviceOwnerships = item.deviceOwnership || [];
-                const itemDeviceOwnershipsArray = Array.isArray(itemDeviceOwnerships) ? itemDeviceOwnerships : [itemDeviceOwnerships];
-                return deviceOwnerships.some(filterOwnership => 
-                  itemDeviceOwnershipsArray.some(itemOwn => matchesNormalized(itemOwn, filterOwnership))
-                );
-              });
+              filtered = filtered.filter(item => matchesArrayFilter(item.deviceOwnership, deviceOwnerships, normalizeForCompare));
             }
           }
           
@@ -1582,15 +1530,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (servicesFilter) {
             const services = Array.isArray(servicesFilter) ? servicesFilter : [servicesFilter];
             if (services.length > 0) {
-              filtered = filtered.filter(item => {
-                const itemServices = item.services || [];
-                const itemServicesArray = Array.isArray(itemServices) ? itemServices : [itemServices];
-                return services.some(filterService => 
-                  itemServicesArray.some(itemSvc => 
-                    itemSvc.toLowerCase().replace(/[\s_]/g, '') === filterService.toLowerCase().replace(/[\s_]/g, '')
-                  )
-                );
-              });
+              filtered = filtered.filter(item => matchesArrayFilter(item.services, services, s => s.toLowerCase().replace(/[\s_]/g, '')));
             }
           }
           
@@ -1599,15 +1539,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (documentTypeFilter) {
             const documentTypes = Array.isArray(documentTypeFilter) ? documentTypeFilter : [documentTypeFilter];
             if (documentTypes.length > 0) {
-              filtered = filtered.filter(item => {
-                const itemDocumentTypes = item.documentType || [];
-                const itemDocumentTypesArray = Array.isArray(itemDocumentTypes) ? itemDocumentTypes : [itemDocumentTypes];
-                return documentTypes.some(filterDocType => 
-                  itemDocumentTypesArray.some(itemDocType => 
-                    itemDocType.toLowerCase() === filterDocType.toLowerCase()
-                  )
-                );
-              });
+              filtered = filtered.filter(item => matchesArrayFilter(item.documentType, documentTypes));
             }
           }
           
@@ -1616,13 +1548,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (serviceDomainsFilter) {
             const serviceDomains = Array.isArray(serviceDomainsFilter) ? serviceDomainsFilter : [serviceDomainsFilter];
             if (serviceDomains.length > 0) {
-              filtered = filtered.filter(item => {
-                const itemServiceDomains = item.serviceDomains || [];
-                const itemServiceDomainsArray = Array.isArray(itemServiceDomains) ? itemServiceDomains : [itemServiceDomains];
-                return serviceDomains.some(filterDomain => 
-                  itemServiceDomainsArray.some(itemDomain => matchesNormalized(itemDomain, filterDomain))
-                );
-              });
+              filtered = filtered.filter(item => matchesArrayFilter(item.serviceDomains, serviceDomains, normalizeForCompare));
             }
           }
           
@@ -1631,13 +1557,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (aiMaturityLevelFilter) {
             const aiMaturityLevels = Array.isArray(aiMaturityLevelFilter) ? aiMaturityLevelFilter : [aiMaturityLevelFilter];
             if (aiMaturityLevels.length > 0) {
-              filtered = filtered.filter(item => {
-                const itemMaturityLevel = item.aiMaturityLevel || '';
-                const itemMaturityLevelArray = Array.isArray(itemMaturityLevel) ? itemMaturityLevel : [itemMaturityLevel];
-                return aiMaturityLevels.some(filterLevel => 
-                  itemMaturityLevelArray.some(itemLevel => matchesNormalized(itemLevel, filterLevel))
-                );
-              });
+              filtered = filtered.filter(item => matchesArrayFilter(item.aiMaturityLevel, aiMaturityLevels, normalizeForCompare));
             }
           }
           
@@ -1646,12 +1566,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (toolCategoryFilter) {
             const toolCategories = Array.isArray(toolCategoryFilter) ? toolCategoryFilter : [toolCategoryFilter];
             if (toolCategories.length > 0) {
-              filtered = filtered.filter(item => {
-                const itemToolCategory = item.toolCategory || '';
-                return toolCategories.some(filterCategory => 
-                  matchesNormalized(itemToolCategory, filterCategory)
-                );
-              });
+              filtered = filtered.filter(item => matchesArrayFilter(item.toolCategory, toolCategories, normalizeForCompare));
             }
           }
           

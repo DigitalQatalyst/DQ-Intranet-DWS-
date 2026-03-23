@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
+import DOMPurify from 'dompurify';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, XIcon, Plus, Minus } from 'lucide-react';
+import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, Plus, Minus } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig';
@@ -511,20 +512,22 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const renderBlocks = (blocks: ContentBlock[]) => {
     return (blocks || []).map((block, idx) => {
       if (block.type === 'p') {
-        return <p key={idx} className="text-gray-700 text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: block.text }}></p>;
+        const safeHtml = DOMPurify.sanitize(block.text);
+        // eslint-disable-next-line react/no-danger
+        return <p key={`block-p-${idx}`} className="text-gray-700 text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: safeHtml }}></p>;
       }
       if (block.type === 'ol') {
-        return <ol key={idx} className="list-decimal pl-6 space-y-3 text-gray-700 mb-4 text-base">
-            {block.items.map((it, i) => <li key={i} className="pl-2 leading-relaxed">{it}</li>)}
+        return <ol key={`block-ol-${idx}`} className="list-decimal pl-6 space-y-3 text-gray-700 mb-4 text-base">
+            {block.items.map((it, i) => <li key={`ol-item-${i}-${it.slice(0, 20)}`} className="pl-2 leading-relaxed">{it}</li>)}
           </ol>;
       }
       if (block.type === 'ul') {
-        return <ul key={idx} className="list-disc pl-6 space-y-3 text-gray-700 mb-4 text-base">
-            {block.items.map((it, i) => <li key={i} className="pl-2 leading-relaxed">{it}</li>)}
+        return <ul key={`block-ul-${idx}`} className="list-disc pl-6 space-y-3 text-gray-700 mb-4 text-base">
+            {block.items.map((it, i) => <li key={`ul-item-${i}-${it.slice(0, 20)}`} className="pl-2 leading-relaxed">{it}</li>)}
           </ul>;
       }
       if (block.type === 'iframe') {
-        return <div key={idx} className="mb-6">
+        return <div key={`block-iframe-${idx}`} className="mb-6">
             <iframe
               src={block.src}
               width={block.width || '640'}
@@ -538,15 +541,15 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           </div>;
       }
       if (block.type === 'accordion') {
-        return <AccordionBlock key={idx} items={block.items || []} />;
+        return <AccordionBlock key={`block-accordion-${idx}`} items={block.items || []} />;
       }
       if (block.type === 'code') {
-        return <CodeBlock key={idx} code={block.code} language={block.language} title={block.title} />;
+        return <CodeBlock key={`block-code-${idx}`} code={block.code} language={block.language} title={block.title} />;
       }
       if (block.type === 'procedure_stages') {
-        const config = procedureStagesConfigs[block.configKey as keyof typeof procedureStagesConfigs];
-        if (config) {
-          return <ProcedureStages key={idx} config={{ ...config, title: '' }} className="my-6" />;
+        const stagesConfig = procedureStagesConfigs[block.configKey as keyof typeof procedureStagesConfigs];
+        if (stagesConfig) {
+          return <ProcedureStages key={`block-stages-${idx}`} config={{ ...stagesConfig, title: '' }} className="my-6" />;
         }
         return null;
       }
@@ -629,23 +632,12 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     }
   };
 
-  const renderTabContent = (tabId: string) => {
-    if (isGHC && ghcContent) {
-      return renderGHCTabContent(tabId);
-    }
+  const renderAIToolTabContent = (tabId: string): React.ReactNode => {
+    const toolData = getAIToolDataById(item?.id);
+    if (!toolData) return null;
 
-    // Regular marketplace content logic
-    const tab = tabsToUse.find(t => t.id === tabId);
-    if (!tab) return null;
-    
-    // Special handling for AI Tools - MUST BE FIRST before generic content
-    if (item?.category === 'AI Tools') {
-      const toolData = getAIToolDataById(item?.id);
-      
-      if (toolData) {
-        // About Tab for AI Tools
-        if (tabId === 'about') {
-          return <div className="space-y-8">
+    if (tabId === 'about') {
+      return <div className="space-y-8">
               {/* Tool Description */}
               <div className="text-gray-700 text-lg leading-relaxed mb-4">
                 {itemDescription}
@@ -881,17 +873,142 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 </div>
               </div>
 
-              {/* Description */}
               {content?.blocks && content.blocks.length > 0 && (
-                <div className="text-gray-700 text-lg leading-relaxed">
-                  {renderBlocks(content.blocks)}
-                </div>
+                <div className="text-gray-700 text-lg leading-relaxed">{renderBlocks(content.blocks)}</div>
               )}
             </div>;
-        }
-      }
     }
-    
+
+    return null;
+  };
+
+  const renderDigitalWorkerTabContent = (tabId: string): React.ReactNode => {
+    const dwService = getDigitalWorkerServiceById(item?.id);
+    if (!dwService) return null;
+
+    if (tabId === 'about') {
+      return <div className="space-y-8">
+          <div className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">{dwService.about.overview}</div>
+          <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-8">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <h4 className="text-2xl font-bold text-gray-900">Key Highlights</h4>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {dwService.keyHighlights.map((highlight, index) => (
+                <div key={`dw-highlight-${index}-${highlight.slice(0,20)}`} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
+                  <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                    <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-700 font-medium leading-relaxed">{highlight}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>;
+    }
+
+    if (tabId === 'requirements') {
+      return (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Requirements</h2>
+            <p className="text-sm text-gray-600">Ensure these requirements are met before implementing {dwService.title}</p>
+          </div>
+          <div className="border-l-4 bg-white p-6 rounded-r-lg shadow-sm" style={{ borderLeftColor: '#030F35' }}>
+            <ul className="space-y-4">
+              {dwService.requirements.map((requirement, index) => (
+                <li key={`req-${index}-${requirement.slice(0,20)}`} className="flex items-start gap-4">
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md mt-0.5" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                    <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-gray-700 flex-1 leading-relaxed">{requirement}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    if (tabId === 'tools') {
+      return (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Tools & Technologies</h2>
+            <p className="text-sm text-gray-600">Technologies and platforms used in this service</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {dwService.tools.map((tool, index) => (
+              <div key={`tool-${index}-${tool.slice(0,20)}`} className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-5 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-blue-300">
+                <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-blue-400/10 blur-2xl"></div>
+                <div className="relative flex items-center gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-900 font-semibold leading-relaxed">{tool}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (tabId === 'sample_use_case') {
+      return (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sample Use Case</h2>
+            <p className="text-sm text-gray-600">Real-world implementation scenario for {dwService.title}</p>
+          </div>
+          <div className="space-y-4">
+            {dwService.sampleUseCase.steps.map((step, index) => (
+              <div key={`step-${index}-${step.slice(0,20)}`} className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full font-bold text-white" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
+                    {index + 1}
+                  </div>
+                </div>
+                <div className="flex-1 pt-1.5">
+                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <p className="text-gray-700 leading-relaxed">{step}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const renderTabContent = (tabId: string) => {
+    if (isGHC && ghcContent) {
+      return renderGHCTabContent(tabId);
+    }
+
+    const tab = tabsToUse.find(t => t.id === tabId);
+    if (!tab) return null;
+
+    // Special handling for AI Tools - MUST BE FIRST before generic content
+    if (item?.category === 'AI Tools') {
+      const aiResult = renderAIToolTabContent(tabId);
+      if (aiResult !== null) return aiResult;
+    }
+
     // Check if this is a custom tab with its own content
     const content = getServiceTabContent(marketplaceType, item?.id, tabId);
     if (content) {
@@ -953,332 +1070,14 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     
     // Special handling for Digital Worker services
     if (item?.category === 'Digital Worker') {
-      const dwService = getDigitalWorkerServiceById(item?.id);
-      
-      if (dwService) {
-        // About Tab for Digital Worker
-        if (tabId === 'about') {
-          return <div className="space-y-8">
-              {/* Overview Text */}
-              <div className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">
-                {dwService.about.overview}
-              </div>
-              
-              {/* Key Highlights Section */}
-              <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-8">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                  </div>
-                  <h4 className="text-2xl font-bold text-gray-900">Key Highlights</h4>
-                </div>
-                
-                <div className="grid gap-3 md:grid-cols-2">
-                  {dwService.keyHighlights.map((highlight, index) => (
-                    <div key={index} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
-                      <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
-                        <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700 font-medium leading-relaxed">{highlight}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>;
-        }
-        
-        // Requirements Tab for Digital Worker
-        if (tabId === 'requirements') {
-          return (
-            <div className="space-y-6">
-              {/* Header */}
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">Requirements</h2>
-                <p className="text-sm text-gray-600">
-                  Ensure these requirements are met before implementing {dwService.title}
-                </p>
-              </div>
-
-              {/* Requirements List */}
-              <div className="border-l-4 bg-white p-6 rounded-r-lg shadow-sm" style={{ borderLeftColor: '#030F35' }}>
-                <ul className="space-y-4">
-                  {dwService.requirements.map((requirement, index) => (
-                    <li key={index} className="flex items-start gap-4">
-                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md mt-0.5" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
-                        <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-sm text-gray-700 flex-1 leading-relaxed">{requirement}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          );
-        }
-        
-        // Tools Tab for Digital Worker
-        if (tabId === 'tools') {
-          return (
-            <div className="space-y-6">
-              {/* Header */}
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">Tools & Technologies</h2>
-                <p className="text-sm text-gray-600">
-                  Technologies and platforms used in this service
-                </p>
-              </div>
-
-              {/* Tools Grid */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {dwService.tools.map((tool, index) => (
-                  <div key={index} className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-5 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-blue-300">
-                    <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-blue-400/10 blur-2xl"></div>
-                    
-                    <div className="relative flex items-center gap-3">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
-                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                        </svg>
-                      </div>
-                      <span className="text-gray-900 font-semibold leading-relaxed">{tool}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        
-        // Sample Use Case Tab for Digital Worker
-        if (tabId === 'sample_use_case') {
-          return (
-            <div className="space-y-6">
-              {/* Header */}
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sample Use Case</h2>
-                <p className="text-sm text-gray-600">
-                  Real-world implementation scenario for {dwService.title}
-                </p>
-              </div>
-
-              {/* Use Case Steps */}
-              <div className="space-y-4">
-                {dwService.sampleUseCase.steps.map((step, index) => (
-                  <div key={index} className="flex gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full font-bold text-white" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
-                        {index + 1}
-                      </div>
-                    </div>
-                    <div className="flex-1 pt-1.5">
-                      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
-                        <p className="text-gray-700 leading-relaxed">{step}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-      }
+      const dwResult = renderDigitalWorkerTabContent(tabId);
+      if (dwResult !== null) return dwResult;
     }
-    
+
     // Return specific tab content based on tab ID for non-custom tabs
     switch (tabId) {
       case 'licenses': {
-        // Special rendering for AI tools licenses tab
-        const isAITool = item?.category === 'AI Tools';
-        if (isAITool) {
-          const content = getServiceTabContent(marketplaceType, item?.id, tabId);
-          const toolData = getAIToolDataById(item?.id);
-          
-          return <div className="space-y-8">
-              {/* Hero Section with Tool Name */}
-              <div className="relative overflow-hidden rounded-2xl" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
-                <div className="absolute inset-0 opacity-10">
-                  <div className="absolute inset-0" style={{ 
-                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-                    backgroundSize: '40px 40px'
-                  }}></div>
-                </div>
-                <div className="relative px-8 py-10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-                        <svg className="h-9 w-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-3xl font-bold text-white mb-1">{toolData?.name || item?.title}</h3>
-                        <p className="text-blue-100 text-sm">License Information</p>
-                      </div>
-                    </div>
-                    <a 
-                      href={toolData?.homepage || '#'} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hidden md:flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-white font-medium transition-all duration-200 hover:scale-105"
-                    >
-                      Visit Website
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              {/* Intro Text */}
-              {content?.blocks && content.blocks.length > 0 && (
-                <div className="text-gray-700 text-lg leading-relaxed">
-                  {renderBlocks(content.blocks)}
-                </div>
-              )}
-              
-              {/* License Status Cards */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Subscription Status Card */}
-                <div className="group relative overflow-hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-                  {/* Decorative Elements */}
-                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-green-400/20 blur-3xl"></div>
-                  <div className="absolute -left-4 -bottom-4 h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl"></div>
-                  
-                  {/* Icon Background */}
-                  <div className="absolute right-4 top-4 opacity-5">
-                    <svg className="h-24 w-24 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="mb-4 flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/50">
-                        <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Subscription Status</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Current License State</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 mb-4">
-                      <p className="text-4xl font-black text-green-700">{toolData?.license.subscriptionStatus || 'Active'}</p>
-                      <div className="flex h-3 w-3 items-center justify-center">
-                        <span className="absolute h-3 w-3 animate-ping rounded-full bg-green-500 opacity-75"></span>
-                        <span className="relative h-3 w-3 rounded-full bg-green-600 shadow-lg shadow-green-500/50"></span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-sm text-green-800 bg-green-100/50 rounded-lg px-3 py-2">
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      <span className="font-medium">Fully operational & ready to use</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Expiry Date Card */}
-                <div className="group relative overflow-hidden rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-                  {/* Decorative Elements */}
-                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl"></div>
-                  <div className="absolute -left-4 -bottom-4 h-24 w-24 rounded-full bg-indigo-400/20 blur-2xl"></div>
-                  
-                  {/* Icon Background */}
-                  <div className="absolute right-4 top-4 opacity-5">
-                    <svg className="h-24 w-24" style={{ color: '#1A2E6E' }} fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
-                    </svg>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="mb-4 flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl shadow-lg" style={{ 
-                        background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)',
-                        boxShadow: '0 10px 25px -5px rgba(26, 46, 110, 0.5)'
-                      }}>
-                        <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Expiry Date</p>
-                        <p className="text-xs text-gray-500 mt-0.5">License Validity</p>
-                      </div>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <p className="text-4xl font-black" style={{ color: '#1A2E6E' }}>{toolData?.license.expiryDate || 'N/A'}</p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-sm text-blue-900 bg-blue-100/50 rounded-lg px-3 py-2">
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="font-medium">No expiration - continuous access</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Key Features Section */}
-              {toolData?.features && (
-                <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-8">
-                  <div className="mb-6 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
-                      <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                      </svg>
-                    </div>
-                    <h4 className="text-2xl font-bold text-gray-900">Key Features Included</h4>
-                  </div>
-                  
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {toolData.features.keyFeatures.map((feature, index) => (
-                      <div key={index} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
-                        <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
-                          <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <span className="text-gray-700 font-medium leading-relaxed">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Info Banner */}
-              <div className="rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100">
-                    <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h5 className="mb-2 text-lg font-bold text-blue-900">License Management</h5>
-                    <p className="text-blue-800 leading-relaxed">
-                      Your license remains active as long as you are actively using {toolData?.shortName || 'the tool'} and remain employed at DQ. 
-                      Inactive licenses may be reallocated after 60 days of non-use. For questions about your license status or to request 
-                      access, contact the Digital Innovation team.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>;
-        }
-        // Fallback to default rendering for non-AI tools
+        // AI Tools licenses are handled by renderAIToolTabContent above; fall through to default
         break;
       }
       case 'submit_request': {
@@ -1371,7 +1170,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
               </h3>
               {/* Features/Highlights list - Consistent for all types */}
               <ul className="space-y-2">
-                {highlights.map((highlight, index) => <li key={index} className="flex items-start">
+                {highlights.map((highlight, index) => <li key={`highlight-${index}-${highlight.slice(0,20)}`} className="flex items-start">
                     <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
                     <span className="text-gray-700">{highlight}</span>
                   </li>)}
@@ -1457,7 +1256,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 Core Learning Outcomes
               </h3>
               <ol className="space-y-3">
-                {highlights.map((outcome, index) => <li key={index} className="pl-2">
+                {highlights.map((outcome, index) => <li key={`outcome-${index}-${outcome.slice(0,20)}`} className="pl-2">
                     <div className="flex items-start gap-3">
                       <span className="text-gray-500 font-medium">
                         {index + 1}.
@@ -1473,7 +1272,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 Skills You'll Gain
               </h3>
               <div className="grid md:grid-cols-2 gap-2">
-                {['Strategic thinking and planning', 'Problem-solving techniques', 'Implementation best practices', 'Performance measurement', 'Risk assessment and mitigation', 'Communication and presentation'].map((skill, index) => <div key={index} className="flex items-center">
+                {['Strategic thinking and planning', 'Problem-solving techniques', 'Implementation best practices', 'Performance measurement', 'Risk assessment and mitigation', 'Communication and presentation'].map((skill, index) => <div key={`skill-${index}`} className="flex items-center">
                     <CheckCircleIcon size={16} className="text-dqYellow mr-2 flex-shrink-0" />
                     <span className="text-gray-700">{skill}</span>
                   </div>)}
@@ -1507,7 +1306,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 Eligibility Requirements
               </h3>
               <ul className="space-y-2">
-                {item.eligibilityCriteria ? item.eligibilityCriteria.map((criteria, index) => <li key={index} className="flex items-start">
+                {item.eligibilityCriteria ? item.eligibilityCriteria.map((criteria, index) => <li key={`criteria-${index}-${criteria.slice(0,20)}`} className="flex items-start">
                       <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
                       <span className="text-gray-700">{criteria}</span>
                     </li>) : <li className="flex items-start">
@@ -1546,7 +1345,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 Additional Terms
               </h4>
               <ul className="space-y-2">
-                {item.additionalTerms ? item.additionalTerms.map((term, index) => <li key={index} className="flex items-start">
+                {item.additionalTerms ? item.additionalTerms.map((term, index) => <li key={`term-${index}-${term.slice(0,20)}`} className="flex items-start">
                       <span className="text-gray-400 mr-2">•</span>
                       <span className="text-gray-700">{term}</span>
                     </li>) : <>
@@ -1588,7 +1387,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             </p>
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="space-y-3">
-                {item.applicationProcess ? item.applicationProcess.map((step, index) => <div key={index} className="flex items-start gap-3">
+                {item.applicationProcess ? item.applicationProcess.map((step, index) => <div key={`step-${index}-${step.title?.slice(0,20)}`} className="flex items-start gap-3">
                       <span className="text-gray-500 font-medium">
                         {index + 1}.
                       </span>
@@ -1652,7 +1451,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 Required Documents
               </h3>
               <div className="grid md:grid-cols-2 gap-3">
-                {item.requiredDocuments ? item.requiredDocuments.map((doc, index) => <div key={index} className="flex items-start">
+                {item.requiredDocuments ? item.requiredDocuments.map((doc, index) => <div key={`doc-${index}-${doc.slice(0,20)}`} className="flex items-start">
                       <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{doc}</span>
                     </div>) : <>
@@ -1719,7 +1518,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 Areas of Expertise
               </h4>
               <div className="flex flex-wrap gap-2 mb-6">
-                {item.providerExpertise ? item.providerExpertise.map((expertise, index) => <span key={index} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                {item.providerExpertise ? item.providerExpertise.map((expertise, index) => <span key={`expertise-${index}-${expertise.slice(0,20)}`} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
                       {expertise}
                     </span>) : <>
                     <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
@@ -1764,15 +1563,6 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
           </div>;
       // Add other tab cases as needed
       default:
-        if (tab.renderContent) {
-          return <div>
-              <p className="text-gray-600 text-lg mb-6">
-                Additional information about this{' '}
-                {config.itemName.toLowerCase()}.
-              </p>
-              {tab.renderContent(item, marketplaceType)}
-            </div>;
-        }
         return <div>
             <p className="text-gray-600 text-lg mb-6">
               Additional information about this {config.itemName.toLowerCase()}.
@@ -1986,7 +1776,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                         {relatedItem.description}
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {(relatedItem.tags || []).slice(0, 2).map((tag, idx) => <span key={tag || idx} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
+                        {(relatedItem.tags || []).slice(0, 2).map((tag, idx) => <span key={tag || `tag-${idx}`} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
                               {tag}
                             </span>)}
                       </div>
