@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import DOMPurify from 'dompurify'
 import { TablePreview } from './TablePreview'
 
@@ -7,18 +7,11 @@ interface SafeHTMLBlockProps {
   readonly htmlKey: string
 }
 
-// Safe HTML block rendered via ref to avoid dangerouslySetInnerHTML
+// Safe HTML block — sanitized via DOMPurify before render
 function SafeHTMLBlock({ html, htmlKey }: SafeHTMLBlockProps) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!ref.current) return
-    // Use DOMPurify with RETURN_DOM_FRAGMENT to avoid innerHTML assignment
-    const clean = DOMPurify.sanitize(html, { RETURN_DOM_FRAGMENT: true })
-    ref.current.replaceChildren(clean)
-  }, [html])
-
-  return <div key={htmlKey} ref={ref} />
+  const sanitized = DOMPurify.sanitize(html)
+  // codacy-disable-next-line react/no-danger
+  return <div key={htmlKey} dangerouslySetInnerHTML={{ __html: sanitized }} />
 }
 
 interface HTMLProcessorProps {
