@@ -53,8 +53,12 @@ stages:
           --exit-code 1 \
           --severity HIGH,CRITICAL \
           --no-progress \
-          $(registry)/$(imageName):$(imageTag)
+          $TARGET_REGISTRY/$TARGET_IMAGE_NAME:$TARGET_IMAGE_TAG
       displayName: Trivy Image Scan.
+      env:
+        TARGET_REGISTRY: $(registry)
+        TARGET_IMAGE_NAME: $(imageName)
+        TARGET_IMAGE_TAG: $(imageTag)
 
 - stage: Deploy
   displayName: Deploy to OVH Kubernetes

@@ -238,7 +238,7 @@ export function AuthProvider({
           }
           
           // Sync user to Supabase (this also fetches userContext)
-          void syncUserQuietly(account);
+          syncUserQuietly(account).catch(console.error);
         }
       }
     });

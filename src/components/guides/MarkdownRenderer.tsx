@@ -6,118 +6,118 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 
-const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
-  // Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
-  const rehypePreserveDivClass = React.useMemo(() => {
-    return () => (tree: any) => {
-      const walk = (node: any) => {
-        if (!node || typeof node !== 'object') return
-        if (node.type === 'element' && node.tagName === 'div') {
-          // Ensure class is preserved in properties
-          if (node.properties) {
-            // Get class value (could be string or array)
-            const classValue = node.properties.class
-            if (classValue) {
-              // Convert to string
-              const classStr = Array.isArray(classValue) 
-                ? classValue.join(' ') 
-                : String(classValue)
-              
-              // ALWAYS set className from class (this is critical for react-markdown)
-              node.properties.className = classStr
-              // Also keep class for compatibility
-              node.properties.class = classStr
-            }
-            // If className exists but is array, convert to string
-            if (node.properties.className && Array.isArray(node.properties.className)) {
-              node.properties.className = node.properties.className.join(' ')
-            }
-          }
+// Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
+const rehypePreserveDivClass = () => (tree: any) => {
+  const walk = (node: any) => {
+    if (!node || typeof node !== 'object') return
+    if (node.type === 'element' && node.tagName === 'div') {
+      // Ensure class is preserved in properties
+      if (node.properties) {
+        // Get class value (could be string or array)
+        const classValue = node.properties.class
+        if (classValue) {
+          // Convert to string
+          const classStr = Array.isArray(classValue) 
+            ? classValue.join(' ') 
+            : String(classValue)
+          
+          // ALWAYS set className from class (this is critical for react-markdown)
+          node.properties.className = classStr
+          // Also keep class for compatibility
+          node.properties.class = classStr
         }
-        const kids = node.children || []
-        for (const k of kids) walk(k)
+        // If className exists but is array, convert to string
+        if (node.properties.className && Array.isArray(node.properties.className)) {
+          node.properties.className = node.properties.className.join(' ')
+        }
       }
-      walk(tree)
     }
-  }, [])
-  
-  // Rehype plugin: remove leading icon nodes (img/svg/span with img) from list items
-  const rehypeStripListIcons = React.useMemo(() => {
-    const stripText = (s: string) => {
-      return (s || '')
-        .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric shapes
-        .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}]+\s*/u, '') // emoji basic
-        .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F900}-\u{1F9FF}]+\s*/u, '') // emoji extended
-        .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
-        .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
-    }
-    const containsImage = (node: any): boolean => {
-      if (!node || typeof node !== 'object') return false
-      if (node.type === 'element' && (node.tagName === 'img' || node.tagName === 'picture' || node.tagName === 'svg')) return true
-      const kids = (node.children || []) as any[]
-      for (const k of kids) { if (containsImage(k)) return true }
-      return false
-    }
-    const stripLeadingInContainer = (node: any) => {
-      if (!node || !Array.isArray(node.children)) return
-      // Work inside <li> and inside its first <p>
-      const cleanFront = (arr: any[]) => {
-        while (arr.length) {
-          const first = arr[0]
-          if (first?.type === 'text') {
-            const next = stripText(first.value)
-            if (next !== first.value) first.value = next
-            if (!first.value || !first.value.trim()) { arr.shift(); continue }
-            break
-          }
-          if (first?.type === 'element') {
-            if (first.tagName === 'img' || first.tagName === 'picture' || first.tagName === 'svg' || (first.tagName === 'span' && containsImage(first))) { arr.shift(); continue }
-            if (first.tagName === 'p' && Array.isArray(first.children)) { cleanFront(first.children); if (first.children.length === 0) { arr.shift(); continue } }
-          }
+    const kids = node.children || []
+    for (const k of kids) walk(k)
+  }
+  walk(tree)
+}
+
+// Rehype plugin: remove leading icon nodes (img/svg/span with img) from list items
+const rehypeStripListIcons = () => {
+  const stripText = (s: string) => {
+    return (s || '')
+      .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric shapes
+      .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}]+\s*/u, '') // emoji basic
+      .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F900}-\u{1F9FF}]+\s*/u, '') // emoji extended
+      .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
+      .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
+  }
+  const containsImage = (node: any): boolean => {
+    if (!node || typeof node !== 'object') return false
+    if (node.type === 'element' && (node.tagName === 'img' || node.tagName === 'picture' || node.tagName === 'svg')) return true
+    const kids = (node.children || []) as any[]
+    for (const k of kids) { if (containsImage(k)) return true }
+    return false
+  }
+  const stripLeadingInContainer = (node: any) => {
+    if (!node || !Array.isArray(node.children)) return
+    // Work inside <li> and inside its first <p>
+    const cleanFront = (arr: any[]) => {
+      while (arr.length) {
+        const first = arr[0]
+        if (first?.type === 'text') {
+          const next = stripText(first.value)
+          if (next !== first.value) first.value = next
+          if (!first.value || !first.value.trim()) { arr.shift(); continue }
           break
         }
+        if (first?.type === 'element') {
+          if (first.tagName === 'img' || first.tagName === 'picture' || first.tagName === 'svg' || (first.tagName === 'span' && containsImage(first))) { arr.shift(); continue }
+          if (first.tagName === 'p' && Array.isArray(first.children)) { cleanFront(first.children); if (first.children.length === 0) { arr.shift(); continue } }
+        }
+        break
       }
-      cleanFront(node.children)
     }
-    const walk = (node: any) => {
-      if (!node || typeof node !== 'object') return
-      if (node.type === 'element') {
-        if (node.tagName === 'li' || node.tagName === 'summary') stripLeadingInContainer(node)
-        // Keep <details>/<summary> intact so dropdowns work
-      }
-      const kids = node.children || []
-      for (const k of kids) walk(k)
+    cleanFront(node.children)
+  }
+  const walk = (node: any) => {
+    if (!node || typeof node !== 'object') return
+    if (node.type === 'element') {
+      if (node.tagName === 'li' || node.tagName === 'summary') stripLeadingInContainer(node)
+      // Keep <details>/<summary> intact so dropdowns work
     }
-    return () => (tree: any) => { walk(tree); }
-  }, [])
-  const sanitizeDecorators = React.useCallback((text: string): string => {
-    const stripLine = (s: string) => {
-      let line = s
-      // Preserve markdown list bullet prefix
-      const m = line.match(/^(\s*[-*+]\s*)/)
-      const prefix = m ? m[1] : ''
-      if (prefix) line = line.slice(prefix.length)
-      // Remove leading geometric-shape arrows/bullets (includes ▶, ►, ▸ and many others)
-      line = line.replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '')
-      // Remove leading emoji pictographs
-      line = line.replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
-      // Replace leading markdown/HTML image icons with their alt text (to keep names)
+    const kids = node.children || []
+    for (const k of kids) walk(k)
+  }
+  return (tree: any) => { walk(tree); }
+}
+
+const sanitizeDecorators = (text: string): string => {
+  const stripLine = (s: string) => {
+    let line = s
+    // Preserve markdown list bullet prefix
+    const m = line.match(/^(\s*[-*+]\s*)/)
+    const prefix = m ? m[1] : ''
+    if (prefix) line = line.slice(prefix.length)
+    // Remove leading geometric-shape arrows/bullets (includes ▶, ►, ▸ and many others)
+    line = line.replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '')
+    // Remove leading emoji pictographs
+    line = line.replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
+    // Replace leading markdown/HTML image icons with their alt text (to keep names)
+    line = line
+      .replace(/^<img[^>]*alt=["']?([^"'>]+)[^>]*>\s*/i, '$1 ')
+      .replace(/^!\[([^\]]*)\]\([^)]*\)\s*/i, '$1 ')
+    // For list items: convert inline images to their alt text (remove icon but keep name)
+    if (prefix) {
       line = line
-        .replace(/^<img[^>]*alt=["']?([^"'>]+)[^>]*>\s*/i, '$1 ')
-        .replace(/^!\[([^\]]*)\]\([^)]*\)\s*/i, '$1 ')
-      // For list items: convert inline images to their alt text (remove icon but keep name)
-      if (prefix) {
-        line = line
-          .replace(/<img[^>]*alt=["']?([^"'>]+)[^>]*>/gi, '$1')
-          .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-      }
-      // Drop stray heading-only lines like '#', '##', '###'
-      if ((prefix + line).trim().match(/^#{1,6}\s*$/)) return ''
-      return (prefix + line)
+        .replace(/<img[^>]*alt=["']?([^"'>]+)[^>]*>/gi, '$1')
+        .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
     }
-    return (text || '').split('\n').map(stripLine).join('\n')
-  }, [])
-  const processedBody = React.useMemo(() => sanitizeDecorators(body), [body, sanitizeDecorators])
+    // Drop stray heading-only lines like '#', '##', '###'
+    if ((prefix + line).trim().match(/^#{1,6}\s*$/)) return ''
+    return (prefix + line)
+  }
+  return (text || '').split('\n').map(stripLine).join('\n')
+}
+
+const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
+  const processedBody = React.useMemo(() => sanitizeDecorators(body), [body])
   return (
     <div className="markdown-content">
     <ReactMarkdown
