@@ -7,7 +7,7 @@ interface SafeHTMLBlockProps {
   readonly htmlKey: string
 }
 
-// Safe HTML block — uses DOMPurify fragment + replaceChildren to avoid innerHTML/dangerouslySetInnerHTML
+// Safe HTML block — uses DOMPurify fragment + replaceChildren (no direct HTML injection)
 function SafeHTMLBlock({ html, htmlKey }: SafeHTMLBlockProps) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -77,7 +77,7 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
     const components: React.ReactNode[] = []
     let lastIndex = 0
 
-    tables.forEach((table, index) => {
+    tables.forEach((table) => {
       const tableHtml = table.outerHTML
       const tableIndex = html.indexOf(tableHtml, lastIndex)
 
@@ -85,14 +85,14 @@ export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
         const beforeTable = html.substring(lastIndex, tableIndex)
         if (beforeTable.trim()) {
           components.push(
-            <SafeHTMLBlock key={`html-${index}`} html={beforeTable} htmlKey={`html-${index}`} />
+            <SafeHTMLBlock key={`html-at-${tableIndex}`} html={beforeTable} htmlKey={`html-at-${tableIndex}`} />
           )
         }
 
         const tableData = extractTableData(tableHtml)
         if (tableData && tableData.headers.length > 0 && tableData.rows.length > 0) {
           components.push(
-            <TablePreview key={`table-${index}`} data={tableData} />
+            <TablePreview key={`table-at-${tableIndex}`} data={tableData} />
           )
         }
 

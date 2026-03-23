@@ -1,2 +1,6 @@
 export { TablePreview } from './TablePreview'
 export { HTMLProcessor } from './HTMLProcessor'
+export { SummaryTable } from './SummaryTable'
+export { FullTableModal } from './FullTableModal'
+export type { SummaryTableColumn, SummaryTableProps } from './SummaryTable'
+export type { FullTableModalColumn, FullTableModalProps } from './FullTableModal'
