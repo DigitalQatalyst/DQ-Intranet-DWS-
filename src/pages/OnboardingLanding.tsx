@@ -514,9 +514,9 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#F2B9A3] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-slate-700 leading-relaxed">
-                          <p>Before you dive in, get grounded in the organisation you’ve joined.</p>
-                          <p>DQ is built for execution, not hierarchy — with clear units, roles, and decision paths.</p>
-                          <p>Use this as your internal map to understand how work flows and who to involve.</p>
+                          <p>Before you dive in, understand the organisation behind the work.</p>
+                          <p>DQ is designed to move with clarity — connecting teams, roles, and decision paths so work flows with purpose and pace.</p>
+                          <p>Use this as your internal map to see how DQ fits together, where work moves, and who to engage along the way.</p>
                         </div>
                       </div>
                       <button
