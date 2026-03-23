@@ -11,7 +11,6 @@ import { HTMLProcessor } from '../../../components/guidelines/HTMLProcessor'
 function GuidelinePage() {
   const { user } = useAuth()
   const [guideTitle, setGuideTitle] = useState<string>('DQ Associate Owned Asset Guidelines')
-  const [lastUpdated, setLastUpdated] = useState<string>('Version 1.8 • December 19, 2025')
   const [guideHtml, setGuideHtml] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,10 +48,10 @@ function GuidelinePage() {
     let procedureCount = 0
     let responsibilitiesCount = 0
     
-    return html.replace(/<(h[1-6])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, content) => {
+    return html.replaceAll(/<(h[1-6])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, content) => {
       // Clean the content for ID generation
       const cleanContent = content
-        .replace(/<[^>]+>/g, '') // Remove HTML tags
+        .replaceAll(/<[^>]+>/g, '') // Remove HTML tags
         .replaceAll('&nbsp;', ' ') // Replace &nbsp; with space
         .replaceAll('.', '') // Remove periods
         .trim()
@@ -98,8 +97,7 @@ function GuidelinePage() {
         if (!cancelled && data) {
           setGuideTitle(data.title || 'DQ Associate Owned Asset Guidelines')
           if (data.last_updated_at) {
-            const date = new Date(data.last_updated_at)
-            setLastUpdated(`Version 1.8 • ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`)
+            // last_updated_at available for future use
           }
           
           // Store HTML directly (no JSON parsing)
@@ -108,7 +106,7 @@ function GuidelinePage() {
             let processedHtml = (data.body as string).replaceAll(String.raw`\n`, '\n')
             
             // Strip leading pipe characters from headings (artifact from database content)
-            processedHtml = processedHtml.replace(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')
+            processedHtml = processedHtml.replaceAll(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')
             
             // Add IDs to headings for table of contents navigation
             processedHtml = addIdsToHeadings(processedHtml)
@@ -157,7 +155,7 @@ function GuidelinePage() {
       <Header toggleSidebar={() => {}} sidebarOpen={false} />
       
       {/* Hero Section */}
-      <HeroSection title={guideTitle} date={lastUpdated} />
+      <HeroSection title={guideTitle} />
 
       {/* Main Content */}
       <main className="flex-1">

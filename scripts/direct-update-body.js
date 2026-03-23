@@ -18,14 +18,14 @@ const content = {
       title: "1. Context",
       order: 1,
       type: "text",
-      content: "The Associate Owned Asset Initiative is a strategic effort aimed at enhancing operational efficiency, reducing asset management costs, and improving the accountability of devices used for company work. As a result of this initiative, the Associate Owned Asset Guidelines have been developed to mitigate the risk of asset theft by departing associates, while ensuring secure management and compliance with company standards. Through flexible options such as BYOD, FYOD and HYOD, DQ empowers associates to manage their own devices, fostering a more efficient and scalable approach to device management.\\n\\nIn this context, the `Company` refers to DQ whereas `Devices` refers to laptops."
+      content: String.raw`The Associate Owned Asset Initiative is a strategic effort aimed at enhancing operational efficiency, reducing asset management costs, and improving the accountability of devices used for company work. As a result of this initiative, the Associate Owned Asset Guidelines have been developed to mitigate the risk of asset theft by departing associates, while ensuring secure management and compliance with company standards. Through flexible options such as BYOD, FYOD and HYOD, DQ empowers associates to manage their own devices, fostering a more efficient and scalable approach to device management.\n\nIn this context, the Company refers to DQ whereas Devices refers to laptops.`
     },
     {
       id: "overview",
       title: "2. Overview",
       order: 2,
       type: "text",
-      content: "The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for transitioning to an associate-owned device model at DQ. This initiative aims to:\\n\\n<ul class='list-disc pl-6 space-y-2'><li>Mitigate Asset Theft.</li><li>Promote Accountability.</li><li>Support Seamless Transitions.</li><li>Optimize Operational Efficiency.</li></ul>"
+      content: String.raw`The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for transitioning to an associate-owned device model at DQ. This initiative aims to:\n\n<ul class='list-disc pl-6 space-y-2'><li>Mitigate Asset Theft.</li><li>Promote Accountability.</li><li>Support Seamless Transitions.</li><li>Optimize Operational Efficiency.</li></ul>`
     }
   ]
 };

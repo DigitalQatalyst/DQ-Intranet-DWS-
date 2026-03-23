@@ -6,7 +6,7 @@ import { getProductMetadata } from '../../utils/productMetadata'
 function formatLabel(value?: string | null): string {
   if (!value) return ''
   return value
-    .replace(/[_-]+/g, ' ')
+    .replaceAll(/[_-]+/g, ' ')
     .split(' ')
     .filter(Boolean)
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
@@ -15,7 +15,7 @@ function formatLabel(value?: string | null): string {
 
 function normalizeTag(value?: string | null): string {
   if (!value) return ''
-  const cleaned = value.toLowerCase().replace(/[_-]+/g, ' ').trim()
+  const cleaned = value.toLowerCase().replaceAll(/[_-]+/g, ' ').trim()
   return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
 }
 
@@ -56,7 +56,7 @@ const KNOWN_PRODUCT_NAMES = [
 function hovTitleFromSlug(s: string): string | null {
   const idx = HOV_ORDER.indexOf(s)
   if (idx === -1) return null
-  const label = s.replace('dq-competencies-', '').replace(/-/g, ' ')
+  const label = s.replaceAll('dq-competencies-', '').replaceAll('-', ' ')
   const nice = label.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
   return `HoV ${idx + 1} - ${nice}`
 }
@@ -66,8 +66,8 @@ function resolveGhcTitle(rawTitle: string, slug: string): string {
   const hovTitle = hovTitleFromSlug(slug)
   if (hovTitle) return hovTitle
   if (rawTitle.toLowerCase().includes('golden honeycomb')) return 'GHC Overview'
-  const match = rawTitle.match(/^GHC\s+Competency\s+(\d+):\s*(.+)/i)
-  if (match) return `GHC ${match[1]} - ${match[2].trim()}`
+  const ghcMatch = /^GHC\s+Competency\s+(\d+):\s*(.+)/i.exec(rawTitle)
+  if (ghcMatch) return `GHC ${ghcMatch[1]} - ${ghcMatch[2].trim()}`
   return rawTitle
 }
 
@@ -76,7 +76,7 @@ function resolveDwsTitle(title: string, cleanedTitle: string, productMetadata: a
   if (!lower.includes('dws') || lower.includes('digital workspace system')) return null
   if (productMetadata && (lower.includes('dws') || lower.includes('digital workspace'))) return 'Digital Workspace System (DWS)'
   if (cleanedTitle.toLowerCase() === 'dws') return 'Digital Workspace System (DWS)'
-  if (cleanedTitle.toLowerCase().startsWith('dws')) return cleanedTitle.replace(/^dws\s*/i, 'Digital Workspace System (DWS)')
+  if (cleanedTitle.toLowerCase().startsWith('dws')) return cleanedTitle.replaceAll(/^dws\s*/i, 'Digital Workspace System (DWS)')
   return null
 }
 
@@ -93,16 +93,33 @@ function matchKnownProduct(productMetadata: any): string | null {
 
 function resolveBlueprintTitle(title: string, hasStaticProps: boolean, productMetadata: any): string {
   if (hasStaticProps) return title
-  const cleanedTitle = title.replace(/\s*Blueprint\s*/gi, '').trim()
+  const cleanedTitle = title.replaceAll(/\s*Blueprint\s*/gi, '').trim()
   const dwsTitle = resolveDwsTitle(title, cleanedTitle, productMetadata)
   if (dwsTitle) return dwsTitle
-  const finalTitle = cleanedTitle.replace(/\s*blueprint\s*/gi, '').trim()
+  const finalTitle = cleanedTitle.replaceAll(/\s*blueprint\s*/gi, '').trim()
   const knownProduct = matchKnownProduct(productMetadata)
   if (knownProduct) return knownProduct
   return (!finalTitle || finalTitle.toLowerCase() === 'blueprint') ? 'Product' : finalTitle
 }
 
-export interface GuideCardProps {
+function isGhcStrategySlug(slug: string, subDomain: string): boolean {
+  if (slug === 'dq-hov' || slug.includes('competencies')) return true
+  if (subDomain.includes('hov') || subDomain.includes('competencies')) return true
+  if (slug === 'dq-vision' || slug === 'dq-persona' || slug.includes('agile-')) return true
+  if (subDomain.includes('ghc') && !subDomain.includes('competencies')) return true
+  return false
+}
+
+function getBadgeLabel(isBlueprint: boolean, domain: string | undefined, guide: any): string {
+  if (isBlueprint) return 'Product'
+  if (domain?.toLowerCase() === 'strategy') {
+    const slug = (guide.slug || '').toLowerCase()
+    const subDomain = (guide.subDomain || guide.sub_domain || '').toLowerCase()
+    if (isGhcStrategySlug(slug, subDomain)) return 'GHC'
+    return formatLabel(domain)
+  }
+  return formatLabel(domain)
+}
   guide: any
   onClick: () => void
   imageOverrideUrl?: string
@@ -113,7 +130,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
   const lastUpdated = guide.lastUpdatedAt
     ? new Date(guide.lastUpdatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : ''
-  const domain = guide.domain as string | undefined
+  const domain: string | undefined = guide.domain
 
   const isBlueprint =
     (guide.domain || '').toLowerCase().includes('blueprint') ||
@@ -121,31 +138,17 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
     guide.domain === 'Product' ||
     (guide.productType && guide.productStage)
 
-  const getBadgeLabel = (): string => {
-    if (isBlueprint) return 'Product'
-    if (domain?.toLowerCase() === 'strategy') {
-      const slug = (guide.slug || '').toLowerCase()
-      const subDomain = (guide.subDomain || (guide as any).sub_domain || '').toLowerCase()
-      if (slug === 'dq-hov' || slug.includes('competencies') || subDomain.includes('hov') || subDomain.includes('competencies')) {
-        return 'GHC'
-      }
-      if (slug === 'dq-vision' || slug === 'dq-persona' || slug.includes('agile-') ||
-          (subDomain.includes('ghc') && !subDomain.includes('competencies'))) {
-        return 'GHC'
-      }
-      return formatLabel(domain)
-    }
-    return formatLabel(domain)
-  }
 
-  const domainLabel = getBadgeLabel()
+  const domainLabel = getBadgeLabel(isBlueprint, domain, guide)
   const isDuplicateTag = normalizeTag(domain) !== '' && normalizeTag(domain) === normalizeTag(guide.guideType)
 
-  const productMetadata = isBlueprint
-    ? (guide.productType && guide.productStage)
-      ? { productType: guide.productType, productStage: guide.productStage, description: guide.summary || '', imageUrl: guide.heroImageUrl || '' }
-      : getProductMetadata(guide.title)
-    : null
+  const productMetadata = (() => {
+    if (!isBlueprint) return null
+    if (guide.productType && guide.productStage) {
+      return { productType: guide.productType, productStage: guide.productStage, description: guide.summary || '', imageUrl: guide.heroImageUrl || '' }
+    }
+    return getProductMetadata(guide.title)
+  })()
 
   const getDisplayTitle = (): string => {
     if (!isBlueprint) return resolveGhcTitle(guide.title || '', (guide.slug || '').toLowerCase())
@@ -153,8 +156,8 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
   }
 
   const displayTitle = getDisplayTitle()
-  const heroImage = guide.heroImageUrl || (guide as any).hero_image_url || null
-  const subDomain = guide.subDomain || (guide as any).sub_domain || null
+  const heroImage = guide.heroImageUrl || guide.hero_image_url || null
+  const subDomain = guide.subDomain || guide.sub_domain || null
 
   const defaultImageUrl = isBlueprint && productMetadata?.imageUrl
     ? productMetadata.imageUrl
@@ -187,7 +190,10 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
   return (
     <div
       className="bg-white rounded-2xl shadow border border-gray-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden"
+      role={isDraft ? undefined : 'button'}
+      tabIndex={isDraft ? undefined : 0}
       onClick={isDraft ? undefined : onClick}
+      onKeyDown={isDraft ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() }}
     >
       {imageUrl && (
         <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>

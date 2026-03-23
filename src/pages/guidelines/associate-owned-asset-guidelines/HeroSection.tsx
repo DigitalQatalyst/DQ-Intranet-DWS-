@@ -3,8 +3,6 @@ import { GlassmorphismHeroSection } from '../../../components/shared/Glassmorphi
 
 interface HeroSectionProps {
   readonly title?: string
-  readonly date?: string
-  readonly author?: string
 }
 
 export function HeroSection({ title = 'DQ Associate Owned Asset Guidelines' }: HeroSectionProps) {
