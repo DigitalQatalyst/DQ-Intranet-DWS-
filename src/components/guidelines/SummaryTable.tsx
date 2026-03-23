@@ -7,15 +7,15 @@ export interface SummaryTableColumn {
 }
 
 export interface SummaryTableProps {
-  columns: SummaryTableColumn[]
-  data: Record<string, string | number>[]
-  title?: string
-  onViewFull?: () => void
-  getSummary?: (value: string | number) => string
+  readonly columns: SummaryTableColumn[]
+  readonly data: Record<string, string | number>[]
+  readonly title?: string
+  readonly onViewFull?: () => void
+  readonly getSummary?: (value: string | number) => string
 }
 
 interface SafeCellProps {
-  value: string | number
+  readonly value: string | number
 }
 
 function SafeCell({ value }: SafeCellProps) {
@@ -24,7 +24,7 @@ function SafeCell({ value }: SafeCellProps) {
   useEffect(() => {
     if (!ref.current) return
     const raw = typeof value === 'string' ? value : String(value)
-    const html = raw.replaceAll('\n', '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    const html = raw.replaceAll('\n', '<br>').replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     const fragment = DOMPurify.sanitize(html, { RETURN_DOM_FRAGMENT: true })
     ref.current.replaceChildren(fragment)
   }, [value])
@@ -70,9 +70,9 @@ export function SummaryTable({ columns, data, title, onViewFull, getSummary }: S
         <table className="min-w-full border-collapse border border-gray-300">
           <thead>
             <tr style={{ backgroundColor: '#030E31' }}>
-              {columns.map((col, idx) => (
+              {columns.map((col) => (
                 <th
-                  key={idx}
+                  key={col.accessor}
                   className="px-6 py-4 text-left text-sm font-semibold text-white border border-gray-300"
                 >
                   {col.header}
@@ -82,7 +82,7 @@ export function SummaryTable({ columns, data, title, onViewFull, getSummary }: S
           </thead>
           <tbody className="bg-white">
             {data.slice(0, 2).map((row, rowIdx) => (
-              <tr key={rowIdx} className="bg-white">
+              <tr key={`row-${rowIdx}-${String(row[columns[0]?.accessor] ?? rowIdx).slice(0, 20)}`} className="bg-white">
                 {columns.map((col, colIdx) => {
                   const value = row[col.accessor]
                   const isLastColumn = colIdx === columns.length - 1

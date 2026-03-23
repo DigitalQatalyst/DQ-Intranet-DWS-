@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 export interface FullTableModalColumn {
   header: string
@@ -6,12 +6,12 @@ export interface FullTableModalColumn {
 }
 
 export interface FullTableModalProps {
-  isOpen: boolean
-  onClose: () => void
-  title: string
-  columns: FullTableModalColumn[]
-  data: Record<string, string | number>[]
-  description?: string
+  readonly isOpen: boolean
+  readonly onClose: () => void
+  readonly title: string
+  readonly columns: FullTableModalColumn[]
+  readonly data: Record<string, string | number>[]
+  readonly description?: string
 }
 
 function renderCellContent(value: string | number): React.ReactNode {
@@ -30,8 +30,8 @@ function renderCellContent(value: string | number): React.ReactNode {
     if (bulletItems.length > 0) {
       return (
         <ul className="list-inside space-y-2">
-          {bulletItems.map((item, idx) => (
-            <li key={idx} className="flex items-start gap-3">
+          {bulletItems.map((item) => (
+            <li key={item.slice(0, 40)} className="flex items-start gap-3">
               <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[#FB5535] flex-shrink-0"></span>
               <span className="text-base text-gray-800">{item}</span>
             </li>
@@ -45,10 +45,16 @@ function renderCellContent(value: string | number): React.ReactNode {
 }
 
 export function FullTableModal({ isOpen, onClose, title, columns, data, description }: FullTableModalProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+
   useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
     if (isOpen) {
+      dialog.showModal()
       document.body.style.overflow = 'hidden'
     } else {
+      dialog.close()
       document.body.style.overflow = 'unset'
     }
     return () => {
@@ -61,16 +67,17 @@ export function FullTableModal({ isOpen, onClose, title, columns, data, descript
   const filteredColumns = columns.filter(col => col.header.trim() !== '' && col.accessor.trim() !== '')
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
-      onClick={onClose}
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+    <dialog
+      ref={dialogRef}
+      className="fixed inset-0 z-50 m-auto p-0 bg-transparent max-w-5xl w-full max-h-[85vh] rounded-xl overflow-hidden backdrop:bg-black backdrop:bg-opacity-50"
+      onClose={onClose}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
+      aria-labelledby="modal-title"
     >
-      <div
-        className="bg-white rounded-xl shadow-lg w-full max-w-5xl max-h-[85vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="bg-white rounded-xl shadow-lg w-full max-h-[85vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+          <h2 id="modal-title" className="text-2xl font-bold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 hover:text-gray-900"
@@ -101,9 +108,9 @@ export function FullTableModal({ isOpen, onClose, title, columns, data, descript
             <table className="min-w-full border-collapse border" style={{ borderColor: '#E5E7EB' }}>
               <thead>
                 <tr style={{ backgroundColor: '#0A1A3B' }}>
-                  {filteredColumns.map((col, idx) => (
+                  {filteredColumns.map((col) => (
                     <th
-                      key={idx}
+                      key={col.accessor}
                       className="px-6 py-4 text-left text-sm font-semibold text-white border"
                       style={{ borderColor: '#E5E7EB' }}
                     >
@@ -114,10 +121,10 @@ export function FullTableModal({ isOpen, onClose, title, columns, data, descript
               </thead>
               <tbody className="bg-white">
                 {data.map((row, rowIdx) => (
-                  <tr key={rowIdx} className="bg-white">
-                    {filteredColumns.map((col, colIdx) => (
+                  <tr key={`row-${rowIdx}-${String(row[filteredColumns[0]?.accessor] ?? rowIdx).slice(0, 20)}`} className="bg-white">
+                    {filteredColumns.map((col) => (
                       <td
-                        key={colIdx}
+                        key={col.accessor}
                         className="px-6 py-4 text-sm border"
                         style={{ borderColor: '#E5E7EB' }}
                       >
@@ -131,6 +138,6 @@ export function FullTableModal({ isOpen, onClose, title, columns, data, descript
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }
