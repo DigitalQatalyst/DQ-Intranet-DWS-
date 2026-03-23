@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Literal \n sequence used in DB content strings
+const NL = String.raw`\n`;
+
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
@@ -32,14 +35,14 @@ async function migrate() {
           title: "1. Context",
           order: 1,
           type: "text",
-          content: "The Associate Owned Asset Initiative is a strategic effort aimed at enhancing operational efficiency, reducing asset management costs, and improving the accountability of devices used for company work. As a result of this initiative, the Associate Owned Asset Guidelines have been developed to mitigate the risk of asset theft by departing associates, while ensuring secure management and compliance with company standards. Through flexible options such as BYOD, FYOD and HYOD, DQ empowers associates to manage their own devices, fostering a more efficient and scalable approach to device management.\\n\\nIn this context, the `Company` refers to DQ whereas `Devices` refers to laptops."
+          content: `The Associate Owned Asset Initiative is a strategic effort aimed at enhancing operational efficiency, reducing asset management costs, and improving the accountability of devices used for company work. As a result of this initiative, the Associate Owned Asset Guidelines have been developed to mitigate the risk of asset theft by departing associates, while ensuring secure management and compliance with company standards. Through flexible options such as BYOD, FYOD and HYOD, DQ empowers associates to manage their own devices, fostering a more efficient and scalable approach to device management.${NL}${NL}In this context, the \`Company\` refers to DQ whereas \`Devices\` refers to laptops.`
         },
         {
           id: "overview",
           title: "2. Overview",
           order: 2,
           type: "text",
-          content: "The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for transitioning to an associate-owned device model at DQ. This initiative aims to:\\n\\n<ul class='list-disc pl-6 space-y-2'><li>Mitigate Asset Theft.</li><li>Promote Accountability.</li><li>Support Seamless Transitions.</li><li>Optimize Operational Efficiency.</li></ul>"
+          content: `The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for transitioning to an associate-owned device model at DQ. This initiative aims to:${NL}${NL}<ul class='list-disc pl-6 space-y-2'><li>Mitigate Asset Theft.</li><li>Promote Accountability.</li><li>Support Seamless Transitions.</li><li>Optimize Operational Efficiency.</li></ul>`
         },
         {
           id: "purpose-scope",
@@ -143,12 +146,12 @@ async function migrate() {
               {
                 number: "01",
                 role: "Associate",
-                description: "**Responsible for the acquisition, maintenance, and repair of personal devices used for work.** Associates must ensure that their personal laptops devices meet the minimum technical specifications set by DQ.\\n\\n**Strictly adhere to all aspects of the guidelines.**\\n\\n**Promptly report any laptop malfunction, damage, or loss to the Admin and IT departments within 24 hours** to ensure continued productivity through the issuance of a temporary DQ device under the HYOD program.\\n\\n**Associates must delete all company data from their devices during off-boarding.**"
+                description: `**Responsible for the acquisition, maintenance, and repair of personal devices used for work.** Associates must ensure that their personal laptops devices meet the minimum technical specifications set by DQ.${NL}${NL}**Strictly adhere to all aspects of the guidelines.**${NL}${NL}**Promptly report any laptop malfunction, damage, or loss to the Admin and IT departments within 24 hours** to ensure continued productivity through the issuance of a temporary DQ device under the HYOD program.${NL}${NL}**Associates must delete all company data from their devices during off-boarding.**`
               },
               {
                 number: "02",
                 role: "Admin",
-                description: "**Monitor and enforce compliance with the guidelines**, ensuring associates adhere to the guidelines for personal device usage.\\n\\n**Act as the first point of contact for any issues or disputes** related to the BYOD program.\\n\\n**Maintain accurate records** for associates under the BYOD program."
+                description: `**Monitor and enforce compliance with the guidelines**, ensuring associates adhere to the guidelines for personal device usage.${NL}${NL}**Act as the first point of contact for any issues or disputes** related to the BYOD program.${NL}${NL}**Maintain accurate records** for associates under the BYOD program.`
               },
               {
                 number: "03",
@@ -229,12 +232,12 @@ async function migrate() {
               {
                 number: "01",
                 role: "Associate",
-                description: "**Associates must complete and submit a Commitment Form to Admin.**\\n\\n**Once approved, an associate will pick a device of their choosing** and ensure they sign the Commitment Form.\\n\\n**Associates are responsible for company devices**, and DQ will not be liable for any damage caused by negligence. Maintenance will only cover system malfunctions, and a temporary device will be provided to the associate during that time.\\n\\n**Associates must return the devices to Admin daily by 5PM** until all final deductions have been completed.\\n\\n**Associates must delete all company data from their devices during off-boarding.**"
+                description: `**Associates must complete and submit a Commitment Form to Admin.**${NL}${NL}**Once approved, an associate will pick a device of their choosing** and ensure they sign the Commitment Form.${NL}${NL}**Associates are responsible for company devices**, and DQ will not be liable for any damage caused by negligence. Maintenance will only cover system malfunctions, and a temporary device will be provided to the associate during that time.${NL}${NL}**Associates must return the devices to Admin daily by 5PM** until all final deductions have been completed.${NL}${NL}**Associates must delete all company data from their devices during off-boarding.**`
               },
               {
                 number: "02",
                 role: "Admin",
-                description: "**Review and approve FYOD applications** based on their compliance with DQ standards.\\n\\n**Assist associates with completing the FYOD process** and ensure they are informed about the program.\\n\\n**Ensure associates fill in and sign the Commitment Form** upon issuance of the device.\\n\\n**Ensure DQ owned devices are locked daily after 5:00PM.**\\n\\n**Ensure associates return company devices daily by 5.00PM** until all payments are complete."
+                description: `**Review and approve FYOD applications** based on their compliance with DQ standards.${NL}${NL}**Assist associates with completing the FYOD process** and ensure they are informed about the program.${NL}${NL}**Ensure associates fill in and sign the Commitment Form** upon issuance of the device.${NL}${NL}**Ensure DQ owned devices are locked daily after 5:00PM.**${NL}${NL}**Ensure associates return company devices daily by 5.00PM** until all payments are complete.`
               },
               {
                 number: "03",
@@ -315,17 +318,17 @@ async function migrate() {
               {
                 number: "01",
                 role: "Associate",
-                description: "**Immediately report device failure or loss to Admin within 24hours** to ensure continued productivity by issuance of a temporary company device.\\n\\n**Sign a Commitment Form for the company device.**\\n\\n**Return the company device by 5.00 PM and confirm its return with Admin.** All company devices must be returned in good working condition" // NOSONAR
+                description: `**Immediately report device failure or loss to Admin within 24hours** to ensure continued productivity by issuance of a temporary company device.${NL}${NL}**Sign a Commitment Form for the company device.**${NL}${NL}**Return the company device by 5.00 PM and confirm its return with Admin.** All company devices must be returned in good working condition`
               },
               {
                 number: "02",
                 role: "Admin",
-                description: "**Maintain records of company devices issued** and ensure compliance with the HYOD program.\\n\\n**Coordinate with IT** to ensure associates are issued company devices and that associates return the devices in good working condition"
+                description: `**Maintain records of company devices issued** and ensure compliance with the HYOD program.${NL}${NL}**Coordinate with IT** to ensure associates are issued company devices and that associates return the devices in good working condition`
               },
               {
                 number: "03",
                 role: "IT",
-                description: "**Assess the emergency and approve the issuance of a company laptop** if necessary.\\n\\n**Diagnose device issues**, assist with troubleshooting and system malfunctions only.\\n\\n**Inspect the company device upon return.**"
+                description: `**Assess the emergency and approve the issuance of a company laptop** if necessary.${NL}${NL}**Diagnose device issues**, assist with troubleshooting and system malfunctions only.${NL}${NL}**Inspect the company device upon return.**`
               },
               {
                 number: "04",

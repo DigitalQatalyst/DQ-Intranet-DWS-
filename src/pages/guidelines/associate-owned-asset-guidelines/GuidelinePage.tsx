@@ -20,9 +20,9 @@ function GuidelinePage() {
   const generateId = (text: string): string => {
     return text
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replaceAll(' ', '-') // Replace spaces with hyphens
-      .replaceAll('&nbsp;', '') // Remove &nbsp;
+      .replaceAll(/[^\w\s-]/g, '')
+      .replaceAll(' ', '-')
+      .replaceAll('&nbsp;', '')
       .trim()
   }
   

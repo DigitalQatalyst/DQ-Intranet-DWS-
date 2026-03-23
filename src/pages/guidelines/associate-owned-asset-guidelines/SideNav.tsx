@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 
 interface SideNavProps {
-  activeSection?: string
-  onSectionClick?: (sectionId: string) => void
-  guideHtml?: string
+  readonly activeSection?: string
+  readonly onSectionClick?: (sectionId: string) => void
+  readonly guideHtml?: string
 }
 
 export function SideNav({ activeSection, onSectionClick, guideHtml }: SideNavProps) {

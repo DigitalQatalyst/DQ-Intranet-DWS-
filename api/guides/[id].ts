@@ -51,7 +51,7 @@ function mapRowToGuide(row: any, includeBody: boolean) {
 }
 
 function extractSettled<T>(result: PromiseSettledResult<{ data: T | null; error: any }>): T[] {
-  return result.status === 'fulfilled' && !result.value.error ? (result.value.data || []) as T[] : [];
+  return result.status === 'fulfilled' && !result.value.error ? (result.value.data ?? []) as T[] : [];
 }
 
 async function fetchSubContent(guideId: string) {

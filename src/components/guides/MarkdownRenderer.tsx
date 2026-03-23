@@ -29,7 +29,7 @@ function walkPreserveDivClass(node: any): void {
 function stripText(s: string): string {
   return (s || '')
     .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric arrows
-    .replace(/^[\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '') // emoji
+    .replace(/^[\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]+\s*/u, '') // emoji
 }
 
 function containsImage(node: any): boolean {
@@ -109,7 +109,7 @@ const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
       // Remove leading geometric-shape arrows/bullets (includes ▶, ►, ▸ and many others)
       line = line.replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '')
       // Remove leading emoji pictographs
-      line = line.replace(/^[\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
+      line = line.replace(/^[\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]+\s*/u, '')
       // Replace leading markdown/HTML image icons with their alt text (to keep names)
       line = line
         .replace(/^<img[^>]*alt=["']?([^"'>]+)[^>]*>\s*/i, '$1 ')

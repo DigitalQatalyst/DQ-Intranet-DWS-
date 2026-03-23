@@ -146,10 +146,10 @@ async function updateDatabase() {
       console.log(`   Guide ID: ${newGuide.id}`);
     }
 
-    console.log(`\\n📊 Stored ${guidelineContent.sections.length} sections`);
-    console.log('\\n⚠️  NOTE: This script only includes the first 6 sections as an example.');
+    console.log(`\n📊 Stored ${guidelineContent.sections.length} sections`);
+    console.log('\n⚠️  NOTE: This script only includes the first 6 sections as an example.');
     console.log('   You need to add the remaining sections (BYOD procedures, FYOD, HYOD, etc.)');
-    console.log('   to complete the migration.\\n');
+    console.log('   to complete the migration.\n');
 
   } catch (error) {
     console.error('❌ Unexpected error:', error);

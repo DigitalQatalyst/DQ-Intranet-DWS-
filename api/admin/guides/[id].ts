@@ -79,7 +79,8 @@ async function handlePut(id: string, req: AnyRequest, res: AnyResponse): Promise
   const { error } = await supabaseAdmin.from('guides').update(buildUpdateData(body)).eq('id', id)
   if (error) throw error
 
-  console.log(`[Admin] Updated guide: id=${id}, slug=${existingGuide.slug}${isSlugChanging ? ` -> ${body.slug}` : ''}`)
+  const slugChange = isSlugChanging ? ` -> ${body.slug}` : ''
+  console.log(`[Admin] Updated guide: id=${id}, slug=${existingGuide.slug}${slugChange}`)
 
   await supabaseAdmin.from('guides_versions').insert({
     guide_id: id,

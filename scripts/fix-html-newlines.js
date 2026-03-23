@@ -24,7 +24,7 @@ async function fixNewlines() {
     console.log(`Current length: ${guide.body.length} characters`);
 
     // Replace literal \n with actual newlines
-    let fixedHtml = guide.body.replaceAll('\\n', '\n');
+    let fixedHtml = guide.body.replaceAll(String.raw`\n`, '\n');
     
     // Also clean up any double newlines
     fixedHtml = fixedHtml.replaceAll('\n\n\n', '\n\n');

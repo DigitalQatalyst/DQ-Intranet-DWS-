@@ -58,7 +58,7 @@ function convertJsonToHtml(jsonBody) {
           section.table.columns.forEach(col => {
             const cellValue = row[col.accessor] || '';
             // Convert \n to <br> for line breaks in table cells
-            const formattedValue = cellValue.replace(/\\n/g, '<br>');
+            const formattedValue = cellValue.replaceAll('\\n', '<br>');
             html += `      <td>${formattedValue}</td>\n`;
           });
           html += '    </tr>\n';

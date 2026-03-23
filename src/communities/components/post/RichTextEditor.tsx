@@ -94,10 +94,12 @@ export function RichTextEditor({
       {/* Editor - Scrollable container */}
       <div
         className="flex-1 overflow-y-auto cursor-text"
+        role="textbox"
+        aria-label="Text editor area"
+        aria-multiline="true"
+        tabIndex={0}
         onClick={() => editor?.chain().focus().run()}
         onKeyDown={(e) => e.key === 'Enter' && editor?.chain().focus().run()}
-        tabIndex={0}
-        aria-label="Text editor area"
       >
         <EditorContent editor={editor} className={`max-w-none p-3 focus:outline-none
                      ${currentMode === 'long' ? 'prose prose-lg min-h-[400px]' : 'prose prose-sm min-h-[200px]'}

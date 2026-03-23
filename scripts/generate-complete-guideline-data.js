@@ -1,5 +1,8 @@
 import fs from 'node:fs';
 
+// Literal \n sequence used in DB content strings
+const NL = String.raw`\n`;
+
 // Complete guideline data structure
 const guidelineData = {
   slug: "dq-associate-owned-asset-guidelines",
@@ -29,7 +32,7 @@ guidelineData.sections.push(
     title: "3. Purpose and Scope",
     order: 3,
     type: "text",
-    content: "### 3.1 Purpose\\n\\nThe purpose of the Associate Owned Asset Guidelines is to transition to an associate-owned device model at DQ, aimed at mitigating asset theft by departing associates while ensuring accountability, and proper maintenance of devices used for work. These guidelines empower associates with flexible options to use and manage their personal work devices.\\n\\n### 3.2 Scope\\n\\nThese guidelines apply to all DQ Associates. They cover the use of personal devices for all company-related work and include procedures for the BYOD, FYOD and HYOD programs.\\n\\nThe scope also involves clear responsibilities for device acquisition, maintenance, and reporting."
+    content: `### 3.1 Purpose${NL}${NL}The purpose of the Associate Owned Asset Guidelines is to transition to an associate-owned device model at DQ, aimed at mitigating asset theft by departing associates while ensuring accountability, and proper maintenance of devices used for work. These guidelines empower associates with flexible options to use and manage their personal work devices.${NL}${NL}### 3.2 Scope${NL}${NL}These guidelines apply to all DQ Associates. They cover the use of personal devices for all company-related work and include procedures for the BYOD, FYOD and HYOD programs.${NL}${NL}The scope also involves clear responsibilities for device acquisition, maintenance, and reporting.`
   }
 );
 
