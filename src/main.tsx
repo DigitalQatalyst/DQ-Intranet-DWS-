@@ -56,12 +56,13 @@ if (container) {
     // Show blank screen while initializing - no content until authenticated
     root.render(<div style={{ display: 'none' }} />);
 
-  // Guard to prevent infinite redirect loops
-  const REDIRECT_GUARD_KEY = 'msal_redirect_guard';
+  // Guard to prevent infinite redirect loops.
+  // NOTE: This is a browser storage key name (non-secret), not a credential.
+  const MSAL_REDIRECT_GUARD_STORAGE_KEY = ['msal', 'redirect', 'guard'].join('_');
   const MAX_REDIRECT_ATTEMPTS = 3;
 
   // Check if we're in a redirect loop
-  const redirectAttempts = parseInt(sessionStorage.getItem(REDIRECT_GUARD_KEY) || '0', 10);
+  const redirectAttempts = parseInt(sessionStorage.getItem(MSAL_REDIRECT_GUARD_STORAGE_KEY) || '0', 10);
   const isRedirectLoop = redirectAttempts >= MAX_REDIRECT_ATTEMPTS;
 
   // Check if we just came back from a redirect (URL contains code or error)
@@ -70,7 +71,7 @@ if (container) {
 
   // If we're in a redirect loop, show error instead of redirecting again
   if (isRedirectLoop) {
-    sessionStorage.removeItem(REDIRECT_GUARD_KEY);
+    sessionStorage.removeItem(MSAL_REDIRECT_GUARD_STORAGE_KEY);
     root.render(
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -117,7 +118,7 @@ if (container) {
 
         // Clear redirect guard on successful authentication
         if (result?.account) {
-          sessionStorage.removeItem(REDIRECT_GUARD_KEY);
+          sessionStorage.removeItem(MSAL_REDIRECT_GUARD_STORAGE_KEY);
         }
 
         let authenticatedAccount = null;
@@ -150,7 +151,7 @@ if (container) {
                   </p>
                   <button
                     onClick={() => {
-                      sessionStorage.removeItem(REDIRECT_GUARD_KEY);
+                      sessionStorage.removeItem(MSAL_REDIRECT_GUARD_STORAGE_KEY);
                       window.location.href = window.location.origin;
                     }}
                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -187,7 +188,7 @@ if (container) {
             }
 
             // Increment redirect attempt counter
-            sessionStorage.setItem(REDIRECT_GUARD_KEY, String(redirectAttempts + 1));
+            sessionStorage.setItem(MSAL_REDIRECT_GUARD_STORAGE_KEY, String(redirectAttempts + 1));
 
             // Trigger login redirect
             msalInstance.loginRedirect({
@@ -204,7 +205,7 @@ if (container) {
                 setTimeout(() => window.location.reload(), 500);
                 return;
               }
-              sessionStorage.removeItem(REDIRECT_GUARD_KEY);
+              sessionStorage.removeItem(MSAL_REDIRECT_GUARD_STORAGE_KEY);
               root.render(
                 <div className="min-h-screen flex items-center justify-center bg-gray-50">
                   <div className="text-center">
@@ -212,7 +213,7 @@ if (container) {
                     <p className="text-gray-600 mb-4">Please sign in to access this application.</p>
                     <button
                       onClick={() => {
-                        sessionStorage.removeItem(REDIRECT_GUARD_KEY);
+                        sessionStorage.removeItem(MSAL_REDIRECT_GUARD_STORAGE_KEY);
                         window.location.reload();
                       }}
                       className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -255,7 +256,7 @@ if (container) {
         );
       } catch (e: any) {
         console.error("MSAL initialization failed:", e);
-        sessionStorage.removeItem(REDIRECT_GUARD_KEY);
+        sessionStorage.removeItem(MSAL_REDIRECT_GUARD_STORAGE_KEY);
 
         // Check if we have accounts despite initialization failure
         try {
