@@ -1,3 +1,4 @@
+import { secureRandom } from '../../utils/secureRandom';
 import React, { useState, useRef, useCallback } from "react";
 import {
     FileIcon,
@@ -96,7 +97,7 @@ export function DocumentsPage({ title, documents }: DocumentsPageProps) {
             return min + Math.floor((buf[0] / 0xffffffff) * range);
         }
         // Fallback for environments without crypto API
-        return min + Math.floor(Math.random() * range);
+        return min + Math.floor(secureRandom() * range);
     };
 
     const secureId = () => {
@@ -111,7 +112,7 @@ export function DocumentsPage({ title, documents }: DocumentsPageProps) {
                 .join("");
         }
         // Fallback for environments without crypto API
-        return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+        return `${Date.now()}-${secureRandom().toString(36).slice(2, 11)}`;
     };
 
     // Process files

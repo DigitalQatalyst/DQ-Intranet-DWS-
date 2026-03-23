@@ -1,3 +1,4 @@
+import { secureRandom } from '../../utils/secureRandom';
 import React, { useState, useRef } from 'react';
 import { FileIcon, FileTextIcon, ImageIcon, FileSpreadsheetIcon, DownloadIcon, TrashIcon, UploadIcon, XIcon, CheckIcon, AlertCircleIcon } from 'lucide-react';
 export function DocumentSection({
@@ -64,7 +65,7 @@ export function DocumentSection({
                 crypto.getRandomValues(buf);
                 randomId = Array.from(buf).map(n => n.toString(36)).join('');
             } else {
-                randomId = Math.random().toString(36).substr(2, 9);
+                randomId = secureRandom().toString(36).substr(2, 9);
             }
             
             return {
@@ -91,7 +92,7 @@ export function DocumentSection({
                 crypto.getRandomValues(buf);
                 increment = Math.floor((buf[0] / 0xffffffff) * 10) + 5;
             } else {
-                increment = Math.floor(Math.random() * 10) + 5;
+                increment = Math.floor(secureRandom() * 10) + 5;
             }
             progress += increment;
             if (progress >= 100) {

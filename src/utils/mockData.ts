@@ -1,3 +1,4 @@
+import { secureRandom } from './secureRandom';
 // Mock data for the Course Marketplace
 export interface ProviderType {
   id: string;
@@ -537,7 +538,7 @@ const assignFieldStatuses = (fields: any) => {
       crypto.getRandomValues(buf);
       randomIndex = Math.floor((buf[0] / 0xffffffff) * statuses.length);
     } else {
-      randomIndex = Math.floor(Math.random() * statuses.length);
+      randomIndex = Math.floor(secureRandom() * statuses.length);
     }
     return {
       ...field,

@@ -1,3 +1,4 @@
+import { secureRandom } from '../utils/secureRandom';
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { BookmarkIcon, ScaleIcon, Calendar, MapPin, StarIcon, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon } from 'lucide-react';
@@ -39,7 +40,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
       crypto.getRandomValues(buf);
       return (4 + (buf[0] / 0xffffffff)).toFixed(1);
     }
-    return (4 + Math.random()).toFixed(1);
+    return (4 + secureRandom()).toFixed(1);
   })();
   
   const reviewCount = (() => {
@@ -48,7 +49,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
       crypto.getRandomValues(buf);
       return Math.floor((buf[0] / 0xffffffff) * 50) + 10;
     }
-    return Math.floor(Math.random() * 50) + 10;
+    return Math.floor(secureRandom() * 50) + 10;
   })();
   useEffect(() => {
     const fetchCourseDetails = async () => {

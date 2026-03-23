@@ -1,3 +1,4 @@
+import { secureRandom } from '../utils/secureRandom';
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Send, Minimize2, Maximize2, Bot, Loader } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -51,7 +52,7 @@ function pickGreetingResponse(options: string[]): string {
     crypto.getRandomValues(buf);
     choice = options[Math.floor((buf[0] / 0xffffffff) * options.length)];
   } else {
-    choice = options[Math.floor(Math.random() * options.length)];
+    choice = options[Math.floor(secureRandom() * options.length)];
   }
   
   if (lastGreetingResponse && options.length > 1) {
@@ -63,7 +64,7 @@ function pickGreetingResponse(options: string[]): string {
         crypto.getRandomValues(buf);
         choice = options[Math.floor((buf[0] / 0xffffffff) * options.length)];
       } else {
-        choice = options[Math.floor(Math.random() * options.length)];
+        choice = options[Math.floor(secureRandom() * options.length)];
       }
       attempts += 1;
     }

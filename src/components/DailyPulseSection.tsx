@@ -1,3 +1,4 @@
+import { secureRandom } from '../utils/secureRandom';
 import { useState } from 'react';
 import { RefreshCw, Bookmark, Share2 } from 'lucide-react';
 import { FadeInUpOnScroll } from './AnimationUtils';
@@ -25,7 +26,7 @@ const DailyPulseSection = () => {
       crypto.getRandomValues(buf);
       randomIndex = Math.floor((buf[0] / 0xffffffff) * dailyQuotes.length);
     } else {
-      randomIndex = Math.floor(Math.random() * dailyQuotes.length);
+      randomIndex = Math.floor(secureRandom() * dailyQuotes.length);
     }
     setCurrentQuote(dailyQuotes[randomIndex]);
     setIsExpanded(false);

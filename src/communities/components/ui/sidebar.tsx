@@ -1,3 +1,4 @@
+import { secureRandom } from '../../../utils/secureRandom';
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
@@ -349,7 +350,7 @@ const SidebarMenuSkeleton = React.forwardRef<HTMLDivElement, React.ComponentProp
 }, ref) => {
   // Random width between 50 to 90%.
   const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`;
+    return `${Math.floor(secureRandom() * 40) + 50}%`;
   }, []);
   return <div ref={ref} data-sidebar="menu-skeleton" className={cn("flex h-8 items-center gap-2 rounded-md px-2", className)} {...props}>
       {showIcon && <Skeleton className="size-4 rounded-md" data-sidebar="menu-skeleton-icon" />}
