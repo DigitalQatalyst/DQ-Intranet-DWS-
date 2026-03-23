@@ -2,9 +2,6 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { parseCsv, toCsv } from '../../utils/guides'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import {
-  KNOWLEDGE_SYSTEMS,
-  GHC_DIMENSIONS,
-  SIX_XD_PERSPECTIVES,
   ALPHABET
 } from '../../pages/guides/glossaryFilters'
 
@@ -31,7 +28,7 @@ interface Props {
   facets: GuidesFacets
   query: URLSearchParams
   onChange: (next: URLSearchParams) => void
-  activeTab: 'guidelines' | 'strategy' | 'blueprints' | 'testimonials' | 'glossary' | 'faqs'
+  activeTab: 'guidelines' | 'strategy' | '6xd' | 'blueprints' | 'testimonials' | 'glossary' | 'faqs'
 }
 
 const TESTIMONIAL_CATEGORIES: Facet[] = [
@@ -42,71 +39,10 @@ const TESTIMONIAL_CATEGORIES: Facet[] = [
   { id: 'milestone-achievement', name: 'Milestone / Achievement' }
 ]
 
-const TESTIMONIAL_UNITS: Facet[] = [
-  { id: 'deals', name: 'Deals' },
-  { id: 'dq-delivery-accounts', name: 'DQ Delivery (Accounts)' },
-  { id: 'dq-delivery-deploys', name: 'DQ Delivery (Deploys)' },
-  { id: 'dq-delivery-designs', name: 'DQ Delivery (Designs)' },
-  { id: 'finance', name: 'Finance' },
-  { id: 'hra', name: 'HRA' },
-  { id: 'intelligence', name: 'Intelligence' },
-  { id: 'products', name: 'Products' },
-  { id: 'secdevops', name: 'SecDevOps' },
-  { id: 'solutions', name: 'Solutions' },
-  { id: 'stories', name: 'Stories' }
-]
-
-const GUIDELINES_GUIDE_TYPES: Facet[] = [
-  { id: 'best-practice', name: 'Best Practice' },
-  { id: 'policy', name: 'Policy' },
-  { id: 'process', name: 'Process' },
-  { id: 'sop', name: 'SOP' }
-]
-
-const GUIDELINES_UNITS: Facet[] = [
-  { id: 'deals', name: 'Deals' },
-  { id: 'dq-delivery-accounts', name: 'DQ Delivery (Accounts)' },
-  { id: 'dq-delivery-deploys', name: 'DQ Delivery (Deploys)' },
-  { id: 'dq-delivery-designs', name: 'DQ Delivery (Designs)' },
-  { id: 'finance', name: 'Finance' },
-  { id: 'hra', name: 'HRA' },
-  { id: 'intelligence', name: 'Intelligence' },
-  { id: 'products', name: 'Products' },
-  { id: 'secdevops', name: 'SecDevOps' },
-  { id: 'solutions', name: 'Solutions' },
-  { id: 'stories', name: 'Stories' }
-]
-
 const GUIDELINES_LOCATIONS: Facet[] = [
   { id: 'DXB', name: 'DXB' },
   { id: 'KSA', name: 'KSA' },
   { id: 'NBO', name: 'NBO' }
-]
-
-const GUIDELINES_CATEGORIES: Facet[] = [
-  { id: 'resources', name: 'Guidelines' },
-  { id: 'policies', name: 'Policies' }
-]
-
-const BLUEPRINT_GUIDE_TYPES: Facet[] = [
-  { id: 'best-practice', name: 'Best Practice' },
-  { id: 'policy', name: 'Policy' },
-  { id: 'process', name: 'Process' },
-  { id: 'sop', name: 'SOP' }
-]
-
-const BLUEPRINT_UNITS: Facet[] = [
-  { id: 'deals', name: 'Deals' },
-  { id: 'dq-delivery-accounts', name: 'DQ Delivery (Accounts)' },
-  { id: 'dq-delivery-deploys', name: 'DQ Delivery (Deploys)' },
-  { id: 'dq-delivery-designs', name: 'DQ Delivery (Designs)' },
-  { id: 'finance', name: 'Finance' },
-  { id: 'hra', name: 'HRA' },
-  { id: 'intelligence', name: 'Intelligence' },
-  { id: 'products', name: 'Products' },
-  { id: 'secdevops', name: 'SecDevOps' },
-  { id: 'solutions', name: 'Solutions' },
-  { id: 'stories', name: 'Stories' }
 ]
 
 const BLUEPRINT_LOCATIONS: Facet[] = [
@@ -115,45 +51,10 @@ const BLUEPRINT_LOCATIONS: Facet[] = [
   { id: 'NBO', name: 'NBO' }
 ]
 
-const PRODUCT_TYPES: Facet[] = [
-  { id: 'tmaas', name: 'TMaaS' },
-  { id: 'dtma', name: 'DTMA' },
-  { id: 'dtmp', name: 'DTMP' },
-  { id: 'plant-4-0', name: 'Plant 4.0' },
-  { id: 'dtmcc', name: 'DTMCC' },
-  { id: 'dto4t', name: 'DTO4T' }
-]
-
-const PRODUCT_STAGES: Facet[] = [
-  { id: 'concept', name: 'Concept' },
-  { id: 'mvp', name: 'MVP' },
-  { id: 'live', name: 'Live' },
-  { id: 'scaling', name: 'Scaling' },
-  { id: 'enterprise-ready', name: 'Enterprise-ready' }
-]
-
 const PRODUCT_CLASSES: Facet[] = [
   { id: 'class-01', name: 'Class 01 DBP Services' },
   { id: 'class-02', name: 'Class 02 DT 2.0' },
   { id: 'class-03', name: 'Class 03 DCO' }
-]
-
-// Keep legacy framework filters for backward compatibility (mapped to product domains)
-const BLUEPRINT_FRAMEWORKS: Facet[] = [
-  { id: 'devops', name: 'DevOps' },
-  { id: 'dbp', name: 'DBP' },
-  { id: 'dxp', name: 'DXP' },
-  { id: 'dws', name: 'DWS' },
-  { id: 'products', name: 'Products' },
-  { id: 'projects', name: 'Projects' }
-]
-
-const PRODUCT_SECTORS: Facet[] = [
-  { id: 'government-4.0', name: 'Government 4.0' },
-  { id: 'infrastructure-4.0', name: 'Infrastructure 4.0' },
-  { id: 'plant-4.0', name: 'Plant 4.0' },
-  { id: 'logistics-4.0', name: 'Logistics 4.0' },
-  { id: 'service-4.0', name: 'Service 4.0' }
 ]
 
 const FAQ_CATEGORIES: Facet[] = [
@@ -161,26 +62,6 @@ const FAQ_CATEGORIES: Facet[] = [
   { id: 'general', name: 'General' },
   { id: 'process', name: 'Process' },
   { id: 'resources', name: 'Resources' }
-]
-
-const STRATEGY_LOCATIONS: Facet[] = [
-  { id: 'DXB', name: 'DXB' },
-  { id: 'KSA', name: 'KSA' },
-  { id: 'NBO', name: 'NBO' }
-]
-
-const STRATEGY_UNITS: Facet[] = [
-  { id: 'deals', name: 'Deals' },
-  { id: 'dq-delivery-accounts', name: 'DQ Delivery (Accounts)' },
-  { id: 'dq-delivery-deploys', name: 'DQ Delivery (Deploys)' },
-  { id: 'dq-delivery-designs', name: 'DQ Delivery (Designs)' },
-  { id: 'finance', name: 'Finance' },
-  { id: 'hra', name: 'HRA' },
-  { id: 'intelligence', name: 'Intelligence' },
-  { id: 'products', name: 'Products' },
-  { id: 'secdevops', name: 'SecDevOps' },
-  { id: 'solutions', name: 'Solutions' },
-  { id: 'stories', name: 'Stories' }
 ]
 
 const STRATEGY_FRAMEWORKS: Facet[] = [
@@ -203,7 +84,7 @@ const ALL_CATEGORIES = [
   'faq_category'
 ]
 
-const Section: React.FC<{ idPrefix: string; title: string; category: string; collapsed: boolean; onToggle: (category: string) => void }> = ({ idPrefix, title, category, collapsed, onToggle, children }) => {
+const Section: React.FC<{ idPrefix: string; title: string; category: string; collapsed: boolean; onToggle: (category: string) => void; children?: React.ReactNode }> = ({ idPrefix, title, category, collapsed, onToggle, children }) => {
   const contentId = `${idPrefix}-filters-${category}`
   return (
     <div className="border-b border-gray-100 pb-3 mb-3">
@@ -230,7 +111,7 @@ const CheckboxList: React.FC<{ idPrefix: string; name: string; options: Facet[];
     const override = LABEL_OVERRIDES[value.toLowerCase()] ?? LABEL_OVERRIDES[value];
     if (override) return override;
     return value
-      .replace(/[_-]+/g, ' ')
+      .replaceAll(/[_-]+/g, ' ')
       .split(' ')
       .filter(Boolean)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
@@ -314,7 +195,6 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, active
   const isGuidelinesSelected = activeTab === 'guidelines'
   const isGlossarySelected = activeTab === 'glossary'
   const isFAQsSelected = activeTab === 'faqs'
-  const isResourcesSelected = activeTab === 'resources'
   const prevTabRef = useRef<typeof activeTab>(activeTab)
   
   const availableStrategyFrameworks = useMemo(() => {
@@ -412,125 +292,125 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, active
     onChange(next)
   }
   const locationOptions = getLocationOptions(isGuidelinesSelected, isFAQsSelected, isTestimonialsSelected, facets.location)
+
+  const renderTabSpecificFilters = () => {
+    if (isGlossarySelected) {
+      return (
+        <Section
+          idPrefix={instanceId}
+          title="Alphabetical"
+          category="glossary_letter"
+          collapsed={collapsedSet.has('glossary_letter')}
+          onToggle={toggleCollapsed}
+        >
+          <div className="flex flex-wrap gap-2">
+            {ALPHABET.map(letter => {
+              const selected = parseCsv(query.get('glossary_letter')).includes(letter)
+              return (
+                <button
+                  key={letter}
+                  onClick={() => {
+                    const next = new URLSearchParams(query.toString())
+                    const values = new Set(parseCsv(next.get('glossary_letter')))
+                    if (values.has(letter)) {
+                      values.delete(letter)
+                    } else {
+                      values.add(letter)
+                    }
+                    if (values.size > 0) {
+                      next.set('glossary_letter', toCsv(Array.from(values)))
+                    } else {
+                      next.delete('glossary_letter')
+                    }
+                    onChange(next)
+                  }}
+                  className={`w-8 h-8 rounded text-xs font-medium transition-colors ${selected ? 'bg-[var(--guidelines-primary)] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                >
+                  {letter}
+                </button>
+              )
+            })}
+          </div>
+        </Section>
+      )
+    }
+    if (isBlueprintSelected) {
+      return (
+        <Section idPrefix={instanceId} title="Class" category="product_class" collapsed={collapsedSet.has('product_class')} onToggle={toggleCollapsed}>
+          <CheckboxList idPrefix={instanceId} name="product_class" options={PRODUCT_CLASSES} query={query} onChange={onChange} />
+        </Section>
+      )
+    }
+    if (isGuidelinesSelected) {
+      return (
+        <Section
+          idPrefix={instanceId}
+          title="Categorization"
+          category="categorization"
+          collapsed={collapsedSet.has('categorization')}
+          onToggle={toggleCollapsed}
+        >
+          <CheckboxList
+            idPrefix={instanceId}
+            name="categorization"
+            options={[
+              { id: 'policy-set-1a-opg', name: 'Policy Set 1a – OPG' },
+              { id: 'policy-set-1b-ppp', name: 'Policy Set 1b – PPP' },
+            ]}
+            query={query}
+            onChange={onChange}
+          />
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            <button
+              type="button"
+              className="w-full flex items-center justify-between text-left text-sm font-semibold text-gray-900"
+              onClick={() => setPolicySet2Collapsed(prev => !prev)}
+              aria-expanded={!policySet2Collapsed}
+            >
+              <span>Policy Set 02</span>
+              {policySet2Collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {!policySet2Collapsed && (
+              <div className="mt-2">
+                <CheckboxList
+                  idPrefix={`${instanceId}-policy-set-02`}
+                  name="categorization"
+                  options={[
+                    { id: 'policy-set-2a-vision', name: '2A - Vision' },
+                    { id: 'policy-set-2b-culture', name: '2B - Culture' },
+                    { id: 'policy-set-2c-persona', name: '2C - Persona' },
+                    { id: 'policy-set-2d-task', name: '2D - Task' },
+                    { id: 'policy-set-2e-govern', name: '2E - Govern' },
+                    { id: 'policy-set-2f-flow', name: '2F - Flow' },
+                    { id: 'policy-set-2g-product', name: '2G - Product' },
+                  ]}
+                  query={query}
+                  onChange={onChange}
+                />
+              </div>
+            )}
+          </div>
+        </Section>
+      )
+    }
+    const showGenericGuideType = !(isStrategySelected || isBlueprintSelected || isTestimonialsSelected) && facets.guide_type && facets.guide_type.length > 0
+    if (showGenericGuideType) {
+      return (
+        <Section idPrefix={instanceId} title="Guide Type" category="guide_type" collapsed={collapsedSet.has('guide_type')} onToggle={toggleCollapsed}>
+          <CheckboxList idPrefix={instanceId} name="guide_type" options={facets.guide_type || []} query={query} onChange={onChange} />
+        </Section>
+      )
+    }
+    return null
+  }
+
   return (
     <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} aria-label="Guides filters">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Filters</h2>
         <button onClick={clearAll} className="text-[var(--guidelines-primary)] text-sm font-medium">Clear all</button>
       </div>
-      {isGlossarySelected ? (
-          <>
-            {/* ALPHABETICAL FILTER: A–Z browsing for fast scanning */}
-            <Section
-              idPrefix={instanceId}
-              title="Alphabetical"
-              category="glossary_letter"
-              collapsed={collapsedSet.has('glossary_letter')}
-              onToggle={toggleCollapsed}
-            >
-              <div className="flex flex-wrap gap-2">
-                {ALPHABET.map(letter => {
-                  const selected = parseCsv(query.get('glossary_letter')).includes(letter)
-                  return (
-                    <button
-                      key={letter}
-                      onClick={() => {
-                        const next = new URLSearchParams(query.toString())
-                        const values = new Set(parseCsv(next.get('glossary_letter')))
-                        if (values.has(letter)) {
-                          values.delete(letter)
-                        } else {
-                          values.add(letter)
-                        }
-                        if (values.size > 0) {
-                          next.set('glossary_letter', toCsv(Array.from(values)))
-                        } else {
-                          next.delete('glossary_letter')
-                        }
-                        onChange(next)
-                      }}
-                      className={`
-                        w-8 h-8 rounded text-xs font-medium transition-colors
-                        ${
-                          selected
-                            ? 'bg-[var(--guidelines-primary)] text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }
-                      `}
-                    >
-                      {letter}
-                    </button>
-                  )
-                })}
-              </div>
-            </Section>
-          </>
-      ) : isBlueprintSelected ? (
-        <>
-          <Section idPrefix={instanceId} title="Class" category="product_class" collapsed={collapsedSet.has('product_class')} onToggle={toggleCollapsed}>
-            <CheckboxList idPrefix={instanceId} name="product_class" options={PRODUCT_CLASSES} query={query} onChange={onChange} />
-          </Section>
-        </>
-      ) : isGuidelinesSelected ? (
-        <>
-          <Section
-            idPrefix={instanceId}
-            title="Categorization"
-            category="categorization"
-            collapsed={collapsedSet.has('categorization')}
-            onToggle={toggleCollapsed}
-          >
-            <CheckboxList
-              idPrefix={instanceId}
-              name="categorization"
-              options={[
-                { id: 'policy-set-1a-opg', name: 'Policy Set 1a – OPG' },
-                { id: 'policy-set-1b-ppp', name: 'Policy Set 1b – PPP' },
-              ]}
-              query={query}
-              onChange={onChange}
-            />
-            <div className="mt-3 border-t border-gray-100 pt-3">
-              <button
-                type="button"
-                className="w-full flex items-center justify-between text-left text-sm font-semibold text-gray-900"
-                onClick={() => setPolicySet2Collapsed(prev => !prev)}
-                aria-expanded={!policySet2Collapsed}
-              >
-                <span>Policy Set 02</span>
-                {policySet2Collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-              </button>
-              {!policySet2Collapsed && (
-                <div className="mt-2">
-                  <CheckboxList
-                    idPrefix={`${instanceId}-policy-set-02`}
-                    name="categorization"
-                    options={[
-                      { id: 'policy-set-2a-vision', name: '2A - Vision' },
-                      { id: 'policy-set-2b-culture', name: '2B - Culture' },
-                      { id: 'policy-set-2c-persona', name: '2C - Persona' },
-                      { id: 'policy-set-2d-task', name: '2D - Task' },
-                      { id: 'policy-set-2e-govern', name: '2E - Govern' },
-                      { id: 'policy-set-2f-flow', name: '2F - Flow' },
-                      { id: 'policy-set-2g-product', name: '2G - Product' },
-                    ]}
-                    query={query}
-                    onChange={onChange}
-                  />
-                </div>
-              )}
-            </div>
-          </Section>
-        </>
-      ) : isResourcesSelected ? (
-        <Section idPrefix={instanceId} title="Guide Type" category="guide_type" collapsed={collapsedSet.has('guide_type')} onToggle={toggleCollapsed}>
-          <CheckboxList idPrefix={instanceId} name="guide_type" options={GUIDELINES_GUIDE_TYPES} query={query} onChange={onChange} />
-        </Section>
-      ) : !(isStrategySelected || isBlueprintSelected || isTestimonialsSelected) && facets.guide_type && facets.guide_type.length > 0 && (
-        <Section idPrefix={instanceId} title="Guide Type" category="guide_type" collapsed={collapsedSet.has('guide_type')} onToggle={toggleCollapsed}>
-          <CheckboxList idPrefix={instanceId} name="guide_type" options={facets.guide_type || []} query={query} onChange={onChange} />
-        </Section>
-      )}
+      {renderTabSpecificFilters()}
       {isFAQsSelected && (
         <Section idPrefix={instanceId} title="Category" category="faq_category" collapsed={collapsedSet.has('faq_category')} onToggle={toggleCollapsed}>
           <div className="flex flex-wrap gap-2 mb-3">
@@ -555,17 +435,15 @@ export const GuidesFilters: React.FC<Props> = ({ facets, query, onChange, active
         </Section>
       )}
       {isTestimonialsSelected && (
-      <Section idPrefix={instanceId} title="Story Type" category="testimonial_category" collapsed={collapsedSet.has('testimonial_category')} onToggle={toggleCollapsed}>
-        <CheckboxList idPrefix={instanceId} name="testimonial_category" options={TESTIMONIAL_CATEGORIES} query={query} onChange={onChange} />
-      </Section>
-    )}
-    {isStrategySelected && (
-      <>
-          <Section idPrefix={instanceId} title="GHC Elements" category="strategy_framework" collapsed={collapsedSet.has('strategy_framework')} onToggle={toggleCollapsed}>
-            <CheckboxList idPrefix={instanceId} name="strategy_framework" options={availableStrategyFrameworks.length > 0 ? availableStrategyFrameworks : STRATEGY_FRAMEWORKS} query={query} onChange={onChange} />
-          </Section>
-      </>
-    )}
+        <Section idPrefix={instanceId} title="Story Type" category="testimonial_category" collapsed={collapsedSet.has('testimonial_category')} onToggle={toggleCollapsed}>
+          <CheckboxList idPrefix={instanceId} name="testimonial_category" options={TESTIMONIAL_CATEGORIES} query={query} onChange={onChange} />
+        </Section>
+      )}
+      {isStrategySelected && (
+        <Section idPrefix={instanceId} title="GHC Elements" category="strategy_framework" collapsed={collapsedSet.has('strategy_framework')} onToggle={toggleCollapsed}>
+          <CheckboxList idPrefix={instanceId} name="strategy_framework" options={availableStrategyFrameworks.length > 0 ? availableStrategyFrameworks : STRATEGY_FRAMEWORKS} query={query} onChange={onChange} />
+        </Section>
+      )}
       {!isGlossarySelected && !isBlueprintSelected && !isStrategySelected && !isTestimonialsSelected && (
         <Section idPrefix={instanceId} title="Location" category="location" collapsed={collapsedSet.has('location')} onToggle={toggleCollapsed}>
           <CheckboxList idPrefix={instanceId} name="location" options={locationOptions} query={query} onChange={onChange} />

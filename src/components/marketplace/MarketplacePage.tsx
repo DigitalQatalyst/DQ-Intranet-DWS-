@@ -43,8 +43,8 @@ const slugify = (value: string): string =>
   value
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replaceAll(/[^a-z0-9]+/g, '-')
+    .replaceAll(/^-+|-+$/g, '');
 
 const prependLearningTypeFilter = (marketplaceType: string, configs: FilterConfig[]): FilterConfig[] => {
   if (marketplaceType !== 'courses') {
@@ -166,7 +166,11 @@ const parseFilterValues = (params: URLSearchParams, key: string): string[] =>
 // Module-level helper — extracted to reduce cognitive complexity of run()
 const countBy = (arr: any[] | null | undefined, key: string) => {
   const m = new Map<string, number>();
-  for (const r of (arr || [])) { const v = (r as any)[key]; if (!v) continue; m.set(v, (m.get(v) || 0) + 1); }
+  for (const r of (arr || [])) {
+    const v = r[key];
+    if (!v) continue;
+    m.set(v, (m.get(v) || 0) + 1);
+  }
   return Array.from(m.entries()).map(([id, cnt]) => ({ id, name: id, count: cnt }))
     .sort((a, b) => a.name.localeCompare(b.name));
 };
@@ -390,14 +394,11 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     next.delete('page');
     if (tab === 'guidelines') {
       next.delete('tab');
-    } else {
-      next.set('tab', tab);
-    }
-    if (tab === 'guidelines') {
       // Switching to Guidelines - clear Strategy and Blueprint-specific filters
       const keysToDelete = ['strategy_type', 'strategy_framework', 'blueprint_framework', 'blueprint_sector'];
       keysToDelete.forEach(key => next.delete(key));
     } else {
+      next.set('tab', tab);
       // For Strategy and Blueprints, keep 'unit' filter; only delete incompatible filters
       if (tab === 'strategy') {
         // Keep 'unit' and 'location' for Strategy; delete incompatible filters
@@ -506,8 +507,8 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     setQueryParams(new URLSearchParams(next.toString()));
   }, [isGuides, activeTab]);
 
-  const pageSize = Math.min(200, Math.max(1, parseInt(queryParams.get('pageSize') || String(DEFAULT_GUIDE_PAGE_SIZE), 10)));
-  const currentPage = Math.max(1, parseInt(queryParams.get('page') || '1', 10));
+  const pageSize = Math.min(200, Math.max(1, Number.parseInt(queryParams.get('pageSize') || String(DEFAULT_GUIDE_PAGE_SIZE), 10)));
+  const currentPage = Math.max(1, Number.parseInt(queryParams.get('page') || '1', 10));
   const totalPages = Math.max(1, Math.ceil(Math.max(totalCount, 0) / pageSize));
 
   // UI state
@@ -649,37 +650,16 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
   
   // Fetch items based on marketplace type
   useEffect(() => {
-    const run = async () => {
-      // COURSES: items come from LMS arrays / URL filters; no fetch
-      if (isCourses) {
+    const runGuides = async () => {
+      if (activeTab === 'glossary' || activeTab === 'faqs') {
         setLoading(false);
-        setError(null);
-        // optional: reflect count in state for pager/UI
-        setTotalCount(searchFilteredItems.length);
-        setFilteredItems([]);       // render uses searchFilteredItems when isCourses
+        setFilteredItems([]);
+        setTotalCount(0);
         return;
       }
 
-      // KNOWLEDGE HUB: use fallback data (no API)
-      if (isKnowledgeHub) {
-        const fallbackItems = getFallbackItems(marketplaceType);
-        setFilteredItems(fallbackItems);
-        setTotalCount(fallbackItems.length);
-        setLoading(false);
-        return;
-      }
-
-      // GUIDES: Supabase query + facets (skip for glossary, faqs, and products tabs)
-      if (isGuides) {
-        if (activeTab === 'glossary' || activeTab === 'faqs') {
-          setLoading(false);
-          setFilteredItems([]);
-          setTotalCount(0);
-          return;
-        }
-        
-        // Products tab: Skip database query entirely, use static products
-        if (activeTab === 'blueprints') {
+      // Products tab: Skip database query entirely, use static products
+      if (activeTab === 'blueprints') {
           setLoading(true);
           try {
             const qStr = queryParams.get('q') || '';
@@ -757,7 +737,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           // Exclude removed guidelines from frontend
           const excludedSlugs = ['atp-guidelines', 'agile-working-guidelines', 'client-session-guidelines', 'dbp-support-guidelines', 'dq-products'];
           
-          let q = supabaseClient.from('guides').select(GUIDE_LIST_SELECT, { count: 'exact' });
+          let q = supabaseClient.from('guides').select(GUIDE_LIST_SELECT, { count: 'exact' }) as any;
           excludedSlugs.forEach(slug => {
             q = q.neq('slug', slug);
           });
@@ -781,7 +761,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           const productSectors = parseFilterValues(queryParams, 'product_sector');
 
           // Get activeTab from state - ensure it's current
-          const currentActiveTab = activeTab;
+          const currentActiveTab = activeTab as WorkGuideTab;
           const isStrategyTab = currentActiveTab === 'strategy';
           const isBlueprintTab = currentActiveTab === 'blueprints';
           const isTestimonialsTab = currentActiveTab === 'testimonials';
@@ -875,7 +855,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           // Exclude removed guidelines from facets
           let facetQ = supabaseClient
             .from('guides')
-            .select('domain,sub_domain,guide_type,function_area,unit,location,status');
+            .select('domain,sub_domain,guide_type,function_area,unit,location,status') as any;
           
           // Apply same status filter as main query for facets
           if (statuses.length) {
@@ -1439,14 +1419,15 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (start) { const latency = Date.now() - start; track('Guides.Search', { q: qStr, latency_ms: latency }); searchStartRef.current = null; }
           track('Guides.ViewList', { q: qStr, sort, page: String(currentPage) });
         } catch (e) {
+          console.error('[MarketplacePage] Failed to load guides:', e);
           setError('Failed to load guides. Please try again.');
           setFilteredItems([]); setFacets({}); setTotalCount(0);
         } finally {
           setLoading(false);
         }
-        return;
       }
 
+    const runOtherMarketplace = async () => {
       // OTHER MARKETPLACES (financial, non-financial, onboarding)
       setLoading(true);
       setError(null);
@@ -1488,7 +1469,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   const normalizedFilter = filterType.toLowerCase().trim();
                   // Normalize variations: 'self-service', 'self service', 'selfservice' all match
                   const normalizeType = (type: string) => {
-                    return type.replace(/[\s-]/g, '').toLowerCase();
+                    return type.replaceAll(/[\s-]/g, '').toLowerCase();
                   };
                   const normalizedItemType = normalizeType(itemServiceType);
                   const normalizedFilterType = normalizeType(normalizedFilter);
@@ -1530,7 +1511,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (servicesFilter) {
             const services = Array.isArray(servicesFilter) ? servicesFilter : [servicesFilter];
             if (services.length > 0) {
-              filtered = filtered.filter(item => matchesArrayFilter(item.services, services, s => s.toLowerCase().replace(/[\s_]/g, '')));
+              filtered = filtered.filter(item => matchesArrayFilter(item.services, services, s => s.toLowerCase().replaceAll(/[\s_]/g, '')));
             }
           }
           
@@ -1581,8 +1562,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   const normalizedFilter = filterMode.toLowerCase().trim();
                   // Normalize variations: 'inperson', 'in person', 'in-person' all match
                   const normalizeMode = (mode: string) => {
-                    // Remove spaces and hyphens for comparison
-                    const cleaned = mode.replace(/[\s-]/g, '');
+                    const cleaned = mode.replaceAll(/[\s-]/g, '');
                     if (cleaned === 'inperson' || cleaned.includes('person')) {
                       return 'inperson';
                     }
@@ -1707,6 +1687,32 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       } finally {
         setLoading(false);
       }
+    };
+
+    const run = async () => {
+      // COURSES: items come from LMS arrays / URL filters; no fetch
+      if (isCourses) {
+        setLoading(false);
+        setError(null);
+        setTotalCount(searchFilteredItems.length);
+        setFilteredItems([]);
+        return;
+      }
+      // KNOWLEDGE HUB: use fallback data (no API)
+      if (isKnowledgeHub) {
+        const fallbackItems = getFallbackItems(marketplaceType);
+        setFilteredItems(fallbackItems);
+        setTotalCount(fallbackItems.length);
+        setLoading(false);
+        return;
+      }
+      // GUIDES: Supabase query + facets
+      if (isGuides) {
+        await runGuides();
+        return;
+      }
+      // OTHER MARKETPLACES
+      await runOtherMarketplace();
     };
 
     run();
@@ -1890,7 +1896,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 items={filteredItems}
                 hideEmptyState={false}
                 emptyStateTitle={activeTab === 'blueprints' ? 'No products found' : 'No guides found'}
-                emptyStateMessage={activeTab === 'blueprints' ? 'Try adjusting your filters or search' : 'Try adjusting your filters or search'}
+                emptyStateMessage="Try adjusting your filters or search"
                 onClickGuide={(g) => {
                   const qs = queryParams.toString();
                   const isProduct = (g.domain === 'Product') || (g.productType && g.productStage);
@@ -1955,6 +1961,10 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     );
   };
 
+  const normalizedFilters: Record<string, string[]> = isCourses
+    ? urlBasedFilters
+    : (Object.fromEntries(Object.entries(filters).map(([k, v]) => [k, Array.isArray(v) ? v : (v ? [v] : [])])) as Record<string, string[]>);
+
   return (
     <div className={`min-h-screen flex flex-col bg-gray-50 ${isGuides ? 'guidelines-theme' : ''}`}>
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
@@ -1969,14 +1979,12 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               </Link>
             </li>
             {isGuides ? (
-              <>
-                <li aria-current="page">
-                  <div className="flex items-center">
-                    <ChevronRightIcon size={16} className="text-gray-400" />
-                    <span className="ml-1 text-gray-700 md:ml-2">{config.title}</span>
-                  </div>
-                </li>
-              </>
+              <li aria-current="page">
+                <div className="flex items-center">
+                  <ChevronRightIcon size={16} className="text-gray-400" />
+                  <span className="ml-1 text-gray-700 md:ml-2">{config.title}</span>
+                </div>
+              </li>
             ) : (
               <>
                 <li>
@@ -2149,7 +2157,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           };
 
           return (
-            <>
               <div className="mb-6 border-b border-gray-200">
                 <nav className="flex space-x-8" aria-label="Design System navigation">
                   {(['cids', 'vds', 'cds'] as DesignSystemTab[]).map(tab => (
@@ -2184,7 +2191,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   </div>
                 )}
               </div>
-            </>
           );
         })()}
 
@@ -2270,14 +2276,13 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                     <GuidesFilters activeTab={activeTab} facets={facets} query={queryParams} onChange={(next) => { next.delete('page'); const qs = next.toString(); globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`); setQueryParams(new URLSearchParams(next.toString())); track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); }} />
                   ) : (
                     <FilterSidebar
-                      filters={isCourses ? urlBasedFilters : (Object.fromEntries(Object.entries(filters).map(([k, v]) => [k, Array.isArray(v) ? v : (v ? [v] : [])])) as Record<string, string[]>)}
+                      filters={normalizedFilters}
                       filterConfig={filterConfig}
                       onFilterChange={handleFilterChange}
                       onResetFilters={resetFilters}
                       isResponsive={true}
                     />
                   )}
-                </div>
               </div>
             </dialog>
           </div>
@@ -2314,7 +2319,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   </div>
                 ) : (
                   <FilterSidebar
-                    filters={isCourses ? urlBasedFilters : (Object.fromEntries(Object.entries(filters).map(([k, v]) => [k, Array.isArray(v) ? v : (v ? [v] : [])])) as Record<string, string[]>)}
+                    filters={normalizedFilters}
                     filterConfig={filterConfig}
                     onFilterChange={handleFilterChange}
                     onResetFilters={resetFilters}
