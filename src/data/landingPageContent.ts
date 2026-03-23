@@ -309,7 +309,10 @@ export const getLeadApplyCards = (navigate: (path: string) => void): LeadApplyCa
     description:
       "Learn how AI prompting is used across DQ to improve thinking, delivery, and everyday digital work.",
     cta: "Learn More",
-    onClick: () => {}, // Updated to be functional
+    onClick: () => {
+      // TODO: Implement AI Prompting navigation
+      console.log('AI Prompting clicked - navigation to be implemented');
+    },
     ariaLabel: "AI Prompting Page",
     testId: "ai-prompting-cta",
     comingSoon: false,

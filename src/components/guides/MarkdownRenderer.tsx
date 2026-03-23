@@ -45,7 +45,7 @@ const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
   const rehypeStripListIcons = React.useMemo(() => {
     const stripText = (s: string) => {
       return (s || '')
-        .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric arrows
+        .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric shapes
         .replace(/^[\u200d\ufe0f\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '') // emoji
     }
     const containsImage = (node: any): boolean => {

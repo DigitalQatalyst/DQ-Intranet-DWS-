@@ -49,15 +49,19 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
 
     // Service Center / Digital Worker items
     if (marketplaceType === 'non-financial' && item.category === 'Digital Worker') {
-      return 'View Details';
+      // Handle Digital Worker navigation
+      navigate(`${config.route}/${item.id}`);
+      return;
     }
 
     if (marketplaceType === 'non-financial' && item.category === 'AI Tools') {
-      return 'Request Tool';
+      // Handle AI Tools navigation
+      navigate(`${config.route}/${item.id}`);
+      return;
     }
 
     // Fallback to marketplace-level default
-    return config.primaryCTA;
+    navigate(`${config.route}/${item.id}`);
   };
 
   const handlePrimaryAction = (e: React.MouseEvent) => {
@@ -102,8 +106,6 @@ export const MarketplaceCard: React.FC<MarketplaceItemProps> = ({
   const durationLabel = item.duration || '';
 
   const categoryLabel = item.courseCategory || item.category || (Array.isArray(item.tags) ? item.tags[0] : null);
-
-  const isComingSoon = false; // Removed coming soon functionality
 
   return (
     <div

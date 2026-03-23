@@ -1166,8 +1166,8 @@ export const LmsCourseDetailPage: React.FC = () => {
                         navigate(`/lms/${course.slug}/lesson/${firstLesson.id}`);
                       }
                     }}
-                    disabled={!firstLesson || course.status === 'coming-soon'}
-                    className={`w-full px-4 py-3 text-white font-semibold rounded-md transition-colors shadow-md ${firstLesson && course.status !== 'coming-soon' ? 'hover:opacity-90' : 'opacity-50 cursor-not-allowed'
+                    disabled={!firstLesson}
+                    className={`w-full px-4 py-3 text-white font-semibold rounded-md transition-colors shadow-md ${firstLesson ? 'hover:opacity-90' : 'opacity-50 cursor-not-allowed'
                       }`}
                     style={{ backgroundColor: '#030F35' }}
                   >

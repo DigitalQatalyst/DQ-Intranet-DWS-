@@ -196,7 +196,7 @@ const CALLOUTS: { role: Role; text: string; side: Side }[] = [
 function Hex({ fill, id }: { fill: "navy" | "white"; id?: number }) {
   const w = HEX_W, h = HEX_H;
   const d = `M${w / 2} 4 L${w - 4} ${h * 0.25} L${w - 4} ${h * 0.75} L${w / 2} ${h - 4} L4 ${h * 0.75} L4 ${h * 0.25} Z`;
-  const uniqueId = id ?? Math.random().toString(36).substr(2, 9);
+  const uniqueId = id ?? `hex-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
   if (fill === "white") {
     // Textured fill: subtle blend of blue, orange, and white

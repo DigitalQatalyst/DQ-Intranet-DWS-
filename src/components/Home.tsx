@@ -229,12 +229,18 @@ const approvedSections = {
 };
 
 /* ---------------------------- Service Card --------------------------- */
-const ServiceCard = ({
+const interface ServiceItem {
+  title: string;
+  description: string;
+  icon?: React.ReactElement;
+}
+
+ServiceCard = ({
   service,
   onClick,
   sectionStyle = defaultSectionStyle,
 }: {
-  service: any;
+  service: ServiceItem;
   onClick: () => void;
   sectionStyle?: SectionStyle;
 }) => {

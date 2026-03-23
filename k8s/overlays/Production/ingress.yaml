@@ -4,9 +4,9 @@ metadata:
   name: dws-ingress
   namespace: dws
   annotations:
-    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod   # 🔹 Reference staging ClusterIssuer
 spec:
+  ingressClassName: nginx
   tls:
   - hosts:
     - apps.digitalqatalyst.com   # 🔹 Replace with your domain
@@ -22,4 +22,3 @@ spec:
             name: dws-service
             port:
               number: 80
-      

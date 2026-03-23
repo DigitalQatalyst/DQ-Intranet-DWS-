@@ -734,8 +734,6 @@ export const LmsCourses: React.FC = () => {
                     const durationLabel = track.duration || 'N/A';
                     const categoryLabel = track.courseCategory || track.category;
 
-                    const isComingSoon = false; // Removed coming soon functionality
-
                     const CardContent = (
                       <div className="flex flex-col h-full">
                         {/* Track Image & Overlay Badge */}

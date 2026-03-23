@@ -365,7 +365,9 @@ export function AuthProvider({
         if (!cancelled && resolved && !looksSynthetic(resolved)) {
           setEmailOverride(resolved);
         }
-      } catch {
+      } catch (error) {
+        // Silently handle Graph API errors - fallback to account email
+        console.debug('Graph API fallback failed:', error);
       }
     })();
     return () => {
