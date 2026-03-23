@@ -372,11 +372,33 @@ export default function PodcastSeriesPage() {
     }
   };
 
+  const isTrustedAudioUrl = (audioUrl: string): boolean => {
+    try {
+      const parsed = new URL(audioUrl, window.location.origin);
+
+      // Allow only same-origin URLs
+      if (parsed.origin !== window.location.origin) return false;
+
+      // Restrict to known podcast asset paths
+      const allowedPrefixes = ['/Podcasts/', '/public/Podcasts/'];
+      return allowedPrefixes.some((prefix) => parsed.pathname.startsWith(prefix));
+    } catch {
+      return false;
+    }
+  };
+
   const handleDownload = async (episode: NewsItem, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!episode.audioUrl) { alert('Audio file not available for download'); return; }
+
+    if (!isTrustedAudioUrl(episode.audioUrl)) {
+      alert('Invalid or untrusted audio source.');
+      return;
+    }
+
     try {
-      const response = await fetch(episode.audioUrl);
+      const trustedUrl = new URL(episode.audioUrl, window.location.origin).toString();
+      const response = await fetch(trustedUrl, { method: 'GET' });
       if (!response.ok) throw new Error('Failed to fetch');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
