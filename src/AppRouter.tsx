@@ -20,7 +20,6 @@ import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
-import DiscoverDQ from "./pages/DiscoverDQ";
 import OnboardingLanding from "./pages/OnboardingLanding";
 import { OnboardingJourney } from "./pages/OnboardingJourney";
 import ComingSoonPage from "./pages/ComingSoonPage";
@@ -30,8 +29,6 @@ import NotFound from "./pages/NotFound";
 import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
 const GHCInspectorPage = React.lazy(() => import("./pages/admin/ghc-inspector/GHCInspectorPage"));
-import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
-import { ApolloProvider } from "@apollo/client/react";
 import EventsPage from "./pages/events/EventsPage";
 import { DWSChatProvider } from "./components/DWSChatProvider";
 import ThankYou from "./pages/ThankYou";
@@ -43,19 +40,10 @@ import GHCLanding from "./pages/GHCLanding";
 import SixXDLanding from "./pages/6XDLanding";
 
 export function AppRouter() {
-
-  const client = new ApolloClient({
-    link: new HttpLink({
-      uri: "https://9609a7336af8.ngrok-free.app/services-api",
-    }), // <-- Use HttpLink
-    cache: new InMemoryCache(),
-  });
-
   return (
-    <ApolloProvider client={client}>
-      <BrowserRouter>
-        <AuthProvider>
-          <DWSChatProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <DWSChatProvider>
             <Routes>
             <Route path="/discover-dq" element={<ComingSoonPage />} />
             <Route path="/coming-soon" element={<ComingSoonPage />} />
@@ -111,9 +99,8 @@ export function AppRouter() {
             <Route path="/*" element={<App />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
-          </DWSChatProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </ApolloProvider>
+        </DWSChatProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
