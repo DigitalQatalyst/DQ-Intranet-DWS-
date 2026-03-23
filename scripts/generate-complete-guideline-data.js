@@ -38,16 +38,11 @@ guidelineData.sections.push(
   }
 );
 
-// Save to file
+// Save to file — outputDir is derived from import.meta.url, not user input
 const outputDir = path.join(__dirname, 'guideline-data');
-// codacy-disable-next-line security/detect-non-literal-fs-filename
-if (!fs.existsSync(outputDir)) {
-  // codacy-disable-next-line security/detect-non-literal-fs-filename
-  fs.mkdirSync(outputDir, { recursive: true });
-}
+fs.mkdirSync(outputDir, { recursive: true });
 
 const outputPath = path.join(outputDir, 'associate-owned-asset-complete.json');
-// codacy-disable-next-line security/detect-non-literal-fs-filename
 fs.writeFileSync(outputPath, JSON.stringify(guidelineData, null, 2));
 
 console.log(`✅ Generated complete guideline data at: ${outputPath}`);

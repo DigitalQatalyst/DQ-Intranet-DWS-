@@ -22,9 +22,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function migrate() {
   console.log('📝 Migrating Associate Owned Asset Guidelines...\n');
 
-  // Read the JSON data file
+  // Read the JSON data file — dataPath is derived from __dirname, not user input
   const dataPath = path.join(__dirname, 'guideline-data', 'associate-owned-asset-data.json');
-  // codacy-disable-next-line security/detect-non-literal-fs-filename
   const guidelineData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
   try {
