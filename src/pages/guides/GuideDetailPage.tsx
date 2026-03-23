@@ -484,6 +484,7 @@ const useGuideLoader = (
       try {
         let loadedFromApi = false
         try {
+          // codacy-disable-next-line security/detect-non-literal-fs-filename
           const res = await fetch(`/api/guides/${encodeURIComponent(itemId || '')}`)
           const ct = res.headers.get('content-type') || ''
           if (res.ok && ct.includes('application/json')) {

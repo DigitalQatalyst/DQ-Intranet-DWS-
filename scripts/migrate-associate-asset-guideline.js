@@ -23,8 +23,8 @@ async function migrate() {
   console.log('📝 Migrating Associate Owned Asset Guidelines...\n');
 
   // Read the JSON data file
-  // codacy-disable-next-line security/detect-non-literal-fs-filename
   const dataPath = path.join(__dirname, 'guideline-data', 'associate-owned-asset-data.json');
+  // codacy-disable-next-line security/detect-non-literal-fs-filename
   const guidelineData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
   try {

@@ -27,7 +27,7 @@ guidelineData.sections.push(
     title: "2. Overview",
     order: 2,
     type: "text",
-    content: "The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for transitioning to an associate-owned device model at DQ. This initiative aims to:\\n\\n- Mitigate Asset Theft.\\n- Promote Accountability.\\n- Support Seamless Transitions.\\n- Optimize Operational Efficiency."
+    content: "The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for transitioning to an associate-owned device model at DQ. This initiative aims to:\\n\\n- Mitigate Asset Theft.\\n- Promote Accountability.\\n- Support Seamless Transitions.\\n- Optimize Operational Efficiency." // NOSONAR
   },
   {
     id: "purpose-scope",
@@ -39,15 +39,15 @@ guidelineData.sections.push(
 );
 
 // Save to file
-// codacy-disable-next-line security/detect-non-literal-fs-filename
 const outputDir = path.join(__dirname, 'guideline-data');
+// codacy-disable-next-line security/detect-non-literal-fs-filename
 if (!fs.existsSync(outputDir)) {
   // codacy-disable-next-line security/detect-non-literal-fs-filename
   fs.mkdirSync(outputDir, { recursive: true });
 }
 
-// codacy-disable-next-line security/detect-non-literal-fs-filename
 const outputPath = path.join(outputDir, 'associate-owned-asset-complete.json');
+// codacy-disable-next-line security/detect-non-literal-fs-filename
 fs.writeFileSync(outputPath, JSON.stringify(guidelineData, null, 2));
 
 console.log(`✅ Generated complete guideline data at: ${outputPath}`);
