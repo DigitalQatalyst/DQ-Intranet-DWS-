@@ -45,9 +45,19 @@ function saveUserRequests(requests: UserRequestsData): void {
 export function addLeaveRequest(request: LeaveRequestForm): StoredLeaveRequest {
   const requests = getUserRequests();
   
+  const generateSecureId = () => {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint32Array(2);
+      crypto.getRandomValues(array);
+      return `leave-${Date.now()}-${array[0]}-${array[1]}`;
+    }
+    // Fallback for environments without crypto API
+    return `leave-${Date.now()}-${Date.now().toString(36)}`;
+  };
+
   const newRequest: StoredLeaveRequest = {
     ...request,
-    id: `leave-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: generateSecureId(),
     submittedAt: new Date().toISOString(),
     status: 'pending',
   };

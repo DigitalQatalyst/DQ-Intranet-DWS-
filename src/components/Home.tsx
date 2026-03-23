@@ -11,10 +11,8 @@ import {
   Calendar,
   Book as BookIcon,
   MessageCircle,
-  Clock,
   Compass,
   Building,
-  Lock,
   GraduationCap,
   CircleDot,
   ClipboardList,
@@ -229,20 +227,22 @@ const approvedSections = {
 };
 
 /* ---------------------------- Service Card --------------------------- */
-const interface ServiceItem {
+export interface ServiceItem {
   title: string;
   description: string;
-  icon?: React.ReactElement;
+  icon?: React.ReactNode;
 }
 
-ServiceCard = ({
+const ServiceCard = ({
   service,
   onClick,
   sectionStyle = defaultSectionStyle,
+  isComingSoon,
 }: {
   service: ServiceItem;
   onClick: () => void;
   sectionStyle?: SectionStyle;
+  isComingSoon?: boolean;
 }) => {
   const activeCardClasses = `${sectionStyle.cardClasses} hover:shadow-md hover:-translate-y-0.5 cursor-pointer`;
 
@@ -258,11 +258,11 @@ ServiceCard = ({
   ) : (
     <CircleDot aria-hidden="true" />
   );
-  const iconElement = cloneElement(iconNode, {
+  const iconElement = React.isValidElement(iconNode) ? cloneElement(iconNode as React.ReactElement<any>, {
     size: 20,
     "aria-hidden": true,
-    className: `${iconColorClass} ${iconNode.props?.className ?? ""}`.trim(),
-  });
+    className: `${iconColorClass} ${(iconNode as React.ReactElement<any>).props?.className ?? ""}`.trim(),
+  } as any) : <span className={iconColorClass}>{iconNode}</span>;
 
   const wrapperClasses = `${activeCardClasses} ${baseLayoutClasses}`;
   const titleClass = `${sectionStyle.headingClass} text-base font-semibold text-white mb-1 truncate`;

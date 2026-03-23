@@ -112,9 +112,30 @@ export const ResourceCard = ({
     description: content.description,
     tags: content.tags || [],
     resourceType: mapResourceType(content.type), // Required: resourceType field
-    fileSize: content.fileSize || (Math.random() * 5).toFixed(1) + ' MB',
-    downloadCount: content.downloadCount || Math.floor(Math.random() * 1000) + 100,
-    accessCount: content.accessCount || Math.floor(Math.random() * 5000) + 500,
+    fileSize: content.fileSize || (() => {
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        return ((buf[0] / 0xffffffff) * 5).toFixed(1) + ' MB';
+      }
+      return (Math.random() * 5).toFixed(1) + ' MB';
+    })(),
+    downloadCount: content.downloadCount || (() => {
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        return Math.floor((buf[0] / 0xffffffff) * 1000) + 100;
+      }
+      return Math.floor(Math.random() * 1000) + 100;
+    })(),
+    accessCount: content.accessCount || (() => {
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        return Math.floor((buf[0] / 0xffffffff) * 5000) + 500;
+      }
+      return Math.floor(Math.random() * 5000) + 500;
+    })(),
     thumbnailUrl: content.imageUrl, // Map imageUrl to thumbnailUrl
     isExternal: content.isExternal || false,
     lastUpdated: content.lastUpdated || 'January 2024'

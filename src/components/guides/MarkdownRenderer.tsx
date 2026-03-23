@@ -46,7 +46,10 @@ const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
     const stripText = (s: string) => {
       return (s || '')
         .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric shapes
-        .replace(/^[\u200d\ufe0f\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '') // emoji
+        .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}]+\s*/u, '') // emoji basic
+        .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F900}-\u{1F9FF}]+\s*/u, '') // emoji extended
+        .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
+        .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
     }
     const containsImage = (node: any): boolean => {
       if (!node || typeof node !== 'object') return false
@@ -97,7 +100,7 @@ const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
       // Remove leading geometric-shape arrows/bullets (includes ▶, ►, ▸ and many others)
       line = line.replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '')
       // Remove leading emoji pictographs
-      line = line.replace(/^[\u200d\ufe0f\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
+      line = line.replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
       // Replace leading markdown/HTML image icons with their alt text (to keep names)
       line = line
         .replace(/^<img[^>]*alt=["']?([^"'>]+)[^>]*>\s*/i, '$1 ')

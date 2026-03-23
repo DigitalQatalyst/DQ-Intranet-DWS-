@@ -57,10 +57,20 @@ export function DocumentSection({
     };
     // Process files
     const handleFiles = files => {
-        const newUploadingFiles = files.map(file => ({
-            id: Date.now() + Math.random().toString(36).substr(2, 9),
-            name: file.name,
-            type: getFileType(file.name),
+        const newUploadingFiles = files.map(file => {
+            let randomId: string;
+            if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+                const buf = new Uint32Array(2);
+                crypto.getRandomValues(buf);
+                randomId = Array.from(buf).map(n => n.toString(36)).join('');
+            } else {
+                randomId = Math.random().toString(36).substr(2, 9);
+            }
+            
+            return {
+                id: Date.now() + randomId,
+                name: file.name,
+                type: getFileType(file.name),
             size: formatFileSize(file.size),
             progress: 0,
             status: 'uploading'
@@ -75,7 +85,15 @@ export function DocumentSection({
     const simulateUpload = fileId => {
         let progress = 0;
         const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 10) + 5;
+            let increment: number;
+            if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+                const buf = new Uint32Array(1);
+                crypto.getRandomValues(buf);
+                increment = Math.floor((buf[0] / 0xffffffff) * 10) + 5;
+            } else {
+                increment = Math.floor(Math.random() * 10) + 5;
+            }
+            progress += increment;
             if (progress >= 100) {
                 clearInterval(interval);
                 progress = 100;

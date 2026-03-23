@@ -6,7 +6,6 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod   # 🔹 Reference staging ClusterIssuer
 spec:
-  ingressClassName: nginx
   tls:
   - hosts:
     - apps.digitalqatalyst.com   # 🔹 Replace with your domain

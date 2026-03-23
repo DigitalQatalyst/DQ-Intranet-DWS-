@@ -95,6 +95,7 @@ export function DocumentsPage({ title, documents }: DocumentsPageProps) {
             crypto.getRandomValues(buf);
             return min + Math.floor((buf[0] / 0xffffffff) * range);
         }
+        // Fallback for environments without crypto API
         return min + Math.floor(Math.random() * range);
     };
 
@@ -109,6 +110,7 @@ export function DocumentsPage({ title, documents }: DocumentsPageProps) {
                 .map((n) => n.toString(16).padStart(8, "0"))
                 .join("");
         }
+        // Fallback for environments without crypto API
         return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     };
 

@@ -44,7 +44,15 @@ class ChatService {
     this.setConnectionStatus(ConnectionStatus.CONNECTING);
     // Simulate connection process with random success/failure
     this.connectionTimeout = setTimeout(() => {
-      const isSuccess = Math.random() > 0.1; // 10% chance of failure for demo purposes
+      let isSuccess: boolean;
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        isSuccess = (buf[0] / 0xffffffff) > 0.1; // 10% chance of failure for demo purposes
+      } else {
+        isSuccess = Math.random() > 0.1;
+      }
+      
       if (isSuccess) {
         this.setConnectionStatus(ConnectionStatus.CONNECTED);
       } else {
@@ -176,7 +184,14 @@ class ChatService {
           // Show typing indicator
           this.setAdvisorTyping(true);
           // Simulate advisor typing and responding
-          const typingTime = 1500 + Math.random() * 2000; // Random typing time between 1.5-3.5 seconds
+          let typingTime: number;
+          if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            const buf = new Uint32Array(1);
+            crypto.getRandomValues(buf);
+            typingTime = 1500 + (buf[0] / 0xffffffff) * 2000; // Random typing time between 1.5-3.5 seconds
+          } else {
+            typingTime = 1500 + Math.random() * 2000;
+          }
           this.typingTimeout = setTimeout(() => {
             this.setAdvisorTyping(false);
             this.simulateAdvisorResponse(

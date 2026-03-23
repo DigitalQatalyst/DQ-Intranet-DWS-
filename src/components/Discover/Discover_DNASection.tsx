@@ -193,10 +193,22 @@ const CALLOUTS: { role: Role; text: string; side: Side }[] = [
 ];
 
 /* ===== Hex (flat-top) ===== */
+let globalHexCounter = 0;
 function Hex({ fill, id }: { fill: "navy" | "white"; id?: number }) {
   const w = HEX_W, h = HEX_H;
   const d = `M${w / 2} 4 L${w - 4} ${h * 0.25} L${w - 4} ${h * 0.75} L${w / 2} ${h - 4} L4 ${h * 0.75} L4 ${h * 0.25} Z`;
-  const uniqueId = id ?? `hex-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  // Generate a more secure unique ID using crypto API if available
+  const generateSecureId = () => {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint32Array(2);
+      crypto.getRandomValues(array);
+      return `hex-${array[0]}-${array[1]}`;
+    }
+    // Fallback for environments without crypto API
+    return `hex-${Date.now()}-${globalHexCounter++}`;
+  };
+  
+  const uniqueId = id ?? generateSecureId();
 
   if (fill === "white") {
     // Textured fill: subtle blend of blue, orange, and white
@@ -631,7 +643,7 @@ function Discover_DNASection({}: Discover_DNASectionProps) {
       role: n.role as Role,
       title: n.title,
       subtitle: n.subtitle,
-      fill: n.fill as "navy" | "white",
+      fill: n.fill as "navy" | "outline",
       details: n.details ?? undefined,
     }))
     : NODES;

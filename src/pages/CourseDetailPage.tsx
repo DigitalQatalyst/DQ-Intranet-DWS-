@@ -33,8 +33,23 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Generate a random rating between 4.0 and 5.0
-  const rating = (4 + Math.random()).toFixed(1);
-  const reviewCount = Math.floor(Math.random() * 50) + 10;
+  const rating = (() => {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return (4 + (buf[0] / 0xffffffff)).toFixed(1);
+    }
+    return (4 + Math.random()).toFixed(1);
+  })();
+  
+  const reviewCount = (() => {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return Math.floor((buf[0] / 0xffffffff) * 50) + 10;
+    }
+    return Math.floor(Math.random() * 50) + 10;
+  })();
   useEffect(() => {
     const fetchCourseDetails = async () => {
       if (!courseId) return;
