@@ -253,19 +253,12 @@ export const ServiceDetailPage: React.FC = () => {
     return NON_GHC_TABS;
   }, [isGHC, isDigitalWorkspace]);
 
-  // Force re-render when ghcContent or guide changes to update tabs
+  // Set appropriate default tab based on guideline type
   useEffect(() => {
-    if (ghcContent || guide) {
-      // Set appropriate default tab based on guideline type
-      if (isDigitalWorkspaceGuideline(guide)) {
-        setActiveTab('purpose');
-      } else if (ghcContent) {
-        setActiveTab('purpose');
-      } else {
-        setActiveTab('overview');
-      }
-      setForceUpdate(prev => prev + 1);
-    }
+    if (!ghcContent && !guide) return;
+    const defaultTab = isDigitalWorkspaceGuideline(guide) || ghcContent ? 'purpose' : 'overview';
+    setActiveTab(defaultTab);
+    setForceUpdate(prev => prev + 1);
   }, [ghcContent, guide]);
 
   // Scroll to top immediately when itemId changes (for navigation between related competencies)
@@ -360,11 +353,6 @@ export const ServiceDetailPage: React.FC = () => {
     if (!isGHC || !itemId) return null;
     
     switch (activeTab) {
-      case 'purpose':
-        return {
-          text: 'View Details',
-          url: `/marketplace/guides/${itemId}/details` // Link to detailed guide page with body content
-        };
       case 'essentials':
         return {
           text: 'Read More in Playbook',
@@ -512,19 +500,19 @@ export const ServiceDetailPage: React.FC = () => {
                     <div className="space-y-6">
                       {/* Main Description */}
                       <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
-                        {ghcContent.shortOverview.split('\n\n').map((paragraph, index) => (
-                          <p key={index}>{paragraph}</p>
+                        {ghcContent.shortOverview.split('\n\n').map((paragraph) => (
+                          <p key={paragraph.slice(0, 40)}>{paragraph}</p>
                         ))}
                       </div>
 
                       {/* Course Highlights Section */}
                       <div className="space-y-5">
                         <SubHeading text="Five Reasons To Work With The GHC" />
-                        {ghcContent.highlights.map((highlight, index) => {
+                        {ghcContent.highlights.map((highlight) => {
                           const [title, ...descParts] = highlight.split(':')
                           const description = descParts.join(':').trim()
                           return (
-                            <div key={index} className="flex items-start gap-3">
+                            <div key={highlight.slice(0, 40)} className="flex items-start gap-3">
                               <div className="flex-shrink-0 mt-1">
                                 <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />

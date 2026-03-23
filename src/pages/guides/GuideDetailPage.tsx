@@ -486,7 +486,8 @@ const useGuideLoader = (
         try {
           // Validate itemId is a safe slug before using in URL (alphanumeric, hyphens, underscores only)
           const safeId = /^[\w-]+$/.test(itemId || '') ? itemId : ''
-          const res = await fetch(`/api/guides/${encodeURIComponent(safeId || '')}`)
+          const apiUrl = `/api/guides/${encodeURIComponent(safeId ?? '')}`
+          const res = await fetch(apiUrl)
           const ct = res.headers.get('content-type') || ''
           if (res.ok && ct.includes('application/json')) {
             const data = await res.json()

@@ -24,10 +24,10 @@ async function fixNewlines() {
     console.log(`Current length: ${guide.body.length} characters`);
 
     // Replace literal \n with actual newlines
-    let fixedHtml = guide.body.replace(/\\n/g, '\n');
+    let fixedHtml = guide.body.replaceAll('\\n', '\n');
     
     // Also clean up any double newlines
-    fixedHtml = fixedHtml.replace(/\n\n+/g, '\n\n');
+    fixedHtml = fixedHtml.replaceAll('\n\n\n', '\n\n');
     
     console.log(`Fixed length: ${fixedHtml.length} characters`);
     console.log('\nFirst 500 chars after fix:');

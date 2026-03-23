@@ -3,7 +3,7 @@ import { supabaseAdmin } from '../../lib/supabaseAdmin'
 type AnyRequest = { method?: string; headers: Record<string,string|undefined>; url?: string; [k:string]: any }
 type AnyResponse = { status?: (c:number)=>AnyResponse; json?: (b:any)=>void }
 
-const GHC_SLUGS = ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd']
+const GHC_SLUGS = new Set(['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'])
 
 function parseJSONBody(req: AnyRequest): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -27,7 +27,7 @@ function buildUpdateData(body: any): Record<string, any> {
 }
 
 async function validateSlugChange(existingGuide: any, newSlug: string, id: string, res: AnyResponse): Promise<boolean> {
-  if (GHC_SLUGS.includes(existingGuide.slug) && GHC_SLUGS.includes(newSlug)) {
+  if (GHC_SLUGS.has(existingGuide.slug) && GHC_SLUGS.has(newSlug)) {
     res.status?.(400)
     res.json?.({ error: `Cannot change GHC element slug from "${existingGuide.slug}" to "${newSlug}". Each GHC element must have a unique, fixed slug.` })
     return false
@@ -71,7 +71,7 @@ async function handlePut(id: string, req: AnyRequest, res: AnyResponse): Promise
   }
 
   // Log GHC body changes for auditing
-  if (GHC_SLUGS.includes(existingGuide.slug) && body.body && body.body !== existingGuide.body) {
+  if (GHC_SLUGS.has(existingGuide.slug) && body.body && body.body !== existingGuide.body) {
     console.log(`[Admin] GHC Guide Update: ${existingGuide.slug} (ID: ${id})`)
     console.log(`[Admin] Body length changed: ${existingGuide.body?.length || 0} -> ${body.body.length}`)
   }

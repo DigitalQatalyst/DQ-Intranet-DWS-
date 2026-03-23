@@ -1,9 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import fs from 'node:fs';
 
 // Complete guideline data structure
 const guidelineData = {
@@ -38,11 +33,11 @@ guidelineData.sections.push(
   }
 );
 
-// Save to file — outputDir is derived from import.meta.url, not user input
-const outputDir = path.join(__dirname, 'guideline-data');
+// Save to file — path is relative to this script's directory
+const outputDir = new URL('./guideline-data', import.meta.url).pathname;
 fs.mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, 'associate-owned-asset-complete.json');
+const outputPath = new URL('./guideline-data/associate-owned-asset-complete.json', import.meta.url).pathname;
 fs.writeFileSync(outputPath, JSON.stringify(guidelineData, null, 2));
 
 console.log(`✅ Generated complete guideline data at: ${outputPath}`);

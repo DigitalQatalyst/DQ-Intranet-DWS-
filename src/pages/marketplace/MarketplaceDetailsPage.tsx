@@ -21,7 +21,7 @@ import { ServiceDetailsSidebar } from '../../components/marketplace/ServiceDetai
 import { GUIDE_CONTENT, GuideContent } from '../../constants/guideContent';
 
 // GHC service IDs that should use GUIDE_CONTENT instead of marketplace data
-const GHC_SERVICE_IDS = [
+const GHC_SERVICE_IDS = new Set([
   'ghc',
   'dq-vision',
   'dq-hov',
@@ -30,11 +30,11 @@ const GHC_SERVICE_IDS = [
   'dq-agile-sos',
   'dq-agile-flows',
   'dq-agile-6xd'
-];
+]);
 
 // Helper function to detect if itemId is a GHC service
 const isGHCService = (itemId: string): boolean => {
-  return GHC_SERVICE_IDS.includes(itemId);
+  return GHC_SERVICE_IDS.has(itemId);
 };
 
 // Helper function to map GHC itemId to GUIDE_CONTENT key
@@ -382,7 +382,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     { label: 'Competency Type', value: 'Golden Honeycomb' }
   ] : config.attributes.map(attr => ({
     label: attr.label,
-    value: item[attr.key] || 'N/A'
+    value: item[attr.key] ?? 'N/A'
   })).filter(detail => detail.value !== 'N/A');
   
   // Extract highlights/features based on marketplace type
@@ -553,96 +553,85 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
       return null;
     });
   };
+  const renderGHCTabContent = (tabId: string): React.ReactNode => {
+    if (!ghcContent) return null;
+    switch (tabId) {
+      case 'overview':
+        return (
+          <div>
+            <p className="text-gray-700 leading-relaxed mb-6">{ghcContent.shortOverview}</p>
+            {ghcContent.highlights && ghcContent.highlights.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Highlights</h3>
+                <div className="space-y-3">
+                  {ghcContent.highlights.map((highlight) => (
+                    <div key={highlight.slice(0, 40)} className="flex items-start gap-3">
+                      <CheckCircleIcon className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                      <span className="text-gray-700">{highlight}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      case 'understand':
+        return (
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Understanding This Competency</h3>
+            <p className="text-gray-700 leading-relaxed mb-6">{ghcContent.storybookIntro}</p>
+            {ghcContent.whatYouWillLearn && ghcContent.whatYouWillLearn.length > 0 && (
+              <div className="mt-8">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Learn</h4>
+                <div className="space-y-3">
+                  {ghcContent.whatYouWillLearn.map((item) => (
+                    <div key={item.slice(0, 40)} className="flex items-start gap-3">
+                      <CheckCircleIcon className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
+                      <span className="text-gray-700">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      case 'practice':
+        return (
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Learn & Practice</h3>
+            {ghcContent.courseIntro && (
+              <p className="text-gray-700 leading-relaxed mb-6">{ghcContent.courseIntro}</p>
+            )}
+            {ghcContent.whatYouWillPractice && ghcContent.whatYouWillPractice.length > 0 && (
+              <div className="mt-8">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Practice</h4>
+                <div className="space-y-3">
+                  {ghcContent.whatYouWillPractice.map((practiceItem) => (
+                    <div key={practiceItem.slice(0, 40)} className="flex items-start gap-3">
+                      <CheckCircleIcon className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />
+                      <span className="text-gray-700">{practiceItem}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      case 'materials':
+        return (
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">Other Materials</h3>
+            <p className="text-gray-600">Additional resources and materials for this competency will be available here soon.</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   const renderTabContent = (tabId: string) => {
-    // Handle GHC services first
     if (isGHC && ghcContent) {
-      switch (tabId) {
-        case 'overview':
-          return (
-            <div>
-              <p className="text-gray-700 leading-relaxed mb-6">
-                {ghcContent.shortOverview}
-              </p>
-
-              {ghcContent.highlights && ghcContent.highlights.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Highlights</h3>
-                  <div className="space-y-3">
-                    {ghcContent.highlights.map((highlight, index) => (
-                      <div key={highlight.slice(0, 40) || index} className="flex items-start gap-3">
-                        <CheckCircleIcon className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
-                        <span className="text-gray-700">{highlight}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-
-        case 'understand':
-          return (
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Understanding This Competency</h3>
-              <p className="text-gray-700 leading-relaxed mb-6">
-                {ghcContent.storybookIntro}
-              </p>
-
-              {ghcContent.whatYouWillLearn && ghcContent.whatYouWillLearn.length > 0 && (
-                <div className="mt-8">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Learn</h4>
-                  <div className="space-y-3">
-                    {ghcContent.whatYouWillLearn.map((item, index) => (
-                      <div key={item.slice(0, 40) || index} className="flex items-start gap-3">
-                        <CheckCircleIcon className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
-                        <span className="text-gray-700">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-
-        case 'practice':
-          return (
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Learn & Practice</h3>
-              {ghcContent.courseIntro && (
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  {ghcContent.courseIntro}
-                </p>
-              )}
-
-              {ghcContent.whatYouWillPractice && ghcContent.whatYouWillPractice.length > 0 && (
-                <div className="mt-8">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">What You Will Practice</h4>
-                  <div className="space-y-3">
-                    {ghcContent.whatYouWillPractice.map((item, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <CheckCircleIcon className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />
-                        <span className="text-gray-700">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-
-        case 'materials':
-          return (
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Other Materials</h3>
-              <p className="text-gray-600">
-                Additional resources and materials for this competency will be available here soon.
-              </p>
-            </div>
-          );
-
-        default:
-          return null;
-      }
+      return renderGHCTabContent(tabId);
     }
 
     // Regular marketplace content logic

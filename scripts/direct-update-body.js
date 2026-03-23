@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import fs from 'fs';
 
 dotenv.config();
 
@@ -34,7 +33,7 @@ const content = {
 async function update() {
   try {
     // First, let's see what guides exist
-    const { data: guides, error: listError } = await supabase
+    const { data: guides } = await supabase
       .from('guides')
       .select('id, slug, title')
       .ilike('slug', '%associate%');

@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 
 interface TableData {
-  headers: string[]
-  rows: string[][]
+  readonly headers: readonly string[]
+  readonly rows: readonly (readonly string[])[]
 }
 
 interface TablePreviewProps {
-  data: TableData
-  maxPreviewRows?: number
+  readonly data: TableData
+  readonly maxPreviewRows?: number
 }
 
 export function TablePreview({ data, maxPreviewRows = 2 }: TablePreviewProps) {
@@ -25,9 +25,9 @@ export function TablePreview({ data, maxPreviewRows = 2 }: TablePreviewProps) {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                {data.headers.map((header, index) => (
+                {data.headers.map((header) => (
                   <th
-                    key={index}
+                    key={header}
                     className="text-white px-4 py-3 text-left font-semibold text-sm border-r last:border-r-0"
                     style={{ backgroundColor: '#030E31', borderRightColor: 'rgba(255,255,255,0.2)' }}
                   >
@@ -38,10 +38,10 @@ export function TablePreview({ data, maxPreviewRows = 2 }: TablePreviewProps) {
             </thead>
             <tbody>
               {previewRows.map((row, rowIndex) => (
-                <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <tr key={row[0] ?? rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   {row.map((cell, cellIndex) => (
                     <td
-                      key={cellIndex}
+                      key={`${data.headers[cellIndex] ?? cellIndex}-${rowIndex}`}
                       className="px-4 py-3 text-sm text-gray-700 border-r border-gray-200 last:border-r-0"
                     >
                       {cell}
@@ -98,9 +98,9 @@ export function TablePreview({ data, maxPreviewRows = 2 }: TablePreviewProps) {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
-                      {data.headers.map((header, index) => (
+                      {data.headers.map((header) => (
                         <th
-                          key={index}
+                          key={header}
                           className="text-white px-4 py-3 text-left font-semibold text-sm border-r last:border-r-0 sticky top-0"
                           style={{ backgroundColor: '#030E31', borderRightColor: 'rgba(255,255,255,0.2)' }}
                         >
@@ -111,10 +111,10 @@ export function TablePreview({ data, maxPreviewRows = 2 }: TablePreviewProps) {
                   </thead>
                   <tbody>
                     {data.rows.map((row, rowIndex) => (
-                      <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <tr key={row[0] ?? rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         {row.map((cell, cellIndex) => (
                           <td
-                            key={cellIndex}
+                            key={`${data.headers[cellIndex] ?? cellIndex}-${rowIndex}`}
                             className="px-4 py-3 text-sm text-gray-700 border-r border-gray-200 last:border-r-0 border-b border-gray-200"
                           >
                             {cell}

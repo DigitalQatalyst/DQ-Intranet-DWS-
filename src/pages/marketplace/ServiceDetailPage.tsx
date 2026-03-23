@@ -25,7 +25,7 @@ interface ServiceDetail {
 }
 
 // GHC service IDs that should use GUIDE_CONTENT instead of Supabase data
-const GHC_SERVICE_IDS = [
+const GHC_SERVICE_IDS = new Set([
   'ghc',
   'dq-vision',
   'dq-hov',
@@ -34,11 +34,11 @@ const GHC_SERVICE_IDS = [
   'dq-agile-sos',
   'dq-agile-flows',
   'dq-agile-6xd'
-]
+])
 
 // Helper function to detect if serviceId is a GHC service
 const isGHCService = (serviceId: string): boolean => {
-  return GHC_SERVICE_IDS.includes(serviceId)
+  return GHC_SERVICE_IDS.has(serviceId)
 }
 
 // Helper function to map GHC serviceId to GUIDE_CONTENT key
@@ -311,8 +311,8 @@ export default function ServiceDetailPage() {
 
   // Determine if we're displaying a GHC service
   const isGHC = ghcContent !== null
-  const displayTitle = isGHC ? ghcContent!.title : service!.title
-  const displayDescription = isGHC ? ghcContent!.subtitle : service!.description
+  const displayTitle = isGHC ? (ghcContent?.title ?? '') : (service?.title ?? '')
+  const displayDescription = isGHC ? (ghcContent?.subtitle ?? '') : (service?.description ?? '')
 
   const getCategoryBadge = () => {
     if (isGHC) {
@@ -326,7 +326,7 @@ export default function ServiceDetailPage() {
       prompt_library: 'PROMPT LIBRARY',
       ai_tools: 'AI TOOLS'
     }
-    return categoryMap[service!.category] || 'SERVICE'
+    return categoryMap[service?.category ?? ''] || 'SERVICE'
   }
 
   const getServiceTypeLabel = (type: string) => {
@@ -406,28 +406,28 @@ export default function ServiceDetailPage() {
 
           {/* Service Metadata Tags */}
           <div className="flex flex-wrap gap-4 text-sm">
-            {!isGHC && service!.service_type && (
+            {!isGHC && service?.service_type && (
               <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
                 <span className="text-white/70">Type:</span>
-                <span className="font-medium">{getServiceTypeLabel(service!.service_type)}</span>
+                <span className="font-medium">{getServiceTypeLabel(service.service_type)}</span>
               </div>
             )}
-            {!isGHC && service!.delivery_mode && (
+            {!isGHC && service?.delivery_mode && (
               <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
                 <span className="text-white/70">Mode:</span>
-                <span className="font-medium">{getDeliveryModeLabel(service!.delivery_mode)}</span>
+                <span className="font-medium">{getDeliveryModeLabel(service.delivery_mode)}</span>
               </div>
             )}
-            {!isGHC && service!.provider && (
+            {!isGHC && service?.provider && (
               <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
                 <Building size={16} />
-                <span className="font-medium">{service!.provider}</span>
+                <span className="font-medium">{service.provider}</span>
               </div>
             )}
-            {!isGHC && service!.location && (
+            {!isGHC && service?.location && (
               <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
                 <MapPin size={16} />
-                <span className="font-medium">{service!.location}</span>
+                <span className="font-medium">{service.location}</span>
               </div>
             )}
             {isGHC && (
@@ -544,9 +544,9 @@ export default function ServiceDetailPage() {
 
                 {/* Tab Content */}
                 <div className="p-8">
-                  {isGHC
-                    ? <GHCTabContent ghcContent={ghcContent!} activeTab={activeTab} />
-                    : <ServiceTabContent service={service!} activeTab={activeTab} />
+                  {isGHC && ghcContent
+                    ? <GHCTabContent ghcContent={ghcContent} activeTab={activeTab} />
+                    : service && <ServiceTabContent service={service} activeTab={activeTab} />
                   }
                 </div>
               </div>
@@ -570,34 +570,34 @@ export default function ServiceDetailPage() {
                     ) : (
                       // Non-GHC service summary
                       <>
-                        {service!.service_type && (
+                        {service?.service_type && (
                           <div>
                             <p className="text-sm text-gray-500 mb-1">Service Type</p>
-                            <p className="text-gray-900 font-medium">{getServiceTypeLabel(service!.service_type)}</p>
+                            <p className="text-gray-900 font-medium">{getServiceTypeLabel(service.service_type)}</p>
                           </div>
                         )}
-                        {service!.delivery_mode && (
+                        {service?.delivery_mode && (
                           <div>
                             <p className="text-sm text-gray-500 mb-1">Delivery Mode</p>
-                            <p className="text-gray-900 font-medium">{getDeliveryModeLabel(service!.delivery_mode)}</p>
+                            <p className="text-gray-900 font-medium">{getDeliveryModeLabel(service.delivery_mode)}</p>
                           </div>
                         )}
-                        {service!.response_time && (
+                        {service?.response_time && (
                           <div>
                             <p className="text-sm text-gray-500 mb-1">Response Time</p>
-                            <p className="text-gray-900 font-medium">{service!.response_time}</p>
+                            <p className="text-gray-900 font-medium">{service.response_time}</p>
                           </div>
                         )}
-                        {service!.provider && (
+                        {service?.provider && (
                           <div>
                             <p className="text-sm text-gray-500 mb-1">Department</p>
-                            <p className="text-gray-900 font-medium">{service!.provider}</p>
+                            <p className="text-gray-900 font-medium">{service.provider}</p>
                           </div>
                         )}
-                        {service!.location && (
+                        {service?.location && (
                           <div>
                             <p className="text-sm text-gray-500 mb-1">Location</p>
-                            <p className="text-gray-900 font-medium">{service!.location}</p>
+                            <p className="text-gray-900 font-medium">{service.location}</p>
                           </div>
                         )}
                       </>

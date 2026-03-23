@@ -108,7 +108,7 @@ function GuidelinePage() {
             let processedHtml = (data.body as string).replaceAll('\\n', '\n')
             
             // Strip leading pipe characters from headings (artifact from database content)
-            processedHtml = processedHtml.replace(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')
+            processedHtml = processedHtml.replaceAll(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')
             
             // Add IDs to headings for table of contents navigation
             processedHtml = addIdsToHeadings(processedHtml)

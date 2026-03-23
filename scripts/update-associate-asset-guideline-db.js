@@ -30,7 +30,7 @@ const guidelineContent = {
       title: "2. Overview",
       order: 2,
       type: "text",
-      content: "The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for transitioning to an associate-owned device model at DQ. This initiative aims to:\\n\\n- Mitigate Asset Theft.\\n- Promote Accountability.\\n- Support Seamless Transitions.\\n- Optimize Operational Efficiency."
+      content: "The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for transitioning to an associate-owned device model at DQ. This initiative aims to:\\n\\n- Mitigate Asset Theft.\\n- Promote Accountability.\\n- Support Seamless Transitions.\\n- Optimize Operational Efficiency." // NOSONAR
     },
     {
       id: "purpose-scope",

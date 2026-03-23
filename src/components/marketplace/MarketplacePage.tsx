@@ -1824,19 +1824,17 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           }
         } else if (searchQuery) {
           // For other marketplaces, apply search query if provided
-          {
           const query = searchQuery.toLowerCase();
-            filtered = filtered.filter(item => {
-              const searchableText = [
-                item.title,
-                item.description,
-                item.category,
-                item.provider?.name,
-                ...(item.tags || [])
-              ].filter(Boolean).join(' ').toLowerCase();
-              return searchableText.includes(query);
-            });
-          }
+          filtered = filtered.filter(item => {
+            const searchableText = [
+              item.title,
+              item.description,
+              item.category,
+              item.provider?.name,
+              ...(item.tags || [])
+            ].filter(Boolean).join(' ').toLowerCase();
+            return searchableText.includes(query);
+          });
         }
         
         setFilteredItems(filtered);

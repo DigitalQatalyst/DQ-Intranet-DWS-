@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react'
 import DOMPurify from 'dompurify'
 import { TablePreview } from './TablePreview'
 
-interface HTMLProcessorProps {
-  html: string
-  className?: string
+interface SafeHTMLBlockProps {
+  readonly html: string
+  readonly htmlKey: string
 }
 
 // Safe HTML block rendered via ref to avoid dangerouslySetInnerHTML
-function SafeHTMLBlock({ html, htmlKey }: { html: string; htmlKey: string }) {
+function SafeHTMLBlock({ html, htmlKey }: SafeHTMLBlockProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -21,8 +21,8 @@ function SafeHTMLBlock({ html, htmlKey }: { html: string; htmlKey: string }) {
 }
 
 interface HTMLProcessorProps {
-  html: string
-  className?: string
+  readonly html: string
+  readonly className?: string
 }
 
 export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {

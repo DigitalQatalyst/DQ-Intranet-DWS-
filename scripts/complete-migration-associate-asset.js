@@ -315,7 +315,7 @@ async function migrate() {
               {
                 number: "01",
                 role: "Associate",
-                description: "**Immediately report device failure or loss to Admin within 24hours** to ensure continued productivity by issuance of a temporary company device.\\n\\n**Sign a Commitment Form for the company device.**\\n\\n**Return the company device by 5.00 PM and confirm its return with Admin.** All company devices must be returned in good working condition"
+                description: "**Immediately report device failure or loss to Admin within 24hours** to ensure continued productivity by issuance of a temporary company device.\\n\\n**Sign a Commitment Form for the company device.**\\n\\n**Return the company device by 5.00 PM and confirm its return with Admin.** All company devices must be returned in good working condition" // NOSONAR
               },
               {
                 number: "02",

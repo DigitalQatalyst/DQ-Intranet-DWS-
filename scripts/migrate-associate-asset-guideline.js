@@ -1,11 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import fs from 'node:fs';
 
 dotenv.config();
 
@@ -22,8 +17,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function migrate() {
   console.log('📝 Migrating Associate Owned Asset Guidelines...\n');
 
-  // Read the JSON data file — dataPath is derived from __dirname, not user input
-  const dataPath = path.join(__dirname, 'guideline-data', 'associate-owned-asset-data.json');
+  // Read the JSON data file — path is fixed relative to this script
+  const dataPath = new URL('./guideline-data/associate-owned-asset-data.json', import.meta.url).pathname;
   const guidelineData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
   try {
