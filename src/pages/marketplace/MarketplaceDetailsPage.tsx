@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import DOMPurify from 'dompurify';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, Plus, Minus } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
@@ -9,7 +9,6 @@ import { getServiceTabContent, getCustomTabs } from '../../utils/serviceDetailsC
 import type { ContentBlock } from '../../utils/serviceDetailsContent';
 import { fetchMarketplaceItemDetails, fetchRelatedMarketplaceItems } from '../../services/marketplace';
 import { ErrorDisplay } from '../../components/SkeletonLoader';
-import { Link } from 'react-router-dom';
 import { getFallbackItemDetails, getFallbackItems } from '../../utils/fallbackData';
 import { getAIToolDataById } from '../../utils/aiToolsData';
 import { getDigitalWorkerServiceById } from '../../utils/digitalWorkerData';
@@ -20,6 +19,126 @@ import { INITIAL_APPROVERS } from '../../utils/mockApprovers';
 import { ServiceHeroSection } from '../../components/marketplace/ServiceHeroSection';
 import { ServiceDetailsSidebar } from '../../components/marketplace/ServiceDetailsSidebar';
 import { GUIDE_CONTENT, GuideContent } from '../../constants/guideContent';
+
+// CodeBlock component for rendering code snippets in tab content
+const CodeBlock: React.FC<{ code: string; language?: string; title?: string }> = ({ code, language, title }) => {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="mb-6 relative">
+      {title && (
+        <div className="bg-gray-100 px-4 py-2 rounded-t-lg border-b border-gray-300">
+          <h4 className="text-sm font-semibold text-gray-700">{title}</h4>
+        </div>
+      )}
+      <div className="relative">
+        <pre className="bg-gray-900 text-gray-100 p-6 rounded-b-lg overflow-x-auto text-sm leading-relaxed">
+          <code className={language ? `language-${language}` : ''}>{code}</code>
+        </pre>
+        <button
+          onClick={handleCopy}
+          className="absolute top-3 right-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors duration-200 flex items-center gap-1.5"
+        >
+          {copied ? (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Copied!
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// AccordionBlock component for FAQs in tab content
+const AccordionBlock: React.FC<{ items: Array<{ question: string; answer: string }> }> = ({ items }) => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggleAccordion = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
+  return (
+    <div className="space-y-4 mb-6">
+      {items.map((accordionItem, index) => {
+        const isOpen = openIndex === index;
+        return (
+          <div
+            key={`accordion-${index}-${accordionItem.question.slice(0, 20)}`}
+            className="rounded-lg overflow-hidden transition-all duration-300 ease-in border-2"
+            style={{
+              borderColor: isOpen ? '#030F35' : '#E5E7EB',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+            }}
+          >
+            <button
+              onClick={() => toggleAccordion(index)}
+              className="w-full flex items-center justify-between p-5 text-left transition-all duration-300 ease-in"
+              style={isOpen ? {
+                backgroundColor: '#030F35',
+                color: 'white'
+              } : {
+                backgroundColor: 'white',
+                color: '#374151'
+              }}
+              onMouseEnter={(e) => {
+                if (!isOpen) {
+                  e.currentTarget.style.backgroundColor = '#F9FAFB';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isOpen) {
+                  e.currentTarget.style.backgroundColor = 'white';
+                }
+              }}
+            >
+              <span className="text-base font-medium pr-4">
+                {accordionItem.question}
+              </span>
+              <div
+                className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ease-in"
+                style={isOpen ? { backgroundColor: 'white' } : { backgroundColor: '#E5E7EB' }}
+              >
+                {isOpen ? (
+                  <Minus className="w-4 h-4" style={{ color: '#030F35' }} />
+                ) : (
+                  <Plus className="w-4 h-4 text-gray-600" />
+                )}
+              </div>
+            </button>
+            <div
+              className="overflow-hidden transition-all duration-300 ease-in"
+              style={{
+                maxHeight: isOpen ? '500px' : '0px',
+                opacity: isOpen ? 1 : 0,
+              }}
+            >
+              <div className="px-5 pb-5 pt-2.5 bg-white">
+                <p className="text-gray-600 text-base leading-relaxed">{accordionItem.answer}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 // GHC service IDs that should use GUIDE_CONTENT instead of marketplace data
 const GHC_SERVICE_IDS = new Set([
@@ -33,9 +152,217 @@ const GHC_SERVICE_IDS = new Set([
   'dq-agile-6xd'
 ]);
 
+// Context passed to module-level item loaders to avoid closure over state setters
+interface ItemLoadContext {
+  marketplaceType: string;
+  shouldTakeAction: boolean;
+  navigate: (path: string) => void;
+  configRoute: string;
+  setGhcContent: (c: GuideContent | null) => void;
+  setActiveTab: (t: string) => void;
+  setItem: (i: any) => void;
+  setRelatedItems: (items: any[]) => void;
+  setError: (e: string | null) => void;
+  setRedirectTimer: (t: NodeJS.Timeout | null) => void;
+  setLoading: (v: boolean) => void;
+}
+
+const fetchItemDetails = async (
+  itemId: string | undefined,
+  redirectTimer: NodeJS.Timeout | null,
+  ctx: ItemLoadContext
+): Promise<void> => {
+  if (!itemId) return;
+  ctx.setLoading(true);
+  ctx.setError(null);
+  clearTimeout(redirectTimer ?? undefined);
+  ctx.setRedirectTimer(null);
+  try {
+    if (isGHCService(itemId)) {
+      await loadGHCItem(itemId, ctx);
+    } else {
+      await loadRegularItem(itemId, ctx);
+    }
+  } catch (err) {
+    console.error('Error in marketplace details page:', err);
+    ctx.setItem(getFallbackItemDetails(ctx.marketplaceType, 'generic-fallback'));
+    ctx.setRelatedItems(getFallbackItems(ctx.marketplaceType));
+    ctx.setError(null);
+  } finally {
+    ctx.setLoading(false);
+  }
+};
+
+const loadGHCItem = async (id: string, ctx: ItemLoadContext): Promise<void> => {
+  const contentKey = getGHCContentKey(id);
+  const content = GUIDE_CONTENT[contentKey];
+  if (content) {
+    ctx.setGhcContent(content);
+    ctx.setActiveTab('overview');
+    ctx.setRelatedItems(getFallbackItems(ctx.marketplaceType));
+  } else {
+    console.error('GHC content not found for itemId:', id);
+    const finalItemData = getFallbackItemDetails(ctx.marketplaceType, id || 'fallback-1');
+    ctx.setItem(finalItemData);
+    ctx.setRelatedItems(getFallbackItems(ctx.marketplaceType));
+  }
+};
+
+const loadRegularItem = async (id: string, ctx: ItemLoadContext): Promise<void> => {
+  let itemData = null;
+  try {
+    itemData = await fetchMarketplaceItemDetails(ctx.marketplaceType, id);
+  } catch (fetchError) {
+    console.error(`Error fetching ${ctx.marketplaceType} item details:`, fetchError);
+  }
+  const finalItemData = itemData ?? getFallbackItemDetails(ctx.marketplaceType, id ?? 'fallback-1');
+  if (finalItemData) {
+    ctx.setItem(finalItemData);
+    let relatedItemsData: any[] = [];
+    try {
+      relatedItemsData = await fetchRelatedMarketplaceItems(
+        ctx.marketplaceType,
+        finalItemData.id,
+        finalItemData.category || '',
+        finalItemData.provider?.name || ''
+      );
+    } catch (relatedError) {
+      console.error('Error fetching related items:', relatedError);
+    }
+    const related = relatedItemsData;
+    ctx.setRelatedItems(related.length > 0 ? related : getFallbackItems(ctx.marketplaceType));
+    if (ctx.shouldTakeAction) {
+      setTimeout(() => {
+        const actionSection = document.getElementById('action-section');
+        actionSection?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  } else {
+    const genericFallback = getFallbackItemDetails(ctx.marketplaceType, 'generic-fallback');
+    ctx.setItem(genericFallback);
+    ctx.setError(null);
+    const timer = setTimeout(() => { ctx.navigate(ctx.configRoute); }, 5000);
+    ctx.setRedirectTimer(timer);
+  }
+};
+
+// Helper to get back URL with tab preserved
+const getBackUrl = (marketplaceType: string, serviceTab: string | null, configRoute: string): string => {
+  if (marketplaceType === 'non-financial' && serviceTab) {
+    return `${configRoute}?tab=${serviceTab}`;
+  }
+  return configRoute;
+};
+
+// Helper to get tab label for Services Center tabs
+const getTabLabel = (tab: string | null): string => {
+  if (!tab) return '';
+  const tabMap: Record<string, string> = {
+    'technology': 'Technology',
+    'business': 'Employee Services',
+    'digital_worker': 'Digital Worker',
+    'prompt_library': 'Prompt Library',
+    'ai_tools': 'AI Tools'
+  };
+  return tabMap[tab] ?? '';
+};
+
+// Helper to get primary action label
+const getPrimaryActionLabel = (
+  isGHC: boolean,
+  isLeaveApplication: boolean,
+  isPromptLibrary: boolean,
+  isDigitalWorker: boolean,
+  isAITool: boolean,
+  fallback: string
+): string => {
+  if (isGHC) return 'Explore Competency →';
+  if (isLeaveApplication) return 'Apply For Leave';
+  if (isPromptLibrary) return 'View Prompt';
+  if (isDigitalWorker) return 'View Details';
+  if (isAITool) return 'Request Tool';
+  return fallback;
+};
+
+// Helper to get provider type label based on marketplace type
+const getProviderTypeLabel = (type: string): string => {
+  if (type === 'courses') return 'Leading provider of business education';
+  if (type === 'financial') return 'Trusted financial services provider';
+  return 'Expert business services provider';
+};
+
+// Helper to get sticky CTA price label
+const getStickyCtaPrice = (type: string, item: Record<string, unknown>): string => {
+  if (type === 'courses') return (item.price as string) || 'Free';
+  if (type === 'financial') return (item.amount as string) || 'Apply Now';
+  return 'Request Now';
+};
+
 // Helper function to detect if itemId is a GHC service
 const isGHCService = (itemId: string): boolean => {
   return GHC_SERVICE_IDS.has(itemId);
+};
+
+// Module-level scroll handler for sticky bottom CTA — avoids nesting penalty in component
+const computeStickyCtaVisible = (summaryCardEl: HTMLDivElement | null): boolean => {
+  if (summaryCardEl && window.innerWidth < 1024) {
+    const summaryCardBottom = summaryCardEl.offsetTop + summaryCardEl.offsetHeight;
+    return window.scrollY + window.innerHeight > summaryCardBottom + 100;
+  }
+  return false;
+};
+
+// Module-level helper to get highlights for non-GHC items
+const getNonGhcHighlights = (marketplaceType: string, item: any): any[] => {
+  if (marketplaceType === 'courses') {
+    return item.learningOutcomes ?? [];
+  }
+  return item.details ?? [];
+};
+const renderBlocks = (blocks: ContentBlock[]): React.ReactNode[] => {
+  return (blocks || []).map((block, idx) => {
+    if (block.type === 'p') {
+      const safeHtml = DOMPurify.sanitize(block.text);
+      // eslint-disable-next-line react/no-danger
+      return <p key={`block-p-${block.text?.slice(0, 30) ?? idx}`} className="text-gray-700 text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: safeHtml }}></p>;
+    }
+    if (block.type === 'ol') {
+      return <ol key={`block-ol-${block.items?.[0]?.slice(0, 20) ?? idx}`} className="list-decimal pl-6 space-y-3 text-gray-700 mb-4 text-base">
+          {block.items.map((it) => <li key={`ol-${it.slice(0, 30)}`} className="pl-2 leading-relaxed">{it}</li>)}
+        </ol>;
+    }
+    if (block.type === 'ul') {
+      return <ul key={`block-ul-${block.items?.[0]?.slice(0, 20) ?? idx}`} className="list-disc pl-6 space-y-3 text-gray-700 mb-4 text-base">
+          {block.items.map((it) => <li key={`ul-${it.slice(0, 30)}`} className="pl-2 leading-relaxed">{it}</li>)}
+        </ul>;
+    }
+    if (block.type === 'iframe') {
+      return <div key={`block-iframe-${block.src ?? idx}`} className="mb-6">
+          <iframe
+            src={block.src}
+            width={block.width || '640'}
+            height={block.height || '360'}
+            allowFullScreen
+            title={block.title || 'Embedded video'}
+            className="rounded-lg shadow-md border-0 overflow-hidden"
+          />
+        </div>;
+    }
+    if (block.type === 'accordion') {
+      return <AccordionBlock key={`block-accordion-${block.items?.[0]?.question?.slice(0, 20) ?? idx}`} items={block.items || []} />;
+    }
+    if (block.type === 'code') {
+      return <CodeBlock key={`block-code-${block.code?.slice(0, 20) ?? idx}`} code={block.code} language={block.language} title={block.title} />;
+    }
+    if (block.type === 'procedure_stages') {
+      const stagesConfig = procedureStagesConfigs[block.configKey as keyof typeof procedureStagesConfigs];
+      if (stagesConfig) {
+        return <ProcedureStages key={`block-stages-${block.configKey}`} config={{ ...stagesConfig, title: '' }} className="my-6" />;
+      }
+      return null;
+    }
+    return null;
+  });
 };
 
 // Helper function to map GHC itemId to GUIDE_CONTENT key
@@ -68,31 +395,12 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const shouldTakeAction = searchParams.get('action') === 'true';
   const serviceTab = searchParams.get('tab'); // Get tab from URL for Services Center
   const config = getMarketplaceConfig(marketplaceType);
-  
-  // Helper to get tab label
-  const getTabLabel = (tab: string | null): string => {
-    if (!tab) return '';
-    const tabMap: Record<string, string> = {
-      'technology': 'Technology',
-      'business': 'Employee Services',
-      'digital_worker': 'Digital Worker',
-      'prompt_library': 'Prompt Library',
-      'ai_tools': 'AI Tools'
-    };
-    return tabMap[tab] || '';
-  };
-  
-  // Helper to get back URL with tab preserved
-  const getBackUrl = (): string => {
-    if (marketplaceType === 'non-financial' && serviceTab) {
-      return `${config.route}?tab=${serviceTab}`;
-    }
-    return config.route;
-  };
-  const [item, setItem] = useState<any | null>(null);
+  const backUrl = getBackUrl(marketplaceType, serviceTab, config.route);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [item, setItem] = useState<any>(null);
   const [ghcContent, setGhcContent] = useState<GuideContent | null>(null);
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
-  const [_isBookmarked, _setIsBookmarked] = useState(false);
+  // isBookmarked state reserved for future UI wiring
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,18 +424,14 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const summaryCardRef = useRef<HTMLDivElement>(null);
   // Check if tabs overflow and need navigation controls
   const checkOverflow = () => {
-    if (tabsRef.current && containerRef.current) {
-      const scrollWidth = tabsRef.current.scrollWidth;
-      const clientWidth = containerRef.current.clientWidth - 96; // Account for potential arrow buttons
-      setShowNavigation(scrollWidth > clientWidth);
-    }
+    const scrollWidth = tabsRef.current?.scrollWidth ?? 0;
+    const clientWidth = (containerRef.current?.clientWidth ?? 0) - 96; // Account for potential arrow buttons
+    setShowNavigation(scrollWidth > clientWidth);
   };
   useEffect(() => {
     checkOverflow();
     const resizeObserver = new ResizeObserver(checkOverflow);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
+    resizeObserver.observe(containerRef.current as Element);
     return () => resizeObserver.disconnect();
   }, [item]);
   // FLOATING CARD SCROLL HANDLER REMOVED:
@@ -136,48 +440,24 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   // The sticky bottom CTA is now handled by the handler below.
   // To restore floating behavior, add back the scroll detection logic that sets isVisible state.
   // Handle scroll for sticky bottom CTA on mobile
+  const handleStickyCtaScroll = () => {
+    setShowStickyBottomCTA(computeStickyCtaVisible(summaryCardRef.current));
+  };
+
   useEffect(() => {
-    const handleScroll = () => {
-      if (summaryCardRef.current && window.innerWidth < 1024) {
-        const summaryCardBottom = summaryCardRef.current.offsetTop + summaryCardRef.current.offsetHeight;
-        const scrollPosition = window.scrollY + window.innerHeight;
-        // Show sticky CTA when scrolled past summary card
-        setShowStickyBottomCTA(scrollPosition > summaryCardBottom + 100);
-      } else {
-        setShowStickyBottomCTA(false);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
+    window.addEventListener('scroll', handleStickyCtaScroll);
+    window.addEventListener('resize', handleStickyCtaScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener('scroll', handleStickyCtaScroll);
+      window.removeEventListener('resize', handleStickyCtaScroll);
     };
   }, []);
   // Clear any redirect timers when component unmounts
   useEffect(() => {
-    return () => {
-      if (redirectTimer) {
-        clearTimeout(redirectTimer);
-      }
-    };
+    return () => { clearTimeout(redirectTimer ?? undefined); };
   }, [redirectTimer]);
-  const scrollLeft = () => {
-    if (tabsRef.current) {
-      tabsRef.current.scrollBy({
-        left: -200,
-        behavior: 'smooth'
-      });
-    }
-  };
-  const scrollRight = () => {
-    if (tabsRef.current) {
-      tabsRef.current.scrollBy({
-        left: 200,
-        behavior: 'smooth'
-      });
-    }
-  };
+  const scrollLeft = () => { tabsRef.current?.scrollBy({ left: -200, behavior: 'smooth' }); };
+  const scrollRight = () => { tabsRef.current?.scrollBy({ left: 200, behavior: 'smooth' }); };
   // Check for custom tabs for this service or GHC services
   const isGHC = ghcContent !== null;
   const ghcTabs = [
@@ -187,102 +467,38 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     { id: 'materials', label: 'Other Materials' }
   ];
   const customTabs = item ? getCustomTabs(marketplaceType, item.id) : undefined;
-  const tabsToUse = isGHC ? ghcTabs : (customTabs || config.tabs);
+  const tabsToUse = isGHC ? ghcTabs : (customTabs ?? config.tabs);
   // Add state for active tab
-  const [activeTab, setActiveTab] = useState<string>(config.tabs[0]?.id || 'about');
+  const [activeTab, setActiveTab] = useState<string>(config.tabs[0]?.id ?? 'about');
   
   // Update active tab when custom tabs are loaded
   useEffect(() => {
-    if (customTabs && customTabs.length > 0) {
-      setActiveTab(customTabs[0].id);
-    }
+    const firstTab = customTabs?.[0]?.id;
+    setActiveTab(firstTab ?? config.tabs[0]?.id ?? 'about');
   }, [customTabs]);
   // Generate a random rating between 4.0 and 5.0 for display purposes
   // const rating = (4 + Math.random()).toFixed(1);
   // const reviewCount = Math.floor(Math.random() * 50) + 10;
   useEffect(() => {
-    const loadGHCItem = async (id: string) => {
-      const contentKey = getGHCContentKey(id);
-      const content = GUIDE_CONTENT[contentKey];
-      if (content) {
-        setGhcContent(content);
-        setActiveTab('overview');
-        setRelatedItems(getFallbackItems(marketplaceType));
-      } else {
-        console.error('GHC content not found for itemId:', id);
-        const finalItemData = getFallbackItemDetails(marketplaceType, id || 'fallback-1');
-        setItem(finalItemData);
-        setRelatedItems(getFallbackItems(marketplaceType));
-      }
+    const ctx: ItemLoadContext = {
+      marketplaceType,
+      shouldTakeAction,
+      navigate,
+      configRoute: config.route,
+      setGhcContent,
+      setActiveTab,
+      setItem,
+      setRelatedItems,
+      setError,
+      setRedirectTimer,
+      setLoading,
     };
-
-    const loadRegularItem = async (id: string) => {
-      let itemData = null;
-      try {
-        itemData = await fetchMarketplaceItemDetails(marketplaceType, id);
-      } catch (fetchError) {
-        console.error(`Error fetching ${marketplaceType} item details:`, fetchError);
-      }
-      const finalItemData = itemData || getFallbackItemDetails(marketplaceType, id || 'fallback-1');
-      if (finalItemData) {
-        setItem(finalItemData);
-        let relatedItemsData: any[] = [];
-        try {
-          relatedItemsData = await fetchRelatedMarketplaceItems(marketplaceType, finalItemData.id, finalItemData.category || '', finalItemData.provider?.name || '');
-        } catch (relatedError) {
-          console.error('Error fetching related items:', relatedError);
-        }
-        setRelatedItems(relatedItemsData && relatedItemsData.length > 0 ? relatedItemsData : getFallbackItems(marketplaceType));
-        if (shouldTakeAction) {
-          setTimeout(() => {
-            const actionSection = document.getElementById('action-section');
-            if (actionSection) {
-              actionSection.scrollIntoView({ behavior: 'smooth' });
-            }
-          }, 100);
-        }
-      } else {
-        const genericFallback = getFallbackItemDetails(marketplaceType, 'generic-fallback');
-        setItem(genericFallback);
-        setError(null);
-        const timer = setTimeout(() => { navigate(config.route); }, 5000);
-        setRedirectTimer(timer);
-      }
-    };
-
-    const fetchItemDetails = async () => {
-      if (!itemId) return;
-      setLoading(true);
-      setError(null);
-      if (redirectTimer) {
-        clearTimeout(redirectTimer);
-        setRedirectTimer(null);
-      }
-      try {
-        if (isGHCService(itemId)) {
-          await loadGHCItem(itemId);
-        } else {
-          await loadRegularItem(itemId);
-        }
-      } catch (err) {
-        console.error('Error in marketplace details page:', err);
-        const fallbackItem = getFallbackItemDetails(marketplaceType, 'generic-fallback');
-        setItem(fallbackItem);
-        setRelatedItems(getFallbackItems(marketplaceType));
-        setError(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchItemDetails();
+    fetchItemDetails(itemId, redirectTimer, ctx);
   }, [itemId, marketplaceType, bookmarkedItems, shouldTakeAction, navigate, config]);
 
   const retryFetch = () => {
     setError(null);
-    // Re-fetch by triggering the useEffect
-    if (itemId) {
-      setLoading(true);
-    }
+    setLoading(true);
   };
   if (loading) {
     return <div className="min-h-screen flex flex-col bg-gray-50">
@@ -311,7 +527,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
               <li>
                 <div className="flex items-center">
                   <ChevronRightIcon size={16} className="text-gray-400" />
-                  <Link to={getBackUrl()} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
+                  <Link to={backUrl} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
                     {config.itemNamePlural}
                   </Link>
                 </div>
@@ -320,7 +536,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 <li>
                   <div className="flex items-center">
                     <ChevronRightIcon size={16} className="text-gray-400" />
-                    <Link to={getBackUrl()} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
+                    <Link to={backUrl} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
                       {getTabLabel(serviceTab)}
                     </Link>
                   </div>
@@ -368,15 +584,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const isDigitalWorker = item.category === 'Digital Worker';
   const isLeaveApplication = item.id === '13';
   const isITSupportService = marketplaceType === 'non-financial' && ['1', '2', '3'].includes(item.id);
-  const getPrimaryAction = (): string => {
-    if (isGHC) return 'Explore Competency →';
-    if (isLeaveApplication) return 'Apply For Leave';
-    if (isPromptLibrary) return 'View Prompt';
-    if (isDigitalWorker) return 'View Details';
-    if (isAITool) return 'Request Tool';
-    return config.primaryCTA;
-  };
-  const primaryAction = getPrimaryAction();
+  const primaryAction = getPrimaryActionLabel(isGHC, isLeaveApplication, isPromptLibrary, isDigitalWorker, isAITool, config.primaryCTA);
   // const secondaryAction = config.secondaryCTA;
   // Extract details for the sidebar
   const detailItems = isGHC ? [
@@ -387,175 +595,10 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   })).filter(detail => detail.value !== 'N/A');
   
   // Extract highlights/features based on marketplace type
-  const nonGhcHighlights = marketplaceType === 'courses' ? item.learningOutcomes || [] : item.details || [];
-  const highlights = isGHC ? (ghcContent?.highlights || []) : nonGhcHighlights;
-  // Render tab content with consistent styling
-  const CodeBlock: React.FC<{ code: string; language?: string; title?: string }> = ({ code, language, title }) => {
-    const [copied, setCopied] = React.useState(false);
-    
-    const handleCopy = () => {
-      navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    };
+  const highlights = isGHC ? (ghcContent?.highlights ?? []) : getNonGhcHighlights(marketplaceType, item);
+  // CodeBlock and AccordionBlock are defined at module level above the component
 
-    return (
-      <div className="mb-6 relative">
-        {title && (
-          <div className="bg-gray-100 px-4 py-2 rounded-t-lg border-b border-gray-300">
-            <h4 className="text-sm font-semibold text-gray-700">{title}</h4>
-          </div>
-        )}
-        <div className="relative">
-          <pre className="bg-gray-900 text-gray-100 p-6 rounded-b-lg overflow-x-auto text-sm leading-relaxed">
-            <code className={language ? `language-${language}` : ''}>{code}</code>
-          </pre>
-          <button
-            onClick={handleCopy}
-            className="absolute top-3 right-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors duration-200 flex items-center gap-1.5"
-          >
-            {copied ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Copied!
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Copy
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  // Accordion component for FAQs
-  const AccordionBlock: React.FC<{ items: Array<{ question: string; answer: string }> }> = ({ items }) => {
-    const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-    const toggleAccordion = (index: number) => {
-      setOpenIndex(openIndex === index ? null : index);
-    };
-
-    return (
-      <div className="space-y-4 mb-6">
-        {items.map((item, index) => {
-          const isOpen = openIndex === index;
-          return (
-            <div
-              key={index}
-              className="rounded-lg overflow-hidden transition-all duration-300 ease-in border-2"
-              style={{ 
-                borderColor: isOpen ? '#030F35' : '#E5E7EB',
-                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
-              }}
-            >
-              <button
-                onClick={() => toggleAccordion(index)}
-                className="w-full flex items-center justify-between p-5 text-left transition-all duration-300 ease-in"
-                style={isOpen ? { 
-                  backgroundColor: '#030F35',
-                  color: 'white'
-                } : { 
-                  backgroundColor: 'white',
-                  color: '#374151' 
-                }}
-                onMouseEnter={(e) => {
-                  if (!isOpen) {
-                    e.currentTarget.style.backgroundColor = '#F9FAFB';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isOpen) {
-                    e.currentTarget.style.backgroundColor = 'white';
-                  }
-                }}
-              >
-                <span className="text-base font-medium pr-4">
-                  {item.question}
-                </span>
-                <div 
-                  className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ease-in"
-                  style={isOpen ? { backgroundColor: 'white' } : { backgroundColor: '#E5E7EB' }}
-                >
-                  {isOpen ? (
-                    <Minus className="w-4 h-4" style={{ color: '#030F35' }} />
-                  ) : (
-                    <Plus className="w-4 h-4 text-gray-600" />
-                  )}
-                </div>
-              </button>
-              <div
-                className="overflow-hidden transition-all duration-300 ease-in"
-                style={{
-                  maxHeight: isOpen ? '500px' : '0px',
-                  opacity: isOpen ? 1 : 0,
-                }}
-              >
-                <div className="px-5 pb-5 pt-2.5 bg-white">
-                  <p className="text-gray-600 text-base leading-relaxed">{item.answer}</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderBlocks = (blocks: ContentBlock[]) => {
-    return (blocks || []).map((block, idx) => {
-      if (block.type === 'p') {
-        const safeHtml = DOMPurify.sanitize(block.text);
-        // eslint-disable-next-line react/no-danger
-        return <p key={`block-p-${idx}`} className="text-gray-700 text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: safeHtml }}></p>;
-      }
-      if (block.type === 'ol') {
-        return <ol key={`block-ol-${idx}`} className="list-decimal pl-6 space-y-3 text-gray-700 mb-4 text-base">
-            {block.items.map((it, i) => <li key={`ol-item-${i}-${it.slice(0, 20)}`} className="pl-2 leading-relaxed">{it}</li>)}
-          </ol>;
-      }
-      if (block.type === 'ul') {
-        return <ul key={`block-ul-${idx}`} className="list-disc pl-6 space-y-3 text-gray-700 mb-4 text-base">
-            {block.items.map((it, i) => <li key={`ul-item-${i}-${it.slice(0, 20)}`} className="pl-2 leading-relaxed">{it}</li>)}
-          </ul>;
-      }
-      if (block.type === 'iframe') {
-        return <div key={`block-iframe-${idx}`} className="mb-6">
-            <iframe
-              src={block.src}
-              width={block.width || '640'}
-              height={block.height || '360'}
-              frameBorder="0"
-              scrolling="no"
-              allowFullScreen
-              title={block.title || 'Embedded video'}
-              className="rounded-lg shadow-md"
-            />
-          </div>;
-      }
-      if (block.type === 'accordion') {
-        return <AccordionBlock key={`block-accordion-${idx}`} items={block.items || []} />;
-      }
-      if (block.type === 'code') {
-        return <CodeBlock key={`block-code-${idx}`} code={block.code} language={block.language} title={block.title} />;
-      }
-      if (block.type === 'procedure_stages') {
-        const stagesConfig = procedureStagesConfigs[block.configKey as keyof typeof procedureStagesConfigs];
-        if (stagesConfig) {
-          return <ProcedureStages key={`block-stages-${idx}`} config={{ ...stagesConfig, title: '' }} className="my-6" />;
-        }
-        return null;
-      }
-      return null;
-    });
-  };
+  // renderBlocks is defined at module level above the component
   const renderGHCTabContent = (tabId: string): React.ReactNode => {
     if (!ghcContent) return null;
     switch (tabId) {
@@ -655,8 +698,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 </div>
                 
                 <div className="grid gap-3 md:grid-cols-2">
-                  {toolData.features.keyFeatures.map((feature, index) => (
-                    <div key={index} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
+                  {toolData.features.keyFeatures.map((feature) => (
+                    <div key={`feature-${feature.slice(0, 30)}`} className="group flex items-start gap-3 rounded-xl bg-white p-4 border border-gray-100 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
                       <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md" style={{ background: 'linear-gradient(135deg, #1A2E6E 0%, #152347 100%)' }}>
                         <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -691,7 +734,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   {Object.entries(requirements.minimum).map(([key, value]) => (
                     <li key={key} className="flex items-start gap-3">
                       <span className="text-xs font-semibold text-gray-500 uppercase w-24 flex-shrink-0 pt-0.5">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}:
+                        {key.replaceAll(/([A-Z])/g, ' $1').trim()}:
                       </span>
                       <span className="text-sm text-gray-700 flex-1">{value}</span>
                     </li>
@@ -706,7 +749,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   {Object.entries(requirements.recommended).map(([key, value]) => (
                     <li key={key} className="flex items-start gap-3">
                       <span className="text-xs font-semibold text-gray-500 uppercase w-24 flex-shrink-0 pt-0.5">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}:
+                        {key.replaceAll(/([A-Z])/g, ' $1').trim()}:
                       </span>
                       <span className="text-sm text-gray-700 flex-1">{value}</span>
                     </li>
@@ -720,7 +763,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Additional Notes</h3>
                   <ul className="space-y-2">
                     {requirements.additionalNotes.map((note, index) => (
-                      <li key={index} className="flex items-start gap-2">
+                      <li key={`note-${index}-${note.slice(0, 20)}`} className="flex items-start gap-2">
                         <span className="text-gray-400 mt-0.5">•</span>
                         <span className="text-sm text-gray-700">{note}</span>
                       </li>
@@ -834,7 +877,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
         if (tabId === 'visit_site') {
           const content = getServiceTabContent(marketplaceType, item?.id, tabId);
           const urlField = content?.action?.urlField;
-          const computedUrl = (urlField && item && item[urlField]) || content?.action?.fallbackUrl || toolData.homepage || '#';
+          const computedUrl = (urlField ? item?.[urlField] : null) ?? content?.action?.fallbackUrl ?? toolData.homepage ?? '#';
           
           return <div className="space-y-8">
               {/* Hero Section */}
@@ -995,6 +1038,392 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     return null;
   };
 
+  // --- Tab render helpers (extracted to reduce renderTabContent complexity) ---
+
+  const renderSubmitRequestTab = () => {
+    const tabContent = getServiceTabContent(marketplaceType, item?.id, 'submit_request');
+    const urlField = tabContent?.action?.urlField;
+    const computedUrl = (urlField ? item?.[urlField] : null) ?? tabContent?.action?.fallbackUrl ?? '#';
+    const isPromptLibraryItem = item?.id === '17' || item?.category === 'Prompt Library';
+    return <div className="space-y-6">
+        <div className="prose max-w-none">
+          {tabContent?.heading && <h3 className="text-xl font-bold text-gray-900 mb-2">{tabContent.heading}</h3>}
+          {renderBlocks(tabContent?.blocks || [])}
+        </div>
+        {!isPromptLibraryItem && tabContent?.action && <div>
+            <button
+              id="action-section"
+              className="px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md"
+              style={{ backgroundColor: '#030F35' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')}
+              onClick={() => {
+                if (isITSupportService) {
+                  setIsTechSupportFormOpen(true);
+                } else {
+                  window.open(computedUrl, '_blank', 'noopener');
+                }
+              }}
+            >
+              {tabContent.action.label || 'Submit Request'}
+            </button>
+          </div>}
+      </div>;
+  };
+
+  const renderServiceContentTab = (tabId: string) => {
+    const tabContent = getServiceTabContent(marketplaceType, item?.id, tabId);
+    return <div className="space-y-6">
+        <div className="prose max-w-none">
+          {tabContent?.heading && <h3 className="text-xl font-bold text-gray-900 mb-2">{tabContent.heading}</h3>}
+          {renderBlocks(tabContent?.blocks || [])}
+        </div>
+      </div>;
+  };
+
+  const renderAboutTab = () => (
+    <div className="space-y-6">
+      <p className="text-gray-600 text-lg mb-6">
+        Learn more about this {config.itemName.toLowerCase()} and what it offers for your business.
+      </p>
+      <div className="prose max-w-none">
+        <p className="text-gray-700 mb-5">{itemDescription}</p>
+        {marketplaceType === 'courses' && <p className="text-gray-700">
+            This course is designed to accommodate {item.businessStage}{' '}
+            businesses, with a focus on practical applications that you can implement immediately.
+            Our experienced instructors bring real-world expertise to help you navigate the challenges
+            of modern business environments.
+          </p>}
+        {marketplaceType === 'financial' && <p className="text-gray-700">
+            This financial service is tailored for businesses at the{' '}
+            {item.businessStage || 'growth'} stage, providing the financial resources needed to
+            achieve your business objectives. With competitive terms and a streamlined application
+            process, you can access the funding you need quickly and efficiently.
+          </p>}
+        {marketplaceType === 'non-financial' && <p className="text-gray-700">
+            This service is designed to support businesses at all stages, with particular benefits
+            for those in the {item.businessStage || 'growth'} phase. Our team of experts will work
+            closely with you to ensure you receive the maximum value and can implement effective
+            solutions for your specific business needs.
+          </p>}
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Key Highlights</h3>
+        <ul className="space-y-2">
+          {highlights.map((highlight, index) => <li key={`highlight-${index}-${highlight.slice(0, 20)}`} className="flex items-start">
+              <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
+              <span className="text-gray-700">{highlight}</span>
+            </li>)}
+        </ul>
+      </div>
+    </div>
+  );
+
+  const renderScheduleTab = () => (
+    <div className="space-y-6">
+      <p className="text-gray-600 text-lg mb-6">Here's the complete schedule and timeline for this course.</p>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="flex flex-col md:flex-row md:items-center mb-6 bg-blue-50 p-3 rounded-lg">
+          <div className="flex-grow flex items-center">
+            <Calendar className="text-blue-600 mr-3" size={18} />
+            <div>
+              <p className="font-medium text-gray-800">Start Date: <span className="text-blue-700">{item.startDate}</span></p>
+              <p className="text-sm text-gray-600">Duration: {item.duration}</p>
+            </div>
+          </div>
+          <div className="mt-2 md:mt-0 md:ml-auto">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 border border-green-100">
+              {item.deliveryMode}
+            </span>
+          </div>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Timeline</h3>
+        <div className="space-y-4">
+          {[
+            { week: 'Week 1', desc: 'Introduction and foundation concepts' },
+            { week: 'Week 2', desc: 'Core principles and practical exercises' },
+            { week: 'Week 3-4', desc: 'Advanced techniques and final projects' },
+            { week: 'Final Week', desc: 'Project presentations and certification' },
+          ].map(({ week, desc }) => (
+            <div key={week} className="relative pl-8 pb-4 border-l-2 border-blue-200 last:pb-0">
+              <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+              <h4 className="font-semibold text-gray-900">{week}</h4>
+              <p className="text-gray-700">{desc}</p>
+            </div>
+          ))}
+        </div>
+        {item.location && <div className="mt-6 pt-4 border-t border-gray-100">
+            <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+              <MapPin className="text-blue-600 mr-2" size={16} />
+              Location Details
+            </h4>
+            <p className="text-gray-700 ml-6">{item.location}</p>
+          </div>}
+      </div>
+    </div>
+  );
+
+  const renderLearningOutcomesTab = () => (
+    <div className="space-y-6">
+      <p className="text-gray-600 text-lg mb-6">What you'll learn from this course and the skills you'll develop.</p>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Core Learning Outcomes</h3>
+        <ol className="space-y-3">
+          {highlights.map((outcome, index) => <li key={`outcome-${index}-${outcome.slice(0, 20)}`} className="pl-2">
+              <div className="flex items-start gap-3">
+                <span className="text-gray-500 font-medium">{index + 1}.</span>
+                <p className="text-gray-700 leading-relaxed">{outcome}</p>
+              </div>
+            </li>)}
+        </ol>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Skills You'll Gain</h3>
+        <div className="grid md:grid-cols-2 gap-2">
+          {['Strategic thinking and planning', 'Problem-solving techniques', 'Implementation best practices', 'Performance measurement', 'Risk assessment and mitigation', 'Communication and presentation'].map((skill) => (
+            <div key={`skill-${skill.slice(0, 30)}`} className="flex items-center">
+              <CheckCircleIcon size={16} className="text-dqYellow mr-2 flex-shrink-0" />
+              <span className="text-gray-700">{skill}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-3">Upon Completion</h3>
+        <p className="text-gray-700 mb-3">
+          Receive a certificate of completion, gain practical skills for immediate implementation,
+          and join our network of alumni and industry professionals.
+        </p>
+        <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded border border-blue-100">
+          Businesses report an average of 40% improvement in relevant metrics within 6 months of course completion.
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderEligibilityTermsTab = () => (
+    <div className="space-y-6">
+      <p className="text-gray-600 text-lg mb-6">Review eligibility requirements and terms & conditions for this service.</p>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Eligibility Requirements</h3>
+        <ul className="space-y-2">
+          {item.eligibilityCriteria ? item.eligibilityCriteria.map((criteria: string, index: number) => (
+            <li key={`criteria-${index}-${criteria.slice(0, 20)}`} className="flex items-start">
+              <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
+              <span className="text-gray-700">{criteria}</span>
+            </li>
+          )) : (
+            <li className="flex items-start">
+              <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
+              <span className="text-gray-700">{item.eligibility || `Businesses at the ${item.businessStage || 'growth'} stage`}</span>
+            </li>
+          )}
+        </ul>
+        <div className="mt-6 bg-blue-50 rounded-lg p-3">
+          <h4 className="text-md font-medium text-blue-800 mb-2">Not sure if you qualify?</h4>
+          <p className="text-gray-700 mb-3 text-sm">
+            Contact {item.provider.name} for a preliminary eligibility assessment before submitting your full application.
+          </p>
+          <button className="text-blue-600 text-sm font-medium hover:text-blue-800 transition-colors flex items-center">
+            Contact Provider
+            <ChevronRight size={14} className="ml-1" />
+          </button>
+        </div>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Terms & Conditions</h3>
+        <h4 className="text-md font-semibold text-gray-900 mb-3">Key Terms</h4>
+        <p className="text-gray-700 mb-4">
+          {item.keyTerms || 'Zero interest rate with a grace period of 12 months. Repayment in equal monthly installments over the loan tenure. Early settlement allowed without penalties after 24 months.'}
+        </p>
+        <h4 className="text-md font-semibold text-gray-900 mb-3">Additional Terms</h4>
+        <ul className="space-y-2">
+          {item.additionalTerms ? item.additionalTerms.map((term: string, index: number) => (
+            <li key={`term-${index}-${term.slice(0, 20)}`} className="flex items-start">
+              <span className="text-gray-400 mr-2">•</span>
+              <span className="text-gray-700">{term}</span>
+            </li>
+          )) : (
+            <>
+              <li className="flex items-start"><span className="text-gray-400 mr-2">•</span><span className="text-gray-700">Collateral requirements will be determined based on loan amount and business risk profile</span></li>
+              <li className="flex items-start"><span className="text-gray-400 mr-2">•</span><span className="text-gray-700">Late payment penalties may apply as per the final loan agreement</span></li>
+              <li className="flex items-start"><span className="text-gray-400 mr-2">•</span><span className="text-gray-700">Prepayment options available subject to terms outlined in the loan agreement</span></li>
+            </>
+          )}
+        </ul>
+      </div>
+      <div className="text-sm text-gray-500 italic">
+        The information provided here is a summary of key terms and conditions. The full terms and conditions will be provided in the final agreement. {item.provider.name} reserves the right to modify these terms at their discretion.
+      </div>
+    </div>
+  );
+
+  const renderApplicationProcessTab = () => (
+    <div className="space-y-6">
+      <p className="text-gray-600 text-lg mb-6">Follow these simple steps to complete your application.</p>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="space-y-3">
+          {item.applicationProcess ? item.applicationProcess.map((step: { title: string; description: string }, index: number) => (
+            <div key={`step-${index}-${step.title?.slice(0, 20)}`} className="flex items-start gap-3">
+              <span className="text-gray-500 font-medium">{index + 1}.</span>
+              <div>
+                <h4 className="font-medium text-gray-900">{step.title}</h4>
+                <p className="text-gray-600 text-sm mt-1">{step.description}</p>
+              </div>
+            </div>
+          )) : (
+            <>
+              {[
+                { num: '1.', title: 'Submit Application', desc: 'Complete the online application form with your business details and required information.' },
+                { num: '2.', title: 'Document Verification', desc: 'Upload required documents for verification and wait for our team to review them.' },
+                { num: '3.', title: 'Review & Approval', desc: 'Our team will review your application and contact you with a decision within 5-7 business days.' },
+              ].map(({ num, title, desc }) => (
+                <div key={title} className="flex items-start gap-3">
+                  <span className="text-gray-500 font-medium">{num}</span>
+                  <div>
+                    <h4 className="font-medium text-gray-900">{title}</h4>
+                    <p className="text-gray-600 text-sm mt-1">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderRequiredDocumentsTab = () => (
+    <div className="space-y-6">
+      <p className="text-gray-600 text-lg mb-6">Prepare these documents to support your application and ensure a smooth process.</p>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Required Documents</h3>
+        <div className="grid md:grid-cols-2 gap-3">
+          {item.requiredDocuments ? item.requiredDocuments.map((doc: string, index: number) => (
+            <div key={`doc-${index}-${doc.slice(0, 20)}`} className="flex items-start">
+              <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+              <span className="text-gray-700">{doc}</span>
+            </div>
+          )) : (
+            <>
+              {['Business Registration Certificate', 'Trade License', 'Financial Statements (last 2 years)', 'Business Plan or Proposal'].map((doc) => (
+                <div key={doc} className="flex items-start">
+                  <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700">{doc}</span>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+        <div className="mt-6 text-sm text-gray-700 bg-amber-50 p-3 rounded border border-amber-100">
+          <span className="font-medium text-amber-800">Note:</span> All documents must be submitted in PDF format. Documents in languages other than English or Arabic must be accompanied by certified translations.
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderProviderTab = () => (
+    <div className="space-y-6">
+      <p className="text-gray-600 text-lg mb-6">Learn more about the provider and their expertise in this field.</p>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+          <img src={provider.logoUrl} alt={provider.name} className="h-16 w-16 object-contain rounded-lg" />
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">{provider.name}</h3>
+            <p className="text-gray-600 text-sm">{getProviderTypeLabel(marketplaceType)}</p>
+          </div>
+          <div className="md:ml-auto flex flex-col md:items-end">
+            <div className="text-sm text-gray-500">Established</div>
+            <div className="font-medium text-blue-600">{item.providerEstablished || '2007'} {item.providerLocation || 'UAE'}</div>
+          </div>
+        </div>
+        <p className="text-gray-700 mb-6">
+          {provider.description || `${provider.name} is an independent, not-for-profit small and medium enterprises (SMEs) socio-economic development organization established in 2007.`}
+        </p>
+        <h4 className="text-md font-semibold text-gray-900 mb-3">Areas of Expertise</h4>
+        <div className="flex flex-wrap gap-2 mb-6">
+          {item.providerExpertise ? item.providerExpertise.map((expertise: string, index: number) => (
+            <span key={`expertise-${index}-${expertise.slice(0, 20)}`} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">{expertise}</span>
+          )) : (
+            <>
+              <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">SME Financing</span>
+              <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-medium">Business Advisory</span>
+              <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium">Entrepreneurship</span>
+              <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-medium">Financial Planning</span>
+            </>
+          )}
+        </div>
+        <button className="text-blue-600 font-medium hover:text-blue-800 transition-colors flex items-center">
+          Visit Provider Website
+          <ExternalLinkIcon size={16} className="ml-1" />
+        </button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[
+          { label: 'Location', value: item.providerLocation || 'Abu Dhabi, UAE' },
+          { label: 'Contact', value: item.providerContact || 'info@provider.ae' },
+          { label: 'Services', value: item.providerServices || '20+ Financial Products' },
+        ].map(({ label, value }) => (
+          <div key={label} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <h4 className="text-sm text-gray-500 mb-1">{label}</h4>
+            <p className="font-medium text-gray-900">{value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderCustomTabContent = (tabId: string, content: ReturnType<typeof getServiceTabContent>) => {
+    if (tabId === 'visit_site') {
+      const urlField = content!.action?.urlField;
+      const computedUrl = (urlField ? item?.[urlField] : null) ?? content!.action?.fallbackUrl ?? '#';
+      return <div className="space-y-8">
+          <div className="prose max-w-none">
+            {content!.heading && <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">{content!.heading}</h2>}
+            {renderBlocks(content!.blocks || [])}
+          </div>
+          <div className="pt-4">
+            <button
+              id="action-section"
+              className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 inline-flex items-center gap-2"
+              style={{ backgroundColor: '#030F35' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')}
+              onClick={() => window.open(computedUrl as string, '_blank', 'noopener,noreferrer')}
+            >
+              {content!.action?.label || 'Visit Website'}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </button>
+          </div>
+        </div>;
+    }
+    // Generic custom tab with optional action button (skip for leave applications)
+    return <div className="space-y-8">
+        <div className="prose max-w-none">
+          {content!.heading && <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">{content!.heading}</h2>}
+          {renderBlocks(content!.blocks || [])}
+        </div>
+        {content!.action && content!.action.label !== 'Apply For Leave' && <div className="pt-4">
+            <button
+              id="action-section"
+              className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              style={{ backgroundColor: '#030F35' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')}
+              onClick={() => {
+                const urlField = content!.action?.urlField;
+                const computedUrl = (urlField ? item?.[urlField] : null) ?? content!.action?.fallbackUrl ?? '#';
+                window.open(computedUrl, '_blank', 'noopener');
+              }}
+            >
+              {content!.action.label}
+            </button>
+          </div>}
+      </div>;
+  };
+
   const renderTabContent = (tabId: string) => {
     if (isGHC && ghcContent) {
       return renderGHCTabContent(tabId);
@@ -1012,60 +1441,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     // Check if this is a custom tab with its own content
     const content = getServiceTabContent(marketplaceType, item?.id, tabId);
     if (content) {
-      // Special handling for visit_site tab
-      if (tabId === 'visit_site') {
-        const urlField = content.action?.urlField;
-        const computedUrl = (urlField && item && item[urlField]) || content.action?.fallbackUrl || '#';
-        
-        return <div className="space-y-8">
-            <div className="prose max-w-none">
-              {content.heading && <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">{content.heading}</h2>}
-              {renderBlocks(content.blocks || [])}
-            </div>
-            <div className="pt-4">
-              <button 
-                id="action-section" 
-                className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 inline-flex items-center gap-2" 
-                style={{ backgroundColor: '#030F35' }} 
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} 
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')} 
-                onClick={() => window.open(computedUrl, '_blank', 'noopener,noreferrer')}
-              >
-                {content.action?.label || 'Visit Website'}
-                <svg 
-                  className="w-4 h-4" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" 
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>;
-      }
-      
-      // Render content with action button if available (skip for leave applications as they use sidebar button)
-      return <div className="space-y-8">
-          <div className="prose max-w-none">
-            {content.heading && <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">{content.heading}</h2>}
-            {renderBlocks(content.blocks || [])}
-          </div>
-          {content.action && content.action.label !== 'Apply For Leave' && <div className="pt-4">
-              <button id="action-section" className="px-6 py-3.5 text-white text-base font-bold rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" style={{ backgroundColor: '#030F35' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')} onClick={() => {
-              const urlField = content.action?.urlField;
-              const computedUrl = (urlField && item && item[urlField]) || content.action?.fallbackUrl || '#';
-              window.open(computedUrl, '_blank', 'noopener');
-          }}>
-                {content.action.label}
-              </button>
-            </div>}
-        </div>;
+      return renderCustomTabContent(tabId, content);
     }
     
     // Special handling for Digital Worker services
@@ -1080,488 +1456,25 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
         // AI Tools licenses are handled by renderAIToolTabContent above; fall through to default
         break;
       }
-      case 'submit_request': {
-        const content = getServiceTabContent(marketplaceType, item?.id, tabId);
-        const urlField = content?.action?.urlField;
-        const computedUrl = (urlField && item && item[urlField]) || content?.action?.fallbackUrl || '#';
-        
-        // Check if this is a prompt library item (service 17)
-        const isPromptLibrary = item?.id === '17' || item?.category === 'Prompt Library';
-        
-        return <div className="space-y-6">
-            <div className="prose max-w-none">
-              {content?.heading && <h3 className="text-xl font-bold text-gray-900 mb-2">{content.heading}</h3>}
-              {renderBlocks(content?.blocks || [])}
-            </div>
-            {!isPromptLibrary && content?.action && <div>
-                <button 
-                  id="action-section" 
-                  className="px-4 py-3 text-white font-bold rounded-md transition-colors shadow-md" 
-                  style={{ backgroundColor: '#030F35' }} 
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#020a23')} 
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#030F35')} 
-                  onClick={() => {
-                    if (isITSupportService) {
-                      setIsTechSupportFormOpen(true);
-                    } else {
-                      window.open(computedUrl, '_blank', 'noopener');
-                    }
-                  }}
-                >
-                  {content.action.label || 'Submit Request'}
-                </button>
-              </div>}
-          </div>;
-      }
-      case 'self_service_faq': {
-        const content = getServiceTabContent(marketplaceType, item?.id, tabId);
-        return <div className="space-y-6">
-            <div className="prose max-w-none">
-              {content?.heading && <h3 className="text-xl font-bold text-gray-900 mb-2">{content.heading}</h3>}
-              {renderBlocks(content?.blocks || [])}
-            </div>
-          </div>;
-      }
-      case 'contact_sla': {
-        const content = getServiceTabContent(marketplaceType, item?.id, tabId);
-        return <div className="space-y-6">
-            <div className="prose max-w-none">
-              {content?.heading && <h3 className="text-xl font-bold text-gray-900 mb-2">{content.heading}</h3>}
-              {renderBlocks(content?.blocks || [])}
-            </div>
-          </div>;
-      }
+      case 'submit_request':
+        return renderSubmitRequestTab();
+      case 'self_service_faq':
+      case 'contact_sla':
+        return renderServiceContentTab(tabId);
       case 'about':
-        return <div className="space-y-6">
-            <p className="text-gray-600 text-lg mb-6">
-              Learn more about this {config.itemName.toLowerCase()} and what it
-              offers for your business.
-            </p>
-            <div className="prose max-w-none">
-              <p className="text-gray-700 mb-5">{itemDescription}</p>
-              {marketplaceType === 'courses' && <p className="text-gray-700">
-                  This course is designed to accommodate {item.businessStage}{' '}
-                  businesses, with a focus on practical applications that you
-                  can implement immediately. Our experienced instructors bring
-                  real-world expertise to help you navigate the challenges of
-                  modern business environments.
-                </p>}
-              {marketplaceType === 'financial' && <p className="text-gray-700">
-                  This financial service is tailored for businesses at the{' '}
-                  {item.businessStage || 'growth'} stage, providing the
-                  financial resources needed to achieve your business
-                  objectives. With competitive terms and a streamlined
-                  application process, you can access the funding you need
-                  quickly and efficiently.
-                </p>}
-              {marketplaceType === 'non-financial' && <p className="text-gray-700">
-                  This service is designed to support businesses at all stages,
-                  with particular benefits for those in the{' '}
-                  {item.businessStage || 'growth'} phase. Our team of experts
-                  will work closely with you to ensure you receive the maximum
-                  value and can implement effective solutions for your specific
-                  business needs.
-                </p>}
-            </div>
-            {/* Key Highlights Section - Unified layout for all marketplace types */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Key Highlights
-              </h3>
-              {/* Features/Highlights list - Consistent for all types */}
-              <ul className="space-y-2">
-                {highlights.map((highlight, index) => <li key={`highlight-${index}-${highlight.slice(0,20)}`} className="flex items-start">
-                    <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">{highlight}</span>
-                  </li>)}
-              </ul>
-            </div>
-          </div>;
+        return renderAboutTab();
       case 'schedule':
-        return <div className="space-y-6">
-            <p className="text-gray-600 text-lg mb-6">
-              Here's the complete schedule and timeline for this course.
-            </p>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <div className="flex flex-col md:flex-row md:items-center mb-6 bg-blue-50 p-3 rounded-lg">
-                <div className="flex-grow flex items-center">
-                  <Calendar className="text-blue-600 mr-3" size={18} />
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      Start Date:{' '}
-                      <span className="text-blue-700">{item.startDate}</span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Duration: {item.duration}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-2 md:mt-0 md:ml-auto">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 border border-green-100">
-                    {item.deliveryMode}
-                  </span>
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Course Timeline
-              </h3>
-              <div className="space-y-4">
-                <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
-                  <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                  <h4 className="font-semibold text-gray-900">Week 1</h4>
-                  <p className="text-gray-700">
-                    Introduction and foundation concepts
-                  </p>
-                </div>
-                <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
-                  <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                  <h4 className="font-semibold text-gray-900">Week 2</h4>
-                  <p className="text-gray-700">
-                    Core principles and practical exercises
-                  </p>
-                </div>
-                <div className="relative pl-8 pb-4 border-l-2 border-blue-200">
-                  <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                  <h4 className="font-semibold text-gray-900">Week 3-4</h4>
-                  <p className="text-gray-700">
-                    Advanced techniques and final projects
-                  </p>
-                </div>
-                <div className="relative pl-8">
-                  <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
-                  <h4 className="font-semibold text-gray-900">Final Week</h4>
-                  <p className="text-gray-700">
-                    Project presentations and certification
-                  </p>
-                </div>
-              </div>
-              {/* Location if applicable */}
-              {item.location && <div className="mt-6 pt-4 border-t border-gray-100">
-                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                    <MapPin className="text-blue-600 mr-2" size={16} />
-                    Location Details
-                  </h4>
-                  <p className="text-gray-700 ml-6">{item.location}</p>
-                </div>}
-            </div>
-          </div>;
+        return renderScheduleTab();
       case 'learning_outcomes':
-        return <div className="space-y-6">
-            <p className="text-gray-600 text-lg mb-6">
-              What you'll learn from this course and the skills you'll develop.
-            </p>
-            {/* Core Learning Outcomes - simplified numbered list */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Core Learning Outcomes
-              </h3>
-              <ol className="space-y-3">
-                {highlights.map((outcome, index) => <li key={`outcome-${index}-${outcome.slice(0,20)}`} className="pl-2">
-                    <div className="flex items-start gap-3">
-                      <span className="text-gray-500 font-medium">
-                        {index + 1}.
-                      </span>
-                      <p className="text-gray-700 leading-relaxed">{outcome}</p>
-                    </div>
-                  </li>)}
-              </ol>
-            </div>
-            {/* Skills You'll Gain - compact two-column grid */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Skills You'll Gain
-              </h3>
-              <div className="grid md:grid-cols-2 gap-2">
-                {['Strategic thinking and planning', 'Problem-solving techniques', 'Implementation best practices', 'Performance measurement', 'Risk assessment and mitigation', 'Communication and presentation'].map((skill, index) => <div key={`skill-${index}`} className="flex items-center">
-                    <CheckCircleIcon size={16} className="text-dqYellow mr-2 flex-shrink-0" />
-                    <span className="text-gray-700">{skill}</span>
-                  </div>)}
-              </div>
-            </div>
-            {/* Upon Completion - single subtle highlight box */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Upon Completion
-              </h3>
-              <p className="text-gray-700 mb-3">
-                Receive a certificate of completion, gain practical skills for
-                immediate implementation, and join our network of alumni and
-                industry professionals.
-              </p>
-              <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded border border-blue-100">
-                Businesses report an average of 40% improvement in relevant
-                metrics within 6 months of course completion.
-              </div>
-            </div>
-          </div>;
+        return renderLearningOutcomesTab();
       case 'eligibility_terms':
-        return <div className="space-y-6">
-            <p className="text-gray-600 text-lg mb-6">
-              Review eligibility requirements and terms & conditions for this
-              service.
-            </p>
-            {/* Eligibility Section - unified card style */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Eligibility Requirements
-              </h3>
-              <ul className="space-y-2">
-                {item.eligibilityCriteria ? item.eligibilityCriteria.map((criteria, index) => <li key={`criteria-${index}-${criteria.slice(0,20)}`} className="flex items-start">
-                      <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
-                      <span className="text-gray-700">{criteria}</span>
-                    </li>) : <li className="flex items-start">
-                    <CheckCircleIcon size={16} className="text-dqYellow mr-3 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">
-                      {item.eligibility || `Businesses at the ${item.businessStage || 'growth'} stage`}
-                    </span>
-                  </li>}
-              </ul>
-              <div className="mt-6 bg-blue-50 rounded-lg p-3">
-                <h4 className="text-md font-medium text-blue-800 mb-2">
-                  Not sure if you qualify?
-                </h4>
-                <p className="text-gray-700 mb-3 text-sm">
-                  Contact {item.provider.name} for a preliminary eligibility
-                  assessment before submitting your full application.
-                </p>
-                <button className="text-blue-600 text-sm font-medium hover:text-blue-800 transition-colors flex items-center">
-                  Contact Provider
-                  <ChevronRight size={14} className="ml-1" />
-                </button>
-              </div>
-            </div>
-            {/* Terms & Conditions Section - unified card style */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Terms & Conditions
-              </h3>
-              <h4 className="text-md font-semibold text-gray-900 mb-3">
-                Key Terms
-              </h4>
-              <p className="text-gray-700 mb-4">
-                {item.keyTerms || 'Zero interest rate with a grace period of 12 months. Repayment in equal monthly installments over the loan tenure. Early settlement allowed without penalties after 24 months.'}
-              </p>
-              <h4 className="text-md font-semibold text-gray-900 mb-3">
-                Additional Terms
-              </h4>
-              <ul className="space-y-2">
-                {item.additionalTerms ? item.additionalTerms.map((term, index) => <li key={`term-${index}-${term.slice(0,20)}`} className="flex items-start">
-                      <span className="text-gray-400 mr-2">•</span>
-                      <span className="text-gray-700">{term}</span>
-                    </li>) : <>
-                    <li className="flex items-start">
-                      <span className="text-gray-400 mr-2">•</span>
-                      <span className="text-gray-700">
-                        Collateral requirements will be determined based on loan
-                        amount and business risk profile
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-gray-400 mr-2">•</span>
-                      <span className="text-gray-700">
-                        Late payment penalties may apply as per the final loan
-                        agreement
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-gray-400 mr-2">•</span>
-                      <span className="text-gray-700">
-                        Prepayment options available subject to terms outlined
-                        in the loan agreement
-                      </span>
-                    </li>
-                  </>}
-              </ul>
-            </div>
-            <div className="text-sm text-gray-500 italic">
-              The information provided here is a summary of key terms and
-              conditions. The full terms and conditions will be provided in the
-              final agreement. {item.provider.name} reserves the right to modify
-              these terms at their discretion.
-            </div>
-          </div>;
+        return renderEligibilityTermsTab();
       case 'application_process':
-        return <div className="space-y-6">
-            <p className="text-gray-600 text-lg mb-6">
-              Follow these simple steps to complete your application.
-            </p>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <div className="space-y-3">
-                {item.applicationProcess ? item.applicationProcess.map((step, index) => <div key={`step-${index}-${step.title?.slice(0,20)}`} className="flex items-start gap-3">
-                      <span className="text-gray-500 font-medium">
-                        {index + 1}.
-                      </span>
-                      <div>
-                        <h4 className="font-medium text-gray-900">
-                          {step.title}
-                        </h4>
-                        <p className="text-gray-600 text-sm mt-1">
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>) : <>
-                    <div className="flex items-start gap-3">
-                      <span className="text-gray-500 font-medium">1.</span>
-                      <div>
-                        <h4 className="font-medium text-gray-900">
-                          Submit Application
-                        </h4>
-                        <p className="text-gray-600 text-sm mt-1">
-                          Complete the online application form with your
-                          business details and required information.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="text-gray-500 font-medium">2.</span>
-                      <div>
-                        <h4 className="font-medium text-gray-900">
-                          Document Verification
-                        </h4>
-                        <p className="text-gray-600 text-sm mt-1">
-                          Upload required documents for verification and wait
-                          for our team to review them.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="text-gray-500 font-medium">3.</span>
-                      <div>
-                        <h4 className="font-medium text-gray-900">
-                          Review & Approval
-                        </h4>
-                        <p className="text-gray-600 text-sm mt-1">
-                          Our team will review your application and contact you
-                          with a decision within 5-7 business days.
-                        </p>
-                      </div>
-                    </div>
-                  </>}
-              </div>
-            </div>
-          </div>;
+        return renderApplicationProcessTab();
       case 'required_documents':
-        return <div className="space-y-6">
-            <p className="text-gray-600 text-lg mb-6">
-              Prepare these documents to support your application and ensure a
-              smooth process.
-            </p>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Required Documents
-              </h3>
-              <div className="grid md:grid-cols-2 gap-3">
-                {item.requiredDocuments ? item.requiredDocuments.map((doc, index) => <div key={`doc-${index}-${doc.slice(0,20)}`} className="flex items-start">
-                      <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{doc}</span>
-                    </div>) : <>
-                    <div className="flex items-start">
-                      <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">
-                        Business Registration Certificate
-                      </span>
-                    </div>
-                    <div className="flex items-start">
-                      <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">Trade License</span>
-                    </div>
-                    <div className="flex items-start">
-                      <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">
-                        Financial Statements (last 2 years)
-                      </span>
-                    </div>
-                    <div className="flex items-start">
-                      <FileText size={16} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">
-                        Business Plan or Proposal
-                      </span>
-                    </div>
-                  </>}
-              </div>
-              <div className="mt-6 text-sm text-gray-700 bg-amber-50 p-3 rounded border border-amber-100">
-                <span className="font-medium text-amber-800">Note:</span> All
-                documents must be submitted in PDF format. Documents in
-                languages other than English or Arabic must be accompanied by
-                certified translations.
-              </div>
-            </div>
-          </div>;
+        return renderRequiredDocumentsTab();
       case 'provider':
-        return <div className="space-y-6">
-            <p className="text-gray-600 text-lg mb-6">
-              Learn more about the provider and their expertise in this field.
-            </p>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-                <img src={provider.logoUrl} alt={provider.name} className="h-16 w-16 object-contain rounded-lg" />
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">
-                    {provider.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    {marketplaceType === 'courses' ? 'Leading provider of business education' : marketplaceType === 'financial' ? 'Trusted financial services provider' : 'Expert business services provider'}
-                  </p>
-                </div>
-                <div className="md:ml-auto flex flex-col md:items-end">
-                  <div className="text-sm text-gray-500">Established</div>
-                  <div className="font-medium text-blue-600">
-                    {item.providerEstablished || '2007'}{' '}
-                    {item.providerLocation || 'UAE'}
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-700 mb-6">
-                {provider.description || `${provider.name} is an independent, not-for-profit small and medium enterprises (SMEs) socio-economic development organization established in 2007.`}
-              </p>
-              <h4 className="text-md font-semibold text-gray-900 mb-3">
-                Areas of Expertise
-              </h4>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {item.providerExpertise ? item.providerExpertise.map((expertise, index) => <span key={`expertise-${index}-${expertise.slice(0,20)}`} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-                      {expertise}
-                    </span>) : <>
-                    <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-                      SME Financing
-                    </span>
-                    <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-medium">
-                      Business Advisory
-                    </span>
-                    <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium">
-                      Entrepreneurship
-                    </span>
-                    <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-medium">
-                      Financial Planning
-                    </span>
-                  </>}
-              </div>
-              <button className="text-blue-600 font-medium hover:text-blue-800 transition-colors flex items-center">
-                Visit Provider Website
-                <ExternalLinkIcon size={16} className="ml-1" />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <h4 className="text-sm text-gray-500 mb-1">Location</h4>
-                <p className="font-medium text-gray-900">
-                  {item.providerLocation || 'Abu Dhabi, UAE'}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <h4 className="text-sm text-gray-500 mb-1">Contact</h4>
-                <p className="font-medium text-gray-900">
-                  {item.providerContact || 'info@provider.ae'}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <h4 className="text-sm text-gray-500 mb-1">Services</h4>
-                <p className="font-medium text-gray-900">
-                  {item.providerServices || '20+ Financial Products'}
-                </p>
-              </div>
-            </div>
-          </div>;
-      // Add other tab cases as needed
+        return renderProviderTab();
       default:
         return <div>
             <p className="text-gray-600 text-lg mb-6">
@@ -1624,7 +1537,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                 <li>
                   <div className="flex items-center">
                     <ChevronRightIcon size={16} className="text-gray-400" />
-                    <Link to={getBackUrl()} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
+                    <Link to={backUrl} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
                       {config.itemNamePlural}
                     </Link>
                   </div>
@@ -1633,7 +1546,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   <li>
                     <div className="flex items-center">
                       <ChevronRightIcon size={16} className="text-gray-400" />
-                      <Link to={getBackUrl()} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
+                      <Link to={backUrl} className="ml-1 text-gray-600 hover:text-gray-900 md:ml-2">
                         {getTabLabel(serviceTab)}
                       </Link>
                     </div>
@@ -1794,7 +1707,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
             <div className="flex items-center justify-between max-w-sm mx-auto">
               <div className="mr-3">
                 <div className="text-gray-900 font-bold">
-                  {marketplaceType === 'courses' ? item.price || 'Free' : marketplaceType === 'financial' ? item.amount || 'Apply Now' : 'Request Now'}
+                  {getStickyCtaPrice(marketplaceType, item)}
                 </div>
                 <div className="text-sm text-gray-600">
                   {item.duration || item.serviceType || ''}
@@ -1849,4 +1762,5 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     </div>;
 };
 export default MarketplaceDetailsPage;
+
 
