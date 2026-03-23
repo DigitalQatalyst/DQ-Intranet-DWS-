@@ -461,7 +461,7 @@ export function OnboardingLanding() {
                     Welcome to DQ Onboarding
                 </h1>
                 <p className="text-white/95 mb-6 font-normal leading-relaxed text-center max-w-4xl mx-auto" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSize: '18px' }}>
-                  Your 3-month onboarding journey helps you integrate into DQ, adopt our DNA, and gain confidence in your role.
+                  Over the next three months, you will discover how DQ works, connect with our shared DNA, and grow into your role with clarity and confidence.
                 </p>
               </FadeInUpOnScroll>
 
