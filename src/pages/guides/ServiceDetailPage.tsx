@@ -240,7 +240,7 @@ export const ServiceDetailPage: React.FC = () => {
   const [ghcContent, setGhcContent] = useState<GuideContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [, setForceUpdate] = useState(0);
+  const [_forceUpdate, setForceUpdate] = useState(0);
 
   // Check if this is a GHC service - use ghcContent state for accurate detection
   const isGHC = !!ghcContent;
@@ -378,6 +378,121 @@ export const ServiceDetailPage: React.FC = () => {
 
   const ghcButtonConfig = getGHCButtonConfig();
 
+  const renderOverviewContent = () => {
+    if (isGHC && ghcContent) {
+      return (
+        <div className="space-y-6">
+          <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
+            {ghcContent.shortOverview.split('\n\n').map((paragraph) => (
+              <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+            ))}
+          </div>
+          <div className="space-y-5">
+            <SubHeading text="Five Reasons To Work With The GHC" />
+            {ghcContent.highlights.map((highlight) => {
+              const [title, ...descParts] = highlight.split(':')
+              const description = descParts.join(':').trim()
+              return (
+                <div key={highlight.slice(0, 40)} className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-700 text-base leading-relaxed">
+                    <span className="font-semibold">{title}:</span> {description}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+    if (isDigitalWorkspace) {
+      return (
+        <div className="space-y-6">
+          <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
+            <p>
+              The Associate Owned Asset Initiative represents a strategic transformation in how DQ manages workplace technology.
+              By shifting from traditional company-owned devices to associate-owned assets, we create a more flexible,
+              cost-effective, and secure approach to device management.
+            </p>
+            <p>
+              These guidelines establish clear frameworks for three distinct programs—BYOD, FYOD, and HYOD—each designed
+              to accommodate different associate needs while maintaining operational excellence and security standards.
+            </p>
+          </div>
+          <div className="space-y-5">
+            <SubHeading text="Strategic Objectives" />
+            <div className="grid gap-4 md:grid-cols-2">
+              {[
+                { color: 'red', label: 'Mitigate Asset Theft', desc: 'Reduce risk of device misappropriation through clear ownership structures and accountability measures.' },
+                { color: 'blue', label: 'Promote Accountability', desc: 'Establish direct responsibility for device maintenance, security, and proper usage among associates.' },
+                { color: 'green', label: 'Support Seamless Transitions', desc: 'Ensure smooth onboarding and device management processes with minimal work disruption.' },
+                { color: 'purple', label: 'Optimize Operational Efficiency', desc: 'Streamline IT operations and reduce administrative overhead through distributed device management.' },
+              ].map(({ color, label, desc }) => (
+                <div key={label} className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <svg className={`w-6 h-6 text-${color}-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">{label}</h4>
+                    <p className="text-gray-700 text-sm">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-5">
+            <SubHeading text="Available Programs" />
+            <div className="grid gap-4 md:grid-cols-3">
+              {[
+                { key: 'BYOD', color: 'blue', title: 'Bring Your Own Device', desc: 'Use your personal device for work with company security standards.' },
+                { key: 'FYOD', color: 'green', title: 'Finance Your Own Device', desc: 'Purchase a company device with salary deduction options.' },
+                { key: 'HYOD', color: 'orange', title: 'Hold Your Own Device', desc: 'Temporary company device for emergency situations.' },
+              ].map(({ key, color, title, desc }) => (
+                <div key={key} className={`p-4 bg-${color}-50 rounded-lg border border-${color}-200 text-center`}>
+                  <div className={`w-12 h-12 bg-${color}-100 rounded-full flex items-center justify-center mx-auto mb-3`}>
+                    <span className={`text-${color}-600 font-bold`}>{key}</span>
+                  </div>
+                  <h4 className={`font-semibold text-${color}-900 mb-2`}>{title}</h4>
+                  <p className={`text-${color}-800 text-sm`}>{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+    return (
+      <div className="space-y-4 text-gray-700 leading-relaxed">
+        <p>
+          The Associate Owned Asset Initiative is a strategic effort aimed at enhancing operational efficiency,
+          reducing asset management costs, and improving the accountability of devices used for company work.
+          As a result of this initiative, the Associate Owned Asset Guidelines have been developed to mitigate
+          the risk of asset theft by departing associates, while ensuring secure management and compliance
+          with company standards.
+        </p>
+        <p>
+          The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for
+          transitioning to an associate-owned device model at DQ. This initiative aims to:
+        </p>
+        <div className="pt-2">
+          <Checklist items={[
+            "Mitigate Asset Theft.",
+            "Promote Accountability.",
+            "Support Seamless Transitions.",
+            "Optimize Operational Efficiency."
+          ]} />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header toggleSidebar={() => setSidebarOpen(p => !p)} sidebarOpen={sidebarOpen} />
@@ -495,157 +610,7 @@ export const ServiceDetailPage: React.FC = () => {
               {activeTab === 'overview' && !isDigitalWorkspace && (
                 <>
                   <Heading text="Overview" />
-                  {isGHC && ghcContent ? (
-                    // GHC Overview content - rich formatting from detailed guide page
-                    <div className="space-y-6">
-                      {/* Main Description */}
-                      <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
-                        {ghcContent.shortOverview.split('\n\n').map((paragraph) => (
-                          <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-                        ))}
-                      </div>
-
-                      {/* Course Highlights Section */}
-                      <div className="space-y-5">
-                        <SubHeading text="Five Reasons To Work With The GHC" />
-                        {ghcContent.highlights.map((highlight) => {
-                          const [title, ...descParts] = highlight.split(':')
-                          const description = descParts.join(':').trim()
-                          return (
-                            <div key={highlight.slice(0, 40)} className="flex items-start gap-3">
-                              <div className="flex-shrink-0 mt-1">
-                                <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4" />
-                                </svg>
-                              </div>
-                              <p className="text-gray-700 text-base leading-relaxed">
-                                <span className="font-semibold">{title}:</span> {description}
-                              </p>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  ) : isDigitalWorkspace ? (
-                    // Digital Workspace Overview content - refined and comprehensive
-                    <div className="space-y-6">
-                      {/* Main Description */}
-                      <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
-                        <p>
-                          The Associate Owned Asset Initiative represents a strategic transformation in how DQ manages workplace technology. 
-                          By shifting from traditional company-owned devices to associate-owned assets, we create a more flexible, 
-                          cost-effective, and secure approach to device management.
-                        </p>
-                        <p>
-                          These guidelines establish clear frameworks for three distinct programs—BYOD, FYOD, and HYOD—each designed 
-                          to accommodate different associate needs while maintaining operational excellence and security standards.
-                        </p>
-                      </div>
-
-                      {/* Key Objectives */}
-                      <div className="space-y-5">
-                        <SubHeading text="Strategic Objectives" />
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0 mt-1">
-                              <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Mitigate Asset Theft</h4>
-                              <p className="text-gray-700 text-sm">Reduce risk of device misappropriation through clear ownership structures and accountability measures.</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0 mt-1">
-                              <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Promote Accountability</h4>
-                              <p className="text-gray-700 text-sm">Establish direct responsibility for device maintenance, security, and proper usage among associates.</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0 mt-1">
-                              <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Support Seamless Transitions</h4>
-                              <p className="text-gray-700 text-sm">Ensure smooth onboarding and device management processes with minimal work disruption.</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0 mt-1">
-                              <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Optimize Operational Efficiency</h4>
-                              <p className="text-gray-700 text-sm">Streamline IT operations and reduce administrative overhead through distributed device management.</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Program Overview */}
-                      <div className="space-y-5">
-                        <SubHeading text="Available Programs" />
-                        <div className="grid gap-4 md:grid-cols-3">
-                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 text-center">
-                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <span className="text-blue-600 font-bold">BYOD</span>
-                            </div>
-                            <h4 className="font-semibold text-blue-900 mb-2">Bring Your Own Device</h4>
-                            <p className="text-blue-800 text-sm">Use your personal device for work with company security standards.</p>
-                          </div>
-                          <div className="p-4 bg-green-50 rounded-lg border border-green-200 text-center">
-                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <span className="text-green-600 font-bold">FYOD</span>
-                            </div>
-                            <h4 className="font-semibold text-green-900 mb-2">Finance Your Own Device</h4>
-                            <p className="text-green-800 text-sm">Purchase a company device with salary deduction options.</p>
-                          </div>
-                          <div className="p-4 bg-orange-50 rounded-lg border border-orange-200 text-center">
-                            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <span className="text-orange-600 font-bold">HYOD</span>
-                            </div>
-                            <h4 className="font-semibold text-orange-900 mb-2">Hold Your Own Device</h4>
-                            <p className="text-orange-800 text-sm">Temporary company device for emergency situations.</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    // Non-GHC, Non-Digital Workspace Overview content (existing)
-                    <div className="space-y-4 text-gray-700 leading-relaxed">
-                      <p>
-                        The Associate Owned Asset Initiative is a strategic effort aimed at enhancing operational efficiency, 
-                        reducing asset management costs, and improving the accountability of devices used for company work. 
-                        As a result of this initiative, the Associate Owned Asset Guidelines have been developed to mitigate 
-                        the risk of asset theft by departing associates, while ensuring secure management and compliance 
-                        with company standards.
-                      </p>
-                      <p>
-                        The main objective of the Associate Owned Asset Guidelines is to establish clear procedures for 
-                        transitioning to an associate-owned device model at DQ. This initiative aims to:
-                      </p>
-                      <div className="pt-2">
-                        <Checklist items={[
-                          "Mitigate Asset Theft.",
-                          "Promote Accountability.",
-                          "Support Seamless Transitions.",
-                          "Optimize Operational Efficiency."
-                        ]} />
-                      </div>
-                    </div>
-                  )}
+                  {renderOverviewContent()}
                 </>
               )}
 

@@ -386,7 +386,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   })).filter(detail => detail.value !== 'N/A');
   
   // Extract highlights/features based on marketplace type
-  const highlights = isGHC ? (ghcContent?.highlights || []) : (marketplaceType === 'courses' ? item.learningOutcomes || [] : item.details || []);
+  const nonGhcHighlights = marketplaceType === 'courses' ? item.learningOutcomes || [] : item.details || [];
+  const highlights = isGHC ? (ghcContent?.highlights || []) : nonGhcHighlights;
   // Render tab content with consistent styling
   // Code block component with copy functionality
   const CodeBlock: React.FC<{ code: string; language?: string; title?: string }> = ({ code, language, title }) => {

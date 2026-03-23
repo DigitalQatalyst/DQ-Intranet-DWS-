@@ -105,10 +105,10 @@ function GuidelinePage() {
           // Store HTML directly (no JSON parsing)
           if (data.body) {
             // Replace literal \n with actual line breaks
-            let processedHtml = (data.body as string).replaceAll('\\n', '\n')
+            let processedHtml = (data.body as string).replace(/\\n/g, '\n')
             
             // Strip leading pipe characters from headings (artifact from database content)
-            processedHtml = processedHtml.replaceAll(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')
+            processedHtml = processedHtml.replace(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')
             
             // Add IDs to headings for table of contents navigation
             processedHtml = addIdsToHeadings(processedHtml)

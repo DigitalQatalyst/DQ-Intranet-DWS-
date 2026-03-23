@@ -166,8 +166,8 @@ const parseFilterValues = (params: URLSearchParams, key: string): string[] =>
     .map((value) => value.trim())
     .filter(Boolean);
 
-// Helper: normalize a string for loose comparison (remove spaces, hyphens, underscores)
-const normalizeForCompare = (s: string) => s.toLowerCase().replace(/[\s_&-]/g, '');
+// Helper: normalize a string for loose comparison (remove spaces, hyphens, underscores, ampersands)
+const normalizeForCompare = (s: string) => s.toLowerCase().replaceAll(' ', '').replaceAll('_', '').replaceAll('&', '').replaceAll('-', '');
 const matchesNormalized = (a: string, b: string) => normalizeForCompare(a) === normalizeForCompare(b);
 
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({
@@ -189,8 +189,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   // Service Center tabs - sync with URL params
   const getServiceTabFromParams = useCallback((params: URLSearchParams): string => {
     const tab = params.get('tab');
-    const validTabs = ['technology', 'business', 'digital_worker', 'prompt_library', 'ai_tools'];
-    return tab && validTabs.includes(tab) ? tab : 'technology';
+    const validTabs = new Set(['technology', 'business', 'digital_worker', 'prompt_library', 'ai_tools']);
+    return tab && validTabs.has(tab) ? tab : 'technology';
   }, []);
   const [activeServiceTab, setActiveServiceTab] = useState<string>(() => 
     isServicesCenter 
@@ -202,10 +202,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   useEffect(() => {
     if (isServicesCenter) {
       const currentTab = searchParams.get('tab');
-      const validTabs = ['technology', 'business', 'digital_worker', 'prompt_library', 'ai_tools'];
-      if (currentTab && validTabs.includes(currentTab) && currentTab !== activeServiceTab) {
+      const validTabs = new Set(['technology', 'business', 'digital_worker', 'prompt_library', 'ai_tools']);
+      if (currentTab && validTabs.has(currentTab) && currentTab !== activeServiceTab) {
         setActiveServiceTab(currentTab);
-      } else if (currentTab === null || !validTabs.includes(currentTab ?? '')) {
+      } else if (currentTab === null || !validTabs.has(currentTab ?? '')) {
         // Set default tab in URL if not present
         const newParams = new URLSearchParams(searchParams);
         newParams.set('tab', activeServiceTab);
@@ -215,7 +215,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   }, [isServicesCenter, searchParams, activeServiceTab, setSearchParams]);
 
   // Items & filters state
-  const [, setItems] = useState<any[]>([]);
+  const [_items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -915,7 +915,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             throw error;
           }
           if (facetError) {
-            // Facet query failed, continue without facets
+            console.warn('[MarketplacePage] Facet query failed, continuing without facets:', facetError);
           }
           
           // Debug logging removed for production
@@ -959,8 +959,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           if (isStrategyTab) {
             // Show all strategy guides; server-side query already biases toward Strategy
             // EXCLUDE: HoV competencies (HoV 1-12) - only show main HoV card (dq-hov)
-            // EXCLUDE: Any other unwanted strategy guides
-            const excludedStrategySlugs = [
+            const excludedStrategySlugs = new Set([
               'dq-competencies-emotional-intelligence',
               'dq-competencies-growth-mindset',
               'dq-competencies-purpose',
@@ -973,12 +972,12 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               'dq-competencies-collaboration',
               'dq-competencies-responsibility',
               'dq-competencies-trust',
-              'dq-competencies', // Exclude the competencies overview page
-              'dq-beliefs', // Exclude DQ Beliefs if it exists
-              'dq-strategy-2021-2030', // Exclude DQ Strategy 2021-2030 if it exists
-              'dq-journey', // Exclude DQ Journey
-              'journey', // Exclude any guide with "journey" slug
-            ];
+              'dq-competencies',
+              'dq-beliefs',
+              'dq-strategy-2021-2030',
+              'dq-journey',
+              'journey',
+            ]);
             
             // Canonical GHC slugs - only these should be shown
             const canonicalGHCSlugs = new Set([
@@ -996,8 +995,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               const slug = (it.slug || '').toLowerCase();
               const title = (it.title || '').toLowerCase();
               
-              // Exclude if slug matches any excluded slug
-              if (excludedStrategySlugs.includes(slug)) return false;
+              if (excludedStrategySlugs.has(slug)) return false;
               
               // Exclude if title contains unwanted keywords
               if (title.includes('dq journey') || 
@@ -2390,35 +2388,40 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 <FilterIcon size={18} />
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
-              {(isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
-                 isKnowledgeHub ? activeFilters.length > 0 :
-                 isGuides ? false :
-                 Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''))) && (
-                <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
-                  Reset
-                </button>
-              )}
+              {(() => {
+                const hasActiveFilters = isCourses
+                  ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0)
+                  : isKnowledgeHub
+                    ? activeFilters.length > 0
+                    : !isGuides && Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
+                return hasActiveFilters ? (
+                  <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
+                    Reset
+                  </button>
+                ) : null;
+              })()}
             </div>
           </div>
 
           {/* Filter sidebar - mobile/tablet */}
-          <div
-            className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-30 transition-opacity duration-300 xl:hidden ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-            onClick={toggleFilters}
-            onKeyDown={(e) => e.key === 'Escape' && toggleFilters()}
-            role="button"
-            tabIndex={showFilters ? 0 : -1}
-            aria-label="Close filters overlay"
-            aria-hidden={!showFilters}
-          >
+          <div className="xl:hidden">
+            {/* Backdrop */}
             <div
-              id="filter-sidebar"
-              className={`fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}
-              onClick={e => e.stopPropagation()}
-              onKeyDown={e => e.stopPropagation()}
+              role="button"
+              tabIndex={showFilters ? 0 : -1}
+              className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-30 transition-opacity duration-300 ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              onClick={toggleFilters}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') toggleFilters(); }}
+              aria-label="Close filters overlay"
+              aria-hidden={!showFilters}
+            />
+            {/* Panel */}
+            <div
               role="dialog"
               aria-modal="true"
               aria-label="Filters"
+              id="filter-sidebar"
+              className={`fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-40 h-full ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}
             >
               <div className="h-full overflow-y-auto">
                 <div className="sticky top-0 bg-white z-10 p-4 border-b border-gray-200 flex justify-between items-center">
@@ -2452,11 +2455,16 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto filter-sidebar-scroll">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Filters</h2>
-                  {(isCourses ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0) : 
-                     isKnowledgeHub ? activeFilters.length > 0 :
-                     Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''))) && (
-                    <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>
-                  )}
+                  {(() => {
+                    const hasActiveFilters = isCourses
+                      ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0)
+                      : isKnowledgeHub
+                        ? activeFilters.length > 0
+                        : Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
+                    return hasActiveFilters ? (
+                      <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>
+                    ) : null;
+                  })()}
                 </div>
                 {isKnowledgeHub ? (
                   <div className="space-y-4">

@@ -72,7 +72,11 @@ export function TablePreview({ data, maxPreviewRows = 2 }: TablePreviewProps) {
           {/* Background overlay */}
           <div 
             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            role="button"
+            tabIndex={0}
+            aria-label="Close table"
             onClick={() => setShowFullTable(false)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowFullTable(false) }}
           />
           
           {/* Modal panel */}
