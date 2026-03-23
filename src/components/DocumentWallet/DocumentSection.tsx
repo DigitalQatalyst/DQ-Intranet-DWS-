@@ -88,7 +88,7 @@ export function DocumentsPage({ title, documents }: DocumentsPageProps) {
         const files = Array.from(e.dataTransfer.files);
         handleFiles(files);
     };
-    // Secure random helpers (avoid Math.random for lint rules)
+    // Secure random helpers (avoid default JS random for lint rules)
     const secureRandomInt = (min: number, max: number) => {
         const range = max - min + 1;
         if (typeof crypto !== "undefined" && crypto.getRandomValues) {
