@@ -13,8 +13,9 @@ function SafeHTMLBlock({ html, htmlKey }: SafeHTMLBlockProps) {
 
   useEffect(() => {
     if (!ref.current) return
-    // codacy-disable-next-line security/detect-possible-timing-attacks
-    ref.current.innerHTML = DOMPurify.sanitize(html)
+    // Use DOMPurify with RETURN_DOM_FRAGMENT to avoid innerHTML assignment
+    const clean = DOMPurify.sanitize(html, { RETURN_DOM_FRAGMENT: true })
+    ref.current.replaceChildren(clean)
   }, [html])
 
   return <div key={htmlKey} ref={ref} />
