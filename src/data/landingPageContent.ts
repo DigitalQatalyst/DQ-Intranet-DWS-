@@ -274,7 +274,7 @@ export const impactStats: ImpactStat[] = [
 export const heroContent: HeroContent = {
   title: "Welcome to Digital Workspace",
   subtitle:
-    "Start with clarity, stay aligned, and move work forward with the tools, updates, and pathways that support your day.",
+    "Your starting point for staying informed, taking action, and moving work forward across DQ.",
   suggestionPills: [
     "Open an IT service request",
     "Where's the HR leave policy?",
