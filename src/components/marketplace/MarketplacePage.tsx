@@ -166,6 +166,14 @@ const parseFilterValues = (params: URLSearchParams, key: string): string[] =>
     .map((value) => value.trim())
     .filter(Boolean);
 
+// Module-level helper — extracted to reduce cognitive complexity of run()
+const countBy = (arr: any[] | null | undefined, key: string) => {
+  const m = new Map<string, number>();
+  for (const r of (arr || [])) { const v = (r as any)[key]; if (!v) continue; m.set(v, (m.get(v) || 0) + 1); }
+  return Array.from(m.entries()).map(([id, cnt]) => ({ id, name: id, count: cnt }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+};
+
 // Helper: normalize a string for loose comparison (remove spaces, hyphens, underscores, ampersands)
 const normalizeForCompare = (s: string) => s.toLowerCase().replaceAll(' ', '').replaceAll('_', '').replaceAll('&', '').replaceAll('-', '');
 const matchesNormalized = (a: string, b: string) => normalizeForCompare(a) === normalizeForCompare(b);
@@ -194,7 +202,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   }, []);
   const [activeServiceTab, setActiveServiceTab] = useState<string>(() => 
     isServicesCenter 
-      ? getServiceTabFromParams(globalThis.window !== undefined ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams())
+      ? getServiceTabFromParams(new URLSearchParams(globalThis.location?.search ?? ""))
       : 'technology'
   );
   
@@ -205,7 +213,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       const validTabs = new Set(['technology', 'business', 'digital_worker', 'prompt_library', 'ai_tools']);
       if (currentTab && validTabs.has(currentTab) && currentTab !== activeServiceTab) {
         setActiveServiceTab(currentTab);
-      } else if (currentTab === null || !validTabs.has(currentTab ?? '')) {
+      } else if (!currentTab || !validTabs.has(currentTab)) {
         // Set default tab in URL if not present
         const newParams = new URLSearchParams(searchParams);
         newParams.set('tab', activeServiceTab);
@@ -215,7 +223,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   }, [isServicesCenter, searchParams, activeServiceTab, setSearchParams]);
 
   // Items & filters state
-  const [_items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -224,16 +232,14 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
   // Guides facets + URL state
   const [facets, setFacets] = useState<GuidesFacets>({});
-  const [queryParams, setQueryParams] = useState(() => new URLSearchParams(globalThis.window !== undefined ? globalThis.location?.search ?? '' : ''));
+  const [queryParams, setQueryParams] = useState(() => new URLSearchParams(globalThis.location?.search ?? ''));
   const searchStartRef = useRef<number | null>(null);
 
   // Sync queryParams with URL changes
   const location = useLocation();
   useEffect(() => {
-    if (globalThis.window !== undefined) {
-      const currentParams = new URLSearchParams(location.search);
-      setQueryParams(currentParams);
-    }
+    const currentParams = new URLSearchParams(location.search);
+    setQueryParams(currentParams);
   }, [location.search]); // Re-sync when URL search changes
 
   // Listen for browser navigation (back/forward) to sync queryParams
@@ -259,12 +265,12 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     return tab === 'vds' || tab === 'cds' ? tab : 'cids';
   }, []);
   const [activeTab, setActiveTab] = useState<WorkGuideTab>(() => {
-    const initParams = globalThis.window !== undefined ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams();
+    const initParams = new URLSearchParams(globalThis.location?.search ?? "");
     return getTabFromParams(initParams);
   });
   const [activeDesignSystemTab, setActiveDesignSystemTab] = useState<DesignSystemTab>(() => {
     if (!isDesignSystem) return 'cids';
-    const initParams = globalThis.window !== undefined ? new URLSearchParams(globalThis.location?.search ?? "") : new URLSearchParams();
+    const initParams = new URLSearchParams(globalThis.location?.search ?? "");
     return getDesignSystemTabFromParams(initParams);
   });
 
@@ -328,7 +334,11 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     } else {
       next.set('tab', tab);
     }
-    if (tab !== 'guidelines') {
+    if (tab === 'guidelines') {
+      // Switching to Guidelines - clear Strategy and Blueprint-specific filters
+      const keysToDelete = ['strategy_type', 'strategy_framework', 'blueprint_framework', 'blueprint_sector'];
+      keysToDelete.forEach(key => next.delete(key));
+    } else {
       // For Strategy and Blueprints, keep 'unit' filter; only delete incompatible filters
       if (tab === 'strategy') {
         // Keep 'unit' and 'location' for Strategy; delete incompatible filters
@@ -355,10 +365,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         const keysToDelete = ['guide_type', 'sub_domain', 'unit', 'domain', 'strategy_type', 'strategy_framework', 'guidelines_category', 'categorization', 'attachments', 'blueprint_framework', 'blueprint_sector', 'testimonial_category'];
         keysToDelete.forEach(key => next.delete(key));
       }
-    } else {
-      // Switching to Guidelines - clear Strategy and Blueprint-specific filters
-      const keysToDelete = ['strategy_type', 'strategy_framework', 'blueprint_framework', 'blueprint_sector'];
-      keysToDelete.forEach(key => next.delete(key));
     }
     // Clear tab-specific filters when switching away from their respective tabs
     if (tab !== 'guidelines') {
@@ -373,9 +379,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       next.delete('product_sector');
     }
     const qs = next.toString();
-    if (globalThis.window !== undefined) {
-      globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
-    }
+    globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
     setQueryParams(new URLSearchParams(next.toString()));
     track('Guides.TabChanged', { tab });
   }, [queryParams, setQueryParams]);
@@ -439,9 +443,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     });
     if (!changed) return;
     const qs = next.toString();
-    if (globalThis.window !== undefined) {
-      globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
-    }
+    globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
     setQueryParams(new URLSearchParams(next.toString()));
   }, [isGuides, activeTab]);
 
@@ -812,9 +814,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             const next = new URLSearchParams(queryParams.toString());
             if (subDomains.length) next.set('sub_domain', subDomains.join(','));
             else next.delete('sub_domain');
-            if (globalThis.window !== undefined) {
-              globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
-            }
+            globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
             setQueryParams(new URLSearchParams(next.toString()));
             setLoading(false);
             return;
@@ -1443,28 +1443,26 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
             out = out.slice(from, from + pageSize);
           }
 
-          const total = (needsClientSideFiltering || isBlueprintTab) ? totalFiltered : (typeof count === 'number' ? count : out.length);
+          const clientSideTotal = (needsClientSideFiltering || isBlueprintTab) ? totalFiltered : -1;
+          const serverTotal = typeof count === 'number' ? count : out.length;
+          const total = clientSideTotal >= 0 ? clientSideTotal : serverTotal;
           const lastPage = Math.max(1, Math.ceil(total / pageSize));
           // If current page exceeds last page (e.g., after filtering), reset to page 1
           if (currentPage > lastPage) {
             const next = new URLSearchParams(queryParams.toString());
-            if (lastPage <= 1) next.delete('page'); else next.set('page', '1'); // Always reset to page 1 if invalid
-            if (globalThis.window !== undefined) {
-              globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
-              globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
+            if (lastPage <= 1) {
+              next.delete('page');
+            } else {
+              next.set('page', '1');
             }
+            globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
+            globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
             setQueryParams(new URLSearchParams(next.toString()));
             setLoading(false);
             return;
           }
 
           // facets query (unchanged)
-          const countBy = (arr: any[] | null | undefined, key: string) => {
-            const m = new Map<string, number>();
-            for (const r of (arr || [])) { const v = (r as any)[key]; if (!v) continue; m.set(v, (m.get(v)||0)+1); }
-            return Array.from(m.entries()).map(([id, cnt]) => ({ id, name: id, count: cnt }))
-                      .sort((a,b)=> a.name.localeCompare(b.name));
-          };
 
           // Filter facet rows for Guidelines tab to exclude Strategy/Blueprint/Testimonial
           let filteredFacetRows = facetRows;
@@ -1661,7 +1659,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 const itemServicesArray = Array.isArray(itemServices) ? itemServices : [itemServices];
                 return services.some(filterService => 
                   itemServicesArray.some(itemSvc => 
-                    itemSvc.toLowerCase().replaceAll(/[\s_]/g, '') === filterService.toLowerCase().replaceAll(/[\s_]/g, '')
+                    itemSvc.toLowerCase().replace(/[\s_]/g, '') === filterService.toLowerCase().replace(/[\s_]/g, '')
                   )
                 );
               });
@@ -1952,10 +1950,8 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     const next = new URLSearchParams(queryParams.toString());
     if (clamped <= 1) next.delete('page');
     else next.set('page', String(clamped));
-    if (globalThis.window !== undefined) {
-      globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
-      globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
+    globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
     setQueryParams(new URLSearchParams(next.toString()));
   }, [queryParams, totalPages]);
 
@@ -2389,11 +2385,10 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
               {(() => {
-                const hasActiveFilters = isCourses
-                  ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0)
-                  : isKnowledgeHub
-                    ? activeFilters.length > 0
-                    : !isGuides && Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
+                const coursesHaveFilters = isCourses && Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0);
+                const knowledgeHubHasFilters = isKnowledgeHub && activeFilters.length > 0;
+                const otherHasFilters = !isGuides && Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
+                const hasActiveFilters = coursesHaveFilters || knowledgeHubHasFilters || otherHasFilters;
                 return hasActiveFilters ? (
                   <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
                     Reset
@@ -2406,22 +2401,20 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
           {/* Filter sidebar - mobile/tablet */}
           <div className="xl:hidden">
             {/* Backdrop */}
-            <div
-              role="button"
-              tabIndex={showFilters ? 0 : -1}
-              className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-30 transition-opacity duration-300 ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            <button
+              type="button"
+              className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-30 transition-opacity duration-300 w-full h-full border-0 p-0 cursor-default ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               onClick={toggleFilters}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') toggleFilters(); }}
               aria-label="Close filters overlay"
               aria-hidden={!showFilters}
+              tabIndex={showFilters ? 0 : -1}
             />
             {/* Panel */}
-            <div
-              role="dialog"
-              aria-modal="true"
+            <dialog
+              open={showFilters}
               aria-label="Filters"
               id="filter-sidebar"
-              className={`fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-40 h-full ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}
+              className={`fixed inset-y-0 left-0 m-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-40 h-full max-h-none p-0 ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}
             >
               <div className="h-full overflow-y-auto">
                 <div className="sticky top-0 bg-white z-10 p-4 border-b border-gray-200 flex justify-between items-center">
@@ -2444,7 +2437,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                   )}
                 </div>
               </div>
-            </div>
+            </dialog>
           </div>
 
           {/* Filter sidebar - desktop */}
@@ -2456,11 +2449,10 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Filters</h2>
                   {(() => {
-                    const hasActiveFilters = isCourses
-                      ? Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0)
-                      : isKnowledgeHub
-                        ? activeFilters.length > 0
-                        : Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
+                    const coursesHaveFilters = isCourses && Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0);
+                    const knowledgeHubHasFilters = isKnowledgeHub && activeFilters.length > 0;
+                    const otherHasFilters = Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
+                    const hasActiveFilters = coursesHaveFilters || knowledgeHubHasFilters || otherHasFilters;
                     return hasActiveFilters ? (
                       <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>
                     ) : null;

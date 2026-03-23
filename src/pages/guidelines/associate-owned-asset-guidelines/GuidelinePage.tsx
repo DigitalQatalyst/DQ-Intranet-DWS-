@@ -53,8 +53,8 @@ function GuidelinePage() {
       // Clean the content for ID generation
       const cleanContent = content
         .replace(/<[^>]+>/g, '') // Remove HTML tags
-        .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
-        .replace(/\./g, '') // Remove periods
+        .replaceAll('&nbsp;', ' ') // Replace &nbsp; with space
+        .replaceAll('.', '') // Remove periods
         .trim()
         .toLowerCase()
       
@@ -105,7 +105,7 @@ function GuidelinePage() {
           // Store HTML directly (no JSON parsing)
           if (data.body) {
             // Replace literal \n with actual line breaks
-            let processedHtml = (data.body as string).replace(/\\n/g, '\n')
+            let processedHtml = (data.body as string).replaceAll(String.raw`\n`, '\n')
             
             // Strip leading pipe characters from headings (artifact from database content)
             processedHtml = processedHtml.replace(/(<h[1-6][^>]*>)\s*\|\s*/gi, '$1')

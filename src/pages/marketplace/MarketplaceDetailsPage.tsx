@@ -389,7 +389,6 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
   const nonGhcHighlights = marketplaceType === 'courses' ? item.learningOutcomes || [] : item.details || [];
   const highlights = isGHC ? (ghcContent?.highlights || []) : nonGhcHighlights;
   // Render tab content with consistent styling
-  // Code block component with copy functionality
   const CodeBlock: React.FC<{ code: string; language?: string; title?: string }> = ({ code, language, title }) => {
     const [copied, setCopied] = React.useState(false);
     

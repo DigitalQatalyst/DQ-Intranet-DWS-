@@ -240,7 +240,6 @@ export const ServiceDetailPage: React.FC = () => {
   const [ghcContent, setGhcContent] = useState<GuideContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [_forceUpdate, setForceUpdate] = useState(0);
 
   // Check if this is a GHC service - use ghcContent state for accurate detection
   const isGHC = !!ghcContent;
@@ -258,7 +257,6 @@ export const ServiceDetailPage: React.FC = () => {
     if (!ghcContent && !guide) return;
     const defaultTab = isDigitalWorkspaceGuideline(guide) || ghcContent ? 'purpose' : 'overview';
     setActiveTab(defaultTab);
-    setForceUpdate(prev => prev + 1);
   }, [ghcContent, guide]);
 
   // Scroll to top immediately when itemId changes (for navigation between related competencies)
