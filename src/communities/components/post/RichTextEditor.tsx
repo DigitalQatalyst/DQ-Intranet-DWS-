@@ -96,7 +96,6 @@ export function RichTextEditor({
         className="flex-1 overflow-y-auto cursor-text"
         onClick={() => editor?.chain().focus().run()}
         onKeyDown={(e) => e.key === 'Enter' && editor?.chain().focus().run()}
-        role="button"
         tabIndex={0}
         aria-label="Text editor area"
       >
