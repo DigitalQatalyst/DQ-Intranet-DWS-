@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import DOMPurify from 'dompurify';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, Plus, Minus } from 'lucide-react';
 import { Header } from '../../components/Header';
@@ -319,12 +318,33 @@ const getNonGhcHighlights = (marketplaceType: string, item: any): any[] => {
   }
   return item.details ?? [];
 };
+/**
+ * Safely renders a paragraph string that may contain basic HTML entities
+ * and <br> / <br/> tags as plain React nodes — no raw HTML injection.
+ */
+const renderParagraphText = (text: string): React.ReactNode => {
+  // Decode common HTML entities
+  const decoded = text
+    .replaceAll('&amp;', '&')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&nbsp;', '\u00a0');
+  // Split on <br> variants and render each segment with a <br /> in between
+  const parts = decoded.split(/<br\s*\/?>/i);
+  return parts.map((part, i) => (
+    <React.Fragment key={i}>
+      {i > 0 && <br />}
+      {part}
+    </React.Fragment>
+  ));
+};
+
 const renderBlocks = (blocks: ContentBlock[]): React.ReactNode[] => {
   return (blocks || []).map((block, idx) => {
     if (block.type === 'p') {
-      const safeHtml = DOMPurify.sanitize(block.text);
-      // eslint-disable-next-line react/no-danger
-      return <p key={`block-p-${block.text?.slice(0, 30) ?? idx}`} className="text-gray-700 text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: safeHtml }}></p>;
+      return <p key={`block-p-${block.text?.slice(0, 30) ?? idx}`} className="text-gray-700 text-base leading-relaxed mb-4">{renderParagraphText(block.text)}</p>;
     }
     if (block.type === 'ol') {
       return <ol key={`block-ol-${block.items?.[0]?.slice(0, 20) ?? idx}`} className="list-decimal pl-6 space-y-3 text-gray-700 mb-4 text-base">

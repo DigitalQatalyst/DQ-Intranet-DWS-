@@ -67,12 +67,10 @@ export function FullTableModal({ isOpen, onClose, title, columns, data, descript
   const filteredColumns = columns.filter(col => col.header.trim() !== '' && col.accessor.trim() !== '')
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={dialogRef}
       className="fixed inset-0 z-50 m-auto p-0 bg-transparent max-w-5xl w-full max-h-[85vh] rounded-xl overflow-hidden backdrop:bg-black backdrop:bg-opacity-50"
       onClose={onClose}
-      onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
       aria-labelledby="modal-title"
     >
       <div className="bg-white rounded-xl shadow-lg w-full max-h-[85vh] flex flex-col">

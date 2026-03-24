@@ -985,6 +985,158 @@ const parseDesignSystemTab = (params: URLSearchParams): string => {
   return tab === 'vds' || tab === 'cds' ? tab : 'cids';
 };
 
+// ─── Guide tab-flag helper ─────────────────────────────────────────────────────
+type GuideTabFlags = {
+  isStrategyTab: boolean;
+  isBlueprintTab: boolean;
+  isTestimonialsTab: boolean;
+  isGlossaryTab: boolean;
+  isFAQsTab: boolean;
+  isGuidelinesTab: boolean;
+  isSpecialTab: boolean;
+};
+
+/**
+ * Computes all boolean tab-identity flags from activeTab string.
+ * Extracted to reduce cognitive complexity of runGuides.
+ */
+const computeGuideTabFlags = (tab: string): GuideTabFlags => {
+  const isStrategyTab    = tab === 'strategy';
+  const isBlueprintTab   = tab === 'blueprints';
+  const isTestimonialsTab = tab === 'testimonials';
+  const isGlossaryTab    = tab === 'glossary';
+  const isFAQsTab        = tab === 'faqs';
+  const isGuidelinesTab  = tab === 'guidelines';
+  const isSpecialTab     = isStrategyTab || isBlueprintTab || isTestimonialsTab || isGlossaryTab || isFAQsTab;
+  return { isStrategyTab, isBlueprintTab, isTestimonialsTab, isGlossaryTab, isFAQsTab, isGuidelinesTab, isSpecialTab };
+};
+
+type FetchGuideDataResult = {
+  rows: any[] | null;
+  count: number | null;
+  facetRows: any[] | null;
+  error: Error | null;
+  facetError: Error | null;
+};
+
+/**
+ * Runs the Supabase list + facet queries for runGuides.
+ * Extracted to reduce cognitive complexity of runGuides.
+ */
+const fetchGuideData = async (
+  q: any,
+  facetQ: any,
+  needsClientSideFiltering: boolean,
+  from: number,
+  to: number
+): Promise<FetchGuideDataResult> => {
+  const listPromise = needsClientSideFiltering ? q.limit(10000) : q.range(from, to);
+  const [listResult, facetResult] = await Promise.all([listPromise, facetQ]);
+  return {
+    rows: listResult.data ?? null,
+    count: listResult.count ?? null,
+    error: listResult.error ?? null,
+    facetRows: facetResult.data ?? null,
+    facetError: facetResult.error ?? null,
+  };
+};
+
+type PostFetchParams = {
+  mapped: any[];
+  flags: GuideTabFlags & { isBlueprintTab: boolean };
+  clientFilterParams: Parameters<typeof applyGuideClientFilters>[1];
+  sort: string;
+  needsClientSideFiltering: boolean;
+  from: number;
+  pageSize: number;
+};
+
+/**
+ * Applies tab-shape transforms, client-side filters, sort, and pagination slice
+ * after the Supabase fetch. Extracted to reduce cognitive complexity of runGuides.
+ */
+const applyGuidePostFetch = (params: PostFetchParams): { out: any[]; totalFiltered: number } => {
+  const { mapped, flags, clientFilterParams, sort, needsClientSideFiltering, from, pageSize } = params;
+  const { isStrategyTab, isTestimonialsTab, isGuidelinesTab, isBlueprintTab } = flags;
+  let out = mapped;
+
+  if (isStrategyTab)          out = filterStrategyTab(out);
+  else if (isTestimonialsTab) out = buildTestimonialsTab(mapped);
+  else if (isGuidelinesTab)   out = filterGuidelinesTab(out);
+  else if (!isBlueprintTab)   out = [];
+
+  out = applyGuideClientFilters(out, clientFilterParams);
+  out = sortGuideResults(out, sort);
+  if (!isBlueprintTab) out = applyDefaultHeroImage(out);
+
+  const totalFiltered = out.length;
+  if (needsClientSideFiltering || isBlueprintTab) out = out.slice(from, from + pageSize);
+  return { out, totalFiltered };
+};
+
+type FilterConfigSetters = {
+  setFilterConfig: (c: FilterConfig[]) => void;
+  setFilters: (f: Record<string, string | string[]>) => void;
+};
+
+type FilterConfigContext = {
+  isGuides: boolean;
+  isKnowledgeHub: boolean;
+  isServicesCenter: boolean;
+  isDesignSystem: boolean;
+  marketplaceType: string;
+  activeServiceTab: string;
+  config: { filterCategories: FilterConfig[] };
+  currentFilterConfigLength: number;
+  currentFiltersLength: number;
+};
+
+/**
+ * Loads filter configurations for the marketplace.
+ * Extracted from the useEffect inner loadFilterOptions to reduce component
+ * cognitive complexity (was score 19, now well under 15).
+ */
+const loadFilterConfig = async (
+  ctx: FilterConfigContext,
+  setters: FilterConfigSetters
+): Promise<void> => {
+  const { isGuides, isKnowledgeHub, isServicesCenter, isDesignSystem,
+    marketplaceType, activeServiceTab, config,
+    currentFilterConfigLength, currentFiltersLength } = ctx;
+
+  if (isGuides || isKnowledgeHub) {
+    if (currentFilterConfigLength || currentFiltersLength) {
+      setters.setFilterConfig([]);
+      setters.setFilters({});
+    }
+    return;
+  }
+  const makeInitial = (cats: FilterConfig[]) =>
+    Object.fromEntries(cats.map(c => [c.id, ''])) as Record<string, string | string[]>;
+
+  if (isServicesCenter) {
+    const tabFilters = getTabSpecificFilters(activeServiceTab);
+    setters.setFilterConfig(tabFilters);
+    setters.setFilters(makeInitial(tabFilters));
+    return;
+  }
+  if (isDesignSystem) {
+    setters.setFilterConfig(config.filterCategories);
+    setters.setFilters(makeInitial(config.filterCategories));
+    return;
+  }
+  try {
+    let filterOptions = await fetchMarketplaceFilters(marketplaceType);
+    filterOptions = prependLearningTypeFilter(marketplaceType, filterOptions);
+    setters.setFilterConfig(filterOptions);
+    setters.setFilters(makeInitial(filterOptions));
+  } catch (err) {
+    console.warn('[MarketplacePage] Failed to load filter options, using defaults:', err);
+    setters.setFilterConfig(config.filterCategories);
+    setters.setFilters(makeInitial(config.filterCategories));
+  }
+};
+
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   marketplaceType,
   title: _title,
@@ -1234,50 +1386,15 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       setLoading(false);
       return;
     }
-  const loadFilterOptions = async () => {
-      if (isGuides || isKnowledgeHub) {
-        if (filterConfig.length || Object.keys(filters).length) {
-          setFilterConfig([]);
-          setFilters({});
-        }
-        return;
-      }
-      
-      // Use tab-specific filters for Services Center
-      if (isServicesCenter) {
-        const tabFilters = getTabSpecificFilters(activeServiceTab);
-        setFilterConfig(tabFilters);
-        const initial: Record<string, string | string[]> = {};
-        tabFilters.forEach(c => { initial[c.id] = ''; });
-        setFilters(initial);
-        return;
-      }
-      
-      // For Design System, use config.filterCategories directly
-      if (isDesignSystem) {
-        setFilterConfig(config.filterCategories);
-        const initial: Record<string, string | string[]> = {};
-        config.filterCategories.forEach(c => { initial[c.id] = ''; });
-        setFilters(initial);
-        return;
-      }
-      
-      try {
-        let filterOptions = await fetchMarketplaceFilters(marketplaceType);
-        filterOptions = prependLearningTypeFilter(marketplaceType, filterOptions);
-        setFilterConfig(filterOptions);
-        const initial: Record<string, string | string[]> = {};
-        filterOptions.forEach(c => { initial[c.id] = ''; });
-        setFilters(initial);
-      } catch (err) {
-        console.warn('[MarketplacePage] Failed to load filter options, using defaults:', err);
-        setFilterConfig(config.filterCategories);
-        const initial: Record<string, string | string[]> = {};
-        config.filterCategories.forEach(c => { initial[c.id] = ''; });
-        setFilters(initial);
-      }
-    };
-    loadFilterOptions();
+    loadFilterConfig(
+      {
+        isGuides, isKnowledgeHub, isServicesCenter, isDesignSystem,
+        marketplaceType, activeServiceTab, config,
+        currentFilterConfigLength: filterConfig.length,
+        currentFiltersLength: Object.keys(filters).length,
+      },
+      { setFilterConfig, setFilters }
+    );
   }, [marketplaceType, config, isCourses, isGuides, isKnowledgeHub, isServicesCenter, isDesignSystem, activeServiceTab, filterConfig.length, Object.keys(filters).length]);
   
   // ─── runGuides ────────────────────────────────────────────────────────────────
@@ -1305,20 +1422,16 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       excludedSlugs.forEach(slug => { q = q.neq('slug', slug); });
 
       // Parse all filter values via module-level helper
+      const vars = parseGuideQueryVars(queryParams);
       const {
         qStr, domains, rawSubs, guideTypes, units, statuses, testimonialCategories,
         strategyTypes, strategyFrameworks, guidelinesCategories, categorization,
         blueprintFrameworks, blueprintSectors, productTypes, productStages, productSectors, sort,
-      } = parseGuideQueryVars(queryParams);
+      } = vars;
 
-      const currentActiveTab = activeTab as WorkGuideTab;
-      const isStrategyTab    = currentActiveTab === 'strategy';
-      const isBlueprintTab   = currentActiveTab === 'blueprints';
-      const isTestimonialsTab = currentActiveTab === 'testimonials';
-      const isGlossaryTab    = currentActiveTab === 'glossary';
-      const isFAQsTab        = currentActiveTab === 'faqs';
-      const isGuidelinesTab  = currentActiveTab === 'guidelines';
-      const isSpecialTab     = isStrategyTab || isBlueprintTab || isTestimonialsTab || isGlossaryTab || isFAQsTab;
+      // All boolean tab-identity flags via module-level helper
+      const flags = computeGuideTabFlags(activeTab);
+      const { isStrategyTab, isBlueprintTab, isTestimonialsTab, isGuidelinesTab, isSpecialTab } = flags;
 
       const subDomains       = computeAllowedSubDomains(domains, rawSubs, isSpecialTab);
       const effectiveGuideTypes = isSpecialTab ? [] : guideTypes;
@@ -1336,8 +1449,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       }
 
       const tabFlags: GuidesTabFlags = { isStrategyTab, isTestimonialsTab, isGuidelinesTab, isSpecialTab };
-      const qParams: GuidesQueryParams = { statuses, qStr, domains, subDomains, effectiveGuideTypes, sort };
-      q = applyGuidesQueryFilters(q, qParams, tabFlags);
+      q = applyGuidesQueryFilters(q, { statuses, qStr, domains, subDomains, effectiveGuideTypes, sort }, tabFlags);
 
       const needsClientSideFiltering = computeNeedsClientSideFiltering({
         isStrategyTab, isBlueprintTab, isGuidelinesTab,
@@ -1348,40 +1460,33 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
 
       const from = (currentPage - 1) * pageSize;
       const to   = from + pageSize - 1;
-      const listPromise = needsClientSideFiltering ? q.limit(10000) : q.range(from, to);
-
       const facetQ = applyFacetQueryFilters(
         supabaseClient.from('guides').select('domain,sub_domain,guide_type,function_area,unit,location,status') as any,
-        statuses, qStr, excludedSlugs,
-        { isStrategyTab, isTestimonialsTab }
+        statuses, qStr, excludedSlugs, { isStrategyTab, isTestimonialsTab }
       );
 
-      const [{ data: rows, count, error }, { data: facetRows, error: facetError }] = await Promise.all([listPromise, facetQ]);
+      // Fetch via module-level helper
+      const { rows, count, error, facetRows, facetError } = await fetchGuideData(q, facetQ, needsClientSideFiltering, from, to);
       if (error) throw error;
       if (facetError) console.warn('[MarketplacePage] Facet query failed, continuing without facets:', facetError);
 
       const mapped = (rows || []).map(mapGuideRow);
       let out = mapped.filter((it: any) => !excludedSlugs.includes(it.slug));
 
-      // Tab-specific shape transforms
-      if (isStrategyTab)          out = filterStrategyTab(out);
-      else if (isTestimonialsTab) out = buildTestimonialsTab(mapped);
-      else if (isGuidelinesTab)   out = filterGuidelinesTab(out);
-      else if (!isBlueprintTab)   out = []; // unknown tab — show nothing
-
-      out = applyGuideClientFilters(out, {
+      const clientFilterParams = {
         domains, subDomains, effectiveGuideTypes, effectiveUnits, categorization,
         isGuidelinesTab, isBlueprintTab, isStrategyTab, isTestimonialsTab,
         strategyTypes, strategyFrameworks, guidelinesCategories,
         productTypes, productStages, productSectors, blueprintSectors,
         testimonialCategories, statuses, qStr, slugifyFn: slugify,
+      };
+
+      // Post-fetch processing via module-level helper
+      const { out: rawOut, totalFiltered } = applyGuidePostFetch({
+        mapped, flags: { ...flags }, clientFilterParams, sort,
+        needsClientSideFiltering, from, pageSize,
       });
-
-      out = sortGuideResults(out, sort);
-      if (!isBlueprintTab) out = applyDefaultHeroImage(out);
-
-      const totalFiltered = out.length;
-      if (needsClientSideFiltering || isBlueprintTab) out = out.slice(from, from + pageSize);
+      out = rawOut;
 
       const total    = computePageTotal(out, count, needsClientSideFiltering, isBlueprintTab, totalFiltered);
       const lastPage = Math.max(1, Math.ceil(total / pageSize));
