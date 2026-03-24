@@ -1055,8 +1055,8 @@ type PostFetchParams = {
  * Applies tab-shape transforms, client-side filters, sort, and pagination slice
  * after the Supabase fetch. Extracted to reduce cognitive complexity of runGuides.
  */
-const applyGuidePostFetch = (params: PostFetchParams): { out: any[]; totalFiltered: number } => {
-  const { mapped, flags, clientFilterParams, sort, needsClientSideFiltering, from, pageSize } = params;
+const applyGuidePostFetch = (params: PostFetchParams & { isGuides: boolean; activeTab: string }): { out: any[]; totalFiltered: number } => {
+  const { mapped, flags, clientFilterParams, sort, needsClientSideFiltering, from, pageSize, isGuides, activeTab } = params;
   const { isStrategyTab, isTestimonialsTab, isGuidelinesTab, isBlueprintTab } = flags;
   let out = mapped;
 
@@ -1068,6 +1068,7 @@ const applyGuidePostFetch = (params: PostFetchParams): { out: any[]; totalFilter
   out = applyGuideClientFilters(out, clientFilterParams);
   out = sortGuideResults(out, sort);
   if (!isBlueprintTab) out = applyDefaultHeroImage(out);
+  if (isGuides && activeTab === 'strategy') out = applyGHCOrdering(out);
 
   const totalFiltered = out.length;
   if (needsClientSideFiltering || isBlueprintTab) out = out.slice(from, from + pageSize);
@@ -1137,6 +1138,53 @@ const loadFilterConfig = async (
   }
 };
 
+/**
+ * Handles the sub-domain mismatch guard inside runGuides.
+ * Returns the corrected URLSearchParams when a reset is needed, or null.
+ */
+const applySubDomainGuard = (
+  isSpecialTab: boolean,
+  rawSubs: string[],
+  subDomains: string[],
+  queryParams: URLSearchParams
+): URLSearchParams | null => {
+  if (isSpecialTab || !rawSubs.length || subDomains.length === rawSubs.length) return null;
+  const next = new URLSearchParams(queryParams.toString());
+  if (subDomains.length) next.set('sub_domain', subDomains.join(','));
+  else next.delete('sub_domain');
+  return next;
+};
+
+/**
+ * Handles the page-overflow guard inside runGuides.
+ * Returns the corrected URLSearchParams when a reset is needed, or null.
+ */
+const applyPageOverflowGuard = (
+  currentPage: number,
+  lastPage: number,
+  queryParams: URLSearchParams
+): URLSearchParams | null => {
+  if (currentPage <= lastPage) return null;
+  const next = new URLSearchParams(queryParams.toString());
+  if (lastPage <= 1) next.delete('page');
+  else next.set('page', '1');
+  return next;
+};
+
+/**
+ * Syncs the activeServiceTab with the URL `tab` param.
+ * Extracted to reduce component cognitive complexity.
+ */
+const computeServiceTabSync = (
+  currentTab: string | null,
+  activeServiceTab: string
+): { action: 'set-state'; tab: string } | { action: 'set-url' } | null => {
+  const isValidTab = currentTab !== null && VALID_SERVICE_TABS.has(currentTab);
+  if (isValidTab && currentTab !== activeServiceTab) return { action: 'set-state', tab: currentTab };
+  if (!isValidTab) return { action: 'set-url' };
+  return null;
+};
+
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   marketplaceType,
   title: _title,
@@ -1163,17 +1211,12 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   // Sync activeServiceTab with URL params
   useEffect(() => {
     if (!isServicesCenter) return;
-    const currentTab = searchParams.get('tab');
-    const isValidTab = currentTab !== null && VALID_SERVICE_TABS.has(currentTab);
-    if (isValidTab && currentTab !== activeServiceTab) {
-      setActiveServiceTab(currentTab);
-      return;
-    }
-    if (!isValidTab) {
-      const newParams = new URLSearchParams(searchParams);
-      newParams.set('tab', activeServiceTab);
-      setSearchParams(newParams, { replace: true });
-    }
+    const sync = computeServiceTabSync(searchParams.get('tab'), activeServiceTab);
+    if (!sync) return;
+    if (sync.action === 'set-state') { setActiveServiceTab(sync.tab); return; }
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', activeServiceTab);
+    setSearchParams(newParams, { replace: true });
   }, [isServicesCenter, searchParams, activeServiceTab, setSearchParams]);
 
   // Items & filters state
@@ -1408,7 +1451,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
       return;
     }
 
-    // Blueprints tab: delegate to module-level helper (no DB query)
     if (activeTab === 'blueprints') {
       await runBlueprintsTab(queryParams, currentPage, pageSize, setFilteredItems, setTotalCount, setLoading);
       return;
@@ -1417,33 +1459,26 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     setLoading(true);
     try {
       const excludedSlugs = ['atp-guidelines', 'agile-working-guidelines', 'client-session-guidelines', 'dbp-support-guidelines', 'dq-products'];
-
       let q = supabaseClient.from('guides').select(GUIDE_LIST_SELECT, { count: 'exact' }) as any;
       excludedSlugs.forEach(slug => { q = q.neq('slug', slug); });
 
-      // Parse all filter values via module-level helper
       const vars = parseGuideQueryVars(queryParams);
-      const {
-        qStr, domains, rawSubs, guideTypes, units, statuses, testimonialCategories,
+      const { qStr, domains, rawSubs, guideTypes, units, statuses, testimonialCategories,
         strategyTypes, strategyFrameworks, guidelinesCategories, categorization,
-        blueprintFrameworks, blueprintSectors, productTypes, productStages, productSectors, sort,
-      } = vars;
+        blueprintFrameworks, blueprintSectors, productTypes, productStages, productSectors, sort } = vars;
 
-      // All boolean tab-identity flags via module-level helper
       const flags = computeGuideTabFlags(activeTab);
       const { isStrategyTab, isBlueprintTab, isTestimonialsTab, isGuidelinesTab, isSpecialTab } = flags;
 
-      const subDomains       = computeAllowedSubDomains(domains, rawSubs, isSpecialTab);
+      const subDomains         = computeAllowedSubDomains(domains, rawSubs, isSpecialTab);
       const effectiveGuideTypes = isSpecialTab ? [] : guideTypes;
-      const effectiveUnits   = (isStrategyTab || isBlueprintTab || !isSpecialTab) ? units : [];
+      const effectiveUnits      = (isStrategyTab || isBlueprintTab || !isSpecialTab) ? units : [];
 
-      // Sub-domain mismatch guard: reset URL and bail
-      if (!isSpecialTab && rawSubs.length && subDomains.length !== rawSubs.length) {
-        const next = new URLSearchParams(queryParams.toString());
-        if (subDomains.length) next.set('sub_domain', subDomains.join(','));
-        else next.delete('sub_domain');
-        globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
-        setQueryParams(new URLSearchParams(next.toString()));
+      // Sub-domain mismatch guard via module-level helper
+      const subGuard = applySubDomainGuard(isSpecialTab, rawSubs, subDomains, queryParams);
+      if (subGuard) {
+        globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${subGuard.toString() ? '?' + subGuard.toString() : ''}`);
+        setQueryParams(new URLSearchParams(subGuard.toString()));
         setLoading(false);
         return;
       }
@@ -1465,14 +1500,11 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         statuses, qStr, excludedSlugs, { isStrategyTab, isTestimonialsTab }
       );
 
-      // Fetch via module-level helper
       const { rows, count, error, facetRows, facetError } = await fetchGuideData(q, facetQ, needsClientSideFiltering, from, to);
       if (error) throw error;
       if (facetError) console.warn('[MarketplacePage] Facet query failed, continuing without facets:', facetError);
 
-      const mapped = (rows || []).map(mapGuideRow);
-      let out = mapped.filter((it: any) => !excludedSlugs.includes(it.slug));
-
+      const mapped = (rows || []).map(mapGuideRow).filter((it: any) => !excludedSlugs.includes(it.slug));
       const clientFilterParams = {
         domains, subDomains, effectiveGuideTypes, effectiveUnits, categorization,
         isGuidelinesTab, isBlueprintTab, isStrategyTab, isTestimonialsTab,
@@ -1481,40 +1513,30 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         testimonialCategories, statuses, qStr, slugifyFn: slugify,
       };
 
-      // Post-fetch processing via module-level helper
-      const { out: rawOut, totalFiltered } = applyGuidePostFetch({
+      const { out, totalFiltered } = applyGuidePostFetch({
         mapped, flags: { ...flags }, clientFilterParams, sort,
-        needsClientSideFiltering, from, pageSize,
+        needsClientSideFiltering, from, pageSize, isGuides, activeTab,
       });
-      out = rawOut;
 
       const total    = computePageTotal(out, count, needsClientSideFiltering, isBlueprintTab, totalFiltered);
       const lastPage = Math.max(1, Math.ceil(total / pageSize));
 
-      // Page-overflow guard: reset to page 1
-      if (currentPage > lastPage) {
-        const next = new URLSearchParams(queryParams.toString());
-        if (lastPage <= 1) next.delete('page');
-        else next.set('page', '1');
-        globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${next.toString() ? '?' + next.toString() : ''}`);
+      // Page-overflow guard via module-level helper
+      const pageGuard = applyPageOverflowGuard(currentPage, lastPage, queryParams);
+      if (pageGuard) {
+        globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${pageGuard.toString() ? '?' + pageGuard.toString() : ''}`);
         globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
-        setQueryParams(new URLSearchParams(next.toString()));
+        setQueryParams(new URLSearchParams(pageGuard.toString()));
         setLoading(false);
         return;
       }
 
-      const computedFacets = buildGuideFacets(facetRows, isGuidelinesTab, isSpecialTab, domains);
-      if (isGuides && activeTab === 'strategy') out = applyGHCOrdering(out);
-
       setFilteredItems(out);
       setTotalCount(total);
-      setFacets(computedFacets);
+      setFacets(buildGuideFacets(facetRows, isGuidelinesTab, isSpecialTab, domains));
 
       const start = searchStartRef.current;
-      if (start) {
-        track('Guides.Search', { q: qStr, latency_ms: Date.now() - start });
-        searchStartRef.current = null;
-      }
+      if (start) { track('Guides.Search', { q: qStr, latency_ms: Date.now() - start }); searchStartRef.current = null; }
       track('Guides.ViewList', { q: qStr, sort, page: String(currentPage) });
     } catch (e) {
       console.error('[MarketplacePage] Failed to load guides:', e);

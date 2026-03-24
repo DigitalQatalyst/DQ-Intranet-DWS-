@@ -334,7 +334,7 @@ const renderParagraphText = (text: string): React.ReactNode => {
   // Split on <br> variants and render each segment with a <br /> in between
   const parts = decoded.split(/<br\s*\/?>/i);
   return parts.map((part, i) => (
-    <React.Fragment key={i}>
+    <React.Fragment key={`br-${i}-${part.slice(0, 12)}`}>
       {i > 0 && <br />}
       {part}
     </React.Fragment>
