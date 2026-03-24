@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-ingress
+  namespace: dev-supabase
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  tls:
+  - hosts:
+    - dws.digitalqatalyst.com
+    secretName: supabase-tls
+  rules:
+  - host: dws.digitalqatalyst.com
+    http:
+      paths:
+      - path: /api(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: demo-supabase-kong 
+            port:
+              number: 8000

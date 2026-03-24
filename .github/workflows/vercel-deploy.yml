@@ -11,13 +11,6 @@ on:
       - "develop-staging"
       - "staging"
       - "release"
-      - "feat/**"
-      - "Stage**"
-      - "samuel-knowledge-center"
-      - "**-knowledge-center"
-      - "**-knowledge-**"
-      - "Stage00"
-      - "devlop-discover-dq"
   pull_request:
     branches:
       - main
@@ -33,22 +26,23 @@ jobs:
 
       - name: 📊 Extract commit info
         id: commit_info
+        env:
+          HEAD_COMMIT_NAME: ${{ github.event.head_commit.author.name }}
+          HEAD_COMMIT_EMAIL: ${{ github.event.head_commit.author.email }}
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          AUTHOR_NAME="${{ github.event.head_commit.author.name }}"
-          AUTHOR_EMAIL="${{ github.event.head_commit.author.email }}"
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          echo "author_name=$AUTHOR_NAME" >> $GITHUB_OUTPUT
-          echo "author_email=$AUTHOR_EMAIL" >> $GITHUB_OUTPUT
-          echo "🔍 Commit by: $AUTHOR_NAME ($AUTHOR_EMAIL)"
+          echo "author_name=$HEAD_COMMIT_NAME" >> $GITHUB_OUTPUT
+          echo "author_email=$HEAD_COMMIT_EMAIL" >> $GITHUB_OUTPUT
+          echo "🔍 Commit by: $HEAD_COMMIT_NAME ($HEAD_COMMIT_EMAIL)"
 
       - name: 🧰 Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
           cache: 'npm'
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: 🏗️ Build project
         run: npm run build

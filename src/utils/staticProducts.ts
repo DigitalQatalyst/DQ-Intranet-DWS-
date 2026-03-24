@@ -38,7 +38,7 @@ export const STATIC_PRODUCTS: StaticProduct[] = [
     status: 'Approved',
     slug: 'dtmp',
     productType: 'DTMP',
-    productStage: 'Coming Soon',
+    productStage: 'Live',
     productClass: 'class-02'
   },
   {
@@ -56,7 +56,7 @@ export const STATIC_PRODUCTS: StaticProduct[] = [
     status: 'Approved',
     slug: 'tmaas',
     productType: 'TMaaS',
-    productStage: 'Coming Soon',
+    productStage: 'Live',
     productClass: 'class-02'
   },
   {
@@ -74,7 +74,7 @@ export const STATIC_PRODUCTS: StaticProduct[] = [
     status: 'Approved',
     slug: 'dto4t-twingm-ai',
     productType: 'DTO4T',
-    productStage: 'Coming Soon',
+    productStage: 'Live',
     productClass: 'class-02'
   },
   // Class 03: DCO
@@ -93,7 +93,7 @@ export const STATIC_PRODUCTS: StaticProduct[] = [
     status: 'Approved',
     slug: 'dtmi',
     productType: 'DTMI',
-    productStage: 'Coming Soon',
+    productStage: 'Live',
     productClass: 'class-03'
   },
   {
@@ -111,7 +111,7 @@ export const STATIC_PRODUCTS: StaticProduct[] = [
     status: 'Approved',
     slug: 'dtma',
     productType: 'DTMA',
-    productStage: 'Coming Soon',
+    productStage: 'Live',
     productClass: 'class-03'
   },
   {
@@ -129,7 +129,7 @@ export const STATIC_PRODUCTS: StaticProduct[] = [
     status: 'Approved',
     slug: 'dtmb',
     productType: 'DTMB',
-    productStage: 'Coming Soon',
+    productStage: 'Live',
     productClass: 'class-03'
   }
 ]

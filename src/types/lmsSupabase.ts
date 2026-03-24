@@ -17,6 +17,7 @@ export interface LmsLearningPathRow {
   title: string;
   provider: string;
   description: string | null;
+  excerpt: string | null;
   category: string;
   duration: number; // minutes
   level_code: string | null;
