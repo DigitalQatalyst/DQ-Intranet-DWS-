@@ -62,17 +62,14 @@ function GuideDetailsPage() {
         // Start new section - include the heading in the content
         const title = trimmed.replace(/^#\s*/, '')
         currentSection = {
-          id: title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+          id: title.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, ''),
           title: title,
           content: ''
         }
         // Add the heading line to content so it gets rendered
         currentContent = [line]
-      } else {
-        // Add content to current section (including H2, H3, etc.)
-        if (currentSection) {
+      } else if (currentSection) {
           currentContent.push(line)
-        }
       }
     }
     
@@ -153,7 +150,7 @@ function GuideDetailsPage() {
     if (sections.length === 0) return
 
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 150 // Offset for header
+      const scrollPosition = globalThis.window?.scrollY ?? 0 + 150 // Offset for header
 
       // Find which section is currently in view
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -178,7 +175,7 @@ function GuideDetailsPage() {
     let ticking = false
     const scrollListener = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
+        globalThis.window?.requestAnimationFrame(() => {
           handleScroll()
           ticking = false
         })
@@ -186,10 +183,10 @@ function GuideDetailsPage() {
       }
     }
 
-    window.addEventListener('scroll', scrollListener, { passive: true })
+    globalThis.window?.addEventListener('scroll', scrollListener, { passive: true })
 
     return () => {
-      window.removeEventListener('scroll', scrollListener)
+      globalThis.window?.removeEventListener('scroll', scrollListener)
     }
   }, [sections])
 
@@ -198,9 +195,9 @@ function GuideDetailsPage() {
     if (element) {
       const headerOffset = 120
       const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+      const offsetPosition = elementPosition + (globalThis.window?.pageYOffset ?? 0) - headerOffset
 
-      window.scrollTo({
+      globalThis.window?.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
       })
@@ -323,8 +320,8 @@ function GuideDetailsPage() {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
                 <div className="flex items-center gap-3 text-lg font-semibold text-gray-900 mb-4">
-                  <span className="h-6 w-1 bg-gradient-to-b from-[#030E31] via-[#030E31]/60 to-transparent rounded-full flex-shrink-0"></span>
-                  Table of Contents
+                  <span className="h-6 w-1 bg-gradient-to-b from-[#030E31] via-[#030E31]/60 to-transparent rounded-full flex-shrink-0" />
+                  {' '}Table of Contents
                 </div>
                 <nav className="space-y-2">
                   {sections.map((section) => (

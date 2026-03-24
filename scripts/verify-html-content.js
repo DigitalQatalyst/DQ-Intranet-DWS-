@@ -47,7 +47,7 @@ async function verify() {
       
       // Show first 500 characters
       console.log(`\n📄 Content Preview (first 500 chars):`);
-      console.log('   ' + data.body.substring(0, 500).replace(/\n/g, '\n   '));
+      console.log('   ' + data.body.substring(0, 500).replaceAll('\n', '\n   '));
       
       console.log('\n✅ VERIFICATION COMPLETE');
       console.log('\n🎯 Status:');

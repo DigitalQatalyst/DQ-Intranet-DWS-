@@ -47,8 +47,9 @@ async function finalVerification() {
 
     // Check 4: No escape sequences
     console.log('\n✅ CHECK 4: No Literal Escape Sequences');
-    const hasLiteralNewlines = data.body.includes(String.raw`\n`);
-    console.log(`   Contains literal ${String.raw`\n`}: ${hasLiteralNewlines}`);
+    const literalNewline = String.raw`\n`;
+    const hasLiteralNewlines = data.body.includes(literalNewline);
+    console.log(`   Contains literal ${literalNewline}: ${hasLiteralNewlines}`);
     console.log(`   Status: ${hasLiteralNewlines ? 'FAIL ✗' : 'PASS ✓'}`);
 
     // Check 5: IDs for navigation
