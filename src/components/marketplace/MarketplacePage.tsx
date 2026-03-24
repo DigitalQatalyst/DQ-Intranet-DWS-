@@ -1283,6 +1283,255 @@ const SERVICE_CENTER_TAB_INFO: Record<string, { label: string; description: stri
   }
 };
 
+const MarketplaceBreadcrumbs = ({
+  isGuides,
+  isServicesCenter,
+  config,
+  activeServiceTab
+}: {
+  isGuides: boolean;
+  isServicesCenter: boolean;
+  config: any;
+  activeServiceTab: string;
+}) => (
+  <nav className="flex mb-4" aria-label="Breadcrumb">
+    <ol className="inline-flex items-center space-x-1 md:space-x-2">
+      <li className="inline-flex items-center">
+        <Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center">
+          <HomeIcon size={16} className="mr-1" />
+          <span>Home</span>
+        </Link>
+      </li>
+      {isGuides ? (
+        <li aria-current="page">
+          <div className="flex items-center">
+            <ChevronRightIcon size={16} className="text-gray-400" />
+            <span className="ml-1 text-gray-700 md:ml-2">{config.title}</span>
+          </div>
+        </li>
+      ) : (
+        <>
+          <li>
+            <div className="flex items-center">
+              <ChevronRightIcon size={16} className="text-gray-400" />
+              <Link to={config.route} className="ml-1 text-gray-500 hover:text-gray-700 md:ml-2">
+                {config.itemNamePlural}
+              </Link>
+            </div>
+          </li>
+          {isServicesCenter && activeServiceTab && SERVICE_CENTER_TAB_INFO[activeServiceTab] && (
+            <li aria-current="page">
+              <div className="flex items-center">
+                <ChevronRightIcon size={16} className="text-gray-400" />
+                <span className="ml-1 text-gray-700 md:ml-2">
+                  {SERVICE_CENTER_TAB_INFO[activeServiceTab].label}
+                </span>
+              </div>
+            </li>
+          )}
+        </>
+      )}
+    </ol>
+  </nav>
+);
+
+const ServiceCenterContent = ({
+  isServicesCenter,
+  activeServiceTab,
+  setActiveServiceTab,
+  searchParams,
+  setSearchParams
+}: {
+  isServicesCenter: boolean;
+  activeServiceTab: string;
+  setActiveServiceTab: (tab: string) => void;
+  searchParams: URLSearchParams;
+  setSearchParams: (params: URLSearchParams, options?: { replace?: boolean }) => void;
+}) => {
+  if (!isServicesCenter || !SERVICE_CENTER_TAB_INFO[activeServiceTab]) return null;
+  const info = SERVICE_CENTER_TAB_INFO[activeServiceTab];
+
+  return (
+    <>
+      <div className="mb-6">
+        <div className="mb-4 p-4 rounded-lg shadow-sm" style={{ backgroundColor: '#FFFFFF' }}>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Current focus</p>
+              <p className="text-lg font-semibold text-gray-900 mb-1">{info.label}</p>
+            </div>
+            <button className="px-3 py-1.5 rounded-full text-xs font-medium text-blue-700" style={{ backgroundColor: '#DBEAFE' }}>
+              Tab overview
+            </button>
+          </div>
+          <p className="text-gray-600 text-sm mb-1">{info.description}</p>
+          <p className="text-xs text-gray-500">{info.author}</p>
+        </div>
+      </div>
+      <div className="mb-6 border-b border-gray-200">
+        <nav className="flex space-x-8" aria-label="Service tabs">
+          {Object.entries(SERVICE_CENTER_TAB_INFO).sort((a,b) => a[1].order - b[1].order).map(([tabId, tabInfo]) => {
+            const isActive = activeServiceTab === tabId;
+            return (
+              <button
+                key={tabId}
+                onClick={() => {
+                  setActiveServiceTab(tabId);
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.set('tab', tabId);
+                  setSearchParams(newParams, { replace: false });
+                }}
+                className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors focus:outline-none ${
+                   isActive ? 'border-blue-700' : 'text-gray-700 border-transparent hover:text-gray-900 hover:border-gray-300'
+                }`}
+                style={isActive ? { color: '#030F35', borderColor: '#030F35' } : {}}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {tabInfo.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    </>
+  );
+};
+
+const GuidesTabsSection = ({
+  isGuides,
+  activeTab,
+  handleGuidesTabChange
+}: {
+  isGuides: boolean;
+  activeTab: WorkGuideTab;
+  handleGuidesTabChange: (tab: WorkGuideTab) => void;
+}) => {
+  if (!isGuides) return null;
+  return (
+    <div className="mb-6 border-b border-gray-200">
+      <nav className="flex space-x-8" aria-label="Guides navigation">
+        {(['strategy', 'guidelines', '6xd', 'blueprints', 'testimonials', 'glossary', 'faqs'] as WorkGuideTab[]).map(tab => (
+          <button
+            key={tab}
+            onClick={() => handleGuidesTabChange(tab)}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors focus:outline-none ${
+              activeTab === tab
+                ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+            aria-current={activeTab === tab ? 'page' : undefined}
+          >
+            {TAB_LABELS[tab]}
+          </button>
+        ))}
+      </nav>
+      {activeTab && TAB_DESCRIPTIONS[activeTab] && (
+        <div className="pt-2 pb-2 mt-3 border border-gray-200 rounded-lg bg-white p-3 shadow-sm">
+          <p className="text-sm text-gray-600 leading-relaxed">
+            {TAB_DESCRIPTIONS[activeTab].description}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const DesignSystemTabsSection = ({
+  isDesignSystem,
+  activeDesignSystemTab,
+  setActiveDesignSystemTab,
+  searchParams,
+  setSearchParams
+}: {
+  isDesignSystem: boolean;
+  activeDesignSystemTab: DesignSystemTab;
+  setActiveDesignSystemTab: (tab: DesignSystemTab) => void;
+  searchParams: URLSearchParams;
+  setSearchParams: (params: URLSearchParams, options?: { replace?: boolean }) => void;
+}) => {
+  if (!isDesignSystem) return null;
+  return (
+    <div className="mb-6 border-b border-gray-200">
+      <nav className="flex space-x-8" aria-label="Design System navigation">
+        {(['cids', 'vds', 'cds'] as DesignSystemTab[]).map(tab => (
+          <button
+            key={tab}
+            onClick={() => {
+              setActiveDesignSystemTab(tab);
+              const newParams = new URLSearchParams(searchParams);
+              newParams.set('tab', tab);
+              setSearchParams(newParams, { replace: false });
+            }}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeDesignSystemTab === tab
+                ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+            aria-current={activeDesignSystemTab === tab ? 'page' : undefined}
+          >
+            {DESIGN_SYSTEM_TAB_LABELS[tab]}
+          </button>
+        ))}
+      </nav>
+      {activeDesignSystemTab && DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab] && (
+        <div className="pt-4 pb-4">
+          <p className="text-sm text-gray-600 leading-relaxed">
+            {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].description}
+          </p>
+          {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].author && (
+            <p className="text-xs text-gray-500 mt-2">
+              {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].author}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MarketplaceSearchBarSection = ({
+  isDesignSystem,
+  isGuides,
+  isKnowledgeHub,
+  searchQuery,
+  queryParams,
+  setQueryParams,
+  setSearchQuery
+}: {
+  isDesignSystem: boolean;
+  isGuides: boolean;
+  isKnowledgeHub: boolean;
+  searchQuery: string;
+  queryParams: URLSearchParams;
+  setQueryParams: (params: URLSearchParams) => void;
+  setSearchQuery: (q: string) => void;
+}) => {
+  if (isDesignSystem) return null;
+  return (
+    <div className="mb-6 flex items-center gap-3">
+      <div className="flex-1">
+        <SearchBar
+          searchQuery={isGuides ? (queryParams.get('q') || '') : searchQuery}
+          placeholder={isGuides || isKnowledgeHub ? "Search in DQ Knowledge Center" : undefined}
+          ariaLabel={isGuides || isKnowledgeHub ? "Search in DQ Knowledge Center" : undefined}
+          setSearchQuery={(q: string) => {
+            if (isGuides) {
+              const next = new URLSearchParams(queryParams.toString());
+              next.delete('page');
+              if (q) next.set('q', q); else next.delete('q');
+              const qs = next.toString();
+              globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
+              setQueryParams(new URLSearchParams(next.toString()));
+            } else {
+              setSearchQuery(q);
+            }
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
 /**
  * Computes URL-based filters for courses.
  */
@@ -1931,207 +2180,47 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     <div className={`min-h-screen flex flex-col bg-gray-50 ${isGuides ? 'guidelines-theme' : ''}`}>
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
       <div className="container mx-auto px-4 py-8 flex-grow max-w-7xl">
-        {/* Breadcrumbs */}
-        <nav className="flex mb-4" aria-label="Breadcrumb">
-          <ol className="inline-flex items-center space-x-1 md:space-x-2">
-            <li className="inline-flex items-center">
-              <Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center">
-                <HomeIcon size={16} className="mr-1" />
-                <span>Home</span>
-              </Link>
-            </li>
-            {isGuides ? (
-              <li aria-current="page">
-                <div className="flex items-center">
-                  <ChevronRightIcon size={16} className="text-gray-400" />
-                  <span className="ml-1 text-gray-700 md:ml-2">{config.title}</span>
-                </div>
-              </li>
-            ) : (
-              <>
-                <li>
-                  <div className="flex items-center">
-                    <ChevronRightIcon size={16} className="text-gray-400" />
-                    <Link to={config.route} className="ml-1 text-gray-500 hover:text-gray-700 md:ml-2">
-                      {config.itemNamePlural}
-                    </Link>
-                  </div>
-                </li>
-                {isServicesCenter && activeServiceTab && SERVICE_CENTER_TAB_INFO[activeServiceTab] && (
-                  <li aria-current="page">
-                    <div className="flex items-center">
-                      <ChevronRightIcon size={16} className="text-gray-400" />
-                      <span className="ml-1 text-gray-700 md:ml-2">
-                        {SERVICE_CENTER_TAB_INFO[activeServiceTab].label}
-                      </span>
-                    </div>
-                  </li>
-                )}
-              </>
-            )}
-          </ol>
-        </nav>
+        <MarketplaceBreadcrumbs
+          isGuides={isGuides}
+          isServicesCenter={isServicesCenter}
+          config={config}
+          activeServiceTab={activeServiceTab}
+        />
 
         <h1 className="text-3xl font-bold text-gray-800 mb-2">{config.title}</h1>
         <p className="text-gray-600 mb-6">{config.description}</p>
 
-        {/* Service Center Tab Description Section */}
-        {isServicesCenter && SERVICE_CENTER_TAB_INFO[activeServiceTab] && (
-          <div className="mb-6">
-            <div className="mb-4 p-4 rounded-lg shadow-sm" style={{ backgroundColor: '#FFFFFF' }}>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Current focus</p>
-                  <p className="text-lg font-semibold text-gray-900 mb-1">
-                    {SERVICE_CENTER_TAB_INFO[activeServiceTab].label}
-                  </p>
-                </div>
-                <button className="px-3 py-1.5 rounded-full text-xs font-medium text-blue-700" style={{ backgroundColor: '#DBEAFE' }}>
-                  Tab overview
-                </button>
-              </div>
-              <p className="text-gray-600 text-sm mb-1">
-                {SERVICE_CENTER_TAB_INFO[activeServiceTab].description}
-              </p>
-              <p className="text-xs text-gray-500">
-                {SERVICE_CENTER_TAB_INFO[activeServiceTab].author}
-              </p>
-            </div>
-          </div>
-        )}
+        <ServiceCenterContent
+          isServicesCenter={isServicesCenter}
+          activeServiceTab={activeServiceTab}
+          setActiveServiceTab={setActiveServiceTab}
+          searchParams={searchParams}
+          setSearchParams={setSearchParams}
+        />
 
-        {/* Service Center Tabs */}
-        {isServicesCenter && (
-          <div className="mb-6 border-b border-gray-200">
-            <nav className="flex space-x-8" aria-label="Service tabs">
-              {Object.entries(SERVICE_CENTER_TAB_INFO).sort((a,b) => a[1].order - b[1].order).map(([tabId, info]) => {
-                const isActive = activeServiceTab === tabId;
-                return (
-                  <button
-                    key={tabId}
-                    onClick={() => {
-                      setActiveServiceTab(tabId);
-                      const newParams = new URLSearchParams(searchParams);
-                      newParams.set('tab', tabId);
-                      setSearchParams(newParams, { replace: false });
-                    }}
-                    className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors focus:outline-none ${
-                      isActive
-                        ? 'border-blue-700'
-                        : 'text-gray-700 border-transparent hover:text-gray-900 hover:border-gray-300'
-                    }`}
-                    style={isActive ? { color: '#030F35', borderColor: '#030F35' } : {}}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    {info.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        )}
+        <GuidesTabsSection
+          isGuides={isGuides}
+          activeTab={activeTab}
+          handleGuidesTabChange={handleGuidesTabChange}
+        />
 
-        {/* Guides Tabs Section */}
-        {isGuides && (
-          <div className="mb-6 border-b border-gray-200">
-            <nav className="flex space-x-8" aria-label="Guides navigation">
-              {/* Main tabs rendered as buttons */}
-              {(['strategy', 'guidelines', '6xd', 'blueprints', 'testimonials', 'glossary', 'faqs'] as WorkGuideTab[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => handleGuidesTabChange(tab)}
-                  className={`
-                    py-4 px-1 border-b-2 font-medium text-sm transition-colors focus:outline-none
-                    ${
-                      activeTab === tab
-                        ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }
-                  `}
-                  aria-current={activeTab === tab ? 'page' : undefined}
-                >
-                  {TAB_LABELS[tab]}
-                </button>
-              ))}
-            </nav>
-            {/* Tab Description - Integrated with tabs */}
-            {activeTab && TAB_DESCRIPTIONS[activeTab] && (
-              <div className="pt-2 pb-2 mt-3 border border-gray-200 rounded-lg bg-white p-3 shadow-sm">
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {TAB_DESCRIPTIONS[activeTab].description}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+        <DesignSystemTabsSection
+          isDesignSystem={isDesignSystem}
+          activeDesignSystemTab={activeDesignSystemTab}
+          setActiveDesignSystemTab={setActiveDesignSystemTab}
+          searchParams={searchParams}
+          setSearchParams={setSearchParams}
+        />
 
-        {/* Design System Tabs Section */}
-        {isDesignSystem && (
-            <div className="mb-6 border-b border-gray-200">
-              <nav className="flex space-x-8" aria-label="Design System navigation">
-                {(['cids', 'vds', 'cds'] as DesignSystemTab[]).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => {
-                      setActiveDesignSystemTab(tab);
-                      const newParams = new URLSearchParams(searchParams);
-                      newParams.set('tab', tab);
-                      setSearchParams(newParams, { replace: false });
-                    }}
-                    className={`
-                      py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                      ${
-                        activeDesignSystemTab === tab
-                          ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }
-                    `}
-                    aria-current={activeDesignSystemTab === tab ? 'page' : undefined}
-                  >
-                    {DESIGN_SYSTEM_TAB_LABELS[tab]}
-                  </button>
-                ))}
-              </nav>
-              {/* Tab Description - Integrated with tabs */}
-              {activeDesignSystemTab && DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab] && (
-                <div className="pt-4 pb-4">
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].description}
-                  </p>
-                  {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].author && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].author}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-        )}
-
-        {/* Search + Sort - Show for all tabs including Glossary */}
-        {!isDesignSystem && (
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex-1">
-              <SearchBar
-                searchQuery={isGuides ? (queryParams.get('q') || '') : searchQuery}
-                placeholder={isGuides || isKnowledgeHub ? "Search in DQ Knowledge Center" : undefined}
-                ariaLabel={isGuides || isKnowledgeHub ? "Search in DQ Knowledge Center" : undefined}
-                setSearchQuery={(q: string) => {
-                  if (isGuides) {
-                    const next = new URLSearchParams(queryParams.toString());
-                    next.delete('page');
-                    if (q) next.set('q', q); else next.delete('q');
-                    const qs = next.toString();
-                    globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`);
-                    setQueryParams(new URLSearchParams(next.toString()));
-                  } else {
-                    setSearchQuery(q);
-                  }
-                }}
-              />
-            </div>
-          </div>
-        )}
+        <MarketplaceSearchBarSection
+          isDesignSystem={isDesignSystem}
+          isGuides={isGuides}
+          isKnowledgeHub={isKnowledgeHub}
+          searchQuery={searchQuery}
+          queryParams={queryParams}
+          setQueryParams={setQueryParams}
+          setSearchQuery={setSearchQuery}
+        />
 
         <div className="flex flex-col xl:flex-row gap-6">
           {/* Mobile filter toggle */}
