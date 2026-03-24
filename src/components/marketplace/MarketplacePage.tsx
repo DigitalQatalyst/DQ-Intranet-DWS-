@@ -1185,6 +1185,58 @@ const computeServiceTabSync = (
   return null;
 };
 
+/**
+ * Computes URL-based filters for courses.
+ */
+const computeUrlBasedFilters = (isCourses: boolean, courseFacets: any): Record<string, string[]> => {
+  if (!isCourses || !courseFacets) return {};
+  return {
+    category: courseFacets.category || [],
+    delivery: courseFacets.delivery || [],
+    duration: courseFacets.duration || [],
+    level: (courseFacets.level || []) as string[],
+    department: courseFacets.department || [],
+    location: courseFacets.location || [],
+    audience: courseFacets.audience || [],
+    status: courseFacets.status || []
+  };
+};
+
+/**
+ * Applies search query filtering to LMS items.
+ */
+const filterLmsItemsBySearch = (isCourses: boolean, searchQuery: string, lmsFilteredItems: any[]): any[] => {
+  if (!isCourses || !searchQuery) return lmsFilteredItems;
+  return lmsFilteredItems.filter(item => {
+    const searchableText = [
+      item.title,
+      item.summary,
+      item.courseCategory,
+      item.deliveryMode,
+      item.duration,
+      item.levelCode,
+      item.levelLabel,
+      ...(item.locations || []),
+      ...(item.audience || []),
+      ...(item.department || [])
+    ].filter(Boolean).join(' ').toLowerCase();
+    return searchableText.includes(searchQuery.toLowerCase());
+  });
+};
+
+/**
+ * Checks and updates searchParams for the 'newjoiner' track.
+ */
+const handleNewjoinerTrackParams = (searchParams: URLSearchParams): URLSearchParams | null => {
+  const track = searchParams.get('track');
+  if (track !== 'newjoiner') return null;
+  const newParams = new URLSearchParams(searchParams);
+  let changed = false;
+  if (!newParams.get('level')) { newParams.set('level', 'L1,L2'); changed = true; }
+  if (!newParams.get('category')) { newParams.set('category', 'Day in DQ'); changed = true; }
+  return changed ? newParams : null;
+};
+
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   marketplaceType,
   title: _title,
@@ -1371,54 +1423,16 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
   }, [searchParams, setSearchParams]);
   
   // Apply search query to LMS items
-  const searchFilteredItems = isCourses && searchQuery
-    ? lmsFilteredItems.filter(item => {
-        const searchableText = [
-          item.title,
-          item.summary,
-          item.courseCategory,
-          item.deliveryMode,
-          item.duration,
-          item.levelCode,
-          item.levelLabel,
-          ...(item.locations || []),
-          ...(item.audience || []),
-          ...(item.department || [])
-        ].filter(Boolean).join(' ').toLowerCase();
-        return searchableText.includes(searchQuery.toLowerCase());
-      })
-    : lmsFilteredItems;
-  
-
+  const searchFilteredItems = filterLmsItemsBySearch(isCourses, searchQuery, lmsFilteredItems);
   
   // Compute filters from URL for courses
-  const urlBasedFilters: Record<string, string[]> = isCourses
-    ? {
-        category: courseFacets?.category || [],
-        delivery: courseFacets?.delivery || [],
-        duration: courseFacets?.duration || [],
-        level: (courseFacets?.level || []) as string[],
-        department: courseFacets?.department || [],
-        location: courseFacets?.location || [],
-        audience: courseFacets?.audience || [],
-        status: courseFacets?.status || []
-      }
-    : {};
+  const urlBasedFilters = computeUrlBasedFilters(isCourses, courseFacets);
   
   // Handle track parameter for newjoiner (courses)
   useEffect(() => {
     if (isCourses) {
-      const track = searchParams.get('track');
-      if (track === 'newjoiner') {
-        const newParams = new URLSearchParams(searchParams);
-        if (!newParams.get('level')) {
-          newParams.set('level', 'L1,L2');
-        }
-        if (!newParams.get('category')) {
-          newParams.set('category', 'Day in DQ');
-        }
-        setSearchParams(newParams, { replace: true });
-      }
+      const updatedParams = handleNewjoinerTrackParams(searchParams);
+      if (updatedParams) setSearchParams(updatedParams, { replace: true });
     }
   }, [isCourses, searchParams, setSearchParams]);
   
