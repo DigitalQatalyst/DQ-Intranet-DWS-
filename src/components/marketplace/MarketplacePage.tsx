@@ -1250,6 +1250,39 @@ const DESIGN_SYSTEM_TAB_DESCRIPTIONS: Record<DesignSystemTab, { description: str
   }
 };
 
+const SERVICE_CENTER_TAB_INFO: Record<string, { label: string; description: string; author: string; order: number }> = {
+  technology: {
+    label: 'Technology',
+    description: 'Access technology-related services including IT support, software requests, system access, and technical assistance.',
+    author: 'Managed by DQ IT Support and Technical teams.',
+    order: 0
+  },
+  business: {
+    label: 'Employee Services',
+    description: 'Explore employee services including HR support, finance services, administrative requests, and operational assistance.',
+    author: 'Provided by DQ HR, Finance, and Administrative teams.',
+    order: 1
+  },
+  digital_worker: {
+    label: 'Digital Worker',
+    description: 'Discover digital worker services including automation solutions, AI agents requests, AI tools and usage guidelines',
+    author: 'Handled by DQ Automation Teams.',
+    order: 2
+  },
+  prompt_library: {
+    label: 'Prompt Library',
+    description: "A curated collection of your team's best and previously used prompts to speed up workflows and boost productivity.",
+    author: 'Curated and maintained by DQ Digital Innovation Teams.',
+    order: 3
+  },
+  ai_tools: {
+    label: 'AI Tools',
+    description: 'A centralized hub showcasing all AI tools and solutions used across the company.',
+    author: 'Provided by DQ AI & Innovation Teams.',
+    order: 4
+  }
+};
+
 /**
  * Computes URL-based filters for courses.
  */
@@ -1924,16 +1957,12 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                     </Link>
                   </div>
                 </li>
-                {isServicesCenter && activeServiceTab && (
+                {isServicesCenter && activeServiceTab && SERVICE_CENTER_TAB_INFO[activeServiceTab] && (
                   <li aria-current="page">
                     <div className="flex items-center">
                       <ChevronRightIcon size={16} className="text-gray-400" />
                       <span className="ml-1 text-gray-700 md:ml-2">
-                        {activeServiceTab === 'technology' && 'Technology'}
-                        {activeServiceTab === 'business' && 'Employee Services'}
-                        {activeServiceTab === 'digital_worker' && 'Digital Worker'}
-                        {activeServiceTab === 'prompt_library' && 'Prompt Library'}
-                        {activeServiceTab === 'ai_tools' && 'AI Tools'}
+                        {SERVICE_CENTER_TAB_INFO[activeServiceTab].label}
                       </span>
                     </div>
                   </li>
@@ -1947,18 +1976,14 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         <p className="text-gray-600 mb-6">{config.description}</p>
 
         {/* Service Center Tab Description Section */}
-        {isServicesCenter && (
+        {isServicesCenter && SERVICE_CENTER_TAB_INFO[activeServiceTab] && (
           <div className="mb-6">
             <div className="mb-4 p-4 rounded-lg shadow-sm" style={{ backgroundColor: '#FFFFFF' }}>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Current focus</p>
                   <p className="text-lg font-semibold text-gray-900 mb-1">
-                    {activeServiceTab === 'technology' && 'Technology'}
-                    {activeServiceTab === 'business' && 'Employee Services'}
-                    {activeServiceTab === 'digital_worker' && 'Digital Worker'}
-                    {activeServiceTab === 'prompt_library' && 'Prompt Library'}
-                    {activeServiceTab === 'ai_tools' && 'AI Tools'}
+                    {SERVICE_CENTER_TAB_INFO[activeServiceTab].label}
                   </p>
                 </div>
                 <button className="px-3 py-1.5 rounded-full text-xs font-medium text-blue-700" style={{ backgroundColor: '#DBEAFE' }}>
@@ -1966,18 +1991,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 </button>
               </div>
               <p className="text-gray-600 text-sm mb-1">
-                {activeServiceTab === 'technology' && 'Access technology-related services including IT support, software requests, system access, and technical assistance.'}
-                {activeServiceTab === 'business' && 'Explore employee services including HR support, finance services, administrative requests, and operational assistance.'}
-                {activeServiceTab === 'digital_worker' && 'Discover digital worker services including automation solutions, AI agents requests, AI tools and usage guidelines'}
-                {activeServiceTab === 'prompt_library' && "A curated collection of your team's best and previously used prompts to speed up workflows and boost productivity."}
-                {activeServiceTab === 'ai_tools' && 'A centralized hub showcasing all AI tools and solutions used across the company.'}
+                {SERVICE_CENTER_TAB_INFO[activeServiceTab].description}
               </p>
               <p className="text-xs text-gray-500">
-                {activeServiceTab === 'technology' && 'Managed by DQ IT Support and Technical teams.'}
-                {activeServiceTab === 'business' && 'Provided by DQ HR, Finance, and Administrative teams.'}
-                {activeServiceTab === 'digital_worker' && 'Handled by DQ Automation Teams.'}
-                {activeServiceTab === 'prompt_library' && 'Curated and maintained by DQ Digital Innovation Teams.'}
-                {activeServiceTab === 'ai_tools' && 'Provided by DQ AI & Innovation Teams.'}
+                {SERVICE_CENTER_TAB_INFO[activeServiceTab].author}
               </p>
             </div>
           </div>
@@ -1987,22 +2004,15 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         {isServicesCenter && (
           <div className="mb-6 border-b border-gray-200">
             <nav className="flex space-x-8" aria-label="Service tabs">
-              {[
-                { id: 'technology', label: 'Technology' },
-                { id: 'business', label: 'Employee Services' },
-                { id: 'digital_worker', label: 'Digital Worker' },
-                { id: 'prompt_library', label: 'Prompt Library' },
-                { id: 'ai_tools', label: 'AI Tools' }
-              ].map((tab) => {
-                const isActive = activeServiceTab === tab.id;
+              {Object.entries(SERVICE_CENTER_TAB_INFO).sort((a,b) => a[1].order - b[1].order).map(([tabId, info]) => {
+                const isActive = activeServiceTab === tabId;
                 return (
                   <button
-                    key={tab.id}
+                    key={tabId}
                     onClick={() => {
-                      setActiveServiceTab(tab.id);
-                      // Update URL with tab parameter
+                      setActiveServiceTab(tabId);
                       const newParams = new URLSearchParams(searchParams);
-                      newParams.set('tab', tab.id);
+                      newParams.set('tab', tabId);
                       setSearchParams(newParams, { replace: false });
                     }}
                     className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors focus:outline-none ${
@@ -2013,7 +2023,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                     style={isActive ? { color: '#030F35', borderColor: '#030F35' } : {}}
                     aria-current={isActive ? 'page' : undefined}
                   >
-                    {tab.label}
+                    {info.label}
                   </button>
                 );
               })}
