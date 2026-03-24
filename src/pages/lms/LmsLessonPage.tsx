@@ -147,6 +147,7 @@ export const LmsLessonPage: React.FC = () => {
 
   // Quiz Wizard State
   const [showQuizOverlay, setShowQuizOverlay] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
@@ -348,7 +349,7 @@ export const LmsLessonPage: React.FC = () => {
       setQuizSubmitted(false);
       setQuizScore(null);
       setQuizPassed(isQuizPassed(lessonId));
-      setQuizPassed(isQuizPassed(lessonId));
+      setVideoEnded(false);
 
       const isFinalAssessment = allLessons.find(l => l.id === lessonId)?.type === 'final-assessment';
 
@@ -361,12 +362,11 @@ export const LmsLessonPage: React.FC = () => {
 
       promise
         .then((data) => {
+          console.log('[Quiz] fetched for lessonId:', lessonId, '→', data);
           setQuiz(data);
-          // If it's a final assessment, we might want to automatically show it
-          // OR valid strategy: if it's final assessment, we treat the main view as the quiz start page
         })
         .catch((error) => {
-          console.error('Error fetching quiz:', error);
+          console.error('[Quiz] fetch error for lessonId:', lessonId, error);
           setQuiz(null);
         })
         .finally(() => setQuizLoading(false));
@@ -508,15 +508,20 @@ export const LmsLessonPage: React.FC = () => {
       setVideoProgress(100);
       saveLessonProgress(currentLesson.id, 100);
 
-      // Trigger quiz if exists and not passed
-      if (quiz && !quizPassed) {
-        setShowQuizOverlay(true);
-        setCurrentQuestionIndex(0);
-        setSelectedOption(null);
-        setIsAnswerChecked(false);
-      }
+      // Mark video as ended; the useEffect below will show the quiz once quiz data is ready
+      setVideoEnded(true);
     }
   };
+
+  // Show quiz overlay once both video has ended AND quiz data is loaded
+  useEffect(() => {
+    if (videoEnded && quiz && !quizPassed) {
+      setShowQuizOverlay(true);
+      setCurrentQuestionIndex(0);
+      setSelectedOption(null);
+      setIsAnswerChecked(false);
+    }
+  }, [videoEnded, quiz, quizPassed]);
 
   // Quiz Wizard Handlers
   const handleOptionSelect = (optIndex: number) => {
