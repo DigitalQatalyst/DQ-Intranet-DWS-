@@ -2283,6 +2283,7 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                       isResponsive={true}
                     />
                   )}
+                </div>
               </div>
             </dialog>
           </div>
