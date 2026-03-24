@@ -45,6 +45,26 @@ const BlockChecklist = ({ items }: { items: string[] }) => (
 
 // ─── Tab content parsers ───────────────────────────────────────────────────
 
+// Helper function to parse content lines into paragraphs and sections
+function parseContentLines(lines: string[]) {
+  const paragraphs: string[] = [];
+  const sections: { label: string; bullets: string[] }[] = [];
+  let currentSection: { label: string; bullets: string[] } | null = null;
+
+  for (const line of lines) {
+    if (line.endsWith(':') && !line.startsWith('-') && !line.startsWith('*')) {
+      currentSection = { label: line.replace(/:$/, ''), bullets: [] };
+      sections.push(currentSection);
+    } else if (currentSection && (line.startsWith('- ') || line.startsWith('* '))) {
+      currentSection.bullets.push(line.replace(/^[-*]\s+/, ''));
+    } else if (!currentSection) {
+      paragraphs.push(line);
+    }
+  }
+
+  return { paragraphs, sections };
+}
+
 /**
  * Parses raw text with optional "Label:" section headers + bullet lists.
  * Returns rendered JSX blocks.
@@ -55,20 +75,7 @@ const renderStructuredContent = (raw: string) => {
   }
 
   const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
-  const paragraphs: string[] = [];
-  const sections: { label: string; bullets: string[] }[] = [];
-  let currentSection: { label: string; bullets: string[] } | null = null;
-
-  for (const l of lines) {
-    if (l.endsWith(':') && !l.startsWith('-') && !l.startsWith('*')) {
-      currentSection = { label: l.replace(/:$/, ''), bullets: [] };
-      sections.push(currentSection);
-    } else if (currentSection && (l.startsWith('- ') || l.startsWith('* '))) {
-      currentSection.bullets.push(l.replace(/^[-*]\s+/, ''));
-    } else if (!currentSection) {
-      paragraphs.push(l);
-    }
-  }
+  const { paragraphs, sections } = parseContentLines(lines);
 
   return (
     <div className="max-w-[760px] space-y-8">
@@ -200,6 +207,78 @@ const RelatedSection = ({
 
 // ─── Main component ────────────────────────────────────────────────────────
 
+// Helper function to render blog overview content
+function renderBlogOverview(article: NewsItem, overview: string[]) {
+  if (article.content) {
+    const lines = article.content.split('\n').map(l => l.trim()).filter(Boolean);
+    const { paragraphs, sections } = parseContentLines(lines);
+    
+    return (
+      <div className="space-y-6">
+        {paragraphs.map((p, i) => <BlockParagraph key={i} text={parseBold(p)} />)}
+        {sections.map((sec, si) => (
+          <div key={si} className="space-y-3">
+            <BlockHeading text={sec.label} />
+            <div className="pt-1">
+              <ul className="space-y-[11px]">
+                {sec.bullets.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <svg className="mt-0.5 h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span className="text-base font-normal leading-[1.6] text-[#475467]">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  } else {
+    return overview.map((p, i) => p.trim() ? <BlockParagraph key={i} text={parseBold(p.trim())} /> : null);
+  }
+}
+
+// Helper function to render blog tab content
+function renderBlogTabContent(tab: BlogTab, article: NewsItem, overview: string[]) {
+  if (tab === 'overview') {
+    return renderBlogOverview(article, overview);
+  } else if (tab === 'highlights' || tab === 'impact' || tab === 'takeaways') {
+    const raw = tab === 'highlights' ? (article.what ?? '') : tab === 'impact' ? (article.how ?? '') : (article.when ?? '');
+    return renderStructuredContent(raw);
+  } else {
+    return (
+      <p className="text-[#475467] text-base italic">
+        No content available for this section yet. Check back soon.
+      </p>
+    );
+  }
+}
+
+// Helper function to render podcast tab content
+function renderPodcastTabContent(tab: NonNewsTab, article: NewsItem, overview: string[]) {
+  if (tab === 'overview') {
+    if (article.content) {
+      return article.content.split('\n').map((line, i) => {
+        const t = line.trim();
+        if (!t) return null;
+        if (t.startsWith('# ') || t.startsWith('## ') || t.startsWith('### '))
+          return <BlockHeading key={i} text={t.replace(/^#+\s+/, '')} />;
+        if (t.startsWith('- ') || t.startsWith('* '))
+          return <BlockChecklist key={i} items={[t.replace(/^[-*]\s+/, '')]} />;
+        return <BlockParagraph key={i} text={parseBold(t)} />;
+      });
+    } else {
+      return overview.map((p, i) => p.trim() ? <BlockParagraph key={i} text={parseBold(p.trim())} /> : null);
+    }
+  } else {
+    return (
+      <p className="text-[#475467] text-base italic">
+        No updates have been posted yet. Check back soon.
+      </p>
+    );
+  }
+}
+
 export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related }) => {
   const location = useLocation();
   const isPodcast = article.format === 'Podcast' || article.tags?.some(t => t.toLowerCase().includes('podcast'));
@@ -227,57 +306,7 @@ export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related
         <TabBar tabs={blogTabs} active={blogTab} onChange={setBlogTab} />
 
         <div className="py-2 max-w-[760px] space-y-6">
-          {blogTab === 'overview' ? (
-            article.content ? (
-              (() => {
-                const lines = article.content.split('\n').map(l => l.trim()).filter(Boolean);
-                const paragraphs: string[] = [];
-                const sections: { label: string; bullets: string[] }[] = [];
-                let currentSection: { label: string; bullets: string[] } | null = null;
-                for (const l of lines) {
-                  if (l.endsWith(':') && !l.startsWith('-') && !l.startsWith('*')) {
-                    currentSection = { label: l.replace(/:$/, ''), bullets: [] };
-                    sections.push(currentSection);
-                  } else if (currentSection && (l.startsWith('- ') || l.startsWith('* '))) {
-                    currentSection.bullets.push(l.replace(/^[-*]\s+/, ''));
-                  } else if (!currentSection) {
-                    paragraphs.push(l);
-                  }
-                }
-                return (
-                  <div className="space-y-6">
-                    {paragraphs.map((p, i) => <BlockParagraph key={i} text={parseBold(p)} />)}
-                    {sections.map((sec, si) => (
-                      <div key={si} className="space-y-3">
-                        <BlockHeading text={sec.label} />
-                        <div className="pt-1">
-                          <ul className="space-y-[11px]">
-                            {sec.bullets.map((item, i) => (
-                              <li key={i} className="flex items-start gap-3">
-                                <svg className="mt-0.5 h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                <span className="text-base font-normal leading-[1.6] text-[#475467]">{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()
-            ) : (
-              overview.map((p, i) => p.trim() ? <BlockParagraph key={i} text={parseBold(p.trim())} /> : null)
-            )
-          ) : blogTab === 'highlights' || blogTab === 'impact' || blogTab === 'takeaways' ? (
-            (() => {
-              const raw = blogTab === 'highlights' ? (article.what ?? '') : blogTab === 'impact' ? (article.how ?? '') : (article.when ?? '');
-              return renderStructuredContent(raw);
-            })()
-          ) : (
-            <p className="text-[#475467] text-base italic">
-              No content available for this section yet. Check back soon.
-            </p>
-          )}
+          {renderBlogTabContent(blogTab, article, overview)}
         </div>
 
         <RelatedSection items={related} kind="blog" locationSearch={location.search} />
@@ -298,25 +327,7 @@ export const ArticleContent: React.FC<ArticleContentProps> = ({ article, related
         <TabBar tabs={podcastTabs} active={nonNewsTab} onChange={setNonNewsTab} />
 
         <div className="py-2 max-w-[760px] space-y-6">
-          {nonNewsTab === 'overview' ? (
-            article.content ? (
-              article.content.split('\n').map((line, i) => {
-                const t = line.trim();
-                if (!t) return null;
-                if (t.startsWith('# ') || t.startsWith('## ') || t.startsWith('### '))
-                  return <BlockHeading key={i} text={t.replace(/^#+\s+/, '')} />;
-                if (t.startsWith('- ') || t.startsWith('* '))
-                  return <BlockChecklist key={i} items={[t.replace(/^[-*]\s+/, '')]} />;
-                return <BlockParagraph key={i} text={parseBold(t)} />;
-              })
-            ) : (
-              overview.map((p, i) => p.trim() ? <BlockParagraph key={i} text={parseBold(p.trim())} /> : null)
-            )
-          ) : (
-            <p className="text-[#475467] text-base italic">
-              No updates have been posted yet. Check back soon.
-            </p>
-          )}
+          {renderPodcastTabContent(nonNewsTab, article, overview)}
         </div>
 
         <RelatedSection items={related} kind="podcast" locationSearch={location.search} />

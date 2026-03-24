@@ -107,36 +107,56 @@ export default function PodcastSeriesPage() {
     setTargetEpisodeId(params.get('episode'));
   }, [location.search]);
 
+// Helper function to filter podcast episodes by series
+function filterSeriesEpisodes(allNews: NewsItem[], isExecutionMindsetSeries: boolean): NewsItem[] {
+  const allPodcastEpisodes = allNews.filter(
+    (item) => item.format === 'Podcast' || item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))
+  );
+  
+  return allPodcastEpisodes.filter((item) => {
+    if (!item.audioUrl) return false;
+    if (isExecutionMindsetSeries) return item.audioUrl.includes('/02. Series 02 - The Execution Mindset/');
+    return item.audioUrl.startsWith('/Podcasts/');
+  });
+}
+
+// Helper function to load episode durations
+async function loadEpisodeDurations(episodes: NewsItem[]): Promise<Map<string, number>> {
+  const durations = new Map<string, number>();
+  
+  const loadPromises = episodes.map((episode) => {
+    if (!episode.audioUrl) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      const audio = new Audio(episode.audioUrl);
+      audio.addEventListener('loadedmetadata', () => {
+        if (audio.duration && isFinite(audio.duration) && !isNaN(audio.duration)) {
+          durations.set(episode.id, audio.duration);
+        }
+        resolve();
+      }, { once: true });
+      audio.addEventListener('error', () => resolve(), { once: true });
+      audio.load();
+    });
+  });
+  
+  await Promise.all(loadPromises);
+  return durations;
+}
+
+// Helper function to load episodes data
+async function loadEpisodesData(isExecutionMindsetSeries: boolean): Promise<{ episodes: NewsItem[], durations: Map<string, number> }> {
+  const allNews = await fetchAllNews();
+  const episodes = filterSeriesEpisodes(allNews, isExecutionMindsetSeries);
+  const durations = await loadEpisodeDurations(episodes);
+  
+  return { episodes, durations };
+}
+
   React.useEffect(() => {
     const loadEpisodes = async () => {
       try {
-        const allNews = await fetchAllNews();
-        const allPodcastEpisodes = allNews.filter(
-          (item) => item.format === 'Podcast' || item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))
-        );
-        const seriesEpisodes = allPodcastEpisodes.filter((item) => {
-          if (!item.audioUrl) return false;
-          if (isExecutionMindsetSeries) return item.audioUrl.includes('/02. Series 02 - The Execution Mindset/');
-          return item.audioUrl.startsWith('/Podcasts/');
-        });
-        setEpisodes(seriesEpisodes);
-
-        const durations = new Map<string, number>();
-        const loadPromises = seriesEpisodes.map((episode) => {
-          if (!episode.audioUrl) return Promise.resolve();
-          return new Promise<void>((resolve) => {
-            const audio = new Audio(episode.audioUrl);
-            audio.addEventListener('loadedmetadata', () => {
-              if (audio.duration && isFinite(audio.duration) && !isNaN(audio.duration)) {
-                durations.set(episode.id, audio.duration);
-              }
-              resolve();
-            }, { once: true });
-            audio.addEventListener('error', () => resolve(), { once: true });
-            audio.load();
-          });
-        });
-        await Promise.all(loadPromises);
+        const { episodes, durations } = await loadEpisodesData(isExecutionMindsetSeries);
+        setEpisodes(episodes);
         setEpisodeDurations(durations);
       } catch {}
       finally { setLoading(false); }
@@ -144,46 +164,65 @@ export default function PodcastSeriesPage() {
     loadEpisodes();
   }, [isExecutionMindsetSeries]);
 
-  const filteredAndSortedEpisodes = useMemo(() => {
-    let filtered = [...episodes];
+// Helper function to get episode duration in minutes
+function getEpisodeDurationMinutes(episode: NewsItem, episodeDurations: Map<string, number>): number {
+  const episodeDurationSeconds = episodeDurations.get(episode.id);
+  if (episodeDurationSeconds && episodeDurationSeconds > 0) {
+    return Math.round(episodeDurationSeconds / 60);
+  } else if (episode.readingTime) {
+    const dur = formatDuration(episode.readingTime);
+    return parseInt(dur.replace(' min', '')) || 0;
+  }
+  return 0;
+}
+
+// Helper function to check if duration matches filter
+function matchesDurationFilter(durationMinutes: number, durationFilter: string[]): boolean {
+  return durationFilter.some((filter) => {
+    if (filter === '10–20') return durationMinutes >= 10 && durationMinutes < 20;
+    if (filter === '20+') return durationMinutes >= 20;
+    return false;
+  });
+}
+
+// Helper function to filter episodes by domain and duration
+function filterEpisodes(episodes: NewsItem[], urlFilters: any, episodeDurations: Map<string, number>): NewsItem[] {
+  return episodes.filter((episode) => {
     const domainFilter = urlFilters.domain;
     const durationFilter = urlFilters.readingTime;
 
-    filtered = filtered.filter((episode) => {
-      if (domainFilter && domainFilter.length > 0) {
-        if (!episode.domain || !domainFilter.includes(episode.domain)) return false;
-      }
-      if (durationFilter && durationFilter.length > 0) {
-        const episodeDurationSeconds = episodeDurations.get(episode.id);
-        let durationMinutes = 0;
-        if (episodeDurationSeconds && episodeDurationSeconds > 0) {
-          durationMinutes = Math.round(episodeDurationSeconds / 60);
-        } else if (episode.readingTime) {
-          const dur = formatDuration(episode.readingTime);
-          durationMinutes = parseInt(dur.replace(' min', '')) || 0;
-        }
-        const matchesDuration = durationFilter.some((filter) => {
-          if (filter === '10–20') return durationMinutes >= 10 && durationMinutes < 20;
-          if (filter === '20+') return durationMinutes >= 20;
-          return false;
-        });
-        if (!matchesDuration) return false;
-      }
-      return true;
-    });
-
-    if (sortBy === 'latest') {
-      const orderMap = new Map<string, number>(ACTION_SOLVER_EPISODE_ORDER.map((id, index) => [id, index + 1]));
-      filtered.sort((a, b) => {
-        const numA = orderMap.get(a.id) ?? 0;
-        const numB = orderMap.get(b.id) ?? 0;
-        if (numA !== numB) return numA - numB; // EP1 first, EP10 last
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      });
-    } else if (sortBy === 'most-listened') {
-      filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+    if (domainFilter && domainFilter.length > 0) {
+      if (!episode.domain || !domainFilter.includes(episode.domain)) return false;
     }
-    return filtered;
+    
+    if (durationFilter && durationFilter.length > 0) {
+      const durationMinutes = getEpisodeDurationMinutes(episode, episodeDurations);
+      if (!matchesDurationFilter(durationMinutes, durationFilter)) return false;
+    }
+    
+    return true;
+  });
+}
+
+// Helper function to sort episodes
+function sortEpisodes(episodes: NewsItem[], sortBy: 'latest' | 'most-listened'): NewsItem[] {
+  if (sortBy === 'latest') {
+    const orderMap = new Map<string, number>(ACTION_SOLVER_EPISODE_ORDER.map((id, index) => [id, index + 1]));
+    return episodes.sort((a, b) => {
+      const numA = orderMap.get(a.id) ?? 0;
+      const numB = orderMap.get(b.id) ?? 0;
+      if (numA !== numB) return numA - numB; // EP1 first, EP10 last
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+  } else if (sortBy === 'most-listened') {
+    return episodes.sort((a, b) => (b.views || 0) - (a.views || 0));
+  }
+  return episodes;
+}
+
+  const filteredAndSortedEpisodes = useMemo(() => {
+    const filtered = filterEpisodes([...episodes], urlFilters, episodeDurations);
+    return sortEpisodes(filtered, sortBy);
   }, [episodes, sortBy, urlFilters, episodeDurations]);
 
   const episodeNumberMap = useMemo(() => {
