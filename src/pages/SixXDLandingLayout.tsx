@@ -26,7 +26,6 @@ import {
 
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import SixPerspectivesCarousel from '@/components/perspectives/SixPerspectivesCarousel'; // NOSONAR: reserved for future use
 
 const IconGlyph = ({ glyph, className }: { glyph: string; className?: string }) => (
   <span className={`inline-flex items-center justify-center leading-none font-semibold ${className ?? ''}`}>
@@ -97,7 +96,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Stopped workstreams that did not serve the purpose',
     ],
     impact: 'Decisions converged and teams moved in one direction under pressure.',
-    route: '/marketplace/guides/dq-vision',
+    route: '/marketplace/guides/service/dq-vision',
     icon: Target,
     gradient: 'bg-gradient-to-br from-[#131e42] via-[#1d2f64] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -118,7 +117,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Held weekly value-based retros on tough calls',
     ],
     impact: 'Debates shortened and teams trusted decisions made against the shared rulebook.',
-    route: '/marketplace/guides/dq-hov',
+    route: '/marketplace/guides/service/dq-hov',
     icon: Heart,
     gradient: 'bg-gradient-to-br from-[#1b2553] via-[#243a75] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -140,7 +139,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Published a simple “who decides / who delivers” chart',
     ],
     impact: 'Escalations stopped and onboarding cycle time dropped because owners were clear.',
-    route: '/marketplace/guides/dq-persona',
+    route: '/marketplace/guides/service/dq-persona',
     icon: User,
     gradient: 'bg-gradient-to-br from-[#131e42] via-[#30478a] to-[#f0f6ff]',
     accent: '#f0f6ff',
@@ -162,7 +161,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Retired stale backlog items each mission',
     ],
     impact: 'Execution cadence matched strategy shifts and handoffs became predictable.',
-    route: '/marketplace/guides/dq-agile-tms',
+    route: '/marketplace/guides/service/dq-agile-tms',
     icon: Zap,
     gradient: 'bg-gradient-to-br from-[#1f2c63] via-[#2d3f80] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -184,7 +183,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Trimmed tools down to a single source for status and risk',
     ],
     impact: 'Risks surfaced earlier and delivery sped up because tools matched daily flow.',
-    route: '/marketplace/guides/dq-agile-sos',
+    route: '/marketplace/guides/service/dq-agile-sos',
     icon: Shield,
     gradient: 'bg-gradient-to-br from-[#131e42] via-[#1b2553] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -206,7 +205,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Removed extra handoffs that delayed fixes',
     ],
     impact: 'Feedback arrived sooner and work flowed without stalls.',
-    route: '/marketplace/guides/dq-agile-flows',
+    route: '/marketplace/guides/service/dq-agile-flows',
     icon: GitBranch,
     gradient: 'bg-gradient-to-br from-[#1b2553] via-[#30478a] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -228,7 +227,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Instituted weekly trust-but-verify reviews',
     ],
     impact: 'Teams shipped faster while leaders focused on strategic calls.',
-    route: '/marketplace/guides/dq-agile-6xd',
+    route: '/marketplace/guides/service/dq-agile-6xd',
     icon: Sparkles,
     gradient: 'bg-gradient-to-br from-[#131e42] via-[#1f2c63] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -252,16 +251,6 @@ const FEATURE_CARDS_DEFAULT = [
     icon: IconSeven,
     description: 'Connected responses that realign work when traditional models break.',
   },
-];
-
-const RESPONSE_TAGS = [
-  'Vision',
-  'House of Values',
-  'Persona',
-  'Agile TMS',
-  'Agile SoS',
-  'Agile Flows',
-  'Agile 6xD',
 ];
 
 const ACTION_CARDS_DEFAULT: ActionCard[] = [
@@ -441,6 +430,8 @@ type LandingOverrides = {
   heroHeadlineFontSize?: string;
   heroCTA?: string;
   heroSupporting?: string;
+  heroSingleLine?: boolean;
+  heroSupportingSingleLine?: boolean;
   heroFootnote?: string;
   heroCTALink?: string;
   foundationTitle?: string;
@@ -486,22 +477,7 @@ type GHCLandingProps = {
 
 export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSONAR: props are intentionally mutable for component flexibility
   const navigate = useNavigate();
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
 
-  const responseCards = overrides?.responseCards ?? COMPETENCY_CARDS_DEFAULT;
-  const responseTags = overrides?.responseTags ?? [ // NOSONAR: reserved for future use
-    'Vision',
-    'House of Values',
-    'Persona',
-    'Agile TMS',
-    'Agile SoS',
-    'Agile Flows',
-    'Agile 6xD',
-  ];
-  const responsesLayout = overrides?.responsesLayout ?? 'carousel'; // NOSONAR: reserved for future use
-  const featureCards = overrides?.foundationCards ?? FEATURE_CARDS_DEFAULT; // NOSONAR: reserved for future use
-  const actionCards = overrides?.actionCards ?? ACTION_CARDS_DEFAULT; // NOSONAR: reserved for future use
   const heroHeadline = overrides?.heroHeadline;
   const heroHeadlineHighlightWord = overrides?.heroHeadlineHighlightWord;
   const heroHeadlineFontSize = overrides?.heroHeadlineFontSize;
@@ -509,29 +485,10 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
   const heroSupporting =
     overrides?.heroSupporting ??
     'DQ built an operating system of seven responses so you can see what broke in work — and how to realign it.';
+  const heroSingleLine = overrides?.heroSingleLine ?? true;
+  const heroSupportingSingleLine = overrides?.heroSupportingSingleLine ?? false;
   const heroFootnote = overrides?.heroFootnote;
   const heroCTALink = overrides?.heroCTALink ?? 'https://preview.shorthand.com/Pg0KQCF1Rp904ao7';
-  const foundationSubtitle = // NOSONAR: reserved for future use
-    overrides?.foundationSubtitle ??
-    'Not a framework to memorise — an operating system for modern work that guides how you think, decide, adapt, and create impact.';
-  const foundationTitle = overrides?.foundationTitle ?? 'What is the Golden Honeycomb?'; // NOSONAR: reserved for future use
-  const foundationTitleFontSize = overrides?.foundationTitleFontSize; // NOSONAR: reserved for future use
-  const foundationSubtitleFontSize = overrides?.foundationSubtitleFontSize; // NOSONAR: reserved for future use
-  const foundationCTA = overrides?.foundationCTA ?? 'Read the full GHC Storybook'; // NOSONAR: reserved for future use
-  const responsesTitle = overrides?.responsesTitle ?? 'Seven responses'; // NOSONAR: reserved for future use
-  const responsesIntro = // NOSONAR: reserved for future use
-    overrides?.responsesIntro ??
-    'Each exists because something in traditional work stopped working. Problem → response.';
-  const responsesSequential = overrides?.responsesSequential ?? false;
-  const bottomCTA = overrides?.bottomCTA ?? 'Explore all Seven Responses together'; // NOSONAR: reserved for future use
-  const finalHeadline = overrides?.finalHeadline ?? 'Where the Golden Honeycomb becomes real'; // NOSONAR: reserved for future use
-  const finalSubtitle = // NOSONAR: reserved for future use
-    overrides?.finalSubtitle ??
-    'The Golden Honeycomb comes to life through real decisions, tools, and daily work inside the DQ Digital Workspace.';
-
-  const handleEnterHoneycomb = useCallback(() => {
-    navigate('/marketplace/guides/dq-ghc');
-  }, [navigate]);
 
   const handleReadStorybook = useCallback(() => {
     const isExternal = /^https?:\/\//i.test(heroCTALink);
@@ -546,59 +503,11 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
     document.getElementById('ghc-carousel')?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  const scrollToNext = useCallback(() => {
-    const nextIndex = Math.min(carouselIndex + 1, responseCards.length - 1);
-
-    if (responsesSequential) {
-      setCarouselIndex(nextIndex);
-      return;
-    }
-
-    if (!carouselRef.current) return;
-    const cardWidth = carouselRef.current.scrollWidth / responseCards.length;
-    carouselRef.current.scrollTo({ left: nextIndex * cardWidth, behavior: 'smooth' });
-    setCarouselIndex(nextIndex);
-  }, [carouselIndex, responseCards.length, responsesSequential]);
-
-  const scrollToPrev = useCallback(() => {
-    const nextIndex = Math.max(carouselIndex - 1, 0);
-
-    if (responsesSequential) {
-      setCarouselIndex(nextIndex);
-      return;
-    }
-
-    if (!carouselRef.current) return;
-    const cardWidth = carouselRef.current.scrollWidth / responseCards.length;
-    carouselRef.current.scrollTo({ left: nextIndex * cardWidth, behavior: 'smooth' });
-    setCarouselIndex(nextIndex);
-  }, [carouselIndex, responseCards.length, responsesSequential]);
-
-  const handleCarouselScroll = useCallback(() => {
-    if (responsesSequential) return;
-    if (!carouselRef.current) return;
-    const { scrollLeft, scrollWidth } = carouselRef.current;
-    const cardWidth = scrollWidth / responseCards.length;
-    const index = Math.round(scrollLeft / cardWidth);
-    setCarouselIndex(Math.min(index, responseCards.length - 1));
-  }, [responseCards.length, responsesSequential]);
-
-  const goToSlide = useCallback((index: number) => {
-    if (responsesSequential) {
-      setCarouselIndex(Math.min(Math.max(index, 0), responseCards.length - 1));
-      return;
-    }
-    if (!carouselRef.current) return;
-    const cardWidth = carouselRef.current.scrollWidth / responseCards.length;
-    carouselRef.current.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
-    setCarouselIndex(index);
-  }, [responseCards.length, responsesSequential]);
-
   const renderHeroHeadline = () => {
     const baseStyle = {
       fontSize: heroHeadlineFontSize ?? 'clamp(40px, 5vw, 70px)',
       lineHeight: 1.05,
-      whiteSpace: 'nowrap' as const,
+      whiteSpace: heroSingleLine ? 'nowrap' as const : 'normal' as const,
     };
     const highlightClass = 'text-[#e1513b] underline decoration-[#e1513b] decoration-4 underline-offset-8';
 
@@ -613,19 +522,44 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
           const highlight = heroHeadline.slice(startIndex, startIndex + heroHeadlineHighlightWord.length);
           const after = heroHeadline.slice(startIndex + heroHeadlineHighlightWord.length);
 
+          // Split on | to force line breaks
+          const renderPart = (text: string) =>
+            text.split('|').map((part, i) => (
+              <span key={i}>{part}{i < text.split('|').length - 1 && <br />}</span>
+            ));
+
+          const fullBefore = before.replace('|', '');
+          const fullAfter = after.replace('|', '');
+          const parts = (before + highlight + after).split('|');
+
           return (
             <span className="ghc-font-display font-bold text-white" style={baseStyle}>
-              {before}
-              <span className={highlightClass}>{highlight}</span>
-              {after}
+              {parts.map((part, i) => {
+                const lowerPart = part.toLowerCase();
+                const hIdx = lowerPart.indexOf(lowerHighlight);
+                if (hIdx !== -1) {
+                  return (
+                    <span key={i}>
+                      {part.slice(0, hIdx)}
+                      <span className={highlightClass}>{part.slice(hIdx, hIdx + heroHeadlineHighlightWord.length)}</span>
+                      {part.slice(hIdx + heroHeadlineHighlightWord.length)}
+                      {i < parts.length - 1 && <br />}
+                    </span>
+                  );
+                }
+                return <span key={i}>{part}{i < parts.length - 1 && <br />}</span>;
+              })}
             </span>
           );
         }
       }
 
+      const parts = heroHeadline.split('|');
       return (
         <span className="ghc-font-display font-bold text-white" style={baseStyle}>
-          <span className={highlightClass}>{heroHeadline}</span>
+          {parts.map((part, i) => (
+            <span key={i}><span className={highlightClass}>{part}</span>{i < parts.length - 1 && <br />}</span>
+          ))}
         </span>
       );
     }
@@ -665,7 +599,7 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
         </div>
         <FloatingOrbs />
 
-        <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 text-center max-w-4xl">
+        <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 text-center max-w-6xl">
           <motion.div
             className="inline-flex items-center gap-2 rounded-full bg-[#f0f6ff]/20 border border-[#e1513b]/50 shadow-sm px-4 py-1.5 text-sm text-[#e1513b] backdrop-blur mb-6"
             initial={{ opacity: 0, y: 10 }}
@@ -676,7 +610,7 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
             <span>{badgeLabel ?? 'The Golden Honeycomb of Competencies (GHC)'}</span>
           </motion.div>
           <motion.div
-            className="mx-auto flex flex-col items-center justify-center text-center gap-4"
+            className="flex flex-col items-center justify-center text-center gap-6"
             style={{ maxWidth: '100%' }}
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -684,11 +618,14 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
           >
             {renderHeroHeadline()}
             <span
-              className="text-white/85 md:whitespace-nowrap"
+              className="text-white/85 inline-block text-center w-full"
               style={{
                 fontSize: 'clamp(16px, 2.6vw, 20px)',
-                lineHeight: 1.1,
-                maxWidth: '100%',
+                lineHeight: 1.6,
+                maxWidth: heroSupportingSingleLine ? '100%' : '680px',
+                margin: '0 auto',
+                whiteSpace: heroSupportingSingleLine ? 'nowrap' : 'normal',
+                textAlign: 'center',
               }}
             >
               {heroSupporting}
@@ -738,19 +675,12 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
       {/* -----------------------------------------
           2. WHAT IS GHC SECTION
           ----------------------------------------- */}
-      <SectionWhatIsGHC onReadStorybook={handleEnterHoneycomb} content={overrides} />
+      <SectionWhatIsGHC content={overrides} />
 
       {/* -----------------------------------------
           3. SEVEN RESPONSES CAROUSEL
           ----------------------------------------- */}
       <SectionCarousel
-        carouselRef={carouselRef}
-        carouselIndex={carouselIndex}
-        onPrev={scrollToPrev}
-        onNext={scrollToNext}
-        onScroll={handleCarouselScroll}
-        onDotClick={goToSlide}
-        onExploreMarketplace={() => navigate('/marketplace/guides')}
         content={overrides}
       />
 
@@ -774,21 +704,17 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
    ----------------------------------------- */
 
 interface SectionWhatIsGHCProps {
-  onReadStorybook: () => void;
   content?: LandingOverrides;
 }
 
-function SectionWhatIsGHC({ onReadStorybook, content }: SectionWhatIsGHCProps) { // NOSONAR: props are intentionally mutable
+function SectionWhatIsGHC({ content }: SectionWhatIsGHCProps) { // NOSONAR: props are intentionally mutable
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
   const foundationTitle = content?.foundationTitle ?? 'What is the Golden Honeycomb?';
-  const foundationSubtitle = content?.foundationSubtitle ?? 'Not a framework to memorise — an operating system for modern work.';
+  const foundationSubtitle = content?.foundationSubtitle ?? 'Not a framework to memorise, but an operating system for modern work.';
   const foundationTitleFontSize = content?.foundationTitleFontSize;
   const foundationSubtitleFontSize = content?.foundationSubtitleFontSize;
   const foundationCards = content?.foundationCards ?? FEATURE_CARDS_DEFAULT;
-  const foundationCTA = content?.foundationCTA ?? 'Read the full GHC storybook'; // NOSONAR: reserved for future use
-  const foundationCTATo = // NOSONAR: reserved for future use
-    content?.foundationCTATo ?? 'https://preview.shorthand.com/Pg0KQCF1Rp904ao7';
   const foundationFootnote = content?.foundationFootnote;
   const isTwoCardLayout = foundationCards.length === 2;
 
@@ -881,29 +807,10 @@ function SectionWhatIsGHC({ onReadStorybook, content }: SectionWhatIsGHCProps) {
    ----------------------------------------- */
 
 interface SectionCarouselProps {
-  carouselRef: React.RefObject<HTMLDivElement>;
-  carouselIndex: number;
-  onPrev: () => void;
-  onNext: () => void;
-  onScroll: () => void;
-  onDotClick: (index: number) => void;
-  onExploreMarketplace: () => void;
   content?: LandingOverrides;
 }
 
-function SectionCarousel({ // NOSONAR: props are intentionally mutable
-  carouselRef,
-  carouselIndex,
-  onPrev,
-  onNext,
-  onScroll,
-  onDotClick,
-  onExploreMarketplace,
-  content,
-}: SectionCarouselProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 }); // NOSONAR: reserved for future use
-  const [activeTag, setActiveTag] = useState(0); // NOSONAR: reserved for future use
+function SectionCarousel({ content }: SectionCarouselProps) { // NOSONAR: props are intentionally mutable
 
   const responsesTitle = content?.responsesTitle ?? 'Seven Responses in Action';
   const responsesIntro =
@@ -917,19 +824,9 @@ function SectionCarousel({ // NOSONAR: props are intentionally mutable
     content?.responseTags ??
     ['Vision', 'House of Values', 'Persona', 'Agile TMS', 'Agile SoS', 'Agile Flows', 'Agile 6xD'];
   const responseCards = content?.responseCards ?? COMPETENCY_CARDS_DEFAULT;
-  const bottomCTA = content?.bottomCTA ?? 'Explore all Seven Responses together →'; // NOSONAR: reserved for future use
   const responsesCTALabel = content?.responsesCTALabel;
   const responsesCTATo = content?.responsesCTATo;
   const responsesCTALocked = content?.responsesCTALocked ?? Boolean(responsesCTALabel && /coming soon/i.test(responsesCTALabel));
-
-  useEffect(() => {
-    setActiveTag(carouselIndex);
-  }, [carouselIndex]);
-
-  const handleTagClick = (index: number) => { // NOSONAR: reserved for future use
-    setActiveTag(index);
-    onDotClick(index);
-  };
 
   if (responsesSequential) {
     return (
@@ -1366,7 +1263,6 @@ function ClassGrid({ // NOSONAR: props are intentionally mutable
   subtitleFontSize,
   tags,
   cards,
-  variant = 'list',
 }: {
   id: string;
   title: string;
@@ -1375,7 +1271,6 @@ function ClassGrid({ // NOSONAR: props are intentionally mutable
   subtitleFontSize?: string;
   tags: string[];
   cards: CompetencyCard[];
-  variant?: 'list' | 'chips';
 }) {
   const [activeClass, setActiveClass] = useState(tags[0] ?? '');
   const filteredCards = activeClass === 'All Products'
@@ -1572,6 +1467,7 @@ const TakeActionHeader = ({
   </motion.div>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TakeActionGridLayout = ({
   refEl,
   isInView,
@@ -1685,6 +1581,7 @@ const TakeActionGridLayout = ({
   </section>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TakeActionPrimaryLayout = ({
   refEl,
   isInView,
@@ -1928,7 +1825,7 @@ function SectionTakeAction({ navigate, content }: { navigate: (path: string) => 
   const takeActionTitleFontSize = content?.takeActionTitleFontSize;
   const takeActionSubtitleFontSize = content?.takeActionSubtitleFontSize;
   const takeActionLayout = content?.takeActionLayout ?? 'grid';
-  const isActionLocked = (card: ActionCard) => /knowledge center/i.test(card.title);
+  const isActionLocked = (_card: ActionCard) => false;
   const handleNavigate = (path: string) => {
     if (path.startsWith('http')) {
       window.open(path, '_blank', 'noopener,noreferrer');
@@ -2170,7 +2067,7 @@ function SectionTakeAction({ navigate, content }: { navigate: (path: string) => 
                 variants={containerVariants}
                 custom={0}
               >
-                {secondaryCards.map((item, i) => (
+                {secondaryCards.map((item) => (
                   <motion.div
                     key={item.title}
                     variants={itemVariants}
@@ -2206,8 +2103,10 @@ function SectionTakeAction({ navigate, content }: { navigate: (path: string) => 
                       type="button"
                       onClick={isActionLocked(item) ? undefined : () => handleNavigate(item.path)}
                       aria-disabled={isActionLocked(item)}
-                      className={`inline-flex items-center gap-1 text-sm font-semibold mt-6 ${
-                        isActionLocked(item) ? 'text-[#9aa4c6] cursor-not-allowed' : `${item.accent} group-hover:underline`
+                      className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold mt-6 border transition-colors ${
+                        isActionLocked(item)
+                          ? 'text-[#9aa4c6] cursor-not-allowed border-[#e6eaf5]'
+                          : 'border-[#d5dbea] text-[#131e42] bg-white hover:bg-[#f5f7ff]'
                       }`}
                     >
                       {isActionLocked(item) ? <Lock className="h-4 w-4" /> : null}
@@ -2230,7 +2129,7 @@ function SectionTakeAction({ navigate, content }: { navigate: (path: string) => 
             variants={containerVariants}
             custom={0}
           >
-            {actionCards.map((item, i) => (
+            {actionCards.map((item) => (
               <motion.div
                 key={item.title}
                 variants={itemVariants}

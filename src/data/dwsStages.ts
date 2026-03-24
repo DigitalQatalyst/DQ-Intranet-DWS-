@@ -103,7 +103,7 @@ export const dwsStages: DwsStage[] = [
     id: "follow",
     order: 2,
     level: "L1",
-    title: "Level 1 (Follow)",
+    title: "Level 01 (Follow)",
     subtitle: "Follow instructions and learn the basics with close guidance. Build confidence through routine tasks and clear feedback.",
     about:
       "At this level you will complete guided tasks and learn DQ ways of working, communicate progress early and ask for support, and build foundational knowledge and good habits.",
@@ -164,7 +164,7 @@ export const dwsStages: DwsStage[] = [
     id: "assist",
     order: 3,
     level: "L2",
-    title: "Level 2 (Assist)",
+    title: "Level 02 (Assist)",
     subtitle: "Support defined tasks under routine direction. Contribute reliably, improve consistency, and collaborate with your immediate team.",
     about:
       "At this level you will deliver assigned tasks with regular review, work confidently within a defined routine, and strengthen communication and execution discipline.",
@@ -234,7 +234,7 @@ export const dwsStages: DwsStage[] = [
     id: "apply",
     order: 4,
     level: "L3",
-    title: "Level 3 (Apply)",
+    title: "Level 03 (Apply)",
     subtitle: "Work under general direction to complete assigned tasks. Use judgment on non-routine work and share progress at milestones.",
     about:
       "At this level you will own standard deliverables end-to-end, solve familiar problems and escalate smartly, and collaborate across the squad to keep work moving.",
@@ -295,7 +295,7 @@ export const dwsStages: DwsStage[] = [
     id: "enable",
     order: 5,
     level: "L4",
-    title: "Level 4 (Enable)",
+    title: "Level 04 (Enable)",
     subtitle: "Operate with general direction within clear accountability, exercising autonomy to plan, coordinate work, and occasionally delegate tasks to others.",
     about:
       "At this level you will take responsibility for outcomes and quality, coordinate tasks, timelines, and dependencies, and improve how the team delivers (not just what).",
@@ -365,7 +365,7 @@ export const dwsStages: DwsStage[] = [
     id: "ensure",
     order: 6,
     level: "L5",
-    title: "Level 5 (Ensure, advise)",
+    title: "Level 05 (Ensure, advise)",
     subtitle: "Work under broad direction and lead through expertise. Ensure effective practices and advise others to raise delivery standards.",
     about:
       "At this level you will guide others and strengthen delivery consistency, make sound decisions across risk, quality, and value, and promote good working practices and culture.",
@@ -426,7 +426,7 @@ export const dwsStages: DwsStage[] = [
     id: "influence",
     order: 7,
     level: "L6",
-    title: "Level 6 (Initiate, influence)",
+    title: "Level 06 (Initiate, influence)",
     subtitle: "Own a significant area of work with defined authority and accountability. Influence strategy and drive cross-organisation initiatives.",
     about:
       "At this level you will lead major initiatives and shape direction, influence decisions, priorities, and resource choices, and drive transformation outcomes across teams.",
@@ -496,7 +496,7 @@ export const dwsStages: DwsStage[] = [
     id: "inspire",
     order: 8,
     level: "L7",
-    title: "Level 7 (Set strategy, inspire, mobilise)",
+    title: "Level 07 (Set strategy, inspire, mobilise)",
     subtitle: "Set organisational strategy and mobilise the system to deliver it. Inspire leadership alignment and authorise resources at scale.",
     about:
       "At this level you will define strategic direction and long-range outcomes, inspire and align leaders across the organisation, and mobilise resources to execute at scale.",

@@ -19,8 +19,7 @@ export const DESIGN_SYSTEM_ITEMS: DesignSystemItem[] = [
     type: 'cids',
     imageUrl: '/images/cids.PNG',
     tags: ['CI.DS'],
-    category: 'cids-framework',
-    location: 'DXB'
+    category: 'cids-framework'
   },
   {
     id: 'vds-framework',
@@ -29,8 +28,7 @@ export const DESIGN_SYSTEM_ITEMS: DesignSystemItem[] = [
     type: 'vds',
     imageUrl: '/images/vds.png',
     tags: ['V.DS'],
-    category: 'vds-framework',
-    location: 'KSA'
+    category: 'vds-framework'
   },
   {
     id: 'cds-campaigns-design-system',
@@ -39,8 +37,7 @@ export const DESIGN_SYSTEM_ITEMS: DesignSystemItem[] = [
     type: 'cds',
     imageUrl: '/images/cds.png',
     tags: ['CDS'],
-    category: 'cds-framework',
-    location: 'NBO'
+    category: 'cds-framework'
   }
 ]
 

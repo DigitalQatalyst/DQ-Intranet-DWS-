@@ -71,7 +71,18 @@ const CALLOUTS: { role: Role; text: string; side: Side }[] = [
 function Hex({ fill, id }: { fill: "navy" | "white"; id?: number }) {
   const w = HEX_W, h = HEX_H;
   const d = `M${w/2} 4 L${w-4} ${h*0.25} L${w-4} ${h*0.75} L${w/2} ${h-4} L4 ${h*0.75} L4 ${h*0.25} Z`;
-  const uniqueId = id ?? Math.random().toString(36).substr(2, 9);
+  // Generate a more secure unique ID using crypto API if available
+  const generateSecureId = () => {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint32Array(2);
+      crypto.getRandomValues(array);
+      return `hex-${array[0]}-${array[1]}`;
+    }
+    // Fallback for environments without crypto API
+    return `hex-${Date.now()}-${Date.now().toString(36)}`;
+  };
+  
+  const uniqueId = id ?? generateSecureId();
   
   if (fill === "white") {
     return (
@@ -140,7 +151,9 @@ export const DNAHexagonDiagram: React.FC<HexagonDiagramProps> = ({ nodes }) => {
           const s = anchor(c.role, c.side);
           const yAnchor = c.side === "bottom" ? s.y : s.y + DY[c.role];
 
-          let x1 = s.x, y1 = yAnchor, x2 = s.x, y2 = yAnchor, tx = x2, ty = y2;
+          const x1 = s.x;
+          const y1 = yAnchor;
+          let x2 = s.x, y2 = yAnchor, tx = x2, ty = y2;
           let ta: "start" | "end" | "middle" = "middle";
 
           if (c.side === "left") {

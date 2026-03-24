@@ -1,3 +1,4 @@
+import { secureRandom } from '../../utils/secureRandom';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, XIcon, Plus, Minus } from 'lucide-react';
@@ -166,8 +167,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     }
   }, [customTabs]);
   // Generate a random rating between 4.0 and 5.0 for display purposes
-  // const rating = (4 + Math.random()).toFixed(1);
-  // const reviewCount = Math.floor(Math.random() * 50) + 10;
+  // const rating = (4 + secureRandom()).toFixed(1);
+  // const reviewCount = Math.floor(secureRandom() * 50) + 10;
   useEffect(() => {
     const fetchItemDetails = async () => {
       if (!itemId) return;
@@ -1856,7 +1857,7 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
                   {relatedItems.map(relatedItem => <Link key={relatedItem.id} to={`${config.route}/${relatedItem.id}`} className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow block">
                       <div className="flex items-center mb-3">
                         <span className="text-sm text-gray-600">
-                          {relatedItem.provider.name}
+                          {relatedItem.provider?.name || 'DQ Workspace'}
                         </span>
                       </div>
                       <h3 className="font-semibold text-gray-900 mb-2">

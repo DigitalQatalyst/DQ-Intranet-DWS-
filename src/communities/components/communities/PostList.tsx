@@ -1,3 +1,4 @@
+import { secureRandom } from '../../../utils/secureRandom';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/communities/integrations/supabase/client';
@@ -169,11 +170,11 @@ export function PostList({
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1.5 text-gray-500 text-sm">
                   <ThumbsUp className="h-4 w-4" />
-                  <span>{Math.floor(Math.random() * 25)}</span>
+                  <span>{Math.floor(secureRandom() * 25)}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-gray-500 text-sm">
                   <MessageSquare className="h-4 w-4" />
-                  <span>{Math.floor(Math.random() * 10)}</span>
+                  <span>{Math.floor(secureRandom() * 10)}</span>
                 </div>
               </div>
               {/* Read link */}

@@ -11,10 +11,8 @@ import {
   Calendar,
   Book as BookIcon,
   MessageCircle,
-  Clock,
   Compass,
   Building,
-  Lock,
   GraduationCap,
   CircleDot,
   ClipboardList,
@@ -147,7 +145,7 @@ const approvedSections = {
     },
   ],
 
-  // 3) Service Requests & Enablement Hub
+  // 3) Service Requests & Support
   serviceEnablementHub: [
     {
       id: 'technology',
@@ -229,69 +227,53 @@ const approvedSections = {
 };
 
 /* ---------------------------- Service Card --------------------------- */
+export interface ServiceItem {
+  title: string;
+  description: string;
+  icon?: React.ReactNode;
+}
+
 const ServiceCard = ({
   service,
   onClick,
-  isComingSoon = false,
   sectionStyle = defaultSectionStyle,
+  isComingSoon,
 }: {
-  service: any;
+  service: ServiceItem;
   onClick: () => void;
-  isComingSoon?: boolean;
   sectionStyle?: SectionStyle;
+  isComingSoon?: boolean;
 }) => {
   const activeCardClasses = `${sectionStyle.cardClasses} hover:shadow-md hover:-translate-y-0.5 cursor-pointer`;
-  const disabledClasses =
-    sectionStyle.disabledCardClasses ??
-    "bg-dqsec-tint text-white/70 opacity-70 cursor-not-allowed border border-transparent";
 
   const baseLayoutClasses =
     "rounded-2xl p-6 flex flex-col justify-between min-h-[260px] shadow-sm overflow-hidden transition-all duration-300 transform backdrop-blur-sm";
-  const baseButtonClasses =
-    "mt-auto h-9 px-4 rounded-md font-medium w-full flex items-center justify-center";
-  const disabledButtonClasses = `${baseButtonClasses} bg-white/70 text-gray-600 cursor-not-allowed transition-all duration-200`;
 
-  const iconColorClass = isComingSoon
-    ? "text-gray-500"
-    : sectionStyle.iconClass ?? "text-[#1A2E6E]";
+  const iconColorClass = sectionStyle.iconClass ?? "text-[#1A2E6E]";
   const iconWrapperClasses = sectionStyle.iconWrapperClass ?? "w-12 h-12";
-  const descriptionClasses = `text-sm text-gray-600 leading-snug text-balance line-clamp-2 mt-3 mb-4 ${
-    isComingSoon ? "text-white/70" : sectionStyle.descriptionClass
-  }`;
+  const descriptionClasses = `text-sm text-gray-600 leading-snug text-balance line-clamp-2 mt-3 mb-4 ${sectionStyle.descriptionClass}`;
 
   const iconNode = service.icon ? (
     service.icon
   ) : (
     <CircleDot aria-hidden="true" />
   );
-  const iconElement = cloneElement(iconNode, {
+  const iconElement = React.isValidElement(iconNode) ? cloneElement(iconNode as React.ReactElement<any>, {
     size: 20,
     "aria-hidden": true,
-    className: `${iconColorClass} ${iconNode.props?.className ?? ""}`.trim(),
-  });
+    className: `${iconColorClass} ${(iconNode as React.ReactElement<any>).props?.className ?? ""}`.trim(),
+  } as any) : <span className={iconColorClass}>{iconNode}</span>;
 
-  const wrapperClasses = `${
-    isComingSoon ? disabledClasses : activeCardClasses
-  } ${baseLayoutClasses}`;
-  const titleClass = `${
-    isComingSoon ? "text-white/80" : sectionStyle.headingClass
-  } text-base font-semibold text-white mb-1 truncate`;
+  const wrapperClasses = `${activeCardClasses} ${baseLayoutClasses}`;
+  const titleClass = `${sectionStyle.headingClass} text-base font-semibold text-white mb-1 truncate`;
   const displayTitle = toTitleCase(service.title);
 
   return (
     <div
       className={wrapperClasses}
-      onClick={isComingSoon ? undefined : onClick}
+      onClick={onClick}
       role="button"
-      aria-disabled={isComingSoon}
     >
-      {isComingSoon && (
-        <div className="absolute top-3 right-3 bg-yellow-400 text-[10px] font-bold px-2 py-1 rounded-full text-gray-900 flex items-center">
-          <Clock size={12} className="mr-1" />
-          Coming Soon
-        </div>
-      )}
-
       <div className="flex items-start gap-3">
         <div
           className={`${iconWrapperClasses} rounded-full bg-white border border-white/40 shadow-sm flex items-center justify-center mb-3`}
@@ -304,25 +286,14 @@ const ServiceCard = ({
       <p className={descriptionClasses}>{service.description}</p>
 
       <button
-        className={isComingSoon ? disabledButtonClasses : "cta-dq"}
-        disabled={isComingSoon}
+        className="cta-dq"
         onClick={(e) => {
-          if (!isComingSoon) {
-            e.stopPropagation();
-            onClick();
-          }
+          e.stopPropagation();
+          onClick();
         }}
       >
-        {isComingSoon ? (
-          <>
-            <Lock size={14} className="mr-2" /> Coming Soon
-          </>
-        ) : (
-          <>
-            Explore Now
-            <span className="chev">›</span>
-          </>
-        )}
+        Explore Now
+        <span className="chev">›</span>
       </button>
     </div>
   );
@@ -401,7 +372,7 @@ export const HomePage: React.FC = () => {
   const sectionStyles: Record<string, SectionStyle> = {
     'Learning Center & DQ Knowledge': navySectionStyle,
     'Media & Communications': navySectionStyle,
-    'Service Requests & Enablement': navySectionStyle,
+    'Service Requests & Support': navySectionStyle,
     'Organization, Roles & People': navySectionStyle,
   };
 
@@ -418,7 +389,7 @@ export const HomePage: React.FC = () => {
             </h2>
             <div>
               <p className="text-base sm:text-lg text-gray-600 mx-auto leading-relaxed max-w-4xl whitespace-nowrap">
-                Access tools, learning, and guidelines designed to help you work smarter and act confidently all in one place.
+                Access tools, learning, and guidelines to help you work smarter and act with confidence
               </p>
             </div>
           </FadeInUpOnScroll>
@@ -429,7 +400,7 @@ export const HomePage: React.FC = () => {
               <CategoryHeader
                 icon={<BookOpen size={24} />}
                 title="Learning Center & DQ Knowledge"
-                description="Learn, reference standards, and access knowledge that guides delivery."
+                description="Access learning, standards, and knowledge that guide delivery."
               />
             </FadeInUpOnScroll>
             <ServiceCarousel
@@ -477,13 +448,13 @@ export const HomePage: React.FC = () => {
             />
           </div>
 
-          {/* 3. Service Requests & Enablement Hub */}
+          {/* 3. Service Requests & Support */}
           <div className="mb-10">
             <FadeInUpOnScroll>
               <CategoryHeader
                 icon={<Briefcase size={24} />}
-                title="Service Requests & Enablement"
-                description="Request support and enablement services — tracked and visible."
+                title="Service Requests & Support"
+                description="Request support and enablement services through a clear, trackable process."
               />
             </FadeInUpOnScroll>
             <ServiceCarousel
@@ -494,7 +465,7 @@ export const HomePage: React.FC = () => {
                   <FadeInUpOnScroll key={service.id} delay={index * 0.1}>
                     <ServiceCard
                       service={service}
-                      sectionStyle={sectionStyles['Service Requests & Enablement']}
+                      sectionStyle={sectionStyles['Service Requests & Support']}
                       onClick={() => handleServiceClick(service.path)}
                       isComingSoon={!service.isActive}
                     />

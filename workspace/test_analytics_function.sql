@@ -1,3 +1,5 @@
+SET QUOTED_IDENTIFIER ON;
+
 -- Test Script for get_community_analytics Function
 -- Run these queries in Supabase SQL Editor
 
@@ -79,4 +81,3 @@ SELECT column_name, data_type
 FROM information_schema.columns
 WHERE table_name = 'community_post_reactions_new' 
   AND column_name = 'emoji';
-

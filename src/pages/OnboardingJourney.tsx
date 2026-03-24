@@ -12,7 +12,7 @@ interface JourneyPhase {
   subtitle: string;
   theme: string;
   primaryQuestion: string;
-  whatMonthIsAbout?: string;
+  whatMonthIsAbout?: string[];
   focusAreas: string[];
   whatAssociateIsDoing: string[];
   keyOutcomes: string[];
@@ -40,11 +40,11 @@ const journeyPhases: JourneyPhase[] = [
       'Building confidence in systems and structure'
     ],
     keyOutcomes: [
-      'Clear understanding of DQ structure & towers',
-      'Clear understanding of GHC principles',
-      'Clear understanding of 6x Digitals',
-      'Clear understanding of role expectations',
-      'Associate feels oriented, supported, and grounded'
+      'DQ structure & towers',
+      'GHC principles',
+      '6x Digitals',
+      'Role expectations',
+      'Feeling oriented, supported, and grounded'
     ]
   },
   {
@@ -80,7 +80,12 @@ const journeyPhases: JourneyPhase[] = [
     subtitle: 'Own the Role & Strengthen the System',
     theme: 'Ownership, Impact, Influence',
     primaryQuestion: 'Can I independently own my position and positively impact the DQ system?',
-    whatMonthIsAbout: 'Moving from participant → contributor. Demonstrating ownership without being asked. Influencing outcomes, not just completing tasks. Becoming a net-positive force in the system.',
+    whatMonthIsAbout: [
+      'Moving from participant → contributor',
+      'Demonstrating ownership without being asked',
+      'Influencing outcomes, not just completing tasks',
+      'Becoming a net-positive force in the system'
+    ],
     focusAreas: [
       'Independent ownership of responsibilities',
       'Proactive problem-solving',
@@ -170,8 +175,8 @@ function SideNav({ activeSection, onSectionClick }: SideNavProps) {
   };
 
   return (
-    <nav className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
-      <div className="pr-6">
+    <nav className="sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto bg-white border border-gray-200 shadow-sm rounded-xl p-4">
+      <div className="pr-2">
         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
           Contents
         </h3>
@@ -199,51 +204,32 @@ function SideNav({ activeSection, onSectionClick }: SideNavProps) {
 // Simplified Hero Section matching Guidelines style
 function HeroSection() {
   return (
-    <div className="relative w-full min-h-[600px] overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.15
-        }}
-      />
-      {/* Gradient Overlay */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(135deg, #030F35 0%, #1A2E6E 40%, #2A3F7F 70%, #1A2E6E 100%)'
-        }}
-      />
-      <div className="relative z-10 h-full flex items-center px-6 md:px-12 lg:px-16 xl:px-24 py-20">
-        <div className="w-full max-w-7xl mx-auto">
-          {/* Main Content */}
-          <div className="text-white max-w-4xl">
-            {/* Eyebrow Label */}
-            <div className="text-sm font-medium text-white/70 mb-6 tracking-wider uppercase">
-              DQ Onboarding Framework
-      </div>
-
-            {/* Primary Headline */}
-            <h1 className="text-[72px] font-bold mb-8 leading-[1.05] font-inter text-white">
-              Your First 3 Months at DQ
-          </h1>
-
-            {/* Supporting Description */}
-            <p className="text-[23px] text-white/90 mb-8 leading-relaxed font-inter max-w-3xl">
-              This page will guide you through what is expected of you during your first three months at DQ from integration and learning to execution and ownership.
-            </p>
-
-            {/* Minimal Metadata */}
-            <div className="text-sm text-white/60 font-inter">
-              Updated {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · DQ Onboarding
-            </div>
+    <div
+      className="relative w-full overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #030F35 0%, #1A2E6E 60%, #2A3F7F 100%)' }}
+    >
+      <div className="relative z-10 px-6 md:px-12 lg:px-16 xl:px-24 py-16 md:py-20">
+        <div className="w-full max-w-5xl mx-auto">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
+            <span>Home</span>
+            <span>›</span>
+            <span>Onboarding</span>
+            <span>›</span>
+            <span className="text-white/80">3-Month Onboarding Guide</span>
           </div>
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+            Your First 3 Months at DQ
+          </h1>
+          {/* Subtitle */}
+          <p className="text-lg text-white/75 max-w-2xl">
+            A guided journey through integration, execution, and ownership — designed to help you succeed from day one.
+          </p>
         </div>
       </div>
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-50 to-transparent" />
     </div>
   );
 }
@@ -262,6 +248,11 @@ export function OnboardingJourney() {
       <main className="flex-1">
         <div className="container mx-auto px-4 py-12 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Left Column - Sticky Side Navigation (placed before main content for accessibility) */}
+            <aside className="lg:col-span-1">
+              <SideNav />
+            </aside>
+
             {/* Main Content */}
             <div className="lg:col-span-3 bg-white rounded-lg shadow-sm p-8 md:p-12">
               {/* Overall Philosophy */}
@@ -271,14 +262,14 @@ export function OnboardingJourney() {
                 </p>
                 <ul className="space-y-2 mb-6 text-gray-700 list-disc pl-6">
                   <li>Fully embedded into the DQ system</li>
-                  <li>Aligned to DQ DNA (GHC) and 6x Digitals (6xD))</li>
+                  <li>Aligned to DQ DNA (GHC) and 6x Digitals (6xD)</li>
                   <li>Operationally effective in their specific position</li>
                   <li>Ready to independently contribute and create impact</li>
                 </ul>
               </GuidelineSection>
 
               {/* Journey Phases */}
-              {journeyPhases.map((phase, index) => (
+              {journeyPhases.map((phase) => (
                 <GuidelineSection
                   key={phase.id}
                   id={phase.id}
@@ -297,7 +288,11 @@ export function OnboardingJourney() {
                   {phase.whatMonthIsAbout && (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold text-[#030E31] mb-2">What Month {phase.month} Is Really About:</h3>
-                      <p className="text-gray-700 leading-relaxed">{phase.whatMonthIsAbout}</p>
+                      <ul className="space-y-2 text-gray-700 list-disc pl-6">
+                        {phase.whatMonthIsAbout.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
                     </div>
                   )}
 
@@ -411,11 +406,6 @@ export function OnboardingJourney() {
                 </div>
               </GuidelineSection>
             </div>
-
-            {/* Right Column - Sticky Side Navigation */}
-            <aside className="lg:col-span-1">
-              <SideNav />
-            </aside>
           </div>
         </div>
       </main>
