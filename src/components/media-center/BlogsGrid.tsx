@@ -16,52 +16,96 @@ interface GridProps {
 
 const ITEMS_PER_PAGE = 9;
 
+// Helper function to generate pagination numbers
+function generatePageNumbers(currentPage: number, totalPages: number): (number | string)[] {
+  const pages: (number | string)[] = [];
+  const delta = 2; // Number of pages to show on each side of current page
+  
+  if (totalPages <= 7) {
+    // Show all pages if 7 or fewer
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Always show first page
+    pages.push(1);
+    
+    if (currentPage > delta + 2) {
+      pages.push('...');
+    }
+    
+    // Show pages around current page
+    const start = Math.max(2, currentPage - delta);
+    const end = Math.min(totalPages - 1, currentPage + delta);
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    if (currentPage < totalPages - delta - 1) {
+      pages.push('...');
+    }
+    
+    // Always show last page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+  }
+  
+  return pages;
+}
+
+// Helper function to filter blog items
+function filterBlogItems(sourceItems: NewsItem[], query: GridProps['query']): NewsItem[] {
+  const search = query.q?.toLowerCase() ?? '';
+  return sourceItems
+    .filter((item) => item.type === 'Thought Leadership')
+    .filter((item) => {
+      // Exclude podcasts - they should only appear in the Podcasts tab
+      const isPodcast = item.format === 'Podcast' || item.tags?.some(tag => tag.toLowerCase().includes('podcast'));
+      return !isPodcast;
+    })
+    .filter((item) => {
+      if (!search) return true;
+      return (
+        item.title.toLowerCase().includes(search) ||
+        item.excerpt.toLowerCase().includes(search) ||
+        item.author.toLowerCase().includes(search)
+      );
+    })
+    .filter((item) => {
+      const format = query.filters?.format;
+      const source = query.filters?.source;
+      const department = query.filters?.department;
+      const location = query.filters?.location;
+      const domain = query.filters?.domain;
+      const readingTime = query.filters?.readingTime;
+
+      const matches = (val?: string, sel?: string[]) => !sel?.length || (val && sel.includes(val));
+      return (
+        matches(item.format, format) &&
+        matches(item.source, source) &&
+        matches(item.department, department) &&
+        matches(item.location, location) &&
+        matches(item.domain, domain) &&
+        matches(item.readingTime, readingTime)
+      );
+    })
+    .sort((a, b) => {
+      // Sort by date descending (newest first)
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA;
+    });
+}
+
 export default function BlogsGrid({ query, items }: GridProps) {
   const sourceItems: NewsItem[] = items;
   const [currentPage, setCurrentPage] = useState(1);
   const location = useLocation();
 
   const filteredItems = useMemo(() => {
-    const search = query.q?.toLowerCase() ?? '';
-    return sourceItems
-      .filter((item) => item.type === 'Thought Leadership')
-      .filter((item) => {
-        // Exclude podcasts - they should only appear in the Podcasts tab
-        const isPodcast = item.format === 'Podcast' || item.tags?.some(tag => tag.toLowerCase().includes('podcast'));
-        return !isPodcast;
-      })
-      .filter((item) => {
-        if (!search) return true;
-        return (
-          item.title.toLowerCase().includes(search) ||
-          item.excerpt.toLowerCase().includes(search) ||
-          item.author.toLowerCase().includes(search)
-        );
-      })
-      .filter((item) => {
-        const format = query.filters?.format;
-        const source = query.filters?.source;
-        const department = query.filters?.department;
-        const location = query.filters?.location;
-        const domain = query.filters?.domain;
-        const readingTime = query.filters?.readingTime;
-
-        const matches = (val?: string, sel?: string[]) => !sel?.length || (val && sel.includes(val));
-        return (
-          matches(item.format, format) &&
-          matches(item.source, source) &&
-          matches(item.department, department) &&
-          matches(item.location, location) &&
-          matches(item.domain, domain) &&
-          matches(item.readingTime, readingTime)
-        );
-      })
-      .sort((a, b) => {
-        // Sort by date descending (newest first)
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        return dateB - dateA;
-      });
+    return filterBlogItems(sourceItems, query);
   }, [query, sourceItems]);
 
   // Reset to page 1 when filters or search change
@@ -81,45 +125,6 @@ export default function BlogsGrid({ query, items }: GridProps) {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Generate page numbers to display (Google-style pagination)
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const delta = 2; // Number of pages to show on each side of current page
-    
-    if (totalPages <= 7) {
-      // Show all pages if 7 or fewer
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first page
-      pages.push(1);
-      
-      if (currentPage > delta + 2) {
-        pages.push('...');
-      }
-      
-      // Show pages around current page
-      const start = Math.max(2, currentPage - delta);
-      const end = Math.min(totalPages - 1, currentPage + delta);
-      
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-      
-      if (currentPage < totalPages - delta - 1) {
-        pages.push('...');
-      }
-      
-      // Always show last page
-      if (totalPages > 1) {
-        pages.push(totalPages);
-      }
-    }
-    
-    return pages;
   };
 
   if (filteredItems.length === 0) {
@@ -161,7 +166,7 @@ export default function BlogsGrid({ query, items }: GridProps) {
           </button>
           
           <div className="flex items-center gap-1">
-            {getPageNumbers().map((page, index) => {
+            {generatePageNumbers(currentPage, totalPages).map((page, index) => {
               if (page === '...') {
                 return (
                   <span key={`ellipsis-${index}`} className="px-2 text-gray-500">

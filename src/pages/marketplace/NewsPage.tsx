@@ -298,22 +298,71 @@ const NewsPage: React.FC = () => {
     [tab, queryText, filters]
   );
 
+// Helper function to filter podcast episodes
+function filterPodcastEpisodes(items: NewsItem[], search: string): NewsItem[] {
+  return items
+    .filter(
+      (item) =>
+        item.format === 'Podcast' ||
+        item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))
+    )
+    .filter((item) =>
+      item.title.toLowerCase().includes(search) ||
+      item.excerpt?.toLowerCase().includes(search)
+    );
+}
+
+// Helper function to filter announcements
+function filterAnnouncements(items: NewsItem[], search: string): NewsItem[] {
+  const UPDATE_TYPES_LOCAL = ['Announcement', 'Guidelines', 'Notice'];
+  return items
+    .filter((item) => UPDATE_TYPES_LOCAL.includes(item.type))
+    .filter((item) =>
+      item.title.toLowerCase().includes(search) ||
+      item.excerpt?.toLowerCase().includes(search) ||
+      item.author?.toLowerCase().includes(search)
+    )
+    .slice(0, 8);
+}
+
+// Helper function to filter blogs
+function filterBlogs(items: NewsItem[], search: string): NewsItem[] {
+  return items
+    .filter((item) => item.type === 'Thought Leadership')
+    .filter((item) => {
+      const isPodcast = item.format === 'Podcast' || item.tags?.some(tag => tag.toLowerCase().includes('podcast'));
+      return !isPodcast;
+    })
+    .filter((item) =>
+      item.title.toLowerCase().includes(search) ||
+      item.excerpt.toLowerCase().includes(search) ||
+      item.author?.toLowerCase().includes(search)
+    )
+    .slice(0, 8);
+}
+
+// Helper function to get search placeholder
+function getSearchPlaceholder(tab: MediaCenterTabKey): string {
+  switch (tab) {
+    case 'announcements':
+      return 'Search News & Announcements';
+    case 'insights':
+      return 'Search Blogs';
+    case 'podcasts':
+      return 'Search Podcasts and Episodes';
+    case 'opportunities':
+      return 'Search jobs and roles… e.g., SFIA L3, frontend developer';
+    default:
+      return 'Search…';
+  }
+}
+
   // Podcast episode search results for the Podcasts tab
   const podcastSearchResults = useMemo(() => {
     if (tab !== 'podcasts') return [] as NewsItem[];
     const search = queryText.trim().toLowerCase();
     if (!search) return [] as NewsItem[];
-
-    return newsItems
-      .filter(
-        (item) =>
-          item.format === 'Podcast' ||
-          item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))
-      )
-      .filter((item) =>
-        item.title.toLowerCase().includes(search) ||
-        item.excerpt?.toLowerCase().includes(search)
-      );
+    return filterPodcastEpisodes(newsItems, search);
   }, [tab, queryText, newsItems]);
 
   // News & Announcements search dropdown results
@@ -321,15 +370,7 @@ const NewsPage: React.FC = () => {
     if (tab !== 'announcements') return [] as NewsItem[];
     const search = queryText.trim().toLowerCase();
     if (!search) return [] as NewsItem[];
-    const UPDATE_TYPES_LOCAL = ['Announcement', 'Guidelines', 'Notice'];
-    return newsItems
-      .filter((item) => UPDATE_TYPES_LOCAL.includes(item.type))
-      .filter((item) =>
-        item.title.toLowerCase().includes(search) ||
-        item.excerpt?.toLowerCase().includes(search) ||
-        item.author?.toLowerCase().includes(search)
-      )
-      .slice(0, 8);
+    return filterAnnouncements(newsItems, search);
   }, [tab, queryText, newsItems]);
 
   // Blog search dropdown results
@@ -337,33 +378,11 @@ const NewsPage: React.FC = () => {
     if (tab !== 'insights') return [] as NewsItem[];
     const search = queryText.trim().toLowerCase();
     if (!search) return [] as NewsItem[];
-    return newsItems
-      .filter((item) => item.type === 'Thought Leadership')
-      .filter((item) => {
-        const isPodcast = item.format === 'Podcast' || item.tags?.some(tag => tag.toLowerCase().includes('podcast'));
-        return !isPodcast;
-      })
-      .filter((item) =>
-        item.title.toLowerCase().includes(search) ||
-        item.excerpt?.toLowerCase().includes(search) ||
-        item.author?.toLowerCase().includes(search)
-      )
-      .slice(0, 8);
+    return filterBlogs(newsItems, search);
   }, [tab, queryText, newsItems]);
 
   const searchPlaceholder = useMemo(() => {
-    switch (tab) {
-      case 'announcements':
-        return 'Search News & Announcements';
-      case 'insights':
-        return 'Search Blogs';
-      case 'podcasts':
-        return 'Search Podcasts and Episodes';
-      case 'opportunities':
-        return 'Search jobs and roles… e.g., SFIA L3, frontend developer';
-      default:
-        return 'Search…';
-    }
+    return getSearchPlaceholder(tab);
   }, [tab]);
 
   const toggleFilters = () => setShowFilters((prev) => !prev);

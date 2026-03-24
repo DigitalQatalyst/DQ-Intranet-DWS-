@@ -16,7 +16,8 @@
     "test": "vitest run",
     "db:seed-guides": "node scripts/seed-guides.js",
     "create-test-user": "node scripts/create-test-user.js",
-    "postinstall": "npm rebuild rollup"
+    "postinstall": "npm rebuild rollup",
+    "sonar:scan": "node scripts/sonar-scan.js"
   },
   "dependencies": {
     "@apollo/client": "^4.0.5",
