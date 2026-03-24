@@ -1185,6 +1185,71 @@ const computeServiceTabSync = (
   return null;
 };
 
+type WorkGuideTab = 'guidelines' | 'strategy' | '6xd' | 'blueprints' | 'testimonials' | 'glossary' | 'faqs';
+type DesignSystemTab = 'cids' | 'vds' | 'cds';
+
+const TAB_LABELS: Record<WorkGuideTab, string> = {
+  strategy: 'GHC',
+  guidelines: 'Guidelines',
+  '6xd': '6xD',
+  blueprints: 'Products',
+  testimonials: 'Testimonials',
+  glossary: 'Glossary',
+  faqs: 'FAQs'
+};
+
+const TAB_DESCRIPTIONS: Record<WorkGuideTab, { description: string; author?: string }> = {
+  strategy: {
+    description: 'Explore the Golden Honeycomb of Competencies (GHC), the system behind how DQ works and delivers value.',
+    author: 'Authored by DQ Leadership and Strategy Teams'
+  },
+  guidelines: {
+    description: 'Find practical guidelines and best practices to optimize workflow and collaboration across all DQ units.',
+    author: 'Authored by DQ Associates, Leads, and Subject Matter Experts'
+  },
+  '6xd': {
+    description: 'Discover the six dimensions of digital transformation that guide how organizations evolve, adapt, and thrive in the digital economy.',
+    author: 'Authored by DQ Strategy and Transformation Teams'
+  },
+  blueprints: {
+    description: 'Explore DQ\'s solutions, created to help organizations succeed and grow through digital transformation.',
+    author: 'Product Owner / Practice'
+  },
+  testimonials: {
+    description: 'Discover how DQ has enabled impactful transformations through our clients\' success feedback and testimonials.',
+    author: 'Authored by DQ Teams, Clients, and Partners'
+  },
+  glossary: {
+    description: 'Find clear explanations of key DQ terms, acronyms, and concepts to help you better understand how we operate.',
+    author: 'Maintained by DQ Knowledge Management Team'
+  },
+  faqs: {
+    description: 'Find answers to frequently asked questions about how we work, the tools we use, and the best practices followed across DQ.',
+    author: 'Maintained by DQ Knowledge Management Team'
+  }
+};
+
+const DESIGN_SYSTEM_TAB_LABELS: Record<DesignSystemTab, string> = {
+  cids: 'CI.DS',
+  vds: 'V.DS',
+  cds: 'CDS'
+};
+
+const DESIGN_SYSTEM_TAB_DESCRIPTIONS: Record<DesignSystemTab, { description: string; author?: string }> = {
+  cids: {
+    description: 'Component Integration Design System - Reusable UI components, patterns, and integration guidelines for building consistent digital experiences.',
+    author: 'Maintained by DQ Design & Engineering Teams'
+  },
+  vds: {
+    description: 'Visual Design System - Design tokens, typography, color palettes, and visual guidelines for creating cohesive brand experiences.',
+    author: 'Maintained by DQ Design Team'
+  },
+  cds: {
+    description: 'Content Design System - Content patterns, writing guidelines, and messaging frameworks for clear and effective communication.',
+    author: 'Maintained by DQ Content & Communications Teams'
+  }
+};
+
 /**
  * Computes URL-based filters for courses.
  */
@@ -1302,8 +1367,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     globalThis.window.addEventListener('popstate', handlePopState);
     return () => globalThis.window.removeEventListener('popstate', handlePopState);
   }, []);
-type WorkGuideTab = 'guidelines' | 'strategy' | '6xd' | 'blueprints' | 'testimonials' | 'glossary' | 'faqs';
-type DesignSystemTab = 'cids' | 'vds' | 'cds';
+
   const [activeTab, setActiveTab] = useState<WorkGuideTab>(() =>
     parseGuideTab(new URLSearchParams(globalThis.location?.search ?? "")) as WorkGuideTab
   );
@@ -1311,47 +1375,6 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     if (!isDesignSystem) return 'cids';
     return parseDesignSystemTab(new URLSearchParams(globalThis.location?.search ?? "")) as DesignSystemTab;
   });
-
-  const TAB_LABELS: Record<WorkGuideTab, string> = {
-    strategy: 'GHC',
-    guidelines: 'Guidelines',
-    '6xd': '6xD',
-    blueprints: 'Products',
-    testimonials: 'Testimonials',
-    glossary: 'Glossary',
-    faqs: 'FAQs'
-  };
-
-  const TAB_DESCRIPTIONS: Record<WorkGuideTab, { description: string; author?: string }> = {
-    strategy: {
-      description: 'Explore the Golden Honeycomb of Competencies (GHC), the system behind how DQ works and delivers value.',
-      author: 'Authored by DQ Leadership and Strategy Teams'
-    },
-    guidelines: {
-      description: 'Find practical guidelines and best practices to optimize workflow and collaboration across all DQ units.',
-      author: 'Authored by DQ Associates, Leads, and Subject Matter Experts'
-    },
-    '6xd': {
-      description: 'Discover the six dimensions of digital transformation that guide how organizations evolve, adapt, and thrive in the digital economy.',
-      author: 'Authored by DQ Strategy and Transformation Teams'
-    },
-    blueprints: {
-      description: 'Explore DQ\'s solutions, created to help organizations succeed and grow through digital transformation.',
-      author: 'Product Owner / Practice'
-    },
-    testimonials: {
-      description: 'Discover how DQ has enabled impactful transformations through our clients\' success feedback and testimonials.',
-      author: 'Authored by DQ Teams, Clients, and Partners'
-    },
-    glossary: {
-      description: 'Find clear explanations of key DQ terms, acronyms, and concepts to help you better understand how we operate.',
-      author: 'Maintained by DQ Knowledge Management Team'
-    },
-    faqs: {
-      description: 'Find answers to frequently asked questions about how we work, the tools we use, and the best practices followed across DQ.',
-      author: 'Maintained by DQ Knowledge Management Team'
-    }
-  };
 
   useEffect(() => {
     if (!isGuides) return;
@@ -1866,6 +1889,11 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
     ? urlBasedFilters
     : (Object.fromEntries(Object.entries(filters).map(([k, v]) => [k, toNormalizedArr(v)])) as Record<string, string[]>);
 
+  const coursesHaveFilters = isCourses && Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0);
+  const knowledgeHubHasFilters = isKnowledgeHub && activeFilters.length > 0;
+  const otherHasFilters = !isGuides && Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
+  const hasActiveFilters = coursesHaveFilters || knowledgeHubHasFilters || otherHasFilters;
+
   return (
     <div className={`min-h-screen flex flex-col bg-gray-50 ${isGuides ? 'guidelines-theme' : ''}`}>
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
@@ -2028,72 +2056,47 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
         )}
 
         {/* Design System Tabs Section */}
-        {isDesignSystem && (() => {
-          const DESIGN_SYSTEM_TAB_LABELS: Record<DesignSystemTab, string> = {
-            cids: 'CI.DS',
-            vds: 'V.DS',
-            cds: 'CDS'
-          };
-
-          const DESIGN_SYSTEM_TAB_DESCRIPTIONS: Record<DesignSystemTab, { description: string; author?: string }> = {
-            cids: {
-              description: 'Component Integration Design System - Reusable UI components, patterns, and integration guidelines for building consistent digital experiences.',
-              author: 'Maintained by DQ Design & Engineering Teams'
-            },
-            vds: {
-              description: 'Visual Design System - Design tokens, typography, color palettes, and visual guidelines for creating cohesive brand experiences.',
-              author: 'Maintained by DQ Design Team'
-            },
-            cds: {
-              description: 'Content Design System - Content patterns, writing guidelines, and messaging frameworks for clear and effective communication.',
-              author: 'Maintained by DQ Content & Communications Teams'
-            }
-          };
-
-          const handleDesignSystemTabChange = (tab: DesignSystemTab) => {
-            setActiveDesignSystemTab(tab);
-            const newParams = new URLSearchParams(searchParams);
-            newParams.set('tab', tab);
-            setSearchParams(newParams, { replace: false });
-          };
-
-          return (
-              <div className="mb-6 border-b border-gray-200">
-                <nav className="flex space-x-8" aria-label="Design System navigation">
-                  {(['cids', 'vds', 'cds'] as DesignSystemTab[]).map(tab => (
-                    <button
-                      key={tab}
-                      onClick={() => handleDesignSystemTabChange(tab)}
-                      className={`
-                        py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                        ${
-                          activeDesignSystemTab === tab
-                            ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }
-                      `}
-                      aria-current={activeDesignSystemTab === tab ? 'page' : undefined}
-                    >
-                      {DESIGN_SYSTEM_TAB_LABELS[tab]}
-                    </button>
-                  ))}
-                </nav>
-                {/* Tab Description - Integrated with tabs */}
-                {activeDesignSystemTab && DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab] && (
-                  <div className="pt-4 pb-4">
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].description}
+        {isDesignSystem && (
+            <div className="mb-6 border-b border-gray-200">
+              <nav className="flex space-x-8" aria-label="Design System navigation">
+                {(['cids', 'vds', 'cds'] as DesignSystemTab[]).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      setActiveDesignSystemTab(tab);
+                      const newParams = new URLSearchParams(searchParams);
+                      newParams.set('tab', tab);
+                      setSearchParams(newParams, { replace: false });
+                    }}
+                    className={`
+                      py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                      ${
+                        activeDesignSystemTab === tab
+                          ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }
+                    `}
+                    aria-current={activeDesignSystemTab === tab ? 'page' : undefined}
+                  >
+                    {DESIGN_SYSTEM_TAB_LABELS[tab]}
+                  </button>
+                ))}
+              </nav>
+              {/* Tab Description - Integrated with tabs */}
+              {activeDesignSystemTab && DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab] && (
+                <div className="pt-4 pb-4">
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].description}
+                  </p>
+                  {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].author && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].author}
                     </p>
-                    {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].author && (
-                      <p className="text-xs text-gray-500 mt-2">
-                        {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].author}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-          );
-        })()}
+                  )}
+                </div>
+              )}
+            </div>
+        )}
 
         {/* Search + Sort - Show for all tabs including Glossary */}
         {!isDesignSystem && (
@@ -2133,17 +2136,11 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
                 <FilterIcon size={18} />
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
-              {(() => {
-                const coursesHaveFilters = isCourses && Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0);
-                const knowledgeHubHasFilters = isKnowledgeHub && activeFilters.length > 0;
-                const otherHasFilters = !isGuides && Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
-                const hasActiveFilters = coursesHaveFilters || knowledgeHubHasFilters || otherHasFilters;
-                return hasActiveFilters ? (
-                  <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
-                    Reset
-                  </button>
-                ) : null;
-              })()}
+              {hasActiveFilters ? (
+                <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
+                  Reset
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -2197,15 +2194,9 @@ type DesignSystemTab = 'cids' | 'vds' | 'cds';
               <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto filter-sidebar-scroll">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Filters</h2>
-                  {(() => {
-                    const coursesHaveFilters = isCourses && Object.values(urlBasedFilters).some(f => Array.isArray(f) && f.length > 0);
-                    const knowledgeHubHasFilters = isKnowledgeHub && activeFilters.length > 0;
-                    const otherHasFilters = Object.values(filters).some(f => (Array.isArray(f) ? f.length > 0 : f !== ''));
-                    const hasActiveFilters = coursesHaveFilters || knowledgeHubHasFilters || otherHasFilters;
-                    return hasActiveFilters ? (
-                      <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>
-                    ) : null;
-                  })()}
+                  {hasActiveFilters ? (
+                    <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>
+                  ) : null}
                 </div>
                 {isKnowledgeHub ? (
                   <div className="space-y-4">
