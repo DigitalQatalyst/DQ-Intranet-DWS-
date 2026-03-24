@@ -1,0 +1,7 @@
+namespace: dws
+
+resources:
+  - ../../base
+  - deployment.yaml
+  - ingress.yaml
+  - clusterissuer.yaml

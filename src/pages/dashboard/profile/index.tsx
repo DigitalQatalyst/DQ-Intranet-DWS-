@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useMsal } from "@azure/msal-react";
+// import { useMsal } from "@azure/msal-react"; // Disabled for development
 import {
     User,
     Mail,
@@ -25,7 +25,8 @@ import {
 import { BurgerMenuButton } from '../../../components/Sidebar';
 
 const ProfilePage: React.FC = () => {
-    const { accounts } = useMsal();
+    // const { accounts } = useMsal(); // Disabled for development
+    const accounts = [{ name: 'Development User', username: 'dev@example.com' }]; // Mock for development
     const account = accounts[0];
     const [onboardingData, setOnboardingData] = useState<any>(null);
     const [loading, setLoading] = useState(true);

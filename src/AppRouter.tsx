@@ -73,7 +73,9 @@ export function AppRouter() {
             <Route path="/lms" element={<LmsCourses />} />
             <Route path="/lms/:courseSlug/lesson/:lessonId" element={<LmsLessonPage />} />
             <Route path="/lms/:slug/reviews" element={<LmsCourseReviewsPage />} />
+            <Route path="/lms/:slug/assessment" element={<LmsCourseAssessmentPage />} />
             <Route path="/lms/:slug" element={<LmsCourseDetailPageWrapper />} />
+            
             {/* Onboarding - specific routes before wildcard */}
             <Route path="/onboarding/welcome" element={<OnboardingLanding />} />
             <Route path="/onboarding/journey" element={<OnboardingJourney />} />
