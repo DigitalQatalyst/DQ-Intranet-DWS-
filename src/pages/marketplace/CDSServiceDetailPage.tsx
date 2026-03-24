@@ -2,6 +2,75 @@ import { useState, useEffect } from 'react';
 import { Header } from '../../components/Header/Header';
 import { Footer } from '../../components/Footer/Footer';
 
+const SectionParagraph = ({ paragraph }: { paragraph: string }) => {
+  if (paragraph.startsWith('•')) {
+    return (
+      <ul className="list-disc list-inside space-y-2 text-gray-700 leading-relaxed ml-4">
+        {paragraph.split('\n').filter(line => line.trim()).map((line, lineIndex) => (
+          <li key={lineIndex} className="text-gray-700">
+            {line.replace(/^•\s*/, '')}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  
+  if (paragraph.includes('|') && paragraph.includes('Platform')) {
+    return (
+      <div className="overflow-x-auto my-6">
+        <table className="min-w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-50">
+              {paragraph.split('\n')[0].split('|').map((header, headerIndex) => (
+                <th key={headerIndex} className="border border-gray-300 px-4 py-2 text-left font-semibold text-gray-900">
+                  {header.trim()}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {paragraph.split('\n').slice(1).filter(row => row.includes('|')).map((row, rowIndex) => (
+              <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                {row.split('|').map((cell, cellIndex) => (
+                  <td key={cellIndex} className="border border-gray-300 px-4 py-2 text-gray-700">
+                    {cell.trim()}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+  
+  if (paragraph.includes('Class 01:') || paragraph.includes('Class 02:') || paragraph.includes('Class 03:') || paragraph.includes('Class 04:')) {
+    return (
+      <div className="bg-gray-50 p-4 rounded-lg mb-4">
+        <div className="space-y-2">
+          {paragraph.split('\n').map((line, lineIndex) => (
+            <div key={lineIndex}>
+              {line.startsWith('Class') ? (
+                <h4 className="font-semibold text-gray-900 mb-2">{line}</h4>
+              ) : line.startsWith('- Product') ? (
+                <div className="ml-4 text-gray-700">• {line.substring(2)}</div>
+              ) : line.trim() ? (
+                <p className="text-gray-700 leading-relaxed">{line}</p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <p className="text-gray-700 leading-relaxed">
+      {paragraph}
+    </p>
+  );
+};
+
 export default function CDSServiceDetailPage() {
   const [activeSection, setActiveSection] = useState('introduction');
 
@@ -517,62 +586,9 @@ Ultimately, this governance cycle transforms campaign development from a one-tim
                         {section.title}
                       </h2>
                       <div className="prose prose-gray max-w-none">
-                        {section.content.split('\n\n').map((paragraph, index) => (
+                        {section.content.split('\n\n').map((paragraph: string, index: number) => (
                           <div key={index} className="mb-4">
-                            {paragraph.startsWith('•') ? (
-                              <ul className="list-disc list-inside space-y-2 text-gray-700 leading-relaxed ml-4">
-                                {paragraph.split('\n').filter(line => line.trim()).map((line, lineIndex) => (
-                                  <li key={lineIndex} className="text-gray-700">
-                                    {line.replace(/^•\s*/, '')}
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : paragraph.includes('|') && paragraph.includes('Platform') ? (
-                              <div className="overflow-x-auto my-6">
-                                <table className="min-w-full border-collapse border border-gray-300">
-                                  <thead>
-                                    <tr className="bg-gray-50">
-                                      {paragraph.split('\n')[0].split('|').map((header, headerIndex) => (
-                                        <th key={headerIndex} className="border border-gray-300 px-4 py-2 text-left font-semibold text-gray-900">
-                                          {header.trim()}
-                                        </th>
-                                      ))}
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {paragraph.split('\n').slice(1).filter(row => row.includes('|')).map((row, rowIndex) => (
-                                      <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                        {row.split('|').map((cell, cellIndex) => (
-                                          <td key={cellIndex} className="border border-gray-300 px-4 py-2 text-gray-700">
-                                            {cell.trim()}
-                                          </td>
-                                        ))}
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            ) : paragraph.includes('Class 01:') || paragraph.includes('Class 02:') || paragraph.includes('Class 03:') || paragraph.includes('Class 04:') ? (
-                              <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                                <div className="space-y-2">
-                                  {paragraph.split('\n').map((line, lineIndex) => (
-                                    <div key={lineIndex}>
-                                      {line.startsWith('Class') ? (
-                                        <h4 className="font-semibold text-gray-900 mb-2">{line}</h4>
-                                      ) : line.startsWith('- Product') ? (
-                                        <div className="ml-4 text-gray-700">• {line.substring(2)}</div>
-                                      ) : line.trim() ? (
-                                        <p className="text-gray-700 leading-relaxed">{line}</p>
-                                      ) : null}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : (
-                              <p className="text-gray-700 leading-relaxed">
-                                {paragraph}
-                              </p>
-                            )}
+                            <SectionParagraph paragraph={paragraph} />
                           </div>
                         ))}
                       </div>

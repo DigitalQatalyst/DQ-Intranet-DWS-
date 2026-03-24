@@ -5,6 +5,96 @@ import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { getDesignSystemItemById } from '../../utils/designSystemData';
 
+const OVERVIEW_DESCRIPTIONS: Record<string, string> = {
+  vds: 'V.DS is the video design system that helps teams plan, produce, review, and distribute video content consistently across DQ. It brings structure to how videos are shaped, designed, and delivered while ensuring cinematic quality, storytelling clarity, and brand consistency across every channel.',
+  cds: 'CDS is the marketing campaigns design system that helps teams plan, design, deploy, and review campaigns consistently across DQ. It brings structure to how campaigns are shaped, aligned, and delivered across channels and stakeholders.',
+  default: 'CI.CD is the content item design system that helps teams structure, create, review, and manage content consistently across DQ. It brings clarity to how content is designed, governed, and delivered across the organization.'
+};
+
+const HIGHLIGHTS: Record<string, string[]> = {
+  vds: [
+    'Brings a unified system for creating high-impact video content across DQ',
+    'Strengthens storytelling, visual quality, and brand consistency in every video',
+    'Supports collaboration across creative, technical, and strategic teams',
+    'Improves production clarity from concept through release and performance tracking',
+  ],
+  cds: [
+    'Standardizes how marketing campaigns are conceived, executed, and governed',
+    "Aligns campaign activity with DQ's vision, values, voice, and content pillars",
+    'Supports stronger collaboration across creative, technical, strategic, and data teams',
+    'Improves campaign consistency, quality, and effectiveness across channels',
+  ],
+  default: [
+    'Standardizes how content items are created and managed',
+    'Improves consistency across teams, channels, and outputs',
+    'Supports clearer review, approval, and governance workflows',
+    'Aligns content delivery with DQ standards and strategic intent',
+  ]
+};
+
+const WHY_IT_MATTERS: Record<string, string[]> = {
+  vds: [
+    'Establish a clear and consistent way to conceptualize, produce, and distribute video content across DQ',
+    'Ensure every video delivers cinematic quality, narrative coherence, and strong brand expression',
+    'Improve collaboration between scriptwriters, editors, designers, reviewers, and marketers',
+    'Strengthen audience engagement and video performance through a more structured production system',
+  ],
+  cds: [
+    'Establish a clear and consistent way to manage marketing campaigns across DQ',
+    "Ensure campaigns reflect DQ's brand identity, strategic direction, and narrative clarity",
+    'Improve campaign quality, repeatability, and cross-team alignment',
+    'Accelerate production while strengthening campaign effectiveness and impact',
+  ],
+  default: [
+    'Establish a clear and consistent way to design, create, review, and manage content across DQ',
+    'Improve quality, governance, and alignment across all content items and delivery teams',
+    "Ensure content is structured to support DQ's standards, brand logic, and strategic intent",
+    'Enable teams to produce content more efficiently with greater clarity, consistency, and control',
+  ]
+};
+
+const HOW_IT_WORKS: Record<string, string[]> = {
+  vds: [
+    'Uses a structured lifecycle from strategy and ideation to production, review, and publishing',
+    "Aligns each video to DQ's narrative, audience, format, and channel before production begins",
+    'Supports consistency through shared templates, planning tools, milestones, and review checkpoints',
+    'Combines creative direction, production discipline, and performance readiness into one operating system',
+  ],
+  cds: [
+    'Uses a structured campaign lifecycle covering planning, design, execution, and governance',
+    "Organizes campaigns around DQ's five content pillars to maintain message consistency and strategic fit",
+    'Guides teams through campaign briefs, messaging frameworks, asset templates, and review checkpoints',
+    'Combines creative production, channel planning, deployment discipline, and performance learning into one system',
+  ],
+  default: [
+    'Uses a structured workflow to guide content from planning through creation, review, and delivery',
+    'Defines clear stages, responsibilities, and review points across the content lifecycle',
+    'Supports consistency through shared standards, templates, and governance practices',
+    'Helps teams manage content more effectively across different channels, formats, and use cases',
+  ]
+};
+
+const WHERE_IT_APPLIES: Record<string, string[]> = {
+  vds: [
+    'Used for instructional, promotional, strategic, and storytelling videos across DQ',
+    'Applies to internal communications, learning content, social media, and thought leadership videos',
+    'Supports video use across marketing, HRA, DTMA, DQ Stories, and other contributing teams',
+    'Ensures every video remains aligned, high-quality, and consistent regardless of format, length, or platform',
+  ],
+  cds: [
+    'Used when DQ teams are creating, launching, managing, or reviewing marketing campaigns',
+    'Applies across brand, product, education, community, and thought-leadership campaigns',
+    'Supports campaign delivery across website, LinkedIn, YouTube, Instagram, email, and other relevant channels',
+    'Helps ensure campaigns stay aligned, measurable, and consistent from strategy through execution and review',
+  ],
+  default: [
+    'Used when teams are creating, reviewing, publishing, or updating content across DQ',
+    'Applies to internal, external, learning, and client-facing content items',
+    'Supports use across different teams, channels, platforms, and delivery contexts',
+    'Helps ensure content remains consistent, governed, and aligned from creation to release',
+  ]
+};
+
 export const DesignSystemDetailPage: React.FC = () => {
   const { cardId } = useParams<{ cardId: string }>();
   const navigate = useNavigate();
@@ -138,12 +228,7 @@ export const DesignSystemDetailPage: React.FC = () => {
               {activeTab === 'details' && (
                 <div className="space-y-8">
                   <p className="text-gray-600 leading-relaxed">
-                    {item.type === 'vds'
-                      ? 'V.DS is the video design system that helps teams plan, produce, review, and distribute video content consistently across DQ. It brings structure to how videos are shaped, designed, and delivered while ensuring cinematic quality, storytelling clarity, and brand consistency across every channel.'
-                      : item.type === 'cds'
-                      ? "CDS is the marketing campaigns design system that helps teams plan, design, deploy, and review campaigns consistently across DQ. It brings structure to how campaigns are shaped, aligned, and delivered across channels and stakeholders."
-                      : 'CI.CD is the content item design system that helps teams structure, create, review, and manage content consistently across DQ. It brings clarity to how content is designed, governed, and delivered across the organization.'
-                    }
+                    {OVERVIEW_DESCRIPTIONS[item.type] || OVERVIEW_DESCRIPTIONS.default}
                   </p>
 
                   <div>
@@ -152,27 +237,7 @@ export const DesignSystemDetailPage: React.FC = () => {
                       {item.type === 'vds' ? 'V.DS Highlights' : item.type === 'cds' ? 'CDS Highlights' : 'CI.CD Highlights'}
                     </h2>
                     <div className="space-y-3">
-                      {(item.type === 'vds'
-                        ? [
-                            'Brings a unified system for creating high-impact video content across DQ',
-                            'Strengthens storytelling, visual quality, and brand consistency in every video',
-                            'Supports collaboration across creative, technical, and strategic teams',
-                            'Improves production clarity from concept through release and performance tracking',
-                          ]
-                        : item.type === 'cds'
-                        ? [
-                            'Standardizes how marketing campaigns are conceived, executed, and governed',
-                            "Aligns campaign activity with DQ's vision, values, voice, and content pillars",
-                            'Supports stronger collaboration across creative, technical, strategic, and data teams',
-                            'Improves campaign consistency, quality, and effectiveness across channels',
-                          ]
-                        : [
-                            'Standardizes how content items are created and managed',
-                            'Improves consistency across teams, channels, and outputs',
-                            'Supports clearer review, approval, and governance workflows',
-                            'Aligns content delivery with DQ standards and strategic intent',
-                          ]
-                      ).map((text) => (
+                      {(HIGHLIGHTS[item.type] || HIGHLIGHTS.default).map((text) => (
                         <div key={text} className="flex items-start gap-3">
                           <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={18} />
                           <p className="text-gray-700 text-sm">{text}</p>
@@ -187,27 +252,7 @@ export const DesignSystemDetailPage: React.FC = () => {
               {activeTab === 'outcomes' && (
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold text-gray-900">Why It Matters</h2>
-                  {(item.type === 'vds'
-                    ? [
-                        'Establish a clear and consistent way to conceptualize, produce, and distribute video content across DQ',
-                        'Ensure every video delivers cinematic quality, narrative coherence, and strong brand expression',
-                        'Improve collaboration between scriptwriters, editors, designers, reviewers, and marketers',
-                        'Strengthen audience engagement and video performance through a more structured production system',
-                      ]
-                    : item.type === 'cds'
-                    ? [
-                        'Establish a clear and consistent way to manage marketing campaigns across DQ',
-                        "Ensure campaigns reflect DQ's brand identity, strategic direction, and narrative clarity",
-                        'Improve campaign quality, repeatability, and cross-team alignment',
-                        'Accelerate production while strengthening campaign effectiveness and impact',
-                      ]
-                    : [
-                        'Establish a clear and consistent way to design, create, review, and manage content across DQ',
-                        'Improve quality, governance, and alignment across all content items and delivery teams',
-                        "Ensure content is structured to support DQ's standards, brand logic, and strategic intent",
-                        'Enable teams to produce content more efficiently with greater clarity, consistency, and control',
-                      ]
-                  ).map((text) => (
+                  {(WHY_IT_MATTERS[item.type] || WHY_IT_MATTERS.default).map((text) => (
                     <div key={text} className="flex items-start gap-3">
                       <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={18} />
                       <p className="text-gray-700">{text}</p>
@@ -220,27 +265,7 @@ export const DesignSystemDetailPage: React.FC = () => {
               {activeTab === 'curriculum' && (
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold text-gray-900">How It Works</h2>
-                  {(item.type === 'vds'
-                    ? [
-                        'Uses a structured lifecycle from strategy and ideation to production, review, and publishing',
-                        "Aligns each video to DQ's narrative, audience, format, and channel before production begins",
-                        'Supports consistency through shared templates, planning tools, milestones, and review checkpoints',
-                        'Combines creative direction, production discipline, and performance readiness into one operating system',
-                      ]
-                    : item.type === 'cds'
-                    ? [
-                        'Uses a structured campaign lifecycle covering planning, design, execution, and governance',
-                        "Organizes campaigns around DQ's five content pillars to maintain message consistency and strategic fit",
-                        'Guides teams through campaign briefs, messaging frameworks, asset templates, and review checkpoints',
-                        'Combines creative production, channel planning, deployment discipline, and performance learning into one system',
-                      ]
-                    : [
-                        'Uses a structured workflow to guide content from planning through creation, review, and delivery',
-                        'Defines clear stages, responsibilities, and review points across the content lifecycle',
-                        'Supports consistency through shared standards, templates, and governance practices',
-                        'Helps teams manage content more effectively across different channels, formats, and use cases',
-                      ]
-                  ).map((text) => (
+                  {(HOW_IT_WORKS[item.type] || HOW_IT_WORKS.default).map((text) => (
                     <div key={text} className="flex items-start gap-3">
                       <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={18} />
                       <p className="text-gray-700">{text}</p>
@@ -253,27 +278,7 @@ export const DesignSystemDetailPage: React.FC = () => {
               {activeTab === 'reviews' && (
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold text-gray-900">Where It Applies</h2>
-                  {(item.type === 'vds'
-                    ? [
-                        'Used for instructional, promotional, strategic, and storytelling videos across DQ',
-                        'Applies to internal communications, learning content, social media, and thought leadership videos',
-                        'Supports video use across marketing, HRA, DTMA, DQ Stories, and other contributing teams',
-                        'Ensures every video remains aligned, high-quality, and consistent regardless of format, length, or platform',
-                      ]
-                    : item.type === 'cds'
-                    ? [
-                        'Used when DQ teams are creating, launching, managing, or reviewing marketing campaigns',
-                        'Applies across brand, product, education, community, and thought-leadership campaigns',
-                        'Supports campaign delivery across website, LinkedIn, YouTube, Instagram, email, and other relevant channels',
-                        'Helps ensure campaigns stay aligned, measurable, and consistent from strategy through execution and review',
-                      ]
-                    : [
-                        'Used when teams are creating, reviewing, publishing, or updating content across DQ',
-                        'Applies to internal, external, learning, and client-facing content items',
-                        'Supports use across different teams, channels, platforms, and delivery contexts',
-                        'Helps ensure content remains consistent, governed, and aligned from creation to release',
-                      ]
-                  ).map((text) => (
+                  {(WHERE_IT_APPLIES[item.type] || WHERE_IT_APPLIES.default).map((text) => (
                     <div key={text} className="flex items-start gap-3">
                       <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={18} />
                       <p className="text-gray-700">{text}</p>
