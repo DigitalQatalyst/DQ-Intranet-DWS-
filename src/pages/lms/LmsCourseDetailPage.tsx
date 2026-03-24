@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   BookmarkIcon,
@@ -309,29 +309,45 @@ const ModuleCard = ({
   );
 };
 
-export const LmsCourseDetailPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('details');
-  // State for expanded sections in curriculum
-  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
-  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
-  const [hasInitializedCurriculum, setHasInitializedCurriculum] = useState(false);
-  const [renderError, setRenderError] = useState<Error | null>(null);
+// Helper to flatten lessons from curriculum structure
+const getFlattenedLessons = (curriculum: any[]) => {
+  const lessons: Array<{ id: string; order: number; type: string }> = [];
+  const sortedCurriculum = [...curriculum].sort((a, b) => a.order - b.order);
 
-  // Fetch course data from Supabase - MUST be called before any conditional returns
+  sortedCurriculum.forEach(item => {
+    // If item has topics (old structure)
+    if (item.topics && item.topics.length > 0) {
+      const sortedTopics = [...item.topics].sort((a, b) => a.order - b.order);
+      sortedTopics.forEach(topic => {
+        if (!topic.lessons) return;
+        const sortedTopicLessons = [...topic.lessons].sort((a, b) => a.order - b.order);
+        sortedTopicLessons.forEach(l => {
+          lessons.push({ id: l.id, order: lessons.length, type: l.type });
+        });
+      });
+    }
+    // If item has direct lessons (new structure)
+    else if (item.lessons && item.lessons.length > 0) {
+      const sortedItemLessons = [...item.lessons].sort((a, b) => a.order - b.order);
+      sortedItemLessons.forEach(l => {
+        lessons.push({ id: l.id, order: lessons.length, type: l.type });
+      });
+    }
+  });
+  return lessons;
+};
+
+// Custom hook for fetching course data
+const useCourseData = (slug: string) => {
   const { data: course, isLoading: courseLoading, isFetching: courseFetching, error: courseError } = useLmsCourse(slug || '');
   const { data: allCourses = [] } = useLmsCourseDetails();
 
-  // Find learning paths that contain this course
   const { data: learningPaths = [] } = useQuery({
     queryKey: ['learning-paths-for-course', course?.id],
     queryFn: () => course?.id ? findLearningPathsForCourse(course.id) : Promise.resolve([]),
     enabled: !!course?.id,
   });
 
-  // Fetch courses in the first learning path (if course is part of a track)
   const firstPath = learningPaths[0];
   const { data: pathCourses = [] } = useQuery({
     queryKey: ['courses-in-path', firstPath?.pathId],
@@ -339,70 +355,79 @@ export const LmsCourseDetailPage: React.FC = () => {
     enabled: !!firstPath?.pathId,
   });
 
-  // Track previous slug to detect navigation
-  const prevSlugRef = React.useRef<string | undefined>(slug);
-  const [isNavigating, setIsNavigating] = React.useState(false);
+  return { course, courseLoading, courseFetching, courseError, allCourses, learningPaths, pathCourses };
+};
 
-  // Reset component state when slug changes (navigation to different course)
-  React.useEffect(() => {
+// Custom hook for course navigation and state management
+const useCourseState = (slug: string | undefined, course: any, courseFetching: boolean) => {
+  const [activeTab, setActiveTab] = useState<TabType>('details');
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
+  const [hasInitializedCurriculum, setHasInitializedCurriculum] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const prevSlugRef = React.useRef<string | undefined>(slug);
+
+  // Reset state on slug change
+  useEffect(() => {
     if (prevSlugRef.current !== slug && prevSlugRef.current !== undefined) {
       setIsNavigating(true);
       setExpandedCourses(new Set());
       setExpandedTopics(new Set());
       setHasInitializedCurriculum(false);
-      setActiveTab('details'); // Reset to details tab on navigation
-      setRenderError(null);
+      setActiveTab('details');
       prevSlugRef.current = slug;
     } else if (prevSlugRef.current === undefined) {
       prevSlugRef.current = slug;
     }
   }, [slug]);
 
-  // Functions migrated outside the component
-
-
-  // Reset navigating state when course data is loaded and matches current slug
-  React.useEffect(() => {
+  // Reset navigating state
+  useEffect(() => {
     if (course && !courseFetching) {
-      // Only reset if the course slug matches the current route slug
       if (course.slug === slug || course.slug.toLowerCase() === slug?.toLowerCase()) {
         setIsNavigating(false);
       }
     }
   }, [course, courseFetching, slug]);
 
-  // Log course data for debugging
-  React.useEffect(() => {
-    if (course) {
-      console.log('[LMS Detail Page] Course loaded:', {
-        id: course.id,
-        slug: course.slug,
-        title: course.title,
-        duration: course.duration,
-        durationMinutes: course.durationMinutes,
-        hasHighlights: !!course.highlights,
-        hasOutcomes: !!course.outcomes,
-        hasCurriculum: !!course.curriculum,
-        highlightsCount: course.highlights?.length || 0,
-        outcomesCount: course.outcomes?.length || 0,
-        curriculumCount: course.curriculum?.length || 0,
-      });
-      console.log('[LMS Detail Page] Full course object:', JSON.stringify(course, null, 2));
-    } else {
-      console.log('[LMS Detail Page] No course data found');
-    }
-  }, [course]);
-
-  // Auto-expand first module when data loads
-  React.useEffect(() => {
-    if (!hasInitializedCurriculum && course?.curriculum && course.curriculum.length > 0) {
+  // Auto-expand first module
+  useEffect(() => {
+    if (!hasInitializedCurriculum && course?.curriculum?.length > 0) {
       setExpandedCourses(new Set([course.curriculum[0].id]));
       setHasInitializedCurriculum(true);
     }
   }, [course, hasInitializedCurriculum]);
 
+  return {
+    activeTab, setActiveTab,
+    expandedCourses, setExpandedCourses,
+    expandedTopics, setExpandedTopics,
+    isNavigating, setIsNavigating
+  };
+};
+
+export const LmsCourseDetailPage: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  const { course, courseLoading, courseFetching, courseError, allCourses, learningPaths, pathCourses } = useCourseData(slug || '');
+  const { activeTab, setActiveTab, expandedCourses, setExpandedCourses, expandedTopics, setExpandedTopics, isNavigating } = useCourseState(slug, course, courseFetching);
+
+  // Log course data for debugging
+  useEffect(() => {
+    if (course) {
+      console.log('[LMS Detail Page] Course loaded:', {
+        id: course.id,
+        slug: course.slug,
+        title: course.title,
+        curriculumCount: course.curriculum?.length || 0,
+      });
+    }
+  }, [course]);
+
   // Log any errors
-  React.useEffect(() => {
+  useEffect(() => {
     if (courseError) {
       console.error('[LMS Detail Page] Course error:', courseError);
     }
@@ -432,30 +457,7 @@ export const LmsCourseDetailPage: React.FC = () => {
   }, [curriculum]);
 
   // Flatten all lessons for lock logic
-  const allFlattenedLessons = useMemo(() => {
-    const lessons: Array<{ id: string; order: number; type: string }> = [];
-    const sortedCurriculum = [...curriculum].sort((a, b) => a.order - b.order);
-
-    sortedCurriculum.forEach(item => {
-      // If item has topics (old structure)
-      if (item.topics && item.topics.length > 0) {
-        item.topics.sort((a, b) => a.order - b.order).forEach(topic => {
-          if (topic.lessons) {
-            topic.lessons.sort((a, b) => a.order - b.order).forEach(l => {
-              lessons.push({ id: l.id, order: lessons.length, type: l.type });
-            });
-          }
-        });
-      }
-      // If item has direct lessons (new structure / simple courses)
-      else if (item.lessons && item.lessons.length > 0) {
-        item.lessons.sort((a, b) => a.order - b.order).forEach(l => {
-          lessons.push({ id: l.id, order: lessons.length, type: l.type });
-        });
-      }
-    });
-    return lessons;
-  }, [curriculum]);
+  const allFlattenedLessons = useMemo(() => getFlattenedLessons(curriculum), [curriculum]);
 
   // Calculate course stats for sidebar
   const courseStats = useMemo(() => {
@@ -606,140 +608,72 @@ export const LmsCourseDetailPage: React.FC = () => {
     );
   }
 
-  // Compute other values safely
-  const HeroIcon = course ? (CARD_ICON_BY_ID[course.id] || DEFAULT_COURSE_ICON) : DEFAULT_COURSE_ICON;
-  const statusLabel = course?.status === 'live' ? 'Live' : 'Live'; // Removed coming soon status
-  const statusClass = course?.status === 'live' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200';
-  const locationsLabel = formatList(course?.locations);
-  const audienceLabel = formatList(course?.audience);
-  const departmentLabel = formatList(course?.department);
-  const averageRating = course?.rating || 0;
-  const reviewCount = course?.reviewCount || 0;
+  return (
+    <CourseLayout
+      course={course}
+      slug={slug}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      expandedCourses={expandedCourses}
+      setExpandedCourses={setExpandedCourses}
+      allFlattenedLessons={allFlattenedLessons}
+      navigate={navigate}
+      courseStats={courseStats}
+      relatedCourses={relatedCourses}
+      chipData={chipData}
+      learningPaths={learningPaths}
+      pathCourses={pathCourses}
+      sidebarOpen={sidebarOpen}
+      setSidebarOpen={setSidebarOpen}
+    />
+  );
+};
 
+// Main Layout component to reduce top-level complexity
+const CourseLayout = ({
+  course,
+  slug,
+  activeTab,
+  setActiveTab,
+  expandedCourses,
+  setExpandedCourses,
+  allFlattenedLessons,
+  navigate,
+  courseStats,
+  relatedCourses,
+  chipData,
+  learningPaths,
+  pathCourses,
+  sidebarOpen,
+  setSidebarOpen
+}: any) => {
+  const HeroIcon = course ? (CARD_ICON_BY_ID[course.id] || DEFAULT_COURSE_ICON) : DEFAULT_COURSE_ICON;
+  const statusLabel = course?.status === 'live' ? 'Live' : 'Live';
+  const statusClass = course?.status === 'live' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200';
   const isTrack = course?.courseType === 'Course (Bundles)';
+  
   const tabs = [
     { id: 'details' as TabType, label: isTrack ? 'Track Details' : 'Course Details' },
     { id: 'outcomes' as TabType, label: 'Learning Outcomes' },
     { id: 'curriculum' as TabType, label: isTrack ? 'Track Curriculum' : 'Curriculum' },
     { id: 'reviews' as TabType, label: 'Reviews' },
-    ...(isTrack && course?.faq && Array.isArray(course.faq) && course.faq.length > 0 ? [{ id: 'faq' as TabType, label: 'FAQ' }] : []),
+    ...(isTrack && course?.faq?.length > 0 ? [{ id: 'faq' as TabType, label: 'FAQ' }] : []),
   ];
 
   return (
     <div className="bg-white min-h-screen flex flex-col">
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
       <main className="flex-grow">
-        {/* Hero Section */}
-        <div
-          className="w-full border-b border-gray-200 relative"
-          style={{
-            backgroundImage: course?.imageUrl
-              ? `url(${course.imageUrl})`
-              : 'linear-gradient(to right, rgb(239 246 255), rgb(243 232 255))',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        >
-          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(26, 46, 110, 0.6)' }}></div>
-          <div className="relative z-10">
-            <div className="container mx-auto px-4 md:px-6 max-w-7xl py-12">
-              <nav className="flex mb-6" aria-label="Breadcrumb">
-                <ol className="inline-flex items-center space-x-1 md:space-x-2">
-                  <li className="inline-flex items-center">
-                    <Link to="/" className="text-white/80 hover:text-white inline-flex items-center">
-                      <HomeIcon size={16} className="mr-1" />
-                      <span>Home</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <div className="flex items-center">
-                      <ChevronRightIcon size={16} className="text-white/60" />
-                      <Link to="/lms" className="ml-1 text-white/80 hover:text-white md:ml-2">
-                        Courses
-                      </Link>
-                    </div>
-                  </li>
-                  <li aria-current="page">
-                    <div className="flex items-center">
-                      <ChevronRightIcon size={16} className="text-white/60" />
-                      <span className="ml-1 text-white/80 md:ml-2 truncate max-w-[200px]">
-                        {course.title}
-                      </span>
-                    </div>
-                  </li>
-                </ol>
-              </nav>
-
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
-                <div className="max-w-3xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm text-white font-medium">{course.provider}</span>
-                    {course.track && (
-                      <>
-                        <span className="text-gray-400">•</span>
-                        <span className="text-sm font-medium" style={{ color: '#fcfcfc' }}>{course.track}</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <HeroIcon className="h-6 w-6 shrink-0" style={{ color: '#fff' }} aria-hidden="true" />
-                    <h1 className="text-2xl md:text-3xl font-bold leading-tight text-white">
-                      {course.title}
-                    </h1>
-                  </div>
-
-                  {/* Rating and Reviews */}
-                  {averageRating > 0 && (
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="flex items-center">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              size={20}
-                              className={i < Math.floor(averageRating) ? 'text-yellow-400 fill-yellow-400' : 'text-white/40'}
-                            />
-                          ))}
-                        </div>
-                        <span className="ml-2 text-lg font-semibold text-white">{averageRating.toFixed(1)}</span>
-                      </div>
-                      <Link
-                        to={`/lms/${course.slug}/reviews`}
-                        className="font-medium flex items-center gap-1 hover:underline text-white"
-                      >
-                        <MessageSquare size={16} />
-                        <span>{reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}</span>
-                      </Link>
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {chipData.map((chip, index) => {
-                      const Icon = resolveChipIcon(chip.key, chip.iconValue ?? chip.label);
-                      return (
-                        <span
-                          key={`${chip.key}-${chip.label}-${index}`}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border bg-white/20 backdrop-blur-sm border-white/30 text-white"
-                        >
-                          {Icon ? <Icon className="h-4 w-4 mr-1.5" /> : null}
-                          {chip.label}
-                        </span>
-                      );
-                    })}
-                  </div>
-
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${statusClass}`}>
-                    {statusLabel}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <CourseHero 
+          course={course}
+          HeroIcon={HeroIcon}
+          chipData={chipData}
+          statusClass={statusClass}
+          statusLabel={statusLabel}
+          averageRating={course?.rating || 0}
+          reviewCount={course?.reviewCount || 0}
+        />
+        
         {/* Tabs Navigation */}
         <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
           <div className="container mx-auto px-4 md:px-6 max-w-7xl">
@@ -747,7 +681,7 @@ export const LmsCourseDetailPage: React.FC = () => {
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => setActiveTab(tab.id as any)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -761,516 +695,495 @@ export const LmsCourseDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Tab Content */}
         <div className="container mx-auto px-4 md:px-6 max-w-7xl py-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-8">
-
-
-              {/* Learning Outcomes Tab */}
-              {activeTab === 'outcomes' && (
-                <section className="space-y-6">
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-8 shadow-sm">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                      <span className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-                        <CheckCircleIcon size={18} className="text-white" />
-                      </span>
-                      What You'll Learn
-                    </h3>
-                    <ul className="space-y-4">
-                      {outcomes.map((outcome) => (
-                        <li key={outcome} className="flex items-start gap-3 group">
-                          <div className="mt-2 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-125 transition-transform" />
-                          <p className="text-gray-700 leading-relaxed">{outcome}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-              )}
-
-              {/* Track/Course Details Tab */}
-              {activeTab === 'details' && (
-                <section className="space-y-8">
-                  {/* Summary Cards */}
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-                          <Clock size={24} className="text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-medium">Duration</p>
-                          <p className="text-sm font-semibold text-gray-900">
-                            {course.durationMinutes !== undefined && course.durationMinutes > 0
-                              ? formatDurationFromMinutes(course.durationMinutes)
-                              : course.duration || 'N/A'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
-                          <Star size={24} className="text-amber-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-medium">Level</p>
-                          <p className="text-sm font-semibold text-gray-900">{SFIA_LEVELS.find(level => level.code === course.levelCode)?.label || course.levelCode}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
-                          <PlayCircleIcon size={24} className="text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-medium">Delivery Mode</p>
-                          <p className="text-sm font-semibold text-gray-900">{course.deliveryMode}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
-                          <BookOpen size={24} className="text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-medium">
-                            {isTrack ? 'Courses' : 'Lessons'}
-                          </p>
-                          <p className="text-sm font-semibold text-gray-900">
-                            {isTrack
-                              ? `${curriculum.length} courses`
-                              : `${courseStats.totalLessons} lessons`}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Course Description */}
-                  <div>
-                    <p className="text-gray-700 leading-relaxed text-base">
-                      {course.summary}
-                    </p>
-                  </div>
-
-                  {/* Course Highlights */}
-                  {highlights.length > 0 && (
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">
-                        {isTrack ? 'Track Highlights' : 'Course Highlights'}
-                      </h3>
-                      <div className="space-y-3">
-                        {highlights.map((highlight) => (
-                          <div
-                            key={highlight}
-                            className="flex items-start gap-3"
-                          >
-                            <CheckCircleIcon size={20} className="text-green-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-gray-700">{highlight}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Part of Track Section */}
-                  {firstPath && pathCourses.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold mb-2" style={{ color: '#030F35' }}>
-                        Part of {firstPath.pathTitle}
-                      </h3>
-                      <p className="text-gray-700 mb-4 text-sm">
-                        This course is part of a larger learning track. Explore other courses in this track to complete your learning journey.
-                      </p>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {pathCourses.map((pathCourse, index) => {
-                          const isCurrentCourse = pathCourse.slug === course?.slug;
-                          return (
-                            <React.Fragment key={pathCourse.id}>
-                              {index > 0 && (
-                                <span className="text-gray-400" style={{ color: '#030F35' }}>→</span>
-                              )}
-                              {isCurrentCourse ? (
-                                <span
-                                  className="font-medium text-sm"
-                                  style={{ color: '#030F35' }}
-                                >
-                                  {pathCourse.title}
-                                </span>
-                              ) : (
-                                <Link
-                                  to={`/lms/${pathCourse.slug}`}
-                                  className="font-medium text-sm hover:underline"
-                                  style={{ color: '#030F35' }}
-                                >
-                                  {pathCourse.title}
-                                </Link>
-                              )}
-                            </React.Fragment>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {/* Curriculum Tab */}
-              {activeTab === 'curriculum' && (
-                <section className="space-y-4">
-                  {curriculum && curriculum.length > 0 && (
-                    <div className="flex items-center justify-start mb-2">
-                      <span className="text-sm text-gray-600">
-                        {isTrack
-                          ? `This track has ${curriculum.length} ${curriculum.length === 1 ? 'course' : 'courses'}`
-                          : `This course has ${courseStats.totalModules} ${courseStats.totalModules === 1 ? 'module' : 'modules'} and ${courseStats.totalLessons} ${courseStats.totalLessons === 1 ? 'lesson' : 'lessons'}`}
-                      </span>
-                    </div>
-                  )}
-                  {curriculum && curriculum.length > 0 ? (
-                    <div className="space-y-4">
-                      {curriculum
-                        .sort((a, b) => a.order - b.order)
-                        .map((item, curriculumIndex) => {
-                          const toggleExpand = (id: string) => {
-                            setExpandedCourses(prev => {
-                              const next = new Set(prev);
-                              if (next.has(id)) next.delete(id);
-                              else next.add(id);
-                              return next;
-                            });
-                          };
-
-                          return (
-                            <ModuleCard
-                              key={item.id || curriculumIndex}
-                              item={item}
-                              curriculumIndex={curriculumIndex}
-                              isTrack={isTrack}
-                              expandedCourses={expandedCourses}
-                              toggleExpand={toggleExpand}
-                              courseSlug={course?.slug || ''}
-                              allFlattenedLessons={allFlattenedLessons}
-                              navigate={navigate}
-                            />
-                          );
-                        })}
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-                      <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
-                      <p className="text-gray-600">
-                        Curriculum details are not available for this course yet.
-                      </p>
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {/* Reviews Tab */}
-              {activeTab === 'reviews' && (
-                <section className="space-y-6">
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-                    <MessageSquare size={48} className="mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Reviews Yet</h3>
-                    <p className="text-gray-600">
-                      Be the first to share your experience with this course. Reviews will appear here once available.
-                    </p>
-                  </div>
-                </section>
-              )}
-
-              {/* FAQ Tab (only for tracks) */}
-              {activeTab === 'faq' && isTrack && course.faq && course.faq.length > 0 && (
-                <section className="space-y-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <HelpCircle size={24} style={{ color: '#030F35' }} />
-                    <h2 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
-                  </div>
-                  <div className="space-y-4">
-                    {course.faq.map((item, index) => (
-                      <div
-                        key={index}
-                        className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-                      >
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-start">
-                          <span className="mr-3 flex-shrink-0" style={{ color: '#030F35' }}>
-                            Q{index + 1}:
-                          </span>
-                          <span>{item.question}</span>
-                        </h3>
-                        <p className="text-gray-700 leading-relaxed ml-8">
-                          {item.answer}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Track Information - Only show for courses that are part of a track, not for tracks themselves */}
-              {course.track && !isTrack && (
-                <section className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Part of {course.track}
-                  </h3>
-                  <p className="text-gray-700 mb-4">
-                    This course is part of a larger learning track. Explore other courses in this track to complete your learning journey.
-                  </p>
-                  {relatedCourses.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {relatedCourses.map((related) => (
-                        <Link
-                          key={related.id}
-                          to={`/lms/${related.slug}`}
-                          className="font-medium text-sm hover:underline"
-                          style={{ color: '#030F35' }}
-                        >
-                          {related.title} →
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {/* Track Courses Information - Show for tracks to highlight courses within the track */}
-              {isTrack && course.curriculum && course.curriculum.length > 0 && (
-                <section className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Courses in this Track
-                  </h3>
-                  <p className="text-gray-700 mb-4">
-                    This track contains {curriculum.length} {curriculum.length === 1 ? 'course' : 'courses'}. Complete all courses to master the full learning journey. Each course can be accessed individually, and you can view the detailed curriculum in the Curriculum tab above.
-                  </p>
-                  {curriculum.slice(0, 5).map((item) => (
-                    <div key={item.id} className="mb-2">
-                      {item.courseSlug ? (
-                        <Link
-                          to={`/lms/${item.courseSlug}`}
-                          className="font-medium text-sm hover:underline flex items-center gap-1"
-                          style={{ color: '#030F35' }}
-                        >
-                          {item.title}
-                          <ChevronRightIcon size={14} />
-                        </Link>
-                      ) : (
-                        <span className="text-sm text-gray-700">{item.title}</span>
-                      )}
-                    </div>
-                  ))}
-                  {curriculum.length > 5 && (
-                    <p className="text-sm text-gray-600 mt-2">
-                      and {curriculum.length - 5} more {curriculum.length - 5 === 1 ? 'course' : 'courses'}
-                    </p>
-                  )}
-                </section>
-              )}
-
-              {/* Reviews */}
-              {course.testimonials && course.testimonials.length > 0 && (
-                <section className="mt-10">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Reviews</h2>
-                  <div className="space-y-4">
-                    {course.testimonials.map((testimonial, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{testimonial.author}</h3>
-                            <p className="text-sm text-gray-600">{testimonial.role}</p>
-                          </div>
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                size={16}
-                                className={i < testimonial.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-gray-700">"{testimonial.text}"</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Case Studies */}
-              {course.caseStudies && course.caseStudies.length > 0 && (
-                <section className="mt-10">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Case Studies</h2>
-                  <div className="space-y-4">
-                    {course.caseStudies.map((caseStudy, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-2">{caseStudy.title}</h3>
-                            <p className="text-gray-700 mb-4">{caseStudy.description}</p>
-                            {caseStudy.link && (
-                              <a
-                                href={caseStudy.link}
-                                className="font-medium flex items-center gap-1 hover:underline"
-                                style={{ color: '#030F35' }}
-                              >
-                                View Case Study
-                                <ExternalLink size={16} />
-                              </a>
-                            )}
-                          </div>
-                          <FileText size={24} className="text-gray-400 ml-4" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* References */}
-              {course.references && course.references.length > 0 && (
-                <section className="mt-10">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">References</h2>
-                  <div className="space-y-4">
-                    {course.references.map((reference, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-2">{reference.title}</h3>
-                            <p className="text-gray-700 mb-4">{reference.description}</p>
-                            {reference.link && (
-                              <a
-                                href={reference.link}
-                                className="font-medium flex items-center gap-1 hover:underline"
-                                style={{ color: '#030F35' }}
-                              >
-                                View Reference
-                                <ExternalLink size={16} />
-                              </a>
-                            )}
-                          </div>
-                          <FileText size={24} className="text-gray-400 ml-4" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+              <CourseTabContent 
+                activeTab={activeTab}
+                course={course}
+                isTrack={isTrack}
+                curriculum={course?.curriculum || []}
+                outcomes={course?.outcomes || []}
+                highlights={course?.highlights || []}
+                courseStats={courseStats}
+                expandedCourses={expandedCourses}
+                setExpandedCourses={setExpandedCourses}
+                allFlattenedLessons={allFlattenedLessons}
+                navigate={navigate}
+                firstPath={learningPaths[0]}
+                pathCourses={pathCourses}
+              />
             </div>
-
-            {/* Sidebar */}
-            <aside className="lg:col-span-4">
-              <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden sticky top-24">
-                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {isTrack ? 'Track Summary' : 'Course Summary'}
-                  </h3>
-                </div>
-                <div className="p-4 space-y-4">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Duration</span>
-                    <span className="font-medium text-gray-900">
-                      {course.durationMinutes !== undefined && course.durationMinutes > 0
-                        ? formatDurationFromMinutes(course.durationMinutes)
-                        : course.duration || 'N/A'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{isTrack ? 'Courses' : 'Lessons'}</span>
-                    <span className="font-medium text-gray-900">
-                      {isTrack
-                        ? `${curriculum.length} ${curriculum.length === 1 ? 'course' : 'courses'}`
-                        : `${courseStats.totalLessons} ${courseStats.totalLessons === 1 ? 'lesson' : 'lessons'}`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Level</span>
-                    <span className="font-medium text-gray-900 text-right">
-                      {SFIA_LEVELS.find(level => level.code === course.levelCode)?.label || course.levelCode}
-                    </span>
-                  </div>
-                  {courseStats.totalModules > 0 && (
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>Modules</span>
-                      <span className="font-medium text-gray-900">
-                        {courseStats.totalModules} {courseStats.totalModules === 1 ? 'module' : 'modules'}
-                      </span>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => {
-                      if (firstLesson && course.status !== 'coming-soon') {
-                        navigate(`/lms/${course.slug}/lesson/${firstLesson.id}`);
-                      }
-                    }}
-                    disabled={!firstLesson}
-                    className={`w-full px-4 py-3 text-white font-semibold rounded-md transition-colors shadow-md ${firstLesson ? 'hover:opacity-90' : 'opacity-50 cursor-not-allowed'
-                      }`}
-                    style={{ backgroundColor: '#030F35' }}
-                  >
-                    {isTrack ? 'Enroll to Curriculum' : 'Start Course'}
-                  </button>
-                  <button
-                    className="w-full px-4 py-2.5 font-medium bg-white border rounded-md hover:bg-gray-50 transition-colors flex items-center justify-center"
-                    style={{ borderColor: '#030F35', color: '#030F35' }}
-                  >
-                    <BookmarkIcon size={16} className="mr-2" />
-                    Save for Later
-                  </button>
-                </div>
-              </div>
-            </aside>
+            <div className="lg:col-span-4">
+              <CourseSidebar 
+                course={course}
+                relatedCourses={relatedCourses}
+                isTrack={isTrack}
+                curriculum={course?.curriculum || []}
+                courseStats={courseStats}
+              />
+            </div>
           </div>
         </div>
-
-        {/* Related Courses */}
-        <section className="bg-gray-50 border-t border-gray-200 py-10">
-          <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {course.track ? `Other Courses in ${course.track}` : 'Related Courses'}
-              </h2>
-              <Link to="/lms" className="font-medium flex items-center hover:underline" style={{ color: '#030F35' }}>
-                Browse all courses
-                <ChevronRightIcon size={16} className="ml-1" />
-              </Link>
-            </div>
-            {relatedCourses.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {relatedCourses.map((related) => {
-                  const RelatedIcon = CARD_ICON_BY_ID[related.id] || DEFAULT_COURSE_ICON;
-                  return (
-                    <div
-                      key={related.id}
-                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/lms/${related.slug}`)}
-                    >
-                      <div className="flex items-center mb-3 gap-2">
-                        <RelatedIcon className="h-5 w-5" style={{ color: '#030F35' }} aria-hidden="true" />
-                        <span className="text-sm text-gray-600">{related.provider}</span>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                        {related.title}
-                      </h3>
-                      <div className="flex flex-wrap gap-1 text-xs text-gray-600">
-                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100">
-                          {related.courseCategory}
-                        </span>
-                        <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded-full border border-green-100">
-                          {related.deliveryMode}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-600">
-                No additional courses {course.track ? 'in this track' : 'in this category'} yet. Check back soon for fresh content.
-              </div>
-            )}
-          </div>
-        </section>
       </main>
       <Footer isLoggedIn={false} />
     </div>
+  );
+};
+
+// --- Sub-components to reduce cognitive complexity ---
+
+const CourseHero = ({ 
+  course, 
+  HeroIcon, 
+  chipData, 
+  statusClass, 
+  statusLabel, 
+  averageRating, 
+  reviewCount 
+}: any) => (
+  <div
+    className="w-full border-b border-gray-200 relative"
+    style={{
+      backgroundImage: course?.imageUrl
+        ? `url(${course.imageUrl})`
+        : 'linear-gradient(to right, rgb(239 246 255), rgb(243 232 255))',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    }}
+  >
+    <div className="absolute inset-0" style={{ backgroundColor: 'rgba(26, 46, 110, 0.6)' }}></div>
+    <div className="relative z-10">
+      <div className="container mx-auto px-4 md:px-6 max-w-7xl py-12">
+        <nav className="flex mb-6" aria-label="Breadcrumb">
+          <ol className="inline-flex items-center space-x-1 md:space-x-2">
+            <li className="inline-flex items-center">
+              <Link to="/" className="text-white/80 hover:text-white inline-flex items-center">
+                <HomeIcon size={16} className="mr-1" />
+                <span>Home</span>
+              </Link>
+            </li>
+            <li>
+              <div className="flex items-center">
+                <ChevronRightIcon size={16} className="text-white/60" />
+                <Link to="/lms" className="ml-1 text-white/80 hover:text-white md:ml-2">
+                  Courses
+                </Link>
+              </div>
+            </li>
+            <li aria-current="page">
+              <div className="flex items-center">
+                <ChevronRightIcon size={16} className="text-white/60" />
+                <span className="ml-1 text-white/80 md:ml-2 truncate max-w-[200px]">
+                  {course?.title}
+                </span>
+              </div>
+            </li>
+          </ol>
+        </nav>
+
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm text-white font-medium">{course?.provider}</span>
+              {course?.track && (
+                <>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-sm font-medium" style={{ color: '#fcfcfc' }}>{course.track}</span>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <HeroIcon className="h-6 w-6 shrink-0" style={{ color: '#fff' }} aria-hidden="true" />
+              <h1 className="text-2xl md:text-3xl font-bold leading-tight text-white">
+                {course?.title}
+              </h1>
+            </div>
+
+            {averageRating > 0 && (
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={20}
+                        className={i < Math.floor(averageRating) ? 'text-yellow-400 fill-yellow-400' : 'text-white/40'}
+                      />
+                    ))}
+                  </div>
+                  <span className="ml-2 text-lg font-semibold text-white">{averageRating.toFixed(1)}</span>
+                </div>
+                <Link
+                  to={`/lms/${course?.slug}/reviews`}
+                  className="font-medium flex items-center gap-1 hover:underline text-white"
+                >
+                  <MessageSquare size={16} />
+                  <span>{reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}</span>
+                </Link>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              {chipData.map((chip: any, index: number) => {
+                const Icon = resolveChipIcon(chip.key, chip.iconValue ?? chip.label);
+                return (
+                  <span
+                    key={`${chip.key}-${chip.label}-${index}`}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border bg-white/20 backdrop-blur-sm border-white/30 text-white"
+                  >
+                    {Icon ? <Icon className="h-4 w-4 mr-1.5" /> : null}
+                    {chip.label}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${statusClass}`}>
+              {statusLabel}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const CourseTabContent = ({
+  activeTab,
+  course,
+  isTrack,
+  outcomes,
+  highlights,
+  courseStats,
+  curriculum,
+  expandedCourses,
+  setExpandedCourses,
+  allFlattenedLessons,
+  navigate,
+  firstPath,
+  pathCourses
+}: any) => {
+  if (activeTab === 'outcomes') {
+    return (
+      <section className="space-y-6">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-8 shadow-sm">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <span className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+              <CheckCircleIcon size={18} className="text-white" />
+            </span>
+            What You'll Learn
+          </h3>
+          <ul className="space-y-4">
+            {outcomes.map((outcome: string) => (
+              <li key={outcome} className="flex items-start gap-3 group">
+                <div className="mt-2 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-125 transition-transform" />
+                <p className="text-gray-700 leading-relaxed">{outcome}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    );
+  }
+
+  if (activeTab === 'details') {
+    return (
+      <section className="space-y-8">
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                <Clock size={24} className="text-blue-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-medium">Duration</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {course?.durationMinutes !== undefined && course.durationMinutes > 0
+                    ? formatDurationFromMinutes(course.durationMinutes)
+                    : course?.duration || 'N/A'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+                <Star size={24} className="text-amber-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-medium">Level</p>
+                <p className="text-sm font-semibold text-gray-900">{SFIA_LEVELS.find(level => level.code === course?.levelCode)?.label || course?.levelCode}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
+                <PlayCircleIcon size={24} className="text-purple-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-medium">Delivery Mode</p>
+                <p className="text-sm font-semibold text-gray-900">{course?.deliveryMode}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
+                <BookOpen size={24} className="text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-medium">
+                  {isTrack ? 'Courses' : 'Lessons'}
+                </p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {isTrack
+                    ? `${curriculum.length} courses`
+                    : `${courseStats.totalLessons} lessons`}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-gray-700 leading-relaxed text-base">
+            {course?.summary}
+          </p>
+        </div>
+
+        {highlights.length > 0 && (
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              {isTrack ? 'Track Highlights' : 'Course Highlights'}
+            </h3>
+            <div className="space-y-3">
+              {highlights.map((highlight: string) => (
+                <div key={highlight} className="flex items-start gap-3">
+                  <CheckCircleIcon size={20} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700">{highlight}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {firstPath && pathCourses.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-2" style={{ color: '#030F35' }}>
+              Part of {firstPath.pathTitle}
+            </h3>
+            <p className="text-gray-700 mb-4 text-sm">
+              This course is part of a larger learning track. Explore other courses in this track to complete your learning journey.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {pathCourses.map((pathCourse: any, index: number) => {
+                const isCurrentCourse = pathCourse.slug === course?.slug;
+                return (
+                  <React.Fragment key={pathCourse.id}>
+                    {index > 0 && (
+                      <span className="text-gray-400" style={{ color: '#030F35' }}>→</span>
+                    )}
+                    {isCurrentCourse ? (
+                      <span className="font-medium text-sm" style={{ color: '#030F35' }}>
+                        {pathCourse.title}
+                      </span>
+                    ) : (
+                      <Link
+                        to={`/lms/${pathCourse.slug}`}
+                        className="font-medium text-sm hover:underline"
+                        style={{ color: '#030F35' }}
+                      >
+                        {pathCourse.title}
+                      </Link>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  if (activeTab === 'curriculum') {
+    return (
+      <section className="space-y-4">
+        {curriculum && curriculum.length > 0 && (
+          <div className="flex items-center justify-start mb-2">
+            <span className="text-sm text-gray-600">
+              {isTrack
+                ? `This track has ${curriculum.length} ${curriculum.length === 1 ? 'course' : 'courses'}`
+                : `This course has ${courseStats.totalModules} ${courseStats.totalModules === 1 ? 'module' : 'modules'} and ${courseStats.totalLessons} ${courseStats.totalLessons === 1 ? 'lesson' : 'lessons'}`}
+            </span>
+          </div>
+        )}
+        {curriculum && curriculum.length > 0 ? (
+          <div className="space-y-4">
+            {curriculum
+              .sort((a: any, b: any) => a.order - b.order)
+              .map((item: any, curriculumIndex: number) => (
+                <ModuleCard
+                  key={item.id || curriculumIndex}
+                  item={item}
+                  curriculumIndex={curriculumIndex}
+                  isTrack={isTrack}
+                  expandedCourses={expandedCourses}
+                  toggleExpand={(id: string) => {
+                    setExpandedCourses((prev: Set<string>) => {
+                      const next = new Set(prev);
+                      if (next.has(id)) next.delete(id);
+                      else next.add(id);
+                      return next;
+                    });
+                  }}
+                  courseSlug={course?.slug || ''}
+                  allFlattenedLessons={allFlattenedLessons}
+                  navigate={navigate}
+                />
+              ))}
+          </div>
+        ) : (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+            <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-600">
+              Curriculum details are not available for this course yet.
+            </p>
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  if (activeTab === 'reviews') {
+    return (
+      <section className="space-y-6">
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+          <MessageSquare size={48} className="mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Reviews Yet</h3>
+          <p className="text-gray-600">
+            Be the first to share your experience with this course. Reviews will appear here once available.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  if (activeTab === 'faq' && isTrack && course?.faq?.length > 0) {
+    return (
+      <section className="space-y-6">
+        <div className="flex items-center gap-3 mb-4">
+          <HelpCircle size={24} style={{ color: '#030F35' }} />
+          <h2 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
+        </div>
+        <div className="space-y-4">
+          {course.faq.map((item: any, index: number) => (
+            <div
+              key={index}
+              className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-start">
+                <span className="mr-3 flex-shrink-0" style={{ color: '#030F35' }}>
+                  Q{index + 1}:
+                </span>
+                <span>{item.question}</span>
+              </h3>
+              <p className="text-gray-700 leading-relaxed ml-8">
+                {item.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return null;
+};
+
+const CourseSidebar = ({ course, relatedCourses, isTrack, curriculum, courseStats }: any) => {
+  const navigate = useNavigate();
+  return (
+    <aside className="space-y-8 sticky top-24">
+      {/* Course Action Card */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden overflow-visible">
+        <div className="p-6 space-y-4">
+          <button
+            onClick={() => {
+              if (curriculum?.[0]?.lessons?.[0]) {
+                navigate(`/lms/${course.slug}/lesson/${curriculum[0].lessons[0].id}`);
+              } else if (curriculum?.[0]?.topics?.[0]?.lessons?.[0]) {
+                navigate(`/lms/${course.slug}/lesson/${curriculum[0].topics[0].lessons[0].id}`);
+              }
+            }}
+            className="w-full py-4 px-6 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            style={{ backgroundColor: '#030F35' }}
+          >
+            <PlayCircleIcon size={24} />
+            {isTrack ? 'Start Track' : 'Start Learning'}
+          </button>
+
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500 flex items-center gap-2">
+                <BookOpen size={16} /> {isTrack ? 'Courses' : 'Lessons'}
+              </span>
+              <span className="text-gray-900 font-semibold">
+                {isTrack ? curriculum.length : courseStats.totalLessons}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500 flex items-center gap-2">
+                <Clock size={16} /> Total Duration
+              </span>
+              <span className="text-gray-900 font-semibold">
+                {course?.durationMinutes !== undefined && course.durationMinutes > 0
+                  ? formatDurationFromMinutes(course.durationMinutes)
+                  : course?.duration || 'N/A'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500 flex items-center gap-2">
+                <Star size={16} /> Level
+              </span>
+              <span className="text-gray-900 font-semibold">
+                {SFIA_LEVELS.find(level => level.code === course?.levelCode)?.label || course?.levelCode}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Related Courses */}
+      {relatedCourses.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-gray-900 px-1">
+            {isTrack ? 'Related Tracks' : 'Related Courses'}
+          </h3>
+          <div className="space-y-4">
+            {relatedCourses.map((related: any) => (
+              <Link
+                key={related.id}
+                to={`/lms/${related.slug}`}
+                className="flex gap-4 p-3 rounded-lg border border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all group"
+              >
+                <div className="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                  {related.imageUrl ? (
+                    <img src={related.imageUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <Library className="text-gray-400" size={24} />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    {related.title}
+                  </h4>
+                  <p className="text-xs text-gray-500 mt-1">{related.provider}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </aside>
   );
 };
 

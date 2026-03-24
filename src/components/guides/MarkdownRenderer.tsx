@@ -7,35 +7,50 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 
 // Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
+const processDivProperties = (properties: any) => {
+  if (!properties) return
+  
+  // Get class value (could be string or array)
+  const classValue = properties.class
+  if (classValue) {
+    // Convert to string
+    const classStr = Array.isArray(classValue) 
+      ? classValue.join(' ') 
+      : String(classValue)
+    
+    // ALWAYS set className from class (this is critical for react-markdown)
+    properties.className = classStr
+    // Also keep class for compatibility
+    properties.class = classStr
+  }
+  
+  // If className exists but is array, convert to string
+  if (properties.className && Array.isArray(properties.className)) {
+    properties.className = properties.className.join(' ')
+  }
+}
+
+// Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
 const rehypePreserveDivClass = () => (tree: any) => {
   const walk = (node: any) => {
     if (!node || typeof node !== 'object') return
     if (node.type === 'element' && node.tagName === 'div') {
-      // Ensure class is preserved in properties
-      if (node.properties) {
-        // Get class value (could be string or array)
-        const classValue = node.properties.class
-        if (classValue) {
-          // Convert to string
-          const classStr = Array.isArray(classValue) 
-            ? classValue.join(' ') 
-            : String(classValue)
-          
-          // ALWAYS set className from class (this is critical for react-markdown)
-          node.properties.className = classStr
-          // Also keep class for compatibility
-          node.properties.class = classStr
-        }
-        // If className exists but is array, convert to string
-        if (node.properties.className && Array.isArray(node.properties.className)) {
-          node.properties.className = node.properties.className.join(' ')
-        }
-      }
+      processDivProperties(node.properties)
     }
     const kids = node.children || []
     for (const k of kids) walk(k)
   }
   walk(tree)
+}
+
+const isIconNode = (node: any): boolean => {
+  if (!node || node.type !== 'element') return false
+  const iconTags = ['img', 'picture', 'svg']
+  if (iconTags.includes(node.tagName)) return true
+  if (node.tagName === 'span') {
+    return (node.children || []).some((k: any) => isIconNode(k))
+  }
+  return false
 }
 
 // Rehype plugin: remove leading icon nodes (img/svg/span with img) from list items
@@ -48,39 +63,31 @@ const rehypeStripListIcons = () => {
       .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
       .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
   }
-  const containsImage = (node: any): boolean => {
-    if (!node || typeof node !== 'object') return false
-    if (node.type === 'element' && (node.tagName === 'img' || node.tagName === 'picture' || node.tagName === 'svg')) return true
-    const kids = (node.children || []) as any[]
-    for (const k of kids) { if (containsImage(k)) return true }
-    return false
-  }
-  const stripLeadingInContainer = (node: any) => {
-    if (!node || !Array.isArray(node.children)) return
-    // Work inside <li> and inside its first <p>
-    const cleanFront = (arr: any[]) => {
-      while (arr.length) {
-        const first = arr[0]
-        if (first?.type === 'text') {
-          const next = stripText(first.value)
-          if (next !== first.value) first.value = next
-          if (!first.value || !first.value.trim()) { arr.shift(); continue }
-          break
-        }
-        if (first?.type === 'element') {
-          if (first.tagName === 'img' || first.tagName === 'picture' || first.tagName === 'svg' || (first.tagName === 'span' && containsImage(first))) { arr.shift(); continue }
-          if (first.tagName === 'p' && Array.isArray(first.children)) { cleanFront(first.children); if (first.children.length === 0) { arr.shift(); continue } }
-        }
+
+  const cleanFront = (arr: any[]) => {
+    while (arr.length) {
+      const first = arr[0]
+      if (first?.type === 'text') {
+        const next = stripText(first.value)
+        if (next !== first.value) first.value = next
+        if (!first.value || !first.value.trim()) { arr.shift(); continue }
         break
       }
+      if (first?.type === 'element') {
+        if (isIconNode(first)) { arr.shift(); continue }
+        if (first.tagName === 'p' && Array.isArray(first.children)) {
+          cleanFront(first.children)
+          if (first.children.length === 0) { arr.shift(); continue }
+        }
+      }
+      break
     }
-    cleanFront(node.children)
   }
+
   const walk = (node: any) => {
     if (!node || typeof node !== 'object') return
-    if (node.type === 'element') {
-      if (node.tagName === 'li' || node.tagName === 'summary') stripLeadingInContainer(node)
-      // Keep <details>/<summary> intact so dropdowns work
+    if (node.type === 'element' && (node.tagName === 'li' || node.tagName === 'summary')) {
+      if (Array.isArray(node.children)) cleanFront(node.children)
     }
     const kids = node.children || []
     for (const k of kids) walk(k)

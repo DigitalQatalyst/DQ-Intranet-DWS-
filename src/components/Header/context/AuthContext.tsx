@@ -1,4 +1,4 @@
-import React, {
+import {
   useEffect,
   useMemo,
   useState,
@@ -107,8 +107,8 @@ export function AuthProvider({
         const { data: userData, error } = await supabaseClient
           .from('users_local')
           .select('id, email, dws_role, segment, domain, role')
-          .eq('id', userId)
-          .maybeSingle();
+          .eq('id', userId as any)
+          .maybeSingle() as any;
 
         if (error || !userData) {
           return {
@@ -122,9 +122,9 @@ export function AuthProvider({
         }
 
         const { data: responsibilityRolesData } = await supabaseClient
-          .from('user_responsibility_roles')
+          .from('user_responsibility_roles' as any)
           .select('role')
-          .eq('user_id', userId);
+          .eq('user_id', userId as any) as any;
 
         const roleString = (userData.dws_role as string) || (userData.role as string) || 'viewer';
         const progressiveRole = normalizeRole(roleString) as UserRole;
@@ -170,15 +170,15 @@ export function AuthProvider({
       try {
         await supabaseClient.from('users_local').upsert(
           {
-            id: userId,
+            id: userId as any,
             email: emailToSync,
             name: userData.name,
             username,
             azure_id: userData.azureId,
-            role: 'member',
-            segment: 'employee',
+            role: 'member' as any,
+            segment: 'employee' as any,
             updated_at: new Date().toISOString(),
-          },
+          } as any,
           {
             onConflict: 'id',
           },
@@ -303,7 +303,22 @@ export function AuthProvider({
 
   const ability = useMemo(() => {
     try {
-      return buildAbilityFromUserContext(userContext);
+      if (!userContext) return buildAbilityFromUserContext(null);
+      
+      // Transform IamUserContext to the shape expected by buildAbilityFromUserContext
+      const transformedContext = {
+        id: userContext.id,
+        email: userContext.email,
+        name: userContext.name,
+        roles: [
+          userContext.progressiveRole,
+          ...(userContext.responsibilityRoles || [])
+        ],
+        employeeSegment: userContext.segment,
+        newJoiner: userContext.segment === 'new_joiner'
+      };
+      
+      return buildAbilityFromUserContext(transformedContext as any);
     } catch (error) {
       console.error('Error building ability:', error);
       return buildAbilityFromUserContext(null);
@@ -313,7 +328,6 @@ export function AuthProvider({
   // Loading is complete once we've checked auth state at least once
   useEffect(() => {
     // Always resolve loading state after checking accounts
-    const account = instance.getActiveAccount() || accounts[0];
     setIsLoading(false);
   }, [isAuthenticated, accounts, instance]);
 
