@@ -34,9 +34,12 @@ jobs:
       - name: 📊 Extract commit info
         id: commit_info
         run: |
-          AUTHOR_NAME="${{ github.event.head_commit.author.name }}"
-          AUTHOR_EMAIL="${{ github.event.head_commit.author.email }}"
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          # Sanitize author name and email to prevent script injection
+          AUTHOR_NAME="$(echo "${{ github.event.head_commit.author.name }}" | tr -d '\"\`\$\;&|<>')"
+          AUTHOR_EMAIL="$(echo "${{ github.event.head_commit.author.email }}" | tr -d '\"\`\$\;&|<>')"
+          COMMIT_MSG="$(echo "${{ github.event.head_commit.message }}" | tr -d '\"\`\$\;&|<>' | head -c 200)"
+          
+          # Set outputs safely
           echo "author_name=$AUTHOR_NAME" >> $GITHUB_OUTPUT
           echo "author_email=$AUTHOR_EMAIL" >> $GITHUB_OUTPUT
           echo "🔍 Commit by: $AUTHOR_NAME ($AUTHOR_EMAIL)"
@@ -123,9 +126,13 @@ jobs:
 
       - name: 📝 Deployment summary
         run: |
+          # Use sanitized data from previous step
+          AUTHOR_NAME="${{ steps.commit_info.outputs.author_name }}"
+          AUTHOR_EMAIL="${{ steps.commit_info.outputs.author_email }}"
+          
           echo "## 🎉 Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Deployed by:** ${{ steps.commit_info.outputs.author_name }} (${{ steps.commit_info.outputs.author_email }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed by:** $AUTHOR_NAME ($AUTHOR_EMAIL)" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** ${{ steps.deploy.outputs.deploy_url }}" >> $GITHUB_STEP_SUMMARY
