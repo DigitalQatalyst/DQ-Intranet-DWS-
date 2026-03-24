@@ -111,32 +111,135 @@ const normalizeTagValue = (value?: string | null) => {
   return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
 }
 
+// Helper function to check if slug or title matches multiple conditions
+const matchesAny = (slug: string, title: string, slugPatterns: string[], titlePatterns: string[], titleAndPatterns?: string[][]): boolean => {
+  const slugMatches = slugPatterns.some(pattern => slug === pattern);
+  const titleMatches = titlePatterns.some(pattern => title.includes(pattern));
+  
+  if (slugMatches || titleMatches) return true;
+  
+  if (titleAndPatterns) {
+    return titleAndPatterns.some(patterns => 
+      patterns.every(pattern => title.includes(pattern))
+    );
+  }
+  
+  return false;
+};
+
+// Helper function to check DQ-specific conditions
+const checkDQCondition = (slug: string, title: string, type: string, excludeCondition?: () => boolean): boolean => {
+  if (excludeCondition && excludeCondition()) return false;
+  return matchesAny(slug, title, [`dq-${type}`], [`${type}`]);
+};
+
 const buildGuideFlags = (guide: GuideRecord | null): GuideFlags => {
-  const slug = (guide?.slug || '').toLowerCase()
-  const title = (guide?.title || '').toLowerCase()
+  const slug = (guide?.slug || '').toLowerCase();
+  const title = (guide?.title || '').toLowerCase();
 
-  const isClientTestimonials = slug === 'client-testimonials'
-  const isL24WorkingRooms = slug === 'dq-l24-working-rooms-guidelines' || title.includes('l24 working rooms')
-  const isRescueShift = slug === 'dq-rescue-shift-guidelines' || slug === 'rescue-shift-guidelines' || title.includes('rescue shift')
-  const isRAID = slug === 'raid-guidelines' || slug === 'dq-raid-guidelines' || title.includes('raid guidelines')
-  const isAgendaScheduling = slug === 'dq-agenda-and-scheduling-guidelines' || slug === 'agenda-scheduling-guidelines' || (title.includes('agenda') && title.includes('scheduling'))
-  const isFunctionalTracker = slug === 'dq-functional-tracker-guidelines' || slug === 'functional-tracker-guidelines' || title.includes('functional tracker')
-  const isScrumMaster = slug === 'dq-scrum-master-guidelines' || slug === 'scrum-master-guidelines' || title.includes('scrum master')
-  const isQForum = slug === 'forum-guidelines' || slug === 'dq-forum-guidelines' || slug === 'qforum-guidelines' || title.includes('forum guidelines')
+  const isClientTestimonials = slug === 'client-testimonials';
+  
+  // Guidelines with simple slug/title matching
+  const isL24WorkingRooms = matchesAny(slug, title, 
+    ['dq-l24-working-rooms-guidelines'], 
+    ['l24 working rooms']
+  );
+  
+  const isRescueShift = matchesAny(slug, title, 
+    ['dq-rescue-shift-guidelines', 'rescue-shift-guidelines'], 
+    ['rescue shift']
+  );
+  
+  const isRAID = matchesAny(slug, title, 
+    ['raid-guidelines', 'dq-raid-guidelines'], 
+    ['raid guidelines']
+  );
+  
+  const isAgendaScheduling = matchesAny(slug, title, 
+    ['dq-agenda-and-scheduling-guidelines', 'agenda-scheduling-guidelines'], 
+    [],
+    [['agenda', 'scheduling']]
+  );
+  
+  const isFunctionalTracker = matchesAny(slug, title, 
+    ['dq-functional-tracker-guidelines', 'functional-tracker-guidelines'], 
+    ['functional tracker']
+  );
+  
+  const isScrumMaster = matchesAny(slug, title, 
+    ['dq-scrum-master-guidelines', 'scrum-master-guidelines'], 
+    ['scrum master']
+  );
+  
+  const isQForum = matchesAny(slug, title, 
+    ['forum-guidelines', 'dq-forum-guidelines', 'qforum-guidelines'], 
+    ['forum guidelines']
+  );
 
-  const isDQGHC = slug === 'dq-ghc' || slug === 'ghc' || slug === 'golden-honeycomb' || title.includes('ghc') || title.includes('golden honeycomb') || (title.includes('foundation') && title.includes('dna'))
-  const isDQCompetencies = !isDQGHC && (slug === 'dq-competencies' || title.includes('dq competencies') || (title.includes('competencies') && !title.includes('ghc')))
-  const isDQVisionMission = slug === 'dq-vision-and-mission' || slug === 'dq-vision-mission' || (title.includes('dq vision') && title.includes('mission')) || (title.includes('vision') && title.includes('mission'))
-  const isDQProducts = slug === 'dq-products' || title.includes('dq products') || (title.includes('products') && !title.includes('6xd'))
-  const isDQVision = slug === 'dq-vision' || slug === 'dq-vision-purpose'
-  const isDQHoV = slug === 'dq-hov' || slug === 'hov' || slug === 'house-of-values'
-  const isDQPersona = slug === 'dq-persona' || slug === 'persona-identity'
-  const isDQAgileTMS = slug === 'dq-agile-tms' || slug === 'agile-tms'
-  const isDQAgileSoS = slug === 'dq-agile-sos' || slug === 'agile-sos'
-  const isDQAgileFlows = slug === 'dq-agile-flows' || slug === 'agile-flows'
-  const isDQAgile6xD = slug === 'dq-agile-6xd' || slug === 'agile-6xd'
+  // DQ-specific flags
+  const isDQGHC = matchesAny(slug, title, 
+    ['dq-ghc', 'ghc', 'golden-honeycomb'], 
+    ['ghc', 'golden honeycomb'],
+    [['foundation', 'dna']]
+  );
+  
+  const isDQCompetencies = checkDQCondition(slug, title, 'competencies', () => isDQGHC) || 
+    (title.includes('competencies') && !title.includes('ghc'));
+  
+  const isDQVisionMission = matchesAny(slug, title, 
+    ['dq-vision-and-mission', 'dq-vision-mission'], 
+    [],
+    [['dq vision', 'mission'], ['vision', 'mission']]
+  );
+  
+  const isDQProducts = matchesAny(slug, title, 
+    ['dq-products'], 
+    ['dq products']
+  ) && !title.includes('6xd');
+  
+  const isDQVision = matchesAny(slug, title, 
+    ['dq-vision', 'dq-vision-purpose'], 
+    []
+  );
+  
+  const isDQHoV = matchesAny(slug, title, 
+    ['dq-hov', 'hov', 'house-of-values'], 
+    []
+  );
+  
+  const isDQPersona = matchesAny(slug, title, 
+    ['dq-persona', 'persona-identity'], 
+    []
+  );
+  
+  const isDQAgileTMS = matchesAny(slug, title, 
+    ['dq-agile-tms', 'agile-tms'], 
+    []
+  );
+  
+  const isDQAgileSoS = matchesAny(slug, title, 
+    ['dq-agile-sos', 'agile-sos'], 
+    []
+  );
+  
+  const isDQAgileFlows = matchesAny(slug, title, 
+    ['dq-agile-flows', 'agile-flows'], 
+    []
+  );
+  
+  const isDQAgile6xD = matchesAny(slug, title, 
+    ['dq-agile-6xd', 'agile-6xd'], 
+    []
+  );
 
-  const hasCustomGuidelinePage = isL24WorkingRooms || isRescueShift || isRAID || isAgendaScheduling || isFunctionalTracker || isScrumMaster || isQForum || isDQCompetencies || isDQVisionMission || isDQGHC || isDQProducts || isDQVision || isDQHoV || isDQPersona || isDQAgileTMS || isDQAgileSoS || isDQAgileFlows || isDQAgile6xD
+  const guidelineFlags = [
+    isL24WorkingRooms, isRescueShift, isRAID, isAgendaScheduling, 
+    isFunctionalTracker, isScrumMaster, isQForum, isDQCompetencies, 
+    isDQVisionMission, isDQGHC, isDQProducts, isDQVision, isDQHoV, 
+    isDQPersona, isDQAgileTMS, isDQAgileSoS, isDQAgileFlows, isDQAgile6xD
+  ];
+  
+  const hasCustomGuidelinePage = guidelineFlags.some(Boolean);
 
   return {
     isClientTestimonials,
