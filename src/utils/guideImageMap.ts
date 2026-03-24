@@ -230,8 +230,18 @@ export function getGuideImageUrl(g: GuideLike): string {
   const isGuidelinesDomain = (g.domain || '').toLowerCase().trim() === 'guidelines' ||
                              (g.domain || '').toLowerCase().trim() === 'guideline'
   
+  // Helper function to check if guide should use guidelines image
+  const shouldUseGuidelinesImage = (g: Guide) => {
+    return isGuidelinesDomain && 
+           !isHOVGuide(g) && 
+           !isGHCGuide(g) && 
+           !isBlueprint && 
+           !isStrategy && 
+           !isTestimonial;
+  };
+  
   // Only apply guidelines image if domain is explicitly Guidelines (not for products/blueprints)
-  if (isGuidelinesDomain && !isHOVGuide(g) && !isGHCGuide(g) && !isBlueprint && !isStrategy && !isTestimonial) {
+  if (shouldUseGuidelinesImage(g)) {
     return GUIDELINES_IMAGE
   }
 

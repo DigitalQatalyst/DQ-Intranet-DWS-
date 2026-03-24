@@ -71,6 +71,15 @@ const getLessonTypeLabel = (type: string) => {
   }
 };
 
+// Helper function to check if course is completed
+const isCourseCompleted = (nextLesson: any, isVideoCompleted: boolean, quiz: any, quizPassed: boolean, courseQuiz: any, isFinalAssessmentLesson: boolean) => {
+  return !nextLesson && 
+         isVideoCompleted && 
+         (!quiz || quizPassed) && 
+         !courseQuiz && 
+         !isFinalAssessmentLesson;
+};
+
 // Progress storage key prefix
 
 // Helper to get progress from localStorage
@@ -970,7 +979,7 @@ export const LmsLessonPage: React.FC = () => {
                         </div>
                       )}
                     </div>
-                  ) : !nextLesson && isVideoCompleted && (!quiz || quizPassed) && !courseQuiz && !isFinalAssessmentLesson ? (
+                  ) : isCourseCompleted(nextLesson, isVideoCompleted, quiz, quizPassed, courseQuiz, isFinalAssessmentLesson) ? (
                     // Course Completed - Show Review Form in Main Content Area
                     <div className="bg-white rounded-lg border border-gray-200 p-8 min-h-[400px] flex flex-col justify-center">
                       {!showReviewForm && !reviewSubmitted ? (

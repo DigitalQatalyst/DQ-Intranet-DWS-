@@ -54,6 +54,15 @@ const KNOWN_PRODUCT_NAMES = [
   'TMaaS – Transformation Management as a Service',
 ]
 
+// Helper function to check if guide should show author info
+const shouldShowAuthorInfo = (guide: any, isBlueprint: boolean, isGhcOverview: boolean, domain?: string) => {
+  return !isBlueprint && 
+         !isGhcOverview && 
+         domain?.toLowerCase() !== 'strategy' && 
+         domain?.toLowerCase() !== 'guidelines' && 
+         (guide.authorName || guide.authorOrg);
+};
+
 function hovTitleFromSlug(s: string): string | null {
   const idx = HOV_ORDER.indexOf(s)
   if (idx === -1) return null
@@ -290,7 +299,7 @@ export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverr
         {lastUpdated && <span>{lastUpdated}</span>}
       </div>
       {/* Show author info only when provided and not a product or GHC/Strategy guide or Guidelines */}
-      {(!isBlueprint && !isGhcOverview && domain?.toLowerCase() !== 'strategy' && domain?.toLowerCase() !== 'guidelines' && (guide.authorName || guide.authorOrg)) && (
+      {shouldShowAuthorInfo(guide, isBlueprint, isGhcOverview, domain) && (
         <div className="text-xs text-gray-600 mb-2.5 flex-shrink-0">
           <span
             className="truncate"
