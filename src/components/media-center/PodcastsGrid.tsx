@@ -47,35 +47,33 @@ export default function PodcastsGrid({ query, items }: GridProps) {
     return Math.round(total / episodes.length);
   };
 
+  // Helper function to check domain filter match
+  const hasDomainMatch = (episodes: typeof podcastEpisodes, domainFilter: string[]) => {
+    if (!domainFilter || domainFilter.length === 0) return true;
+    return episodes.some(episode => episode.domain && domainFilter.includes(episode.domain));
+  };
+
+  // Helper function to check duration filter match
+  const hasDurationMatch = (episodes: typeof podcastEpisodes, durationFilter: string[]) => {
+    if (!durationFilter || durationFilter.length === 0) return true;
+    
+    const avg = calcAvgDuration(episodes);
+    return durationFilter.some((filter) => {
+      if (filter === '10–20' || filter === '10–20 Min') {
+        return avg >= 10 && avg < 20;
+      } else if (filter === '20+' || filter === '20+ Min') {
+        return avg >= 20;
+      }
+      return false;
+    });
+  };
+
   // Check if series matches filters
   const shouldShowSeries = useMemo(() => {
     const filters = query.filters || {};
     
-    // Domain filter - check if any episode matches
-    const domainFilter = filters.domain;
-    if (domainFilter && domainFilter.length > 0) {
-      const hasMatchingDomain = podcastEpisodes.some(
-        (episode) => episode.domain && domainFilter.includes(episode.domain)
-      );
-      if (!hasMatchingDomain) return false;
-    }
-
-    // Duration filter - check if average duration matches
-    const durationFilter = filters.readingTime;
-    if (durationFilter && durationFilter.length > 0) {
-      const avg = calcAvgDuration(podcastEpisodes);
-      const matchesDuration = durationFilter.some((filter) => {
-        if (filter === '10–20' || filter === '10–20 Min') {
-          return avg >= 10 && avg < 20;
-        } else if (filter === '20+' || filter === '20+ Min') {
-          return avg >= 20;
-        }
-        return false;
-      });
-      if (!matchesDuration) return false;
-    }
-
-    return true;
+    return hasDomainMatch(podcastEpisodes, filters.domain) &&
+           hasDurationMatch(podcastEpisodes, filters.readingTime);
   }, [query.filters, podcastEpisodes]);
 
   if (query.tab !== 'podcasts') {
