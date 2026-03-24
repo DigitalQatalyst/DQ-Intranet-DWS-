@@ -30,7 +30,6 @@ import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
 const GHCInspectorPage = React.lazy(() => import("./pages/admin/ghc-inspector/GHCInspectorPage"));
 import EventsPage from "./pages/events/EventsPage";
-import { RequireAuth } from "./components/RequireAuth";
 import { DWSChatProvider } from "./components/DWSChatProvider";
 import ThankYou from "./pages/ThankYou";
 import UnitProfilePage from "./pages/UnitProfilePage";
@@ -44,8 +43,7 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <RequireAuth>
-          <DWSChatProvider>
+        <DWSChatProvider>
             <Routes>
             <Route path="/discover-dq" element={<ComingSoonPage />} />
             <Route path="/coming-soon" element={<ComingSoonPage />} />
@@ -102,7 +100,6 @@ export function AppRouter() {
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
         </DWSChatProvider>
-        </RequireAuth>
       </AuthProvider>
     </BrowserRouter>
   );
