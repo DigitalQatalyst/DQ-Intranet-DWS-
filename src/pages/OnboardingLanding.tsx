@@ -668,9 +668,9 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#C27555] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-[#676f7e] leading-relaxed">
-                          <p>Your role is more than a title — it is your part in the system that turns intent into execution.</p>
+                          <p>Your role is more than a title. It is how you contribute to the system that turns intent into execution.</p>
                           <p>At DQ, you are empowered to own your work, contribute with purpose, and help move delivery forward with others.</p>
-                          <p>This is where your journey becomes uniquely yours — and where your impact starts to matter.</p>
+                          <p>This is where your journey becomes your own, and where your impact begins.</p>
                         </div>
                       </div>
                       <button
