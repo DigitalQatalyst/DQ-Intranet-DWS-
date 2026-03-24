@@ -53,56 +53,56 @@ const isIconNode = (node: any): boolean => {
   return false
 }
 
-// Rehype plugin: remove leading icon nodes (img/svg/span with img) from list items
-const rehypeStripListIcons = () => {
-  const stripText = (s: string) => {
-    return (s || '')
-      .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric shapes
-      .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}]+\s*/u, '') // emoji basic
-      .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F900}-\u{1F9FF}]+\s*/u, '') // emoji extended
-      .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
-      .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
-  }
+const stripText = (s: string) => {
+  return (s || '')
+    .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric shapes
+    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}]+\s*/u, '') // emoji basic
+    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F900}-\u{1F9FF}]+\s*/u, '') // emoji extended
+    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
+    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
+}
 
-  const handleTextNode = (node: any, arr: any[]) => {
-    const next = stripText(node.value)
-    if (next !== node.value) node.value = next
-    if (!node.value || !node.value.trim()) {
+const handleTextNode = (node: any, arr: any[]) => {
+  const next = stripText(node.value)
+  if (next !== node.value) node.value = next
+  if (!node.value || !node.value.trim()) {
+    arr.shift()
+    return true // handled and should continue
+  }
+  return false // handled but should break
+}
+
+const handleElementNode = (node: any, arr: any[]) => {
+  if (isIconNode(node)) {
+    arr.shift()
+    return true // handled and should continue
+  }
+  if (node.tagName === 'p' && Array.isArray(node.children)) {
+    cleanFront(node.children)
+    if (node.children.length === 0) {
       arr.shift()
       return true // handled and should continue
     }
-    return false // handled but should break
   }
+  return false // handled but should break
+}
 
-  const handleElementNode = (node: any, arr: any[]) => {
-    if (isIconNode(node)) {
-      arr.shift()
-      return true // handled and should continue
-    }
-    if (node.tagName === 'p' && Array.isArray(node.children)) {
-      cleanFront(node.children)
-      if (node.children.length === 0) {
-        arr.shift()
-        return true // handled and should continue
-      }
-    }
-    return false // handled but should break
-  }
-
-  const cleanFront = (arr: any[]) => {
-    while (arr.length) {
-      const first = arr[0]
-      if (first?.type === 'text') {
-        if (handleTextNode(first, arr)) continue
-        break
-      }
-      if (first?.type === 'element') {
-        if (handleElementNode(first, arr)) continue
-      }
+const cleanFront = (arr: any[]) => {
+  while (arr.length) {
+    const first = arr[0]
+    if (first?.type === 'text') {
+      if (handleTextNode(first, arr)) continue
       break
     }
+    if (first?.type === 'element') {
+      if (handleElementNode(first, arr)) continue
+    }
+    break
   }
+}
 
+// Rehype plugin: remove leading icon nodes (img/svg/span with img) from list items
+const rehypeStripListIcons = () => {
   const walk = (node: any) => {
     if (!node || typeof node !== 'object') return
     if (node.type === 'element' && (node.tagName === 'li' || node.tagName === 'summary')) {
@@ -111,7 +111,9 @@ const rehypeStripListIcons = () => {
     const kids = node.children || []
     for (const k of kids) walk(k)
   }
-  return (tree: any) => { walk(tree); }
+  return (tree: any) => {
+    walk(tree)
+  }
 }
 
 const sanitizeDecorators = (text: string): string => {

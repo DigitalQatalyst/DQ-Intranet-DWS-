@@ -872,25 +872,6 @@ const OutcomesTab = ({ outcomes }: { outcomes: string[] }) => (
   </section>
 );
 
-const CourseTabContent = ({
-  activeTab,
-  course,
-  isTrack,
-  outcomes,
-  highlights,
-  courseStats,
-  curriculum,
-  expandedCourses,
-  setExpandedCourses,
-  allFlattenedLessons,
-  navigate,
-  firstPath,
-  pathCourses
-}: any) => {
-  if (activeTab === 'outcomes') {
-    return <OutcomesTab outcomes={outcomes} />;
-  }
-
 const DetailsTab = ({ course, isTrack, curriculum, courseStats, highlights, firstPath, pathCourses }: any) => (
   <section className="space-y-8">
     <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -1004,20 +985,6 @@ const DetailsTab = ({ course, isTrack, curriculum, courseStats, highlights, firs
   </section>
 );
 
-  if (activeTab === 'details') {
-    return (
-      <DetailsTab 
-        course={course} 
-        isTrack={isTrack} 
-        curriculum={curriculum} 
-        courseStats={courseStats} 
-        highlights={highlights} 
-        firstPath={firstPath} 
-        pathCourses={pathCourses} 
-      />
-    );
-  }
-
 const CurriculumTab = ({ isTrack, curriculum, courseStats, expandedCourses, setExpandedCourses, courseSlug, allFlattenedLessons, navigate }: any) => (
   <section className="space-y-4">
     {curriculum && curriculum.length > 0 && (
@@ -1065,21 +1032,6 @@ const CurriculumTab = ({ isTrack, curriculum, courseStats, expandedCourses, setE
   </section>
 );
 
-  if (activeTab === 'curriculum') {
-    return (
-      <CurriculumTab 
-        isTrack={isTrack} 
-        curriculum={curriculum} 
-        courseStats={courseStats} 
-        expandedCourses={expandedCourses} 
-        setExpandedCourses={setExpandedCourses} 
-        courseSlug={course?.slug || ''} 
-        allFlattenedLessons={allFlattenedLessons} 
-        navigate={navigate} 
-      />
-    );
-  }
-
 const ReviewsTab = () => (
   <section className="space-y-6">
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
@@ -1119,15 +1071,59 @@ const FaqTab = ({ course }: any) => (
   </section>
 );
 
-  if (activeTab === 'reviews') {
-    return <ReviewsTab />;
+const CourseTabContent = ({
+  activeTab,
+  course,
+  isTrack,
+  outcomes,
+  highlights,
+  courseStats,
+  curriculum,
+  expandedCourses,
+  setExpandedCourses,
+  allFlattenedLessons,
+  navigate,
+  firstPath,
+  pathCourses
+}: any) => {
+  switch (activeTab) {
+    case 'outcomes':
+      return <OutcomesTab outcomes={outcomes} />;
+    case 'details':
+      return (
+        <DetailsTab 
+          course={course} 
+          isTrack={isTrack} 
+          curriculum={curriculum} 
+          courseStats={courseStats} 
+          highlights={highlights} 
+          firstPath={firstPath} 
+          pathCourses={pathCourses} 
+        />
+      );
+    case 'curriculum':
+      return (
+        <CurriculumTab 
+          isTrack={isTrack} 
+          curriculum={curriculum} 
+          courseStats={courseStats} 
+          expandedCourses={expandedCourses} 
+          setExpandedCourses={setExpandedCourses} 
+          courseSlug={course?.slug || ''} 
+          allFlattenedLessons={allFlattenedLessons} 
+          navigate={navigate} 
+        />
+      );
+    case 'reviews':
+      return <ReviewsTab />;
+    case 'faq':
+      if (isTrack && course?.faq?.length > 0) {
+        return <FaqTab course={course} />;
+      }
+      return null;
+    default:
+      return null;
   }
-
-  if (activeTab === 'faq' && isTrack && course?.faq?.length > 0) {
-    return <FaqTab course={course} />;
-  }
-
-  return null;
 };
 
 const CourseSidebar = ({ course, relatedCourses, isTrack, curriculum, courseStats }: any) => {
