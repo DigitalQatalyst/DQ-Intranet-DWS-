@@ -1,3 +1,4 @@
+import { secureRandom } from '../../utils/secureRandom';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Calendar, MapPin, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon, FileText, ChevronLeft, ChevronRight, MoreHorizontal, Plus, Minus } from 'lucide-react';
@@ -497,8 +498,8 @@ const MarketplaceDetailsPage: React.FC<MarketplaceDetailsPageProps> = ({
     setActiveTab(firstTab ?? config.tabs[0]?.id ?? 'about');
   }, [customTabs]);
   // Generate a random rating between 4.0 and 5.0 for display purposes
-  // const rating = (4 + Math.random()).toFixed(1);
-  // const reviewCount = Math.floor(Math.random() * 50) + 10;
+  // const rating = (4 + secureRandom()).toFixed(1);
+  // const reviewCount = Math.floor(secureRandom() * 50) + 10;
   useEffect(() => {
     const ctx: ItemLoadContext = {
       marketplaceType,

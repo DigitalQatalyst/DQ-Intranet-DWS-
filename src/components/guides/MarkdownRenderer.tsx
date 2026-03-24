@@ -6,128 +6,148 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 
-function normalizeDivProperties(node: any): void {
-  if (!node.properties) return
-  const classValue = node.properties.class
+// Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
+const processDivProperties = (properties: any) => {
+  if (!properties) return
+  
+  // Get class value (could be string or array)
+  const classValue = properties.class
   if (classValue) {
-    const classStr = Array.isArray(classValue) ? classValue.join(' ') : String(classValue)
-    node.properties.className = classStr
-    node.properties.class = classStr
+    // Convert to string
+    const classStr = Array.isArray(classValue) 
+      ? classValue.join(' ') 
+      : String(classValue)
+    
+    // ALWAYS set className from class (this is critical for react-markdown)
+    properties.className = classStr
+    // Also keep class for compatibility
+    properties.class = classStr
   }
-  if (node.properties.className && Array.isArray(node.properties.className)) {
-    node.properties.className = node.properties.className.join(' ')
+  
+  // If className exists but is array, convert to string
+  if (properties.className && Array.isArray(properties.className)) {
+    properties.className = properties.className.join(' ')
   }
 }
 
-function walkPreserveDivClass(node: any): void {
-  if (!node || typeof node !== 'object') return
-  if (node.type === 'element' && node.tagName === 'div') normalizeDivProperties(node)
-  const kids = node.children || []
-  for (const k of kids) walkPreserveDivClass(k)
+// Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
+const rehypePreserveDivClass = () => (tree: any) => {
+  const walk = (node: any) => {
+    if (!node || typeof node !== 'object') return
+    if (node.type === 'element' && node.tagName === 'div') {
+      processDivProperties(node.properties)
+    }
+    const kids = node.children || []
+    for (const k of kids) walk(k)
+  }
+  walk(tree)
 }
 
-function stripText(s: string): string {
+const isIconNode = (node: any): boolean => {
+  if (!node || node.type !== 'element') return false
+  const iconTags = ['img', 'picture', 'svg']
+  if (iconTags.includes(node.tagName)) return true
+  if (node.tagName === 'span') {
+    return (node.children || []).some((k: any) => isIconNode(k))
+  }
+  return false
+}
+
+const stripText = (s: string) => {
   return (s || '')
-    .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric arrows
-    .replace(/^[\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]+\s*/u, '') // emoji
+    .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric shapes
+    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}]+\s*/u, '') // emoji basic
+    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F900}-\u{1F9FF}]+\s*/u, '') // emoji extended
+    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
+    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
 }
 
-function containsImage(node: any): boolean {
-  if (!node || typeof node !== 'object') return false
-  if (node.type === 'element' && (node.tagName === 'img' || node.tagName === 'picture' || node.tagName === 'svg')) return true
-  const kids = (node.children || []) as any[]
-  for (const k of kids) { if (containsImage(k)) return true }
-  return false
-}
-
-function isLeadingIconNode(node: any): boolean {
-  return node.tagName === 'img' || node.tagName === 'picture' || node.tagName === 'svg' ||
-    (node.tagName === 'span' && containsImage(node))
-}
-
-function processTextFirstNode(arr: any[]): boolean {
-  const first = arr[0]
-  const next = stripText(first.value)
-  if (next !== first.value) first.value = next
-  if (!first.value || !first.value.trim()) { arr.shift(); return true }
-  return false
-}
-
-function processElementFirstNode(arr: any[]): boolean {
-  const first = arr[0]
-  if (isLeadingIconNode(first)) { arr.shift(); return true }
-  if (first.tagName === 'p' && Array.isArray(first.children)) {
-    cleanFront(first.children)
-    if (first.children.length === 0) { arr.shift(); return true }
+const handleTextNode = (node: any, arr: any[]) => {
+  const next = stripText(node.value)
+  if (next !== node.value) node.value = next
+  if (!node.value || !node.value.trim()) {
+    arr.shift()
+    return true // handled and should continue
   }
-  return false
+  return false // handled but should break
 }
 
-function cleanFront(arr: any[]): void {
+const handleElementNode = (node: any, arr: any[]) => {
+  if (isIconNode(node)) {
+    arr.shift()
+    return true // handled and should continue
+  }
+  if (node.tagName === 'p' && Array.isArray(node.children)) {
+    cleanFront(node.children)
+    if (node.children.length === 0) {
+      arr.shift()
+      return true // handled and should continue
+    }
+  }
+  return false // handled but should break
+}
+
+const cleanFront = (arr: any[]) => {
   while (arr.length) {
     const first = arr[0]
     if (first?.type === 'text') {
-      if (processTextFirstNode(arr)) continue
+      if (handleTextNode(first, arr)) continue
       break
     }
-    if (first?.type === 'element' && processElementFirstNode(arr)) continue
+    if (first?.type === 'element') {
+      if (handleElementNode(first, arr)) continue
+    }
     break
   }
 }
 
-function stripLeadingInContainer(node: any): void {
-  if (!node || !Array.isArray(node.children)) return
-  cleanFront(node.children)
+// Rehype plugin: remove leading icon nodes (img/svg/span with img) from list items
+const rehypeStripListIcons = () => {
+  const walk = (node: any) => {
+    if (!node || typeof node !== 'object') return
+    if (node.type === 'element' && (node.tagName === 'li' || node.tagName === 'summary')) {
+      if (Array.isArray(node.children)) cleanFront(node.children)
+    }
+    const kids = node.children || []
+    for (const k of kids) walk(k)
+  }
+  return (tree: any) => {
+    walk(tree)
+  }
 }
 
-function walkStripListIcons(node: any): void {
-  if (!node || typeof node !== 'object') return
-  if (node.type === 'element') {
-    if (node.tagName === 'li' || node.tagName === 'summary') stripLeadingInContainer(node)
+const sanitizeDecorators = (text: string): string => {
+  const stripLine = (s: string) => {
+    let line = s
+    // Preserve markdown list bullet prefix
+    const m = line.match(/^(\s*[-*+]\s*)/)
+    const prefix = m ? m[1] : ''
+    if (prefix) line = line.slice(prefix.length)
+    // Remove leading geometric-shape arrows/bullets (includes ▶, ►, ▸ and many others)
+    line = line.replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '')
+    // Remove leading emoji pictographs
+    line = line.replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
+    // Replace leading markdown/HTML image icons with their alt text (to keep names)
+    line = line
+      .replace(/^<img[^>]*alt=["']?([^"'>]+)[^>]*>\s*/i, '$1 ')
+      .replace(/^!\[([^\]]*)\]\([^)]*\)\s*/i, '$1 ')
+    // For list items: convert inline images to their alt text (remove icon but keep name)
+    if (prefix) {
+      line = line
+        .replace(/<img[^>]*alt=["']?([^"'>]+)[^>]*>/gi, '$1')
+        .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    }
+    // Drop stray heading-only lines like '#', '##', '###'
+    if ((prefix + line).trim().match(/^#{1,6}\s*$/)) return ''
+    return (prefix + line)
   }
-  const kids = node.children || []
-  for (const k of kids) walkStripListIcons(k)
+  return (text || '').split('\n').map(stripLine).join('\n')
 }
 
 const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
-  // Rehype plugin: preserve class attribute on div elements and ensure feature-box is detected
-  const rehypePreserveDivClass = React.useMemo(() => {
-    return () => (tree: any) => walkPreserveDivClass(tree)
-  }, [])
-  
-  // Rehype plugin: remove leading icon nodes (img/svg/span with img) from list items
-  const rehypeStripListIcons = React.useMemo(() => {
-    return () => (tree: any) => walkStripListIcons(tree)
-  }, [])
-  const sanitizeDecorators = React.useCallback((text: string): string => {
-    const stripLine = (s: string) => {
-      let line = s
-      // Preserve markdown list bullet prefix
-      const m = line.match(/^(\s*[-*+]\s*)/)
-      const prefix = m ? m[1] : ''
-      if (prefix) line = line.slice(prefix.length)
-      // Remove leading geometric-shape arrows/bullets (includes ▶, ►, ▸ and many others)
-      line = line.replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '')
-      // Remove leading emoji pictographs
-      line = line.replace(/^[\uFE0F\u2060\s]*[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]+\s*/u, '')
-      // Replace leading markdown/HTML image icons with their alt text (to keep names)
-      line = line
-        .replace(/^<img[^>]*alt=["']?([^"'>]+)[^>]*>\s*/i, '$1 ')
-        .replace(/^!\[([^\]]*)\]\([^)]*\)\s*/i, '$1 ')
-      // For list items: convert inline images to their alt text (remove icon but keep name)
-      if (prefix) {
-        line = line
-          .replace(/<img[^>]*alt=["']?([^"'>]+)[^>]*>/gi, '$1')
-          .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-      }
-      // Drop stray heading-only lines like '#', '##', '###'
-      if ((prefix + line).trim().match(/^#{1,6}\s*$/)) return ''
-      return (prefix + line)
-    }
-    return (text || '').split('\n').map(stripLine).join('\n')
-  }, [])
-  const processedBody = React.useMemo(() => sanitizeDecorators(body), [body, sanitizeDecorators])
+  const processedBody = React.useMemo(() => sanitizeDecorators(body), [body])
   return (
+    <div className="markdown-content">
     <ReactMarkdown
       remarkPlugins={([remarkGfm as any, remarkSlug as any] as any)}
       rehypePlugins={[
@@ -148,132 +168,55 @@ const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
         rehypeStripListIcons as any
       ] as any}
       components={{
-        p: ({ node, ...props }) => (
-          <p className="mb-3 text-gray-700 leading-relaxed" {...(props as any)}>
-            {props.children}
-          </p>
-        ),
-        h1: ({ node, ...props }) => (
-          <h1 className="text-3xl font-bold text-gray-900 mt-6 mb-4 pl-5 relative" {...(props as any)}>
-            <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#030E31] via-[#030E31]/60 to-transparent rounded-full"></span>
-            {props.children}
-          </h1>
-        ),
         h2: ({ node, ...props }) => (
-          <h2 className="text-2xl font-bold text-gray-900 mt-6 mb-3" {...(props as any)}>
+          <h2 className="text-xl font-bold text-gray-900 mt-6 mb-4 pl-4 relative border-0 border-l-0 [&_*]:border-0" {...(props as any)}>
+            <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#1A2E6E] via-[#1A2E6E]/80 to-transparent"></span>
             {props.children}
           </h2>
         ),
         h3: ({ node, ...props }) => (
-          <h3 className="text-xl font-semibold text-gray-900 mt-5 mb-2.5" {...(props as any)}>
+          <h3 className="text-lg font-bold text-gray-900 mt-6 mb-4 pl-4 relative border-0 border-l-0 [&_*]:border-0" {...(props as any)}>
+            <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#1A2E6E] via-[#1A2E6E]/80 to-transparent"></span>
             {props.children}
           </h3>
         ),
         h4: ({ node, ...props }) => (
-          <h4 className="text-lg font-semibold text-gray-900 mt-4 mb-2" {...(props as any)}>
+          <h4 className="text-base font-bold text-gray-900 mt-4 mb-3 pl-4 relative border-0 border-l-0 [&_*]:border-0" {...(props as any)}>
+            <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#1A2E6E] via-[#1A2E6E]/80 to-transparent"></span>
             {props.children}
           </h4>
         ),
         img: ({ node, ...props }) => (
           // Constrain and lazy-load images for performance
-          <img loading="lazy" decoding="async" style={{ maxWidth: '100%', height: 'auto' }} {...(props as any)} />
-        ),
-        ul: ({ node, ...props }) => (
-          <ul className="list-disc pl-6 space-y-1.5 mb-3 mt-2" {...(props as any)} />
-        ),
-        ol: ({ node, ...props }) => (
-          <ol className="list-decimal pl-6 space-y-1.5 mb-3 mt-2" {...(props as any)} />
-        ),
-        li: ({ node, ...props }) => (
-          <li className="ml-1 text-gray-700 leading-relaxed" {...(props as any)} />
-        ),
-        table: ({ node, ...props }) => (
-          <div className="overflow-x-auto my-8">
-            <table className="min-w-full border-collapse border border-gray-300" {...(props as any)} />
-          </div>
-        ),
-        thead: ({ node, ...props }) => (
-          <thead {...(props as any)} />
-        ),
-        tbody: ({ node, ...props }) => (
-          <tbody className="bg-white" {...(props as any)} />
-        ),
-        tr: ({ node, ...props }) => (
-          <tr className="bg-white" {...(props as any)} />
-        ),
-        th: ({ node, ...props }) => (
-          <th 
-            className="px-6 py-4 text-left text-sm font-semibold text-white border border-gray-300" 
-            style={{ backgroundColor: '#030E31', minWidth: '180px' }} 
-            {...(props as any)} 
-          />
-        ),
-        td: ({ node, ...props }) => (
-          <td 
-            className="px-6 py-4 text-sm text-gray-900 border border-gray-300 whitespace-pre-line" 
-            style={{ minWidth: '300px' }} 
-            {...(props as any)} 
-          />
-        ),
-        div: (props: any) => {
-          const { node, children, className, class: classProp, ...restProps } = props
-          
-          // CRITICAL: Check node.properties FIRST (this is where rehypePreserveDivClass sets it)
-          const nodeClass = node?.properties?.className || node?.properties?.class
-          const nodeClassStr = nodeClass 
-            ? (Array.isArray(nodeClass) ? nodeClass.join(' ') : String(nodeClass))
-            : ''
-          
-          // Also check props (fallback)
-          const propsClass = className || classProp
-          const propsClassStr = propsClass
-            ? (Array.isArray(propsClass) ? propsClass.join(' ') : String(propsClass))
-            : ''
-          
-          // Combine and check
-          const combinedClass = nodeClassStr || propsClassStr
-          const isFeatureBox = combinedClass && combinedClass.includes('feature-box')
-          
-          if (isFeatureBox) {
-            // Filter out empty children (whitespace-only text nodes, empty elements)
-            const filteredChildren = React.Children.toArray(children).filter((child: any) => {
-              if (typeof child === 'string') {
-                return child.trim().length > 0
-              }
-              if (React.isValidElement(child)) {
-                // Check if element has meaningful content
-                const childProps = child.props as { children?: unknown } | undefined
-                const childChildren = childProps?.children
-                if (typeof childChildren === 'string') {
-                  return childChildren.trim().length > 0
-                }
-                return true
-              }
-              return true
-            })
-            
-            // Don't render if no meaningful content
-            if (filteredChildren.length === 0) {
-              return null
-            }
-            
-            return (
-              <div
-                className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-4"
-                {...restProps}
-              >
-                {filteredChildren}
-              </div>
-            )
-          }
-          
-          // Default div rendering - preserve className
-          return <div className={combinedClass || className || classProp} {...restProps}>{children}</div>
-        }
+          <img loading="lazy" decoding="async" style={{ maxWidth: '100%', height: 'auto' }} {...props as any} />
+          ),
+          h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mt-6 mb-4 text-gray-900" {...props} />,
+          h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mt-5 mb-3 text-gray-900" {...props} />,
+          h3: ({ node, ...props }) => <h3 className="text-xl font-semibold mt-4 mb-2 text-gray-900" {...props} />,
+          h4: ({ node, ...props }) => <h4 className="text-lg font-semibold mt-3 mb-2 text-gray-900" {...props} />,
+          h5: ({ node, ...props }) => <h5 className="text-base font-semibold mt-3 mb-2 text-gray-900" {...props} />,
+          h6: ({ node, ...props }) => <h6 className="text-sm font-semibold mt-2 mb-2 text-gray-900" {...props} />,
+          p: ({ node, ...props }) => <p className="mb-4 text-gray-700 leading-relaxed" {...props} />,
+          a: ({ node, ...props }) => <a className="text-blue-600 underline hover:text-blue-800 transition-colors" {...props} />,
+          ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-4 space-y-2 text-gray-700" {...props} />,
+          ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-4 space-y-2 text-gray-700" {...props} />,
+          li: ({ node, ...props }) => <li className="ml-4" {...props} />,
+          strong: ({ node, ...props }) => <strong className="font-semibold text-gray-900" {...props} />,
+          em: ({ node, ...props }) => <em className="italic" {...props} />,
+          code: ({ node, inline, ...props }: any) => 
+            inline ? (
+              <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
+            ) : (
+              <code className="block bg-gray-100 text-gray-800 p-4 rounded-lg text-sm font-mono overflow-x-auto mb-4" {...props} />
+            ),
+          blockquote: ({ node, ...props }) => (
+            <blockquote className="border-l-4 border-gray-300 pl-4 italic text-gray-600 my-4" {...props} />
+          ),
       }}
     >
       {processedBody}
     </ReactMarkdown>
+    </div>
   )
 }
 

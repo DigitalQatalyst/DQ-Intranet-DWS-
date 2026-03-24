@@ -14,7 +14,7 @@ import {
     Filter,
     MoreHorizontal
 } from 'lucide-react';
-import { useMsal } from "@azure/msal-react";
+// import { useMsal } from "@azure/msal-react"; // Disabled for development
 import { OnboardingProgress } from './OnboardingProgress';
 import { ServiceRequestsTable } from './ServiceRequestsTable';
 import { ObligationsDeadlines as UpcomingTasks } from './ObligationsDeadlines';
@@ -23,7 +23,8 @@ import { Announcements } from './Announcements';
 import { BurgerMenuButton } from '../../../components/Sidebar';
 
 export const Overview: React.FC = () => {
-    const { accounts } = useMsal();
+    // const { accounts } = useMsal(); // Disabled for development
+    const accounts = [{ name: 'Development User', username: 'dev@example.com' }]; // Mock for development
     const account = accounts[0];
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
