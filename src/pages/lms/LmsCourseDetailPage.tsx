@@ -851,6 +851,27 @@ const CourseHero = ({
   </div>
 );
 
+const OutcomesTab = ({ outcomes }: { outcomes: string[] }) => (
+  <section className="space-y-6">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-8 shadow-sm">
+      <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <span className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+          <CheckCircleIcon size={18} className="text-white" />
+        </span>
+        What You'll Learn
+      </h3>
+      <ul className="space-y-4">
+        {outcomes.map((outcome: string) => (
+          <li key={outcome} className="flex items-start gap-3 group">
+            <div className="mt-2 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-125 transition-transform" />
+            <p className="text-gray-700 leading-relaxed">{outcome}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+);
+
 const CourseTabContent = ({
   activeTab,
   course,
@@ -867,233 +888,243 @@ const CourseTabContent = ({
   pathCourses
 }: any) => {
   if (activeTab === 'outcomes') {
-    return (
-      <section className="space-y-6">
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-8 shadow-sm">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <span className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-              <CheckCircleIcon size={18} className="text-white" />
-            </span>
-            What You'll Learn
-          </h3>
-          <ul className="space-y-4">
-            {outcomes.map((outcome: string) => (
-              <li key={outcome} className="flex items-start gap-3 group">
-                <div className="mt-2 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-125 transition-transform" />
-                <p className="text-gray-700 leading-relaxed">{outcome}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    );
+    return <OutcomesTab outcomes={outcomes} />;
   }
 
-  if (activeTab === 'details') {
-    return (
-      <section className="space-y-8">
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-                <Clock size={24} className="text-blue-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase font-medium">Duration</p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {course?.durationMinutes !== undefined && course.durationMinutes > 0
-                    ? formatDurationFromMinutes(course.durationMinutes)
-                    : course?.duration || 'N/A'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
-                <Star size={24} className="text-amber-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase font-medium">Level</p>
-                <p className="text-sm font-semibold text-gray-900">{SFIA_LEVELS.find(level => level.code === course?.levelCode)?.label || course?.levelCode}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
-                <PlayCircleIcon size={24} className="text-purple-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase font-medium">Delivery Mode</p>
-                <p className="text-sm font-semibold text-gray-900">{course?.deliveryMode}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
-                <BookOpen size={24} className="text-green-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase font-medium">
-                  {isTrack ? 'Courses' : 'Lessons'}
-                </p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {isTrack
-                    ? `${curriculum.length} courses`
-                    : `${courseStats.totalLessons} lessons`}
-                </p>
-              </div>
-            </div>
+const DetailsTab = ({ course, isTrack, curriculum, courseStats, highlights, firstPath, pathCourses }: any) => (
+  <section className="space-y-8">
+    <div className="bg-white border border-gray-200 rounded-lg p-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+            <Clock size={24} className="text-blue-600" />
           </div>
-        </div>
-
-        <div>
-          <p className="text-gray-700 leading-relaxed text-base">
-            {course?.summary}
-          </p>
-        </div>
-
-        {highlights.length > 0 && (
           <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              {isTrack ? 'Track Highlights' : 'Course Highlights'}
-            </h3>
-            <div className="space-y-3">
-              {highlights.map((highlight: string) => (
-                <div key={highlight} className="flex items-start gap-3">
-                  <CheckCircleIcon size={20} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">{highlight}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {firstPath && pathCourses.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-2" style={{ color: '#030F35' }}>
-              Part of {firstPath.pathTitle}
-            </h3>
-            <p className="text-gray-700 mb-4 text-sm">
-              This course is part of a larger learning track. Explore other courses in this track to complete your learning journey.
+            <p className="text-xs text-gray-500 uppercase font-medium">Duration</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {course?.durationMinutes !== undefined && course.durationMinutes > 0
+                ? formatDurationFromMinutes(course.durationMinutes)
+                : course?.duration || 'N/A'}
             </p>
-            <div className="flex flex-wrap items-center gap-2">
-              {pathCourses.map((pathCourse: any, index: number) => {
-                const isCurrentCourse = pathCourse.slug === course?.slug;
-                return (
-                  <React.Fragment key={pathCourse.id}>
-                    {index > 0 && (
-                      <span className="text-gray-400" style={{ color: '#030F35' }}>→</span>
-                    )}
-                    {isCurrentCourse ? (
-                      <span className="font-medium text-sm" style={{ color: '#030F35' }}>
-                        {pathCourse.title}
-                      </span>
-                    ) : (
-                      <Link
-                        to={`/lms/${pathCourse.slug}`}
-                        className="font-medium text-sm hover:underline"
-                        style={{ color: '#030F35' }}
-                      >
-                        {pathCourse.title}
-                      </Link>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
           </div>
-        )}
-      </section>
-    );
-  }
-
-  if (activeTab === 'curriculum') {
-    return (
-      <section className="space-y-4">
-        {curriculum && curriculum.length > 0 && (
-          <div className="flex items-center justify-start mb-2">
-            <span className="text-sm text-gray-600">
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+            <Star size={24} className="text-amber-600" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 uppercase font-medium">Level</p>
+            <p className="text-sm font-semibold text-gray-900">{SFIA_LEVELS.find((level: any) => level.code === course?.levelCode)?.label || course?.levelCode}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
+            <PlayCircleIcon size={24} className="text-purple-600" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 uppercase font-medium">Delivery Mode</p>
+            <p className="text-sm font-semibold text-gray-900">{course?.deliveryMode}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
+            <BookOpen size={24} className="text-green-600" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 uppercase font-medium">
+              {isTrack ? 'Courses' : 'Lessons'}
+            </p>
+            <p className="text-sm font-semibold text-gray-900">
               {isTrack
-                ? `This track has ${curriculum.length} ${curriculum.length === 1 ? 'course' : 'courses'}`
-                : `This course has ${courseStats.totalModules} ${courseStats.totalModules === 1 ? 'module' : 'modules'} and ${courseStats.totalLessons} ${courseStats.totalLessons === 1 ? 'lesson' : 'lessons'}`}
-            </span>
-          </div>
-        )}
-        {curriculum && curriculum.length > 0 ? (
-          <div className="space-y-4">
-            {curriculum
-              .sort((a: any, b: any) => a.order - b.order)
-              .map((item: any, curriculumIndex: number) => (
-                <ModuleCard
-                  key={item.id || curriculumIndex}
-                  item={item}
-                  curriculumIndex={curriculumIndex}
-                  isTrack={isTrack}
-                  expandedCourses={expandedCourses}
-                  toggleExpand={(id: string) => {
-                    setExpandedCourses((prev: Set<string>) => {
-                      const next = new Set(prev);
-                      if (next.has(id)) next.delete(id);
-                      else next.add(id);
-                      return next;
-                    });
-                  }}
-                  courseSlug={course?.slug || ''}
-                  allFlattenedLessons={allFlattenedLessons}
-                  navigate={navigate}
-                />
-              ))}
-          </div>
-        ) : (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600">
-              Curriculum details are not available for this course yet.
+                ? `${curriculum.length} courses`
+                : `${courseStats.totalLessons} lessons`}
             </p>
           </div>
-        )}
-      </section>
-    );
-  }
-
-  if (activeTab === 'reviews') {
-    return (
-      <section className="space-y-6">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <MessageSquare size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Reviews Yet</h3>
-          <p className="text-gray-600">
-            Be the first to share your experience with this course. Reviews will appear here once available.
-          </p>
         </div>
-      </section>
-    );
-  }
+      </div>
+    </div>
 
-  if (activeTab === 'faq' && isTrack && course?.faq?.length > 0) {
-    return (
-      <section className="space-y-6">
-        <div className="flex items-center gap-3 mb-4">
-          <HelpCircle size={24} style={{ color: '#030F35' }} />
-          <h2 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
-        </div>
-        <div className="space-y-4">
-          {course.faq.map((item: any, index: number) => (
-            <div
-              key={index}
-              className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-start">
-                <span className="mr-3 flex-shrink-0" style={{ color: '#030F35' }}>
-                  Q{index + 1}:
-                </span>
-                <span>{item.question}</span>
-              </h3>
-              <p className="text-gray-700 leading-relaxed ml-8">
-                {item.answer}
-              </p>
+    <div>
+      <p className="text-gray-700 leading-relaxed text-base">
+        {course?.summary}
+      </p>
+    </div>
+
+    {highlights.length > 0 && (
+      <div>
+        <h3 className="text-xl font-bold text-gray-900 mb-4">
+          {isTrack ? 'Track Highlights' : 'Course Highlights'}
+        </h3>
+        <div className="space-y-3">
+          {highlights.map((highlight: string) => (
+            <div key={highlight} className="flex items-start gap-3">
+              <CheckCircleIcon size={20} className="text-green-500 mt-0.5 flex-shrink-0" />
+              <span className="text-gray-700">{highlight}</span>
             </div>
           ))}
         </div>
-      </section>
+      </div>
+    )}
+
+    {firstPath && pathCourses.length > 0 && (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-2" style={{ color: '#030F35' }}>
+          Part of {firstPath.pathTitle}
+        </h3>
+        <p className="text-gray-700 mb-4 text-sm">
+          This course is part of a larger learning track. Explore other courses in this track to complete your learning journey.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          {pathCourses.map((pathCourse: any, index: number) => {
+            const isCurrentCourse = pathCourse.slug === course?.slug;
+            return (
+              <React.Fragment key={pathCourse.id}>
+                {index > 0 && (
+                  <span className="text-gray-400" style={{ color: '#030F35' }}>→</span>
+                )}
+                {isCurrentCourse ? (
+                  <span className="font-medium text-sm" style={{ color: '#030F35' }}>
+                    {pathCourse.title}
+                  </span>
+                ) : (
+                  <Link
+                    to={`/lms/${pathCourse.slug}`}
+                    className="font-medium text-sm hover:underline"
+                    style={{ color: '#030F35' }}
+                  >
+                    {pathCourse.title}
+                  </Link>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+    )}
+  </section>
+);
+
+  if (activeTab === 'details') {
+    return (
+      <DetailsTab 
+        course={course} 
+        isTrack={isTrack} 
+        curriculum={curriculum} 
+        courseStats={courseStats} 
+        highlights={highlights} 
+        firstPath={firstPath} 
+        pathCourses={pathCourses} 
+      />
     );
+  }
+
+const CurriculumTab = ({ isTrack, curriculum, courseStats, expandedCourses, setExpandedCourses, courseSlug, allFlattenedLessons, navigate }: any) => (
+  <section className="space-y-4">
+    {curriculum && curriculum.length > 0 && (
+      <div className="flex items-center justify-start mb-2">
+        <span className="text-sm text-gray-600">
+          {isTrack
+            ? `This track has ${curriculum.length} ${curriculum.length === 1 ? 'course' : 'courses'}`
+            : `This course has ${courseStats.totalModules} ${courseStats.totalModules === 1 ? 'module' : 'modules'} and ${courseStats.totalLessons} ${courseStats.totalLessons === 1 ? 'lesson' : 'lessons'}`}
+        </span>
+      </div>
+    )}
+    {curriculum && curriculum.length > 0 ? (
+      <div className="space-y-4">
+        {curriculum
+          .sort((a: any, b: any) => a.order - b.order)
+          .map((item: any, curriculumIndex: number) => (
+            <ModuleCard
+              key={item.id || curriculumIndex}
+              item={item}
+              curriculumIndex={curriculumIndex}
+              isTrack={isTrack}
+              expandedCourses={expandedCourses}
+              toggleExpand={(id: string) => {
+                setExpandedCourses((prev: Set<string>) => {
+                  const next = new Set(prev);
+                  if (next.has(id)) next.delete(id);
+                  else next.add(id);
+                  return next;
+                });
+              }}
+              courseSlug={courseSlug}
+              allFlattenedLessons={allFlattenedLessons}
+              navigate={navigate}
+            />
+          ))}
+      </div>
+    ) : (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+        <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
+        <p className="text-gray-600">
+          Curriculum details are not available for this course yet.
+        </p>
+      </div>
+    )}
+  </section>
+);
+
+  if (activeTab === 'curriculum') {
+    return (
+      <CurriculumTab 
+        isTrack={isTrack} 
+        curriculum={curriculum} 
+        courseStats={courseStats} 
+        expandedCourses={expandedCourses} 
+        setExpandedCourses={setExpandedCourses} 
+        courseSlug={course?.slug || ''} 
+        allFlattenedLessons={allFlattenedLessons} 
+        navigate={navigate} 
+      />
+    );
+  }
+
+const ReviewsTab = () => (
+  <section className="space-y-6">
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+      <MessageSquare size={48} className="mx-auto text-gray-400 mb-4" />
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Reviews Yet</h3>
+      <p className="text-gray-600">
+        Be the first to share your experience with this course. Reviews will appear here once available.
+      </p>
+    </div>
+  </section>
+);
+
+const FaqTab = ({ course }: any) => (
+  <section className="space-y-6">
+    <div className="flex items-center gap-3 mb-4">
+      <HelpCircle size={24} style={{ color: '#030F35' }} />
+      <h2 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
+    </div>
+    <div className="space-y-4">
+      {course.faq.map((item: any, index: number) => (
+        <div
+          key={index}
+          className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+        >
+          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-start">
+            <span className="mr-3 flex-shrink-0" style={{ color: '#030F35' }}>
+              Q{index + 1}:
+            </span>
+            <span>{item.question}</span>
+          </h3>
+          <p className="text-gray-700 leading-relaxed ml-8">
+            {item.answer}
+          </p>
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+  if (activeTab === 'reviews') {
+    return <ReviewsTab />;
+  }
+
+  if (activeTab === 'faq' && isTrack && course?.faq?.length > 0) {
+    return <FaqTab course={course} />;
   }
 
   return null;

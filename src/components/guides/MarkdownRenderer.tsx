@@ -64,21 +64,40 @@ const rehypeStripListIcons = () => {
       .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
   }
 
+  const handleTextNode = (node: any, arr: any[]) => {
+    const next = stripText(node.value)
+    if (next !== node.value) node.value = next
+    if (!node.value || !node.value.trim()) {
+      arr.shift()
+      return true // handled and should continue
+    }
+    return false // handled but should break
+  }
+
+  const handleElementNode = (node: any, arr: any[]) => {
+    if (isIconNode(node)) {
+      arr.shift()
+      return true // handled and should continue
+    }
+    if (node.tagName === 'p' && Array.isArray(node.children)) {
+      cleanFront(node.children)
+      if (node.children.length === 0) {
+        arr.shift()
+        return true // handled and should continue
+      }
+    }
+    return false // handled but should break
+  }
+
   const cleanFront = (arr: any[]) => {
     while (arr.length) {
       const first = arr[0]
       if (first?.type === 'text') {
-        const next = stripText(first.value)
-        if (next !== first.value) first.value = next
-        if (!first.value || !first.value.trim()) { arr.shift(); continue }
+        if (handleTextNode(first, arr)) continue
         break
       }
       if (first?.type === 'element') {
-        if (isIconNode(first)) { arr.shift(); continue }
-        if (first.tagName === 'p' && Array.isArray(first.children)) {
-          cleanFront(first.children)
-          if (first.children.length === 0) { arr.shift(); continue }
-        }
+        if (handleElementNode(first, arr)) continue
       }
       break
     }
