@@ -5,18 +5,25 @@
 -- This creates the base records that sync scripts will update
 -- =====================================================
 
--- Insert base guide records (empty content, will be populated by sync scripts)
-INSERT INTO public.guides (slug, title, status, guide_type, domain)
-VALUES
-  ('dq-vision', 'DQ Vision & Mission', 'Approved', 'Strategy', 'GHC'),
-  ('dq-hov', 'House of Values', 'Approved', 'Strategy', 'GHC'),
-  ('dq-persona', 'DQ Persona', 'Approved', 'Strategy', 'GHC'),
-  ('dq-ghc-overview', 'GHC Overview', 'Approved', 'Strategy', 'GHC'),
-  ('dq-agile-tms', 'Agile TMS', 'Approved', 'Strategy', 'Agile'),
-  ('dq-agile-sos', 'Agile SoS', 'Approved', 'Strategy', 'Agile'),
-  ('dq-agile-flows', 'Agile Flows', 'Approved', 'Strategy', 'Agile'),
-  ('dq-agile-6xd', 'Agile 6xD', 'Approved', 'Strategy', 'Agile')
-ON CONFLICT (slug) DO NOTHING;
+-- Define constants to avoid string duplication
+DO $$
+DECLARE
+  v_strategy_status CONSTANT VARCHAR := 'Approved';
+  v_strategy_type CONSTANT VARCHAR := 'Strategy';
+BEGIN
+  -- Insert base guide records (empty content, will be populated by sync scripts)
+  INSERT INTO public.guides (slug, title, status, guide_type, domain)
+  VALUES
+    ('dq-vision', 'DQ Vision & Mission', v_strategy_status, v_strategy_type, 'GHC'),
+    ('dq-hov', 'House of Values', v_strategy_status, v_strategy_type, 'GHC'),
+    ('dq-persona', 'DQ Persona', v_strategy_status, v_strategy_type, 'GHC'),
+    ('dq-ghc-overview', 'GHC Overview', v_strategy_status, v_strategy_type, 'GHC'),
+    ('dq-agile-tms', 'Agile TMS', v_strategy_status, v_strategy_type, 'Agile'),
+    ('dq-agile-sos', 'Agile SoS', v_strategy_status, v_strategy_type, 'Agile'),
+    ('dq-agile-flows', 'Agile Flows', v_strategy_status, v_strategy_type, 'Agile'),
+    ('dq-agile-6xd', 'Agile 6xD', v_strategy_status, v_strategy_type, 'Agile')
+  ON CONFLICT (slug) DO NOTHING;
+END $$;
 
 -- Verify insertion
 SELECT slug, title, status, guide_type, domain
