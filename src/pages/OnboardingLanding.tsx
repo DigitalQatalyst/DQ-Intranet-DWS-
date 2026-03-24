@@ -531,13 +531,12 @@ export function OnboardingLanding() {
                   </div>
                 </FadeInUpOnScroll>
                 <FadeInUpOnScroll delay={0.1} className="md:col-span-6 lg:col-span-6">
-                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border border-slate-200/70">
+                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden border border-slate-200/70">
                     <img 
                       src="https://image2url.com/r2/default/images/1770972456174-3432815c-ed3e-43c7-9a75-42aaa65db071.webp" 
                       alt="DQ associates collaborating in a global digital workspace" 
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
                   </div>
                 </FadeInUpOnScroll>
               </div>
@@ -551,7 +550,7 @@ export function OnboardingLanding() {
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 items-center">
                 <FadeInUpOnScroll delay={0.1} className="md:col-span-6 lg:col-span-6 order-2 md:order-1">
-                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border border-slate-200/60">
+                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden border border-slate-200/60">
                     <img 
                       src="https://i.ibb.co/hR2rjJzY/Screenshot-2026-01-20-at-10-45-17-AM.png"
                       alt="Golden Honeycomb of Competence Framework"
@@ -563,7 +562,6 @@ export function OnboardingLanding() {
                         }
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                 </div>
               </FadeInUpOnScroll>
                 <FadeInUpOnScroll className="md:col-span-6 lg:col-span-6 order-1 md:order-2">
@@ -625,7 +623,7 @@ export function OnboardingLanding() {
                   </div>
                 </FadeInUpOnScroll>
                 <FadeInUpOnScroll delay={0.1} className="md:col-span-6 lg:col-span-6">
-                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border border-slate-200/60">
+                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden border border-slate-200/60">
                     <img 
                       src="https://image2url.com/r2/default/images/1770973586407-9eaf23f4-1e09-4b63-ac44-e3a28805c125.jpeg"
                       alt="Team collaborating in front of a digital board with agile plans"
@@ -636,7 +634,6 @@ export function OnboardingLanding() {
                         target.src = 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80';
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
                   </div>
                 </FadeInUpOnScroll>
               </div>
@@ -650,7 +647,7 @@ export function OnboardingLanding() {
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 items-center">
                 <FadeInUpOnScroll delay={0.05} className="md:col-span-6 lg:col-span-6 order-2 md:order-1">
-                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border border-slate-800/60">
+                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden border border-slate-800/60">
                     <img 
                       src="https://i.ibb.co/Nn1m3yxD/IT-04.webp"
                       alt="Associates in a strategy discussion at sunrise"
@@ -660,7 +657,6 @@ export function OnboardingLanding() {
                         target.src = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80';
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent" />
                   </div>
                 </FadeInUpOnScroll>
                 <FadeInUpOnScroll className="md:col-span-6 lg:col-span-6 order-1 md:order-2">
