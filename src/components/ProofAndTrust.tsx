@@ -909,7 +909,7 @@ const ProofAndTrust: React.FC = () => {
           <div className="flex justify-center relative z-10">
             <a
               href="/marketplace/guides/associate-testimonials"
-              className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center border-2 border-gray-200"
+              className="px-6 py-3 bg-[#1b2e6e] hover:bg-[#1b2e6e]/90 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
             >
               Read More Associate Stories
             </a>
