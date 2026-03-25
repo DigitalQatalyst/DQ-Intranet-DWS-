@@ -453,7 +453,7 @@ export async function fetchAllLearningPaths(): Promise<LmsCard[]> {
     locations: ['Riyadh'],
     audience: parseTextToArray(path.audience),
     status: normalizeStatus(path.status),
-    summary: path.description || path.title,
+    summary: path.excerpt || path.description || path.title,
     department: parseTextToArray(path.department),
     courseType: undefined,
     track: undefined,

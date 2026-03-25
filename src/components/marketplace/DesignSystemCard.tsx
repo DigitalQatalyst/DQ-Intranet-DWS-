@@ -19,9 +19,9 @@ export const DesignSystemCard: React.FC<DesignSystemCardProps> = ({
   type
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer h-[350px] flex flex-col p-3 pb-0">
-      {/* Hero Image */}
-      <div className="rounded-lg overflow-hidden mb-3 bg-gradient-to-br from-blue-900 via-blue-700 to-purple-600">
+    <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer h-[350px] flex flex-col overflow-hidden">
+      {/* Hero Image - extends to card edges */}
+      <div className="bg-gradient-to-br from-blue-900 via-blue-700 to-purple-600">
         <img 
           src={imageUrl} 
           alt={title}
@@ -31,7 +31,7 @@ export const DesignSystemCard: React.FC<DesignSystemCardProps> = ({
       </div>
 
       {/* Card Body */}
-      <div className="flex flex-col">
+      <div className="flex flex-col p-3 flex-grow">
         {/* Title */}
         <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
           {title}
@@ -42,13 +42,16 @@ export const DesignSystemCard: React.FC<DesignSystemCardProps> = ({
           {description}
         </p>
 
+        {/* Date */}
+        <p className="text-xs text-gray-400 mb-3">March 16, 2026</p>
+
         {/* Spacer to push button to bottom */}
         <div className="flex-grow"></div>
 
         {/* View Details Button */}
         <Link
-          to={`/marketplace/design-system/${id}?tab=${type}`}
-          className="w-full block text-center px-6 py-2 bg-[#0a1628] text-white rounded-full font-bold text-sm hover:bg-[#162238] transition-colors duration-200 mb-[-12px]"
+          to={`/marketplace/design-system/${id}`}
+          className="w-full block text-center px-6 py-2 bg-[#0a1628] text-white rounded-full font-bold text-sm hover:bg-[#162238] transition-colors duration-200 mb-3"
         >
           View Details
         </Link>

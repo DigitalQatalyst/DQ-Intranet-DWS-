@@ -1,7 +1,0 @@
-Please add the actual 6xd.png and ghc.png image files to this directory.
-
-The placeholder files are currently 1x1 pixel transparent images.
-
-Replace them with:
-- 6xd.png: The Agile 6xD diagram
-- ghc.png: The Golden Honeycomb of Competence diagram

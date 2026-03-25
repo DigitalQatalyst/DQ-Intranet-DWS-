@@ -1092,20 +1092,11 @@ function runDesignSystemLoad(s: ItemSetters, params: DesignSystemRunParams): voi
       item.category && categoryArray.includes(item.category)
     );
   }
-  const locationFilters = filters['location'];
-  const locationArray = Array.isArray(locationFilters)
-    ? locationFilters
-    : (typeof locationFilters === 'string' && locationFilters ? locationFilters.split(',').filter(Boolean) : []);
-  if (locationArray.length > 0) {
-    filteredDesignSystemItems = filteredDesignSystemItems.filter(item =>
-      item.location && locationArray.includes(item.location)
-    );
-  }
   const searchQueryValue = queryParams.get('q') || '';
   if (searchQueryValue) {
     const query = searchQueryValue.toLowerCase();
     filteredDesignSystemItems = filteredDesignSystemItems.filter(item => {
-      const searchableText = [item.title, item.description, item.category, item.location].filter(Boolean).join(' ').toLowerCase();
+      const searchableText = [item.title, item.description, item.category].filter(Boolean).join(' ').toLowerCase();
       return searchableText.includes(query);
     });
   }

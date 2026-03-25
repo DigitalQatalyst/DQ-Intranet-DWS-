@@ -34,7 +34,7 @@ if (!process.env.SONAR_TOKEN) {
 }
 
 // Create sonar-project.properties if it doesn't exist or update it
-const sonarPropsPath = path.join(process.cwd(), 'sonar-project.properties');
+const sonarPropsPath = path.resolve(__dirname, '..', 'sonar-project.properties');
 const sonarProps = `sonar.projectKey=DigitalQatalyst_DQ-Intranet-DWS-
 sonar.organization=dq
 sonar.projectName=DQ Intranet DWS

@@ -33,12 +33,16 @@ jobs:
 
       - name: 📊 Extract commit info
         id: commit_info
+        env:
+          RAW_AUTHOR_NAME: ${{ github.event.head_commit.author.name }}
+          RAW_AUTHOR_EMAIL: ${{ github.event.head_commit.author.email }}
+          RAW_COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           # Sanitize author name and email to prevent script injection
-          AUTHOR_NAME="$(echo "${{ github.event.head_commit.author.name }}" | tr -d '\"\`\$\;&|<>')"
-          AUTHOR_EMAIL="$(echo "${{ github.event.head_commit.author.email }}" | tr -d '\"\`\$\;&|<>')"
-          COMMIT_MSG="$(echo "${{ github.event.head_commit.message }}" | tr -d '\"\`\$\;&|<>' | head -c 200)"
-          
+          AUTHOR_NAME="$(echo "$RAW_AUTHOR_NAME" | tr -d '\"\`\$\;&|<>')"
+          AUTHOR_EMAIL="$(echo "$RAW_AUTHOR_EMAIL" | tr -d '\"\`\$\;&|<>')"
+          COMMIT_MSG="$(echo "$RAW_COMMIT_MSG" | tr -d '\"\`\$\;&|<>' | head -c 200)"
+
           # Set outputs safely
           echo "author_name=$AUTHOR_NAME" >> $GITHUB_OUTPUT
           echo "author_email=$AUTHOR_EMAIL" >> $GITHUB_OUTPUT

@@ -842,13 +842,13 @@ const ProofAndTrust: React.FC = () => {
             </h2>
             <div>
               <p className="text-base sm:text-lg text-gray-600 mx-auto mb-8 text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
-                DQ brings Agile to life through GHC and 7S ways of working—driving alignment, feedback, and continuous improvement.
+                DQ brings Agile to life through GHC and 7S ways of working driving alignment, feedback, and continuous improvement.
               </p>
             </div>
           </FadeInUpOnScroll>
 
           <StaggeredFadeIn
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
             staggerDelay={0.15}
           >
             {impactStats.map((stat, index) => {
@@ -881,7 +881,7 @@ const ProofAndTrust: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
             <a
               href="/ghc"
-              className="px-6 py-3 bg-[#FB5535] hover:bg-[#E64A2E] text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
+              className="px-6 py-3 bg-[#1b2e6e] hover:bg-[#1b2e6e]/90 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
             >
               Explore DQ GHC
             </a>
@@ -896,7 +896,7 @@ const ProofAndTrust: React.FC = () => {
             </h2>
             <div>
               <p className="text-base sm:text-lg text-gray-600 mx-auto leading-tight whitespace-nowrap text-center overflow-hidden text-ellipsis">
-                Short reflections from Qatalysts on how DQ DNA helps them collaborate better, learn faster, and deliver more impact.
+                Real reflections from Qatalysts on how DQ DNA shapes the way we think, collaborate, and create meaningful impact.
               </p>
             </div>
           </FadeInUpOnScroll>
@@ -909,7 +909,7 @@ const ProofAndTrust: React.FC = () => {
           <div className="flex justify-center relative z-10">
             <a
               href="/marketplace/guides/associate-testimonials"
-              className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center border-2 border-gray-200"
+              className="px-6 py-3 bg-[#1b2e6e] hover:bg-[#1b2e6e]/90 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
             >
               Read More Associate Stories
             </a>

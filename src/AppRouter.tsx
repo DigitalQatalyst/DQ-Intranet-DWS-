@@ -92,7 +92,6 @@ export function AppRouter() {
             <Route path="/blueprints/:projectId/:folderId" element={<BlueprintsPage />} />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
             <Route path="/thank-you" element={<ThankYou />} />
-            {/* Redirect encoded leading-space path to canonical route */}
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/communities/*" element={<CommunitiesRouter />} />

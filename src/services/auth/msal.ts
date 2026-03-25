@@ -7,9 +7,24 @@ import {
 
 // Support both NEXT_PUBLIC_* and VITE_* envs
 const env = (import.meta as any).env as Record<string, string | undefined>;
-console.log(env);
 
-const CLIENT_ID = env.NEXT_PUBLIC_AAD_CLIENT_ID || env.VITE_AZURE_CLIENT_ID || "f996140d-d79b-419d-a64c-f211d23a38ad";
+// Client ID must be provided via environment variable
+const CLIENT_ID = env.NEXT_PUBLIC_AAD_CLIENT_ID || env.VITE_AZURE_CLIENT_ID;
+
+// Development mode check - allow missing credentials in development
+const isDevelopment = import.meta.env?.DEV;
+const isValidClientId = CLIENT_ID && CLIENT_ID !== 'your_azure_client_id_here';
+
+if (!CLIENT_ID || !isValidClientId) {
+  if (isDevelopment) {
+    console.warn('⚠️ Azure AD Client ID not configured for development - authentication will be bypassed');
+  } else {
+    throw new Error(
+      "Azure AD Client ID is required. Please set VITE_AZURE_CLIENT_ID or NEXT_PUBLIC_AAD_CLIENT_ID in your .env file.\n\n" +
+      "This application uses Azure Entra ID (not B2C) for authentication."
+    );
+  }
+}
 const REDIRECT_URI =
   env.NEXT_PUBLIC_REDIRECT_URI ||
   env.VITE_AZURE_REDIRECT_URI ||
@@ -26,89 +41,111 @@ const API_SCOPES = (env.NEXT_PUBLIC_API_SCOPES || env.VITE_AZURE_SCOPES || "")
 // Always request standard OIDC scopes; include email to avoid UPN-only claims and offline_access for refresh tokens
 const DEFAULT_OIDC_SCOPES = ["openid", "profile", "email", "offline_access"] as const;
 
-// Vite exposes only VITE_* via import.meta.env (not process.env)
-const TENANT_NAME = env.NEXT_PUBLIC_B2C_TENANT_NAME || env.VITE_B2C_TENANT_NAME || "dqproj";
-// Optional dedicated Sign-Up policy/user flow
-const POLICY_SIGNUP = env.NEXT_PUBLIC_B2C_POLICY_SIGNUP || env.VITE_B2C_POLICY_SIGNUP;
+// Entra ID (Azure AD) Configuration
+// Tenant ID is required for Entra ID authentication
+// Can be provided as either tenant ID (GUID) or verified domain name
+// Tenant ID or Domain must be provided via environment variable
+const TENANT_ID = env.NEXT_PUBLIC_TENANT_ID || env.VITE_AZURE_TENANT_ID;
+const TENANT_DOMAIN = env.NEXT_PUBLIC_TENANT_DOMAIN || env.VITE_AZURE_TENANT_DOMAIN;
 
-// Select correct login host. Prefer explicit host; default to B2C (b2clogin.com).
-// If you are using Entra External Identities (CIAM), set NEXT_PUBLIC_IDENTITY_HOST or VITE_IDENTITY_HOST
-// to e.g. "yourtenant.ciamlogin.com".
+// Skip the rest of configuration in development if credentials are invalid
+const shouldSkipAuth = isDevelopment && (!CLIENT_ID || !isValidClientId);
 
+// Wrap initialization in a function to avoid exporting mutable lets
+const initializeAuth = () => {
+  if (shouldSkipAuth) return { msalConfig: null, msalInstance: null, defaultLoginRequest: null, signupRequest: null };
 
+  // Custom domain support (optional)
+  const CUSTOM_DOMAIN = env.NEXT_PUBLIC_CIAM_CUSTOM_DOMAIN || env.VITE_AZURE_CUSTOM_DOMAIN;
 
+  // Compute authority URL for Entra ID (Azure AD):
+  let computedAuthority: string;
+  if (CUSTOM_DOMAIN && TENANT_ID) {
+    computedAuthority = `https://${CUSTOM_DOMAIN}/${TENANT_ID}`;
+  } else if (TENANT_ID) {
+    computedAuthority = `https://login.microsoftonline.com/${TENANT_ID}`;
+  } else if (TENANT_DOMAIN) {
+    computedAuthority = `https://login.microsoftonline.com/${TENANT_DOMAIN}`;
+  } else if (env.VITE_AZURE_AUTHORITY || env.NEXT_PUBLIC_AZURE_AUTHORITY) {
+    computedAuthority = env.VITE_AZURE_AUTHORITY || env.NEXT_PUBLIC_AZURE_AUTHORITY || '';
+    if (computedAuthority.includes('/common')) {
+      throw new Error(
+        `Invalid Azure AD authority configuration: The /common endpoint is not supported for single-tenant applications.`
+      );
+    }
+  } else {
+    throw new Error(
+      "Azure AD Tenant configuration is required."
+    );
+  }
 
-// For external Entra ID (Azure AD), prefer tenant ID or domain
-// const TENANT_ID = env.NEXT_PUBLIC_TENANT_ID || env.VITE_AZURE_TENANT_ID;
-// const CUSTOM_DOMAIN = env.NEXT_PUBLIC_CIAM_CUSTOM_DOMAIN || env.VITE_AZURE_CUSTOM_DOMAIN;
-const SUB = env.NEXT_PUBLIC_CIAM_SUBDOMAIN || env.VITE_AZURE_SUBDOMAIN;
+  if (computedAuthority.includes('/common')) {
+    throw new Error(`CRITICAL: Azure AD authority must be tenant-specific, not /common.`);
+  }
 
-const LOGIN_HOST =
-  env.NEXT_PUBLIC_IDENTITY_HOST ||
-  env.VITE_IDENTITY_HOST ||
-  (SUB ? `${SUB}.ciamlogin.com` : `${TENANT_NAME}.b2clogin.com`);
-const AUTHORITY_SIGNUP_SIGNIN = `https://${LOGIN_HOST}/${TENANT_NAME}.onmicrosoft.com/`;
-const AUTHORITY_SIGNUP = POLICY_SIGNUP
-  ? `https://${LOGIN_HOST}/${TENANT_NAME}.onmicrosoft.com/${POLICY_SIGNUP}`
-  : AUTHORITY_SIGNUP_SIGNIN;
+  console.log('🔐 Azure AD Authority:', computedAuthority);
+  console.log('🔐 Azure AD Client ID:', CLIENT_ID);
+  console.log('🔐 Azure AD Tenant ID:', TENANT_ID);
 
-// Known authorities for MSAL (hostnames only)
-// const knownAuthorities: string[] = (() => {
-//   if (CUSTOM_DOMAIN) return [CUSTOM_DOMAIN];
-//   if (TENANT_ID) {
-//     try {
-//       const url = new URL(computedAuthority);
-//       return [url.host];
-//     } catch {
-//       return [];
-//     }
-//   }
-//   if (SUB) return [`${SUB}.ciamlogin.com`];
-//   try {
-//     const url = new URL(computedAuthority);
-//     return [url.host];
-//   } catch {
-//     return [];
-//   }
-// })();
+  const knownAuthorities: string[] = (() => {
+    if (CUSTOM_DOMAIN) {
+      try {
+        const url = new URL(computedAuthority);
+        return [url.hostname];
+      } catch {
+        return [CUSTOM_DOMAIN];
+      }
+    }
+    try {
+      const url = new URL(computedAuthority);
+      return [url.hostname];
+    } catch {
+      return ["login.microsoftonline.com"];
+    }
+  })();
 
-export const msalConfig: Configuration = {
-  auth: {
-    clientId: CLIENT_ID,
-    authority: AUTHORITY_SIGNUP_SIGNIN,
-    knownAuthorities: [LOGIN_HOST],
-    redirectUri: REDIRECT_URI,
-    postLogoutRedirectUri: POST_LOGOUT_REDIRECT_URI,
-    // Stay on the redirectUri after login instead of bouncing back
-    // to the page where login was initiated.
-    navigateToLoginRequestUrl: false,
-  },
-  cache: {
-    cacheLocation: BrowserCacheLocation.LocalStorage,
-    storeAuthStateInCookie: false,
-  },
-  system: {
-    loggerOptions: {
-      logLevel: LogLevel.Warning,
-      loggerCallback: (level, message) => {
-        if (level >= LogLevel.Error) console.error(message);
+  const AUTHORITY = computedAuthority;
+
+  const msalConfigObj = {
+    auth: {
+      clientId: CLIENT_ID,
+      authority: AUTHORITY,
+      knownAuthorities: knownAuthorities,
+      redirectUri: REDIRECT_URI,
+      postLogoutRedirectUri: POST_LOGOUT_REDIRECT_URI,
+      navigateToLoginRequestUrl: false,
+    },
+    cache: {
+      cacheLocation: BrowserCacheLocation.LocalStorage,
+      storeAuthStateInCookie: false,
+    },
+    system: {
+      loggerOptions: {
+        logLevel: LogLevel.Warning,
+        loggerCallback: (level: any, message: any) => {
+          if (level >= LogLevel.Error) console.error(message);
+        },
       },
     },
-  },
+  };
+
+  const msalInst = new PublicClientApplication(msalConfigObj);
+
+  const ENABLE_GRAPH_USER_READ = (env.VITE_MSAL_ENABLE_GRAPH_FALLBACK || env.NEXT_PUBLIC_MSAL_ENABLE_GRAPH_FALLBACK) === 'true';
+  const GRAPH_SCOPES: string[] = ENABLE_GRAPH_USER_READ ? ["User.Read"] : [];
+
+  const loginReq = {
+    scopes: Array.from(new Set([...(API_SCOPES.length ? API_SCOPES : []), ...DEFAULT_OIDC_SCOPES, ...GRAPH_SCOPES])),
+    authority: AUTHORITY,
+  };
+
+  const signupReq = {
+    scopes: Array.from(new Set([...(API_SCOPES.length ? API_SCOPES : []), ...DEFAULT_OIDC_SCOPES, ...GRAPH_SCOPES])),
+    authority: AUTHORITY,
+  };
+
+  return { msalConfig: msalConfigObj, msalInstance: msalInst, defaultLoginRequest: loginReq, signupRequest: signupReq };
 };
 
-export const msalInstance = new PublicClientApplication(msalConfig);
+export const { msalConfig, msalInstance, defaultLoginRequest, signupRequest } = initializeAuth();
 
-// Optionally include Graph User.Read for email resolution fallback (see AuthContext)
-const ENABLE_GRAPH_USER_READ = (env.VITE_MSAL_ENABLE_GRAPH_FALLBACK || env.NEXT_PUBLIC_MSAL_ENABLE_GRAPH_FALLBACK) === 'true';
-const GRAPH_SCOPES: string[] = ENABLE_GRAPH_USER_READ ? ["User.Read"] : [];
-
-export const defaultLoginRequest = {
-  scopes: Array.from(new Set([...(API_SCOPES.length ? API_SCOPES : []), ...DEFAULT_OIDC_SCOPES, ...GRAPH_SCOPES])),
-  authority: AUTHORITY_SIGNUP_SIGNIN,
-};
-
-export const signupRequest = {
-  scopes: Array.from(new Set([...(API_SCOPES.length ? API_SCOPES : []), ...DEFAULT_OIDC_SCOPES, ...GRAPH_SCOPES])),
-  authority: AUTHORITY_SIGNUP,
-};

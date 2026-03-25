@@ -136,12 +136,12 @@ const handleCacheAndResponse = (res: AnyResponse, output: any, req: AnyRequest) 
   if (inm && inm === etag) {
     res.status?.(304);
     res.end?.();
-    return true; // Response sent
+    return 304;
   }
 
   res.status?.(200);
   res.end?.(json);
-  return true; // Response sent
+  return 200;
 };
 
 // Helper function to handle GET requests

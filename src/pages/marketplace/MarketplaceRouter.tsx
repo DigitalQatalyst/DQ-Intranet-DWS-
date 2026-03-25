@@ -172,6 +172,7 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/design-system/vds/:cardId" element={<VDSServiceDetailPage />} />
       <Route path="/design-system/cds/:cardId" element={<CDSServiceDetailPage />} />
       <Route path="/design-system/cids/:cardId" element={<CIDSServiceDetailPage />} />
+      {/* Direct service detail routes */}
       <Route path="/vds-service-detail" element={<VDSServiceDetailPage />} />
       <Route path="/cds-service-detail" element={<CDSServiceDetailPage />} />
       <Route path="/cids-service-detail" element={<CIDSServiceDetailPage />} />
