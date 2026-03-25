@@ -34,7 +34,7 @@ export const VDS_SERVICE_CARDS: VDSServiceCard[] = [
     id: 'vds-framework',
     title: 'V.DS (Video Design System)',
     description: "DQ Stories' unified blueprint for producing high-impact, cinematic-quality video content across every stage of creation and distribution.",
-    section: 'V1.0.1 | 01.11.25',
+    section: '',
     system: 'V.DS',
     type: 'framework',
     content: {

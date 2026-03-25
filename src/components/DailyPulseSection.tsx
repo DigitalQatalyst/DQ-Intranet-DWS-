@@ -1,3 +1,4 @@
+import { secureRandom } from '../utils/secureRandom';
 import { useState } from 'react';
 import { RefreshCw, Bookmark, Share2 } from 'lucide-react';
 import { FadeInUpOnScroll } from './AnimationUtils';
@@ -19,7 +20,14 @@ const DailyPulseSection = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleNewQuote = () => {
-    const randomIndex = Math.floor(Math.random() * dailyQuotes.length);
+    let randomIndex = 0;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      randomIndex = Math.floor((buf[0] / 0xffffffff) * dailyQuotes.length);
+    } else {
+      randomIndex = Math.floor(secureRandom() * dailyQuotes.length);
+    }
     setCurrentQuote(dailyQuotes[randomIndex]);
     setIsExpanded(false);
   };

@@ -1,3 +1,4 @@
+import { secureRandom } from '../../utils/secureRandom';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { CommunitiesLayout } from '../CommunitiesLayout';
@@ -88,7 +89,7 @@ export default function Home() {
   };
   const getRecentActivity = (communityName: string): string => {
     const activities = [`New discussion started in ${communityName}`, `Member shared a resource in ${communityName}`, `Upcoming event announced in ${communityName}`, `Community guidelines updated in ${communityName}`];
-    return activities[Math.floor(Math.random() * activities.length)];
+    return activities[Math.floor(secureRandom() * activities.length)];
   };
   if (authLoading) {
     return <CommunitiesLayout>
@@ -158,9 +159,9 @@ export default function Home() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
                     {communities.slice(0, 3).map(community => {
                   const activityLevel = getActivityLevel(community.member_count || 0);
-                  const activeMembers = Math.floor((community.member_count || 0) * (0.6 + Math.random() * 0.3));
+                  const activeMembers = Math.floor((community.member_count || 0) * (0.6 + secureRandom() * 0.3));
                   const tags = ['Abu Dhabi', 'Innovation', community.name.includes('Tech') ? 'Technology' : 'Business', activityLevel === 'high' ? 'Popular' : 'Growing'];
-                  const isPrivate = Math.random() > 0.7;
+                  const isPrivate = secureRandom() > 0.7;
                   return <div key={community.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
                           <CommunityCard item={{
                       id: community.id,

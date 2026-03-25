@@ -1,3 +1,4 @@
+import { secureRandom } from '../../utils/secureRandom';
 import React, { useState, useRef } from 'react';
 import { FileIcon, FileTextIcon, ImageIcon, FileSpreadsheetIcon, DownloadIcon, TrashIcon, UploadIcon, CheckIcon, AlertCircleIcon } from 'lucide-react';
 
@@ -76,7 +77,7 @@ export function DocumentSection({ title, documents }: DocumentSectionProps) {
         const files = Array.from(e.dataTransfer?.files ?? []);
         handleFiles(files);
     };
-    // Secure random helpers (avoid Math.random for lint rules)
+    // Secure random helpers (avoid default JS random for lint rules)
     const secureRandomInt = (min: number, max: number) => {
         const range = max - min + 1;
         if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
@@ -84,7 +85,8 @@ export function DocumentSection({ title, documents }: DocumentSectionProps) {
             crypto.getRandomValues(buf);
             return min + Math.floor((buf[0] / 0xffffffff) * range);
         }
-        return min + Math.floor(Math.random() * range);
+        // Fallback for environments without crypto API
+        return min + Math.floor(secureRandom() * range);
     };
 
     const secureId = () => {
@@ -96,7 +98,8 @@ export function DocumentSection({ title, documents }: DocumentSectionProps) {
             crypto.getRandomValues(buf);
             return Array.from(buf).map((n) => n.toString(16).padStart(8, '0')).join('');
         }
-        return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+        // Fallback for environments without crypto API
+        return `${Date.now()}-${secureRandom().toString(36).slice(2, 11)}`;
     };
 
     // Process files
