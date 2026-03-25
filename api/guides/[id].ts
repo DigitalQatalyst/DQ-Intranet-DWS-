@@ -94,7 +94,7 @@ async function handleGet(id: string, isUuid: boolean, urlObj: URL, req: AnyReque
   };
 
   const json = JSON.stringify(out);
-  const etag = 'W/"' + createHash('sha1').update(json).digest('hex') + '"';
+  const etag = 'W/"' + createHash('sha256').update(json).digest('hex') + '"';
   res.setHeader?.('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
   res.setHeader?.('ETag', etag);
   if (req.headers['if-none-match'] === etag) { res.status?.(304); res.end?.(); return; }
