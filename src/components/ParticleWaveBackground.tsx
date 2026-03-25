@@ -21,15 +21,19 @@ const ParticleWaveBackground: React.FC = () => {
     camera.position.set(0, 8, 20);
     camera.lookAt(0, 0, 0);
 
-    // Wave geometry factory
-    const createWave = (size: number, particleSize: number, color: number, opacity: number) => {
-      const geometry = new THREE.PlaneGeometry(40, 40, size, size);
+    // Wave layer factory
+    const createWave = (
+      segments: number,
+      particleSize: number,
+      color: number,
+      opacity: number,
+      zOffset: number
+    ) => {
+      const geometry = new THREE.PlaneGeometry(50, 50, segments, segments);
       const positions = geometry.attributes.position.array as Float32Array;
-      // store original y for animation
-      const originalY = new Float32Array(positions.length / 3);
-      for (let i = 0; i < positions.length / 3; i++) {
-        originalY[i] = positions[i * 3 + 1];
-      }
+      const originalPositions = new Float32Array(positions.length);
+      originalPositions.set(positions);
+
       const material = new THREE.PointsMaterial({
         color,
         size: particleSize,
@@ -39,48 +43,70 @@ const ParticleWaveBackground: React.FC = () => {
         depthWrite: false,
         sizeAttenuation: true,
       });
+
       const points = new THREE.Points(geometry, material);
-      points.rotation.x = -Math.PI / 3; // -60deg
-      return { points, geometry, originalY };
+      points.rotation.x = -Math.PI / 3; // -60deg perspective
+      points.position.z = zOffset;
+
+      return { points, geometry, originalPositions };
     };
 
-    const wave1 = createWave(200, 0.08, 0x06b6d4, 0.8);
-    const wave2 = createWave(150, 0.05, 0x3b82f6, 0.4);
-    wave2.points.position.z = -5;
+    // Layer 1 — Coral/Orange (front, fastest)
+    const layer1 = createWave(200, 0.08, 0xe85d4a, 0.8, 0);
+    // Layer 2 — Purple (mid, medium)
+    const layer2 = createWave(200, 0.05, 0x9b6ba8, 0.5, -5);
+    // Layer 3 — Deep Blue (back, slowest)
+    const layer3 = createWave(200, 0.04, 0x4361ee, 0.3, -10);
 
-    scene.add(wave1.points);
-    scene.add(wave2.points);
+    scene.add(layer1.points);
+    scene.add(layer2.points);
+    scene.add(layer3.points);
 
     let time = 0;
     let animId: number;
+
+    const animateLayer = (
+      positions: Float32Array,
+      original: Float32Array,
+      freqX: number,
+      freqY: number,
+      freqXY: number,
+      timeMultX: number,
+      timeMultY: number,
+      timeMultXY: number,
+      ampA: number,
+      ampB: number,
+      ampC: number
+    ) => {
+      const count = positions.length / 3;
+      for (let i = 0; i < count; i++) {
+        const x = original[i * 3];
+        const y = original[i * 3 + 1];
+        positions[i * 3 + 2] =
+          Math.sin(x * freqX + time * timeMultX) * ampA +
+          Math.sin(y * freqY + time * timeMultY) * ampB +
+          Math.sin((x + y) * freqXY + time * timeMultXY) * ampC;
+      }
+    };
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
       time += 0.008;
 
-      // Animate wave1
-      const pos1 = wave1.geometry.attributes.position.array as Float32Array;
-      for (let i = 0; i < pos1.length / 3; i++) {
-        const x = pos1[i * 3];
-        const y = wave1.originalY[i];
-        pos1[i * 3 + 2] =
-          Math.sin(x * 0.3 + time) * 1.5 +
-          Math.sin(y * 0.3 + time) * 1.5 +
-          Math.sin((x + y) * 0.2 + time) * 2.5;
-      }
-      wave1.geometry.attributes.position.needsUpdate = true;
+      // Layer 1 — coral, fastest
+      const pos1 = layer1.geometry.attributes.position.array as Float32Array;
+      animateLayer(pos1, layer1.originalPositions, 0.3, 0.3, 0.2, 1, 1.2, 0.8, 1.5, 1.5, 2.0);
+      layer1.geometry.attributes.position.needsUpdate = true;
 
-      // Animate wave2
-      const pos2 = wave2.geometry.attributes.position.array as Float32Array;
-      for (let i = 0; i < pos2.length / 3; i++) {
-        const x = pos2[i * 3];
-        const y = wave2.originalY[i];
-        pos2[i * 3 + 2] =
-          Math.sin(x * 0.3 + time + 1) * 1.5 +
-          Math.sin(y * 0.3 + time + 1) * 1.5 +
-          Math.sin((x + y) * 0.2 + time + 1) * 2.0;
-      }
-      wave2.geometry.attributes.position.needsUpdate = true;
+      // Layer 2 — purple, medium
+      const pos2 = layer2.geometry.attributes.position.array as Float32Array;
+      animateLayer(pos2, layer2.originalPositions, 0.25, 0.25, 0.15, 0.7, 0.9, 0.6, 1.8, 1.8, 2.2);
+      layer2.geometry.attributes.position.needsUpdate = true;
+
+      // Layer 3 — blue, slowest
+      const pos3 = layer3.geometry.attributes.position.array as Float32Array;
+      animateLayer(pos3, layer3.originalPositions, 0.2, 0.2, 0.12, 0.5, 0.6, 0.4, 2.0, 2.0, 2.5);
+      layer3.geometry.attributes.position.needsUpdate = true;
 
       // Gentle camera sway
       camera.position.x = Math.sin(time * 0.2) * 2;
@@ -101,10 +127,12 @@ const ParticleWaveBackground: React.FC = () => {
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
-      wave1.geometry.dispose();
-      wave2.geometry.dispose();
-      (wave1.points.material as THREE.Material).dispose();
-      (wave2.points.material as THREE.Material).dispose();
+      layer1.geometry.dispose();
+      layer2.geometry.dispose();
+      layer3.geometry.dispose();
+      (layer1.points.material as THREE.Material).dispose();
+      (layer2.points.material as THREE.Material).dispose();
+      (layer3.points.material as THREE.Material).dispose();
       renderer.dispose();
       if (mount.contains(renderer.domElement)) {
         mount.removeChild(renderer.domElement);

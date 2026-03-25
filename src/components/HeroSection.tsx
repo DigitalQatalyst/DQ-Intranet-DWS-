@@ -27,7 +27,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
     <div
       className="relative w-full overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #0a1628 0%, #082f49 50%, #0a1628 100%)',
+        background: 'linear-gradient(135deg, #e85d4a 0%, #6b4c7a 50%, #1e3a5f 100%)',
         height: "100vh",
       }}
       data-id={dataId}
@@ -35,12 +35,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
       {/* Three.js particle wave */}
       <ParticleWaveBackground />
 
-      {/* Soft cyan/blue glows */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%)', filter: 'blur(120px)' }} />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)', filter: 'blur(150px)' }} />
+      {/* Atmospheric glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(232,93,74,0.15) 0%, transparent 70%)', filter: 'blur(150px)' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(107,76,122,0.20) 0%, transparent 70%)', filter: 'blur(120px)' }} />
+      <div className="absolute top-1/4 left-0 w-80 h-80 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(219,112,147,0.10) 0%, transparent 70%)', filter: 'blur(140px)' }} />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(67,97,238,0.15) 0%, transparent 70%)', filter: 'blur(160px)' }} />
 
       {/* Vignette overlay */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(10,22,40,0.6) 100%)' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(30,20,40,0.7) 100%)' }} />
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible whitespace-nowrap">
