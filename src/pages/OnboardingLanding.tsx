@@ -514,9 +514,9 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#F2B9A3] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-slate-700 leading-relaxed">
-                          <p>Before you dive in, understand the organisation behind the work.</p>
-                          <p>DQ is designed to move with clarity — connecting teams, roles, and decision paths so work flows with purpose and pace.</p>
-                          <p>Use this as your internal map to see how DQ fits together, where work moves, and who to engage along the way.</p>
+                          <p>Before you dive in, understand how DQ is structured and how work flows across the organisation.</p>
+                          <p>DQ is designed to move with clarity by connecting teams, roles, and decision paths so work flows with purpose and momentum.</p>
+                          <p>Use this as your internal guide to understand how DQ fits together, how work moves, and who to engage along the way.</p>
                         </div>
                       </div>
                       <button
@@ -531,13 +531,12 @@ export function OnboardingLanding() {
                   </div>
                 </FadeInUpOnScroll>
                 <FadeInUpOnScroll delay={0.1} className="md:col-span-6 lg:col-span-6">
-                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border border-slate-200/70">
+                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden border border-slate-200/70">
                     <img 
                       src="https://image2url.com/r2/default/images/1770972456174-3432815c-ed3e-43c7-9a75-42aaa65db071.webp" 
                       alt="DQ associates collaborating in a global digital workspace" 
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
                   </div>
                 </FadeInUpOnScroll>
               </div>
@@ -551,7 +550,7 @@ export function OnboardingLanding() {
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 items-center">
                 <FadeInUpOnScroll delay={0.1} className="md:col-span-6 lg:col-span-6 order-2 md:order-1">
-                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border border-slate-200/60">
+                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden border border-slate-200/60">
                     <img 
                       src="https://i.ibb.co/hR2rjJzY/Screenshot-2026-01-20-at-10-45-17-AM.png"
                       alt="Golden Honeycomb of Competence Framework"
@@ -563,7 +562,6 @@ export function OnboardingLanding() {
                         }
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                 </div>
               </FadeInUpOnScroll>
                 <FadeInUpOnScroll className="md:col-span-6 lg:col-span-6 order-1 md:order-2">
@@ -575,9 +573,9 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#F2B9A3] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-slate-700 leading-relaxed">
-                          <p>At DQ, everything you do — how you think, collaborate, and make decisions — is guided by one shared system: GHC.</p>
-                          <p>It connects our purpose, culture, leadership, and delivery into a single, clear way of working.</p>
-                          <p>This helps you understand the standards we expect at DQ — and the impact you’re here to create.</p>
+                          <p>At DQ, how you think, collaborate, and make decisions is guided by one shared system, GHC.</p>
+                          <p>It connects our purpose, culture, leadership, and delivery into one clear way of working.</p>
+                          <p>This helps you understand the standards we work by and the impact you are here to create.</p>
                         </div>
                       </div>
                       <button
@@ -625,7 +623,7 @@ export function OnboardingLanding() {
                   </div>
                 </FadeInUpOnScroll>
                 <FadeInUpOnScroll delay={0.1} className="md:col-span-6 lg:col-span-6">
-                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border border-slate-200/60">
+                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden border border-slate-200/60">
                     <img 
                       src="https://image2url.com/r2/default/images/1770973586407-9eaf23f4-1e09-4b63-ac44-e3a28805c125.jpeg"
                       alt="Team collaborating in front of a digital board with agile plans"
@@ -636,7 +634,6 @@ export function OnboardingLanding() {
                         target.src = 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80';
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
                   </div>
                 </FadeInUpOnScroll>
               </div>
@@ -650,7 +647,7 @@ export function OnboardingLanding() {
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 items-center">
                 <FadeInUpOnScroll delay={0.05} className="md:col-span-6 lg:col-span-6 order-2 md:order-1">
-                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden shadow-2xl border border-slate-800/60">
+                  <div className="relative w-full aspect-[4/3] md:aspect-[5/4] rounded-3xl overflow-hidden border border-slate-800/60">
                     <img 
                       src="https://i.ibb.co/Nn1m3yxD/IT-04.webp"
                       alt="Associates in a strategy discussion at sunrise"
@@ -660,7 +657,6 @@ export function OnboardingLanding() {
                         target.src = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80';
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent" />
                   </div>
                 </FadeInUpOnScroll>
                 <FadeInUpOnScroll className="md:col-span-6 lg:col-span-6 order-1 md:order-2">
@@ -672,9 +668,9 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#C27555] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-[#676f7e] leading-relaxed">
-                          <p>Your role is more than a title — it is your part in the system that turns intent into execution.</p>
+                          <p>Your role is more than a title. It is how you contribute to the system that turns intent into execution.</p>
                           <p>At DQ, you are empowered to own your work, contribute with purpose, and help move delivery forward with others.</p>
-                          <p>This is where your journey becomes uniquely yours — and where your impact starts to matter.</p>
+                          <p>This is where your journey becomes your own, and where your impact begins.</p>
                         </div>
                       </div>
                       <button

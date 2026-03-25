@@ -8,6 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './Header';
 import { heroContent } from '../data/landingPageContent';
+import ParticleWaveBackground from './ParticleWaveBackground';
 
 interface HeroSectionProps {
   "data-id"?: string;
@@ -24,23 +25,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
 
   return (
     <div
-      className="relative w-full bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 overflow-hidden"
+      className="relative w-full overflow-hidden"
       style={{
-        backgroundImage:
-          "linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url('https://images.unsplash.com/photo-1517651685227-828652601fa3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2670')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        background: 'linear-gradient(135deg, #e85d4a 0%, #6b4c7a 50%, #1e3a5f 100%)',
         height: "100vh",
       }}
       data-id={dataId}
     >
-      {/* Animated gradient overlay */}
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-blue-500/40 to-purple-600/40 mix-blend-multiply"
-        style={{
-          animation: "pulse-gradient 8s ease-in-out infinite alternate",
-        }}
-      ></div>
+      {/* Three.js particle wave */}
+      <ParticleWaveBackground />
+
+      {/* Atmospheric glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(232,93,74,0.15) 0%, transparent 70%)', filter: 'blur(150px)' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(107,76,122,0.20) 0%, transparent 70%)', filter: 'blur(120px)' }} />
+      <div className="absolute top-1/4 left-0 w-80 h-80 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(219,112,147,0.10) 0%, transparent 70%)', filter: 'blur(140px)' }} />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(67,97,238,0.15) 0%, transparent 70%)', filter: 'blur(160px)' }} />
+
+      {/* Vignette overlay */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(30,20,40,0.7) 100%)' }} />
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible whitespace-nowrap">
@@ -106,7 +108,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
                 block: 'start'
               });
             }}
-            className="px-8 py-3 bg-[linear-gradient(135deg,_#FB5535_0%,_#1A2E6E_50%,_#030F35_100%)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group"
+            className="px-8 py-3 bg-[#1b2e6e] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group"
           >
             <span className="relative z-10">
               Browse Marketplaces
@@ -133,20 +135,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
           </button>
         </StaggeredFadeIn>
       </div>
-      {/* Add keyframes for gradient animation */}
-      <style>{`
-        @keyframes pulse-gradient {
-          0% {
-            opacity: 0.4;
-          }
-          50% {
-            opacity: 0.6;
-          }
-          100% {
-            opacity: 0.4;
-          }
-        }
-      `}</style>
     </div>
   );
 };
