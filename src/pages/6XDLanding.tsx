@@ -191,7 +191,6 @@ export default function SixXDLanding() {
         heroHeadlineHighlightWord: "theoretical",
         heroHeadlineFontSize: "clamp(40px, 5.5vw, 72px)",
         heroSingleLine: false,
-        heroSupportingSingleLine: true,
         heroSupporting:
           "Agile 6xD is how DQ turns digital and AI transformation into execution designed, delivered, and sustained through real work.",
         heroCTA: "Read the Agile 6xD Storybook",
