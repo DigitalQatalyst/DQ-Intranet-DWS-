@@ -458,7 +458,7 @@ export default function Community() {
             {/* Preview */}
             {newImageUrl && <div className="relative h-32 w-full overflow-hidden rounded-md border border-gray-200">
                 <img src={newImageUrl} alt="Preview" className="h-full w-full object-cover" onError={e => {
-              ;
+              
               (e.target as HTMLImageElement).src = fallbackImageUrl;
             }} />
               </div>}

@@ -27,13 +27,12 @@ jobs:
       - name: 📊 Extract commit info
         id: commit_info
         env:
-          HEAD_COMMIT_NAME: ${{ github.event.head_commit.author.name }}
-          HEAD_COMMIT_EMAIL: ${{ github.event.head_commit.author.email }}
-          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          AUTHOR_NAME: ${{ github.event.head_commit.author.name }}
+          AUTHOR_EMAIL: ${{ github.event.head_commit.author.email }}
         run: |
-          echo "author_name=$HEAD_COMMIT_NAME" >> $GITHUB_OUTPUT
-          echo "author_email=$HEAD_COMMIT_EMAIL" >> $GITHUB_OUTPUT
-          echo "🔍 Commit by: $HEAD_COMMIT_NAME ($HEAD_COMMIT_EMAIL)"
+          echo "author_name=$AUTHOR_NAME" >> $GITHUB_OUTPUT
+          echo "author_email=$AUTHOR_EMAIL" >> $GITHUB_OUTPUT
+          echo "🔍 Commit by: $AUTHOR_NAME ($AUTHOR_EMAIL)"
 
       - name: 🧰 Setup Node
         uses: actions/setup-node@v4
@@ -54,9 +53,12 @@ jobs:
 
       # CRITICAL: Create .vercel directory with project linking BEFORE pulling
       - name: 🔧 Link to Vercel Project
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
         run: |
           mkdir -p .vercel
-          echo "{\"projectId\":\"${{ secrets.VERCEL_PROJECT_ID }}\",\"orgId\":\"${{ secrets.VERCEL_ORG_ID }}\"}" > .vercel/project.json
+          echo "{\"projectId\":\"$VERCEL_PROJECT_ID\",\"orgId\":\"$VERCEL_ORG_ID\"}" > .vercel/project.json
           cat .vercel/project.json
           echo "✅ Linked to Vercel project: dq-intranet"
 
@@ -64,14 +66,17 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
 
       - name: 🏗️ Build with Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            vercel build --prod --token=$VERCEL_TOKEN
           else
-            vercel build --token=${{ secrets.VERCEL_TOKEN }}
+            vercel build --token=$VERCEL_TOKEN
           fi
 
       - name: 🌐 Deploy to Vercel
@@ -87,8 +92,8 @@ jobs:
           echo "🔍 Branch: $BRANCH_NAME"
           echo "👤 Deployed by: $AUTHOR_NAME ($AUTHOR_EMAIL)"
           echo "📦 Project ID: $VERCEL_PROJECT_ID"
-          
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
             echo "🚀 Deploying PRODUCTION build..."
             DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN)
             echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
@@ -103,11 +108,14 @@ jobs:
       - name: 💬 Comment on PR (if applicable)
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+          AUTHOR_NAME: ${{ steps.commit_info.outputs.author_name }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const deployUrl = '${{ steps.deploy.outputs.deploy_url }}';
-            const author = '${{ steps.commit_info.outputs.author_name }}';
+            const deployUrl = process.env.DEPLOY_URL;
+            const author = process.env.AUTHOR_NAME;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -116,10 +124,14 @@ jobs:
             });
 
       - name: 📝 Deployment summary
+        env:
+          AUTHOR_NAME: ${{ steps.commit_info.outputs.author_name }}
+          AUTHOR_EMAIL: ${{ steps.commit_info.outputs.author_email }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
         run: |
           echo "## 🎉 Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Deployed by:** ${{ steps.commit_info.outputs.author_name }} (${{ steps.commit_info.outputs.author_email }})" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** ${{ steps.deploy.outputs.deploy_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`$GITHUB_REF_NAME\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed by:** $AUTHOR_NAME ($AUTHOR_EMAIL)" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`$GITHUB_SHA\`" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY

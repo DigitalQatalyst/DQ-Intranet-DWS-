@@ -1,0 +1,114 @@
+import { useEffect, useRef } from 'react'
+import DOMPurify from 'dompurify'
+
+export interface SummaryTableColumn {
+  header: string
+  accessor: string
+}
+
+export interface SummaryTableProps {
+  readonly columns: SummaryTableColumn[]
+  readonly data: Record<string, string | number>[]
+  readonly title?: string
+  readonly onViewFull?: () => void
+  readonly getSummary?: (value: string | number) => string
+}
+
+interface SafeCellProps {
+  readonly value: string | number
+}
+
+function SafeCell({ value }: SafeCellProps) {
+  const ref = useRef<HTMLTableCellElement>(null)
+
+  useEffect(() => {
+    if (!ref.current) return
+    const raw = typeof value === 'string' ? value : String(value)
+    const html = raw.replaceAll('\n', '<br>').replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    const fragment = DOMPurify.sanitize(html, { RETURN_DOM_FRAGMENT: true })
+    ref.current.replaceChildren(fragment)
+  }, [value])
+
+  return (
+    <td
+      ref={ref}
+      className="px-6 py-4 text-sm text-gray-900 border border-gray-300 whitespace-pre-line"
+    />
+  )
+}
+
+export function SummaryTable({ columns, data, title, onViewFull, getSummary }: SummaryTableProps) {
+  const extractSummary = (value: string | number): string => {
+    if (getSummary) return getSummary(value)
+
+    if (typeof value === 'string') {
+      const lines = value.split('\n').filter(line => line.trim())
+      const bulletPoints = lines.filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'))
+
+      if (bulletPoints.length > 0) {
+        return bulletPoints.slice(0, 2).join('\n')
+      }
+
+      const sentences = value.split(/[.!?]+/).filter(s => s.trim())
+      if (sentences.length > 0) {
+        return sentences.slice(0, 2).join('. ').trim() + (sentences.length > 2 ? '...' : '')
+      }
+
+      const firstTwoLines = lines.slice(0, 2).join('\n')
+      return firstTwoLines.length > 150 ? firstTwoLines.substring(0, 150) + '...' : firstTwoLines
+    }
+
+    return String(value)
+  }
+
+  return (
+    <div className="my-8">
+      {title && (
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">{title}</h3>
+      )}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse border border-gray-300">
+          <thead>
+            <tr style={{ backgroundColor: '#030E31' }}>
+              {columns.map((col) => (
+                <th
+                  key={col.accessor}
+                  className="px-6 py-4 text-left text-sm font-semibold text-white border border-gray-300"
+                >
+                  {col.header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white">
+            {data.slice(0, 2).map((row, rowIdx) => (
+              <tr key={`row-${rowIdx}-${String(row[columns[0]?.accessor] ?? rowIdx).slice(0, 20)}`} className="bg-white">
+                {columns.map((col, colIdx) => {
+                  const value = row[col.accessor]
+                  const isLastColumn = colIdx === columns.length - 1
+                  const displayValue = isLastColumn && typeof value === 'string' && value.length > 100
+                    ? extractSummary(value)
+                    : (value ?? '')
+                  return <SafeCell key={col.accessor} value={displayValue} />
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {onViewFull && data.length > 2 && (
+        <div className="mt-4 text-right">
+          <button
+            onClick={onViewFull}
+            className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+            style={{ backgroundColor: '#030E31' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#020A28'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#030E31'}
+          >
+            View Full Table
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
