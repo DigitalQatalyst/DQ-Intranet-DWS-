@@ -881,7 +881,7 @@ const ProofAndTrust: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
             <a
               href="/ghc"
-              className="px-6 py-3 bg-[#FB5535] hover:bg-[#E64A2E] text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
+              className="px-6 py-3 bg-[#1b2e6e] hover:bg-[#1b2e6e]/90 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
             >
               Explore DQ GHC
             </a>
