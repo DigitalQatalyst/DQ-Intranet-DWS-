@@ -17,7 +17,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: "https://9609a7336af8.ngrok-free.app/services-api",
+    uri: import.meta.env.VITE_GRAPHQL_API_URL ?? "https://9609a7336af8.ngrok-free.app/services-api",
   }),
   cache: new InMemoryCache(),
 });

@@ -13,6 +13,10 @@ import { DQWorkDirectoryPage } from '../DQWorkDirectoryPage';
 import JobDetailPage from './JobDetailPage';
 import JobApplicationPage from './JobApplicationPage';
 import DesignSystemDetailPage from './DesignSystemDetailPage';
+import DesignSystemFrameworkPage from './DesignSystemFrameworkPage';
+import VDSServiceDetailPage from './VDSServiceDetailPage';
+import CDSServiceDetailPage from './CDSServiceDetailPage';
+import CIDSServiceDetailPage from './CIDSServiceDetailPage';
 const GrowthAreasPage = React.lazy(() => import('../GrowthAreasPage'));
 const GuideDetailPage = React.lazy(() => import('../guides/GuideDetailPage'));
 const GuideDetailsPage = React.lazy(() => import('../guides/GuideDetailsPage'));
@@ -164,6 +168,13 @@ export const MarketplaceRouter: React.FC = () => {
       {/* Design System Marketplace */}
       <Route path="/design-system" element={<MarketplacePage marketplaceType="design-system" title={designSystemConfig.title} description={designSystemConfig.description} promoCards={[]} />} />
       <Route path="/design-system/:cardId" element={<DesignSystemDetailPage />} />
+      <Route path="/design-system/:cardId/framework" element={<DesignSystemFrameworkPage />} />
+      <Route path="/design-system/vds/:cardId" element={<VDSServiceDetailPage />} />
+      <Route path="/design-system/cds/:cardId" element={<CDSServiceDetailPage />} />
+      <Route path="/design-system/cids/:cardId" element={<CIDSServiceDetailPage />} />
+      <Route path="/vds-service-detail" element={<VDSServiceDetailPage />} />
+      <Route path="/cds-service-detail" element={<CDSServiceDetailPage />} />
+      <Route path="/cids-service-detail" element={<CIDSServiceDetailPage />} />
       {/* News & Opportunities Marketplace - Redirected to /guides */}
       <Route path="/news" element={<Navigate to="/marketplace/guides" replace />} />
       <Route path="/news/action-solver-podcast" element={<PodcastSeriesPage />} />
