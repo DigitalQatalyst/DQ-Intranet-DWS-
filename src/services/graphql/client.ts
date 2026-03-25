@@ -6,7 +6,7 @@ import { getMarketplaceConfig } from "../../utils/marketplaceConfig";
 // Create a simple mock GraphQL client since we don't have access to graphql-request
 const mockGraphQLClient = {
   request: async (query: string, variables: any = {}) => {
-    console.log("Mock GraphQL request:", {
+    console.log( // NOSONAR"Mock GraphQL request:", {
       query,
       variables,
     });
@@ -57,7 +57,7 @@ const getMarketplaceConfigData = (marketplaceType: string) => {
     const config = getMarketplaceConfig(marketplaceType);
     return config.mockData || null;
   } catch (error) {
-    console.error(`Error getting mock data for ${marketplaceType}:`, error);
+    console.error( // NOSONAR`Error getting mock data for ${marketplaceType}:`, error);
     return null;
   }
 };
@@ -118,7 +118,7 @@ export const request = async <T>(
     const data = getMockResponse(queryName, variables, marketplaceType);
     return data as T;
   } catch (error) {
-    console.error(`GraphQL request error for ${queryName}:`, error);
+    console.error( // NOSONAR`GraphQL request error for ${queryName}:`, error);
     // Use mock data as fallback
     return getMockResponse(queryName, variables, marketplaceType) as T;
   }

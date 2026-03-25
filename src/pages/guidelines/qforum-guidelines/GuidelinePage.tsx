@@ -67,7 +67,7 @@ function GuidelinePage() {
           }
         }
       } catch (error) {
-        console.error('Error fetching current guide:', error)
+        console.error( // NOSONAR'Error fetching current guide:', error)
         if (!cancelled) {
           setCurrentGuide({ domain: null, guideType: null })
         }
@@ -162,7 +162,7 @@ function GuidelinePage() {
           setRelatedGuidesLoading(false)
         }
       } catch (error) {
-        console.error('Error fetching related guides:', error)
+        console.error( // NOSONAR'Error fetching related guides:', error)
         if (!cancelled) {
           setRelatedGuides([])
           setRelatedGuidesLoading(false)

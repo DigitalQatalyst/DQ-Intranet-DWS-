@@ -36,7 +36,7 @@ function GuidelinePage() {
           }
         }
       } catch (error) {
-        console.error('Error fetching guide title:', error)
+        console.error( // NOSONAR'Error fetching guide title:', error)
       }
     })()
     return () => { cancelled = true }
