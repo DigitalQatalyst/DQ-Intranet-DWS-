@@ -48,10 +48,10 @@ function GuidelinePage() {
     let procedureCount = 0
     let responsibilitiesCount = 0
     
-    return html.replaceAll(/<(h[1-6])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, content) => {
+    return html.replaceAll(/<(h[1-6])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, content) => { // NOSONAR - bounded HTML string from trusted DB
       // Clean the content for ID generation
       const cleanContent = content
-        .replaceAll(/<[^>]+>/g, '') // Remove HTML tags
+        .replaceAll(/<[^>]+>/g, '') // NOSONAR - Remove HTML tags, bounded input
         .replaceAll('&nbsp;', ' ') // Replace &nbsp; with space
         .replaceAll('.', '') // Remove periods
         .trim()
