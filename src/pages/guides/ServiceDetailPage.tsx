@@ -359,7 +359,7 @@ export const ServiceDetailPage: React.FC = () => {
       case 'practice':
         return {
           text: 'View Course',
-          url: 'https://dq-intranet-pykepfa4x-digitalqatalysts-projects.vercel.app/lms/ghc-course/lesson/7191832f-d3ac-4577-9eb2-80c9a57e7e28'
+          url: '/lesson/7191832f-d3ac-4577-9eb2-80c9a57e7e28'
         };
       case 'usage':
         return {
