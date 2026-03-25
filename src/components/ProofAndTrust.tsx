@@ -896,7 +896,7 @@ const ProofAndTrust: React.FC = () => {
             </h2>
             <div>
               <p className="text-base sm:text-lg text-gray-600 mx-auto leading-tight whitespace-nowrap text-center overflow-hidden text-ellipsis">
-                Short reflections from Qatalysts on how DQ DNA helps them collaborate better, learn faster, and deliver more impact.
+                Real reflections from Qatalysts on how DQ DNA shapes the way we think, collaborate, and create meaningful impact.
               </p>
             </div>
           </FadeInUpOnScroll>
