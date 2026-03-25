@@ -108,7 +108,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
                 block: 'start'
               });
             }}
-            className="px-8 py-3 bg-[#0d1b4d] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group"
+            className="px-8 py-3 bg-[#1b2e6e] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group"
           >
             <span className="relative z-10">
               Browse Marketplaces
