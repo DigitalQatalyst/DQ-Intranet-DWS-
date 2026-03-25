@@ -37,7 +37,7 @@ async function verify() {
     content.sections.slice(0, 3).forEach((section, index) => {
       console.log(`\n${index + 1}. ${section.title} [${section.type.toUpperCase()}]`);
       if (section.type === 'text') {
-        const preview = section.content.substring(0, 150).replaceAll(/<[^>]*>/g, '');
+        const preview = section.content.substring(0, 150).replaceAll(/<[^>]*>/g, ''); // NOSONAR - safe regex on bounded input
         console.log(`   Preview: ${preview}...`);
       } else if (section.type === 'table') {
         console.log(`   Table: ${section.table.title}`);

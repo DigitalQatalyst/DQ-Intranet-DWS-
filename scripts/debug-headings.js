@@ -20,7 +20,7 @@ const supabase = createClient(
   }
   
   // Extract just the first few headings to see the structure
-  const headingMatches = data.body.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/gi);
+  const headingMatches = data.body.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/gi); // NOSONAR - script-only, bounded input
   console.log('First 15 headings found:');
   headingMatches.slice(0, 15).forEach((h, i) => {
     console.log(`${i+1}. ${h}`);

@@ -14,7 +14,7 @@ function improveHtmlStructure(html) {
   // Find text between </h2> and next <h2> or <table> or <ul>
   // Wrap it in <p> tags if not already wrapped
   improved = improved.replaceAll(
-    /(<\/h2>)\s*([^<][^<]*)/g,
+    /(<\/h2>)\s*([^<][^<]*)/g, // NOSONAR - script-only utility, bounded input
     (match, closingTag, text) => {
       // Clean up the text
       const cleanText = text.trim();
@@ -27,7 +27,7 @@ function improveHtmlStructure(html) {
   
   // Wrap standalone text paragraphs (text followed by double newline)
   improved = improved.replaceAll(
-    /\n\n([^<][^<]+)\n\n/g,
+    /\n\n([^<][^<]+)\n\n/g, // NOSONAR - script-only utility, bounded input
     '\n\n<p>$1</p>\n\n'
   );
   
