@@ -56,7 +56,7 @@ function HouseOfValuesPage() {
           }
         }
       } catch (error) {
-        console.error( // NOSONAR'Error fetching current guide:', error)
+        console.error('Error fetching current guide:', error) // NOSONAR
         if (!cancelled) {
           setCurrentGuide({ domain: null, guideType: null, lastUpdatedAt: null })
         }
@@ -130,7 +130,7 @@ function HouseOfValuesPage() {
           setRelatedGuidesLoading(false)
         }
       } catch (error) {
-        console.error( // NOSONAR'Error fetching related guides:', error)
+        console.error('Error fetching related guides:', error) // NOSONAR
         if (!cancelled) {
           setRelatedGuides([])
           setRelatedGuidesLoading(false)

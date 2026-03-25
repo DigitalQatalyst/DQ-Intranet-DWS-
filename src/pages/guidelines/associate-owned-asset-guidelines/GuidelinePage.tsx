@@ -115,7 +115,7 @@ function GuidelinePage() {
           }
         }
       } catch (error) {
-        console.error( // NOSONAR'Error fetching guide:', error)
+        console.error('Error fetching guide:', error) // NOSONAR
         if (!cancelled) {
           setError('Failed to load guide')
         }
