@@ -24,17 +24,17 @@ export const CDSServiceCardComponent: React.FC<CDSServiceCardProps> = ({ card, o
       style={{ width: '100%', maxWidth: '340px' }}
       onClick={onClick}
     >
-      {/* Featured Image */}
-      <div className="relative bg-gray-200 overflow-hidden" style={{ height: '140px' }}>
+      {/* Featured Image - extends to card edges */}
+      <div className="relative bg-gray-200" style={{ height: '180px' }}>
         <img
           src={imageUrl}
           alt={card.title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain bg-gradient-to-br from-blue-900 via-blue-700 to-purple-600"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
             if (target.parentElement) {
-              target.parentElement.className = 'relative h-48 bg-gradient-to-br from-blue-400 to-blue-600';
+              target.parentElement.className = 'relative bg-gradient-to-br from-blue-400 to-blue-600';
             }
           }}
         />
@@ -72,7 +72,7 @@ export const CDSServiceCardComponent: React.FC<CDSServiceCardProps> = ({ card, o
       </div>
 
       {/* Footer with CTA */}
-      <div className="mt-auto px-8 pt-5 pb-6">
+      <div className="mt-auto px-8 pt-5 pb-8">
         <button
           type="button"
           onClick={(e) => {

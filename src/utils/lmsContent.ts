@@ -28,7 +28,7 @@ export type CourseCategory =
   | 'Day in DQ'
   | 'Key Tools';
 
-export type CourseStatus = 'Live' | 'Coming Soon';
+export type CourseStatus = 'Live'; // Removed coming soon status
 
 export interface LmsItem {
   id: string;
@@ -156,7 +156,7 @@ export const lmsItemsSeed: LmsItem[] = [
     levelLabel: levelLabelFromCode('L3'),
     levelShortLabel: levelShortLabelFromCode('L3'),
     locations: ['Riyadh'],
-    status: 'Coming Soon',
+    status: 'Live',
     lmsUrl: '/lms?category=6xd',
     slug: 'sixx-digital'
   },

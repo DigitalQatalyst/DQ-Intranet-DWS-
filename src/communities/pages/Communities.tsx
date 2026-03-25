@@ -1,3 +1,4 @@
+import { secureRandom } from '../../utils/secureRandom';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -303,11 +304,11 @@ export default function Communities() {
               const count = community.member_count || 0;
               let activityLevel = 'low';
               if (count > 50) activityLevel = 'high';else if (count > 10) activityLevel = 'medium';
-              const activeMembers = Math.floor(count * (0.6 + Math.random() * 0.3));
+              const activeMembers = Math.floor(count * (0.6 + secureRandom() * 0.3));
               const categories = ['Technology', 'Business', 'Creative', 'Social', 'Education'];
-              const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+              const randomCategory = categories[Math.floor(secureRandom() * categories.length)];
               const tags = ['Abu Dhabi', randomCategory, activityLevel === 'high' ? 'Popular' : 'Growing'];
-              const isPrivate = Math.random() > 0.7;
+              const isPrivate = secureRandom() > 0.7;
               return <CommunityCard key={community.id} item={{
                 id: community.id,
                 name: community.name || 'Unnamed Community',

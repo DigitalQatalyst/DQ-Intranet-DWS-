@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dws-ingress
+  namespace: dws
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod   # 🔹 Reference staging ClusterIssuer
+spec:
+  tls:
+  - hosts:
+    - apps.digitalqatalyst.com   # 🔹 Replace with your domain
+    secretName: dws-tls # 🔹 Secret will be created automatically
+  rules:
+  - host: apps.digitalqatalyst.com
+    http:
+      paths:
+      - path: /dws
+        pathType: Prefix
+        backend:
+          service:
+            name: dws-service
+            port:
+              number: 80

@@ -1,3 +1,4 @@
+import { secureRandom } from '../utils/secureRandom';
 export interface DailyQuote {
   id: string;
   text: string;
@@ -190,6 +191,13 @@ export const dailyQuotes: DailyQuote[] = [
 ];
 
 export const getRandomQuote = (): DailyQuote => {
-  const randomIndex = Math.floor(Math.random() * dailyQuotes.length);
+  let randomIndex = 0;
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    randomIndex = Math.floor((buf[0] / 0xffffffff) * dailyQuotes.length);
+  } else {
+    randomIndex = Math.floor(secureRandom() * dailyQuotes.length);
+  }
   return dailyQuotes[randomIndex];
 };
