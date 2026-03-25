@@ -8,6 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './Header';
 import { heroContent } from '../data/landingPageContent';
+import ParticleWaveBackground from './ParticleWaveBackground';
 
 interface HeroSectionProps {
   "data-id"?: string;
@@ -24,23 +25,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
 
   return (
     <div
-      className="relative w-full bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 overflow-hidden"
+      className="relative w-full overflow-hidden"
       style={{
-        backgroundImage:
-          "linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url('https://images.unsplash.com/photo-1517651685227-828652601fa3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2670')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        background: 'linear-gradient(135deg, #0a1628 0%, #082f49 50%, #0a1628 100%)',
         height: "100vh",
       }}
       data-id={dataId}
     >
-      {/* Animated gradient overlay */}
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-blue-500/40 to-purple-600/40 mix-blend-multiply"
-        style={{
-          animation: "pulse-gradient 8s ease-in-out infinite alternate",
-        }}
-      ></div>
+      {/* Three.js particle wave */}
+      <ParticleWaveBackground />
+
+      {/* Soft cyan/blue glows */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%)', filter: 'blur(120px)' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)', filter: 'blur(150px)' }} />
+
+      {/* Vignette overlay */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(10,22,40,0.6) 100%)' }} />
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible whitespace-nowrap">
@@ -133,20 +133,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
           </button>
         </StaggeredFadeIn>
       </div>
-      {/* Add keyframes for gradient animation */}
-      <style>{`
-        @keyframes pulse-gradient {
-          0% {
-            opacity: 0.4;
-          }
-          50% {
-            opacity: 0.6;
-          }
-          100% {
-            opacity: 0.4;
-          }
-        }
-      `}</style>
     </div>
   );
 };
