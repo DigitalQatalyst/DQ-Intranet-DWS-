@@ -272,7 +272,7 @@ const ServiceCard = ({
 
   if (isComingSoon) {
     return (
-      <div className={`${baseLayoutClasses} relative cursor-not-allowed`} style={{ background: sectionStyle.cardClasses.includes('bg-') ? undefined : '#6b7a99' }}>
+      <div className={`${baseLayoutClasses} ${sectionStyle.cardClasses} relative cursor-not-allowed`}>
         {/* Yellow Coming Soon badge top-right */}
         <div className="absolute top-3 right-3 z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-400 text-yellow-900 text-xs font-bold shadow-sm">
@@ -290,7 +290,7 @@ const ServiceCard = ({
               className: `${iconColorClass} ${(iconNode as React.ReactElement<any>).props?.className ?? ""}`.trim(),
             } as any) : <span className={iconColorClass}>{iconNode}</span>}
           </div>
-          <h2 className={`${sectionStyle.headingClass} text-base font-semibold text-white mb-1 truncate`} title={displayTitle}>{displayTitle}</h2>
+          <h2 className={`${sectionStyle.headingClass} text-base font-semibold mb-1 truncate`} title={displayTitle}>{displayTitle}</h2>
         </div>
 
         {/* Description */}
