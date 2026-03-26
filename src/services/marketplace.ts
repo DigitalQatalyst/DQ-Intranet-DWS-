@@ -196,11 +196,8 @@ export const fetchLatestGuides = async (filters?: { guide_type?: string; domain?
       .from('guides')
       .select('id, slug, title, summary, hero_image_url, last_updated_at, author_name, guide_type, domain, status')
       .eq('status', 'Approved')
-      .neq('slug', 'atp-guidelines')
-      .neq('slug', 'agile-working-guidelines')
-      .neq('slug', 'client-session-guidelines')
-      .neq('slug', 'dbp-support-guidelines')
-      .neq('slug', 'dq-products');
+      .not('summary', 'is', null)
+      .in('slug', ['dq-associate-owned-asset-guidelines']);
 
     // Apply filters if provided
     if (filters?.guide_type) {

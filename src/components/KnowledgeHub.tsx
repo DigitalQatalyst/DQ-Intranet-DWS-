@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Newspaper, Loader, AlertCircle, Radio } from "lucide-react";
+import { Loader, AlertCircle, Radio, BookOpen, Monitor, Users, Video, FileText, ScrollText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FadeInUpOnScroll } from "./AnimationUtils";
 import { NewsCard } from "./CardComponents";
+import { getLmsCourses, LmsCard } from '@/data/lmsCourseDetails';
 import { fetchLatestGuides } from '@/services/marketplace';
 import { getGuideImageUrl } from '@/utils/guideImageMap';
 
@@ -11,15 +12,11 @@ interface GuideItem {
   slug: string;
   title: string;
   summary: string;
-  image?: string;
+  hero_image_url?: string;
   guide_type: string;
   sub_domain?: string;
   domain?: string;
-  strategy_type?: string;
-  strategy_framework?: string;
-  guidelines_category?: string;
-  created_at: string;
-  updated_at: string;
+  last_updated_at: string;
 }
 
 // Legacy hardcoded news data - now replaced by Supabase-backed public.news
@@ -171,20 +168,15 @@ const ErrorMessage = ({ message }) => (
 // KnowledgeHub Content Component
 const KnowledgeHubContent = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabId>("ghc");
+  const [activeTab, setActiveTab] = useState<TabId>("guidelines");
   const [isTabChanging, setIsTabChanging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<{ message: string } | null>(null);
-  const [ghcGuides, setGhcGuides] = useState<GuideItem[]>([]);
+  const [ghcGuides] = useState<GuideItem[]>([]);
   const [guidelinesGuides, setGuidelinesGuides] = useState<GuideItem[]>([]);
-  const [learningGuides, setLearningGuides] = useState<GuideItem[]>([]);
+  const [learningCourses, setLearningCourses] = useState<LmsCard[]>([]);
 
   const tabs: TabItem[] = [
-    {
-      id: "ghc",
-      label: "GHC",
-      icon: <Newspaper size={16} className="#030F35-600" />,
-    },
     {
       id: "guidelines",
       label: "Guidelines",
@@ -207,85 +199,43 @@ const KnowledgeHubContent = () => {
     }, 300);
   };
 
-  // Fetch latest guides for all tabs
+  // Fetch guidelines from Supabase and LMS courses
   useEffect(() => {
     let isMounted = true;
 
-    async function loadGuidesData() {
+    async function loadData() {
       setIsLoading(true);
       setError(null);
       try {
-        const [ghc, guidelines, learning] = await Promise.all([
-          fetchLatestGuides('ghc', 6),
-          fetchLatestGuides('guidelines', 6),
-          fetchLatestGuides('learning', 6)
+        const [guidelines, courses] = await Promise.all([
+          fetchLatestGuides({ limit: 6 }),
+          getLmsCourses(),
         ]);
-        
+
         if (!isMounted) return;
-        
-        setGhcGuides(ghc);
         setGuidelinesGuides(guidelines);
-        setLearningGuides(learning);
+        setLearningCourses(courses.slice(0, 6));
       } catch (err) {
         if (!isMounted) return;
-        console.error("Error loading guides data:", err);
-        setError({
-          message: "Unable to load latest guides. Please try again later.",
-        });
+        console.error("Error loading knowledge hub data:", err); // NOSONAR
+        setError({ message: "Unable to load content. Please try again later." });
       } finally {
         if (isMounted) setIsLoading(false);
       }
     }
 
-    loadGuidesData();
-  }, [activeTab]);
+    loadData();
+  }, []);
 
-  // Get data based on active tab - updated to use Media Center news from Supabase
-  const getNewsData = () => {
-    // All news data is fetched from Supabase via fetchAllNews()
-    // Return empty array if no data is available (will show loading/empty state)
-    if (mediaCenterNews.length > 0) {
-      return mediaCenterNews.map(item => ({
-        id: item.id,
-        title: item.title,
-        excerpt: item.excerpt,
-        date: item.date,
-        category: item.department || item.newsType || 'News',
-        source: item.newsSource || item.byline || item.author || 'DQ Media Center',
-        imageUrl: item.image || undefined,
-      }));
-    }
-    // Return empty array - data will be loaded from Supabase
-    return [];
-  };
-  const getEventsData = () => events;
-  const getResourcesData = () => resources;
-
-  // Helper function to get the appropriate icon for a resource type
-  const getResourceIconByType = (type) => {
-    switch (type?.toLowerCase()) {
-      case "guide":
-        return <BookOpen size={24} className="#030F35-600" />;
-      case "templates":
-        return <FileText size={24} className="#030F35-600" />;
-      case "tool":
-        return <Calculator size={24} className="#030F35-600" />;
-      default:
-        return <FileText size={24} className="#030F35-600" />;
-    }
-  };
-
-  // Add this function to handle event registration
-  const handleEventRegister = (event: Event) => {
-    // Here you can implement what happens when someone registers for an event
-    // For example, open a registration modal, navigate to a registration page, etc.
-    console.log("Registering for event:", event.title);
-
-    // Example: Open a registration URL if available
-    // if (event.registrationUrl) {
-    //   window.open(event.registrationUrl, '_blank');
-    // }
-
+  // Pick an icon for a course based on its category/deliveryMode
+  const getCourseIcon = (course: LmsCard) => {
+    const cat = (course.courseCategory || '').toLowerCase();
+    const mode = (course.deliveryMode || '').toLowerCase();
+    if (mode === 'video') return <Video size={24} />;
+    if (mode === 'workshop') return <Users size={24} />;
+    if (cat.includes('ghc') || cat.includes('competenc')) return <BookOpen size={24} />;
+    if (cat.includes('tech') || cat.includes('tool') || cat.includes('microsoft')) return <Monitor size={24} />;
+    return <FileText size={24} />;
   };
 
   // Map guide data to card format
@@ -293,11 +243,17 @@ const KnowledgeHubContent = () => {
     id: guide.id,
     title: guide.title,
     excerpt: guide.summary || '',
-    date: new Date(guide.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    date: new Date(guide.last_updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     category: guide.guide_type || '',
     tags: [guide.guide_type, guide.sub_domain, guide.domain].filter(Boolean) as string[],
     source: guide.domain || 'DQ',
-    imageUrl: guide.image || getGuideImageUrl(guide.slug),
+    imageUrl: guide.hero_image_url || getGuideImageUrl({
+      slug: guide.slug,
+      title: guide.title,
+      domain: guide.domain,
+      guideType: guide.guide_type,
+      heroImageUrl: guide.hero_image_url,
+    }),
   });
 
 
@@ -405,11 +361,11 @@ const KnowledgeHubContent = () => {
                           content={{
                             title: cardData.title,
                             description: cardData.excerpt,
-                            imageUrl: cardData.imageUrl,
                             tags: cardData.tags,
                             date: cardData.date,
                             source: cardData.source,
                           }}
+                          icon={<ScrollText size={24} />}
                           ctaLabel="Open Guideline"
                           onQuickView={() => {
                             navigate(`/marketplace/guides/${guide.slug}`);
@@ -434,41 +390,32 @@ const KnowledgeHubContent = () => {
               aria-live="polite"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {learningGuides.length === 0 ? (
+                {learningCourses.length === 0 ? (
                   <div className="col-span-full text-center text-gray-600">
-                    No learning content available right now.
+                    No courses available right now.
                   </div>
                 ) : (
-                  learningGuides.map((guide, index) => {
-                    const cardData = mapGuideToCard(guide);
-                    return (
-                      <div
-                        key={guide.id}
-                        className="animate-fade-in-up"
-                        style={{
-                          animationDelay: `${index * 0.1}s`,
+                  learningCourses.map((course, index) => (
+                    <div
+                      key={course.id}
+                      className="animate-fade-in-up"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <NewsCard
+                        content={{
+                          title: course.title,
+                          description: course.excerpt || course.summary || '',
+                          tags: [course.courseCategory, course.deliveryMode].filter(Boolean) as string[],
+                          date: course.duration || '',
+                          source: course.provider || 'DQ Learning',
                         }}
-                      >
-                        <NewsCard
-                          content={{
-                            title: cardData.title,
-                            description: cardData.excerpt,
-                            imageUrl: cardData.imageUrl,
-                            tags: cardData.tags,
-                            date: cardData.date,
-                            source: cardData.source,
-                          }}
-                          ctaLabel="View Guide"
-                          onQuickView={() => {
-                            navigate(`/marketplace/guides/${guide.slug}`);
-                          }}
-                          onReadMore={() => {
-                            navigate(`/marketplace/guides/${guide.slug}`);
-                          }}
-                        />
-                      </div>
-                    );
-                  })
+                        icon={getCourseIcon(course)}
+                        ctaLabel="View Course"
+                        onQuickView={() => { navigate(`/lms/${course.slug}`); }}
+                        onReadMore={() => { navigate(`/lms/${course.slug}`); }}
+                      />
+                    </div>
+                  ))
                 )}
               </div>
             </section>
