@@ -14,13 +14,19 @@ export type NewsItem = {
   theme?: 'Leadership' | 'Delivery' | 'Culture' | 'DTMF';
   tags?: string[];
   readingTime?: '<5' | '5–10' | '10–20' | '20+';
-  newsType?: 'Policy Update' | 'Upcoming Events' | 'Company News' | 'Holidays';
+  newsType?: 'Policy Update' | 'Upcoming Events' | 'Company News' | 'Holidays' | 'Leadership Messages' | 'Product Updates' | 'Operational Notices';
   newsSource?: 'DQ Leadership' | 'DQ Operations' | 'DQ Communications';
   focusArea?: 'GHC' | 'DWS' | 'Culture & People';
   content?: string; // Full article content for detail pages
   format?: 'Blog' | 'Article' | 'Research Report' | 'Podcast'; // Format type for blogs and podcasts
   source?: string; // Source/provider name (e.g., DigitalQatalyst, ADGM Academy)
   audioUrl?: string; // Audio file URL for podcasts
+  externalUrl?: string; // External URL for blog posts
+  archived?: boolean; // If true, hidden from the main grid
+  why?: string;
+  what?: string;
+  how?: string;
+  when?: string;
 };
 
 /*
@@ -32,6 +38,7 @@ export const NEWS: NewsItem[] = [
     id: 'dxb-eoy-event-postponement',
     title: 'DXB EoY Event Postponement',
     type: 'Announcement',
+    archived: true,
     date: '2025-12-19',
     author: 'Fadil A',
     byline: 'DQ Operations',
@@ -169,6 +176,7 @@ We wish everyone a safe and joyful festive season.`
     id: 'dq-townhall-meeting-agenda',
     title: 'DQ Townhall Meeting Agenda',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-21',
     author: 'Irene Musyoki',
     byline: 'DQ Operations',
@@ -231,6 +239,7 @@ This townhall aims to:
     id: 'dq-leave-process-guideline',
     title: 'DQ Leave Process Guidelines',
     type: 'Guidelines',
+    archived: true,
     date: '2025-11-18',
     author: 'Felicia Araba',
     byline: 'HRA (People)',
@@ -299,22 +308,13 @@ Three violations may result in termination of employment.
     image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
     format: 'Blog',
     source: 'DigitalQatalyst',
+    externalUrl: 'https://corp-web.qatalyst.tech/blog/rise-of-compute-nationalism',
     readingTime: '10–20',
     newsType: 'Company News',
     newsSource: 'DQ Leadership',
     focusArea: 'GHC',
     tags: ['Geopolitics & Technology'],
-    content: `# Are We Watching the Rise of Compute Nationalism?
-
-Geopolitics & Technology
-
-As nations race to control AI infrastructure and computing resources, we explore how geopolitical tensions are reshaping the global technology landscape and what it means for businesses.
-
-There's a strange new tension shaping the world right now—one that feels familiar, yet entirely new. We once competed over oil fields, shipping routes, and manufacturing dominance. Today, the new territory everyone is scrambling to control is invisible, humming quietly inside massive concrete buildings packed with GPUs, fiber, cooling pipes, and backup generators.
-
-**Compute.**
-
-Raw compute.
+    content: `This blog explores the rise of "compute nationalism," where nations compete to control the infrastructure powering artificial intelligence. Click "Read More" to discover how compute power could shape the future of AI.`
 
 The fuel of the AI economy.
 
@@ -495,6 +495,7 @@ The question now is: Who gets left behind?`
     id: 'dq-storybook-live',
     title: 'From Vision to Impact: The DQ Storybook Goes Live!',
     type: 'Announcement',
+    archived: true,
     date: '2024-08-14',
     author: 'Irene Musyoki',
     views: 75,
@@ -518,12 +519,15 @@ The question now is: Who gets left behind?`
     image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
     format: 'Blog',
     source: 'DigitalQatalyst',
+    externalUrl: 'https://corp-web.qatalyst.tech/blog/china-ai-superstate',
     readingTime: '5–10',
     newsType: 'Company News',
     newsSource: 'DQ Leadership',
     focusArea: 'GHC',
     tags: ['Geopolitics & Technology'],
-    content: `# Is Beijing Building the World's First AI Superstate?
+    content: `China's AI strategy is unfolding quietly but at massive scale. While the U.S. publicly pushes a compute nationalism agenda, China is steadily expanding its AI infrastructure through coordinated investments, rapid datacenter construction, and vertically integrated technology supply chains.
+
+This blog explores how China's silent but strategic approach could reshape the global AI race and raise an important question: is the world's first AI superstate already taking shape in Beijing? Click Read More to uncover China's quiet AI strategy.
 
 While the U.S. pushes a loud "compute nationalism" agenda, China is quietly executing a parallel strategy that is more coordinated, vertically integrated, and harder to track.
 
@@ -635,12 +639,15 @@ In that contest, China is not behind. It's simply quiet.
     image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
     format: 'Blog',
     source: 'DigitalQatalyst',
+    externalUrl: 'https://corp-web.qatalyst.tech/blog/europe-ai-compute-challenge',
     readingTime: '5–10',
     newsType: 'Company News',
     newsSource: 'DQ Leadership',
     focusArea: 'GHC',
     tags: ['Geopolitics & Technology'],
-    content: `# Europe Wants Ethical AI. But Without Compute, Can It Compete?
+    content: `Europe has positioned itself as a global leader in ethical and responsible AI, championing privacy, regulation, and digital rights. But as the global AI race accelerates, a critical question is emerging: can ethical leadership matter without strong compute infrastructure?
+
+This blog explores Europe's growing compute challenge from high energy costs to limited hyper-scale infrastructure and what it could mean for the region's ability to compete in the AI economy. Click Read More to explore whether Europe can balance ethical leadership with compute power.
 
 The European Union has positioned itself as the global moral compass on AI—privacy, ethics, regulation, digital rights, and responsible innovation.
 
@@ -757,6 +764,7 @@ Until Europe builds the latter, the former will not shape the future.`
     image: 'https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1200&q=80',
     format: 'Blog',
     source: 'DigitalQatalyst',
+    externalUrl: 'https://corp-web.qatalyst.tech/blog/global-south-ai-compute-divide',
     readingTime: '10–20',
     newsType: 'Company News',
     newsSource: 'DQ Leadership',
@@ -891,6 +899,7 @@ Because in the AI age:
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
     format: 'Blog',
     source: 'DigitalQatalyst',
+    externalUrl: 'https://corp-web.qatalyst.tech/blog/nations-weaponize-attention-before-missiles',
     readingTime: '10–20',
     newsType: 'Company News',
     newsSource: 'DQ Leadership',
@@ -1058,6 +1067,7 @@ And the battlefield is us.`
     image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
     format: 'Blog',
     source: 'DigitalQatalyst',
+    externalUrl: 'https://corp-web.qatalyst.tech/blog/rise-of-half-attention-worker',
     readingTime: '10–20',
     newsType: 'Company News',
     newsSource: 'DQ Leadership',
@@ -1250,6 +1260,7 @@ The workers and workplaces that learn to protect human attention will unlock lev
     image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80',
     format: 'Blog',
     source: 'DigitalQatalyst',
+    externalUrl: 'https://corp-web.qatalyst.tech/blog/architecture-of-addiction-interface-design',
     readingTime: '10–20',
     newsType: 'Company News',
     newsSource: 'DQ Leadership',
@@ -1444,6 +1455,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'riyadh-horizon-hub',
     title: 'Riyadh Horizon Hub Opens for Cross-Studio Delivery',
     type: 'Announcement',
+    archived: true,
     date: '2024-07-20',
     author: 'Irene Musyoki',
     views: 61,
@@ -1460,6 +1472,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'shifts-allocation-guidelines',
     title: 'Shifts Allocation Guidelines',
     type: 'Guidelines',
+    archived: true,
     date: '2024-07-25',
     author: 'Felicia Araba',
     views: 58,
@@ -1478,6 +1491,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'islamic-new-year',
     title: 'Honoring the Islamic New Year',
     type: 'Notice',
+    archived: true,
     date: '2024-06-27',
     author: 'DQ Communications',
     views: 63,
@@ -1494,6 +1508,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'dq-website-launch',
     title: 'DQ Corporate Website Launch!',
     type: 'Announcement',
+    archived: true,
     date: '2024-06-24',
     author: 'Irene Musyoki',
     views: 84,
@@ -1510,6 +1525,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'po-dev-sync-guidelines',
     title: 'Product Owner & Dev Sync Guidelines',
     type: 'Guidelines',
+    archived: true,
     date: '2024-06-19',
     author: 'Felicia Araba',
     views: 70,
@@ -1526,6 +1542,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'azure-devops-task-guidelines',
     title: 'Azure DevOps Task Guidelines',
     type: 'Guidelines',
+    archived: true,
     date: '2024-06-12',
     author: 'Felicia Araba',
     views: 77,
@@ -1542,6 +1559,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'eid-al-adha',
     title: 'Blessed Eid al-Adha!',
     type: 'Notice',
+    archived: true,
     date: '2024-06-05',
     author: 'DQ Communications',
     views: 47,
@@ -1559,6 +1577,7 @@ The real question is whether we'll sculpt technology into a tool of clarity; or 
     id: 'company-wide-lunch-break-schedule',
     title: 'DQ CHANGES | COMPANY-WIDE LUNCH BREAK SCHEDULE',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-13',
     author: 'Irene Musyoki',
     byline: 'Corporate Comms',
@@ -1697,6 +1716,7 @@ We are committed to maintaining transparent, fair, and consistent grading standa
     id: 'dq-wfh-guidelines',
     title: 'DQ WFH Guidelines',
     type: 'Guidelines',
+    archived: true,
     date: '2025-11-18',
     author: 'Felicia Araba',
     byline: 'HRA (People)',
@@ -1815,6 +1835,7 @@ The **Work From Home (WFH) Guidelines** provide a clear framework for how remote
     id: 'dq-dress-code-guideline',
     title: 'DQ Dress Code Guidelines',
     type: 'Guidelines',
+    archived: true,
     date: '2025-11-18',
     author: 'Felicia Araba',
     byline: 'HRA (People)',
@@ -1938,6 +1959,7 @@ Where in doubt, associates should choose the more professional option and consul
     id: 'dq-storybook-latest-links',
     title: 'DQ Storybook — Latest Version and Links',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-13',
     author: 'Irene Musyoki',
     views: 0,
@@ -2049,6 +2071,7 @@ For questions about any of these resources or to request additional documentatio
     id: 'dq-scrum-master-structure-update',
     title: 'DQ Changes: Updated Scrum Master Structure',
     type: 'Announcement',
+    archived: true,
     date: '2025-11-27',
     author: 'Felicia Araba',
     views: 0,

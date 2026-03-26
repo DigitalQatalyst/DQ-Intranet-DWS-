@@ -28,8 +28,8 @@ function transformEventForCard(event: CommunityEvent) {
   const eventDate = new Date(event.event_date);
   
   // Parse time if available (format: HH:MM:SS or HH:MM)
-  let startDate = new Date(eventDate);
-  let endDate = new Date(eventDate);
+  const startDate = new Date(eventDate);
+  const endDate = new Date(eventDate);
   
   if (event.event_time) {
     const [hours, minutes] = event.event_time.split(':').map(Number);

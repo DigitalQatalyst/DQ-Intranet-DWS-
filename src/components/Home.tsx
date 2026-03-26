@@ -116,24 +116,24 @@ const approvedSections = {
       description:
         'Discover what is happening in DQ, including important announcements, and what teams are building.',
       icon: <Newspaper />,
-      path: '/marketplace/opportunities',
+      path: '/marketplace/media-center',
       isActive: true,
     },
     {
       id: 'podcasts',
       title: 'Podcasts',
-      description: 'Tune in to conversations, stories, and expert insights from DQ leaders and associates.',
+      description: 'Tune in to conversations and stories, from DQ leaders and associates.',
       icon: <MessageCircle />,
-      path: '/marketplace/opportunities?tab=podcasts',
+      path: '/marketplace/media-center?tab=podcasts',
       isActive: true,
     },
     {
       id: 'blogs',
       title: 'Blogs',
       description:
-        'Dive into thought leadership, personal stories, and expert insights written by colleagues across DQ.',
+        'Behind every idea is a story. Explore insights and perspectives from DQ Associates.',
       icon: <BookIcon />,
-      path: '/marketplace/opportunities?tab=insights',
+      path: '/marketplace/media-center?tab=insights',
       isActive: true,
     },
     {

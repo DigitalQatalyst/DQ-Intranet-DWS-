@@ -92,6 +92,7 @@ module.exports = {
           sky: "#57D3FF",
           tint: "#DDE8FF",
         },
+        // Learning Center / News Detail Page Tokens
         hero: {
           DEFAULT: "hsl(var(--hero))",
           foreground: "hsl(var(--hero-foreground))",
@@ -116,7 +117,7 @@ module.exports = {
       },
       fontFamily: {
         display: ["Palatino", "serif"],
-        body: ["Inter", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+        body: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
       },
       zIndex: {
         400: 400,

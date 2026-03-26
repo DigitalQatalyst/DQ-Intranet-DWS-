@@ -36,7 +36,7 @@ const marketplaces: Marketplace[] = [
     name: 'DQ Media Center',
     description: 'Your starting point for news, stories, podcasts, and career opportunities at DQ.',
     icon: NewspaperIcon,
-    href: '/marketplace/opportunities?tab=announcements',
+    href: '/marketplace/media-center?tab=announcements',
     isComingSoon: false,
   },
   {
@@ -206,7 +206,7 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
             {marketplaces.map((marketplace, index) => {
               const Icon = marketplace.icon;
               const isComingSoon = marketplace.isComingSoon;
-              const isActive = marketplace.id === 'news-center' && (location.pathname.startsWith('/marketplace/opportunities') || location.pathname.startsWith('/marketplace/news'));
+              const isActive = marketplace.id === 'news-center' && (location.pathname.startsWith('/marketplace/media-center') || location.pathname.startsWith('/marketplace/news'));
               return (
                 <a
                   key={marketplace.id}

@@ -27,6 +27,7 @@ const FAQsPage = React.lazy(() => import('../guides/FAQsPage'));
 const TestimonialsDetailPage = React.lazy(() => import('../guides/TestimonialsDetailPage'));
 const AssociateTestimonialsDetailPage = React.lazy(() => import('../guides/AssociateTestimonialsDetailPage'));
 const ProductDetailPage = React.lazy(() => import('../products/ProductDetailPage'));
+const ServiceDetailPage = React.lazy(() => import('../guides/ServiceDetailPage'));
 // Promo cards for courses marketplace
 const coursePromoCards = [{
   id: 'finance-promo',
@@ -155,6 +156,7 @@ export const MarketplaceRouter: React.FC = () => {
       <Route path="/guides/faqs" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><FAQsPage /></React.Suspense>} />
       <Route path="/guides/testimonials" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><TestimonialsDetailPage /></React.Suspense>} />
       <Route path="/guides/associate-testimonials" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><AssociateTestimonialsDetailPage /></React.Suspense>} />
+      <Route path="/guides/service/:itemId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><ServiceDetailPage /></React.Suspense>} />
       <Route path="/guides/:itemId" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailPage /></React.Suspense>} />
       <Route path="/guides/:itemId/details" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GuideDetailsPage /></React.Suspense>} />
       
@@ -180,8 +182,12 @@ export const MarketplaceRouter: React.FC = () => {
       {/* News & Opportunities Marketplace - Redirected to /guides */}
       <Route path="/news" element={<Navigate to="/marketplace/guides" replace />} />
       <Route path="/news/action-solver-podcast" element={<PodcastSeriesPage />} />
+      <Route path="/news/the-execution-mindset" element={<PodcastSeriesPage />} />
       <Route path="/news/:id" element={<NewsDetailPage />} />
-      <Route path="/opportunities" element={<NewsPage />} />
+      <Route path="/media-center" element={<NewsPage />} />
+      <Route path="/media-center/:id" element={<JobDetailPage />} />
+      <Route path="/media-center/:id/apply" element={<JobApplicationPage />} />
+      <Route path="/opportunities" element={<Navigate to="/marketplace/media-center" replace />} />
       <Route path="/opportunities/:id" element={<JobDetailPage />} />
       <Route path="/opportunities/:id/apply" element={<JobApplicationPage />} />
       {/* DQ Work Directory */}

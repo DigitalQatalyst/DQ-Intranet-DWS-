@@ -456,26 +456,11 @@ export function DQWorkDirectoryPage() {
         // For positions with ranges (stored as primary level), we check exact match
         // The filter will show positions that match the selected level(s)
         const matchesSfia = level.length === 0 || (position.sfiaLevel ? level.includes(position.sfiaLevel) : false);
-        // Role Family filtering: normalize both filter values and position values for comparison
-        const matchesRoleFamily = roleFamily.length === 0 || (() => {
-          if (!position.roleFamily) return false;
-          const positionRoleFamily = position.roleFamily.trim();
-          return roleFamily.some(filterValue => filterValue.trim() === positionRoleFamily);
-        })();
-        
-        // Debug logging for role family filter
-        if (import.meta.env.DEV && roleFamily.length > 0 && position.roleFamily) {
-          const matched = matchesRoleFamily;
-          if (!matched) {
-            console.log('[Position Filter] Role Family mismatch:', {
-              positionName: position.positionName,
-              positionRoleFamily: position.roleFamily,
-              filterRoleFamilies: roleFamily,
-              matched
-            });
-          }
-        }
-        
+        // Role Family filtering: normalize both sides for comparison
+        const matchesRoleFamily =
+          roleFamily.length === 0 ||
+          (!!position.roleFamily && roleFamily.some(f => f.trim() === position.roleFamily!.trim()));
+
         return matchesUnit && matchesLocation && matchesSfia && matchesRoleFamily;
       })
       .map((position) => ({

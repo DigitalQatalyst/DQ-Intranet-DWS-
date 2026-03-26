@@ -19,87 +19,154 @@ const ITEMS_PER_PAGE = 9;
 const matchesSelection = (value: string | undefined, selections?: string[]) =>
   !selections?.length || (value && selections.includes(value));
 
+// Location label → tag aliases for multi-location items
+const LOCATION_TAG_MAP: Record<string, string[]> = {
+  Dubai: ['DXB', 'Dubai'],
+  Riyadh: ['KSA', 'Riyadh'],
+  Nairobi: ['NBO', 'Nairobi'],
+  Remote: ['Remote'],
+};
+
+const matchesLocation = (item: NewsItem, selections?: string[]) => {
+  if (!selections?.length) return true;
+  return selections.some((sel) => {
+    // Direct location match
+    if (item.location === sel) return true;
+    // Tag-based match (for multi-location items)
+    const aliases = LOCATION_TAG_MAP[sel] || [sel];
+    return item.tags?.some(tag => aliases.some(alias => tag.toLowerCase() === alias.toLowerCase()));
+  });
+};
+
+// Helper function to normalize item date
+const normalizeItemDate = (value: string): number | null => {
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return null;
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+};
+
+// Helper function to check date range filter
+const matchesDateRange = (item: NewsItem, dateRange?: string[]): boolean => {
+  if (!dateRange?.length) return true;
+  
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const itemTime = item.date ? normalizeItemDate(item.date) : null;
+  
+  if (itemTime === null) return false;
+  
+  return dateRange.some((selection) => {
+    if (selection === 'Last 7 days') {
+      const start = todayStart - 6 * DAY_MS;
+      return itemTime >= start && itemTime <= todayStart;
+    }
+    if (selection === 'Last 30 days') {
+      const start = todayStart - 29 * DAY_MS;
+      return itemTime >= start && itemTime <= todayStart;
+    }
+    if (selection === 'Last 90 days') {
+      const start = todayStart - 89 * DAY_MS;
+      return itemTime >= start && itemTime <= todayStart;
+    }
+    if (selection === 'This year') {
+      const startOfYear = new Date(today.getFullYear(), 0, 1).getTime();
+      return itemTime >= startOfYear && itemTime <= todayStart;
+    }
+    return true;
+  });
+};
+
+// Helper function to generate pagination numbers (shared with BlogsGrid)
+function generatePageNumbers(currentPage: number, totalPages: number): (number | string)[] {
+  const pages: (number | string)[] = [];
+  const delta = 2; // Number of pages to show on each side of current page
+  
+  if (totalPages <= 7) {
+    // Show all pages if 7 or fewer
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Always show first page
+    pages.push(1);
+    
+    if (currentPage > delta + 2) {
+      pages.push('...');
+    }
+    
+    // Show pages around current page
+    const start = Math.max(2, currentPage - delta);
+    const end = Math.min(totalPages - 1, currentPage + delta);
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    if (currentPage < totalPages - delta - 1) {
+      pages.push('...');
+    }
+    
+    // Always show last page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+  }
+  
+  return pages;
+}
+
+// Helper function to filter announcement items
+function filterAnnouncementItems(sourceItems: NewsItem[], query: GridProps['query']): NewsItem[] {
+  const search = query.q?.toLowerCase() ?? '';
+  
+  return sourceItems
+    .filter((item) => !item.archived)
+    .filter((item) => UPDATE_TYPES.includes(item.type))
+    .filter((item) => {
+      if (!search) return true;
+      return (
+        item.title.toLowerCase().includes(search) ||
+        item.excerpt.toLowerCase().includes(search) ||
+        item.author.toLowerCase().includes(search)
+      );
+    })
+    .filter((item) => {
+      const department = query.filters?.department;
+      const location = query.filters?.location;
+      const newsType = query.filters?.newsType;
+      const newsSource = query.filters?.newsSource;
+      const focusArea = query.filters?.focusArea;
+      const channel = query.filters?.channel;
+      const audience = query.filters?.audience;
+      const dateRange = query.filters?.dateRange;
+      
+      const okDepartment = matchesSelection(item.department, department);
+      const okLocation = matchesLocation(item, location);
+      const okNewsType = matchesSelection(item.newsType, newsType);
+      const okSource = matchesSelection(item.newsSource, newsSource);
+      const okFocus = matchesSelection(item.focusArea, focusArea);
+      const okChannel = matchesSelection(item.channel, channel);
+      const okAudience = matchesSelection(item.audience, audience);
+      const okDateRange = matchesDateRange(item, dateRange);
+      
+      return okDepartment && okLocation && okNewsType && okSource && okFocus && okChannel && okAudience && okDateRange;
+    })
+    .sort((a, b) => {
+      // Sort by date descending (newest first)
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA;
+    });
+}
+
 export default function AnnouncementsGrid({ query, items }: GridProps) {
   const sourceItems: NewsItem[] = items;
   const [currentPage, setCurrentPage] = useState(1);
   const location = useLocation();
 
   const filteredItems = useMemo(() => {
-    const search = query.q?.toLowerCase() ?? '';
-    const DAY_MS = 24 * 60 * 60 * 1000;
-    const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-
-    const normalizeItemDate = (value: string): number | null => {
-      const d = new Date(value);
-      if (isNaN(d.getTime())) return null;
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-    };
-
-    return sourceItems
-      .filter((item) => UPDATE_TYPES.includes(item.type))
-      .filter((item) => {
-        if (!search) return true;
-        return (
-          item.title.toLowerCase().includes(search) ||
-          item.excerpt.toLowerCase().includes(search) ||
-          item.author.toLowerCase().includes(search)
-        );
-      })
-      .filter((item) => {
-        const department = query.filters?.department;
-        const location = query.filters?.location;
-        const newsType = query.filters?.newsType;
-        const newsSource = query.filters?.newsSource;
-        const focusArea = query.filters?.focusArea;
-        const channel = query.filters?.channel;
-        const audience = query.filters?.audience;
-        const dateRange = query.filters?.dateRange;
-        const okDepartment = matchesSelection(item.department, department);
-        const okLocation = matchesSelection(item.location, location);
-        const okNewsType = matchesSelection(item.newsType, newsType);
-        const okSource = matchesSelection(item.newsSource, newsSource);
-        const okFocus = matchesSelection(item.focusArea, focusArea);
-        const okChannel = matchesSelection(item.channel, channel);
-        const okAudience = matchesSelection(item.audience, audience);
-        let okDateRange = true;
-        if (dateRange && dateRange.length) {
-          const itemTime = item.date ? normalizeItemDate(item.date) : null;
-
-          if (itemTime === null) {
-            // If a date filter is active and the item has no valid date, exclude it
-            okDateRange = false;
-          } else {
-            okDateRange = dateRange.some((selection) => {
-              if (selection === 'Last 7 days') {
-                const start = todayStart - 6 * DAY_MS;
-                return itemTime >= start && itemTime <= todayStart;
-              }
-              if (selection === 'Last 30 days') {
-                const start = todayStart - 29 * DAY_MS;
-                return itemTime >= start && itemTime <= todayStart;
-              }
-              if (selection === 'Last 90 days') {
-                const start = todayStart - 89 * DAY_MS;
-                return itemTime >= start && itemTime <= todayStart;
-              }
-              if (selection === 'This year') {
-                const startOfYear = new Date(today.getFullYear(), 0, 1).getTime();
-                return itemTime >= startOfYear && itemTime <= todayStart;
-              }
-              // Unknown option: fall back to including the item
-              return true;
-            });
-          }
-        }
-        return okDepartment && okLocation && okNewsType && okSource && okFocus && okChannel && okAudience && okDateRange;
-      })
-      .sort((a, b) => {
-        // Sort by date descending (newest first)
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        return dateB - dateA;
-      });
+    return filterAnnouncementItems(sourceItems, query);
   }, [query, sourceItems]);
 
   // Reset to page 1 when filters or search change
@@ -121,51 +188,12 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Generate page numbers to display (Google-style pagination)
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const delta = 2; // Number of pages to show on each side of current page
-    
-    if (totalPages <= 7) {
-      // Show all pages if 7 or fewer
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first page
-      pages.push(1);
-      
-      if (currentPage > delta + 2) {
-        pages.push('...');
-      }
-      
-      // Show pages around current page
-      const start = Math.max(2, currentPage - delta);
-      const end = Math.min(totalPages - 1, currentPage + delta);
-      
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-      
-      if (currentPage < totalPages - delta - 1) {
-        pages.push('...');
-      }
-      
-      // Always show last page
-      if (totalPages > 1) {
-        pages.push(totalPages);
-      }
-    }
-    
-    return pages;
-  };
 
   if (filteredItems.length === 0) {
     return (
       <section className="space-y-3">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <h3 className="font-medium text-gray-800">Available Items (0)</h3>
-          <span>Auto-refresh · Live</span>
         </div>
         <div className="text-center py-12 text-gray-500">No items found</div>
       </section>
@@ -176,7 +204,6 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
     <section className="space-y-3">
       <div className="flex items-center justify-between text-sm text-gray-600">
         <h3 className="font-medium text-gray-800">Available Items ({filteredItems.length})</h3>
-        <span>Auto-refresh · Live</span>
       </div>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {paginatedItems.map((item: NewsItem) => (
@@ -201,7 +228,7 @@ export default function AnnouncementsGrid({ query, items }: GridProps) {
           </button>
           
           <div className="flex items-center gap-1">
-            {getPageNumbers().map((page, index) => {
+            {generatePageNumbers(currentPage, totalPages).map((page, index) => {
               if (page === '...') {
                 return (
                   <span key={`ellipsis-${index}`} className="px-2 text-gray-500">
