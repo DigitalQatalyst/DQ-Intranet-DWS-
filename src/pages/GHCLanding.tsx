@@ -87,7 +87,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
     category: 'Vision',
     title: 'Vision',
     story: 'Problem: When pressure hit, priorities blurred and teams pulled in different directions. Response: Vision re-anchored daily decisions to purpose, keeping direction stable under stress.',
-    problem: 'When pressure hit, priorities blurred and teams pulled in different directions.',
+    problem: 'When pressure increased, priorities became blurred and teams were pulled in different directions.',
     response: 'Vision re-anchored daily decisions to purpose, keeping direction stable under stress.',
     situation: 'Critical launches piled up and priorities collided; teams lost the thread of purpose.',
     changes: [
@@ -108,8 +108,8 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
     category: 'House of Values',
     title: 'House of Values',
     story: 'Problem: Incentives split teams and slowed decisions. Response: Shared values restored a common rulebook, allowing speed and trust to hold.',
-    problem: 'Incentives split teams and slowed decisions.',
-    response: 'Shared values restored a common rulebook, allowing speed and trust to hold.',
+    problem: 'Incentives split teams and slow down decisions.',
+    response: 'Shared values restored a common rulebook, enabling speed and trust to be sustained.',
     situation: 'Sales pushed speed, delivery pushed quality, and teams argued over what “good” meant.',
     changes: [
       'Agreed three behavioural guardrails for all decisions',
@@ -130,8 +130,8 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
     title: 'Persona',
     story:
       'Problem: Roles shifted constantly and individual impact became unclear. Response: Persona clarified the value each person contributes, regardless of role or squad.',
-    problem: 'Roles shifted constantly and individual impact became unclear.',
-    response: 'Persona clarified the value each person contributes, regardless of role or squad.',
+    problem: 'Roles shifted constantly, and individual impact became unclear.',
+    response: 'Persona clarified the value each person contributed, regardless of role or squad.',
     situation: 'Escalations bounced between managers because no one owned customer onboarding.',
     changes: [
       'Named a single accountable owner for onboarding',
@@ -152,8 +152,8 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
     title: 'Agile TMS',
     story:
       'Problem: Strategy changed faster than plans could adapt. Response: Agile TMS translated direction into adaptive missions and execution rhythm.',
-    problem: 'Strategy changed faster than plans could adapt.',
-    response: 'Agile TMS translated direction into adaptive missions and execution rhythm.',
+    problem: 'Strategies changed faster than plans could adapt.',
+    response: 'Agile TMS translated direction into adaptive missions and a clear execution rhythm.',
     situation: 'Strategy changed monthly but teams were stuck on quarterly plans with mismatched cadences.',
     changes: [
       'Shifted to six-week missions with weekly checkpoints',
@@ -175,7 +175,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
     story:
       'Problem: Traditional governance slowed teams when speed mattered most. Response: Agile SoS introduced light guardrails that enabled pace without losing control.',
     problem: 'Traditional governance slowed teams when speed mattered most.',
-    response: 'Agile SoS introduced light guardrails that enabled pace without losing control.',
+    response: 'Agile SoS introduced light guardrails that enabled pace without compromising control.',
     situation: 'Teams duplicated data across tools and couldn’t see blockers until too late.',
     changes: [
       'Standardised one delivery board per team with shared fields',
@@ -196,8 +196,8 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
     title: 'Agile Flows',
     story:
       'Problem: Value broke down in handoffs and feedback arrived too late. Response: Agile Flows connected intent to outcomes end-to-end so feedback moved faster than blockers.',
-    problem: 'Value broke down in handoffs and feedback arrived too late.',
-    response: 'Agile Flows connected intent to outcomes end-to-end so feedback moved faster than blockers.',
+    problem: 'Value broke down in handoffs, and feedback arrived too late.',
+    response: 'Agile Flows connected intent to outcomes end-to-end, ensuring feedback moved faster than blockers.',
     situation: 'Value died in handoffs and issues surfaced only after release.',
     changes: [
       'Mapped intent-to-outcome steps with owners',
@@ -219,7 +219,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
     story:
       'Problem: Transformation succeeded in pilots but stalled at scale. Response: Agile 6xD made change repeatable across diagnose, design, deliver, deploy, drive, and defend.',
     problem: 'Transformation succeeded in pilots but stalled at scale.',
-    response: 'Agile 6xD made change repeatable across diagnose, design, deliver, deploy, drive, and defend.',
+    response: 'Agile 6xD made change repeatable across the six stages: diagnose, design, deliver, deploy, drive, and defend.',
     situation: 'Every decision waited for exec sign-off, stalling rollouts.',
     changes: [
       'Defined decisions to delegate versus escalate',
