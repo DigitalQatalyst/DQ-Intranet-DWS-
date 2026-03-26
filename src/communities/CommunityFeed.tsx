@@ -63,7 +63,7 @@ export function CommunityFeed() {
     }
   }, [user, filterTag]);
 
-  const fetchMyPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+  const fetchMyPosts = async (sortBy = 'recent', offset = 0) => {
     if (!user) return;
     setMyLoading(true);
     
@@ -132,7 +132,7 @@ export function CommunityFeed() {
     }
   };
 
-  const fetchGlobalPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+  const fetchGlobalPosts = async (sortBy = 'recent', offset = 0) => {
     if (!user) return;
     setGlobalLoading(true);
     
@@ -193,7 +193,7 @@ export function CommunityFeed() {
     }
   };
 
-  const fetchTrendingPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+  const fetchTrendingPosts = async (sortBy = 'recent', offset = 0) => {
     setTrendingLoading(true);
     
     try {

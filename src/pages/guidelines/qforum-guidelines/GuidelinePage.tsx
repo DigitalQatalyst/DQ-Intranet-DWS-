@@ -67,7 +67,7 @@ function GuidelinePage() {
           }
         }
       } catch (error) {
-        console.error('Error fetching current guide:', error)
+        console.error('Error fetching current guide:', error) // NOSONAR
         if (!cancelled) {
           setCurrentGuide({ domain: null, guideType: null })
         }
@@ -162,7 +162,7 @@ function GuidelinePage() {
           setRelatedGuidesLoading(false)
         }
       } catch (error) {
-        console.error('Error fetching related guides:', error)
+        console.error('Error fetching related guides:', error) // NOSONAR
         if (!cancelled) {
           setRelatedGuides([])
           setRelatedGuidesLoading(false)
@@ -218,7 +218,12 @@ function GuidelinePage() {
       <main className="flex-1">
         <div className="container mx-auto px-4 py-12 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Left Column - Content Area */}
+            {/* Left Column - Sidebar Navigation */}
+            <aside className="lg:col-span-1">
+              <SideNav />
+            </aside>
+
+            {/* Right Column - Content Area */}
             <div className="lg:col-span-3 bg-white rounded-lg shadow-sm p-8 md:p-12">
               {/* Context Section */}
               <GuidelineSection id="context" title="Context">

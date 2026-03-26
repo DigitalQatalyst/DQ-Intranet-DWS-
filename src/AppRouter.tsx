@@ -24,7 +24,6 @@ import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import OnboardingLanding from "./pages/OnboardingLanding";
 import { OnboardingJourney } from "./pages/OnboardingJourney";
-import DiscoverDQ from "./pages/DiscoverDQ";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import GrowthSectorsComingSoon from "./pages/GrowthSectorsComingSoon";
 import SixXDProductsLanding from "./pages/6XDProductsLanding";
@@ -47,8 +46,8 @@ export function AppRouter() {
     <BrowserRouter>
       <AuthProvider>
         <DWSChatProvider>
-          <Routes>
-            <Route path="/discover-dq" element={<DiscoverDQ />} />
+            <Routes>
+            <Route path="/discover-dq" element={<ComingSoonPage />} />
             <Route path="/coming-soon" element={<ComingSoonPage />} />
             <Route path="/growth-sectors-coming-soon" element={<GrowthSectorsComingSoon />} />
             <Route path="/products" element={<SixXDProductsLanding />} />
@@ -65,6 +64,7 @@ export function AppRouter() {
             <Route path="/lms/:slug/assessment" element={<LmsCourseAssessmentPage />} />
             <Route path="/lms/:courseSlug/lesson/:lessonId" element={<LmsLessonPage />} />
             <Route path="/lms/:slug" element={<LmsCourseDetailPageWrapper />} />
+            
             {/* Onboarding - specific routes before wildcard */}
             <Route path="/onboarding/welcome" element={<OnboardingLanding />} />
             <Route path="/onboarding/journey" element={<OnboardingJourney />} />

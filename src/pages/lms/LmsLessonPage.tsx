@@ -20,6 +20,32 @@ export const LmsLessonPage: React.FC = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+
+
+
+  const [activeTab, setActiveTab] = useState<TabType>('resources');
+  const [quiz, setQuiz] = useState<LmsQuizRow | null>(null);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizScore, setQuizScore] = useState<{ score: number; total: number } | null>(null);
+  const [quizPassed, setQuizPassed] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [isVideoCompleted, setIsVideoCompleted] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const [courseQuiz, setCourseQuiz] = useState<LmsQuizRow | null>(null);
+
+  // Quiz Wizard State
+  const [showQuizOverlay, setShowQuizOverlay] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isAnswerChecked, setIsAnswerChecked] = useState(false);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
+
+  // Review Form State
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
@@ -57,6 +83,251 @@ export const LmsLessonPage: React.FC = () => {
     }
   }, [user?.id, lessonId, course?.id]);
 
+  // Fetch quiz when lesson changes
+  useEffect(() => {
+    if (lessonId) {
+      setQuizLoading(true);
+      setShowQuizOverlay(false);
+      setQuizAnswers({});
+      setQuizSubmitted(false);
+      setQuizScore(null);
+      setQuizPassed(isQuizPassed(lessonId));
+      setVideoEnded(false);
+
+      const isFinalAssessment = allLessons.find(l => l.id === lessonId)?.type === 'final-assessment';
+
+      let promise;
+      if (isFinalAssessment && course?.id) {
+        promise = fetchQuizByCourseId(course.id);
+      } else {
+        promise = fetchQuizByLessonId(lessonId);
+      }
+
+      promise
+        .then((data) => {
+          console.log('[Quiz] fetched for lessonId:', lessonId, '→', data);
+          setQuiz(data);
+        })
+        .catch((error) => {
+          console.error('[Quiz] fetch error for lessonId:', lessonId, error);
+          setQuiz(null);
+        })
+        .finally(() => setQuizLoading(false));
+    }
+  }, [lessonId, course?.id, allLessons]);
+
+  // Handle quiz submission
+  const handleQuizSubmit = () => {
+    if (!quiz || !lessonId || !courseSlug) return;
+
+    const questions = quiz.questions || [];
+    let correctAnswers = 0;
+
+    questions.forEach((question: any, index: number) => {
+      const userAnswer = quizAnswers[index];
+      const correctAnswerIndex = question.correct_answer;
+      if (userAnswer === correctAnswerIndex) {
+        correctAnswers++;
+      }
+    });
+
+    const score = {
+      score: correctAnswers,
+      total: questions.length,
+    };
+
+    const scorePercentage = Math.round((correctAnswers / questions.length) * 100);
+    const passed = scorePercentage >= QUIZ_PASSING_SCORE;
+
+    setQuizScore(score);
+    setQuizSubmitted(true);
+    setQuizPassed(passed);
+
+    // Store quiz submission in localStorage
+    if (typeof window !== 'undefined') {
+      const submissionKey = `${QUIZ_STORAGE_PREFIX}${quiz.id}_${lessonId}`;
+      const submissionData = {
+        quizId: quiz.id,
+        lessonId: lessonId,
+        courseId: course?.id || '',
+        score: correctAnswers,
+        totalQuestions: questions.length,
+        submittedAt: new Date().toISOString(),
+        passed: passed,
+      };
+      localStorage.setItem(submissionKey, JSON.stringify(submissionData));
+
+      // Sync to Supabase
+      if (user && course?.id && quiz) {
+        saveQuizSubmissionMutation.mutate({
+          quiz_id: quiz.id,
+          lesson_id: lessonId,
+          course_id: course.id,
+          score_achieved: correctAnswers,
+          total_questions: questions.length,
+          score_percentage: scorePercentage,
+          passed: passed,
+          answers: quizAnswers,
+        });
+      }
+
+      // Store quiz passed status
+      if (passed) {
+        markQuizPassed(lessonId);
+        markLessonCompleted(lessonId);
+
+        // Sync to Supabase
+        if (user && course?.id) {
+          markLessonCompletedMutation.mutate({
+            lessonId,
+            courseId: course.id,
+            courseSlug: courseSlug || '',
+            quizPassed: true,
+            quizScore: scorePercentage,
+          });
+        }
+      }
+    }
+  };
+
+  // Handle quiz retake
+  const handleQuizRetake = () => {
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
+    setQuizPassed(false);
+  };
+
+  // Video event handlers
+  const handleVideoTimeUpdate = () => {
+    if (!videoRef.current || !currentLesson) return;
+    const video = videoRef.current;
+    const progress = (video.currentTime / video.duration) * 100;
+    setVideoProgress(progress);
+    saveLessonProgress(currentLesson.id, progress);
+
+    // Mark as completed if watched >= 90% AND there is no quiz
+    // If there is a quiz, completion depends on passing it.
+    if (progress >= 90 && !isVideoCompleted && !quiz) {
+      setIsVideoCompleted(true);
+      markLessonCompleted(currentLesson.id);
+
+      // Sync completion to Supabase
+      if (user && course?.id) {
+        markLessonCompletedMutation.mutate({
+          lessonId: currentLesson.id,
+          courseId: course.id,
+          courseSlug: courseSlug || '',
+        });
+      }
+    }
+
+    // Periodically sync progress to Supabase (every 10 seconds or 5% progress)
+    const now = Date.now();
+    const timeDelta = now - lastProgressSyncRef.current;
+    const progressDelta = Math.abs(progress - lastProgressValueRef.current);
+
+    if (user && course?.id && (timeDelta > 10000 || progressDelta >= 5)) {
+      updateVideoProgressMutation.mutate({
+        lessonId: currentLesson.id,
+        courseId: course.id,
+        courseSlug: courseSlug || '',
+        progressPercentage: progress,
+        hasQuiz: !!quiz,
+        quizPassed: !!quizPassed,
+      });
+      lastProgressSyncRef.current = now;
+      lastProgressValueRef.current = progress;
+    }
+  };
+
+  const handleVideoEnded = () => {
+    if (currentLesson) {
+      // If there is a quiz, do NOT mark complete just by finishing video.
+      if (!quiz) {
+        setIsVideoCompleted(true);
+        markLessonCompleted(currentLesson.id);
+      }
+      setVideoProgress(100);
+      saveLessonProgress(currentLesson.id, 100);
+
+      // Mark video as ended; the useEffect below will show the quiz once quiz data is ready
+      setVideoEnded(true);
+    }
+  };
+
+  // Show quiz overlay once both video has ended AND quiz data is loaded
+  useEffect(() => {
+    if (videoEnded && quiz && !quizPassed) {
+      setShowQuizOverlay(true);
+      setCurrentQuestionIndex(0);
+      setSelectedOption(null);
+      setIsAnswerChecked(false);
+    }
+  }, [videoEnded, quiz, quizPassed]);
+
+  // Quiz Wizard Handlers
+  const handleOptionSelect = (optIndex: number) => {
+    if (isAnswerChecked || quizSubmitted) return;
+    setSelectedOption(optIndex);
+  };
+
+  const handleCheckAnswer = () => {
+    if (selectedOption === null || !quiz) return;
+    const currentQuestion = quiz.questions[currentQuestionIndex];
+    const correct = currentQuestion.correct_answer === selectedOption;
+
+    setIsAnswerCorrect(correct);
+    setIsAnswerChecked(true);
+
+    // Save answer
+    setQuizAnswers(prev => ({
+      ...prev,
+      [currentQuestionIndex]: selectedOption
+    }));
+  };
+
+  const handleNextQuestion = () => {
+    if (!quiz) return;
+    if (currentQuestionIndex < quiz.questions.length - 1) {
+      // Move to next question
+      setCurrentQuestionIndex(prev => prev + 1);
+      // Reset state, but check if we already have an answer for the next one (if reviewing?)
+      // For now, assuming linear forward progression
+      const nextAnswer = quizAnswers[currentQuestionIndex + 1];
+      setSelectedOption(nextAnswer !== undefined ? nextAnswer : null);
+      setIsAnswerChecked(nextAnswer !== undefined);
+    } else {
+      // Finished
+      handleQuizSubmit();
+    }
+  };
+
+  const handleRetryWizard = () => {
+    handleQuizRetake();
+    setCurrentQuestionIndex(0);
+    setSelectedOption(null);
+    setIsAnswerChecked(false);
+  };
+
+  const handleVideoPlay = () => {
+    setIsVideoPlaying(true);
+  };
+
+  const handleVideoPause = () => {
+    setIsVideoPlaying(false);
+  };
+
+  // Check if quiz is accessible (video/content must be completed)
+  const isQuizAccessible = isVideoCompleted && !isLocked;
+
+  // Check if quiz exists and is passed for current lesson
+  const currentLessonQuizPassed = useMemo(() => {
+    if (!quiz || !lessonId) return true; // No quiz means can proceed
+    return quizPassed;
+  }, [quiz, lessonId, quizPassed]);
+
+  // Check if next lesson can be accessed (quiz must be passed if it exists)
   const canAccessNextLesson = useMemo(() => {
     if (!curriculum.nextLesson) return false;
     if (quizState.quiz && !quizState.quizPassed) return false;

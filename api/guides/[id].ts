@@ -17,51 +17,16 @@ type AnyResponse = {
   [key: string]: any;
 };
 
-function parseJSONBody(req: AnyRequest): Promise<any> {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    req.on('data', (chunk: any) => (data += chunk));
-    req.on('end', () => {
-      try { resolve(data ? JSON.parse(data) : {}); } catch (e) { reject(e); }
-    });
-    req.on('error', reject);
-  });
-}
-
-// Helper function to extract guide ID from URL
-const extractGuideId = (req: AnyRequest): { id: string; isUuid: boolean } => {
+function extractRequestMeta(req: AnyRequest) {
   const proto = req.headers['x-forwarded-proto'] || 'https';
   const host = req.headers.host || 'localhost';
-  const reqUrl = `${proto}://${host}${req.url || ''}`;
-  const urlObj = new URL(reqUrl);
+  const urlObj = new URL(`${proto}://${host}${req.url || ''}`);
   const id = urlObj.pathname.split('/').pop() as string;
   const isUuid = /^[0-9a-z-]+$/i.test(id);
+  return { urlObj, id, isUuid };
+}
 
-  return { id, isUuid };
-};
-
-// Helper function to check if body should be included
-const shouldIncludeBody = (urlObj: URL): boolean => {
-  const include = (urlObj.searchParams.get('include') || '').toLowerCase();
-  return include === 'body' || include === 'all' || include === '1';
-};
-
-// Helper function to fetch guide by ID or slug
-const fetchGuide = async (id: string, isUuid: boolean) => {
-  const select = '*';
-  const query = isUuid
-    ? supabaseAdmin.from('guides').select(select).eq('id', id).maybeSingle()
-    : supabaseAdmin.from('guides').select(select).eq('slug', id).maybeSingle();
-
-  const { data: row, error } = await query;
-  if (error) throw error;
-  if (!row) throw new Error('Not found');
-
-  return row;
-};
-
-// Helper function to map database row to API shape
-const mapRowToGuide = (row: any, includeBody: boolean) => {
+function mapRowToGuide(row: any, includeBody: boolean) {
   return {
     id: row.id,
     slug: row.slug,
@@ -82,108 +47,65 @@ const mapRowToGuide = (row: any, includeBody: boolean) => {
     complexityLevel: row.complexity_level ?? null,
     documentUrl: row.document_url ?? row.documentUrl ?? null,
     body: includeBody ? (row.body ?? null) : null,
-  } as any;
-};
+  };
+}
 
-// Helper function to fetch sub-content with error handling
-const fetchSubContent = async (guideId: string) => {
-  let steps: any[] = [];
-  let attachments: any[] = [];
-  let templates: any[] = [];
+function extractSettled<T>(result: PromiseSettledResult<{ data: T | null; error: any }>): T[] {
+  return result.status === 'fulfilled' && !result.value.error ? (result.value.data ?? []) as T[] : [];
+}
 
+async function fetchSubContent(guideId: string) {
   try {
     const [stepsResult, attachmentsResult, templatesResult] = await Promise.allSettled([
       supabaseAdmin.from('guide_steps').select('id,position,title,body').eq('guide_id', guideId).order('position', { ascending: true }),
       supabaseAdmin.from('guide_attachments').select('id,kind,title,url,size').eq('guide_id', guideId),
       supabaseAdmin.from('guide_templates').select('id,title,url,size').eq('guide_id', guideId),
     ]);
-
-    if (stepsResult.status === 'fulfilled' && !stepsResult.value.error) {
-      steps = stepsResult.value.data || [];
-    }
-    if (attachmentsResult.status === 'fulfilled' && !attachmentsResult.value.error) {
-      attachments = attachmentsResult.value.data || [];
-    }
-    if (templatesResult.status === 'fulfilled' && !templatesResult.value.error) {
-      templates = templatesResult.value.data || [];
-    }
+    return {
+      steps: extractSettled(stepsResult),
+      attachments: extractSettled(attachmentsResult),
+      templates: extractSettled(templatesResult),
+    };
   } catch (err) {
     console.warn('api/guides/[id] warning: Error fetching sub-content:', err);
+    return { steps: [], attachments: [], templates: [] };
   }
+}
 
-  return { steps, attachments, templates };
-};
+async function handleGet(id: string, isUuid: boolean, urlObj: URL, req: AnyRequest, res: AnyResponse) {
+  const include = (urlObj.searchParams.get('include') || '').toLowerCase();
+  const includeBody = include === 'body' || include === 'all' || include === '1';
 
-// Helper function to format output response
-const formatOutput = (guide: any, steps: any[], attachments: any[], templates: any[]) => {
-  return {
-    ...guide,
-    steps: (steps || []).map(s => ({ id: s.id, position: s.position, title: s.title, content: s.body })),
-    attachments: (attachments || []).map(a => ({ id: a.id, type: a.kind === 'file' ? 'file' : 'link', title: a.title, url: a.url, size: a.size })),
-    templates: (templates || []).map(t => ({ id: t.id, title: t.title, url: t.url, size: t.size })),
-  };
-};
+  const gq = isUuid
+    ? supabaseAdmin.from('guides').select('*').eq('id', id).maybeSingle()
+    : supabaseAdmin.from('guides').select('*').eq('slug', id).maybeSingle();
+  const { data: row, error } = await gq;
+  if (error) throw error;
+  if (!row) { res.status?.(404); res.json?.({ error: 'Not found' }); return; }
 
-// Helper function to handle caching and response
-const handleCacheAndResponse = (res: AnyResponse, output: any, req: AnyRequest) => {
-  const json = JSON.stringify(output);
-  const etag = 'W/"' + createHash('sha1').update(json).digest('hex') + '"';
-  const inm = req.headers['if-none-match'];
-
-  res.setHeader?.('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
-  res.setHeader?.('ETag', etag);
-
-  if (inm && inm === etag) {
-    res.status?.(304);
-    res.end?.();
-    return 304;
-  }
-
-  res.status?.(200);
-  res.end?.(json);
-  return 200;
-};
-
-// Helper function to handle GET requests
-const handleGetRequest = async (req: AnyRequest, res: AnyResponse, urlObj: URL) => {
-  const { id, isUuid } = extractGuideId(req);
-  const includeBody = shouldIncludeBody(urlObj);
-
-  // Fetch and validate guide
-  const row = await fetchGuide(id, isUuid);
-
-  // Map to API shape
   const guide = mapRowToGuide(row, includeBody);
-
-  // Fetch sub-content
   const { steps, attachments, templates } = await fetchSubContent(guide.id);
 
-  // Format output
-  const output = formatOutput(guide, steps, attachments, templates);
+  const out = {
+    ...guide,
+    steps: steps.map((s: any) => ({ id: s.id, position: s.position, title: s.title, content: s.body })),
+    attachments: attachments.map((a: any) => ({ id: a.id, type: a.kind === 'file' ? 'file' : 'link', title: a.title, url: a.url, size: a.size })),
+    templates: templates.map((t: any) => ({ id: t.id, title: t.title, url: t.url, size: t.size })),
+  };
 
-  // Handle caching and send response
-  return handleCacheAndResponse(res, output, req);
-};
-
-// Helper function to send error response
-const sendErrorResponse = (res: AnyResponse, status: number, message: string) => {
-  res.status?.(status);
-  res.json?.({ error: message });
-};
+  const json = JSON.stringify(out);
+  const etag = 'W/"' + createHash('sha256').update(json).digest('hex') + '"';
+  res.setHeader?.('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+  res.setHeader?.('ETag', etag);
+  if (req.headers['if-none-match'] === etag) { res.status?.(304); res.end?.(); return; }
+  res.status?.(200); res.end?.(json);
+}
 
 export default async function handler(req: AnyRequest, res: AnyResponse) {
   try {
-    const proto = req.headers['x-forwarded-proto'] || 'https';
-    const host = req.headers.host || 'localhost';
-    const reqUrl = `${proto}://${host}${req.url || ''}`;
-    const urlObj = new URL(reqUrl);
-
-    if (req.method === 'GET') {
-      await handleGetRequest(req, res, urlObj);
-      return;
-    }
-
-    sendErrorResponse(res, 405, 'Method not allowed');
+    const { urlObj, id, isUuid } = extractRequestMeta(req);
+    if (req.method === 'GET') { await handleGet(id, isUuid, urlObj, req, res); return; }
+    res.status?.(405); res.json?.({ error: 'Method not allowed' });
   } catch (err: any) {
     console.error('api/guides/[id] error:', err);
     
