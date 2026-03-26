@@ -1,603 +1,24 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { FilterSidebar, FilterConfig } from './FilterSidebar.js';
-import { MarketplaceGrid } from './MarketplaceGrid.js';
-import { SearchBar } from '../SearchBar.js';
-import { FilterIcon, XIcon, HomeIcon, ChevronRightIcon, InfoIcon } from 'lucide-react';
-import { ErrorDisplay, CourseCardSkeleton } from '../SkeletonLoader.js';
-import { fetchMarketplaceItems, fetchMarketplaceFilters } from '../../services/marketplace.js';
-import { getMarketplaceConfig, getTabSpecificFilters, getDesignSystemTabSpecificFilters } from '../../utils/marketplaceConfig.js';
-import { MarketplaceComparison } from './MarketplaceComparison.js';
+import React from 'react';
+import { FilterIcon, XIcon } from 'lucide-react';
+import { FilterSidebar } from './FilterSidebar.js';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
-import { getFallbackItems } from '../../utils/fallbackData';
-import KnowledgeHubGrid from './KnowledgeHubGrid';
-import { LMS_COURSES } from '../../data/lmsCourseDetails';
-import { parseFacets, applyFilters } from '../../lms/filters';
-import {
-  LOCATION_ALLOW,
-  LEVELS,
-  CATEGORY_OPTS,
-  DELIVERY_OPTS,
-  DURATION_OPTS
-} from '../../lms/config';
-import GuidesFilters, { GuidesFacets } from '../guides/GuidesFilters';
-import GuidesGrid from '../guides/GuidesGrid';
-import TestimonialsGrid from '../guides/TestimonialsGrid';
-import GlossaryGrid from '../guides/GlossaryGrid';
-import { SixXDPerspectiveCards } from '../guides/SixXDPerspectiveCards';
-import { SixXDComingSoonCards } from '../guides/SixXDComingSoonCards';
-import { supabaseClient } from '../../lib/supabaseClient';
+import GuidesFilters from '../guides/GuidesFilters';
+import { MarketplaceComparison } from './MarketplaceComparison.js';
 import { track } from '../../utils/analytics';
-import FAQsPageContent from '../../pages/guides/FAQsPageContent';
-import { glossaryTerms, GlossaryTerm, CATEGORIES } from '../../pages/guides/glossaryData';
-import { STATIC_PRODUCTS } from '../../utils/staticProducts';
-import { DESIGN_SYSTEM_ITEMS, getDesignSystemItemsByType } from '../../utils/designSystemData';
-import { DesignSystemCard } from './DesignSystemCard';
-const LEARNING_TYPE_FILTER: FilterConfig = {
-  id: 'learningType',
-  title: 'Learning Type',
-  options: [
-    { id: 'courses', name: 'Courses' },
-    { id: 'curricula', name: 'Curricula' },
-    { id: 'testimonials', name: 'Testimonials' }
-  ]
-};
 
-const slugify = (value: string): string =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+// Modular logic & utils
+import { useMarketplaceLogic } from './useMarketplaceLogic';
 
-const prependLearningTypeFilter = (marketplaceType: string, configs: FilterConfig[]): FilterConfig[] => {
-  if (marketplaceType !== 'courses') {
-    return configs;
-  }
-  const hasLearningType = configs.some(config => config.id === 'learningType');
-  if (hasLearningType) {
-    return configs.map(config => {
-      if (config.id !== 'learningType') return config;
-      const options = config.options.length ? config.options : LEARNING_TYPE_FILTER.options;
-      return { ...config, options };
-    });
-  }
-  return [LEARNING_TYPE_FILTER, ...configs];
-};
+// UI components
+import { MarketplaceBreadcrumbs } from './MarketplaceBreadcrumbs';
+import { ServiceCenterContent } from './ServiceCenterContent';
+import { GuidesTabsSection } from './GuidesTabsSection';
+import { DesignSystemTabsSection } from './DesignSystemTabsSection';
+import { MarketplaceSearchBarSection } from './MarketplaceSearchBarSection';
+import { MarketplaceMainContent } from './MarketplaceMainContent';
 
-const COURSE_FILTER_CONFIG: FilterConfig[] = [
-  {
-    id: 'category',
-    title: 'Course Category',
-    options: CATEGORY_OPTS.map(value => ({ id: value, name: value }))
-  },
-  {
-    id: 'delivery',
-    title: 'Delivery Mode',
-    options: DELIVERY_OPTS.map(value => ({ id: value, name: value }))
-  },
-  {
-    id: 'duration',
-    title: 'Duration',
-    options: DURATION_OPTS.map(value => ({ id: value, name: value }))
-  },
-  {
-    id: 'department',
-    title: 'Department',
-    options: [
-      { id: 'DCO', name: 'DCO' },
-      { id: 'DBP', name: 'DBP' },
-      { id: 'HR', name: 'HR' },
-      { id: 'IT', name: 'IT' },
-      { id: 'Finance', name: 'Finance' }
-    ]
-  },
-  {
-    id: 'level',
-    title: 'Level',
-    options: LEVELS.map(level => ({ id: level.code, name: level.label }))
-  },
-  {
-    id: 'location',
-    title: 'Location/Studio',
-    options: LOCATION_ALLOW.map(value => ({ id: value, name: value }))
-  },
-  {
-    id: 'audience',
-    title: 'Audience',
-    options: [
-      { id: 'Associate', name: 'Associate' },
-      { id: 'Lead', name: 'Lead' }
-    ]
-  },
-  {
-    id: 'status',
-    title: 'Status',
-    options: [
-      { id: 'live', name: 'Live' },
-      { id: 'coming-soon', name: 'Coming Soon' }
-    ]
-  }
-];
-
-interface ComparisonItem {
-  id: string;
-  title: string;
-  [key: string]: any;
-}
-
-export interface MarketplacePageProps {
-  marketplaceType: 'courses' | 'financial' | 'non-financial' | 'knowledge-hub' | 'onboarding' | 'guides' | 'design-system';
-  title: string;
-  description: string;
-  promoCards?: any[];
-}
-
-const SUBDOMAIN_BY_DOMAIN: Record<string, string[]> = {
-  strategy: ['journey', 'history', 'digital-framework', 'initiatives', 'clients'],
-  guidelines: ['resources', 'policies'],
-  blueprints: ['devops', 'dbp', 'dxp', 'dws', 'products', 'projects'],
-};
-
-const DEFAULT_GUIDE_PAGE_SIZE = 200;
-const GUIDE_LIST_SELECT = [
-  'id',
-  'slug',
-  'title',
-  'summary',
-  'hero_image_url',
-  'last_updated_at',
-  'author_name',
-  'author_org',
-  'is_editors_pick',
-  'download_count',
-  'guide_type',
-  'domain',
-  'function_area',
-  'unit',
-  'sub_domain',
-  'location',
-  'status',
-  'complexity_level',
-].join(',');
-
-const parseFilterValues = (params: URLSearchParams, key: string): string[] =>
-  (params.get(key) || '')
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean);
-
-// ---------------------------------------------------------------------------
-// Module-level pure helpers (extracted to keep MarketplacePage complexity low)
-// ---------------------------------------------------------------------------
-
-/**
- * Returns the keys to delete from URL params when switching to a specific guides tab.
- */
-function getKeysToDeleteForTab(tab: string): string[] {
-  if (tab === 'strategy') {
-    return ['guide_type', 'sub_domain', 'domain', 'testimonial_category'];
-  }
-  if (tab === 'blueprints') {
-    return ['guide_type', 'sub_domain', 'domain', 'testimonial_category', 'strategy_type', 'strategy_framework', 'guidelines_category', 'categorization', 'attachments'];
-  }
-  if (tab === 'glossary') {
-    return ['guide_type', 'sub_domain', 'unit', 'domain', 'strategy_type', 'strategy_framework', 'guidelines_category', 'categorization', 'attachments', 'blueprint_framework', 'blueprint_sector', 'testimonial_category', 'faq_category', 'location'];
-  }
-  if (tab === 'faqs') {
-    return ['guide_type', 'sub_domain', 'domain', 'strategy_type', 'strategy_framework', 'guidelines_category', 'categorization', 'attachments', 'blueprint_framework', 'blueprint_sector', 'testimonial_category'];
-  }
-  if (tab === 'testimonials') {
-    return ['guide_type', 'sub_domain', 'domain', 'strategy_type', 'strategy_framework', 'guidelines_category', 'categorization', 'attachments', 'blueprint_framework', 'blueprint_sector'];
-  }
-  // Default / other tabs
-  return ['guide_type', 'sub_domain', 'unit', 'domain', 'strategy_type', 'strategy_framework', 'guidelines_category', 'categorization', 'attachments', 'blueprint_framework', 'blueprint_sector', 'testimonial_category'];
-}
-
-/**
- * Builds the next URLSearchParams when switching guides tabs.
- * Pure function – no side effects.
- */
-function buildGuidesTabParams(tab: string, current: URLSearchParams): URLSearchParams {
-  const next = new URLSearchParams(current.toString());
-  next.delete('page');
-  if (tab === 'guidelines') {
-    next.delete('tab');
-  } else {
-    next.set('tab', tab);
-  }
-
-  if (tab !== 'guidelines') {
-    const keysToDelete = getKeysToDeleteForTab(tab);
-    keysToDelete.forEach(key => next.delete(key));
-  } else {
-    // Switching to Guidelines - clear Strategy and Blueprint-specific filters
-    ['strategy_type', 'strategy_framework', 'blueprint_framework', 'blueprint_sector'].forEach(key => next.delete(key));
-  }
-
-  // Clear tab-specific filters when switching away from their respective tabs
-  if (tab !== 'guidelines') {
-    next.delete('guidelines_category');
-  }
-  if (tab !== 'blueprints') {
-    next.delete('blueprint_framework');
-    next.delete('blueprint_sector');
-    next.delete('product_type');
-    next.delete('product_stage');
-    next.delete('product_sector');
-  }
-  return next;
-}
-
-/**
- * Filter glossary terms by knowledge system, GHC dimension, 6xD perspective,
- * letter and free-text search – pure function, no React hooks.
- */
-function filterGlossaryTerms(queryParams: URLSearchParams): GlossaryTerm[] {
-  const knowledgeSystems   = parseFilterValues(queryParams, 'glossary_knowledge_system');
-  const ghcDimensions      = parseFilterValues(queryParams, 'glossary_ghc_dimension');
-  const sixXdPerspectives  = parseFilterValues(queryParams, 'glossary_6xd_perspective');
-  const letters            = parseFilterValues(queryParams, 'glossary_letter');
-  const searchQuery        = queryParams.get('q') || '';
-
-  return glossaryTerms.filter(term => {
-    if (knowledgeSystems.length > 0) {
-      if (!term.knowledgeSystem || !knowledgeSystems.includes(term.knowledgeSystem)) return false;
-    }
-    if (term.knowledgeSystem === 'ghc' && ghcDimensions.length > 0) {
-      if (!term.ghcDimension || !ghcDimensions.includes(term.ghcDimension)) return false;
-    }
-    if (term.knowledgeSystem === '6xd' && sixXdPerspectives.length > 0) {
-      if (!term.sixXdPerspective || !sixXdPerspectives.includes(term.sixXdPerspective)) return false;
-    }
-    if (letters.length > 0) {
-      const termLetter = term.letter.toUpperCase();
-      if (!letters.some(l => l.toUpperCase() === termLetter)) return false;
-    }
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        term.term.toLowerCase().includes(searchLower) ||
-        (term.shortIntro && term.shortIntro.toLowerCase().includes(searchLower)) ||
-        term.explanation.toLowerCase().includes(searchLower) ||
-        term.tags.some(tag => tag.toLowerCase().includes(searchLower));
-      if (!matchesSearch) return false;
-    }
-    return true;
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Sub-component: GuidesContent
-// Renders the main content area for the Guides marketplace type.
-// ---------------------------------------------------------------------------
-type WorkGuideTab = 'guidelines' | 'strategy' | '6xd' | 'blueprints' | 'testimonials' | 'glossary' | 'faqs';
-type DesignSystemTab = 'cids' | 'vds' | 'cds';
-
-interface GuidesContentProps {
-  activeTab: WorkGuideTab;
-  filteredItems: any[];
-  filteredGlossaryTerms: any[];
-  queryParams: URLSearchParams;
-  setQueryParams: (p: URLSearchParams) => void;
-  navigate: ReturnType<typeof import('react-router-dom').useNavigate>;
-  currentPage: number;
-  totalPages: number;
-  goToPage: (page: number) => void;
-}
-
-function GuidesContent({
-  activeTab,
-  filteredItems,
-  filteredGlossaryTerms,
-  queryParams,
-  setQueryParams,
-  navigate,
-  currentPage,
-  totalPages,
-  goToPage,
-}: GuidesContentProps) {
-  if (activeTab === 'faqs') {
-    return <FAQsPageContent categoryFilter={(queryParams.get('faq_category') || '').split(',').filter(Boolean)[0] || null} />;
-  }
-  if (activeTab === '6xd') {
-    return <SixXDComingSoonCards />;
-  }
-  if (activeTab === 'glossary') {
-    const selectedKnowledgeSystems = parseFilterValues(queryParams, 'glossary_knowledge_system');
-    const has6xD = selectedKnowledgeSystems.includes('6xd');
-    const selectedPerspectives = parseFilterValues(queryParams, 'glossary_6xd_perspective');
-    return (
-      <>
-        {/* Global Search Bar for Glossary */}
-        <div className="mb-6">
-          <div className="relative">
-            <input
-              type="text"
-              value={queryParams.get('q') || ''}
-              onChange={(e) => {
-                const next = new URLSearchParams(queryParams.toString());
-                next.delete('page');
-                if (e.target.value) { next.set('q', e.target.value); } else { next.delete('q'); }
-                const qs = next.toString();
-                if (typeof window !== 'undefined') {
-                  window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
-                }
-                setQueryParams(new URLSearchParams(next.toString()));
-              }}
-              placeholder="Search DQ terms (e.g. DWS, CWS, Agile TMS)"
-              className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--guidelines-primary)] focus:border-[var(--guidelines-primary)] outline-none"
-            />
-            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-        </div>
-        {has6xD ? (
-          <>
-            <SixXDPerspectiveCards
-              onCardClick={(perspectiveId) => {
-                navigate(`/marketplace/guides/6xd-perspective/${perspectiveId}`);
-                track('Glossary.6xDPerspectiveSelected', { perspective: perspectiveId });
-              }}
-            />
-            {filteredGlossaryTerms.length > 0 && (
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {selectedPerspectives.length > 0 ? 'Terms in this perspective' : 'All 6xD terms'}
-                </h3>
-                <GlossaryGrid
-                  items={filteredGlossaryTerms}
-                  onClickTerm={(term) => { navigate(`/marketplace/guides/glossary/${term.id}`); }}
-                  hideEmptyState={false}
-                />
-              </div>
-            )}
-          </>
-        ) : (
-          <GlossaryGrid
-            items={filteredGlossaryTerms}
-            onClickTerm={(term) => { navigate(`/marketplace/guides/glossary/${term.id}`); }}
-            hideEmptyState={false}
-          />
-        )}
-      </>
-    );
-  }
-  if (activeTab === 'testimonials') {
-    return (
-      <TestimonialsGrid
-        items={filteredItems}
-        onClickGuide={(g) => {
-          const qs = queryParams.toString();
-          navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`, { state: { fromQuery: qs, activeTab } });
-        }}
-      />
-    );
-  }
-  // Default: guidelines, strategy, blueprints
-  return (
-    <>
-      <GuidesGrid
-        items={filteredItems}
-        hideEmptyState={false}
-        emptyStateTitle={activeTab === 'blueprints' ? 'No products found' : 'No guides found'}
-        emptyStateMessage={activeTab === 'blueprints' ? 'Try adjusting your filters or search' : 'Try adjusting your filters or search'}
-        onClickGuide={(g) => {
-          const qs = queryParams.toString();
-          const isProduct = (g.domain === 'Product') || (g.productType && g.productStage);
-          if (isProduct) {
-            navigate(`/marketplace/products/${encodeURIComponent(g.slug || g.id)}`, { state: { fromQuery: qs, activeTab } });
-          } else {
-            navigate(`/marketplace/guides/${encodeURIComponent(g.slug || g.id)}`, { state: { fromQuery: qs, activeTab } });
-          }
-        }}
-      />
-      {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-4">
-          <button
-            type="button"
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 rounded border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-600">Page {currentPage} of {totalPages}</span>
-          <button
-            type="button"
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage >= totalPages}
-            className="px-4 py-2 rounded border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      )}
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Sub-component: FilterSidebarSection
-// Renders the full filter sidebar (mobile drawer + desktop panel).
-// ---------------------------------------------------------------------------
-interface FilterSidebarSectionProps {
-  isGuides: boolean;
-  isDesignSystem: boolean;
-  isKnowledgeHub: boolean;
-  isCourses: boolean;
-  showFilters: boolean;
-  toggleFilters: () => void;
-  resetFilters: () => void;
-  activeTab: WorkGuideTab;
-  facets: GuidesFacets;
-  queryParams: URLSearchParams;
-  setQueryParams: (p: URLSearchParams) => void;
-  filters: Record<string, string | string[]>;
-  filterConfig: FilterConfig[];
-  handleFilterChange: (filterType: string, value: string) => void;
-  urlBasedFilters: Record<string, string[]>;
-  activeFilters: string[];
-  handleKnowledgeHubFilterChange: (filter: string) => void;
-  hasActiveFilters: boolean;
-}
-
-function FilterSidebarSection({
-  isGuides,
-  isDesignSystem,
-  isKnowledgeHub,
-  isCourses,
-  showFilters,
-  toggleFilters,
-  resetFilters,
-  activeTab,
-  facets,
-  queryParams,
-  setQueryParams,
-  filters,
-  filterConfig,
-  handleFilterChange,
-  urlBasedFilters,
-  activeFilters,
-  handleKnowledgeHubFilterChange,
-  hasActiveFilters,
-}: FilterSidebarSectionProps) {
-  const filtersAsArrays = Object.fromEntries(
-    Object.entries(filters).map(([k, v]) => [k, Array.isArray(v) ? v : (v ? [v] : [])])
-  ) as Record<string, string[]>;
-
-  const guidesFilterOnChange = (next: URLSearchParams) => {
-    next.delete('page');
-    const qs = next.toString();
-    window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
-    setQueryParams(new URLSearchParams(next.toString()));
-    track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) });
-  };
-
-  const mobileContent = isGuides
-    ? <GuidesFilters activeTab={activeTab} facets={facets} query={queryParams} onChange={guidesFilterOnChange} />
-    : isDesignSystem
-      ? <FilterSidebar filters={filtersAsArrays} filterConfig={filterConfig} onFilterChange={handleFilterChange} onResetFilters={resetFilters} isResponsive={true} />
-      : <FilterSidebar filters={isCourses ? urlBasedFilters : filtersAsArrays} filterConfig={filterConfig} onFilterChange={handleFilterChange} onResetFilters={resetFilters} isResponsive={true} />;
-
-  return (
-    <>
-      {/* Filter sidebar - mobile/tablet */}
-      <div
-        className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-30 transition-opacity duration-300 xl:hidden ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={toggleFilters}
-        aria-hidden={!showFilters}
-      >
-        <div
-          id="filter-sidebar"
-          className={`fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}
-          onClick={e => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Filters"
-        >
-          <div className="h-full overflow-y-auto">
-            <div className="sticky top-0 bg-white z-10 p-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Filters</h2>
-              <button onClick={toggleFilters} className="p-1 rounded-full hover:bg-gray-100" aria-label="Close filters">
-                <XIcon size={20} />
-              </button>
-            </div>
-            <div className="p-4">{mobileContent}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter sidebar - desktop */}
-      <div className="hidden xl:block xl:w-1/4">
-        {isGuides ? (
-          <GuidesFilters activeTab={activeTab} facets={facets} query={queryParams} onChange={guidesFilterOnChange} />
-        ) : isDesignSystem ? (
-          <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto filter-sidebar-scroll">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Filters</h2>
-              {hasActiveFilters && <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Clear all</button>}
-            </div>
-            <FilterSidebar filters={filtersAsArrays} filterConfig={filterConfig} onFilterChange={handleFilterChange} onResetFilters={resetFilters} isResponsive={false} />
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto filter-sidebar-scroll">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Filters</h2>
-              {hasActiveFilters && <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>}
-            </div>
-            {isKnowledgeHub ? (
-              <div className="space-y-4">
-                {filterConfig.map(category => (
-                  <div key={category.id} className="border-b border-gray-100 pb-3">
-                    <h3 className="font-medium text-gray-900 mb-2">{category.title}</h3>
-                    <div className="space-y-2">
-                      {category.options.map(option => (
-                        <div key={option.id} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={`desktop-${category.id}-${option.id}`}
-                            checked={activeFilters.includes(option.name)}
-                            onChange={() => handleKnowledgeHubFilterChange(option.name)}
-                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <label htmlFor={`desktop-${category.id}-${option.id}`} className="ml-2 text-sm text-gray-700">{option.name}</label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <FilterSidebar
-                filters={isCourses ? urlBasedFilters : filtersAsArrays}
-                filterConfig={filterConfig}
-                onFilterChange={handleFilterChange}
-                onResetFilters={resetFilters}
-                isResponsive={false}
-              />
-            )}
-          </div>
-        )}
-      </div>
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Interfaces and module-level handlers extracted from useMarketplaceData.run()
-// Each handler covers one marketplace type branch, reducing run() complexity.
-// ---------------------------------------------------------------------------
-
-interface ItemSetters {
-  setLoading: (v: boolean) => void;
-  setError: (v: string | null) => void;
-  setItems: (v: any[]) => void;
-  setFilteredItems: (v: any[]) => void;
-  setTotalCount: (v: number) => void;
-}
-
-interface GuidesSetters extends ItemSetters {
-  setFacets: (v: GuidesFacets) => void;
-}
-
-interface GuidesRunParams {
-  activeTab: string;
-  queryParams: URLSearchParams;
-  currentPage: number;
-  pageSize: number;
-  searchStartRef: React.MutableRefObject<number | null>;
-}
-
-interface DesignSystemRunParams {
-  activeDesignSystemTab: string;
-  filters: Record<string, string | string[]>;
-  queryParams: URLSearchParams;
-}
-
-interface OtherMarketplaceRunParams {
+interface MarketplacePageProps {
   marketplaceType: string;
   filters: Record<string, string | string[]>;
   searchQuery: string;
@@ -1767,458 +1188,71 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   description: _description,
   promoCards = []
 }) => {
-  const isGuides = marketplaceType === 'guides';
-  const isCourses = marketplaceType === 'courses';
-  const isKnowledgeHub = marketplaceType === 'knowledge-hub';
-  const isServicesCenter = marketplaceType === 'non-financial';
-  const isDesignSystem = marketplaceType === 'design-system';
-  
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const config = getMarketplaceConfig(marketplaceType);
-  
-  // Service Center tabs - sync with URL params
-  const [activeServiceTab, setActiveServiceTab] = useState<string>(() =>
-    isServicesCenter
-      ? getValidServiceTab(typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams())
-      : 'technology'
-  );
-  
-  // Sync activeServiceTab with URL params
-  useEffect(() => {
-    if (!isServicesCenter) return;
-    applyServiceTabSync(searchParams.get('tab'), activeServiceTab, setActiveServiceTab, searchParams, setSearchParams);
-  }, [isServicesCenter, searchParams, activeServiceTab, setSearchParams]);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [queryParams, setQueryParams] = useState(() => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''));
-  const [activeTab, setActiveTab] = useState<WorkGuideTab>(() => getValidGuideTab(typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()));
-  const [activeDesignSystemTab, setActiveDesignSystemTab] = useState<DesignSystemTab>(() =>
-    isDesignSystem ? getValidDesignSystemTab(typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()) : 'cids'
-  );
-
-
-  useEffect(() => {
-    if (!isGuides) return;
-    setActiveTab(getValidGuideTab(queryParams));
-  }, [isGuides, queryParams]);
-
-  useEffect(() => {
-    if (!isDesignSystem) return;
-    setActiveDesignSystemTab(getValidDesignSystemTab(searchParams));
-  }, [isDesignSystem, searchParams]);
-
-  const handleDesignSystemTabChange = useCallback((tab: DesignSystemTab) => {
-    setActiveDesignSystemTab(tab);
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set('tab', tab);
-    setSearchParams(newParams, { replace: false });
-  }, [searchParams, setSearchParams]);
-
-  const handleGuidesTabChange = useCallback((tab: WorkGuideTab) => {
-    setActiveTab(tab);
-    const next = buildGuidesTabParams(tab, queryParams);
-    const qs = next.toString();
-    if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
-    }
-    setQueryParams(new URLSearchParams(next.toString()));
-    track('Guides.TabChanged', { tab });
-  }, [queryParams, setQueryParams]);
-
-  // Clean up incompatible filters when tab changes (not on every query change)
-  const prevTabRef = useRef<WorkGuideTab>(activeTab);
-  useEffect(() => {
-    handleTabCleanup(isGuides, activeTab, prevTabRef, queryParams, setQueryParams);
-  }, [isGuides, activeTab]);
-
-  const pageSize = Math.min(200, Math.max(1, parseInt(queryParams.get('pageSize') || String(DEFAULT_GUIDE_PAGE_SIZE), 10)));
-  const currentPage = Math.max(1, parseInt(queryParams.get('page') || '1', 10));
-
-  // UI state
-
-  // For courses: URL-based filtering
-  const courseFacets = isCourses ? parseFacets(searchParams) : undefined;
-  const lmsFilteredItems = isCourses
-    ? applyFilters(LMS_COURSES, courseFacets || {})
-    : [];
-  const [showFilters, setShowFilters] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([]);
-  const [compareItems, setCompareItems] = useState<ComparisonItem[]>([]);
-  const [showComparison, setShowComparison] = useState(false);
-
-  // Knowledge-hub specific state
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-
-  // Courses: URL toggle function
-  const toggleFilter = useCallback((key: string, value: string) => {
-    const curr = new Set((searchParams.get(key)?.split(",").filter(Boolean)) || []);
-    curr.has(value) ? curr.delete(value) : curr.add(value);
-    const newParams = new URLSearchParams(searchParams);
-    if (curr.size) {
-      newParams.set(key, Array.from(curr).join(","));
-    } else {
-      newParams.delete(key);
-    }
-    setSearchParams(newParams, { replace: true });
-  }, [searchParams, setSearchParams]);
-
-  // Apply search query to LMS items
-  const searchFilteredItems = isCourses && searchQuery
-    ? lmsFilteredItems.filter(item => {
-        const searchableText = [
-          item.title,
-          item.summary,
-          item.courseCategory,
-          item.deliveryMode,
-          item.duration,
-          item.levelCode,
-          item.levelLabel,
-          ...(item.locations || []),
-          ...(item.audience || []),
-          ...(item.department || [])
-        ].filter(Boolean).join(' ').toLowerCase();
-        return searchableText.includes(searchQuery.toLowerCase());
-      })
-    : lmsFilteredItems;
-
-  // --- Custom hook: encapsulates filter config loading + data fetching ---
   const {
+    isGuides, isKnowledgeHub, isServicesCenter, isDesignSystem,
+    navigate, config,
+    activeServiceTab, setActiveServiceTab,
     filteredItems,
-    totalCount,
-    filterConfig,
-    setFilters,
-    filters,
-    facets,
-    loading,
-    setLoading,
-    error,
-    setError,
-  } = useMarketplaceData({
-    marketplaceType,
-    config,
-    isCourses,
-    isGuides,
-    isKnowledgeHub,
-    isServicesCenter,
-    isDesignSystem,
-    activeServiceTab,
-    activeDesignSystemTab,
-    activeTab,
-    searchQuery,
-    queryParams,
-    currentPage,
-    pageSize,
-    searchFilteredItemsLength: searchFilteredItems.length,
-  });
-
-  const totalPages = Math.max(1, Math.ceil(Math.max(totalCount, 0) / pageSize));
-  
-  // Filter glossary terms – logic lives in module-level filterGlossaryTerms()
-  const filteredGlossaryTerms = useMemo(
-    () => (isGuides && activeTab === 'glossary') ? filterGlossaryTerms(queryParams) : [],
-    [isGuides, activeTab, queryParams]
-  );
-  
-  // Compute filters from URL for courses
-  const urlBasedFilters: Record<string, string[]> = isCourses
-    ? {
-        category: courseFacets?.category || [],
-        delivery: courseFacets?.delivery || [],
-        duration: courseFacets?.duration || [],
-        level: (courseFacets?.level || []) as string[],
-        department: courseFacets?.department || [],
-        location: courseFacets?.location || [],
-        audience: courseFacets?.audience || [],
-        status: courseFacets?.status || []
-      }
-    : {};
-  
-  // Handle track parameter for newjoiner (courses)
-  useEffect(() => {
-    if (isCourses) applyNewJoinerTrack(searchParams, setSearchParams);
-  }, [isCourses, searchParams, setSearchParams]);
-  
-  // (filter config loading is now handled inside useMarketplaceData hook)
-  
-
-  // Handle filter changes
-  const handleFilterChange = useCallback((filterType: string, value: string) => {
-    if (isCourses) { toggleFilter(filterType, value); return; }
-    if (isGuides) return;
-    setFilters(prev => computeNextFilters(prev, filterType, value));
-  }, [isCourses, isGuides, toggleFilter]);
-  
-  // Reset all filters
-  const resetFilters = useCallback(() => {
-    if (isCourses) {
-      const newParams = new URLSearchParams();
-      setSearchParams(newParams, { replace: true });
-      setSearchQuery('');
-    } else if (isKnowledgeHub) {
-      setActiveFilters([]);
-      setSearchQuery('');
-    } else if (isGuides) {
-      const newParams = new URLSearchParams();
-      const qs = newParams.toString();
-      window.history.replaceState(null, '', `${window.location.pathname}${qs ? '?' + qs : ''}`);
-      setQueryParams(newParams);
-      setSearchQuery('');
-    } else {
-      const empty: Record<string, string | string[]> = {};
-      filterConfig.forEach(c => { empty[c.id] = ''; });
-      setFilters(empty);
-      setSearchQuery('');
-    }
-  }, [isCourses, isKnowledgeHub, isGuides, marketplaceType, filterConfig, setSearchParams]);
-  
-  // Knowledge Hub filter handlers
-  const handleKnowledgeHubFilterChange = useCallback((filter: string) => {
-    setActiveFilters(prev => {
-      if (prev.includes(filter)) {
-        return prev.filter(f => f !== filter);
-      } else {
-        return [...prev, filter];
-      }
-    });
-  }, []);
-  
-  const clearKnowledgeHubFilters = useCallback(() => {
-    setActiveFilters([]);
-  }, []);
-  
-  // UI helpers
-  const toggleFilters = useCallback(() => setShowFilters(prev => !prev), []);
-  const toggleBookmark = useCallback((itemId: string) => {
-    setBookmarkedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);
-  }, []);
-  const handleAddToComparison = useCallback((item: any) => {
-    if (compareItems.length < 3 && !compareItems.some(c => c.id === item.id)) {
-      setCompareItems(prev => [...prev, item]);
-    }
-  }, [compareItems]);
-  const handleRemoveFromComparison = useCallback((itemId: string) => {
-    setCompareItems(prev => prev.filter(item => item.id !== itemId));
-  }, []);
-  const retryFetch = useCallback(() => { setError(null); setLoading(true); }, []);
-  const goToPage = useCallback((page: number) => {
-    const clamped = Math.max(1, Math.min(page, totalPages));
-    const next = new URLSearchParams(queryParams.toString());
-    if (clamped <= 1) next.delete('page');
-    else next.set('page', String(clamped));
-    if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', `${window.location.pathname}${next.toString() ? '?' + next.toString() : ''}`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    setQueryParams(new URLSearchParams(next.toString()));
-  }, [queryParams, totalPages]);
-
-  const hasActiveFilters = computeHasActiveFilters(isCourses, isKnowledgeHub, isGuides, urlBasedFilters, activeFilters, filters);
-
-  const handleSearchQueryChange = useCallback((q: string) => {
-    if (isGuides || isDesignSystem) {
-      updateSearchQueryParams(queryParams, q, setQueryParams);
-    } else {
-      setSearchQuery(q);
-    }
-  }, [isGuides, isDesignSystem, queryParams]);
+    searchQuery, setSearchQuery, filterConfig,
+    facets, queryParams, setQueryParams,
+    activeTab, activeDesignSystemTab, setActiveDesignSystemTab,
+    handleGuidesTabChange, currentPage, totalPages,
+    showFilters, setSidebarOpen, sidebarOpen,
+    bookmarkedItems, compareItems, showComparison, setShowComparison,
+    loading, error,
+    activeFilters,
+    handleFilterChange, resetFilters,
+    handleKnowledgeHubFilterChange, clearKnowledgeHubFilters,
+    toggleFilters, toggleBookmark, handleAddToComparison, handleRemoveFromComparison,
+    retryFetch, goToPage, normalizedFilters, hasActiveFilters,
+    searchFilteredItems, searchParams, setSearchParams, isCourses
+  } = useMarketplaceLogic({ marketplaceType, promoCards });
 
   return (
     <div className={`min-h-screen flex flex-col bg-gray-50 ${isGuides ? 'guidelines-theme' : ''}`}>
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
       <div className="container mx-auto px-4 py-8 flex-grow max-w-7xl">
-        {/* Breadcrumbs */}
-        <nav className="flex mb-4" aria-label="Breadcrumb">
-          <ol className="inline-flex items-center space-x-1 md:space-x-2">
-            <li className="inline-flex items-center">
-              <Link to="/" className="text-gray-600 hover:text-gray-900 inline-flex items-center">
-                <HomeIcon size={16} className="mr-1" />
-                <span>Home</span>
-              </Link>
-            </li>
-            {isGuides ? (
-              <>
-                <li aria-current="page">
-                  <div className="flex items-center">
-                    <ChevronRightIcon size={16} className="text-gray-400" />
-                    <span className="ml-1 text-gray-700 md:ml-2">{config.title}</span>
-                  </div>
-                </li>
-              </>
-            ) : (
-              <>
-                <li>
-                  <div className="flex items-center">
-                    <ChevronRightIcon size={16} className="text-gray-400" />
-                    <Link to={config.route} className="ml-1 text-gray-500 hover:text-gray-700 md:ml-2">
-                      {config.itemNamePlural}
-                    </Link>
-                  </div>
-                </li>
-                {isServicesCenter && SERVICE_TAB_INFO[activeServiceTab] && (
-                  <li aria-current="page">
-                    <div className="flex items-center">
-                      <ChevronRightIcon size={16} className="text-gray-400" />
-                      <span className="ml-1 text-gray-700 md:ml-2">
-                        {SERVICE_TAB_INFO[activeServiceTab].title}
-                      </span>
-                    </div>
-                  </li>
-                )}
-              </>
-            )}
-          </ol>
-        </nav>
+        <MarketplaceBreadcrumbs
+          isGuides={isGuides}
+          isServicesCenter={isServicesCenter}
+          config={config}
+          activeServiceTab={activeServiceTab}
+        />
 
         <h1 className="text-3xl font-bold text-gray-800 mb-2">{config.title}</h1>
         <p className="text-gray-600 mb-6">{config.description}</p>
 
-        {/* Service Center Tab Description Section */}
-        {isServicesCenter && SERVICE_TAB_INFO[activeServiceTab] && (
-          <div className="mb-6">
-            <div className="mb-4 p-4 rounded-lg shadow-sm" style={{ backgroundColor: '#FFFFFF' }}>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Current focus</p>
-                  <p className="text-lg font-semibold text-gray-900 mb-1">{SERVICE_TAB_INFO[activeServiceTab].title}</p>
-                </div>
-                <button className="px-3 py-1.5 rounded-full text-xs font-medium text-blue-700" style={{ backgroundColor: '#DBEAFE' }}>
-                  Tab overview
-                </button>
-              </div>
-              <p className="text-gray-600 text-sm mb-1">{SERVICE_TAB_INFO[activeServiceTab].description}</p>
-              <p className="text-xs text-gray-500">{SERVICE_TAB_INFO[activeServiceTab].managed}</p>
-            </div>
-          </div>
-        )}
+        <ServiceCenterContent
+          isServicesCenter={isServicesCenter}
+          activeServiceTab={activeServiceTab}
+          setActiveServiceTab={setActiveServiceTab}
+          searchParams={searchParams}
+          setSearchParams={setSearchParams}
+        />
 
-        {/* Service Center Tabs */}
-        {isServicesCenter && (
-          <div className="mb-6 border-b border-gray-200">
-            <nav className="flex space-x-8" aria-label="Service tabs">
-              {[
-                { id: 'technology', label: 'Technology' },
-                { id: 'business', label: 'Employee Services' },
-                { id: 'digital_worker', label: 'Digital Worker' },
-                { id: 'prompt_library', label: 'Prompt Library' },
-                { id: 'ai_tools', label: 'AI Tools' }
-              ].map((tab) => {
-                const isActive = activeServiceTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      setActiveServiceTab(tab.id);
-                      // Update URL with tab parameter
-                      const newParams = new URLSearchParams(searchParams);
-                      newParams.set('tab', tab.id);
-                      setSearchParams(newParams, { replace: false });
-                    }}
-                    className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors focus:outline-none ${
-                      isActive
-                        ? 'border-blue-700'
-                        : 'text-gray-700 border-transparent hover:text-gray-900 hover:border-gray-300'
-                    }`}
-                    style={isActive ? { color: '#030F35', borderColor: '#030F35' } : {}}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        )}
+        <GuidesTabsSection
+          isGuides={isGuides}
+          activeTab={activeTab}
+          handleGuidesTabChange={handleGuidesTabChange}
+        />
 
-        {/* Guides Tabs Section */}
-        {isGuides && (
-          <>
-            <div className="mb-6 border-b border-gray-200">
-              <nav className="flex space-x-8" aria-label="Guides navigation">
-                {/* Main tabs rendered as buttons */}
-                {(['strategy', 'guidelines', '6xd', 'blueprints', 'testimonials', 'glossary', 'faqs'] as WorkGuideTab[]).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => handleGuidesTabChange(tab)}
-                    className={`
-                      py-4 px-1 border-b-2 font-medium text-sm transition-colors focus:outline-none
-                      ${
-                        activeTab === tab
-                          ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }
-                    `}
-                    aria-current={activeTab === tab ? 'page' : undefined}
-                  >
-                    {TAB_LABELS[tab]}
-                  </button>
-                ))}
-              </nav>
-              {/* Tab Description - Integrated with tabs */}
-              {activeTab && TAB_DESCRIPTIONS[activeTab] && (
-                <div className="pt-2 pb-2 mt-3 border border-gray-200 rounded-lg bg-white p-3 shadow-sm">
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {TAB_DESCRIPTIONS[activeTab].description}
-                  </p>
-                </div>
-              )}
-            </div>
-          </>
-        )}
+        <DesignSystemTabsSection
+          isDesignSystem={isDesignSystem}
+          activeDesignSystemTab={activeDesignSystemTab}
+          setActiveDesignSystemTab={setActiveDesignSystemTab}
+          searchParams={searchParams}
+          setSearchParams={setSearchParams}
+        />
 
-        {/* Design System Tabs Section */}
-        {isDesignSystem && (
-          <div className="mb-6 border-b border-gray-200">
-            <nav className="flex space-x-8" aria-label="Design System navigation">
-              {(['cids', 'vds', 'cds'] as DesignSystemTab[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => handleDesignSystemTabChange(tab)}
-                  className={`
-                    py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                    ${
-                      activeDesignSystemTab === tab
-                        ? 'border-[var(--guidelines-primary)] text-[var(--guidelines-primary)]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }
-                  `}
-                  aria-current={activeDesignSystemTab === tab ? 'page' : undefined}
-                >
-                  {DESIGN_SYSTEM_TAB_LABELS[tab]}
-                </button>
-              ))}
-            </nav>
-            {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab] && (
-              <div className="pt-2 pb-2 mt-3 border border-gray-200 rounded-lg bg-white p-3 shadow-sm">
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {DESIGN_SYSTEM_TAB_DESCRIPTIONS[activeDesignSystemTab].description}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Search + Sort - Hide for Glossary tab (has its own search) */}
-        {!(isGuides && activeTab === 'glossary') && (
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex-1">
-              <SearchBar
-                searchQuery={(isGuides || isDesignSystem) ? (queryParams.get('q') || '') : searchQuery}
-                placeholder={isDesignSystem ? "Search in Design System" : (isGuides || isKnowledgeHub ? "Search in DQ Knowledge Center" : undefined)}
-                ariaLabel={isDesignSystem ? "Search in Design System" : (isGuides || isKnowledgeHub ? "Search in DQ Knowledge Center" : undefined)}
-                setSearchQuery={handleSearchQueryChange}
-              />
-            </div>
-          </div>
-        )}
-        {isGuides && activeTab === 'blueprints' && (
-          <div className="mb-4">
-            <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
-              Product
-            </span>
-          </div>
-        )}
+        <MarketplaceSearchBarSection
+          isDesignSystem={isDesignSystem}
+          isGuides={isGuides}
+          isKnowledgeHub={isKnowledgeHub}
+          searchQuery={searchQuery}
+          queryParams={queryParams}
+          setQueryParams={setQueryParams}
+          setSearchQuery={setSearchQuery}
+        />
 
         <div className="flex flex-col xl:flex-row gap-6">
           {/* Mobile filter toggle */}
@@ -2233,70 +1267,157 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <FilterIcon size={18} />
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
-              {hasActiveFilters && (
+              {hasActiveFilters ? (
                 <button onClick={resetFilters} className="ml-2 text-blue-600 text-sm font-medium whitespace-nowrap px-3 py-2">
                   Reset
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 
-          <FilterSidebarSection
-            isGuides={isGuides}
-            isDesignSystem={isDesignSystem}
-            isKnowledgeHub={isKnowledgeHub}
-            isCourses={isCourses}
-            showFilters={showFilters}
-            toggleFilters={toggleFilters}
-            resetFilters={resetFilters}
-            activeTab={activeTab}
-            facets={facets}
-            queryParams={queryParams}
-            setQueryParams={setQueryParams}
-            filters={filters}
-            filterConfig={filterConfig}
-            handleFilterChange={handleFilterChange}
-            urlBasedFilters={urlBasedFilters}
-            activeFilters={activeFilters}
-            handleKnowledgeHubFilterChange={handleKnowledgeHubFilterChange}
-            hasActiveFilters={hasActiveFilters}
-          />
+          {/* Filter sidebar - mobile/tablet */}
+          <div className="xl:hidden">
+            <button
+              type="button"
+              className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-30 transition-opacity duration-300 w-full h-full border-0 p-0 cursor-default ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              onClick={toggleFilters}
+              aria-label="Close filters overlay"
+              aria-hidden={!showFilters}
+              tabIndex={showFilters ? 0 : -1}
+            />
+            <dialog
+              open={showFilters}
+              aria-label="Filters"
+              id="filter-sidebar"
+              className={`fixed inset-y-0 left-0 m-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-40 h-full max-h-none p-0 ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}
+            >
+              <div className="h-full overflow-y-auto">
+                <div className="sticky top-0 bg-white z-10 p-4 border-b border-gray-200 flex justify-between items-center">
+                  <h2 className="text-lg font-semibold">Filters</h2>
+                  <button onClick={toggleFilters} className="p-1 rounded-full hover:bg-gray-100" aria-label="Close filters">
+                    <XIcon size={20} />
+                  </button>
+                </div>
+                <div className="p-4">
+                  {isGuides ? (
+                    <GuidesFilters 
+                      activeTab={activeTab} 
+                      facets={facets} 
+                      query={queryParams} 
+                      onChange={(next) => { 
+                        next.delete('page'); 
+                        const qs = next.toString(); 
+                        globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`); 
+                        setQueryParams(new URLSearchParams(next.toString())); 
+                        track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); 
+                      }} 
+                    />
+                  ) : (
+                    <FilterSidebar
+                      filters={normalizedFilters}
+                      filterConfig={filterConfig}
+                      onFilterChange={handleFilterChange}
+                      onResetFilters={resetFilters}
+                      isResponsive={true}
+                    />
+                  )}
+                </div>
+              </div>
+            </dialog>
+          </div>
+
+          {/* Filter sidebar - desktop */}
+          <div className="hidden xl:block xl:w-1/4">
+            {isGuides ? (
+              <GuidesFilters 
+                activeTab={activeTab} 
+                facets={facets} 
+                query={queryParams} 
+                onChange={(next) => { 
+                  next.delete('page'); 
+                  const qs = next.toString(); 
+                  globalThis.history?.replaceState(null, '', `${globalThis.location?.pathname ?? ""}${qs ? '?' + qs : ''}`); 
+                  setQueryParams(new URLSearchParams(next.toString())); 
+                  track('Guides.FilterChanged', { params: Object.fromEntries(next.entries()) }); 
+                }} 
+              />
+            ) : (
+              <div className="bg-white rounded-lg shadow p-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto filter-sidebar-scroll">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold">Filters</h2>
+                  {hasActiveFilters ? (
+                    <button onClick={resetFilters} className="text-blue-600 text-sm font-medium">Reset All</button>
+                  ) : null}
+                </div>
+                {isKnowledgeHub ? (
+                  <div className="space-y-4">
+                    {filterConfig.map(category => (
+                      <div key={category.id} className="border-b border-gray-100 pb-3">
+                        <h3 className="font-medium text-gray-900 mb-2">{category.title}</h3>
+                        <div className="space-y-2">
+                          {category.options.map(option => (
+                            <div key={option.id} className="flex items-center">
+                              <input 
+                                type="checkbox" 
+                                id={`desktop-${category.id}-${option.id}`} 
+                                checked={activeFilters.includes(option.name)} 
+                                onChange={() => handleKnowledgeHubFilterChange(option.name)} 
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                              />
+                              <label htmlFor={`desktop-${category.id}-${option.id}`} className="ml-2 text-sm text-gray-700">{option.name}</label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <FilterSidebar
+                    filters={normalizedFilters}
+                    filterConfig={filterConfig}
+                    onFilterChange={handleFilterChange}
+                    onResetFilters={resetFilters}
+                    isResponsive={false}
+                  />
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Main content */}
-          <MainContent
-            loading={loading}
-            error={error}
-            isGuides={isGuides}
-            isKnowledgeHub={isKnowledgeHub}
-            isDesignSystem={isDesignSystem}
-            isCourses={isCourses}
-            filteredItems={filteredItems}
-            activeDesignSystemTab={activeDesignSystemTab}
-            bookmarkedItems={bookmarkedItems}
-            toggleBookmark={toggleBookmark}
-            handleAddToComparison={handleAddToComparison}
-            searchQuery={searchQuery}
-            activeFilters={activeFilters}
-            handleKnowledgeHubFilterChange={handleKnowledgeHubFilterChange}
-            clearKnowledgeHubFilters={clearKnowledgeHubFilters}
-            retryFetch={retryFetch}
-            activeTab={activeTab}
-            filteredGlossaryTerms={filteredGlossaryTerms}
-            queryParams={queryParams}
-            setQueryParams={setQueryParams}
-            navigate={navigate}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            goToPage={goToPage}
-            searchFilteredItems={searchFilteredItems}
-            marketplaceType={marketplaceType}
-            promoCards={promoCards}
-            activeServiceTab={activeServiceTab}
-          />
+          <div className="xl:w-3/4">
+            <MarketplaceMainContent
+              loading={loading}
+              error={error}
+              isKnowledgeHub={isKnowledgeHub}
+              isDesignSystem={isDesignSystem}
+              isGuides={isGuides}
+              isCourses={isCourses}
+              activeTab={activeTab}
+              filteredItems={filteredItems}
+              searchFilteredItems={searchFilteredItems}
+              bookmarkedItems={bookmarkedItems}
+              searchQuery={searchQuery}
+              activeFilters={activeFilters}
+              marketplaceType={marketplaceType}
+              activeServiceTab={activeServiceTab}
+              queryParams={queryParams}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              promoCards={promoCards}
+              toggleBookmark={toggleBookmark}
+              handleAddToComparison={handleAddToComparison}
+              handleKnowledgeHubFilterChange={handleKnowledgeHubFilterChange}
+              clearKnowledgeHubFilters={clearKnowledgeHubFilters}
+              goToPage={goToPage}
+              retryFetch={retryFetch}
+              navigate={navigate}
+            />
+          </div>
         </div>
 
         {/* Comparison modal */}
-        {showComparison && (
+        {compareItems.length > 0 && showComparison && (
           <MarketplaceComparison
             items={compareItems}
             onClose={() => setShowComparison(false)}

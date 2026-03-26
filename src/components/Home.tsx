@@ -19,6 +19,8 @@ import {
   ScrollText,
   Wand2,
   Bot,
+  Lock,
+  Clock,
 } from 'lucide-react';
 import {
   AnimatedCounter,
@@ -114,24 +116,24 @@ const approvedSections = {
       description:
         'Discover what is happening in DQ, including important announcements, and what teams are building.',
       icon: <Newspaper />,
-      path: '/marketplace/opportunities',
+      path: '/marketplace/media-center',
       isActive: true,
     },
     {
       id: 'podcasts',
       title: 'Podcasts',
-      description: 'Tune in to conversations, stories, and expert insights from DQ leaders and associates.',
+      description: 'Tune in to conversations and stories, from DQ leaders and associates.',
       icon: <MessageCircle />,
-      path: '/marketplace/opportunities?tab=podcasts',
+      path: '/marketplace/media-center?tab=podcasts',
       isActive: true,
     },
     {
       id: 'blogs',
       title: 'Blogs',
       description:
-        'Dive into thought leadership, personal stories, and expert insights written by colleagues across DQ.',
+        'Behind every idea is a story. Explore insights and perspectives from DQ Associates.',
       icon: <BookIcon />,
-      path: '/marketplace/opportunities?tab=insights',
+      path: '/marketplace/media-center?tab=insights',
       isActive: true,
     },
     {
@@ -267,6 +269,44 @@ const ServiceCard = ({
   const wrapperClasses = `${activeCardClasses} ${baseLayoutClasses}`;
   const titleClass = `${sectionStyle.headingClass} text-base font-semibold text-white mb-1 truncate`;
   const displayTitle = toTitleCase(service.title);
+
+  if (isComingSoon) {
+    return (
+      <div className={`${baseLayoutClasses} relative cursor-not-allowed`} style={{ background: '#6e768c' }}>
+        {/* Yellow Coming Soon badge top-right */}
+        <div className="absolute top-3 right-3 z-10">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-400 text-yellow-900 text-xs font-bold shadow-sm">
+            <Clock size={12} />
+            Coming Soon
+          </span>
+        </div>
+
+        {/* Icon + Title row */}
+        <div className="flex items-start gap-3">
+          <div className={`${iconWrapperClasses} rounded-full bg-white border border-white/40 shadow-sm flex items-center justify-center mb-3`}>
+            {React.isValidElement(iconNode) ? cloneElement(iconNode as React.ReactElement<any>, {
+              size: 20,
+              "aria-hidden": true,
+              className: `${iconColorClass} ${(iconNode as React.ReactElement<any>).props?.className ?? ""}`.trim(),
+            } as any) : <span className={iconColorClass}>{iconNode}</span>}
+          </div>
+          <h2 className={`${sectionStyle.headingClass} text-base font-semibold mb-1 truncate`} title={displayTitle}>{displayTitle}</h2>
+        </div>
+
+        {/* Description */}
+        <p className={descriptionClasses}>{service.description}</p>
+
+        {/* Locked button */}
+        <button
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/20 text-white/80 text-sm font-semibold cursor-not-allowed"
+          disabled
+        >
+          <Lock size={14} />
+          Coming Soon
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div

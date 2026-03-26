@@ -168,6 +168,7 @@ const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
         rehypeStripListIcons as any
       ] as any}
       components={{
+        h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mt-6 mb-4 text-gray-900" {...props} />,
         h2: ({ node, ...props }) => (
           <h2 className="text-xl font-bold text-gray-900 mt-6 mb-4 pl-4 relative border-0 border-l-0 [&_*]:border-0" {...(props as any)}>
             <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#1A2E6E] via-[#1A2E6E]/80 to-transparent"></span>
@@ -186,16 +187,12 @@ const MarkdownRenderer: React.FC<{ body: string }> = ({ body }) => {
             {props.children}
           </h4>
         ),
+        h5: ({ node, ...props }) => <h5 className="text-base font-semibold mt-3 mb-2 text-gray-900" {...props} />,
+        h6: ({ node, ...props }) => <h6 className="text-sm font-semibold mt-2 mb-2 text-gray-900" {...props} />,
         img: ({ node, ...props }) => (
           // Constrain and lazy-load images for performance
           <img loading="lazy" decoding="async" style={{ maxWidth: '100%', height: 'auto' }} {...props as any} />
-          ),
-          h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mt-6 mb-4 text-gray-900" {...props} />,
-          h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mt-5 mb-3 text-gray-900" {...props} />,
-          h3: ({ node, ...props }) => <h3 className="text-xl font-semibold mt-4 mb-2 text-gray-900" {...props} />,
-          h4: ({ node, ...props }) => <h4 className="text-lg font-semibold mt-3 mb-2 text-gray-900" {...props} />,
-          h5: ({ node, ...props }) => <h5 className="text-base font-semibold mt-3 mb-2 text-gray-900" {...props} />,
-          h6: ({ node, ...props }) => <h6 className="text-sm font-semibold mt-2 mb-2 text-gray-900" {...props} />,
+        ),
           p: ({ node, ...props }) => <p className="mb-4 text-gray-700 leading-relaxed" {...props} />,
           a: ({ node, ...props }) => <a className="text-blue-600 underline hover:text-blue-800 transition-colors" {...props} />,
           ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-4 space-y-2 text-gray-700" {...props} />,

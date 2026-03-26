@@ -40,7 +40,8 @@ export const formatDateVeryShort = (input: string): string => {
   try {
     return new Date(input).toLocaleDateString('en-US', { 
       month: 'short', 
-      day: 'numeric' 
+      day: 'numeric',
+      year: 'numeric'
     });
   } catch {
     return '';
@@ -186,17 +187,23 @@ export const getNewsTypeDisplay = (item: NewsItem): { label: string; color: stri
   }
   
   const newsTypeColor: Record<NonNullable<NewsItem['newsType']>, string> = {
-    'Policy Update': '#8B5CF6',        // Purple for policy/guidelines
+    'Policy Update': '#0f2055',        // Dark blue for policy/guidelines
     'Upcoming Events': '#F97316',      // Orange for events
     'Company News': '#0EA5E9',         // Blue for company news
-    'Holidays': '#16A34A'              // Green for holidays/notices
+    'Holidays': '#16A34A',             // Green for holidays/notices
+    'Leadership Messages': '#7C3AED',  // Purple for leadership
+    'Product Updates': '#0EA5E9',      // Blue for product updates
+    'Operational Notices': '#F97316'   // Orange for operational notices
   };
 
   const newsTypeLabel: Record<NonNullable<NewsItem['newsType']>, string> = {
     'Policy Update': 'Policy Update',
     'Upcoming Events': 'Upcoming Events',
     'Company News': 'Company News',
-    'Holidays': 'Holidays'
+    'Holidays': 'Holidays',
+    'Leadership Messages': 'Leadership Messages',
+    'Product Updates': 'Product Updates',
+    'Operational Notices': 'Operational Notices'
   };
 
   if (item.newsType) {
@@ -209,7 +216,7 @@ export const getNewsTypeDisplay = (item: NewsItem): { label: string; color: stri
   // Fallback to type if newsType is missing
   const typeFallback: Record<NewsItem['type'], { label: string; color: string }> = {
     Announcement: { label: 'Company News', color: '#0EA5E9' },      // Blue
-    Guidelines: { label: 'Policy Update', color: '#8B5CF6' },        // Purple
+    Guidelines: { label: 'Policy Update', color: '#0f2055' },        // Dark blue
     Notice: { label: 'Holidays', color: '#16A34A' },                  // Green
     'Thought Leadership': { label: 'Blog', color: '#14B8A6' }         // Teal for blogs
   };
