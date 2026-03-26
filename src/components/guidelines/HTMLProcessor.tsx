@@ -1,0 +1,114 @@
+import React, { useEffect, useRef } from 'react'
+import DOMPurify from 'dompurify'
+import { TablePreview } from './TablePreview'
+
+interface SafeHTMLBlockProps {
+  readonly html: string
+  readonly htmlKey: string
+}
+
+// Safe HTML block — uses DOMPurify fragment + replaceChildren (no direct HTML injection)
+function SafeHTMLBlock({ html, htmlKey }: SafeHTMLBlockProps) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!ref.current) return
+    const fragment = DOMPurify.sanitize(html, { RETURN_DOM_FRAGMENT: true })
+    ref.current.replaceChildren(fragment)
+  }, [html])
+
+  return <div key={htmlKey} ref={ref} />
+}
+
+interface HTMLProcessorProps {
+  readonly html: string
+  readonly className?: string
+}
+
+export function HTMLProcessor({ html, className = '' }: HTMLProcessorProps) {
+  const extractTableData = (tableHtml: string) => {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(tableHtml, 'text/html')
+    const table = doc.querySelector('table')
+    if (!table) return null
+
+    const headers: string[] = []
+    const rows: string[][] = []
+
+    const headerRow = table.querySelector('thead tr') || table.querySelector('tr')
+    if (headerRow) {
+      headerRow.querySelectorAll('th, td').forEach(cell => {
+        headers.push(cell.textContent?.trim() || '')
+      })
+    }
+
+    const bodyRows = table.querySelectorAll('tbody tr')
+    if (bodyRows.length > 0) {
+      bodyRows.forEach(row => {
+        const rowData: string[] = []
+        row.querySelectorAll('td').forEach(cell => {
+          rowData.push(cell.textContent?.trim() || '')
+        })
+        if (rowData.length > 0) rows.push(rowData)
+      })
+    } else {
+      const allRows = table.querySelectorAll('tr')
+      for (let i = 1; i < allRows.length; i++) {
+        const rowData: string[] = []
+        allRows[i].querySelectorAll('td').forEach(cell => {
+          rowData.push(cell.textContent?.trim() || '')
+        })
+        if (rowData.length > 0) rows.push(rowData)
+      }
+    }
+
+    return { headers, rows }
+  }
+
+  const processHTML = () => {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, 'text/html')
+    const tables = doc.querySelectorAll('table')
+
+    if (tables.length === 0) {
+      return <SafeHTMLBlock html={html} htmlKey="html-only" />
+    }
+
+    const components: React.ReactNode[] = []
+    let lastIndex = 0
+
+    tables.forEach((table) => {
+      const tableHtml = table.outerHTML
+      const tableIndex = html.indexOf(tableHtml, lastIndex)
+
+      if (tableIndex !== -1) {
+        const beforeTable = html.substring(lastIndex, tableIndex)
+        if (beforeTable.trim()) {
+          components.push(
+            <SafeHTMLBlock key={`html-at-${tableIndex}`} html={beforeTable} htmlKey={`html-at-${tableIndex}`} />
+          )
+        }
+
+        const tableData = extractTableData(tableHtml)
+        if (tableData && tableData.headers.length > 0 && tableData.rows.length > 0) {
+          components.push(
+            <TablePreview key={`table-at-${tableIndex}`} data={tableData} />
+          )
+        }
+
+        lastIndex = tableIndex + tableHtml.length
+      }
+    })
+
+    const remainingHtml = html.substring(lastIndex)
+    if (remainingHtml.trim()) {
+      components.push(
+        <SafeHTMLBlock key="html-final" html={remainingHtml} htmlKey="html-final" />
+      )
+    }
+
+    return <>{components}</>
+  }
+
+  return <div className={className}>{processHTML()}</div>
+}

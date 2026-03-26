@@ -51,52 +51,72 @@ export const SixXDComingSoonCards: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {SIXD_CARDS.map((card, index) => (
-        <div
-          key={index}
-          className="bg-white rounded-lg shadow border border-gray-200 p-3 transition-all duration-300 hover:shadow-md flex flex-col h-[400px]"
-        >
-          {/* Image - Match GuideCard styling */}
-          <div className="rounded-lg overflow-hidden mb-2 bg-slate-50 h-40 min-h-[160px] max-h-[160px] flex-shrink-0">
-            <img
-              src={card.imageUrl}
-              alt={card.title}
-              className="w-full h-full object-cover"
-            />
+      <div
+        key={index}
+        className="bg-white rounded-2xl shadow border border-gray-200 transition-all duration-300 hover:shadow-md flex flex-col overflow-hidden"
+      >
+        {/* Image — flush to top */}
+        <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>
+          <img
+            src={card.imageUrl}
+            alt={card.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Card body */}
+        <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
+          {/* Badge */}
+          <div className="flex items-center gap-2 mb-2 flex-shrink-0">
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full border bg-blue-100 text-blue-700 border-blue-200">
+              6xD
+            </span>
           </div>
 
-          {/* Card Content */}
-          <div className="flex flex-col flex-1">
-            {/* Title - Match GuideCard styling */}
-            <h3 className="font-semibold text-gray-900 mb-1.5 line-clamp-2 min-h-[44px] flex-shrink-0">
-              {card.title}
-            </h3>
+          {/* Title */}
+          <h3 className="font-semibold text-gray-900 mb-1.5 flex-shrink-0" style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            lineHeight: '1.375rem'
+          }}>
+            {card.title}
+          </h3>
 
-            {/* Subtitle - Italic tagline */}
-            <p className="text-sm text-gray-500 mb-2 italic line-clamp-1 flex-shrink-0">
-              {card.subtitle}
-            </p>
+          {/* Subtitle */}
+          <p className="text-sm text-gray-500 italic mb-2 flex-shrink-0" style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 1,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>
+            {card.subtitle}
+          </p>
 
-            {/* Description - Match GuideCard styling */}
-            <p className="text-sm text-gray-600 line-clamp-2 mb-2 min-h-[36px] leading-snug flex-shrink-0">
-              {card.description}
-            </p>
+          {/* Description */}
+          <p className="text-sm text-gray-600 mb-3 flex-shrink-0" style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            lineHeight: '1.25rem'
+          }}>
+            {card.description}
+          </p>
 
-            {/* Spacer to push button to bottom */}
-            <div className="flex-grow min-h-[8px]"></div>
-
-            {/* Footer with Coming Soon Button - Match GuideCard styling */}
-            <div className="pt-2.5 border-t border-gray-100 flex-shrink-0">
-              <button
-                disabled
-                className="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-full text-sm font-semibold cursor-not-allowed flex items-center justify-center gap-2"
-                aria-label="Coming Soon"
-              >
-                <Clock size={16} />
-                <span>Coming Soon</span>
-              </button>
-            </div>
+          {/* Button — no separator */}
+          <div className="mt-auto flex-shrink-0">
+            <button
+              disabled
+              className="w-full px-4 py-2.5 bg-gray-100 text-gray-400 rounded-full text-sm font-semibold cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <Clock size={16} />
+              <span>Coming Soon</span>
+            </button>
           </div>
         </div>
+      </div>
       ))}
     </div>
   );

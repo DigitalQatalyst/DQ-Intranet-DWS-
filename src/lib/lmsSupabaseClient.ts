@@ -5,18 +5,16 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_LMS_SUPABASE_URL as string
 const anon = import.meta.env.VITE_LMS_SUPABASE_ANON_KEY as string
 
-if (!url || !anon) {
-  // Helps you catch misconfigured envs early during dev
-  // eslint-disable-next-line no-console
-  console.error('Missing VITE_LMS_SUPABASE_URL or VITE_LMS_SUPABASE_ANON_KEY. Check your .env and restart the dev server.')
-  throw new Error('LMS Supabase env vars not set')
-}
-
-export const lmsSupabaseClient = createClient(url, anon, {
-  auth: { persistSession: true, autoRefreshToken: true },
-})
+export const lmsSupabaseClient = url && anon
+  ? createClient(url, anon, {
+      auth: { persistSession: true, autoRefreshToken: true },
+    })
+  : {
+      from: () => {
+        throw new Error('LMS Supabase env vars not set. Please set VITE_LMS_SUPABASE_URL and VITE_LMS_SUPABASE_ANON_KEY and restart the dev server.')
+      },
+    }
 
 // Backwards compatibility: also export as 'lmsSupabase'
 export const lmsSupabase = lmsSupabaseClient
 export default lmsSupabaseClient
-

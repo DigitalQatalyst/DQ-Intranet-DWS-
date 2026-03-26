@@ -1318,8 +1318,8 @@ export async function updateLessonVideoProgress(
   courseId: string,
   courseSlug: string,
   progressPercentage: number,
-  hasQuiz: boolean = false,
-  quizPassed: boolean = false
+  hasQuiz = false,
+  quizPassed = false
 ): Promise<LmsLessonProgress> {
   let newStatus: 'in_progress' | 'completed' = 'in_progress';
   if (progressPercentage >= 90) {

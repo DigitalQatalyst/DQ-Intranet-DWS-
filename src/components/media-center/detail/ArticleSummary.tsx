@@ -1,99 +1,91 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import type { NewsItem } from '@/data/media/news';
 import { formatDate, getNewsTypeDisplay } from '@/utils/newsUtils';
 
 interface ArticleSummaryProps {
   article: NewsItem;
   shouldUseNewLayout: boolean;
+  onListenNow?: () => void;
 }
 
-export const ArticleSummary: React.FC<ArticleSummaryProps> = ({ article, shouldUseNewLayout }) => {
-  const location = useLocation();
+export const ArticleSummary: React.FC<ArticleSummaryProps> = ({ article, onListenNow }) => {
   const announcementDate = article.date ? formatDate(article.date) : '';
-  const displayAuthor = article.type === 'Thought Leadership'
+  const isBlog = article.type === 'Thought Leadership' && article.format !== 'Podcast';
+  const isPodcast = article.format === 'Podcast' || article.tags?.some(t => t.toLowerCase().includes('podcast'));
+  const displayAuthor = isBlog || isPodcast
     ? (article.byline || article.author || 'DQ Media Team')
     : article.author;
 
-  const getFullBlogUrl = (): string => {
-    if (article.id === 'compute-nationalism-rise') {
-      return 'https://corp-web.qatalyst.tech/blog/rise-of-compute-nationalism';
-    }
+  const summaryTitle = isPodcast ? 'Episode Summary' : isBlog ? 'Blog Summary' : 'Announcement Summary';
 
-    if (article.id === 'beijing-ai-superstate') {
-      return 'https://corp-web.qatalyst.tech/blog/china-ai-superstate';
-    }
+  const rows = [
+    { label: 'Author', value: displayAuthor ?? '—' },
+    { label: 'Date', value: announcementDate },
+    { label: isPodcast ? 'Duration' : 'Reading Time', value: isPodcast ? '60+ Minutes' : (article.readingTime ? `${article.readingTime} min` : '<5 min') },
+    { label: 'Category', value: getNewsTypeDisplay(article).label },
+  ];
 
-    if (article.id === 'europe-ethical-ai-compute') {
-      return 'https://corp-web.qatalyst.tech/blog/europe-ai-compute-challenge';
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({ title: article.title, text: article.excerpt, url: window.location.href }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href).catch(() => {});
     }
-
-    return `/marketplace/news/${article.id}${location.search || ''}`;
   };
 
-  if (shouldUseNewLayout) {
-    return (
-      <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" aria-label="Article Summary">
-        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Article Summary</h3>
-        </div>
-        <div className="p-4 space-y-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Author</span>
-            <span className="text-gray-900 font-medium">{displayAuthor}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Date</span>
-            <span className="text-gray-900 font-medium">{announcementDate}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Reading Time</span>
-            <span className="text-gray-900 font-medium">{article.readingTime || '5–10'} min</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Category</span>
-            <span className="text-gray-900 font-medium">{getNewsTypeDisplay(article).label}</span>
-          </div>
-        </div>
-        <div className="px-4 pb-4">
-          <button 
-            type="button"
-            className="w-full px-4 py-3 text-white font-semibold rounded-md transition-colors shadow-md hover:opacity-90" 
-            style={{ backgroundColor: '#030F35' }}
-            onClick={() => {
-              window.open(getFullBlogUrl(), '_blank');
-            }}
-          >
-            View Full Blog
-          </button>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" aria-label="Announcement Summary">
-      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Announcement Summary</h3>
+    <div className="sticky top-8 space-y-4">
+      {/* Summary Card */}
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <div className="px-5 pt-5 pb-3">
+          <h3 className="text-base font-semibold text-foreground">{summaryTitle}</h3>
+        </div>
+        <div className="px-5 pb-5">
+          {/* Key-value rows */}
+          <div className="space-y-2.5 mb-5">
+            {rows.map((row, i) => (
+              <div key={i} className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{row.label}</span>
+                <span className="font-medium text-foreground text-right">{row.value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Primary CTA */}
+          <div className="space-y-2.5">
+            {isPodcast ? (
+              <button
+                type="button"
+                onClick={onListenNow}
+                className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#081540' }}
+              >
+                Listen Now <ArrowRight className="h-4 w-4" />
+              </button>
+            ) : isBlog ? (
+              <a
+                href={article.externalUrl || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#081540' }}
+              >
+                Read More <ArrowRight className="h-4 w-4" />
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={handleShare}
+                className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#081540' }}
+              >
+                Share Announcement <ArrowRight className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="p-4 space-y-4">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Author</span>
-          <span className="text-gray-900 font-medium">HRA</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Date</span>
-          <span className="text-gray-900 font-medium">{announcementDate}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Reading Time</span>
-          <span className="text-gray-900 font-medium">{article.readingTime || '5–10'} min</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Category</span>
-          <span className="text-gray-900 font-medium">{getNewsTypeDisplay(article).label}</span>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 };

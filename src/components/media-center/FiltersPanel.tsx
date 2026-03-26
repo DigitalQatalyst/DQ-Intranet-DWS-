@@ -47,7 +47,10 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({ facets, values, onChange, o
       {orderedFacets.map((facet) => (
         <div key={facet.key} className="border-t border-gray-100 pt-4 first:border-t-0 first:pt-0">
           <details>
-            <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-gray-800">
+            <summary
+              className="flex cursor-pointer list-none items-center justify-between"
+              style={{ fontSize: '16px', fontWeight: 500, color: '#111827', fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}
+            >
               {facet.label}
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </summary>
@@ -63,17 +66,18 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({ facets, values, onChange, o
                     type="button"
                     onClick={() => toggleValue(facet.key, optionValue)}
                     aria-pressed={isActive}
-                    className={`flex w-full items-center gap-2 rounded-md border border-transparent px-2 py-1 text-left text-sm transition hover:border-gray-200 ${
+                    className={`flex w-full items-center gap-3 rounded-md border border-transparent px-2 py-1.5 text-left transition hover:border-gray-200 ${
                       isActive ? 'text-[#1A2E6E] font-medium bg-[#EEF2FF] border-[#C7D2FE]' : 'text-gray-700'
                     }`}
+                    style={{ fontSize: '14px', fontWeight: 400, fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}
                   >
                     <span
-                      className={`mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded border ${
+                      className={`flex-shrink-0 inline-flex h-5 w-5 items-center justify-center rounded border ${
                         isActive ? 'bg-gray-600 border-gray-600' : 'border-gray-300 bg-white'
                       }`}
                       aria-hidden="true"
                     >
-                      {isActive && <Check size={10} strokeWidth={3} className="text-white" />}
+                      {isActive && <Check size={11} strokeWidth={3} className="text-white" />}
                     </span>
                     <span className="flex flex-col">
                       <span>{optionLabel}</span>

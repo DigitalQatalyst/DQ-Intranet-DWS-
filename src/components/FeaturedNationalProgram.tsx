@@ -136,11 +136,11 @@ export const FeaturedNationalProgram: React.FC = () => {
     <div className="w-full py-8 px-4">
       <FadeInUpOnScroll className="text-center mb-10">
         <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-          Latest Updates
+          What's New at DQ
         </h2>
         <div>
           <p className="text-base sm:text-lg text-gray-600 mx-auto text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
-            Explore the latest DQ news, insights, and job opportunities.
+            Stay connected to the latest news, insights, and opportunities shaping work and growth across DQ.
           </p>
         </div>
       </FadeInUpOnScroll>

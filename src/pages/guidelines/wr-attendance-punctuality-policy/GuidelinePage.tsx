@@ -36,7 +36,7 @@ function GuidelinePage() {
           }
         }
       } catch (error) {
-        console.error('Error fetching guide title:', error)
+        console.error('Error fetching guide title:', error) // NOSONAR
       }
     })()
     return () => { cancelled = true }
@@ -130,7 +130,12 @@ function GuidelinePage() {
       <main className="flex-1">
         <div className="container mx-auto px-4 py-12 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Left Column - Content Area */}
+            {/* Left Column - Sidebar Navigation */}
+            <div className="lg:col-span-1">
+              <SideNav />
+            </div>
+
+            {/* Right Column - Content Area */}
             <div className="lg:col-span-3 bg-white rounded-lg shadow-sm p-8 md:p-12">
               {/* Document Control Section */}
               <GuidelineSection id="document-control" title="Document Control">
@@ -340,11 +345,6 @@ function GuidelinePage() {
                 </p>
               </GuidelineSection>
 
-            </div>
-
-            {/* Right Column - Sidebar Navigation */}
-            <div className="lg:col-span-1">
-              <SideNav />
             </div>
           </div>
         </div>
