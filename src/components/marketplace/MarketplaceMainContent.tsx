@@ -5,6 +5,7 @@ import { SixXDComingSoonCards } from '../guides/SixXDComingSoonCards';
 import TestimonialsGrid from '../guides/TestimonialsGrid';
 import GuidesGrid from '../guides/GuidesGrid';
 import { MarketplaceGrid } from './MarketplaceGrid.js';
+import { DesignSystemCard } from './DesignSystemCard';
 import { LOCATION_ALLOW } from '../../lms/config';
 import { WorkGuideTab } from './MarketplaceUtils';
 
@@ -87,23 +88,29 @@ export const MarketplaceMainContent: React.FC<MarketplaceMainContentProps> = ({
     );
   }
   if (isDesignSystem) {
+    if (filteredItems.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="text-center max-w-md">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No design systems found</h3>
+            <p className="text-gray-600 text-sm">Service cards will appear here once they are added.</p>
+          </div>
+        </div>
+      );
+    }
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories CI.DS</h3>
-          <p className="text-gray-600 text-sm mb-4">Component Integration Design System - Explore reusable components and integration patterns.</p>
-          <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories V.DS</h3>
-          <p className="text-gray-600 text-sm mb-4">Visual Design System - Discover design tokens, typography, and visual guidelines.</p>
-          <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">DQ Stories CDS</h3>
-          <p className="text-gray-600 text-sm mb-4">Content Design System - Access content patterns and writing guidelines.</p>
-          <p className="text-xs text-gray-500">xDS Design System Marketplace</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {filteredItems.map((item: any) => (
+          <DesignSystemCard
+            key={item.id}
+            id={item.id}
+            title={item.title}
+            description={item.description}
+            imageUrl={item.imageUrl}
+            tags={item.tags}
+            type={item.type}
+          />
+        ))}
       </div>
     );
   }

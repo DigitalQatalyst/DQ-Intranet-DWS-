@@ -5,6 +5,7 @@ import { track } from '../../utils/analytics';
 import { fetchMarketplaceItems } from '../../services/marketplace.js';
 import { getMarketplaceConfig } from '../../utils/marketplaceConfig.js';
 import { getFallbackItems } from '../../utils/fallbackData';
+import { getDesignSystemItemsByType } from '../../utils/designSystemData';
 import { LMS_COURSES } from '../../data/lmsCourseDetails';
 import { parseFacets, applyFilters } from '../../lms/filters';
 import {
@@ -316,8 +317,16 @@ export const useMarketplaceLogic = ({ marketplaceType, promoCards = [] }: UseMar
       runGuides();
       return;
     }
+    if (isDesignSystem) {
+      const items = getDesignSystemItemsByType(activeDesignSystemTab as 'cids' | 'vds' | 'cds');
+      setFilteredItems(items);
+      setTotalCount(items.length);
+      setLoading(false);
+      setError(null);
+      return;
+    }
     runOtherMarketplace();
-  }, [marketplaceType, queryParams, isCourses, isKnowledgeHub, isGuides, currentPage, pageSize, runGuides, runOtherMarketplace, searchFilteredItems.length]);
+  }, [marketplaceType, queryParams, isCourses, isKnowledgeHub, isGuides, isDesignSystem, activeDesignSystemTab, currentPage, pageSize, runGuides, runOtherMarketplace, searchFilteredItems.length]);
 
   useEffect(() => {
     if (isCourses) {
