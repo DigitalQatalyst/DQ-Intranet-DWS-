@@ -1006,8 +1006,8 @@ export const LmsCourses: React.FC = () => {
                         }}
                         marketplaceType="courses"
                         isBookmarked={false}
-                        onToggleBookmark={() => { }}
-                        onQuickView={() => { }}
+                        onToggleBookmark={() => { /* noop */ }}
+                        onQuickView={() => { /* noop */ }}
                       />
                     );
                   })}
