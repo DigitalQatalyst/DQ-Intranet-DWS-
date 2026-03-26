@@ -346,7 +346,7 @@ export function OnboardingJourney() {
                   DQ DNA & Framework Adoption
                 </h3>
                 <p className="text-gray-700 leading-relaxed mb-6">
-                  Your understanding and adoption of DQ's DNA (GHC) and Agile 6xD / 6x Digitals are tracked throughout Month 1 and reinforced in Months 2 and 3. This ensures alignment with DQ's ways of working, decision-making, and execution standards.
+                  Your understanding and adoption of DQ's DNA (GHC) and Agile 6xD. Understanding of these frameworks are tracked throughout Month 1 and reinforced in Months 2 and 3. This ensures alignment with DQ's ways of working, decision-making, and execution standards.
                 </p>
 
                 <h3 className="text-xl font-semibold text-[#030E31] mb-3 mt-6">
