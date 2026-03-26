@@ -1162,169 +1162,188 @@ const TakeActionGridLayout = ({
   const activeCard = cards[activeIndex] ?? cards[0];
 
   return (
-    <section ref={refEl} className="relative py-24" style={{ backgroundColor: '#f0f6ff' }}>
+    <section
+      ref={refEl}
+      className="relative py-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50"
+    >
       <div className="container mx-auto px-4 md:px-6 lg:px-10 max-w-6xl">
 
         {/* Header */}
         <motion.div
-          className="text-center mb-12"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
         >
           <motion.span
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-[0.24em] bg-[#fe6a4d] text-white shadow-sm mb-4"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold bg-orange-50 text-orange-600 mb-6"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={isInView ? { scale: 1, opacity: 1 } : {}}
-            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
           >
-            TAKE ACTION
+            <span className="w-2 h-2 rounded-full bg-orange-500" />
+            Take Action
           </motion.span>
           <h2
-            className="ghc-font-display font-bold text-[#131e42] leading-tight"
-            style={{ fontSize: titleFontSize ?? '40px' }}
+            className="font-bold text-slate-900 tracking-tight leading-tight"
+            style={{ fontSize: titleFontSize ?? '48px' }}
           >
             {title}
           </h2>
-          <p className="text-[#4a5678] mt-3 text-lg max-w-2xl mx-auto" style={{ fontSize: subtitleFontSize }}>
+          <p className="text-slate-600 mt-4 text-xl max-w-2xl mx-auto" style={{ fontSize: subtitleFontSize }}>
             {subtitle}
           </p>
         </motion.div>
 
         {/* Split layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
           {/* LEFT — Step list */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {cards.map((card, i) => {
               const isActive = i === activeIndex;
               return (
-                <motion.button
+                <motion.div
                   key={card.title}
-                  type="button"
-                  onClick={() => setActiveIndex(i)}
-                  className={`relative w-full text-left rounded-xl p-4 border transition-colors duration-200 overflow-hidden ${
-                    isActive
-                      ? 'bg-white border-[#e5e7eb] shadow-md'
-                      : 'bg-[#f9fafb] border-[#f0f0f0] hover:bg-white hover:border-[#e5e7eb] hover:shadow-sm'
-                  }`}
+                  className="relative"
                   initial={{ opacity: 0, x: -24 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
-                  whileHover={{ x: 4 }}
+                  transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
                 >
-                  {/* Active left border */}
-                  {isActive && (
-                    <motion.div
-                      className="absolute left-0 top-0 bottom-0 w-1 bg-[#fe6a4d] rounded-l-xl"
-                      layoutId="activeBorder"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-
-                  <div className="flex items-center gap-4 pl-2">
-                    {/* Icon */}
-                    <motion.div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${
-                        isActive ? 'bg-[#fe6a4d]' : 'bg-[#e5e7eb]'
-                      }`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                    >
-                      <card.icon className="h-5 w-5" style={{ color: isActive ? 'white' : '#9ca3af' }} />
-                    </motion.div>
-
-                    {/* Text */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-[#131e42]">{card.title}</p>
-                      <p className="text-xs text-[#6b7390] mt-0.5 leading-snug line-clamp-2">{card.description}</p>
-                    </div>
-
-                    {/* Arrow */}
-                    {isActive && (
-                      <motion.div
-                        animate={{ x: [0, 4, 0] }}
-                        transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
-                      >
-                        <ArrowRight className="h-4 w-4 text-[#fe6a4d] flex-shrink-0" />
-                      </motion.div>
-                    )}
+                  {/* Number badge outside card */}
+                  <div
+                    className={`absolute -left-3 -top-3 z-10 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-sm transition-colors duration-300 ${
+                      isActive ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {i + 1}
                   </div>
-                </motion.button>
+
+                  <motion.button
+                    type="button"
+                    onClick={() => setActiveIndex(i)}
+                    className={`w-full text-left rounded-2xl p-5 border transition-all duration-300 ${
+                      isActive
+                        ? 'bg-white shadow-lg ring-1 ring-slate-200'
+                        : 'bg-white/60 border-slate-100 hover:bg-white hover:shadow-md'
+                    }`}
+                    whileHover={{ y: -2 }}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${
+                          isActive ? 'bg-orange-100' : 'bg-slate-100'
+                        }`}
+                      >
+                        <card.icon
+                          className="h-6 w-6 transition-colors duration-300"
+                          style={{ color: isActive ? '#f97316' : '#94a3b8' }}
+                        />
+                      </div>
+
+                      {/* Text */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base font-bold text-slate-900">{card.title}</p>
+                        <p className="text-sm text-slate-600 mt-1 leading-relaxed">{card.description}</p>
+                      </div>
+
+                      {/* Arrow */}
+                      {isActive && (
+                        <motion.div
+                          animate={{ x: [0, 4, 0] }}
+                          transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
+                          className="flex-shrink-0 mt-1"
+                        >
+                          <ArrowRight className="h-5 w-5 text-orange-500" />
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.button>
+                </motion.div>
               );
             })}
           </div>
 
           {/* RIGHT — Featured card */}
           <motion.div
-            className="bg-[#f8f9fa] rounded-2xl p-8 border border-[#e5e7eb] shadow-sm min-h-[380px] flex flex-col"
+            className="lg:sticky lg:top-8"
             initial={{ opacity: 0, scale: 0.96 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIndex}
-                className="flex flex-col flex-1"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.3 }}
-              >
-                {/* Icon */}
+            <div className="bg-white rounded-3xl shadow-xl ring-1 ring-slate-200 overflow-hidden">
+              <AnimatePresence mode="wait">
                 <motion.div
-                  className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-5 border border-[#e5e7eb]"
-                  initial={{ rotate: -90, scale: 0.5 }}
-                  animate={{ rotate: 0, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                  key={activeIndex}
+                  className="p-8 flex flex-col items-center text-center"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <activeCard.icon className="h-8 w-8" style={{ color: '#fe6a4d' }} />
-                </motion.div>
-
-                {/* Step label */}
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#fe6a4d] mb-2">
-                  {activeCard.badge}
-                </p>
-
-                {/* Title */}
-                <h3 className="text-2xl font-bold text-[#131e42] mb-3">{activeCard.title}</h3>
-
-                {/* Description */}
-                <p className="text-[#4a5678] leading-relaxed mb-5">{activeCard.description}</p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {activeCard.tags.map((tag, ti) => (
-                    <motion.span
-                      key={tag}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#e5e7eb] text-xs font-medium text-[#4a5678] shadow-sm"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: ti * 0.05, type: 'spring', stiffness: 300 }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#fe6a4d]" />
-                      {tag}
-                    </motion.span>
-                  ))}
-                </div>
-
-                {/* CTA */}
-                <motion.button
-                  type="button"
-                  onClick={() => handleNavigate(activeCard.path)}
-                  className="mt-auto inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#fe6a4d] text-white text-sm font-bold shadow-sm self-start"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  {activeCard.cta}
-                  <motion.span
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                  {/* Icon */}
+                  <motion.div
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
+                    style={{ background: 'linear-gradient(135deg, #f97316, #fb923c)' }}
+                    initial={{ rotate: -90, scale: 0.5 }}
+                    animate={{ rotate: 0, scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 20 }}
                   >
-                    <ArrowRight className="h-4 w-4" />
-                  </motion.span>
-                </motion.button>
-              </motion.div>
-            </AnimatePresence>
+                    <activeCard.icon className="h-10 w-10 text-white" />
+                  </motion.div>
+
+                  {/* Step label */}
+                  <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold mb-4">
+                    Step {activeIndex + 1} of {cards.length}
+                  </span>
+
+                  {/* Title */}
+                  <h3 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight mb-4">
+                    {activeCard.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-slate-600 leading-relaxed max-w-md mb-6">
+                    {activeCard.description}
+                  </p>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap justify-center gap-2 mb-8">
+                    {activeCard.tags.map((tag, ti) => (
+                      <motion.span
+                        key={tag}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 text-slate-700 text-sm font-medium"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: ti * 0.05, type: 'spring', stiffness: 300 }}
+                      >
+                        <span className="text-orange-500">✓</span>
+                        {tag}
+                      </motion.span>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <motion.button
+                    type="button"
+                    onClick={() => handleNavigate(activeCard.path)}
+                    className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-orange-500 text-white text-sm font-bold shadow-lg"
+                    style={{ boxShadow: '0 8px 24px rgba(249,115,22,0.3)' }}
+                    whileHover={{ y: -2, boxShadow: '0 12px 32px rgba(249,115,22,0.4)' }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    {activeCard.cta}
+                    <motion.span
+                      animate={{ x: [0, 4, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </motion.span>
+                  </motion.button>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </motion.div>
         </div>
       </div>
