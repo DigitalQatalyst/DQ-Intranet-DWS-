@@ -61,7 +61,6 @@ export function NotificationCenter({
       setSelectedCategories([...selectedCategories, category]);
     }
   };
-
   // Clear all filters
   const clearFilters = () => {
     setSelectedCategories([]);
@@ -69,33 +68,6 @@ export function NotificationCenter({
     setActiveTab('all');
     setSortBy('newest');
   };
-
-  // Helper function to check if filters are active
-  const hasActiveFilters = () => {
-    return searchQuery || selectedCategories.length > 0 || activeTab === 'unread';
-  };
-
-  // Helper function to get empty state message
-  const getEmptyStateMessage = () => {
-    return hasActiveFilters() 
-      ? 'Try adjusting your filters to see more results' 
-      : "You're all caught up!";
-  };
-
-  // Helper function to render clear filters button
-  const renderClearFiltersButton = () => {
-    if (!hasActiveFilters()) return null;
-    
-    return (
-      <button 
-        className="mt-4 px-4 py-2 text-sm text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100" 
-        onClick={clearFilters}
-      >
-        Clear filters
-      </button>
-    );
-  };
-
   // Group notifications by date
   const groupNotificationsByDate = () => {
     const groups: {
@@ -223,9 +195,11 @@ export function NotificationCenter({
               No notifications found
             </h3>
             <p className="text-sm text-gray-500">
-              {getEmptyStateMessage()}
+              {searchQuery || selectedCategories.length > 0 || activeTab === 'unread' ? 'Try adjusting your filters to see more results' : "You're all caught up!"}
             </p>
-            {renderClearFiltersButton()}
+            {(searchQuery || selectedCategories.length > 0 || activeTab === 'unread') && <button className="mt-4 px-4 py-2 text-sm text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100" onClick={clearFilters}>
+                Clear filters
+              </button>}
           </div>}
       </div>
     </div>;

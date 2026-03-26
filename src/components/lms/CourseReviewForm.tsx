@@ -45,12 +45,7 @@ export const CourseReviewForm: React.FC<CourseReviewFormProps> = ({
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Helper function to validate review form
-    const isReviewFormValid = (starRating: number, keyLearning: string, engagingPart: EngagingPart | '', generalFeedback: string) => {
-        return starRating > 0 && keyLearning.trim() && engagingPart && generalFeedback.trim();
-    };
-
-    const isValid = isReviewFormValid(starRating, keyLearning, engagingPart, generalFeedback);
+    const isValid = starRating > 0 && keyLearning.trim() && engagingPart && generalFeedback.trim();
     const isEditMode = mode === 'edit';
 
     const handleSubmit = async (e: React.FormEvent) => {

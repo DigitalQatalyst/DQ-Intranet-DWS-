@@ -108,11 +108,6 @@ export default async function handler(req: AnyRequest, res: AnyResponse) {
     res.status?.(405); res.json?.({ error: 'Method not allowed' });
   } catch (err: any) {
     console.error('api/guides/[id] error:', err);
-    
-    if (err.message === 'Not found') {
-      sendErrorResponse(res, 404, err.message);
-    } else {
-      sendErrorResponse(res, 500, err?.message || 'Server error');
-    }
+    res.status?.(500); res.json?.({ error: err?.message || 'Server error' });
   }
 }

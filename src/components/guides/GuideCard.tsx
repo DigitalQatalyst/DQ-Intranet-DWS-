@@ -53,15 +53,6 @@ const KNOWN_PRODUCT_NAMES = [
   'TMaaS - Transformation Management as a Service',
 ]
 
-// Helper function to check if guide should show author info
-const shouldShowAuthorInfo = (guide: any, isBlueprint: boolean, isGhcOverview: boolean, domain?: string) => {
-  return !isBlueprint && 
-         !isGhcOverview && 
-         domain?.toLowerCase() !== 'strategy' && 
-         domain?.toLowerCase() !== 'guidelines' && 
-         (guide.authorName || guide.authorOrg);
-};
-
 function hovTitleFromSlug(s: string): string | null {
   const idx = HOV_ORDER.indexOf(s)
   if (idx === -1) return null

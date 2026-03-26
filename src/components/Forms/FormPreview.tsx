@@ -688,14 +688,8 @@ const FormField: React.FC<{
   const getFieldClasses = () => {
     const baseClasses =
       "w-full h-11 px-4 bg-white border rounded-md transition-all duration-200 focus:outline-none focus:ring-2";
-    
-    // Helper function to determine if field should show success state
-    const shouldShowSuccess = (value: any, error: string | undefined, hasBeenTouched: boolean, field: any) => {
-      return value && !error && hasBeenTouched && shouldShowSuccessState(field);
-    };
-    
     if (error) return `${baseClasses} border-red-500 focus:ring-red-500`;
-    if (shouldShowSuccess(value, error, hasBeenTouched, field)) {
+    if (value && !error && hasBeenTouched && shouldShowSuccessState(field)) {
       return `${baseClasses} border-green-500 focus:ring-green-500`;
     }
     return `${baseClasses} border-gray-300 hover:border-gray-400 focus:ring-blue-500`;
@@ -869,7 +863,7 @@ const FormField: React.FC<{
             placeholder={field.placeholder}
             error={!!error}
             success={
-              shouldShowSuccess(value, error, hasBeenTouched, field)
+              value && !error && hasBeenTouched && shouldShowSuccessState(field)
             }
           />
         );

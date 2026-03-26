@@ -13,7 +13,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ isLoading, loadError }) 
   const handleBack = () => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    const backUrl = tab ? `/marketplace/media-center?tab=${tab}` : '/marketplace/media-center';
+    const backUrl = tab ? `/marketplace/opportunities?tab=${tab}` : '/marketplace/opportunities';
     navigate(backUrl);
   };
 

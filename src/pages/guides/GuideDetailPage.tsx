@@ -114,28 +114,6 @@ const normalizeTagValue = (value?: string | null) => {
   return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
 }
 
-// Helper function to check if slug or title matches multiple conditions
-const matchesAny = (slug: string, title: string, slugPatterns: string[], titlePatterns: string[], titleAndPatterns?: string[][]): boolean => {
-  const slugMatches = slugPatterns.some(pattern => slug === pattern);
-  const titleMatches = titlePatterns.some(pattern => title.includes(pattern));
-  
-  if (slugMatches || titleMatches) return true;
-  
-  if (titleAndPatterns) {
-    return titleAndPatterns.some(patterns => 
-      patterns.every(pattern => title.includes(pattern))
-    );
-  }
-  
-  return false;
-};
-
-// Helper function to check DQ-specific conditions
-const checkDQCondition = (slug: string, title: string, type: string, excludeCondition?: () => boolean): boolean => {
-  if (excludeCondition && excludeCondition()) return false;
-  return matchesAny(slug, title, [`dq-${type}`], [`${type}`]);
-};
-
 const buildGuideFlags = (guide: GuideRecord | null): GuideFlags => {
   const slug = (guide?.slug || '').toLowerCase()
   const title = (guide?.title || '').toLowerCase()
