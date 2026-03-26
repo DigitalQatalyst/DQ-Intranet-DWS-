@@ -171,7 +171,7 @@ const ErrorMessage = ({ message }) => (
 // KnowledgeHub Content Component
 const KnowledgeHubContent = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabId>("ghc");
+  const [activeTab, setActiveTab] = useState<TabId>("guidelines");
   const [isTabChanging, setIsTabChanging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<{ message: string } | null>(null);
@@ -180,11 +180,6 @@ const KnowledgeHubContent = () => {
   const [learningGuides, setLearningGuides] = useState<GuideItem[]>([]);
 
   const tabs: TabItem[] = [
-    {
-      id: "ghc",
-      label: "GHC",
-      icon: <Newspaper size={16} className="#030F35-600" />,
-    },
     {
       id: "guidelines",
       label: "Guidelines",
