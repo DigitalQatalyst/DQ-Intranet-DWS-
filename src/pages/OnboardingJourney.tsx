@@ -40,9 +40,9 @@ const journeyPhases: JourneyPhase[] = [
       'Building confidence in systems and structure'
     ],
     keyOutcomes: [
-      'DQ structure & towers',
+      'DQ structure - (Offices | Units | Factories | Towers | Lanes)',
       'GHC principles',
-      '6x Digitals',
+      '6x Digitals framework',
       'Role expectations',
       'Feeling oriented, supported, and grounded'
     ]
