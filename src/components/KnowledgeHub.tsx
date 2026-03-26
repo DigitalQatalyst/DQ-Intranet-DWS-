@@ -3,6 +3,7 @@ import { Newspaper, Loader, AlertCircle, Radio } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FadeInUpOnScroll } from "./AnimationUtils";
 import { NewsCard } from "./CardComponents";
+import { getLmsCourses, LmsCard } from '@/data/lmsCourseDetails';
 import { fetchLatestGuides } from '@/services/marketplace';
 import { getGuideImageUrl } from '@/utils/guideImageMap';
 
@@ -177,7 +178,7 @@ const KnowledgeHubContent = () => {
   const [error, setError] = useState<{ message: string } | null>(null);
   const [ghcGuides, setGhcGuides] = useState<GuideItem[]>([]);
   const [guidelinesGuides, setGuidelinesGuides] = useState<GuideItem[]>([]);
-  const [learningGuides, setLearningGuides] = useState<GuideItem[]>([]);
+  const [learningCourses, setLearningCourses] = useState<LmsCard[]>([]);
 
   const tabs: TabItem[] = [
     {
@@ -202,38 +203,33 @@ const KnowledgeHubContent = () => {
     }, 300);
   };
 
-  // Fetch latest guides for all tabs
+  // Fetch guidelines from Supabase and LMS courses
   useEffect(() => {
     let isMounted = true;
 
-    async function loadGuidesData() {
+    async function loadData() {
       setIsLoading(true);
       setError(null);
       try {
-        const [ghc, guidelines, learning] = await Promise.all([
-          fetchLatestGuides('ghc', 6),
+        const [guidelines, courses] = await Promise.all([
           fetchLatestGuides('guidelines', 6),
-          fetchLatestGuides('learning', 6)
+          getLmsCourses(),
         ]);
-        
+
         if (!isMounted) return;
-        
-        setGhcGuides(ghc);
         setGuidelinesGuides(guidelines);
-        setLearningGuides(learning);
+        setLearningCourses(courses.slice(0, 6));
       } catch (err) {
         if (!isMounted) return;
-        console.error("Error loading guides data:", err);
-        setError({
-          message: "Unable to load latest guides. Please try again later.",
-        });
+        console.error("Error loading knowledge hub data:", err); // NOSONAR
+        setError({ message: "Unable to load content. Please try again later." });
       } finally {
         if (isMounted) setIsLoading(false);
       }
     }
 
-    loadGuidesData();
-  }, [activeTab]);
+    loadData();
+  }, []);
 
   // Get data based on active tab - updated to use Media Center news from Supabase
   const getNewsData = () => {
@@ -410,7 +406,7 @@ const KnowledgeHubContent = () => {
                             navigate(`/marketplace/guides/${guide.slug}`);
                           }}
                           onReadMore={() => {
-                            navigate(`/marketplace/guides/${guide.slug}`);
+                            navigate(`/marketplace/guides?collapsed=guide_type%2Csub_domain%2Cunit%2Clocation%2Ctestimonial_category%2Cproduct_type%2Cproduct_stage%2Cguidelines_category%2Ccategorization%2Cattachments%2Cstrategy_framework%2Cglossary_knowledge_system%2Cglossary_ghc_dimension%2Cglossary_6xd_perspective%2Cglossary_letter%2Cfaq_category`);
                           }}
                         />
                       </div>
@@ -429,41 +425,32 @@ const KnowledgeHubContent = () => {
               aria-live="polite"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {learningGuides.length === 0 ? (
+                {learningCourses.length === 0 ? (
                   <div className="col-span-full text-center text-gray-600">
-                    No learning content available right now.
+                    No courses available right now.
                   </div>
                 ) : (
-                  learningGuides.map((guide, index) => {
-                    const cardData = mapGuideToCard(guide);
-                    return (
-                      <div
-                        key={guide.id}
-                        className="animate-fade-in-up"
-                        style={{
-                          animationDelay: `${index * 0.1}s`,
+                  learningCourses.map((course, index) => (
+                    <div
+                      key={course.id}
+                      className="animate-fade-in-up"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <NewsCard
+                        content={{
+                          title: course.title,
+                          description: course.description || '',
+                          imageUrl: course.imageUrl || undefined,
+                          tags: [course.category, course.deliveryMode].filter(Boolean) as string[],
+                          date: '',
+                          source: 'DQ Learning',
                         }}
-                      >
-                        <NewsCard
-                          content={{
-                            title: cardData.title,
-                            description: cardData.excerpt,
-                            imageUrl: cardData.imageUrl,
-                            tags: cardData.tags,
-                            date: cardData.date,
-                            source: cardData.source,
-                          }}
-                          ctaLabel="View Guide"
-                          onQuickView={() => {
-                            navigate(`/marketplace/guides/${guide.slug}`);
-                          }}
-                          onReadMore={() => {
-                            navigate(`/marketplace/guides/${guide.slug}`);
-                          }}
-                        />
-                      </div>
-                    );
-                  })
+                        ctaLabel="View Course"
+                        onQuickView={() => navigate(`/lms/${course.slug}`)}
+                        onReadMore={() => navigate(`/lms/${course.slug}`)}
+                      />
+                    </div>
+                  ))
                 )}
               </div>
             </section>
