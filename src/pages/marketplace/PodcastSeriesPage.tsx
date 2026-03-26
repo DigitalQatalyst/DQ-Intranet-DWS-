@@ -95,16 +95,22 @@ export default function PodcastSeriesPage() {
   const handleShare = async (episode: NewsItem, e: React.MouseEvent) => {
     e.stopPropagation();
     const shareUrl = `${window.location.origin}/marketplace/news/${episode.id}`;
+    const canUseShare = navigator.share && navigator.canShare && navigator.canShare({ url: shareUrl });
     try {
-      if (navigator.share && navigator.canShare && navigator.canShare({ url: shareUrl })) {
+      if (canUseShare) {
         await navigator.share({ title: episode.title, text: episode.excerpt || '', url: shareUrl });
       } else {
         await navigator.clipboard.writeText(shareUrl);
       }
-      setShareSuccess(episode.id); setTimeout(() => setShareSuccess(null), 2000);
+      setShareSuccess(episode.id);
+      setTimeout(() => setShareSuccess(null), 2000);
     } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        try { await navigator.clipboard.writeText(shareUrl); setShareSuccess(episode.id); setTimeout(() => setShareSuccess(null), 2000); } catch {}
+      const isAbort = (error as Error).name === 'AbortError';
+      if (!isAbort && canUseShare) {
+        await navigator.clipboard.writeText(shareUrl).then(() => {
+          setShareSuccess(episode.id);
+          setTimeout(() => setShareSuccess(null), 2000);
+        }).catch(console.error);
       }
     }
   };

@@ -14,6 +14,14 @@ export type LessonItem = {
   content?: string;
 };
 
+function findParentModuleId(curriculum: any[], lessonId: string): string | undefined {
+  return curriculum.find((item: any) => {
+    const inTopics = item.topics?.some((t: any) => t.lessons?.some((l: any) => l.id === lessonId));
+    const inLessons = item.lessons?.some((l: any) => l.id === lessonId);
+    return inTopics || inLessons;
+  })?.id;
+}
+
 function flattenCurriculum(curriculum: any[]): LessonItem[] {
   const lessons: LessonItem[] = [];
   [...curriculum].sort((a: any, b: any) => a.order - b.order).forEach((item: any) => {
@@ -43,11 +51,7 @@ export function useLessonCurriculum(
 
   useEffect(() => {
     if (!lessonId || !course?.curriculum) return;
-    const parentModuleId = course.curriculum.find((item: any) => {
-      const inTopics = item.topics?.some((t: any) => t.lessons?.some((l: any) => l.id === lessonId));
-      const inLessons = item.lessons?.some((l: any) => l.id === lessonId);
-      return inTopics || inLessons;
-    })?.id;
+    const parentModuleId = findParentModuleId(course.curriculum, lessonId);
     if (parentModuleId) {
       setExpandedModules(prev => {
         const next = new Set(prev);
