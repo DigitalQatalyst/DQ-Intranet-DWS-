@@ -1392,22 +1392,49 @@ export async function toggleSaveForLater(
   currentlySaved: boolean
 ): Promise<boolean> {
   const newValue = !currentlySaved;
-  const { error } = await lmsSupabaseClient
+
+  // Check if a progress record already exists for this user+course
+  const { data: existing } = await lmsSupabaseClient
     .from('lms_course_progress')
-    .upsert(
-      {
+    .select('id')
+    .eq('user_id', userId)
+    .eq('course_id', courseId)
+    .maybeSingle();
+
+  if (existing) {
+    // Record exists — only update saved_for_later, preserve all other progress data
+    const { error } = await lmsSupabaseClient
+      .from('lms_course_progress')
+      .update({ saved_for_later: newValue })
+      .eq('user_id', userId)
+      .eq('course_id', courseId);
+    if (error) {
+      console.error('Error updating save for later:', error);
+      throw error;
+    }
+  } else {
+    // No record yet — insert with required defaults
+    const { error } = await lmsSupabaseClient
+      .from('lms_course_progress')
+      .insert({
         user_id: userId,
         course_id: courseId,
         course_slug: courseSlug,
-        status: 'not_started',
         saved_for_later: newValue,
-      },
-      { onConflict: 'user_id,course_id' }
-    );
-  if (error) {
-    console.error('Error toggling save for later:', error);
-    throw error;
+        status: 'not_started',
+        progress_percentage: 0,
+        lessons_completed: 0,
+        total_lessons: 0,
+        total_time_spent_seconds: 0,
+        certificate_earned: false,
+        last_accessed_at: new Date().toISOString(),
+      });
+    if (error) {
+      console.error('Error inserting save for later:', error);
+      throw error;
+    }
   }
+
   return newValue;
 }
 

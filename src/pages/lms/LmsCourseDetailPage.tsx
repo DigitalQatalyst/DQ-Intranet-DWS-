@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import React, { useMemo, useState, useCallback } from 'react';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import {
   BookmarkIcon,
   CheckCircleIcon,
@@ -26,6 +26,7 @@ import { Footer } from '../../components/Footer';
 import { useLmsCourse, useLmsCourseDetails } from '../../hooks/useLmsCourses';
 import { useCourseReviews, useCourseReviewStats } from '../../hooks/useCourseReviews';
 import { useSaveForLater } from '../../hooks/useCourseProgress';
+import { useAuth } from '../../components/Header/context/AuthContext';
 import type { LmsDetail } from '../../data/lmsCourseDetails';
 import {
   CARD_ICON_BY_ID,
@@ -88,6 +89,9 @@ type TabType = 'details' | 'outcomes' | 'curriculum' | 'reviews' | 'faq';
 export const LmsCourseDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, login } = useAuth();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('details');
   // State for expanded sections in curriculum
@@ -102,6 +106,13 @@ export const LmsCourseDetailPage: React.FC = () => {
 
   // Save for Later
   const { isSaved, toggle: toggleSave } = useSaveForLater(course?.id ?? '', course?.slug ?? '');
+  const handleSaveForLater = useCallback(() => {
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    toggleSave();
+  }, [user, toggleSave]);
 
   // Fetch course reviews from database
   const { data: courseReviews = [], isLoading: reviewsLoading } = useCourseReviews(course?.id || '');
@@ -401,11 +412,37 @@ export const LmsCourseDetailPage: React.FC = () => {
 
   const isTrack = course?.courseType === 'Course (Bundles)';
   const tabs = [
-    { id: 'details' as TabType, label: isTrack ? 'Track Details' : 'Course Details' },
-    { id: 'outcomes' as TabType, label: 'Learning Outcomes' },
-    { id: 'curriculum' as TabType, label: isTrack ? 'Track Curriculum' : 'Curriculum' },
-    { id: 'reviews' as TabType, label: 'Reviews' },
-    ...(isTrack && course?.faq && Array.isArray(course.faq) && course.faq.length > 0 ? [{ id: 'faq' as TabType, label: 'FAQ' }] : []),
+    {
+      id: 'details' as TabType,
+      label: isTrack ? 'Track Details' : 'Course Details',
+      description: isTrack
+        ? 'This section provides a comprehensive overview of the learning track, including its purpose, the audience it is designed for, and the progression of skills you will build across all bundled courses. You will find information on prerequisites, estimated time commitment, and how each course connects to the broader learning journey.'
+        : 'This section gives you a full overview of the course — what it covers, who it is designed for, and what prior knowledge (if any) is recommended. You will find details on the course structure, estimated duration, difficulty level, and how it fits into your broader learning and development goals.',
+    },
+    {
+      id: 'outcomes' as TabType,
+      label: 'Learning Outcomes',
+      description: 'This section outlines the specific knowledge, skills, and competencies you will develop by completing this course. Each outcome is clearly defined so you can understand exactly what you will be able to do upon completion — whether that is applying a new technique, understanding a concept in depth, or demonstrating a professional capability in your day-to-day role.',
+    },
+    {
+      id: 'curriculum' as TabType,
+      label: isTrack ? 'Track Curriculum' : 'Curriculum',
+      description: isTrack
+        ? 'Explore the full structure of this learning track, broken down by course and module. Each course within the track is listed in recommended sequence, and you can expand any course to preview its individual lessons, topics, and estimated duration before you begin.'
+        : 'Explore the full structure of this course, broken down by modules and individual lessons. Each module groups related topics together, and you can expand any module to preview its lessons, learning objectives, and estimated time. This helps you plan your study sessions and understand exactly what to expect before you start.',
+    },
+    {
+      id: 'reviews' as TabType,
+      label: 'Reviews',
+      description: 'Read honest feedback and star ratings submitted by colleagues and peers who have already completed this course. Reviews cover the quality of content, delivery, and real-world applicability — giving you a well-rounded perspective on what to expect and helping you decide whether this course aligns with your current learning goals.',
+    },
+    ...(isTrack && course?.faq && Array.isArray(course.faq) && course.faq.length > 0
+      ? [{
+          id: 'faq' as TabType,
+          label: 'FAQ',
+          description: 'Find answers to the most frequently asked questions about this learning track. Topics covered include prerequisites, how to access the content, expected time commitment, certification details, and what support is available to you throughout your learning journey.',
+        }]
+      : []),
   ];
 
   const sidebarRows = [
@@ -1071,13 +1108,17 @@ export const LmsCourseDetailPage: React.FC = () => {
               rows: sidebarRows,
               ctaLabel: course.status === 'coming-soon' ? 'Coming Soon' : isTrack ? 'Enroll to Curriculum' : 'Start Course',
               ctaOnClick: () => {
+                if (!user) {
+                  setShowLoginPrompt(true);
+                  return;
+                }
                 if (firstLesson && course.status !== 'coming-soon') {
                   navigate(`/lms/${course.slug}/lesson/${firstLesson.id}`);
                 }
               },
               ctaDisabled: !firstLesson || course.status === 'coming-soon',
               secondaryCtaLabel: isSaved ? 'Saved' : 'Save for Later',
-              secondaryCtaOnClick: toggleSave,
+              secondaryCtaOnClick: handleSaveForLater,
               isSaved,
             }} />
           </aside>
@@ -1098,6 +1139,45 @@ export const LmsCourseDetailPage: React.FC = () => {
       />
 
       <Footer isLoggedIn={false} />
+
+      {/* Login prompt modal for unauthenticated save-for-later */}
+      {showLoginPrompt && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowLoginPrompt(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full mx-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="bg-[#030F35]/10 rounded-full p-3">
+                <BookmarkIcon className="h-6 w-6 text-[#030F35]" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-[#030F35]">Sign in to save this course</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Create an account or sign in to bookmark courses and track your learning progress.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 w-full pt-2">
+                <button
+                  onClick={() => login(location.pathname)}
+                  className="w-full bg-[#030F35] text-white rounded-lg py-2.5 text-sm font-medium hover:bg-[#030F35]/90 transition-colors"
+                >
+                  Sign in with Microsoft
+                </button>
+                <button
+                  onClick={() => setShowLoginPrompt(false)}
+                  className="w-full border border-gray-200 text-gray-600 rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

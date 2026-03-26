@@ -215,6 +215,7 @@ async function fetchCourses(): Promise<DBCourse[]> {
     const { data, error } = await lmsSupabaseClient
       .from('lms_courses')
       .select('*')
+      .neq('status', 'archived')
       .order('title');
 
     if (error) {

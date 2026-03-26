@@ -255,9 +255,15 @@ export function useSaveForLater(courseId: string, courseSlug: string) {
     });
 
     const { mutate: toggle, isPending } = useMutation({
-        mutationFn: () => toggleSaveForLater(user!.id, courseId, courseSlug, isSaved),
+        mutationFn: () => {
+            if (!user?.id) throw new Error('User not authenticated');
+            return toggleSaveForLater(user.id, courseId, courseSlug, isSaved);
+        },
         onSuccess: (newValue) => {
             queryClient.setQueryData(queryKey, newValue);
+        },
+        onError: (error) => {
+            console.error('Failed to toggle save for later:', error);
         },
     });
 
