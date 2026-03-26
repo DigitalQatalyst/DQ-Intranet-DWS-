@@ -1,65 +1,81 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface SideNavProps {
-  activeSection?: string
-  onSectionClick?: (sectionId: string) => void
+  readonly activeSection?: string
+  readonly onSectionClick?: (sectionId: string) => void
+  readonly guideHtml?: string
 }
 
-const sections = [
-  { id: 'context', label: 'Context' },
-  { id: 'overview', label: 'Overview' },
-  { id: 'purpose-scope', label: 'Purpose and Scope' },
-  { id: 'core-components', label: 'Core Components' },
-  { id: 'roles-responsibilities', label: 'Roles and Responsibilities' },
-  { id: 'byod', label: '5.1 BYOD (Bring Your Own Device)' },
-  { id: 'byod-procedure', label: '5.1.1 BYOD Procedure' },
-  { id: 'byod-responsibilities', label: '5.1.2 BYOD Responsibilities' },
-  { id: 'fyod', label: '5.2 FYOD (Finance Your Own Device)' },
-  { id: 'fyod-procedure', label: '5.2.1 FYOD Procedure' },
-  { id: 'fyod-responsibilities', label: '5.2.2 FYOD Responsibilities' },
-  { id: 'hyod', label: '5.2.3 HYOD (Hold Your Own Device)' },
-  { id: 'hyod-procedure', label: '5.2.4 HYOD Procedure' },
-  { id: 'hyod-responsibilities', label: '5.2.5 HYOD Responsibilities' },
-  { id: 'guiding-principles', label: 'Guiding Principles and Controls' },
-  { id: 'tools-resources', label: 'Tools and Resources' },
-  { id: 'kpis', label: 'Key Performance Indicators (KPIs)' },
-  { id: 'review-schedule', label: 'Review and Update Schedule' },
-]
+export function SideNav({ activeSection, onSectionClick, guideHtml }: SideNavProps) {
+  const [currentSection, setCurrentSection] = useState(activeSection || '')
+  const [sections, setSections] = useState<{ id: string; label: string }[]>([])
+  const initializedRef = useRef(false)
 
-export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
-  const [currentSection, setCurrentSection] = useState(activeSection || 'context')
+  // Extract H1 headings from the page
+  useEffect(() => {
+    const extractH1Sections = () => {
+      const h1Elements = document.querySelectorAll('.guideline-body h1[id]')
+      const extractedSections = Array.from(h1Elements).map((h1) => ({
+        id: h1.getAttribute('id') || '',
+        label: h1.textContent?.replace(/^\s*\|\s*/, '').trim() || '',
+      }))
+      setSections(extractedSections)
+      
+      // Set first section as active only on first load
+      if (extractedSections.length > 0 && !initializedRef.current) {
+        setCurrentSection(extractedSections[0].id)
+        initializedRef.current = true
+      }
+    }
+
+    // Wait for content to be rendered
+    const timer = setTimeout(extractH1Sections, 300)
+    return () => clearTimeout(timer)
+  }, [guideHtml])
 
   useEffect(() => {
+    if (sections.length === 0) return
+
+    // Better intersection observer settings for accurate section detection
     const observerOptions = {
       root: null,
-      rootMargin: '-20% 0px -60% 0px',
-      threshold: 0,
+      rootMargin: '-80px 0px -80% 0px', // Improved margins for better detection
+      threshold: [0, 0.1, 0.25, 0.5], // Simplified thresholds
     }
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const sectionId = entry.target.getAttribute('id')
-          if (sectionId) {
-            setCurrentSection(sectionId)
-          }
+      // Find the entry with the highest intersection ratio that's actually intersecting
+      const intersectingEntries = entries.filter(entry => entry.isIntersecting && entry.intersectionRatio > 0)
+      
+      if (intersectingEntries.length > 0) {
+        // Sort by position on page (prefer sections closer to top of viewport)
+        intersectingEntries.sort((a, b) => {
+          return a.boundingClientRect.top - b.boundingClientRect.top
+        })
+        
+        const sectionId = intersectingEntries[0].target.getAttribute('id')
+        if (sectionId && sectionId !== currentSection) {
+          setCurrentSection(sectionId)
         }
-      })
+      }
     }
 
     const observer = new IntersectionObserver(observerCallback, observerOptions)
 
-    sections.forEach((section) => {
-      const element = document.getElementById(section.id)
-      if (element) {
-        observer.observe(element)
-      }
-    })
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+      sections.forEach((section) => {
+        const element = document.getElementById(section.id)
+        if (element) {
+          observer.observe(element)
+        }
+      })
+    }, 100)
 
     return () => {
       observer.disconnect()
     }
-  }, [])
+  }, [sections])
 
   useEffect(() => {
     if (activeSection) {
@@ -73,8 +89,25 @@ export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
     
     const element = document.getElementById(sectionId)
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // Calculate offset to account for fixed header and add some padding
+      const headerOffset = 120 // Adjust this value to match your navbar height + desired spacing
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + globalThis.pageYOffset - headerOffset
+
+      globalThis.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+      
+      // Update URL hash without triggering scroll
+      if (globalThis.history?.replaceState) {
+        globalThis.history.replaceState(null, '', `#${sectionId}`)
+      }
     }
+  }
+
+  if (sections.length === 0) {
+    return null
   }
 
   return (
@@ -88,11 +121,12 @@ export function SideNav({ activeSection, onSectionClick }: SideNavProps) {
             <li key={section.id}>
               <button
                 onClick={() => handleClick(section.id)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none ${
                   currentSection === section.id
-                    ? 'bg-blue-50 text-blue-700 font-medium shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'text-gray-900 font-medium border-l-4 pl-2'
+                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                 }`}
+                style={currentSection === section.id ? { borderLeftColor: '#030E31' } : {}}
               >
                 {section.label}
               </button>

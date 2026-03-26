@@ -27,7 +27,7 @@ class ChatService {
   private messageListeners: MessageListener[] = [];
   private typingStatusListeners: TypingStatusListener[] = [];
   private connectionStatusListeners: ConnectionStatusListener[] = [];
-  private isAdvisorTyping: boolean = false;
+  private isAdvisorTyping = false;
   private connectionStatus: ConnectionStatus = ConnectionStatus.IDLE;
   private typingTimeout: NodeJS.Timeout | null = null;
   private connectionTimeout: NodeJS.Timeout | null = null;
@@ -207,7 +207,7 @@ class ChatService {
   // Simulate advisor response
   private simulateAdvisorResponse(
     replyToId?: string,
-    withVoice: boolean = false
+    withVoice = false
   ): void {
     // 30% chance to reply to the message
     const shouldReply = secureRandom() < 0.3 && replyToId;

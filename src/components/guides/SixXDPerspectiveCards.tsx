@@ -1,6 +1,5 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { SIX_XD_PERSPECTIVES } from '../../pages/guides/glossaryFilters';
 
 export interface SixXDPerspectiveCard {
   id: string;
@@ -63,45 +62,68 @@ interface PerspectiveCardProps {
 const PerspectiveCard: React.FC<PerspectiveCardProps> = ({ card, onClick }) => {
   return (
     <div
-      onClick={onClick}
-      className="bg-white border border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg hover:border-gray-300 transition-all group flex flex-col h-full min-h-[280px]"
+      className="bg-white border border-gray-200 rounded-2xl hover:shadow-md transition-all flex flex-col overflow-hidden"
     >
-      {/* Badge */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-xs font-semibold px-2.5 py-1 rounded-full border bg-blue-100 text-blue-700 border-blue-200">
-          6xD
-        </span>
-        <span className="text-xs text-gray-600 bg-gray-50 px-2.5 py-1 rounded-full font-medium">
-          {card.code}
-        </span>
+      {/* Image — flush to top */}
+      <div className="w-full flex-shrink-0 bg-gradient-to-br from-[#030E31] to-[#162862] flex items-center justify-center" style={{ height: '180px' }}>
+        <span className="text-5xl font-bold text-white/20 select-none">{card.code}</span>
       </div>
 
-      {/* Perspective Name */}
-      <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[var(--guidelines-primary)] transition-colors">
-        {card.name}
-      </h3>
+      {/* Card body */}
+      <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
+        {/* Badges */}
+        <div className="flex items-center gap-2 mb-2 flex-shrink-0">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full border bg-blue-100 text-blue-700 border-blue-200">
+            6xD
+          </span>
+          <span className="text-xs text-gray-600 bg-gray-50 px-2.5 py-1 rounded-full font-medium border border-gray-200">
+            {card.code}
+          </span>
+        </div>
 
-      {/* Human-centric Question (italic) */}
-      <p className="text-sm text-gray-600 italic mb-3 leading-relaxed">
-        {card.question}
-      </p>
+        {/* Title */}
+        <h3 className="font-semibold text-gray-900 mb-1.5 flex-shrink-0" style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          lineHeight: '1.375rem'
+        }}>
+          {card.name}
+        </h3>
 
-      {/* Description */}
-      <p className="text-sm text-gray-600 mb-4 leading-relaxed flex-grow">
-        {card.description}
-      </p>
+        {/* Question (italic) */}
+        <p className="text-sm text-gray-500 italic mb-2 flex-shrink-0" style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 1,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}>
+          {card.question}
+        </p>
 
-      {/* Soft CTA */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
-        className="mt-auto w-full bg-[#162862] text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-[#1e3568] transition-colors duration-200 flex items-center justify-center gap-2"
-      >
-        <span>Explore perspective</span>
-        <ArrowRight className="h-4 w-4" />
-      </button>
+        {/* Description */}
+        <p className="text-sm text-gray-600 mb-3 flex-shrink-0" style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          lineHeight: '1.25rem'
+        }}>
+          {card.description}
+        </p>
+
+        {/* Button — no separator */}
+        <div className="mt-auto flex-shrink-0">
+          <button
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            className="w-full bg-[#030E31] text-white px-4 py-2.5 rounded-full text-sm font-semibold hover:bg-[#020A28] transition-colors flex items-center justify-center gap-2"
+          >
+            <span>View Details</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
