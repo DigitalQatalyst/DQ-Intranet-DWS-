@@ -1162,7 +1162,7 @@ const TakeActionGridLayout = ({
   const activeCard = cards[activeIndex] ?? cards[0];
 
   return (
-    <section ref={refEl} className="relative py-24 bg-white">
+    <section ref={refEl} className="relative py-24" style={{ backgroundColor: '#f0f6ff' }}>
       <div className="container mx-auto px-4 md:px-6 lg:px-10 max-w-6xl">
 
         {/* Header */}
