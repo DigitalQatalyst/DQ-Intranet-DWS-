@@ -182,8 +182,12 @@ export const MarketplaceRouter: React.FC = () => {
       {/* News & Opportunities Marketplace - Redirected to /guides */}
       <Route path="/news" element={<Navigate to="/marketplace/guides" replace />} />
       <Route path="/news/action-solver-podcast" element={<PodcastSeriesPage />} />
+      <Route path="/news/the-execution-mindset" element={<PodcastSeriesPage />} />
       <Route path="/news/:id" element={<NewsDetailPage />} />
-      <Route path="/opportunities" element={<NewsPage />} />
+      <Route path="/media-center" element={<NewsPage />} />
+      <Route path="/media-center/:id" element={<JobDetailPage />} />
+      <Route path="/media-center/:id/apply" element={<JobApplicationPage />} />
+      <Route path="/opportunities" element={<Navigate to="/marketplace/media-center" replace />} />
       <Route path="/opportunities/:id" element={<JobDetailPage />} />
       <Route path="/opportunities/:id/apply" element={<JobApplicationPage />} />
       {/* DQ Work Directory */}

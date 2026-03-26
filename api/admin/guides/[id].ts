@@ -104,6 +104,10 @@ export default async function handler(req: AnyRequest, res: AnyResponse) {
     if (req.method === 'DELETE') { await handleDelete(id, res); return }
     res.status?.(405); res.json?.({ error: 'Method not allowed' })
   } catch (e: any) {
-    res.status?.(500); res.json?.({ error: e?.message || 'Server error' })
+    if (e.message === 'Guide not found') {
+      sendErrorResponse(res, 404, e.message)
+    } else {
+      sendErrorResponse(res, 400, e.message)
+    }
   }
 }

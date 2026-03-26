@@ -129,6 +129,10 @@ jobs:
           AUTHOR_EMAIL: ${{ steps.commit_info.outputs.author_email }}
           DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
         run: |
+          # Use sanitized data from previous step
+          AUTHOR_NAME="${{ steps.commit_info.outputs.author_name }}"
+          AUTHOR_EMAIL="${{ steps.commit_info.outputs.author_email }}"
+          
           echo "## 🎉 Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`$GITHUB_REF_NAME\`" >> $GITHUB_STEP_SUMMARY

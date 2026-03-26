@@ -14,7 +14,7 @@ html {
   --dq-white: #FFFFFF;
   --dq-header-gradient: linear-gradient(90deg, var(--dq-navy) 0%, var(--dq-coral) 55%, var(--dq-white) 100%);
   --dq-cta-gradient: linear-gradient(90deg, var(--dq-navy) 0%, var(--dq-coral) 100%);
-  --dq-font: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+  --dq-font: system-ui, -apple-system, "system-ui", "Segoe UI", sans-serif;
   --accent: 11 78% 57%; /* Coral/orange */
   --accent-foreground: 0 0% 100%;
 
@@ -30,8 +30,8 @@ html {
   --card-foreground: 224 56% 17%;
   --border: 228 40% 93%;
   --radius: 0.75rem;
-
-  /* Detail page design tokens */
+  
+  /* Learning Center / News Detail Page Tokens */
   --hero: 226 71% 10%;
   --hero-foreground: 210 40% 98%;
   --hero-muted: 220 20% 65%;

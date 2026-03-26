@@ -172,13 +172,43 @@ export default function CommunityFeed() {
       tag
     });
   };
+
   const clearTagFilter = () => {
     setSearchParams({});
   };
-  const handleLoadMore = (tab: string) => {
-    const offset = tab === 'my_communities' ? myPosts.length : tab === 'global' ? globalPosts.length : trendingPosts.length;
-    if (tab === 'my_communities') fetchMyPosts('recent', offset);else if (tab === 'global') fetchGlobalPosts('recent', offset);else fetchTrendingPosts('recent', offset);
+
+  // Helper function to get posts count for tab
+  const getPostsCount = (tab: string) => {
+    switch (tab) {
+      case 'my_communities':
+        return myPosts.length;
+      case 'global':
+        return globalPosts.length;
+      default:
+        return trendingPosts.length;
+    }
   };
+
+  // Helper function to fetch posts for tab
+  const fetchPostsForTab = (tab: string, offset: number) => {
+    switch (tab) {
+      case 'my_communities':
+        fetchMyPosts('recent', offset);
+        break;
+      case 'global':
+        fetchGlobalPosts('recent', offset);
+        break;
+      default:
+        fetchTrendingPosts('recent', offset);
+        break;
+    }
+  };
+
+  const handleLoadMore = (tab: string) => {
+    const offset = getPostsCount(tab);
+    fetchPostsForTab(tab, offset);
+  };
+
   if (loading) {
     return <MainLayout hidePageLayout fullWidth>
         <div className="flex min-h-screen items-center justify-center">
