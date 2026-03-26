@@ -36,7 +36,7 @@ export function usePodcastAudio({
 
     if (currentlyPlaying === episode.id) {
       if (isPlaying) { audio.pause(); setIsPlaying(false); }
-      else { try { await audio.play(); setIsPlaying(true); } catch {} }
+      else { try { await audio.play(); setIsPlaying(true); } catch (_) { /* browser blocked play — ignore */ } }
       return;
     }
 
@@ -57,10 +57,10 @@ export function usePodcastAudio({
           setEpisodeDurations(prev => { const m = new Map(prev); m.set(episode.id, audio.duration); return m; });
         }
         audio.playbackRate = playbackSpeed;
-        try { await audio.play(); setIsPlaying(true); } catch { setIsPlaying(false); }
+        try { await audio.play(); setIsPlaying(true); } catch (_) { setIsPlaying(false); }
       }, { once: true });
       if (audio.readyState >= 2) { audio.playbackRate = playbackSpeed; await audio.play(); setIsPlaying(true); }
-    } catch { setIsPlaying(false); }
+    } catch (_) { setIsPlaying(false); }
   };
 
   useEffect(() => {

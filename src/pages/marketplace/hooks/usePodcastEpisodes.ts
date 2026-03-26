@@ -15,12 +15,12 @@ export function usePodcastEpisodes(
 
   useEffect(() => {
     const saved = localStorage.getItem('podcast-saved-episodes');
-    if (saved) { try { setSavedEpisodes(new Set(JSON.parse(saved))); } catch {} }
+    if (saved) { try { setSavedEpisodes(new Set(JSON.parse(saved))); } catch (_) { /* invalid localStorage data — ignore */ } }
   }, []);
 
   useEffect(() => {
     const counted = localStorage.getItem('podcast-counted-episodes');
-    if (counted) { try { setCountedEpisodes(new Set(JSON.parse(counted))); } catch {} }
+    if (counted) { try { setCountedEpisodes(new Set(JSON.parse(counted))); } catch (_) { /* invalid localStorage data — ignore */ } }
   }, []);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function usePodcastEpisodes(
         const { episodes: loaded, durations } = await loadEpisodesData(isExecutionMindsetSeries);
         setEpisodes(loaded);
         setEpisodeDurations(durations);
-      } catch {}
+      } catch (_) { /* episode load failed — loading will still be cleared */ }
       finally { setLoading(false); }
     };
     load();
