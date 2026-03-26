@@ -36,7 +36,7 @@ const journeyPhases: JourneyPhase[] = [
     whatAssociateIsDoing: [
       'Learning how work flows at DQ',
       'Observing cultural behaviors and rituals',
-      'Completing guided onboarding tasks (S00, simulations, shadowing)',
+      'Completing guided task onboarding (S00, S01, S02, S03, simulations & shadowing)',
       'Building confidence in systems and structure'
     ],
     keyOutcomes: [
