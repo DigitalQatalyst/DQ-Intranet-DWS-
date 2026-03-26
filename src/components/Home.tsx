@@ -272,7 +272,7 @@ const ServiceCard = ({
 
   if (isComingSoon) {
     return (
-      <div className={`${baseLayoutClasses} ${sectionStyle.cardClasses} relative cursor-not-allowed`}>
+      <div className={`${baseLayoutClasses} relative cursor-not-allowed`} style={{ background: '#6e768c' }}>
         {/* Yellow Coming Soon badge top-right */}
         <div className="absolute top-3 right-3 z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-400 text-yellow-900 text-xs font-bold shadow-sm">
