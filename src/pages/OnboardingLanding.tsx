@@ -573,7 +573,7 @@ export function OnboardingLanding() {
                       <div className="flex gap-4">
                         <span className="w-[2px] bg-[#F2B9A3] rounded-full mt-1" aria-hidden="true"></span>
                         <div className="space-y-4 text-lg text-slate-700 leading-relaxed">
-                          <p>At DQ, how you think, collaborate, and make decisions is guided by one shared system, GHC.</p>
+                          <p>At DQ, how you think, collaborate, and make decisions is guided by one guiding principle, The GHC, our shared DNA.</p>
                           <p>It connects our purpose, culture, leadership, and delivery into one clear way of working.</p>
                           <p>This helps you understand the standards we work by and the impact you are here to create.</p>
                         </div>
