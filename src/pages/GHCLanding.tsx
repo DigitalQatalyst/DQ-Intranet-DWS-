@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import useEmblaCarousel from 'embla-carousel-react';
 import {
   ChevronDown,
@@ -1161,26 +1161,28 @@ const TakeActionGridLayout = ({
   const [activeIndex, setActiveIndex] = useState(0);
   const activeCard = cards[activeIndex] ?? cards[0];
 
-  const stepBg = ['bg-[#fff4f2]', 'bg-[#f0f4ff]', 'bg-[#f8f9fa]'];
-  const badgeBg = ['bg-[#fe6a4d]', 'bg-[#4f46e5]', 'bg-[#9ca3af]'];
-
   return (
     <section ref={refEl} className="relative py-24 bg-white">
       <div className="container mx-auto px-4 md:px-6 lg:px-10 max-w-6xl">
 
         {/* Header */}
         <motion.div
-          className="text-center mb-10"
-          initial={{ opacity: 0, y: 20 }}
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
         >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-[#fe6a4d]/10 border border-[#fe6a4d]/30 text-[#fe6a4d] mb-4">
+          <motion.span
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-[0.24em] bg-[#fe6a4d] text-white shadow-sm mb-4"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={isInView ? { scale: 1, opacity: 1 } : {}}
+            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
+          >
             TAKE ACTION
-          </span>
+          </motion.span>
           <h2
-            className="ghc-font-display font-semibold text-[#131e42] leading-tight"
-            style={{ fontSize: titleFontSize ?? '36px' }}
+            className="ghc-font-display font-bold text-[#131e42] leading-tight"
+            style={{ fontSize: titleFontSize ?? '40px' }}
           >
             {title}
           </h2>
@@ -1189,162 +1191,142 @@ const TakeActionGridLayout = ({
           </p>
         </motion.div>
 
-        {/* Two-column split */}
-        <motion.div
-          className="grid grid-cols-1 lg:grid-cols-[35%_65%] gap-6"
-          initial={{ opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.15 }}
-        >
-          {/* LEFT — Journey Steps */}
-          <div className="bg-white rounded-2xl border border-[#e5e7eb] shadow-sm overflow-hidden">
-            {/* Card header */}
-            <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9ca3af]">JOURNEY STEP</span>
-                <span className="text-[10px] font-semibold text-[#6b7390]">{activeIndex + 1} of {cards.length}</span>
-              </div>
-              <span className="px-2.5 py-1 rounded-full bg-[#fe6a4d]/10 text-[#fe6a4d] text-[10px] font-bold uppercase tracking-[0.15em]">
-                THREE-STEP PATH
-              </span>
-            </div>
+        {/* Split layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-8 items-start">
 
-            {/* Steps */}
-            <div className="p-4 flex flex-col gap-3">
-              {cards.map((card, i) => {
-                const isActive = i === activeIndex;
-                return (
-                  <button
-                    key={card.title}
-                    type="button"
-                    onClick={() => setActiveIndex(i)}
-                    className={`w-full text-left rounded-xl p-4 transition-all duration-200 border ${
-                      isActive
-                        ? `${stepBg[i]} border-[#fe6a4d]/30 shadow-sm`
-                        : 'bg-[#fafafa] border-[#f0f0f0] hover:border-[#e0e0e0]'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Number badge */}
-                      <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${badgeBg[i]}`}>
-                        {i + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        {/* Title row */}
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <card.icon className="h-4 w-4 flex-shrink-0" style={{ color: card.iconColor }} />
-                          <span className="text-sm font-bold text-[#131e42]">{card.title}</span>
-                        </div>
-                        {/* Description */}
-                        <p className="text-xs text-[#6b7390] leading-snug mb-2">{card.description}</p>
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {card.tags.map((tag) => (
-                            <span key={tag} className="px-2 py-0.5 rounded-full bg-white border border-[#e5e7eb] text-[10px] text-[#6b7390] font-medium">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        {/* CTA */}
-                        <span
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#fe6a4d]"
-                          onClick={(e) => { e.stopPropagation(); handleNavigate(card.path); }}
-                          role="button"
-                          tabIndex={0}
-                          onKeyDown={(e) => e.key === 'Enter' && handleNavigate(card.path)}
-                        >
-                          {card.cta} <ArrowRight className="h-3 w-3" />
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* LEFT — Step list */}
+          <div className="flex flex-col gap-3">
+            {cards.map((card, i) => {
+              const isActive = i === activeIndex;
+              return (
+                <motion.button
+                  key={card.title}
+                  type="button"
+                  onClick={() => setActiveIndex(i)}
+                  className={`relative w-full text-left rounded-xl p-4 border transition-colors duration-200 overflow-hidden ${
+                    isActive
+                      ? 'bg-white border-[#e5e7eb] shadow-md'
+                      : 'bg-[#f9fafb] border-[#f0f0f0] hover:bg-white hover:border-[#e5e7eb] hover:shadow-sm'
+                  }`}
+                  initial={{ opacity: 0, x: -24 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
+                  whileHover={{ x: 4 }}
+                >
+                  {/* Active left border */}
+                  {isActive && (
+                    <motion.div
+                      className="absolute left-0 top-0 bottom-0 w-1 bg-[#fe6a4d] rounded-l-xl"
+                      layoutId="activeBorder"
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
 
-          {/* RIGHT — Visual Journey */}
-          <div className="bg-white rounded-2xl border border-[#e5e7eb] shadow-sm overflow-hidden flex flex-col">
-            {/* Card header */}
-            <div className="px-6 py-4 border-b border-[#f0f0f0]">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9ca3af]">VISUAL JOURNEY</span>
-              <h3 className="text-lg font-bold text-[#131e42] mt-1">How the three elements work together</h3>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#fe6a4d] mt-1">
-                PRACTICE → KNOWLEDGE → STORY
-              </p>
-            </div>
-
-            {/* Cascading cards diagram */}
-            <div className="px-6 pt-6 pb-4">
-              <div className="relative h-44">
-                {[...cards].reverse().map((card, ri) => {
-                  const i = cards.length - 1 - ri;
-                  const isActive = i === activeIndex;
-                  const offsets = [0, 16, 32];
-                  const offset = offsets[ri] ?? 0;
-                  return (
-                    <button
-                      key={card.title}
-                      type="button"
-                      onClick={() => setActiveIndex(i)}
-                      className={`absolute left-0 right-0 rounded-xl border p-4 transition-all duration-300 text-left ${
-                        isActive
-                          ? `${stepBg[i]} border-[#fe6a4d]/40 shadow-md z-30`
-                          : 'bg-white border-[#e5e7eb] shadow-sm hover:shadow-md'
+                  <div className="flex items-center gap-4 pl-2">
+                    {/* Icon */}
+                    <motion.div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${
+                        isActive ? 'bg-[#fe6a4d]' : 'bg-[#e5e7eb]'
                       }`}
-                      style={{ top: `${offset}px`, zIndex: isActive ? 30 : 10 - ri }}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${card.iconColor}20` }}>
-                          <card.icon className="h-4 w-4" style={{ color: card.iconColor }} />
-                        </div>
-                        <div>
-                          <p className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: card.iconColor }}>{card.badge}</p>
-                          <p className="text-sm font-bold text-[#131e42]">{card.title}</p>
-                        </div>
-                        <div className="ml-auto flex gap-1">
-                          {card.tags.slice(0, 2).map((tag) => (
-                            <span key={tag} className="px-2 py-0.5 rounded-full bg-white border border-[#e5e7eb] text-[9px] text-[#6b7390]">{tag}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                      <card.icon className="h-5 w-5" style={{ color: isActive ? 'white' : '#9ca3af' }} />
+                    </motion.div>
 
-            {/* Selected step detail */}
-            <div className="mx-6 mb-6 rounded-xl border border-[#fe6a4d]/20 bg-[#fff9f8] p-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#9ca3af] mb-3">SELECTED STEP</p>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-[#fe6a4d]/20">
-                  <activeCard.icon className="h-5 w-5" style={{ color: activeCard.iconColor }} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: activeCard.iconColor }}>{activeCard.badge}</p>
-                  <p className="text-base font-bold text-[#131e42]">{activeCard.title}</p>
-                </div>
-              </div>
-              <p className="text-sm text-[#4a5678] leading-relaxed mb-3">{activeCard.description}</p>
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {activeCard.tags.map((tag) => (
-                  <span key={tag} className="px-2.5 py-1 rounded-full bg-white border border-[#e5e7eb] text-[11px] text-[#6b7390] font-medium">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => handleNavigate(activeCard.path)}
-                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg px-4 py-2.5 bg-[#fe6a4d] text-white hover:bg-[#e85d42] transition-colors shadow-sm"
-              >
-                {activeCard.cta}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-[#131e42]">{card.title}</p>
+                      <p className="text-xs text-[#6b7390] mt-0.5 leading-snug line-clamp-2">{card.description}</p>
+                    </div>
+
+                    {/* Arrow */}
+                    {isActive && (
+                      <motion.div
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                      >
+                        <ArrowRight className="h-4 w-4 text-[#fe6a4d] flex-shrink-0" />
+                      </motion.div>
+                    )}
+                  </div>
+                </motion.button>
+              );
+            })}
           </div>
-        </motion.div>
+
+          {/* RIGHT — Featured card */}
+          <motion.div
+            className="bg-[#f8f9fa] rounded-2xl p-8 border border-[#e5e7eb] shadow-sm min-h-[380px] flex flex-col"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeIndex}
+                className="flex flex-col flex-1"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Icon */}
+                <motion.div
+                  className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-5 border border-[#e5e7eb]"
+                  initial={{ rotate: -90, scale: 0.5 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                >
+                  <activeCard.icon className="h-8 w-8" style={{ color: '#fe6a4d' }} />
+                </motion.div>
+
+                {/* Step label */}
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#fe6a4d] mb-2">
+                  {activeCard.badge}
+                </p>
+
+                {/* Title */}
+                <h3 className="text-2xl font-bold text-[#131e42] mb-3">{activeCard.title}</h3>
+
+                {/* Description */}
+                <p className="text-[#4a5678] leading-relaxed mb-5">{activeCard.description}</p>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {activeCard.tags.map((tag, ti) => (
+                    <motion.span
+                      key={tag}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#e5e7eb] text-xs font-medium text-[#4a5678] shadow-sm"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: ti * 0.05, type: 'spring', stiffness: 300 }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#fe6a4d]" />
+                      {tag}
+                    </motion.span>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <motion.button
+                  type="button"
+                  onClick={() => handleNavigate(activeCard.path)}
+                  className="mt-auto inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#fe6a4d] text-white text-sm font-bold shadow-sm self-start"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {activeCard.cta}
+                  <motion.span
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </motion.span>
+                </motion.button>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
