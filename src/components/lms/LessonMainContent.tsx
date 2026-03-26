@@ -68,69 +68,6 @@ export const LessonMainContent: React.FC<LessonMainContentProps> = (props) => {
   const lessonContent = currentLesson.content || null;
   const hasVideo = !!videoUrl;
   const hasContent = !!lessonContent;
-
-  const renderMainArea = () => {
-    if (showQuizOverlay && quiz) {
-      return (
-        <QuizWizardOverlay
-          quiz={quiz} quizSubmitted={quizSubmitted} quizPassed={quizPassed} quizScore={quizScore}
-          currentQuestionIndex={currentQuestionIndex} selectedOption={selectedOption}
-          isAnswerChecked={isAnswerChecked} isAnswerCorrect={isAnswerCorrect}
-          nextLesson={nextLesson} courseSlug={courseSlug}
-          onOptionSelect={onOptionSelect} onCheckAnswer={onCheckAnswer}
-          onNextQuestion={onNextQuestion} onRetryWizard={onRetryWizard}
-          onClose={onCloseQuiz} navigate={navigate}
-        />
-      );
-    }
-    if (isCourseCompleted(nextLesson, isVideoCompleted, quiz, quizPassed, courseQuiz, isFinalAssessmentLesson)) {
-      return (
-        <CourseCompletedView
-          course={course} courseSlug={courseSlug} hasExistingReview={hasExistingReview}
-          existingUserReview={existingUserReview} showReviewForm={showReviewForm}
-          reviewSubmitted={reviewSubmitted} createReviewMutation={createReviewMutation}
-          updateReviewMutation={updateReviewMutation} navigate={navigate}
-          onShowReviewForm={onShowReviewForm} onReviewSubmitted={onReviewSubmitted}
-        />
-      );
-    }
-    if (hasVideo) {
-      return (
-        <VideoPlayerView
-          videoUrl={videoUrl!} videoRef={videoRef} isVideoCompleted={isVideoCompleted}
-          quiz={quiz} quizPassed={quizPassed} videoProgress={videoProgress}
-          onTimeUpdate={onVideoTimeUpdate} onEnded={onVideoEnded}
-          onPlay={onVideoPlay} onPause={onVideoPause} onOpenQuiz={onOpenQuizOverlay}
-        />
-      );
-    }
-    if (hasContent) {
-      return (
-        <ContentLessonView
-          lessonContent={lessonContent!} isVideoCompleted={isVideoCompleted}
-          quiz={quiz} quizPassed={quizPassed} markLessonCompletedMutation={markLessonCompletedMutation}
-          onMarkCompleted={onMarkContentCompleted} onOpenQuiz={onOpenQuizOverlay}
-        />
-      );
-    }
-    if (isFinalAssessmentLesson) {
-      return (
-        <FinalAssessmentView
-          quiz={quiz} quizSubmitted={quizSubmitted} quizPassed={quizPassed} quizScore={quizScore}
-          onStart={onOpenQuizOverlay} onRetake={() => { onRetryWizard(); onOpenQuizOverlay(); }}
-        />
-      );
-    }
-    return (
-      <div className={`w-full rounded-lg overflow-hidden ${hasVideo ? 'bg-gray-900 aspect-video' : 'bg-gray-50 border border-gray-200 p-8'}`}>
-        <div className={`text-center ${hasVideo ? 'text-white' : 'text-gray-600'}`}>
-          <FileText size={64} className={`mx-auto mb-4 ${hasVideo ? 'opacity-50' : 'text-gray-400'}`} />
-          <p className={hasVideo ? 'text-gray-400' : 'text-gray-600'}>No content available for this lesson</p>
-        </div>
-      </div>
-    );
-  };
-
   const completedCount = allLessons.filter(l => isLessonCompleted(l.id)).length;
 
   return (
@@ -141,7 +78,28 @@ export const LessonMainContent: React.FC<LessonMainContentProps> = (props) => {
             <h1 className="text-2xl font-bold mb-2">{course.title}</h1>
             <h2 className={`text-xl ${hasVideo ? 'text-gray-300' : 'text-gray-700'}`}>{currentLesson.title}</h2>
           </div>
-          {renderMainArea()}
+          <MainContentArea
+            showQuizOverlay={showQuizOverlay} quiz={quiz} quizSubmitted={quizSubmitted}
+            quizPassed={quizPassed} quizScore={quizScore} courseQuiz={courseQuiz}
+            isFinalAssessmentLesson={isFinalAssessmentLesson}
+            currentQuestionIndex={currentQuestionIndex} selectedOption={selectedOption}
+            isAnswerChecked={isAnswerChecked} isAnswerCorrect={isAnswerCorrect}
+            nextLesson={nextLesson} courseSlug={courseSlug}
+            course={course} hasExistingReview={hasExistingReview}
+            existingUserReview={existingUserReview} showReviewForm={showReviewForm}
+            reviewSubmitted={reviewSubmitted} createReviewMutation={createReviewMutation}
+            updateReviewMutation={updateReviewMutation}
+            hasVideo={hasVideo} videoUrl={videoUrl} videoRef={videoRef}
+            isVideoCompleted={isVideoCompleted} videoProgress={videoProgress}
+            hasContent={hasContent} lessonContent={lessonContent}
+            markLessonCompletedMutation={markLessonCompletedMutation}
+            navigate={navigate} onOptionSelect={onOptionSelect} onCheckAnswer={onCheckAnswer}
+            onNextQuestion={onNextQuestion} onRetryWizard={onRetryWizard} onCloseQuiz={onCloseQuiz}
+            onVideoTimeUpdate={onVideoTimeUpdate} onVideoEnded={onVideoEnded}
+            onVideoPlay={onVideoPlay} onVideoPause={onVideoPause}
+            onMarkContentCompleted={onMarkContentCompleted} onOpenQuizOverlay={onOpenQuizOverlay}
+            onShowReviewForm={onShowReviewForm} onReviewSubmitted={onReviewSubmitted}
+          />
           <div className={`mt-4 ${hasVideo ? '' : 'bg-white p-4 rounded-lg border border-gray-200'}`}>
             <div className={`flex items-center justify-between text-sm mb-2 ${hasVideo ? 'text-gray-400' : 'text-gray-600'}`}>
               <span>Course Progress</span>
@@ -158,6 +116,105 @@ export const LessonMainContent: React.FC<LessonMainContentProps> = (props) => {
       </div>
     </div>
   );
+};
+
+interface MainContentAreaProps {
+  showQuizOverlay: boolean; quiz: LmsQuizRow | null; quizSubmitted: boolean;
+  quizPassed: boolean; quizScore: { score: number; total: number } | null;
+  courseQuiz: LmsQuizRow | null; isFinalAssessmentLesson: boolean;
+  currentQuestionIndex: number; selectedOption: number | null;
+  isAnswerChecked: boolean; isAnswerCorrect: boolean;
+  nextLesson: any; courseSlug: string | undefined;
+  course: any; hasExistingReview: boolean; existingUserReview: any;
+  showReviewForm: boolean; reviewSubmitted: boolean;
+  createReviewMutation: any; updateReviewMutation: any;
+  hasVideo: boolean; videoUrl: string | null; videoRef: React.RefObject<HTMLVideoElement>;
+  isVideoCompleted: boolean; videoProgress: number;
+  hasContent: boolean; lessonContent: string | null;
+  markLessonCompletedMutation: any;
+  navigate: (path: string) => void;
+  onOptionSelect: (i: number) => void; onCheckAnswer: () => void;
+  onNextQuestion: () => void; onRetryWizard: () => void; onCloseQuiz: () => void;
+  onVideoTimeUpdate: () => void; onVideoEnded: () => void;
+  onVideoPlay: () => void; onVideoPause: () => void;
+  onMarkContentCompleted: () => void; onOpenQuizOverlay: () => void;
+  onShowReviewForm: (v: boolean) => void; onReviewSubmitted: (v: boolean) => void;
+}
+
+const EmptyLessonView: React.FC<{ hasVideo: boolean }> = ({ hasVideo }) => (
+  <div className={`w-full rounded-lg overflow-hidden ${hasVideo ? 'bg-gray-900 aspect-video' : 'bg-gray-50 border border-gray-200 p-8'}`}>
+    <div className={`text-center ${hasVideo ? 'text-white' : 'text-gray-600'}`}>
+      <FileText size={64} className={`mx-auto mb-4 ${hasVideo ? 'opacity-50' : 'text-gray-400'}`} />
+      <p className={hasVideo ? 'text-gray-400' : 'text-gray-600'}>No content available for this lesson</p>
+    </div>
+  </div>
+);
+
+const MainContentArea: React.FC<MainContentAreaProps> = (props) => {
+  const {
+    showQuizOverlay, quiz, quizSubmitted, quizPassed, quizScore, courseQuiz, isFinalAssessmentLesson,
+    currentQuestionIndex, selectedOption, isAnswerChecked, isAnswerCorrect,
+    nextLesson, courseSlug, course, hasExistingReview, existingUserReview,
+    showReviewForm, reviewSubmitted, createReviewMutation, updateReviewMutation,
+    hasVideo, videoUrl, videoRef, isVideoCompleted, videoProgress,
+    hasContent, lessonContent, markLessonCompletedMutation,
+    navigate, onOptionSelect, onCheckAnswer, onNextQuestion, onRetryWizard, onCloseQuiz,
+    onVideoTimeUpdate, onVideoEnded, onVideoPlay, onVideoPause,
+    onMarkContentCompleted, onOpenQuizOverlay, onShowReviewForm, onReviewSubmitted,
+  } = props;
+
+  if (showQuizOverlay && quiz) {
+    return (
+      <QuizWizardOverlay
+        quiz={quiz} quizSubmitted={quizSubmitted} quizPassed={quizPassed} quizScore={quizScore}
+        currentQuestionIndex={currentQuestionIndex} selectedOption={selectedOption}
+        isAnswerChecked={isAnswerChecked} isAnswerCorrect={isAnswerCorrect}
+        nextLesson={nextLesson} courseSlug={courseSlug}
+        onOptionSelect={onOptionSelect} onCheckAnswer={onCheckAnswer}
+        onNextQuestion={onNextQuestion} onRetryWizard={onRetryWizard}
+        onClose={onCloseQuiz} navigate={navigate}
+      />
+    );
+  }
+  if (isCourseCompleted(nextLesson, isVideoCompleted, quiz, quizPassed, courseQuiz, isFinalAssessmentLesson)) {
+    return (
+      <CourseCompletedView
+        course={course} courseSlug={courseSlug} hasExistingReview={hasExistingReview}
+        existingUserReview={existingUserReview} showReviewForm={showReviewForm}
+        reviewSubmitted={reviewSubmitted} createReviewMutation={createReviewMutation}
+        updateReviewMutation={updateReviewMutation} navigate={navigate}
+        onShowReviewForm={onShowReviewForm} onReviewSubmitted={onReviewSubmitted}
+      />
+    );
+  }
+  if (hasVideo) {
+    return (
+      <VideoPlayerView
+        videoUrl={videoUrl!} videoRef={videoRef} isVideoCompleted={isVideoCompleted}
+        quiz={quiz} quizPassed={quizPassed} videoProgress={videoProgress}
+        onTimeUpdate={onVideoTimeUpdate} onEnded={onVideoEnded}
+        onPlay={onVideoPlay} onPause={onVideoPause} onOpenQuiz={onOpenQuizOverlay}
+      />
+    );
+  }
+  if (hasContent) {
+    return (
+      <ContentLessonView
+        lessonContent={lessonContent!} isVideoCompleted={isVideoCompleted}
+        quiz={quiz} quizPassed={quizPassed} markLessonCompletedMutation={markLessonCompletedMutation}
+        onMarkCompleted={onMarkContentCompleted} onOpenQuiz={onOpenQuizOverlay}
+      />
+    );
+  }
+  if (isFinalAssessmentLesson) {
+    return (
+      <FinalAssessmentView
+        quiz={quiz} quizSubmitted={quizSubmitted} quizPassed={quizPassed} quizScore={quizScore}
+        onStart={onOpenQuizOverlay} onRetake={() => { onRetryWizard(); onOpenQuizOverlay(); }}
+      />
+    );
+  }
+  return <EmptyLessonView hasVideo={hasVideo} />;
 };
 
 const VideoPlayerView: React.FC<{

@@ -14,6 +14,21 @@ export type LessonItem = {
   content?: string;
 };
 
+function flattenCurriculum(curriculum: any[]): LessonItem[] {
+  const lessons: LessonItem[] = [];
+  [...curriculum].sort((a: any, b: any) => a.order - b.order).forEach((item: any) => {
+    item.lessons?.sort((a: any, b: any) => a.order - b.order).forEach((lesson: any) => {
+      lessons.push({ ...lesson, moduleId: item.id });
+    });
+    item.topics?.sort((a: any, b: any) => a.order - b.order).forEach((topic: any) => {
+      topic.lessons?.sort((a: any, b: any) => a.order - b.order).forEach((lesson: any) => {
+        lessons.push({ ...lesson, moduleId: topic.id });
+      });
+    });
+  });
+  return lessons;
+}
+
 export function useLessonCurriculum(
   course: any,
   lessonId: string | undefined,
@@ -44,18 +59,7 @@ export function useLessonCurriculum(
 
   const allLessons = useMemo((): LessonItem[] => {
     if (!course?.curriculum) return [];
-    const lessons: LessonItem[] = [];
-    [...course.curriculum].sort((a: any, b: any) => a.order - b.order).forEach((item: any) => {
-      item.lessons?.sort((a: any, b: any) => a.order - b.order).forEach((lesson: any) => {
-        lessons.push({ ...lesson, moduleId: item.id });
-      });
-      item.topics?.sort((a: any, b: any) => a.order - b.order).forEach((topic: any) => {
-        topic.lessons?.sort((a: any, b: any) => a.order - b.order).forEach((lesson: any) => {
-          lessons.push({ ...lesson, moduleId: topic.id });
-        });
-      });
-    });
-    return lessons;
+    return flattenCurriculum(course.curriculum);
   }, [course]);
 
   const currentLesson = useMemo(() => allLessons.find(l => l.id === lessonId), [allLessons, lessonId]);

@@ -17,16 +17,13 @@ function isFocusHeading(text: string): boolean {
   return FOCUS_HEADING_PATTERNS.some((p) => lower.includes(p));
 }
 
-export const EpisodeContent: React.FC<EpisodeContentProps> = ({ content }) => {
-  if (!content) return null;
-
+function parseEpisodeContent(content: string): JSX.Element[] {
   const lines = content.split('\n');
   const elements: JSX.Element[] = [];
   let currentParagraph: string[] = [];
   let keyCounter = 0;
   let firstHeadingSkipped = false;
   let inFocusSection = false;
-  let shouldStop = false;
 
   const flushParagraph = () => {
     if (currentParagraph.length === 0) return;
@@ -42,7 +39,6 @@ export const EpisodeContent: React.FC<EpisodeContentProps> = ({ content }) => {
   };
 
   for (const line of lines) {
-    if (shouldStop) break;
     const trimmed = line.trim();
     if (!trimmed) continue;
 
@@ -58,7 +54,6 @@ export const EpisodeContent: React.FC<EpisodeContentProps> = ({ content }) => {
 
       if (inFocusSection && !isFocusHeading(headingText)) {
         flushParagraph();
-        shouldStop = true;
         break;
       }
 
@@ -86,6 +81,10 @@ export const EpisodeContent: React.FC<EpisodeContentProps> = ({ content }) => {
   }
 
   if (inFocusSection) flushParagraph();
+  return elements;
+}
 
-  return <>{elements}</>;
+export const EpisodeContent: React.FC<EpisodeContentProps> = ({ content }) => {
+  if (!content) return null;
+  return <>{parseEpisodeContent(content)}</>;
 };
