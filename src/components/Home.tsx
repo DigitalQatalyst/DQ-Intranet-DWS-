@@ -19,6 +19,7 @@ import {
   ScrollText,
   Wand2,
   Bot,
+  Lock,
 } from 'lucide-react';
 import {
   AnimatedCounter,
@@ -267,6 +268,35 @@ const ServiceCard = ({
   const wrapperClasses = `${activeCardClasses} ${baseLayoutClasses}`;
   const titleClass = `${sectionStyle.headingClass} text-base font-semibold text-white mb-1 truncate`;
   const displayTitle = toTitleCase(service.title);
+
+  if (isComingSoon) {
+    return (
+      <div className={`${baseLayoutClasses} bg-gray-100/80 border border-gray-200 opacity-75 cursor-not-allowed relative`}>
+        {/* Coming Soon badge */}
+        <div className="absolute top-3 right-3 z-10">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-gray-200 text-[10px] font-semibold text-gray-500 shadow-sm">
+            <Lock size={10} className="text-gray-400" />
+            Coming Soon
+          </span>
+        </div>
+        <div className="flex items-start gap-3">
+          <div className={`${iconWrapperClasses} rounded-full bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center mb-3`}>
+            {React.isValidElement(iconNode) ? cloneElement(iconNode as React.ReactElement<any>, {
+              size: 20,
+              "aria-hidden": true,
+              className: `text-gray-400 ${(iconNode as React.ReactElement<any>).props?.className ?? ""}`.trim(),
+            } as any) : <span className="text-gray-400">{iconNode}</span>}
+          </div>
+          <h2 className="text-base font-semibold text-gray-500 mb-1 truncate" title={displayTitle}>{displayTitle}</h2>
+        </div>
+        <p className="text-sm text-gray-400 leading-snug line-clamp-2 mt-3 mb-4">{service.description}</p>
+        <button className="cta-dq opacity-40 cursor-not-allowed" disabled>
+          Coming Soon
+          <span className="chev">›</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
