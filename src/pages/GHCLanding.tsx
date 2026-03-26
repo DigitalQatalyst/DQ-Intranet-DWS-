@@ -20,6 +20,7 @@ import {
   GitBranch,
   Sparkles,
   Layers,
+  Check,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -1160,13 +1161,16 @@ const TakeActionGridLayout = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const activeCard = cards[activeIndex] ?? cards[0];
+  const NAVY = '#19234e';
+  const CORAL = '#e7513b';
 
   return (
     <section
       ref={refEl}
-      className="relative py-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50"
+      className="py-24 md:py-32 px-4 sm:px-6 lg:px-8"
+      style={{ backgroundColor: '#f0f6ff' }}
     >
-      <div className="container mx-auto px-4 md:px-6 lg:px-10 max-w-6xl">
+      <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <motion.div
@@ -1176,27 +1180,31 @@ const TakeActionGridLayout = ({
           transition={{ duration: 0.6 }}
         >
           <motion.span
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold bg-orange-50 text-orange-600 mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white mb-6"
+            style={{ backgroundColor: CORAL }}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={isInView ? { scale: 1, opacity: 1 } : {}}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <span className="w-2 h-2 rounded-full bg-orange-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
             Take Action
           </motion.span>
           <h2
-            className="font-bold text-slate-900 tracking-tight leading-tight"
-            style={{ fontSize: titleFontSize ?? '48px' }}
+            className="font-bold leading-tight tracking-tight"
+            style={{ fontSize: titleFontSize ?? '52px', color: NAVY }}
           >
             {title}
           </h2>
-          <p className="text-slate-600 mt-4 text-xl max-w-2xl mx-auto" style={{ fontSize: subtitleFontSize }}>
+          <p
+            className="mt-4 text-xl leading-relaxed whitespace-nowrap"
+            style={{ color: NAVY, opacity: 0.7, fontSize: subtitleFontSize }}
+          >
             {subtitle}
           </p>
         </motion.div>
 
         {/* Split layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
 
           {/* LEFT — Step list */}
           <div className="flex flex-col gap-4">
@@ -1210,11 +1218,10 @@ const TakeActionGridLayout = ({
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
                   transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
                 >
-                  {/* Number badge outside card */}
+                  {/* Number badge */}
                   <div
-                    className={`absolute -left-3 -top-3 z-10 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-sm transition-colors duration-300 ${
-                      isActive ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-600'
-                    }`}
+                    className="absolute -left-4 -top-3 z-10 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg"
+                    style={{ backgroundColor: isActive ? CORAL : NAVY }}
                   >
                     {i + 1}
                   </div>
@@ -1222,30 +1229,35 @@ const TakeActionGridLayout = ({
                   <motion.button
                     type="button"
                     onClick={() => setActiveIndex(i)}
-                    className={`w-full text-left rounded-2xl p-5 border transition-all duration-300 ${
-                      isActive
-                        ? 'bg-white shadow-lg ring-1 ring-slate-200'
-                        : 'bg-white/60 border-slate-100 hover:bg-white hover:shadow-md'
-                    }`}
-                    whileHover={{ y: -2 }}
+                    className="w-full text-left rounded-2xl p-6 transition-all duration-300"
+                    style={{
+                      backgroundColor: isActive ? '#ffffff' : 'rgba(255,255,255,0.6)',
+                      borderLeft: isActive ? `4px solid ${CORAL}` : '4px solid transparent',
+                      boxShadow: isActive ? '0 10px 25px rgba(0,0,0,0.1)' : undefined,
+                    }}
+                    whileHover={{ boxShadow: '0 6px 16px rgba(0,0,0,0.08)' }}
                   >
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-5">
                       {/* Icon */}
                       <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${
-                          isActive ? 'bg-orange-100' : 'bg-slate-100'
-                        }`}
+                        className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{
+                          backgroundColor: isActive ? 'rgba(231,81,59,0.1)' : 'rgba(25,35,78,0.08)',
+                        }}
                       >
                         <card.icon
-                          className="h-6 w-6 transition-colors duration-300"
-                          style={{ color: isActive ? '#f97316' : '#94a3b8' }}
+                          size={26}
+                          strokeWidth={2}
+                          style={{ color: isActive ? CORAL : NAVY }}
                         />
                       </div>
 
                       {/* Text */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-bold text-slate-900">{card.title}</p>
-                        <p className="text-sm text-slate-600 mt-1 leading-relaxed">{card.description}</p>
+                        <p className="text-lg font-bold" style={{ color: NAVY }}>{card.title}</p>
+                        <p className="text-sm mt-1 leading-relaxed" style={{ color: NAVY, opacity: 0.7 }}>
+                          {card.description}
+                        </p>
                       </div>
 
                       {/* Arrow */}
@@ -1255,7 +1267,7 @@ const TakeActionGridLayout = ({
                           transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
                           className="flex-shrink-0 mt-1"
                         >
-                          <ArrowRight className="h-5 w-5 text-orange-500" />
+                          <ArrowRight size={18} strokeWidth={2.5} style={{ color: CORAL }} />
                         </motion.div>
                       )}
                     </div>
@@ -1272,11 +1284,14 @@ const TakeActionGridLayout = ({
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <div className="bg-white rounded-3xl shadow-xl ring-1 ring-slate-200 overflow-hidden">
+            <div
+              className="rounded-3xl p-12 shadow-2xl flex flex-col items-center text-center"
+              style={{ backgroundColor: NAVY }}
+            >
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeIndex}
-                  className="p-8 flex flex-col items-center text-center"
+                  className="flex flex-col items-center w-full"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -16 }}
@@ -1284,41 +1299,50 @@ const TakeActionGridLayout = ({
                 >
                   {/* Icon */}
                   <motion.div
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #f97316, #fb923c)' }}
+                    className="w-24 h-24 rounded-2xl flex items-center justify-center mb-8 shadow-xl"
+                    style={{ backgroundColor: CORAL }}
                     initial={{ rotate: -90, scale: 0.5 }}
                     animate={{ rotate: 0, scale: 1 }}
                     transition={{ type: 'spring', stiffness: 260, damping: 20 }}
                   >
-                    <activeCard.icon className="h-10 w-10 text-white" />
+                    <activeCard.icon size={40} strokeWidth={2} className="text-white" />
                   </motion.div>
 
                   {/* Step label */}
-                  <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold mb-4">
+                  <span
+                    className="px-4 py-2 rounded-full text-xs font-medium text-white mb-6"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  >
                     Step {activeIndex + 1} of {cards.length}
                   </span>
 
                   {/* Title */}
-                  <h3 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight mb-4">
+                  <h3
+                    className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4 leading-tight"
+                  >
                     {activeCard.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-slate-600 leading-relaxed max-w-md mb-6">
+                  <p
+                    className="text-base leading-relaxed max-w-md mb-8"
+                    style={{ color: 'rgba(255,255,255,0.8)' }}
+                  >
                     {activeCard.description}
                   </p>
 
                   {/* Tags */}
-                  <div className="flex flex-wrap justify-center gap-2 mb-8">
+                  <div className="flex flex-wrap justify-center gap-2 mb-10">
                     {activeCard.tags.map((tag, ti) => (
                       <motion.span
                         key={tag}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 text-slate-700 text-sm font-medium"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: ti * 0.05, type: 'spring', stiffness: 300 }}
                       >
-                        <span className="text-orange-500">✓</span>
+                        <Check size={14} strokeWidth={2.5} style={{ color: CORAL }} />
                         {tag}
                       </motion.span>
                     ))}
@@ -1328,9 +1352,9 @@ const TakeActionGridLayout = ({
                   <motion.button
                     type="button"
                     onClick={() => handleNavigate(activeCard.path)}
-                    className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-orange-500 text-white text-sm font-bold shadow-lg"
-                    style={{ boxShadow: '0 8px 24px rgba(249,115,22,0.3)' }}
-                    whileHover={{ y: -2, boxShadow: '0 12px 32px rgba(249,115,22,0.4)' }}
+                    className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-semibold shadow-xl"
+                    style={{ backgroundColor: CORAL }}
+                    whileHover={{ y: -2, boxShadow: '0 20px 40px rgba(231,81,59,0.4)' }}
                     whileTap={{ scale: 0.97 }}
                   >
                     {activeCard.cta}
@@ -1338,7 +1362,7 @@ const TakeActionGridLayout = ({
                       animate={{ x: [0, 4, 0] }}
                       transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
                     >
-                      <ArrowRight className="h-4 w-4" />
+                      <ArrowRight size={18} strokeWidth={2.5} />
                     </motion.span>
                   </motion.button>
                 </motion.div>
