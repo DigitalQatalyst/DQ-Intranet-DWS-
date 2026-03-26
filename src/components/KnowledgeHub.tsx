@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Newspaper, Loader, AlertCircle, Radio } from "lucide-react";
+import { Loader, AlertCircle, Radio, BookOpen, Monitor, Users, Video, FileText, ScrollText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FadeInUpOnScroll } from "./AnimationUtils";
 import { NewsCard } from "./CardComponents";
@@ -12,15 +12,11 @@ interface GuideItem {
   slug: string;
   title: string;
   summary: string;
-  image?: string;
+  hero_image_url?: string;
   guide_type: string;
   sub_domain?: string;
   domain?: string;
-  strategy_type?: string;
-  strategy_framework?: string;
-  guidelines_category?: string;
-  created_at: string;
-  updated_at: string;
+  last_updated_at: string;
 }
 
 // Legacy hardcoded news data - now replaced by Supabase-backed public.news
@@ -176,7 +172,7 @@ const KnowledgeHubContent = () => {
   const [isTabChanging, setIsTabChanging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<{ message: string } | null>(null);
-  const [ghcGuides, setGhcGuides] = useState<GuideItem[]>([]);
+  const [ghcGuides] = useState<GuideItem[]>([]);
   const [guidelinesGuides, setGuidelinesGuides] = useState<GuideItem[]>([]);
   const [learningCourses, setLearningCourses] = useState<LmsCard[]>([]);
 
@@ -212,7 +208,7 @@ const KnowledgeHubContent = () => {
       setError(null);
       try {
         const [guidelines, courses] = await Promise.all([
-          fetchLatestGuides('guidelines', 6),
+          fetchLatestGuides({ limit: 6 }),
           getLmsCourses(),
         ]);
 
@@ -231,52 +227,15 @@ const KnowledgeHubContent = () => {
     loadData();
   }, []);
 
-  // Get data based on active tab - updated to use Media Center news from Supabase
-  const getNewsData = () => {
-    // All news data is fetched from Supabase via fetchAllNews()
-    // Return empty array if no data is available (will show loading/empty state)
-    if (mediaCenterNews.length > 0) {
-      return mediaCenterNews.map(item => ({
-        id: item.id,
-        title: item.title,
-        excerpt: item.excerpt,
-        date: item.date,
-        category: item.department || item.newsType || 'News',
-        source: item.newsSource || item.byline || item.author || 'DQ Media Center',
-        imageUrl: item.image || undefined,
-      }));
-    }
-    // Return empty array - data will be loaded from Supabase
-    return [];
-  };
-  const getEventsData = () => events;
-  const getResourcesData = () => resources;
-
-  // Helper function to get the appropriate icon for a resource type
-  const getResourceIconByType = (type) => {
-    switch (type?.toLowerCase()) {
-      case "guide":
-        return <BookOpen size={24} className="#030F35-600" />;
-      case "templates":
-        return <FileText size={24} className="#030F35-600" />;
-      case "tool":
-        return <Calculator size={24} className="#030F35-600" />;
-      default:
-        return <FileText size={24} className="#030F35-600" />;
-    }
-  };
-
-  // Add this function to handle event registration
-  const handleEventRegister = (event: Event) => {
-    // Here you can implement what happens when someone registers for an event
-    // For example, open a registration modal, navigate to a registration page, etc.
-    console.log("Registering for event:", event.title);
-
-    // Example: Open a registration URL if available
-    // if (event.registrationUrl) {
-    //   window.open(event.registrationUrl, '_blank');
-    // }
-
+  // Pick an icon for a course based on its category/deliveryMode
+  const getCourseIcon = (course: LmsCard) => {
+    const cat = (course.courseCategory || '').toLowerCase();
+    const mode = (course.deliveryMode || '').toLowerCase();
+    if (mode === 'video') return <Video size={24} />;
+    if (mode === 'workshop') return <Users size={24} />;
+    if (cat.includes('ghc') || cat.includes('competenc')) return <BookOpen size={24} />;
+    if (cat.includes('tech') || cat.includes('tool') || cat.includes('microsoft')) return <Monitor size={24} />;
+    return <FileText size={24} />;
   };
 
   // Map guide data to card format
@@ -284,11 +243,17 @@ const KnowledgeHubContent = () => {
     id: guide.id,
     title: guide.title,
     excerpt: guide.summary || '',
-    date: new Date(guide.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    date: new Date(guide.last_updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     category: guide.guide_type || '',
     tags: [guide.guide_type, guide.sub_domain, guide.domain].filter(Boolean) as string[],
     source: guide.domain || 'DQ',
-    imageUrl: guide.image || getGuideImageUrl(guide.slug),
+    imageUrl: guide.hero_image_url || getGuideImageUrl({
+      slug: guide.slug,
+      title: guide.title,
+      domain: guide.domain,
+      guideType: guide.guide_type,
+      heroImageUrl: guide.hero_image_url,
+    }),
   });
 
 
@@ -396,17 +361,17 @@ const KnowledgeHubContent = () => {
                           content={{
                             title: cardData.title,
                             description: cardData.excerpt,
-                            imageUrl: cardData.imageUrl,
                             tags: cardData.tags,
                             date: cardData.date,
                             source: cardData.source,
                           }}
+                          icon={<ScrollText size={24} />}
                           ctaLabel="Open Guideline"
                           onQuickView={() => {
                             navigate(`/marketplace/guides/${guide.slug}`);
                           }}
                           onReadMore={() => {
-                            navigate(`/marketplace/guides?collapsed=guide_type%2Csub_domain%2Cunit%2Clocation%2Ctestimonial_category%2Cproduct_type%2Cproduct_stage%2Cguidelines_category%2Ccategorization%2Cattachments%2Cstrategy_framework%2Cglossary_knowledge_system%2Cglossary_ghc_dimension%2Cglossary_6xd_perspective%2Cglossary_letter%2Cfaq_category`);
+                            navigate(`/marketplace/guides/${guide.slug}`);
                           }}
                         />
                       </div>
@@ -439,15 +404,15 @@ const KnowledgeHubContent = () => {
                       <NewsCard
                         content={{
                           title: course.title,
-                          description: course.description || '',
-                          imageUrl: course.imageUrl || undefined,
-                          tags: [course.category, course.deliveryMode].filter(Boolean) as string[],
-                          date: '',
-                          source: 'DQ Learning',
+                          description: course.excerpt || course.summary || '',
+                          tags: [course.courseCategory, course.deliveryMode].filter(Boolean) as string[],
+                          date: course.duration || '',
+                          source: course.provider || 'DQ Learning',
                         }}
+                        icon={getCourseIcon(course)}
                         ctaLabel="View Course"
-                        onQuickView={() => navigate(`/lms/${course.slug}`)}
-                        onReadMore={() => navigate(`/lms/${course.slug}`)}
+                        onQuickView={() => { navigate(`/lms/${course.slug}`); }}
+                        onReadMore={() => { navigate(`/lms/${course.slug}`); }}
                       />
                     </div>
                   ))

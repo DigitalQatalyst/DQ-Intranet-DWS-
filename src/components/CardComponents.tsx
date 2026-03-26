@@ -7,8 +7,17 @@ import { Download, ExternalLink, FileText, BookOpen, Calculator, Play } from 'lu
 export const NewsCard = ({
   content,
   onQuickView,
-  onReadMore = () => undefined, // Add default no-op function to make it optional in the wrapper
-  ...props
+  onReadMore = () => { /* no-op */ },
+  icon = null,
+  ctaLabel,
+  'data-id': dataId,
+}: {
+  content: any;
+  onQuickView?: () => void;
+  onReadMore?: () => void;
+  icon?: React.ReactNode;
+  ctaLabel?: string;
+  'data-id'?: string;
 }) => {
   const newsItem = {
     id: content.title,
@@ -16,11 +25,12 @@ export const NewsCard = ({
     description: content.description,
     excerpt: content.description || content.title.substring(0, 100) + (content.title.length > 100 ? '...' : ''),
     imageUrl: content.imageUrl,
+    sourceLogoUrl: icon ? undefined : (content.sourceLogoUrl || content.imageUrl),
     tags: content.tags || [],
     date: content.date,
     category: content.tags?.[0] || 'News',
     source: content.source || 'TechNews Daily',
-    sourceLogoUrl: content.sourceLogoUrl
+    mediaIcon: icon,
   };
 
   const pill =
@@ -31,8 +41,17 @@ export const NewsCard = ({
     )
       ? { text: 'Play', icon: <Play size={12} />, variant: 'info' as const }
       : undefined;
-  
-  return <CardsNewsCard item={newsItem} pill={pill} onQuickView={onQuickView} onReadMore={onReadMore} {...props} />;
+
+  return (
+    <CardsNewsCard
+      item={newsItem}
+      pill={pill}
+      onQuickView={onQuickView}
+      onReadMore={onReadMore}
+      ctaLabel={ctaLabel}
+      data-id={dataId}
+    />
+  );
 };
 
 // EventCard wrapper

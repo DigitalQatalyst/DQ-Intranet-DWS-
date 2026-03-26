@@ -12,6 +12,7 @@ export interface NewsItem {
   tags: string[];
   imageUrl?: string;
   sourceLogoUrl?: string;
+  mediaIcon?: React.ReactNode;
 }
 
 export interface NewsCardProps {
@@ -44,9 +45,10 @@ export const NewsCard: React.FC<NewsCardProps> = ({
     subtitle: item.source,
     description: item.excerpt,
     media: {
-      type: item.sourceLogoUrl ? 'image' : 'icon',
-      src: item.sourceLogoUrl,
+      type: item.mediaIcon ? 'icon' : (item.sourceLogoUrl ? 'image' : 'icon'),
+      src: item.mediaIcon ? undefined : item.sourceLogoUrl,
       alt: `${item.source} logo`,
+      icon: item.mediaIcon,
       fallbackIcon: <ExternalLink size={24} />
     },
     tags: item.tags.slice(0, 2).map((tag, index) => ({
