@@ -19,6 +19,7 @@ import {
   Shield,
   GitBranch,
   Sparkles,
+  Layers,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -253,63 +254,45 @@ const FEATURE_CARDS_DEFAULT = [
 
 const ACTION_CARDS_DEFAULT: ActionCard[] = [
   {
-    title: 'Storybooks',
-    icon: BookOpen,
-    badge: 'Storybooks',
-    description:
-      'See the thinking and stories behind the Golden Honeycomb and how DQ chose to work this way. Start here when you want the “why” that shaped the system.',
-    tags: ['Narratives', 'Decisions', 'Origins'],
-    cta: 'Read the story',
-    path: 'https://preview.shorthand.com/Pg0KQCF1Rp904ao7',
-    bg: 'bg-[#fde6de]',
-    accent: 'text-[#e1513b]',
-    badgeColor: 'text-[#e1513b]',
-    iconColor: '#e1513b',
-  },
-  {
-    title: 'Learning Center',
+    title: 'Learn by doing',
     icon: GraduationCap,
-    badge: 'Learning',
-    description:
-      'Build the capabilities expected inside this operating system. Practical paths that help you apply GHC in real decisions and delivery.',
-    tags: ['Guided paths', 'Practice', 'Skills'],
-    cta: 'Start learning',
+    badge: 'Step 1',
+    description: 'Guided Agile 6xD missions with rituals, checklists, and feedback so you can execute while you learn.',
+    tags: ['Practice', 'Missions', 'Feedback'],
+    cta: 'Start Learning',
     path: '/lms',
-    bg: 'bg-[#f0f6ff]',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#e1513b',
+    bg: 'bg-gradient-to-br from-[#fff0ed] to-[#ffe4dc]',
+    accent: 'text-[#fe6a4d]',
+    badgeColor: 'text-[#fe6a4d]',
+    iconColor: '#fe6a4d',
   },
   {
     title: 'Knowledge Center',
-    icon: Users,
-    badge: 'Guidance',
-    description:
-      'When work gets complex, this is where you find the plays, guardrails, and references that keep execution aligned and moving.',
-    tags: ['Plays', 'Guardrails', 'References'],
-    cta: 'Find what you need',
+    icon: Layers,
+    badge: 'Step 2',
+    description: 'Plays, perspectives, and templates to help you design and deliver with Agile 6xD.',
+    tags: ['Plays', 'Templates', 'Perspectives'],
+    cta: 'Explore Resources',
     path: '/marketplace/guides',
-    bg: 'bg-[#e6ebff]',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#131e42',
+    bg: 'bg-gradient-to-br from-[#eef2ff] to-[#e0e7ff]',
+    accent: 'text-[#4f46e5]',
+    badgeColor: 'text-[#4f46e5]',
+    iconColor: '#4f46e5',
   },
   {
-    title: 'Viva Engage',
-    icon: Briefcase,
-    badge: 'Community',
-    description:
-      'Watch GHC in motion through conversations and collaboration. Ask, share, and see how teams live the operating system every day.',
-    tags: ['Conversation', 'Collaboration', 'Community'],
-    cta: 'Join the conversation',
-    path: 'https://engage.cloud.microsoft/main/feed',
-    bg: 'bg-white',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#e1513b',
+    title: 'Storybook',
+    icon: BookOpen,
+    badge: 'Step 3',
+    description: 'Transformation stories showing Agile 6xD pacing, decisions, and outcomes.',
+    tags: ['Context', 'Decisions', 'Outcomes'],
+    cta: 'Read Stories',
+    path: 'https://preview.shorthand.com/Pg0KQCF1Rp904ao7',
+    bg: 'bg-gradient-to-br from-[#fffbeb] to-[#fef3c7]',
+    accent: 'text-[#d97706]',
+    badgeColor: 'text-[#d97706]',
+    iconColor: '#d97706',
   },
 ];
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: (i: number) => ({
@@ -1192,7 +1175,7 @@ const TakeActionGridLayout = ({
       />
 
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-6xl mx-auto"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-5xl mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate={isInView ? 'visible' : 'hidden'}
@@ -1202,59 +1185,49 @@ const TakeActionGridLayout = ({
             key={card.title}
             variants={itemVariants}
             custom={index}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className={`group relative rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 ${card.bg} border border-white/60`}
+            whileHover={{ y: -6, transition: { duration: 0.2 } }}
+            className={`group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ${card.bg} border border-white/80`}
           >
-            {/* Decorative gradient overlay */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/40 to-transparent rounded-bl-[80px] opacity-60" />
-            
-            <div className="relative p-6 flex flex-col h-full">
-              {/* Icon */}
-              <div className="mb-4">
-                <div className="w-12 h-12 rounded-xl bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center group-hover:scale-105 transition-all duration-300">
-                  <card.icon className="h-6 w-6" style={{ color: card.iconColor }} />
+            <div className="relative p-6 flex flex-col h-full min-h-[280px]">
+              {/* Badge + Icon row */}
+              <div className="flex items-center justify-between mb-4">
+                <span className={`text-[10px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-white/70 border border-white/80 ${card.badgeColor}`}>
+                  {card.badge}
+                </span>
+                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                  <card.icon className="h-5 w-5" style={{ color: card.iconColor }} />
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="flex-1 flex flex-col">
-                <div className="mb-4">
-                  <p className={`text-[9px] font-bold uppercase tracking-[0.18em] mb-2 ${card.badgeColor} opacity-80`}>
-                    {card.badge}
-                  </p>
-                  <h3 className="ghc-font-display text-xl font-bold text-[#131e42] leading-tight mb-2">
-                    {card.title}
-                  </h3>
-                  <p className="text-sm text-[#4a5678] leading-relaxed">
-                    {card.description}
-                  </p>
-                </div>
+              {/* Title + Description */}
+              <h3 className="text-lg font-bold text-[#131e42] leading-tight mb-2">
+                {card.title}
+              </h3>
+              <p className="text-sm text-[#4a5678] leading-relaxed flex-1">
+                {card.description}
+              </p>
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {card.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 text-[#131e42] text-[11px] font-medium border border-[#e5e9f5] shadow-sm"
-                    >
-                      <span className="w-1 h-1 rounded-full" style={{ backgroundColor: card.iconColor }} />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* CTA Button */}
-                <div className="mt-auto">
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate(card.path)}
-                    className={`inline-flex items-center gap-1.5 text-sm font-bold ${card.accent} group-hover:gap-2 transition-all duration-300`}
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1.5 my-4">
+                {card.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2.5 py-1 rounded-full bg-white/80 text-[#4a5678] text-[11px] font-medium border border-white/60"
                   >
-                    {card.cta}
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                  </button>
-                </div>
+                    {tag}
+                  </span>
+                ))}
               </div>
+
+              {/* CTA */}
+              <button
+                type="button"
+                onClick={() => handleNavigate(card.path)}
+                className="mt-auto w-full inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg px-4 py-2.5 bg-[#fe6a4d] text-white hover:bg-[#e85d42] transition-colors duration-200 shadow-sm"
+              >
+                {card.cta}
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
           </motion.article>
         ))}
