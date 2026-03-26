@@ -314,6 +314,63 @@ const FinalAssessmentView: React.FC<{
   </div>
 );
 
+async function handleReviewSubmit(
+  input: any,
+  hasExistingReview: boolean,
+  existingUserReview: any,
+  updateReviewMutation: any,
+  createReviewMutation: any,
+  onReviewSubmitted: (v: boolean) => void,
+  onShowReviewForm: (v: boolean) => void,
+): Promise<void> {
+  if (hasExistingReview && existingUserReview) {
+    await updateReviewMutation.mutateAsync({ reviewId: existingUserReview.id, input });
+  } else {
+    await createReviewMutation.mutateAsync(input);
+  }
+  onReviewSubmitted(true);
+  onShowReviewForm(false);
+}
+
+const CourseCompletionPrompt: React.FC<{
+  courseSlug: string | undefined;
+  hasExistingReview: boolean;
+  onShowReviewForm: (v: boolean) => void;
+}> = ({ courseSlug, hasExistingReview, onShowReviewForm }) => (
+  <div className="text-center max-w-lg mx-auto">
+    <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+      <CheckCircle className="w-10 h-10 text-green-600" />
+    </div>
+    <h2 className="text-2xl font-bold text-gray-900 mb-3">🎉 Congratulations!</h2>
+    <p className="text-lg text-gray-700 mb-2">You've completed the course!</p>
+    <p className="text-gray-600 mb-8">
+      {hasExistingReview ? "You've already left a review for this course. You can update it anytime!" : 'Help us improve by sharing your learning experience. Your feedback is valuable!'}
+    </p>
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <button onClick={() => onShowReviewForm(true)} className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-[#030F35] to-[#0A2463] text-white font-semibold rounded-xl hover:shadow-lg transition-all">
+        {hasExistingReview ? <><Edit3 size={20} />Edit Review</> : <><MessageSquare size={20} />Leave a Review</>}
+      </button>
+      <Link to={`/lms/${courseSlug}`} className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors">Back to Course</Link>
+    </div>
+  </div>
+);
+
+const CourseReviewConfirmed: React.FC<{
+  courseSlug: string | undefined;
+  hasExistingReview: boolean;
+}> = ({ courseSlug, hasExistingReview }) => (
+  <div className="text-center max-w-lg mx-auto">
+    <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+      <CheckCircle className="w-10 h-10 text-blue-600" />
+    </div>
+    <h2 className="text-2xl font-bold text-gray-900 mb-3">{hasExistingReview ? 'Review Updated!' : 'Thank You for Your Feedback!'}</h2>
+    <p className="text-gray-600 mb-8">{hasExistingReview ? 'Your review has been successfully updated.' : 'Your review helps us improve courses for future learners.'}</p>
+    <Link to={`/lms/${courseSlug}`} className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-[#030F35] to-[#0A2463] text-white font-semibold rounded-xl hover:shadow-lg transition-all">
+      Back to Course
+    </Link>
+  </div>
+);
+
 const CourseCompletedView: React.FC<{
   course: any; courseSlug: string | undefined; hasExistingReview: boolean;
   existingUserReview: any; showReviewForm: boolean; reviewSubmitted: boolean;
@@ -323,51 +380,19 @@ const CourseCompletedView: React.FC<{
 }> = ({ course, courseSlug, hasExistingReview, existingUserReview, showReviewForm, reviewSubmitted, createReviewMutation, updateReviewMutation, navigate, onShowReviewForm, onReviewSubmitted }) => (
   <div className="bg-white rounded-lg border border-gray-200 p-8 min-h-[400px] flex flex-col justify-center">
     {!showReviewForm && !reviewSubmitted ? (
-      <div className="text-center max-w-lg mx-auto">
-        <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-green-600" />
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">🎉 Congratulations!</h2>
-        <p className="text-lg text-gray-700 mb-2">You've completed the course!</p>
-        <p className="text-gray-600 mb-8">
-          {hasExistingReview ? "You've already left a review for this course. You can update it anytime!" : 'Help us improve by sharing your learning experience. Your feedback is valuable!'}
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button onClick={() => onShowReviewForm(true)} className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-[#030F35] to-[#0A2463] text-white font-semibold rounded-xl hover:shadow-lg transition-all">
-            {hasExistingReview ? <><Edit3 size={20} />Edit Review</> : <><MessageSquare size={20} />Leave a Review</>}
-          </button>
-          <Link to={`/lms/${courseSlug}`} className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors">Back to Course</Link>
-        </div>
-      </div>
+      <CourseCompletionPrompt courseSlug={courseSlug} hasExistingReview={hasExistingReview} onShowReviewForm={onShowReviewForm} />
     ) : showReviewForm ? (
       <div className="max-w-2xl mx-auto w-full">
         <CourseReviewForm
           courseId={course?.id || ''} courseSlug={courseSlug || ''} courseTitle={course?.title || ''}
           mode={hasExistingReview ? 'edit' : 'create'} existingReview={existingUserReview}
           isSubmitting={hasExistingReview ? updateReviewMutation.isPending : createReviewMutation.isPending}
-          onSubmit={async (input: any) => {
-            if (hasExistingReview && existingUserReview) {
-              await updateReviewMutation.mutateAsync({ reviewId: existingUserReview.id, input });
-            } else {
-              await createReviewMutation.mutateAsync(input);
-            }
-            onReviewSubmitted(true);
-            onShowReviewForm(false);
-          }}
+          onSubmit={(input) => handleReviewSubmit(input, hasExistingReview, existingUserReview, updateReviewMutation, createReviewMutation, onReviewSubmitted, onShowReviewForm)}
           onSkip={() => { onShowReviewForm(false); navigate(`/lms/${courseSlug}`); }}
         />
       </div>
     ) : (
-      <div className="text-center max-w-lg mx-auto">
-        <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-blue-600" />
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">{hasExistingReview ? 'Review Updated!' : 'Thank You for Your Feedback!'}</h2>
-        <p className="text-gray-600 mb-8">{hasExistingReview ? 'Your review has been successfully updated.' : 'Your review helps us improve courses for future learners.'}</p>
-        <Link to={`/lms/${courseSlug}`} className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-[#030F35] to-[#0A2463] text-white font-semibold rounded-xl hover:shadow-lg transition-all">
-          Back to Course
-        </Link>
-      </div>
+      <CourseReviewConfirmed courseSlug={courseSlug} hasExistingReview={hasExistingReview} />
     )}
   </div>
 );

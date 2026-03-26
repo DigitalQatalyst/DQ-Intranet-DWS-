@@ -23,6 +23,12 @@ interface EpisodeListItemProps {
   onHover: (episodeId: string | null) => void;
 }
 
+function getItemHoverClass(isHovered: boolean, hoveredEpisode: string | null, episodeId: string): string {
+  if (isHovered) return 'scale-[1.02] bg-white shadow-lg border-gray-200 rounded-lg relative';
+  if (hoveredEpisode && hoveredEpisode !== episodeId) return 'opacity-50';
+  return '';
+}
+
 export const EpisodeListItem: React.FC<EpisodeListItemProps> = ({
   episode, episodeNumber, isCurrentlyPlaying, isPlaying, isExpanded, isHovered,
   hoveredEpisode, savedEpisodes, shareSuccess, episodeDurations,
@@ -35,7 +41,7 @@ export const EpisodeListItem: React.FC<EpisodeListItemProps> = ({
     style={{ zIndex: isHovered ? 50 : 1 }}
     className={`group flex items-center gap-4 border-b border-gray-100 py-3 px-2 transition-all duration-300
       ${isCurrentlyPlaying ? 'bg-[#0f2055]/5' : ''}
-      ${isHovered ? 'scale-[1.02] bg-white shadow-lg border-gray-200 rounded-lg relative' : hoveredEpisode && hoveredEpisode !== episode.id ? 'opacity-50' : ''}`}
+      ${getItemHoverClass(isHovered, hoveredEpisode, episode.id)}`}
   >
     <button onClick={(e) => onPlay(episode, e)} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition hover:scale-110">
       {isCurrentlyPlaying && isPlaying
