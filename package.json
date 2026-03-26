@@ -139,5 +139,8 @@
   "overrides": {
     "react-leaflet": "4.2.1",
     "leaflet": "1.9.4"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.28.1"
   }
 }
