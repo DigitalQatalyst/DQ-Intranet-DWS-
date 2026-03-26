@@ -1161,154 +1161,190 @@ const TakeActionGridLayout = ({
   const [activeIndex, setActiveIndex] = useState(0);
   const activeCard = cards[activeIndex] ?? cards[0];
 
+  const stepBg = ['bg-[#fff4f2]', 'bg-[#f0f4ff]', 'bg-[#f8f9fa]'];
+  const badgeBg = ['bg-[#fe6a4d]', 'bg-[#4f46e5]', 'bg-[#9ca3af]'];
+
   return (
     <section ref={refEl} className="relative py-24 bg-white">
-      <div className="container mx-auto px-4 md:px-6 lg:px-10">
-        <div className="mx-auto w-full max-w-6xl">
-          {/* Header */}
-          <motion.div
-            className="max-w-3xl mb-10"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-[#fe6a4d]/10 border border-[#fe6a4d]/30 text-[#fe6a4d] shadow-sm">
-              TAKE ACTION
-            </span>
-            <h2
-              className="ghc-font-display text-4xl md:text-5xl font-semibold text-[#131e42] mt-4 leading-[1.05]"
-              style={titleFontSize ? { fontSize: titleFontSize } : undefined}
-            >
-              {title}
-            </h2>
-            <p
-              className="text-[#4a5678] mt-3 text-lg leading-snug"
-              style={subtitleFontSize ? { fontSize: subtitleFontSize } : undefined}
-            >
-              {subtitle}
-            </p>
-          </motion.div>
+      <div className="container mx-auto px-4 md:px-6 lg:px-10 max-w-6xl">
 
-          {/* Split layout */}
-          <motion.div
-            className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-8 lg:gap-12 items-start"
-            initial={{ opacity: 0, y: 24 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.15 }}
+        {/* Header */}
+        <motion.div
+          className="text-center mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-[#fe6a4d]/10 border border-[#fe6a4d]/30 text-[#fe6a4d] mb-4">
+            TAKE ACTION
+          </span>
+          <h2
+            className="ghc-font-display font-semibold text-[#131e42] leading-tight"
+            style={{ fontSize: titleFontSize ?? '36px' }}
           >
-            {/* Left — step list */}
-            <ol className="flex flex-col gap-3" aria-label="Steps">
+            {title}
+          </h2>
+          <p className="text-[#4a5678] mt-3 text-lg max-w-2xl mx-auto" style={{ fontSize: subtitleFontSize }}>
+            {subtitle}
+          </p>
+        </motion.div>
+
+        {/* Two-column split */}
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-[35%_65%] gap-6"
+          initial={{ opacity: 0, y: 24 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          {/* LEFT — Journey Steps */}
+          <div className="bg-white rounded-2xl border border-[#e5e7eb] shadow-sm overflow-hidden">
+            {/* Card header */}
+            <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9ca3af]">JOURNEY STEP</span>
+                <span className="text-[10px] font-semibold text-[#6b7390]">{activeIndex + 1} of {cards.length}</span>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-[#fe6a4d]/10 text-[#fe6a4d] text-[10px] font-bold uppercase tracking-[0.15em]">
+                THREE-STEP PATH
+              </span>
+            </div>
+
+            {/* Steps */}
+            <div className="p-4 flex flex-col gap-3">
               {cards.map((card, i) => {
                 const isActive = i === activeIndex;
                 return (
-                  <li key={card.title}>
+                  <button
+                    key={card.title}
+                    type="button"
+                    onClick={() => setActiveIndex(i)}
+                    className={`w-full text-left rounded-xl p-4 transition-all duration-200 border ${
+                      isActive
+                        ? `${stepBg[i]} border-[#fe6a4d]/30 shadow-sm`
+                        : 'bg-[#fafafa] border-[#f0f0f0] hover:border-[#e0e0e0]'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      {/* Number badge */}
+                      <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${badgeBg[i]}`}>
+                        {i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        {/* Title row */}
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <card.icon className="h-4 w-4 flex-shrink-0" style={{ color: card.iconColor }} />
+                          <span className="text-sm font-bold text-[#131e42]">{card.title}</span>
+                        </div>
+                        {/* Description */}
+                        <p className="text-xs text-[#6b7390] leading-snug mb-2">{card.description}</p>
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {card.tags.map((tag) => (
+                            <span key={tag} className="px-2 py-0.5 rounded-full bg-white border border-[#e5e7eb] text-[10px] text-[#6b7390] font-medium">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        {/* CTA */}
+                        <span
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#fe6a4d]"
+                          onClick={(e) => { e.stopPropagation(); handleNavigate(card.path); }}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => e.key === 'Enter' && handleNavigate(card.path)}
+                        >
+                          {card.cta} <ArrowRight className="h-3 w-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RIGHT — Visual Journey */}
+          <div className="bg-white rounded-2xl border border-[#e5e7eb] shadow-sm overflow-hidden flex flex-col">
+            {/* Card header */}
+            <div className="px-6 py-4 border-b border-[#f0f0f0]">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9ca3af]">VISUAL JOURNEY</span>
+              <h3 className="text-lg font-bold text-[#131e42] mt-1">How the three elements work together</h3>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#fe6a4d] mt-1">
+                PRACTICE → KNOWLEDGE → STORY
+              </p>
+            </div>
+
+            {/* Cascading cards diagram */}
+            <div className="px-6 pt-6 pb-4">
+              <div className="relative h-44">
+                {[...cards].reverse().map((card, ri) => {
+                  const i = cards.length - 1 - ri;
+                  const isActive = i === activeIndex;
+                  const offsets = [0, 16, 32];
+                  const offset = offsets[ri] ?? 0;
+                  return (
                     <button
+                      key={card.title}
                       type="button"
                       onClick={() => setActiveIndex(i)}
-                      className={`w-full text-left rounded-xl border px-5 py-4 transition-all duration-200 ${
+                      className={`absolute left-0 right-0 rounded-xl border p-4 transition-all duration-300 text-left ${
                         isActive
-                          ? 'bg-white border-[#fe6a4d]/40 shadow-md'
-                          : 'bg-[#f9fafb] border-[#e5e7eb] hover:bg-white hover:border-[#fe6a4d]/20 hover:shadow-sm'
+                          ? `${stepBg[i]} border-[#fe6a4d]/40 shadow-md z-30`
+                          : 'bg-white border-[#e5e7eb] shadow-sm hover:shadow-md'
                       }`}
+                      style={{ top: `${offset}px`, zIndex: isActive ? 30 : 10 - ri }}
                     >
-                      <div className="flex items-start gap-4">
-                        {/* Number badge */}
-                        <span
-                          className={`mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                            isActive ? 'bg-[#fe6a4d] text-white' : 'bg-[#f0f0f0] text-[#6b7390]'
-                          }`}
-                        >
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <card.icon className="h-4 w-4 flex-shrink-0" style={{ color: isActive ? '#fe6a4d' : '#9ca3af' }} />
-                            <span className="text-base font-semibold text-[#131e42]">{card.title}</span>
-                          </div>
-                          <p className="text-sm text-[#6b7390] leading-snug line-clamp-2">{card.description}</p>
-                          {isActive && (
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); handleNavigate(card.path); }}
-                              className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#fe6a4d] hover:underline"
-                            >
-                              {card.cta} <ArrowRight className="h-3.5 w-3.5" />
-                            </button>
-                          )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${card.iconColor}20` }}>
+                          <card.icon className="h-4 w-4" style={{ color: card.iconColor }} />
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: card.iconColor }}>{card.badge}</p>
+                          <p className="text-sm font-bold text-[#131e42]">{card.title}</p>
+                        </div>
+                        <div className="ml-auto flex gap-1">
+                          {card.tags.slice(0, 2).map((tag) => (
+                            <span key={tag} className="px-2 py-0.5 rounded-full bg-white border border-[#e5e7eb] text-[9px] text-[#6b7390]">{tag}</span>
+                          ))}
                         </div>
                       </div>
                     </button>
-                  </li>
-                );
-              })}
-            </ol>
-
-            {/* Right — visual diagram */}
-            <div className={`rounded-2xl border border-[#e5e7eb] overflow-hidden shadow-sm ${activeCard.bg} min-h-[380px] flex flex-col`}>
-              {/* Top accent bar */}
-              <div className="h-1.5 w-full" style={{ backgroundColor: activeCard.iconColor }} />
-
-              <div className="flex-1 p-8 flex flex-col">
-                {/* Step indicator */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                    <activeCard.icon className="h-6 w-6" style={{ color: activeCard.iconColor }} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: activeCard.iconColor }}>
-                      {activeCard.badge}
-                    </p>
-                    <h3 className="text-xl font-bold text-[#131e42]">{activeCard.title}</h3>
-                  </div>
-                </div>
-
-                <p className="text-[#4a5678] leading-relaxed mb-6">{activeCard.description}</p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-8">
-                  {activeCard.tags.map((tag) => (
-                    <span key={tag} className="px-3 py-1 rounded-full bg-white/80 text-[#4a5678] text-xs font-medium border border-white/60">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Journey diagram */}
-                <div className="mt-auto flex items-center justify-center gap-2">
-                  {cards.map((c, i) => (
-                    <React.Fragment key={c.title}>
-                      <button
-                        type="button"
-                        onClick={() => setActiveIndex(i)}
-                        className={`flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg transition-all ${
-                          i === activeIndex ? 'bg-white shadow-sm scale-105' : 'opacity-50 hover:opacity-75'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: i === activeIndex ? c.iconColor : '#e5e7eb' }}>
-                          <c.icon className="h-4 w-4" style={{ color: i === activeIndex ? 'white' : '#9ca3af' }} />
-                        </div>
-                        <span className="text-[10px] font-semibold text-[#131e42] whitespace-nowrap">{c.title}</span>
-                      </button>
-                      {i < cards.length - 1 && (
-                        <ArrowRight className="h-4 w-4 text-[#fe6a4d] flex-shrink-0" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-
-                {/* CTA */}
-                <button
-                  type="button"
-                  onClick={() => handleNavigate(activeCard.path)}
-                  className="mt-6 w-full inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg px-4 py-3 bg-[#fe6a4d] text-white hover:bg-[#e85d42] transition-colors shadow-sm"
-                >
-                  {activeCard.cta}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
+                  );
+                })}
               </div>
             </div>
-          </motion.div>
-        </div>
+
+            {/* Selected step detail */}
+            <div className="mx-6 mb-6 rounded-xl border border-[#fe6a4d]/20 bg-[#fff9f8] p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#9ca3af] mb-3">SELECTED STEP</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-[#fe6a4d]/20">
+                  <activeCard.icon className="h-5 w-5" style={{ color: activeCard.iconColor }} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: activeCard.iconColor }}>{activeCard.badge}</p>
+                  <p className="text-base font-bold text-[#131e42]">{activeCard.title}</p>
+                </div>
+              </div>
+              <p className="text-sm text-[#4a5678] leading-relaxed mb-3">{activeCard.description}</p>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {activeCard.tags.map((tag) => (
+                  <span key={tag} className="px-2.5 py-1 rounded-full bg-white border border-[#e5e7eb] text-[11px] text-[#6b7390] font-medium">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => handleNavigate(activeCard.path)}
+                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg px-4 py-2.5 bg-[#fe6a4d] text-white hover:bg-[#e85d42] transition-colors shadow-sm"
+              >
+                {activeCard.cta}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
