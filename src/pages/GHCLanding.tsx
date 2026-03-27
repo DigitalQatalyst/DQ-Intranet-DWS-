@@ -1175,35 +1175,95 @@ const TakeActionGridLayout = ({
   subtitleFontSize?: string;
   handleNavigate: (path: string) => void;
 }) => {
-  const [hoveredCard, setHoveredCard] = React.useState<string | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
-  const gradients: Record<string, string> = {
-    'Storybooks': 'linear-gradient(135deg, #E8573A, #F4845F)',
-    'Learning Center': 'linear-gradient(135deg, #E8573A, #FF8A65)',
-    'Knowledge Center': 'linear-gradient(135deg, #C62828, #E8573A)',
-    'Viva Engage': 'linear-gradient(135deg, #B71C1C, #D84315)',
-  };
-
-  const glowColors: Record<string, string> = {
-    'Storybooks': 'rgba(232,87,58,0.18)',
-    'Learning Center': 'rgba(232,87,58,0.18)',
-    'Knowledge Center': 'rgba(198,40,40,0.18)',
-    'Viva Engage': 'rgba(183,28,28,0.18)',
-  };
+  const cardData = [
+    {
+      id: 'storybooks',
+      title: 'Storybooks',
+      label: 'STORYBOOKS',
+      icon: BookOpen,
+      gradientFrom: '#E8573A',
+      gradientTo: '#F4845F',
+      glowColor: 'rgba(232,87,58,0.15)',
+      accent: '#E8573A',
+      tags: ['Leadership', 'Practices', 'Culture'],
+      description: cards[0]?.description ?? '',
+      cta: 'Read the story',
+      path: cards[0]?.path ?? '',
+    },
+    {
+      id: 'learning',
+      title: 'Learning Center',
+      label: 'LEARNING',
+      icon: GraduationCap,
+      gradientFrom: '#E8573A',
+      gradientTo: '#FF8A65',
+      glowColor: 'rgba(255,138,101,0.15)',
+      accent: '#E8573A',
+      tags: ['Facilitation', 'Problem', 'Paths'],
+      description: cards[1]?.description ?? '',
+      cta: 'Start learning',
+      path: cards[1]?.path ?? '',
+    },
+    {
+      id: 'knowledge',
+      title: 'Knowledge Center',
+      label: 'ADVANCED',
+      icon: FileText,
+      gradientFrom: '#C62828',
+      gradientTo: '#E8573A',
+      glowColor: 'rgba(198,40,40,0.15)',
+      accent: '#C62828',
+      tags: ['Maps', 'Guardrails', 'References'],
+      description: cards[2]?.description ?? '',
+      cta: 'Find what you need',
+      path: cards[2]?.path ?? '',
+    },
+    {
+      id: 'viva',
+      title: 'Viva Engage',
+      label: 'COMMUNITY',
+      icon: Users,
+      gradientFrom: '#B71C1C',
+      gradientTo: '#D84315',
+      glowColor: 'rgba(183,28,28,0.15)',
+      accent: '#B71C1C',
+      tags: ['Conversations', 'Collaboration', 'Community'],
+      description: cards[3]?.description ?? '',
+      cta: 'Join the conversation',
+      path: cards[3]?.path ?? '',
+    },
+  ];
 
   return (
     <section
       ref={refEl}
-      className="py-16 md:py-20 relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, #fff8f6 50%, #ffffff 100%)',
-      }}
+      className="relative w-full overflow-hidden py-20 px-4 bg-gradient-to-b from-white via-[#fffaf9] to-white"
     >
-      {/* Decorative blurred circles */}
-      <div className="absolute top-10 left-1/4 w-64 h-64 rounded-full opacity-20 blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, #E8573A, transparent)' }} />
-      <div className="absolute bottom-10 right-1/4 w-48 h-48 rounded-full opacity-15 blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, #C62828, transparent)' }} />
+      {/* Background decorations */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 400, height: 400,
+          top: '-10%', left: '-10%',
+          background: '#E8573A',
+          opacity: 0.03,
+          filter: 'blur(100px)',
+        }}
+      />
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 400, height: 400,
+          bottom: '-10%', right: '-5%',
+          background: '#C62828',
+          opacity: 0.02,
+          filter: 'blur(100px)',
+        }}
+      />
 
-      <div className="container mx-auto px-4 md:px-6 lg:px-10 relative z-10">
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
           className="text-center mb-12"
@@ -1211,142 +1271,163 @@ const TakeActionGridLayout = ({
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
         >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] mb-4 text-white" style={{ background: 'linear-gradient(135deg, #E8573A, #F4845F)' }}>
+          <span className="inline-block px-3 py-1 rounded-full bg-[#E8573A]/10 text-[#E8573A] text-xs font-bold tracking-widest uppercase border border-[#E8573A]/20 mb-4">
             TAKE ACTION
           </span>
           <h2
-            className="ghc-font-display font-bold text-[#131e42] mb-3"
-            style={{ fontSize: titleFontSize ?? '36px' }}
+            className="font-extrabold text-[#1a1a2e] mb-3 tracking-tight text-3xl md:text-4xl"
+            style={{ fontSize: titleFontSize }}
           >
             {title}
           </h2>
           <p
-            className="text-[#4a5678] max-w-2xl mx-auto"
-            style={{ fontSize: subtitleFontSize ?? '18px' }}
+            className="text-gray-500 max-w-xl mx-auto text-base leading-relaxed"
+            style={{ fontSize: subtitleFontSize }}
           >
             {subtitle}
           </p>
         </motion.div>
 
-        {/* 2×2 Card Grid */}
+        {/* 2×2 Grid */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
         >
-          {cards.map((card) => {
-            const isHovered = hoveredCard === card.title;
-            const glow = glowColors[card.title] ?? 'rgba(232,87,58,0.15)';
-            const grad = gradients[card.title] ?? 'linear-gradient(135deg, #E8573A, #F4845F)';
+          {cardData.map((card) => {
+            const isHovered = hoveredCard === card.id;
+            const IconComp = card.icon;
 
             return (
-              <motion.article
-                key={card.title}
+              <motion.div
+                key={card.id}
                 variants={itemVariants}
-                className="group relative rounded-2xl bg-white border border-gray-200 overflow-hidden transition-all duration-300 cursor-pointer"
+                className="group relative rounded-2xl overflow-hidden transition-all duration-300"
                 style={{
                   boxShadow: isHovered
-                    ? `0 12px 32px ${glow}, 0 2px 8px rgba(0,0,0,0.06)`
-                    : '0 2px 12px rgba(0,0,0,0.06)',
+                    ? `0 8px 32px -8px ${card.glowColor}, 0 4px 16px -4px rgba(0,0,0,0.08)`
+                    : '0 2px 16px -4px rgba(0,0,0,0.08)',
                   transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
-                  borderColor: isHovered ? 'transparent' : undefined,
                 }}
-                onMouseEnter={() => setHoveredCard(card.title)}
+                onMouseEnter={() => setHoveredCard(card.id)}
                 onMouseLeave={() => setHoveredCard(null)}
-                onClick={() => handleNavigate(card.path)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleNavigate(card.path); }}
-                aria-label={`${card.title} - ${card.cta}`}
               >
-                {/* Gradient border wash on hover */}
-                {isHovered && (
-                  <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ background: `linear-gradient(135deg, ${glow}, transparent 60%)` }} />
-                )}
-
-                {/* Top accent bar */}
-                <div className="h-1 w-full" style={{ background: grad }} />
-
-                {/* Accent radial glow top-right */}
+                {/* Gradient border overlay */}
                 <div
-                  className="absolute top-0 right-0 w-24 h-24 rounded-bl-full pointer-events-none transition-opacity duration-300"
+                  className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300 z-0"
                   style={{
-                    background: `radial-gradient(circle at top right, ${glow}, transparent 70%)`,
-                    opacity: isHovered ? 1 : 0.4,
+                    opacity: isHovered ? 1 : 0,
+                    background: `linear-gradient(135deg, ${card.gradientFrom}20, transparent 40%, transparent 60%, ${card.gradientTo}15)`,
                   }}
                 />
 
-                {/* Decorative dot top-right */}
+                {/* Card inner */}
                 <div
-                  className="absolute top-3 right-3 w-2 h-2 rounded-full pointer-events-none transition-opacity duration-300"
-                  style={{ background: grad, opacity: isHovered ? 1 : 0 }}
-                />
+                  className="relative bg-white rounded-2xl border transition-colors duration-300 overflow-hidden"
+                  style={{ borderColor: isHovered ? 'transparent' : '#f3f4f6' }}
+                >
+                  {/* Gradient top bar */}
+                  <div
+                    className="h-1 w-full"
+                    style={{ background: `linear-gradient(90deg, ${card.gradientFrom}, ${card.gradientTo})` }}
+                  />
 
-                <div className="relative p-6 flex flex-col h-full">
-                  {/* Icon + label row */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="relative flex-shrink-0">
-                      {/* Glow ring behind icon */}
-                      {isHovered && (
-                        <div className="absolute inset-0 rounded-xl blur-md pointer-events-none" style={{ background: grad, opacity: 0.35 }} />
-                      )}
-                      <div
-                        className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-300"
-                        style={{
-                          background: grad,
-                          transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-                        }}
-                      >
-                        <card.icon className="h-5 w-5 text-white" />
+                  {/* Inner gradient wash top-right */}
+                  <div
+                    className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none transition-opacity duration-300"
+                    style={{
+                      background: card.accent,
+                      opacity: isHovered ? 0.08 : 0.04,
+                    }}
+                  />
+
+                  {/* Corner dot */}
+                  <div
+                    className="absolute top-4 right-4 w-2 h-2 rounded-full pointer-events-none transition-opacity duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${card.gradientFrom}, ${card.gradientTo})`,
+                      opacity: isHovered ? 0.5 : 0.2,
+                    }}
+                  />
+
+                  {/* Card body */}
+                  <div className="relative p-5 md:p-6 flex flex-col">
+                    {/* Icon + label row */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="relative flex-shrink-0">
+                        {/* Glow behind icon */}
+                        <div
+                          className="absolute inset-0 rounded-xl blur-md pointer-events-none transition-opacity duration-300"
+                          style={{
+                            background: `linear-gradient(135deg, ${card.gradientFrom}, ${card.gradientTo})`,
+                            opacity: isHovered ? 0.4 : 0,
+                          }}
+                        />
+                        <div
+                          className="relative w-10 h-10 rounded-xl flex items-center justify-center ring-2 ring-white transition-transform duration-300"
+                          style={{
+                            background: `linear-gradient(135deg, ${card.gradientFrom}, ${card.gradientTo})`,
+                            transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                          }}
+                        >
+                          <IconComp className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                      <div>
+                        <p
+                          className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1"
+                          style={{ color: `${card.accent}b3` }}
+                        >
+                          {card.label}
+                        </p>
+                        <h3 className="text-lg font-bold text-[#1a1a2e] leading-tight">
+                          {card.title}
+                        </h3>
                       </div>
                     </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: card.iconColor }}>
-                        {card.badge}
-                      </p>
-                      <h3 className="ghc-font-display text-base font-bold text-[#131e42] leading-tight">
-                        {card.title}
-                      </h3>
+
+                    {/* Description */}
+                    <p className="text-gray-500 text-[13px] mb-4 leading-relaxed">
+                      {card.description}
+                    </p>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1.5 mb-5">
+                      {card.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-gray-600"
+                          style={{
+                            backgroundColor: `${card.accent}08`,
+                            border: `1px solid ${card.accent}15`,
+                          }}
+                        >
+                          <span
+                            className="w-1 h-1 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: card.accent }}
+                          />
+                          {tag}
+                        </span>
+                      ))}
                     </div>
-                  </div>
 
-                  {/* Description */}
-                  <p className="text-[13px] text-gray-500 leading-relaxed mb-4">
-                    {card.description}
-                  </p>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-1.5 mb-5">
-                    {card.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium"
-                        style={{
-                          backgroundColor: `${glow.replace('0.18', '0.08')}`,
-                          color: card.iconColor,
-                        }}
-                      >
-                        <span className="w-1 h-1 rounded-full" style={{ backgroundColor: card.iconColor }} />
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* CTA */}
-                  <div className="mt-auto">
+                    {/* CTA */}
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); handleNavigate(card.path); }}
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:bg-gray-50"
-                      style={{ color: card.iconColor }}
+                      onClick={() => handleNavigate(card.path)}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 -ml-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 mt-auto"
+                      style={{ color: card.accent }}
                     >
                       {card.cta}
-                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                      <ArrowRight
+                        className="w-3.5 h-3.5 transition-transform duration-300"
+                        style={{ transform: isHovered ? 'translateX(6px)' : 'translateX(0)' }}
+                      />
                     </button>
                   </div>
                 </div>
-              </motion.article>
+              </motion.div>
             );
           })}
         </motion.div>
