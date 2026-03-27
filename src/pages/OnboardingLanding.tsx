@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, User, MessageCircle, BookOpen, Users as UsersIcon, ChevronDown } from 'lucide-react';
+import { ArrowRight, User, MessageCircle, BookOpen, Users as UsersIcon, ChevronDown, Hexagon } from 'lucide-react';
 import { FadeInUpOnScroll, StaggeredFadeIn } from '../components/AnimationUtils';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -50,6 +50,52 @@ const supportOptions: SupportCard[] = [
 
 const HeroAnimatedBackground = () => (
   <>
+    {/* Keyframes */}
+    <style>{`
+      @keyframes float1 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(40px, -30px) rotate(8deg); }
+        50% { transform: translate(-15px, -50px) rotate(-4deg); }
+        75% { transform: translate(-35px, -15px) rotate(6deg); }
+      }
+      @keyframes float2 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(-25px, 30px) rotate(-8deg); }
+        50% { transform: translate(20px, 45px) rotate(4deg); }
+        75% { transform: translate(30px, 12px) rotate(-5deg); }
+      }
+      @keyframes float3 {
+        0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        33% { transform: translate(25px, -35px) scale(1.1) rotate(10deg); }
+        66% { transform: translate(-20px, -20px) scale(0.95) rotate(-5deg); }
+      }
+      @keyframes pulseGlow {
+        0%, 100% { opacity: 0.15; transform: scale(1); }
+        50% { opacity: 0.25; transform: scale(1.15); }
+      }
+      @keyframes pulseGlow2 {
+        0%, 100% { opacity: 0.1; transform: scale(1); }
+        50% { opacity: 0.2; transform: scale(1.2); }
+      }
+      @keyframes driftDots {
+        0% { background-position: 0px 0px; }
+        100% { background-position: 40px 40px; }
+      }
+      @keyframes crackGlow {
+        0%, 100% { opacity: 0.06; }
+        50% { opacity: 0.15; }
+      }
+      @keyframes ringPulse {
+        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
+        50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+        100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
+      }
+      @keyframes shimmer {
+        0% { transform: translateX(-100%) rotate(25deg); }
+        100% { transform: translateX(200%) rotate(25deg); }
+      }
+    `}</style>
+
     {/* Base gradient */}
     <div
       className="absolute inset-0 z-0"
@@ -58,110 +104,122 @@ const HeroAnimatedBackground = () => (
       }}
     />
 
-    {/* Top edge accent */}
-    <div className="absolute top-0 left-0 right-0 h-px z-10 bg-gradient-to-r from-transparent via-[#E8573A]/20 to-transparent" />
-    {/* Bottom edge accent */}
-    <div className="absolute bottom-0 left-0 right-0 h-px z-10 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-    {/* Animated dot grid */}
+    {/* Dot grid overlay */}
     <div
       className="absolute inset-0 pointer-events-none z-[1]"
       style={{
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,1) 1px, transparent 1px)',
+        backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
         backgroundSize: '40px 40px',
         opacity: 0.04,
-        animation: 'obDotDrift 8s linear infinite',
+        animation: 'driftDots 8s linear infinite',
       }}
     />
 
-    {/* Glow orbs */}
-    <div className="absolute pointer-events-none rounded-full z-[1]"
-      style={{ width: 500, height: 500, top: '-10%', left: '-10%', background: '#3D2054', filter: 'blur(120px)', animation: 'obGlow1 6s ease-in-out infinite' }} />
-    <div className="absolute pointer-events-none rounded-full z-[1]"
-      style={{ width: 600, height: 600, bottom: 0, right: 0, background: '#E8573A', filter: 'blur(150px)', transform: 'translate(25%, 25%)', animation: 'obGlow2 8s ease-in-out infinite' }} />
-    <div className="absolute pointer-events-none rounded-full z-[1]"
-      style={{ width: 400, height: 400, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#8B4455', opacity: 0.2, filter: 'blur(100px)', animation: 'obGlow3 10s ease-in-out 2s infinite' }} />
+    {/* Glow orb 1 — top-left purple */}
+    <div
+      className="absolute pointer-events-none rounded-full z-[1]"
+      style={{
+        width: 500, height: 500,
+        top: 0, left: 0,
+        background: '#3D2054',
+        filter: 'blur(120px)',
+        animation: 'pulseGlow 6s ease-in-out infinite',
+      }}
+    />
+
+    {/* Glow orb 2 — bottom-right coral */}
+    <div
+      className="absolute pointer-events-none rounded-full z-[1]"
+      style={{
+        width: 600, height: 600,
+        bottom: 0, right: 0,
+        background: '#E8573A',
+        filter: 'blur(150px)',
+        animation: 'pulseGlow2 8s ease-in-out infinite',
+      }}
+    />
+
+    {/* Glow orb 3 — center mauve */}
+    <div
+      className="absolute pointer-events-none rounded-full z-[1]"
+      style={{
+        width: 400, height: 400,
+        top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        background: 'rgba(139,68,85,0.2)',
+        filter: 'blur(100px)',
+        animation: 'pulseGlow 10s ease-in-out infinite 2s',
+      }}
+    />
+
+    {/* Ring pulse */}
+    <div
+      className="absolute pointer-events-none z-[1]"
+      style={{
+        width: 300, height: 300,
+        top: '45%', left: '50%',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '50%',
+        animation: 'ringPulse 5s ease-in-out infinite',
+      }}
+    />
+
+    {/* Crack line 1 */}
+    <div
+      className="absolute pointer-events-none z-[1]"
+      style={{
+        width: 200, height: 1,
+        top: '30%', left: '15%',
+        background: 'linear-gradient(90deg, transparent, #E8573A, transparent)',
+        transform: 'rotate(-25deg)',
+        animation: 'crackGlow 4s ease-in-out infinite',
+      }}
+    />
+
+    {/* Crack line 2 */}
+    <div
+      className="absolute pointer-events-none z-[1]"
+      style={{
+        width: 160, height: 1,
+        top: '55%', right: '12%',
+        background: 'linear-gradient(90deg, transparent, #E8573A, transparent)',
+        transform: 'rotate(30deg)',
+        animation: 'crackGlow 5s ease-in-out infinite 1.5s',
+      }}
+    />
 
     {/* Floating hexagons */}
-    <div className="absolute top-8 right-12 pointer-events-none z-[2]" style={{ animation: 'obHex1 12s ease-in-out infinite' }}>
-      <svg viewBox="0 0 24 24" className="w-16 h-16 text-white" style={{ opacity: 0.04 }} fill="none" stroke="currentColor" strokeWidth="2">
-        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
-      </svg>
+    <div className="absolute pointer-events-none z-[2]" style={{ top: '8%', right: '8%', animation: 'float1 12s ease-in-out infinite 0s' }}>
+      <Hexagon className="w-16 h-16 text-white" style={{ opacity: 0.04 }} />
     </div>
-    <div className="absolute bottom-10 left-10 pointer-events-none z-[2]" style={{ animation: 'obHex2 15s ease-in-out infinite' }}>
-      <svg viewBox="0 0 24 24" className="w-20 h-20 text-white" style={{ opacity: 0.03 }} fill="none" stroke="currentColor" strokeWidth="2">
-        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
-      </svg>
+    <div className="absolute pointer-events-none z-[2]" style={{ bottom: '10%', left: '6%', animation: 'float2 15s ease-in-out infinite 1s' }}>
+      <Hexagon className="w-20 h-20 text-white" style={{ opacity: 0.03 }} />
     </div>
-    <div className="absolute top-1/2 right-1/4 pointer-events-none z-[2]" style={{ animation: 'obHex3 10s ease-in-out 1s infinite' }}>
-      <svg viewBox="0 0 24 24" className="w-10 h-10 text-white" style={{ opacity: 0.03 }} fill="none" stroke="currentColor" strokeWidth="2">
-        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
-      </svg>
+    <div className="absolute pointer-events-none z-[2]" style={{ top: '45%', right: '22%', animation: 'float3 13s ease-in-out infinite 2s' }}>
+      <Hexagon className="w-10 h-10 text-white" style={{ opacity: 0.03 }} />
     </div>
-    <div className="absolute top-12 left-16 pointer-events-none z-[2]" style={{ animation: 'obHex4 14s ease-in-out 3s infinite' }}>
-      <svg viewBox="0 0 24 24" className="w-8 h-8" style={{ opacity: 0.05, color: '#E8573A' }} fill="none" stroke="currentColor" strokeWidth="2">
-        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
-      </svg>
+    <div className="absolute pointer-events-none z-[2]" style={{ top: '12%', left: '14%', animation: 'float1 14s ease-in-out infinite 3s' }}>
+      <Hexagon className="w-8 h-8" style={{ opacity: 0.05, color: '#E8573A' }} />
     </div>
-    <div className="absolute bottom-8 right-20 pointer-events-none z-[2]" style={{ animation: 'obHex5 11s ease-in-out 2s infinite' }}>
-      <svg viewBox="0 0 24 24" className="w-12 h-12 text-white" style={{ opacity: 0.02 }} fill="none" stroke="currentColor" strokeWidth="2">
-        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
-      </svg>
+    <div className="absolute pointer-events-none z-[2]" style={{ bottom: '8%', right: '18%', animation: 'float2 11s ease-in-out infinite 5s' }}>
+      <Hexagon className="w-12 h-12 text-white" style={{ opacity: 0.02 }} />
     </div>
 
-    {/* Card shimmer overlay */}
+    {/* Card shimmer */}
     <div
-      className="absolute inset-0 pointer-events-none z-[2]"
-      style={{
-        background: 'linear-gradient(25deg, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%)',
-        backgroundSize: '200% 100%',
-        animation: 'obShimmer 6s ease-in-out infinite',
-      }}
-    />
-
-    {/* Keyframes */}
-    <style>{`
-      @keyframes obDotDrift {
-        0% { background-position: 0 0; }
-        100% { background-position: 40px 40px; }
-      }
-      @keyframes obGlow1 {
-        0%, 100% { opacity: 0.15; transform: scale(1); }
-        50% { opacity: 0.25; transform: scale(1.15); }
-      }
-      @keyframes obGlow2 {
-        0%, 100% { opacity: 0.10; transform: translate(25%, 25%) scale(1); }
-        50% { opacity: 0.20; transform: translate(25%, 25%) scale(1.2); }
-      }
-      @keyframes obGlow3 {
-        0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
-        50% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.15); }
-      }
-      @keyframes obHex1 {
-        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-        50% { transform: translate(20px, -30px) rotate(6deg); }
-      }
-      @keyframes obHex2 {
-        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-        50% { transform: translate(-25px, 40px) rotate(-6deg); }
-      }
-      @keyframes obHex3 {
-        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-        50% { transform: translate(30px, -20px) rotate(5deg); }
-      }
-      @keyframes obHex4 {
-        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-        50% { transform: translate(-20px, 35px) rotate(-5deg); }
-      }
-      @keyframes obHex5 {
-        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-        50% { transform: translate(25px, -25px) rotate(6deg); }
-      }
-      @keyframes obShimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-      }
-    `}</style>
+      className="absolute inset-0 pointer-events-none z-[2] overflow-hidden"
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0, bottom: 0,
+          width: '200%',
+          background: 'linear-gradient(25deg, transparent 40%, white 50%, transparent 60%)',
+          opacity: 0.03,
+          animation: 'shimmer 6s ease-in-out infinite',
+        }}
+      />
+    </div>
   </>
 )
 
