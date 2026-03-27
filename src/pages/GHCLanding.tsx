@@ -1727,48 +1727,122 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden dq-gradient-animated"
+      className="relative overflow-hidden"
       style={{
-        background: 'linear-gradient(120deg, #131e42 0%, #1b2553 45%, #e1513b 100%)',
+        background: 'linear-gradient(135deg, #030F35 0%, #0A1840 30%, #3D1A30 60%, #FB5535 100%)',
       }}
     >
-      <div className="dq-digital-bg" aria-hidden="true">
-        <svg viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="dq-digital-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(240,246,255,0.6)" />
-              <stop offset="100%" stopColor="rgba(225,81,59,0.6)" />
-            </linearGradient>
-          </defs>
-          <path className="dq-digital-line" d="M-40 140 L240 90 L520 160 L820 110 L1160 170 L1480 120" />
-          <path className="dq-digital-line alt" d="M-60 260 L180 220 L520 300 L860 240 L1180 320 L1500 260" />
-          <path className="dq-digital-line" d="M-40 400 L260 360 L520 420 L820 370 L1120 430 L1460 380" />
-          <path className="dq-digital-line alt" d="M-80 520 L220 500 L520 560 L840 520 L1160 580 L1500 540" />
-          <path className="dq-digital-line" d="M120 60 L280 180 L460 80 L640 200 L820 120 L1040 220 L1240 140" />
-          <path className="dq-digital-line alt" d="M240 120 L420 260 L620 150 L840 300 L1040 190 L1260 320" />
+      {/* Top edge accent */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FB5535]/20 to-transparent" />
+      {/* Bottom edge accent */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <circle className="dq-digital-dot" cx="240" cy="90" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="520" cy="160" r="4" />
-          <circle className="dq-digital-dot" cx="820" cy="110" r="3" />
-          <circle className="dq-digital-dot alt" cx="1160" cy="170" r="4.5" />
-          <circle className="dq-digital-dot" cx="180" cy="220" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="300" r="4" />
-          <circle className="dq-digital-dot" cx="860" cy="240" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1180" cy="320" r="4" />
-          <circle className="dq-digital-dot" cx="260" cy="360" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="420" r="4" />
-          <circle className="dq-digital-dot" cx="820" cy="370" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1120" cy="430" r="4" />
-          <circle className="dq-digital-dot" cx="220" cy="500" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="560" r="4" />
-          <circle className="dq-digital-dot" cx="840" cy="520" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1160" cy="580" r="4" />
-          <circle className="dq-digital-dot" cx="420" cy="260" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="640" cy="200" r="4" />
-          <circle className="dq-digital-dot" cx="1040" cy="220" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1260" cy="320" r="4" />
-        </svg>
+      {/* Animated dot grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,1) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+          opacity: 0.04,
+          animation: 'dotGridDrift 8s linear infinite',
+        }}
+      />
+
+      {/* Glow orbs */}
+      {/* Top-left navy orb */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 500, height: 500,
+          top: '-10%', left: '-10%',
+          background: '#030F35',
+          filter: 'blur(120px)',
+          animation: 'glowPulse1 6s ease-in-out infinite',
+        }}
+      />
+      {/* Bottom-right orange orb */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 600, height: 600,
+          bottom: 0, right: 0,
+          background: '#FB5535',
+          filter: 'blur(150px)',
+          transform: 'translate(25%, 25%)',
+          animation: 'glowPulse2 8s ease-in-out infinite',
+        }}
+      />
+      {/* Center orange orb */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 400, height: 400,
+          top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: '#FB5535',
+          opacity: 0.1,
+          filter: 'blur(100px)',
+          animation: 'glowPulse3 10s ease-in-out 2s infinite',
+        }}
+      />
+
+      {/* Floating hexagons */}
+      <div className="absolute top-8 right-12 pointer-events-none" style={{ animation: 'floatHex1 12s ease-in-out infinite' }}>
+        <Hexagon className="w-16 h-16 text-white" style={{ opacity: 0.04 }} />
       </div>
+      <div className="absolute bottom-10 left-10 pointer-events-none" style={{ animation: 'floatHex2 15s ease-in-out infinite' }}>
+        <Hexagon className="w-20 h-20 text-white" style={{ opacity: 0.03 }} />
+      </div>
+      <div className="absolute top-1/2 right-1/4 pointer-events-none" style={{ animation: 'floatHex3 10s ease-in-out 1s infinite' }}>
+        <Hexagon className="w-10 h-10 text-white" style={{ opacity: 0.03 }} />
+      </div>
+      <div className="absolute top-12 left-16 pointer-events-none" style={{ animation: 'floatHex4 14s ease-in-out 3s infinite' }}>
+        <Hexagon className="w-8 h-8 text-[#FB5535]" style={{ opacity: 0.05 }} />
+      </div>
+      <div className="absolute bottom-8 right-20 pointer-events-none" style={{ animation: 'floatHex5 11s ease-in-out 2s infinite' }}>
+        <Hexagon className="w-12 h-12 text-white" style={{ opacity: 0.02 }} />
+      </div>
+
+      {/* Keyframes */}
+      <style>{`
+        @keyframes dotGridDrift {
+          0% { background-position: 0 0; }
+          100% { background-position: 40px 40px; }
+        }
+        @keyframes glowPulse1 {
+          0%, 100% { opacity: 0.15; transform: scale(1); }
+          50% { opacity: 0.25; transform: scale(1.15); }
+        }
+        @keyframes glowPulse2 {
+          0%, 100% { opacity: 0.10; transform: translate(25%, 25%) scale(1); }
+          50% { opacity: 0.20; transform: translate(25%, 25%) scale(1.2); }
+        }
+        @keyframes glowPulse3 {
+          0%, 100% { opacity: 0.08; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 0.14; transform: translate(-50%, -50%) scale(1.1); }
+        }
+        @keyframes floatHex1 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(20px, -30px) rotate(6deg); }
+        }
+        @keyframes floatHex2 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(-25px, 40px) rotate(-6deg); }
+        }
+        @keyframes floatHex3 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(30px, -20px) rotate(5deg); }
+        }
+        @keyframes floatHex4 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(-20px, 35px) rotate(-5deg); }
+        }
+        @keyframes floatHex5 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(25px, -25px) rotate(6deg); }
+        }
+      `}</style>
+
       <div className="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
         <div className="relative min-h-[420px] lg:min-h-[520px] flex items-center">
           <motion.div
@@ -1777,14 +1851,14 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-          <motion.p
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-white/15 border border-[#e1513b]/50 text-[#e1513b] backdrop-blur mb-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.15 }}
-          >
-            DQ DIGITAL WORKSPACE
-          </motion.p>
+            <motion.p
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-white/15 border border-[#FB5535]/50 text-[#FB5535] backdrop-blur mb-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.15 }}
+            >
+              DQ DIGITAL WORKSPACE
+            </motion.p>
             <motion.h2
               className="ghc-font-display font-bold text-4xl sm:text-5xl md:text-5xl lg:text-6xl leading-[1.1] text-white tracking-tight"
               initial={{ opacity: 0, y: 20 }}
@@ -1803,46 +1877,45 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
             >
               {finalSubtitle}
             </motion.p>
-
             <motion.div
               className="mt-8 flex flex-wrap gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.35 }}
             >
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  if (finalCTATo.startsWith('http')) {
-                    window.open(finalCTATo, '_blank', 'noopener,noreferrer');
-                  } else {
-                    navigate(finalCTATo);
-                  }
-                }}
-                className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg bg-white text-[#131e42] font-semibold text-base shadow-xl shadow-black/12 transition transform hover:-translate-y-0.5 hover:bg-white/95"
-              >
-                {finalCTALabel}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
-              {finalCTASecondaryLabel && finalCTASecondaryTo ? (
+              <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => {
-                    if (finalCTASecondaryTo.startsWith('http')) {
-                      window.open(finalCTASecondaryTo, '_blank', 'noopener,noreferrer');
+                    if (finalCTATo.startsWith('http')) {
+                      window.open(finalCTATo, '_blank', 'noopener,noreferrer');
                     } else {
-                      navigate(finalCTASecondaryTo);
+                      navigate(finalCTATo);
                     }
                   }}
-                  className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg border border-white/60 text-white font-semibold text-base shadow-lg shadow-black/10 transition transform hover:-translate-y-0.5 hover:bg-white/10"
+                  className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg bg-white text-[#030F35] font-semibold text-base shadow-xl shadow-black/12 transition transform hover:-translate-y-0.5 hover:bg-white/95"
                 >
-                  {finalCTASecondaryLabel}
+                  {finalCTALabel}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </button>
-              ) : null}
-            </div>
-        </motion.div>
+                {finalCTASecondaryLabel && finalCTASecondaryTo ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (finalCTASecondaryTo.startsWith('http')) {
+                        window.open(finalCTASecondaryTo, '_blank', 'noopener,noreferrer');
+                      } else {
+                        navigate(finalCTASecondaryTo);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg border border-white/60 text-white font-semibold text-base shadow-lg shadow-black/10 transition transform hover:-translate-y-0.5 hover:bg-white/10"
+                  >
+                    {finalCTASecondaryLabel}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                ) : null}
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
