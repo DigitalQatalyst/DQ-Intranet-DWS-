@@ -50,52 +50,6 @@ const supportOptions: SupportCard[] = [
 
 const HeroAnimatedBackground = () => (
   <>
-    {/* Keyframes */}
-    <style>{`
-      @keyframes float1 {
-        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-        25% { transform: translate(40px, -30px) rotate(8deg); }
-        50% { transform: translate(-15px, -50px) rotate(-4deg); }
-        75% { transform: translate(-35px, -15px) rotate(6deg); }
-      }
-      @keyframes float2 {
-        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-        25% { transform: translate(-25px, 30px) rotate(-8deg); }
-        50% { transform: translate(20px, 45px) rotate(4deg); }
-        75% { transform: translate(30px, 12px) rotate(-5deg); }
-      }
-      @keyframes float3 {
-        0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-        33% { transform: translate(25px, -35px) scale(1.1) rotate(10deg); }
-        66% { transform: translate(-20px, -20px) scale(0.95) rotate(-5deg); }
-      }
-      @keyframes pulseGlow {
-        0%, 100% { opacity: 0.15; transform: scale(1); }
-        50% { opacity: 0.25; transform: scale(1.15); }
-      }
-      @keyframes pulseGlow2 {
-        0%, 100% { opacity: 0.1; transform: scale(1); }
-        50% { opacity: 0.2; transform: scale(1.2); }
-      }
-      @keyframes driftDots {
-        0% { background-position: 0px 0px; }
-        100% { background-position: 40px 40px; }
-      }
-      @keyframes crackGlow {
-        0%, 100% { opacity: 0.06; }
-        50% { opacity: 0.15; }
-      }
-      @keyframes ringPulse {
-        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
-        50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
-        100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
-      }
-      @keyframes shimmer {
-        0% { transform: translateX(-100%) rotate(25deg); }
-        100% { transform: translateX(200%) rotate(25deg); }
-      }
-    `}</style>
-
     {/* Base gradient */}
     <div
       className="absolute inset-0 z-0"

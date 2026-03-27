@@ -655,65 +655,6 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
           <Hexagon className="w-6 h-6 text-white" style={{ opacity: 0.03 }} />
         </div>
 
-        {/* Keyframes */}
-        <style>{`
-          @keyframes sixHeroDotDrift {
-            0% { background-position: 0 0; }
-            100% { background-position: 48px 48px; }
-          }
-          @keyframes sixHeroGlow1 {
-            0%, 100% { opacity: 0.20; transform: scale(1); }
-            50% { opacity: 0.30; transform: scale(1.2); }
-          }
-          @keyframes sixHeroGlow2 {
-            0%, 100% { opacity: 0.15; transform: scale(1); }
-            50% { opacity: 0.25; transform: scale(1.15); }
-          }
-          @keyframes sixHeroGlow3 {
-            0%, 100% { opacity: 0.05; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.12; transform: translate(-50%, -50%) scale(1.1); }
-          }
-          @keyframes sixHeroRing1 {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
-            100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
-          }
-          @keyframes sixHeroRing2 {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
-            100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
-          }
-          @keyframes sixHeroFracture {
-            0%, 100% { opacity: 0.06; } 50% { opacity: 0.15; }
-          }
-          @keyframes sixHeroHex1 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(30px, -40px) rotate(8deg); }
-          }
-          @keyframes sixHeroHex2 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(-35px, 50px) rotate(-8deg); }
-          }
-          @keyframes sixHeroHex3 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(40px, -25px) rotate(6deg); }
-          }
-          @keyframes sixHeroHex4 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(-25px, 45px) rotate(-7deg); }
-          }
-          @keyframes sixHeroHex5 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(30px, -30px) rotate(8deg); }
-          }
-          @keyframes sixHeroHex6 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(-30px, 35px) rotate(-6deg); }
-          }
-          @keyframes sixHeroHex7 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(25px, -20px) rotate(5deg); }
-          }
-        `}</style>
-
         <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 text-center max-w-6xl">
           <motion.div
             className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-[#E8573A]/50 shadow-sm px-4 py-1.5 text-sm text-[#E8573A] backdrop-blur mb-6"
@@ -2106,45 +2047,6 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
       </div>
 
       {/* Keyframes */}
-      <style>{`
-        @keyframes sixFinalDotDrift {
-          0% { background-position: 0 0; }
-          100% { background-position: 40px 40px; }
-        }
-        @keyframes sixFinalGlow1 {
-          0%, 100% { opacity: 0.15; transform: scale(1); }
-          50% { opacity: 0.25; transform: scale(1.15); }
-        }
-        @keyframes sixFinalGlow2 {
-          0%, 100% { opacity: 0.10; transform: translate(25%, 25%) scale(1); }
-          50% { opacity: 0.20; transform: translate(25%, 25%) scale(1.2); }
-        }
-        @keyframes sixFinalGlow3 {
-          0%, 100% { opacity: 0.08; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 0.14; transform: translate(-50%, -50%) scale(1.1); }
-        }
-        @keyframes sixFinalHex1 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(20px, -30px) rotate(6deg); }
-        }
-        @keyframes sixFinalHex2 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(-25px, 40px) rotate(-6deg); }
-        }
-        @keyframes sixFinalHex3 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(30px, -20px) rotate(5deg); }
-        }
-        @keyframes sixFinalHex4 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(-20px, 35px) rotate(-5deg); }
-        }
-        @keyframes sixFinalHex5 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(25px, -25px) rotate(6deg); }
-        }
-      `}</style>
-
       <div className="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
         <div className="relative min-h-[420px] lg:min-h-[520px] flex items-center">
           <motion.div
