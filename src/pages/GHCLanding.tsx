@@ -703,7 +703,7 @@ function SectionWhatIsGHC({ content }: SectionWhatIsGHCProps) {
   ];
 
   return (
-    <section id="ghc-what" ref={ref} className="w-full py-24 px-4 bg-white">
+    <section id="ghc-what" ref={ref} className="w-full py-24 px-4" style={{ background: '#f0f6ff' }}>
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
         {/* Header */}
         <motion.div
