@@ -1239,7 +1239,8 @@ const TakeActionGridLayout = ({
   return (
     <section
       ref={refEl}
-      className="relative w-full overflow-hidden py-20 px-4 bg-gradient-to-b from-white via-[#fffaf9] to-white"
+      className="relative w-full overflow-hidden py-20 px-4"
+      style={{ background: '#f0f6ff' }}
     >
       {/* Background decorations */}
       <div
