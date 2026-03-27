@@ -556,7 +556,7 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) {
       <section
         className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-24 pb-16"
         style={{
-          background: 'linear-gradient(135deg, #3D2054 0%, #5D3060 20%, #8B4455 40%, #7D4050 55%, #C85A45 75%, #E8573A 100%)',
+          background: 'linear-gradient(135deg, #0E1E4A 0%, #1A2D5A 20%, #2E2545 40%, #5C3040 60%, #D4604A 80%, #FB6B4A 100%)',
         }}
       >
         {/* Top edge accent */}
