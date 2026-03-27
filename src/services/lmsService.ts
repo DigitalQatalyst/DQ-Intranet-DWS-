@@ -431,6 +431,7 @@ export async function fetchAllLearningPaths(): Promise<LmsCard[]> {
     .from('lms_learning_paths')
     .select('*')
     .neq('status', 'archived')
+    .neq('status', 'draft')
     .order('title');
 
   if (error) {

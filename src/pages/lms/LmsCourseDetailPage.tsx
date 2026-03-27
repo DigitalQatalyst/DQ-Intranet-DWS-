@@ -473,7 +473,7 @@ export const LmsCourseDetailPage: React.FC = () => {
 
       <HeroBanner
         title={course.title}
-        badge={course.courseType}
+        badge={undefined}
         description={course.summary}
         breadcrumbs={[
           { label: 'Home', href: '/' },

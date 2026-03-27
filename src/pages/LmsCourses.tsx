@@ -825,9 +825,7 @@ export const LmsCourses: React.FC = () => {
                   })}
                   {filteredItems.length === 0 && (
                     <div className="col-span-full bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-                      <p className="text-gray-600">
-                        No learning tracks found matching your filters.
-                      </p>
+                      <p className="text-gray-600 font-medium">Coming Soon</p>
                     </div>
                   )}
                 </div>
@@ -970,9 +968,7 @@ export const LmsCourses: React.FC = () => {
                   })}
                   {filteredReviews.length === 0 && (
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-                      <p className="text-gray-600">
-                        No reviews found matching your filters.
-                      </p>
+                      <p className="text-gray-600 font-medium">Coming Soon</p>
                     </div>
                   )}
                 </div>
@@ -990,6 +986,11 @@ export const LmsCourses: React.FC = () => {
                     {filteredItems.length} Courses Available
                   </h2>
                 </div>
+                {filteredItems.length === 0 && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                    <p className="text-gray-600 font-medium">Coming Soon</p>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {paginatedItems.map((item) => {
                     const Icon = ICON_BY_ID[item.id] || BookOpenCheck;
