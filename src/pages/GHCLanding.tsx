@@ -556,17 +556,138 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) {
       <section
         className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-24 pb-16"
         style={{
-          background: 'linear-gradient(135deg, #131e42 0%, #1b2553 45%, #e1513b 100%)',
+          background: 'linear-gradient(135deg, #3D2054 0%, #5D3060 20%, #8B4455 40%, #7D4050 55%, #C85A45 75%, #E8573A 100%)',
         }}
       >
-        <div className="absolute inset-0 z-0">
-          <HoneycombPattern />
+        {/* Top edge accent */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E8573A]/20 to-transparent z-10" />
+        {/* Bottom edge accent */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent z-10" />
+
+        {/* Animated dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,1) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+            opacity: 0.04,
+            animation: 'heroDotDrift 10s linear infinite',
+          }}
+        />
+
+        {/* Glow orbs */}
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 800, height: 800, top: '-20%', right: '-15%', background: '#E8573A', filter: 'blur(120px)', animation: 'heroGlow1 7s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 600, height: 600, bottom: '-15%', left: '-10%', background: '#3D2054', filter: 'blur(100px)', animation: 'heroGlow2 9s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 500, height: 500, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', background: '#8B4455', filter: 'blur(100px)', animation: 'heroGlow3 12s ease-in-out 2s infinite' }} />
+
+        {/* Expanding ring pulses */}
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 300, height: 300, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '50%', animation: 'heroRing1 5s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 500, height: 500, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', border: '1px solid rgba(232,87,58,0.10)', borderRadius: '50%', animation: 'heroRing2 7s ease-in-out 1.5s infinite' }} />
+
+        {/* Fracture lines */}
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 200, height: 1, top: '25%', left: '10%', background: 'linear-gradient(90deg, transparent, #E8573A, transparent)', transform: 'rotate(-25deg)', animation: 'heroFracture1 4s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 160, height: 1, top: '50%', right: '15%', background: 'linear-gradient(90deg, transparent, #E8573A, transparent)', transform: 'rotate(30deg)', animation: 'heroFracture2 5s ease-in-out 1.5s infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 120, height: 1, bottom: '20%', left: '45%', background: 'linear-gradient(90deg, transparent, white, transparent)', transform: 'rotate(-15deg)', animation: 'heroFracture3 6s ease-in-out 3s infinite' }} />
+
+        {/* Floating hexagons */}
+        <div className="absolute top-10 right-16 pointer-events-none z-0" style={{ animation: 'heroHex1 14s ease-in-out infinite' }}>
+          <Hexagon className="w-20 h-20 text-white" style={{ opacity: 0.04 }} />
         </div>
-        <FloatingOrbs />
+        <div className="absolute bottom-12 left-10 pointer-events-none z-0" style={{ animation: 'heroHex2 18s ease-in-out infinite' }}>
+          <Hexagon className="w-24 h-24 text-white" style={{ opacity: 0.03 }} />
+        </div>
+        <div className="absolute top-1/2 right-1/4 pointer-events-none z-0" style={{ animation: 'heroHex3 11s ease-in-out 1s infinite' }}>
+          <Hexagon className="w-12 h-12 text-white" style={{ opacity: 0.03 }} />
+        </div>
+        <div className="absolute top-16 left-20 pointer-events-none z-0" style={{ animation: 'heroHex4 16s ease-in-out 4s infinite' }}>
+          <Hexagon className="w-10 h-10 text-[#E8573A]" style={{ opacity: 0.05 }} />
+        </div>
+        <div className="absolute bottom-10 right-24 pointer-events-none z-0" style={{ animation: 'heroHex5 13s ease-in-out 2s infinite' }}>
+          <Hexagon className="w-14 h-14 text-white" style={{ opacity: 0.04 }} />
+        </div>
+        <div className="absolute top-1/2 left-12 pointer-events-none z-0" style={{ animation: 'heroHex6 15s ease-in-out 3s infinite' }}>
+          <Hexagon className="w-8 h-8 text-[#E8573A]" style={{ opacity: 0.05 }} />
+        </div>
+        <div className="absolute bottom-1/4 left-1/2 pointer-events-none z-0" style={{ animation: 'heroHex7 12s ease-in-out 5s infinite' }}>
+          <Hexagon className="w-6 h-6 text-white" style={{ opacity: 0.03 }} />
+        </div>
+
+        {/* Keyframes */}
+        <style>{`
+          @keyframes heroDotDrift {
+            0% { background-position: 0 0; }
+            100% { background-position: 48px 48px; }
+          }
+          @keyframes heroGlow1 {
+            0%, 100% { opacity: 0.20; transform: scale(1); }
+            50% { opacity: 0.30; transform: scale(1.2); }
+          }
+          @keyframes heroGlow2 {
+            0%, 100% { opacity: 0.15; transform: scale(1); }
+            50% { opacity: 0.25; transform: scale(1.15); }
+          }
+          @keyframes heroGlow3 {
+            0%, 100% { opacity: 0.05; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.12; transform: translate(-50%, -50%) scale(1.1); }
+          }
+          @keyframes heroRing1 {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
+            100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+          }
+          @keyframes heroRing2 {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
+            100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+          }
+          @keyframes heroFracture1 {
+            0%, 100% { opacity: 0.06; } 50% { opacity: 0.15; }
+          }
+          @keyframes heroFracture2 {
+            0%, 100% { opacity: 0.06; } 50% { opacity: 0.15; }
+          }
+          @keyframes heroFracture3 {
+            0%, 100% { opacity: 0.06; } 50% { opacity: 0.15; }
+          }
+          @keyframes heroHex1 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(30px, -40px) rotate(8deg); }
+          }
+          @keyframes heroHex2 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-35px, 50px) rotate(-8deg); }
+          }
+          @keyframes heroHex3 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(40px, -25px) rotate(6deg); }
+          }
+          @keyframes heroHex4 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-25px, 45px) rotate(-7deg); }
+          }
+          @keyframes heroHex5 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(30px, -30px) rotate(8deg); }
+          }
+          @keyframes heroHex6 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-30px, 35px) rotate(-6deg); }
+          }
+          @keyframes heroHex7 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(25px, -20px) rotate(5deg); }
+          }
+        `}</style>
 
         <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 text-center max-w-4xl">
           <motion.div
-            className="inline-flex items-center gap-2 rounded-full bg-[#f0f6ff]/20 border border-[#e1513b]/50 shadow-sm px-4 py-1.5 text-sm text-[#e1513b] backdrop-blur mb-6"
+            className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-[#E8573A]/50 shadow-sm px-4 py-1.5 text-sm text-[#E8573A] backdrop-blur mb-6"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
