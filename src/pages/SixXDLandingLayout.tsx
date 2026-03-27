@@ -1607,13 +1607,13 @@ const TakeActionPrimaryLayout = ({
 
   const cardMeta = [
     {
-      gradientFrom: '#FB5535', gradientTo: '#FF7A5C',
+      gradientFrom: '#FB5535', gradientTo: '#0A1E5C',
       accent: '#FB5535', colSpan: 'md:col-span-2',
       label: 'START HERE',
     },
     {
-      gradientFrom: '#030F35', gradientTo: '#1A2D6B',
-      accent: '#FB5535', colSpan: '',
+      gradientFrom: '#030F35', gradientTo: '#FB5535',
+      accent: '#030F35', colSpan: '',
       label: 'DEEPER',
     },
     {
