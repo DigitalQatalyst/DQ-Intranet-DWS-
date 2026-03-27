@@ -7,11 +7,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Hexagon,
+  Brain,
+  RefreshCcw,
   GraduationCap,
   BookOpen,
+  FileText,
   ArrowRight,
   Users,
-  Briefcase,
   Zap,
   Target,
   Heart,
@@ -94,7 +96,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Stopped workstreams that did not serve the purpose',
     ],
     impact: 'Decisions converged and teams moved in one direction under pressure.',
-    route: '/marketplace/guides/dq-vision',
+    route: '/marketplace/guides/service/dq-vision',
     icon: Target,
     gradient: 'bg-gradient-to-br from-[#131e42] via-[#1d2f64] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -115,7 +117,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Held weekly value-based retros on tough calls',
     ],
     impact: 'Debates shortened and teams trusted decisions made against the shared rulebook.',
-    route: '/marketplace/guides/dq-hov',
+    route: '/marketplace/guides/service/dq-hov',
     icon: Heart,
     gradient: 'bg-gradient-to-br from-[#1b2553] via-[#243a75] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -137,7 +139,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Published a simple “who decides / who delivers” chart',
     ],
     impact: 'Escalations stopped and onboarding cycle time dropped because owners were clear.',
-    route: '/marketplace/guides/dq-persona',
+    route: '/marketplace/guides/service/dq-persona',
     icon: User,
     gradient: 'bg-gradient-to-br from-[#131e42] via-[#30478a] to-[#f0f6ff]',
     accent: '#f0f6ff',
@@ -159,7 +161,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Retired stale backlog items each mission',
     ],
     impact: 'Execution cadence matched strategy shifts and handoffs became predictable.',
-    route: '/marketplace/guides/dq-agile-tms',
+    route: '/marketplace/guides/service/dq-agile-tms',
     icon: Zap,
     gradient: 'bg-gradient-to-br from-[#1f2c63] via-[#2d3f80] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -181,7 +183,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Trimmed tools down to a single source for status and risk',
     ],
     impact: 'Risks surfaced earlier and delivery sped up because tools matched daily flow.',
-    route: '/marketplace/guides/dq-agile-sos',
+    route: '/marketplace/guides/service/dq-agile-sos',
     icon: Shield,
     gradient: 'bg-gradient-to-br from-[#131e42] via-[#1b2553] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -203,7 +205,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Removed extra handoffs that delayed fixes',
     ],
     impact: 'Feedback arrived sooner and work flowed without stalls.',
-    route: '/marketplace/guides/dq-agile-flows',
+    route: '/marketplace/guides/service/dq-agile-flows',
     icon: GitBranch,
     gradient: 'bg-gradient-to-br from-[#1b2553] via-[#30478a] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -225,7 +227,7 @@ const COMPETENCY_CARDS_DEFAULT: CompetencyCard[] = [
       'Instituted weekly trust-but-verify reviews',
     ],
     impact: 'Teams shipped faster while leaders focused on strategic calls.',
-    route: '/marketplace/guides/dq-agile-6xd',
+    route: '/marketplace/guides/service/dq-agile-6xd',
     icon: Sparkles,
     gradient: 'bg-gradient-to-br from-[#131e42] via-[#1f2c63] to-[#e1513b]',
     accent: '#f0f6ff',
@@ -258,13 +260,13 @@ const ACTION_CARDS_DEFAULT: ActionCard[] = [
     badge: 'Storybooks',
     description:
       'See the thinking and stories behind the Golden Honeycomb and how DQ chose to work this way. Start here when you want the “why” that shaped the system.',
-    tags: ['Narratives', 'Decisions', 'Origins'],
+    tags: ['Leadership', 'Practices', 'Culture'],
     cta: 'Read the story',
     path: 'https://preview.shorthand.com/Pg0KQCF1Rp904ao7',
-    bg: 'bg-[#fde6de]',
-    accent: 'text-[#e1513b]',
-    badgeColor: 'text-[#e1513b]',
-    iconColor: '#e1513b',
+    bg: 'bg-white',
+    accent: 'text-[#FB5535]',
+    badgeColor: 'text-[#FB5535]',
+    iconColor: '#FB5535',
   },
   {
     title: 'Learning Center',
@@ -272,41 +274,41 @@ const ACTION_CARDS_DEFAULT: ActionCard[] = [
     badge: 'Learning',
     description:
       'Build the capabilities expected inside this operating system. Practical paths that help you apply GHC in real decisions and delivery.',
-    tags: ['Guided paths', 'Practice', 'Skills'],
+    tags: ['Facilitation', 'Problem', 'Paths'],
     cta: 'Start learning',
     path: '/lms',
-    bg: 'bg-[#f0f6ff]',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#e1513b',
+    bg: 'bg-white',
+    accent: 'text-[#FB5535]',
+    badgeColor: 'text-[#FB5535]',
+    iconColor: '#FB5535',
   },
   {
     title: 'Knowledge Center',
-    icon: Users,
-    badge: 'Guidance',
+    icon: FileText,
+    badge: 'Maps',
     description:
       'When work gets complex, this is where you find the plays, guardrails, and references that keep execution aligned and moving.',
-    tags: ['Plays', 'Guardrails', 'References'],
+    tags: ['Maps', 'Guardrails', 'References'],
     cta: 'Find what you need',
     path: '/marketplace/guides',
-    bg: 'bg-[#e6ebff]',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#131e42',
+    bg: 'bg-white',
+    accent: 'text-[#030F35]',
+    badgeColor: 'text-[#030F35]',
+    iconColor: '#030F35',
   },
   {
     title: 'Viva Engage',
-    icon: Briefcase,
-    badge: 'Community',
+    icon: Users,
+    badge: 'Conversations',
     description:
       'Watch GHC in motion through conversations and collaboration. Ask, share, and see how teams live the operating system every day.',
-    tags: ['Conversation', 'Collaboration', 'Community'],
+    tags: ['Conversations', 'Collaboration', 'Community'],
     cta: 'Join the conversation',
     path: 'https://engage.cloud.microsoft/main/feed',
     bg: 'bg-white',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#e1513b',
+    accent: 'text-[#030F35]',
+    badgeColor: 'text-[#030F35]',
+    iconColor: '#030F35',
   },
 ];
 
@@ -554,17 +556,74 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) {
       <section
         className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-24 pb-16"
         style={{
-          background: 'linear-gradient(135deg, #131e42 0%, #1b2553 45%, #e1513b 100%)',
+          background: 'linear-gradient(135deg, #0E1E4A 0%, #1A2D5A 20%, #2E2545 40%, #5C3040 60%, #D4604A 80%, #FB6B4A 100%)',
         }}
       >
-        <div className="absolute inset-0 z-0">
-          <HoneycombPattern />
+        {/* Top edge accent */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E8573A]/20 to-transparent z-10" />
+        {/* Bottom edge accent */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent z-10" />
+
+        {/* Animated dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,1) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+            opacity: 0.04,
+            animation: 'heroDotDrift 10s linear infinite',
+          }}
+        />
+
+        {/* Glow orbs */}
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 800, height: 800, top: '-20%', right: '-15%', background: '#E8573A', filter: 'blur(120px)', animation: 'heroGlow1 7s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 600, height: 600, bottom: '-15%', left: '-10%', background: '#3D2054', filter: 'blur(100px)', animation: 'heroGlow2 9s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 500, height: 500, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', background: '#8B4455', filter: 'blur(100px)', animation: 'heroGlow3 12s ease-in-out 2s infinite' }} />
+
+        {/* Expanding ring pulses */}
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 300, height: 300, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '50%', animation: 'heroRing1 5s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 500, height: 500, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', border: '1px solid rgba(232,87,58,0.10)', borderRadius: '50%', animation: 'heroRing2 7s ease-in-out 1.5s infinite' }} />
+
+        {/* Fracture lines */}
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 200, height: 1, top: '25%', left: '10%', background: 'linear-gradient(90deg, transparent, #E8573A, transparent)', transform: 'rotate(-25deg)', animation: 'heroFracture1 4s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 160, height: 1, top: '50%', right: '15%', background: 'linear-gradient(90deg, transparent, #E8573A, transparent)', transform: 'rotate(30deg)', animation: 'heroFracture2 5s ease-in-out 1.5s infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 120, height: 1, bottom: '20%', left: '45%', background: 'linear-gradient(90deg, transparent, white, transparent)', transform: 'rotate(-15deg)', animation: 'heroFracture3 6s ease-in-out 3s infinite' }} />
+
+        {/* Floating hexagons */}
+        <div className="absolute top-10 right-16 pointer-events-none z-0" style={{ animation: 'heroHex1 14s ease-in-out infinite' }}>
+          <Hexagon className="w-20 h-20 text-white" style={{ opacity: 0.04 }} />
         </div>
-        <FloatingOrbs />
+        <div className="absolute bottom-12 left-10 pointer-events-none z-0" style={{ animation: 'heroHex2 18s ease-in-out infinite' }}>
+          <Hexagon className="w-24 h-24 text-white" style={{ opacity: 0.03 }} />
+        </div>
+        <div className="absolute top-1/2 right-1/4 pointer-events-none z-0" style={{ animation: 'heroHex3 11s ease-in-out 1s infinite' }}>
+          <Hexagon className="w-12 h-12 text-white" style={{ opacity: 0.03 }} />
+        </div>
+        <div className="absolute top-16 left-20 pointer-events-none z-0" style={{ animation: 'heroHex4 16s ease-in-out 4s infinite' }}>
+          <Hexagon className="w-10 h-10 text-[#E8573A]" style={{ opacity: 0.05 }} />
+        </div>
+        <div className="absolute bottom-10 right-24 pointer-events-none z-0" style={{ animation: 'heroHex5 13s ease-in-out 2s infinite' }}>
+          <Hexagon className="w-14 h-14 text-white" style={{ opacity: 0.04 }} />
+        </div>
+        <div className="absolute top-1/2 left-12 pointer-events-none z-0" style={{ animation: 'heroHex6 15s ease-in-out 3s infinite' }}>
+          <Hexagon className="w-8 h-8 text-[#E8573A]" style={{ opacity: 0.05 }} />
+        </div>
+        <div className="absolute bottom-1/4 left-1/2 pointer-events-none z-0" style={{ animation: 'heroHex7 12s ease-in-out 5s infinite' }}>
+          <Hexagon className="w-6 h-6 text-white" style={{ opacity: 0.03 }} />
+        </div>
+
 
         <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 text-center max-w-4xl">
           <motion.div
-            className="inline-flex items-center gap-2 rounded-full bg-[#f0f6ff]/20 border border-[#e1513b]/50 shadow-sm px-4 py-1.5 text-sm text-[#e1513b] backdrop-blur mb-6"
+            className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-[#E8573A]/50 shadow-sm px-4 py-1.5 text-sm text-[#E8573A] backdrop-blur mb-6"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -672,78 +731,93 @@ function SectionWhatIsGHC({ content }: SectionWhatIsGHCProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
   const foundationTitle = content?.foundationTitle ?? 'What is the Golden Honeycomb?';
-  const foundationSubtitle = content?.foundationSubtitle ?? 'Not a framework to memorise, but an operating system for modern work.';
+  const foundationSubtitle = content?.foundationSubtitle ?? 'Not a framework to memorize, but an operating system for modern work.';
   const foundationTitleFontSize = content?.foundationTitleFontSize;
   const foundationSubtitleFontSize = content?.foundationSubtitleFontSize;
-  const foundationCards = content?.foundationCards ?? FEATURE_CARDS_DEFAULT;
-  const isTwoCardLayout = foundationCards.length === 2;
+
+  const cards = [
+    {
+      id: 'dna',
+      icon: Brain,
+      label: 'CORE PRINCIPLES',
+      title: 'Operating DNA',
+      description: 'Principles that guide how people think, decide, and act under pressure and change.',
+    },
+    {
+      id: 'change',
+      icon: RefreshCcw,
+      label: 'ADAPTIVE BY DESIGN',
+      title: 'Built for Change',
+      description: 'Because breakdowns won\'t wait for strategy, control, and governance.',
+    },
+    {
+      id: 'seven',
+      icon: Hexagon,
+      label: 'CONNECTED SYSTEM',
+      title: 'Seven Elements',
+      description: 'Connected responses that realign work when traditional models break.',
+    },
+  ];
 
   return (
-    <section id="ghc-what" ref={ref} className="py-20 md:py-28 bg-[#f0f6ff]">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+    <section id="ghc-what" ref={ref} className="w-full py-24 px-4" style={{ background: '#f0f6ff' }}>
+      <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+        {/* Header */}
         <motion.div
-          className="text-center max-w-6xl mx-auto"
-          initial="hidden"
-          animate={isInView ? 'visible' : 'hidden'}
-          variants={containerVariants}
-          custom={0}
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center"
         >
-          <motion.p
-            variants={itemVariants}
-            className="inline-flex items-center gap-2 rounded-full bg-[#f0f6ff]/20 border border-[#e1513b]/50 shadow-sm px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-[#e1513b] backdrop-blur mb-4 mx-auto justify-center"
-          >
+          <span className="inline-block rounded-full bg-[#FB5535]/10 text-[#FB5535] text-xs font-bold tracking-widest uppercase px-3 py-1 mb-6 border border-[#FB5535]/20">
             THE FOUNDATION
-          </motion.p>
-          <div className="mx-auto w-fit text-center space-y-3">
-            <motion.h2
-              variants={itemVariants}
-              className="ghc-font-display text-4xl md:text-6xl font-bold text-[#131e42] text-center"
-              style={{
-                fontSize: foundationTitleFontSize ?? '36px',
-                lineHeight: 1.05,
-              }}
-            >
-              {foundationTitle}
-            </motion.h2>
-            <motion.p
-              variants={itemVariants}
-              className="text-[#4a5678] text-base md:text-lg leading-relaxed max-w-6xl mx-auto text-center"
-              style={{
-                fontSize: foundationSubtitleFontSize ?? '18px',
-                whiteSpace: 'pre-line',
-              }}
-            >
-              {foundationSubtitle}
-            </motion.p>
-          </div>
-
+          </span>
+          <h2
+            className="font-bold text-[#030F35] mb-4 text-3xl md:text-4xl"
+            style={{ fontSize: foundationTitleFontSize }}
+          >
+            {foundationTitle}
+          </h2>
+          <p
+            className="text-gray-600 max-w-2xl mb-16 text-lg"
+            style={{ fontSize: foundationSubtitleFontSize }}
+          >
+            {foundationSubtitle}
+          </p>
         </motion.div>
 
+        {/* Cards */}
         <motion.div
-          className={`grid grid-cols-1 ${isTwoCardLayout ? 'md:grid-cols-2 lg:grid-cols-2 max-w-5xl' : 'md:grid-cols-3 max-w-6xl'} gap-8 mt-14 mx-auto`}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full"
+          variants={containerVariants}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
-          variants={containerVariants}
           custom={1}
         >
-          {foundationCards.map((card) => (
-            <motion.div
-              key={card.title}
-              variants={itemVariants}
-              whileHover={{ y: -6 }}
-              className="rounded-3xl bg-white border border-[#e0e7ff] shadow-sm hover:shadow-md transition-shadow text-center px-10 py-10"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-[#ffe7e0] flex items-center justify-center mx-auto mb-6">
-                <card.icon className="h-6 w-6 text-[#e1513b]" />
-              </div>
-              <h3 className="ghc-font-display text-2xl font-semibold text-[#131e42] mb-4">
-                {card.title}
-              </h3>
-              <p className="text-[#4a5678] text-sm leading-relaxed max-w-[22rem] mx-auto">
-                {card.description}
-              </p>
-            </motion.div>
-          ))}
+          {cards.map((card) => {
+            const IconComp = card.icon;
+            return (
+              <motion.div
+                key={card.id}
+                variants={itemVariants}
+                whileHover={{ y: -4, transition: { duration: 0.3 } }}
+                className="bg-white rounded-2xl p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col items-center text-center transition-transform duration-300"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#FB5535]/10 text-[#FB5535] flex items-center justify-center mb-3">
+                  <IconComp className="w-5 h-5" />
+                </div>
+                <p className="text-[10px] font-bold tracking-widest uppercase text-[#FB5535] mb-4">
+                  {card.label}
+                </p>
+                <h3 className="text-xl font-bold text-[#030F35] mb-3">
+                  {card.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed text-sm">
+                  {card.description}
+                </p>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>
@@ -1174,94 +1248,268 @@ const TakeActionGridLayout = ({
   titleFontSize?: string;
   subtitleFontSize?: string;
   handleNavigate: (path: string) => void;
-}) => (
-  <section
-    ref={refEl}
-    className="py-16 md:py-20"
-    style={{
-      background: 'linear-gradient(180deg, #f0f6ff 0%, #ffffff 55%, #f0f6ff 100%)',
-    }}
-  >
-    <div className="container mx-auto px-4 md:px-6 lg:px-10">
-      <TakeActionHeader
-        title={title}
-        subtitle={subtitle}
-        titleFontSize={titleFontSize}
-        subtitleFontSize={subtitleFontSize}
-        isInView={isInView}
+}) => {
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+
+  const cardData = [
+    {
+      id: 'storybooks',
+      title: 'Storybooks',
+      label: 'STORYBOOKS',
+      icon: BookOpen,
+      gradientFrom: '#FB5535',
+      gradientTo: '#0A1E5C',
+      glowColor: 'rgba(232,87,58,0.15)',
+      accent: '#FB5535',
+      tags: ['Leadership', 'Practices', 'Culture'],
+      description: cards[0]?.description ?? '',
+      cta: 'Read the story',
+      path: cards[0]?.path ?? '',
+    },
+    {
+      id: 'learning',
+      title: 'Learning Center',
+      label: 'LEARNING',
+      icon: GraduationCap,
+      gradientFrom: '#FB5535',
+      gradientTo: '#1A2D6B',
+      glowColor: 'rgba(255,138,101,0.15)',
+      accent: '#FB5535',
+      tags: ['Facilitation', 'Problem', 'Paths'],
+      description: cards[1]?.description ?? '',
+      cta: 'Start learning',
+      path: cards[1]?.path ?? '',
+    },
+    {
+      id: 'knowledge',
+      title: 'Knowledge Center',
+      label: 'ADVANCED',
+      icon: FileText,
+      gradientFrom: '#030F35',
+      gradientTo: '#FB5535',
+      glowColor: 'rgba(198,40,40,0.15)',
+      accent: '#030F35',
+      tags: ['Maps', 'Guardrails', 'References'],
+      description: cards[2]?.description ?? '',
+      cta: 'Find what you need',
+      path: cards[2]?.path ?? '',
+    },
+    {
+      id: 'viva',
+      title: 'Viva Engage',
+      label: 'COMMUNITY',
+      icon: Users,
+      gradientFrom: '#030F35',
+      gradientTo: '#1A2D6B',
+      glowColor: 'rgba(183,28,28,0.15)',
+      accent: '#030F35',
+      tags: ['Conversations', 'Collaboration', 'Community'],
+      description: cards[3]?.description ?? '',
+      cta: 'Join the conversation',
+      path: cards[3]?.path ?? '',
+    },
+  ];
+
+  return (
+    <section
+      ref={refEl}
+      className="relative w-full overflow-hidden py-20 px-4"
+      style={{ background: '#f0f6ff' }}
+    >
+      {/* Background decorations */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 400, height: 400,
+          top: '-10%', left: '-10%',
+          background: '#FB5535',
+          opacity: 0.03,
+          filter: 'blur(100px)',
+        }}
+      />
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 400, height: 400,
+          bottom: '-10%', right: '-5%',
+          background: '#030F35',
+          opacity: 0.02,
+          filter: 'blur(100px)',
+        }}
       />
 
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-6xl mx-auto"
-        variants={containerVariants}
-        initial="hidden"
-        animate={isInView ? 'visible' : 'hidden'}
-      >
-        {cards.map((card, index) => (
-          <motion.article
-            key={card.title}
-            variants={itemVariants}
-            custom={index}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className={`group relative rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 ${card.bg} border border-white/60`}
+      <div className="relative z-10 max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="inline-block px-3 py-1 rounded-full bg-[#FB5535]/10 text-[#FB5535] text-xs font-bold tracking-widest uppercase border border-[#FB5535]/20 mb-4">
+            TAKE ACTION
+          </span>
+          <h2
+            className="font-extrabold text-[#030F35] mb-3 tracking-tight text-3xl md:text-4xl"
+            style={{ fontSize: titleFontSize }}
           >
-            {/* Decorative gradient overlay */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/40 to-transparent rounded-bl-[80px] opacity-60" />
-            
-            <div className="relative p-6 flex flex-col h-full">
-              {/* Icon */}
-              <div className="mb-4">
-                <div className="w-12 h-12 rounded-xl bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center group-hover:scale-105 transition-all duration-300">
-                  <card.icon className="h-6 w-6" style={{ color: card.iconColor }} />
-                </div>
-              </div>
+            {title}
+          </h2>
+          <p
+            className="text-gray-500 max-w-3xl mx-auto text-base leading-relaxed whitespace-nowrap"
+            style={{ fontSize: subtitleFontSize }}
+          >
+            {subtitle}
+          </p>
+        </motion.div>
 
-              {/* Content */}
-              <div className="flex-1 flex flex-col">
-                <div className="mb-4">
-                  <p className={`text-[9px] font-bold uppercase tracking-[0.18em] mb-2 ${card.badgeColor} opacity-80`}>
-                    {card.badge}
-                  </p>
-                  <h3 className="ghc-font-display text-xl font-bold text-[#131e42] leading-tight mb-2">
-                    {card.title}
-                  </h3>
-                  <p className="text-sm text-[#4a5678] leading-relaxed">
-                    {card.description}
-                  </p>
-                </div>
+        {/* 2×2 Grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          {cardData.map((card) => {
+            const isHovered = hoveredCard === card.id;
+            const IconComp = card.icon;
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {card.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 text-[#131e42] text-[11px] font-medium border border-[#e5e9f5] shadow-sm"
+            return (
+              <motion.div
+                key={card.id}
+                variants={itemVariants}
+                className="group relative rounded-2xl overflow-hidden transition-all duration-300"
+                style={{
+                  boxShadow: isHovered
+                    ? `0 8px 32px -8px ${card.glowColor}, 0 4px 16px -4px rgba(0,0,0,0.08)`
+                    : '0 2px 16px -4px rgba(0,0,0,0.08)',
+                  transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+                }}
+                onMouseEnter={() => setHoveredCard(card.id)}
+                onMouseLeave={() => setHoveredCard(null)}
+              >
+                {/* Gradient border overlay */}
+                <div
+                  className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300 z-0"
+                  style={{
+                    opacity: isHovered ? 1 : 0,
+                    background: `linear-gradient(135deg, ${card.gradientFrom}20, transparent 40%, transparent 60%, ${card.gradientTo}15)`,
+                  }}
+                />
+
+                {/* Card inner */}
+                <div
+                  className="relative bg-white rounded-2xl border transition-colors duration-300 overflow-hidden"
+                  style={{ borderColor: isHovered ? 'transparent' : '#f3f4f6' }}
+                >
+                  {/* Gradient top bar */}
+                  <div
+                    className="h-1 w-full"
+                    style={{ background: `linear-gradient(90deg, ${card.gradientFrom}, ${card.gradientTo})` }}
+                  />
+
+                  {/* Inner gradient wash top-right */}
+                  <div
+                    className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl pointer-events-none transition-opacity duration-300"
+                    style={{
+                      background: card.accent,
+                      opacity: isHovered ? 0.08 : 0.04,
+                    }}
+                  />
+
+                  {/* Corner dot */}
+                  <div
+                    className="absolute top-4 right-4 w-2 h-2 rounded-full pointer-events-none transition-opacity duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${card.gradientFrom}, ${card.gradientTo})`,
+                      opacity: isHovered ? 0.5 : 0.2,
+                    }}
+                  />
+
+                  {/* Card body */}
+                  <div className="relative p-5 md:p-6 flex flex-col">
+                    {/* Icon + label row */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="relative flex-shrink-0">
+                        {/* Glow behind icon */}
+                        <div
+                          className="absolute inset-0 rounded-xl blur-md pointer-events-none transition-opacity duration-300"
+                          style={{
+                            background: `linear-gradient(135deg, ${card.gradientFrom}, ${card.gradientTo})`,
+                            opacity: isHovered ? 0.4 : 0,
+                          }}
+                        />
+                        <div
+                          className="relative w-10 h-10 rounded-xl flex items-center justify-center ring-2 ring-white transition-transform duration-300"
+                          style={{
+                            background: `linear-gradient(135deg, ${card.gradientFrom}, ${card.gradientTo})`,
+                            transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                          }}
+                        >
+                          <IconComp className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                      <div>
+                        <p
+                          className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1"
+                          style={{ color: `${card.accent}b3` }}
+                        >
+                          {card.label}
+                        </p>
+                        <h3 className="text-lg font-bold text-[#030F35] leading-tight">
+                          {card.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-gray-500 text-[13px] mb-4 leading-relaxed">
+                      {card.description}
+                    </p>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1.5 mb-5">
+                      {card.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-gray-600"
+                          style={{
+                            backgroundColor: `${card.accent}08`,
+                            border: `1px solid ${card.accent}15`,
+                          }}
+                        >
+                          <span
+                            className="w-1 h-1 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: card.accent }}
+                          />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* CTA */}
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate(card.path)}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 -ml-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 mt-auto"
+                      style={{ color: card.accent }}
                     >
-                      <span className="w-1 h-1 rounded-full" style={{ backgroundColor: card.iconColor }} />
-                      {tag}
-                    </span>
-                  ))}
+                      {card.cta}
+                      <ArrowRight
+                        className="w-3.5 h-3.5 transition-transform duration-300"
+                        style={{ transform: isHovered ? 'translateX(6px)' : 'translateX(0)' }}
+                      />
+                    </button>
+                  </div>
                 </div>
-
-                {/* CTA Button */}
-                <div className="mt-auto">
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate(card.path)}
-                    className={`inline-flex items-center gap-1.5 text-sm font-bold ${card.accent} group-hover:gap-2 transition-all duration-300`}
-                  >
-                    {card.cta}
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </motion.article>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+};
 
 const TakeActionPrimaryLayout = ({
   refEl,
@@ -1536,48 +1784,84 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden dq-gradient-animated"
+      className="relative overflow-hidden"
       style={{
-        background: 'linear-gradient(120deg, #131e42 0%, #1b2553 45%, #e1513b 100%)',
+        background: 'linear-gradient(135deg, #030F35 0%, #0A1840 30%, #3D1A30 60%, #FB5535 100%)',
       }}
     >
-      <div className="dq-digital-bg" aria-hidden="true">
-        <svg viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="dq-digital-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(240,246,255,0.6)" />
-              <stop offset="100%" stopColor="rgba(225,81,59,0.6)" />
-            </linearGradient>
-          </defs>
-          <path className="dq-digital-line" d="M-40 140 L240 90 L520 160 L820 110 L1160 170 L1480 120" />
-          <path className="dq-digital-line alt" d="M-60 260 L180 220 L520 300 L860 240 L1180 320 L1500 260" />
-          <path className="dq-digital-line" d="M-40 400 L260 360 L520 420 L820 370 L1120 430 L1460 380" />
-          <path className="dq-digital-line alt" d="M-80 520 L220 500 L520 560 L840 520 L1160 580 L1500 540" />
-          <path className="dq-digital-line" d="M120 60 L280 180 L460 80 L640 200 L820 120 L1040 220 L1240 140" />
-          <path className="dq-digital-line alt" d="M240 120 L420 260 L620 150 L840 300 L1040 190 L1260 320" />
+      {/* Top edge accent */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FB5535]/20 to-transparent" />
+      {/* Bottom edge accent */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <circle className="dq-digital-dot" cx="240" cy="90" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="520" cy="160" r="4" />
-          <circle className="dq-digital-dot" cx="820" cy="110" r="3" />
-          <circle className="dq-digital-dot alt" cx="1160" cy="170" r="4.5" />
-          <circle className="dq-digital-dot" cx="180" cy="220" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="300" r="4" />
-          <circle className="dq-digital-dot" cx="860" cy="240" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1180" cy="320" r="4" />
-          <circle className="dq-digital-dot" cx="260" cy="360" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="420" r="4" />
-          <circle className="dq-digital-dot" cx="820" cy="370" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1120" cy="430" r="4" />
-          <circle className="dq-digital-dot" cx="220" cy="500" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="560" r="4" />
-          <circle className="dq-digital-dot" cx="840" cy="520" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1160" cy="580" r="4" />
-          <circle className="dq-digital-dot" cx="420" cy="260" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="640" cy="200" r="4" />
-          <circle className="dq-digital-dot" cx="1040" cy="220" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1260" cy="320" r="4" />
-        </svg>
+      {/* Animated dot grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,1) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+          opacity: 0.04,
+          animation: 'dotGridDrift 8s linear infinite',
+        }}
+      />
+
+      {/* Glow orbs */}
+      {/* Top-left navy orb */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 500, height: 500,
+          top: '-10%', left: '-10%',
+          background: '#030F35',
+          filter: 'blur(120px)',
+          animation: 'glowPulse1 6s ease-in-out infinite',
+        }}
+      />
+      {/* Bottom-right orange orb */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 600, height: 600,
+          bottom: 0, right: 0,
+          background: '#FB5535',
+          filter: 'blur(150px)',
+          transform: 'translate(25%, 25%)',
+          animation: 'glowPulse2 8s ease-in-out infinite',
+        }}
+      />
+      {/* Center orange orb */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        style={{
+          width: 400, height: 400,
+          top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: '#FB5535',
+          opacity: 0.1,
+          filter: 'blur(100px)',
+          animation: 'glowPulse3 10s ease-in-out 2s infinite',
+        }}
+      />
+
+      {/* Floating hexagons */}
+      <div className="absolute top-8 right-12 pointer-events-none" style={{ animation: 'floatHex1 12s ease-in-out infinite' }}>
+        <Hexagon className="w-16 h-16 text-white" style={{ opacity: 0.04 }} />
       </div>
+      <div className="absolute bottom-10 left-10 pointer-events-none" style={{ animation: 'floatHex2 15s ease-in-out infinite' }}>
+        <Hexagon className="w-20 h-20 text-white" style={{ opacity: 0.03 }} />
+      </div>
+      <div className="absolute top-1/2 right-1/4 pointer-events-none" style={{ animation: 'floatHex3 10s ease-in-out 1s infinite' }}>
+        <Hexagon className="w-10 h-10 text-white" style={{ opacity: 0.03 }} />
+      </div>
+      <div className="absolute top-12 left-16 pointer-events-none" style={{ animation: 'floatHex4 14s ease-in-out 3s infinite' }}>
+        <Hexagon className="w-8 h-8 text-[#FB5535]" style={{ opacity: 0.05 }} />
+      </div>
+      <div className="absolute bottom-8 right-20 pointer-events-none" style={{ animation: 'floatHex5 11s ease-in-out 2s infinite' }}>
+        <Hexagon className="w-12 h-12 text-white" style={{ opacity: 0.02 }} />
+      </div>
+
+      {/* Keyframes are defined globally in index.css */}
+
       <div className="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
         <div className="relative min-h-[420px] lg:min-h-[520px] flex items-center">
           <motion.div
@@ -1586,14 +1870,14 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-          <motion.p
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-white/15 border border-[#e1513b]/50 text-[#e1513b] backdrop-blur mb-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.15 }}
-          >
-            DQ DIGITAL WORKSPACE
-          </motion.p>
+            <motion.p
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-white/15 border border-[#FB5535]/50 text-[#FB5535] backdrop-blur mb-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.15 }}
+            >
+              DQ DIGITAL WORKSPACE
+            </motion.p>
             <motion.h2
               className="ghc-font-display font-bold text-4xl sm:text-5xl md:text-5xl lg:text-6xl leading-[1.1] text-white tracking-tight"
               initial={{ opacity: 0, y: 20 }}
@@ -1612,46 +1896,45 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
             >
               {finalSubtitle}
             </motion.p>
-
             <motion.div
               className="mt-8 flex flex-wrap gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.35 }}
             >
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  if (finalCTATo.startsWith('http')) {
-                    window.open(finalCTATo, '_blank', 'noopener,noreferrer');
-                  } else {
-                    navigate(finalCTATo);
-                  }
-                }}
-                className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg bg-white text-[#131e42] font-semibold text-base shadow-xl shadow-black/12 transition transform hover:-translate-y-0.5 hover:bg-white/95"
-              >
-                {finalCTALabel}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
-              {finalCTASecondaryLabel && finalCTASecondaryTo ? (
+              <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => {
-                    if (finalCTASecondaryTo.startsWith('http')) {
-                      window.open(finalCTASecondaryTo, '_blank', 'noopener,noreferrer');
+                    if (finalCTATo.startsWith('http')) {
+                      window.open(finalCTATo, '_blank', 'noopener,noreferrer');
                     } else {
-                      navigate(finalCTASecondaryTo);
+                      navigate(finalCTATo);
                     }
                   }}
-                  className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg border border-white/60 text-white font-semibold text-base shadow-lg shadow-black/10 transition transform hover:-translate-y-0.5 hover:bg-white/10"
+                  className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg bg-white text-[#030F35] font-semibold text-base shadow-xl shadow-black/12 transition transform hover:-translate-y-0.5 hover:bg-white/95"
                 >
-                  {finalCTASecondaryLabel}
+                  {finalCTALabel}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </button>
-              ) : null}
-            </div>
-        </motion.div>
+                {finalCTASecondaryLabel && finalCTASecondaryTo ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (finalCTASecondaryTo.startsWith('http')) {
+                        window.open(finalCTASecondaryTo, '_blank', 'noopener,noreferrer');
+                      } else {
+                        navigate(finalCTASecondaryTo);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg border border-white/60 text-white font-semibold text-base shadow-lg shadow-black/10 transition transform hover:-translate-y-0.5 hover:bg-white/10"
+                  >
+                    {finalCTASecondaryLabel}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                ) : null}
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

@@ -591,17 +591,73 @@ export function GHCLanding({ badgeLabel, overrides }: GHCLandingProps) { // NOSO
       <section
         className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-24 pb-16"
         style={{
-          background: 'linear-gradient(135deg, #131e42 0%, #1b2553 45%, #e1513b 100%)',
+          background: 'linear-gradient(135deg, #0E1E4A 0%, #1A2D5A 20%, #2E2545 40%, #5C3040 60%, #D4604A 80%, #FB6B4A 100%)',
         }}
       >
-        <div className="absolute inset-0 z-0">
-          <HoneycombPattern />
+        {/* Top edge accent */}
+        <div className="absolute top-0 left-0 right-0 h-px z-10 bg-gradient-to-r from-transparent via-[#E8573A]/20 to-transparent" />
+        {/* Bottom edge accent */}
+        <div className="absolute bottom-0 left-0 right-0 h-px z-10 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+        {/* Animated dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,1) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+            opacity: 0.04,
+            animation: 'sixHeroDotDrift 10s linear infinite',
+          }}
+        />
+
+        {/* Glow orbs */}
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 800, height: 800, top: '-20%', right: '-15%', background: '#E8573A', filter: 'blur(120px)', animation: 'sixHeroGlow1 7s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 600, height: 600, bottom: '-15%', left: '-10%', background: '#030F35', filter: 'blur(100px)', animation: 'sixHeroGlow2 9s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none rounded-full z-0"
+          style={{ width: 500, height: 500, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', background: '#8B4455', filter: 'blur(100px)', animation: 'sixHeroGlow3 12s ease-in-out 2s infinite' }} />
+
+        {/* Expanding ring pulses */}
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 300, height: 300, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '50%', animation: 'sixHeroRing1 5s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 500, height: 500, top: '50%', left: '45%', transform: 'translate(-50%, -50%)', border: '1px solid rgba(232,87,58,0.10)', borderRadius: '50%', animation: 'sixHeroRing2 7s ease-in-out 1.5s infinite' }} />
+
+        {/* Fracture lines */}
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 200, height: 1, top: '25%', left: '10%', background: 'linear-gradient(90deg, transparent, #E8573A, transparent)', transform: 'rotate(-25deg)', animation: 'sixHeroFracture 4s ease-in-out infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 160, height: 1, top: '50%', right: '15%', background: 'linear-gradient(90deg, transparent, #E8573A, transparent)', transform: 'rotate(30deg)', animation: 'sixHeroFracture 5s ease-in-out 1.5s infinite' }} />
+        <div className="absolute pointer-events-none z-0"
+          style={{ width: 120, height: 1, bottom: '20%', left: '45%', background: 'linear-gradient(90deg, transparent, white, transparent)', transform: 'rotate(-15deg)', animation: 'sixHeroFracture 6s ease-in-out 3s infinite' }} />
+
+        {/* Floating hexagons */}
+        <div className="absolute top-10 right-16 pointer-events-none z-0" style={{ animation: 'sixHeroHex1 14s ease-in-out infinite' }}>
+          <Hexagon className="w-20 h-20 text-white" style={{ opacity: 0.04 }} />
         </div>
-        <FloatingOrbs />
+        <div className="absolute bottom-12 left-10 pointer-events-none z-0" style={{ animation: 'sixHeroHex2 18s ease-in-out infinite' }}>
+          <Hexagon className="w-24 h-24 text-white" style={{ opacity: 0.03 }} />
+        </div>
+        <div className="absolute top-1/2 right-1/4 pointer-events-none z-0" style={{ animation: 'sixHeroHex3 11s ease-in-out 1s infinite' }}>
+          <Hexagon className="w-12 h-12 text-white" style={{ opacity: 0.03 }} />
+        </div>
+        <div className="absolute top-16 left-20 pointer-events-none z-0" style={{ animation: 'sixHeroHex4 16s ease-in-out 4s infinite' }}>
+          <Hexagon className="w-10 h-10 text-[#E8573A]" style={{ opacity: 0.05 }} />
+        </div>
+        <div className="absolute bottom-10 right-24 pointer-events-none z-0" style={{ animation: 'sixHeroHex5 13s ease-in-out 2s infinite' }}>
+          <Hexagon className="w-14 h-14 text-white" style={{ opacity: 0.04 }} />
+        </div>
+        <div className="absolute top-1/2 left-12 pointer-events-none z-0" style={{ animation: 'sixHeroHex6 15s ease-in-out 3s infinite' }}>
+          <Hexagon className="w-8 h-8 text-[#E8573A]" style={{ opacity: 0.05 }} />
+        </div>
+        <div className="absolute bottom-1/4 left-1/2 pointer-events-none z-0" style={{ animation: 'sixHeroHex7 12s ease-in-out 5s infinite' }}>
+          <Hexagon className="w-6 h-6 text-white" style={{ opacity: 0.03 }} />
+        </div>
 
         <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 text-center max-w-6xl">
           <motion.div
-            className="inline-flex items-center gap-2 rounded-full bg-[#f0f6ff]/20 border border-[#e1513b]/50 shadow-sm px-4 py-1.5 text-sm text-[#e1513b] backdrop-blur mb-6"
+            className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-[#E8573A]/50 shadow-sm px-4 py-1.5 text-sm text-[#E8573A] backdrop-blur mb-6"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -1602,219 +1658,198 @@ const TakeActionPrimaryLayout = ({
   subtitleFontSize?: string;
   handleNavigate: (path: string) => void;
   isActionLocked: (card: ActionCard) => boolean;
-}) => { // NOSONAR: complexity acceptable for action cards rendering
-  const primaryCard = cards.find((card) => card.variant === 'primary') ?? cards[0];
-  const secondaryCards = cards.filter((card) => card !== primaryCard);
-  const hasPrimary = Boolean(primaryCard);
-  const primaryLocked = primaryCard ? isActionLocked(primaryCard) : false;
+}) => {
+  const [hoveredCard, setHoveredCard] = React.useState<string | null>(null);
+
+  const cardMeta = [
+    {
+      gradientFrom: '#FB5535', gradientTo: '#0A1E5C',
+      accent: '#FB5535', colSpan: 'md:col-span-2',
+      label: 'START HERE',
+    },
+    {
+      gradientFrom: '#030F35', gradientTo: '#FB5535',
+      accent: '#030F35', colSpan: '',
+      label: 'DEEPER',
+    },
+    {
+      gradientFrom: '#030F35', gradientTo: '#1A2D6B',
+      accent: '#030F35', colSpan: '',
+      label: 'DISCOVER',
+    },
+  ];
 
   return (
     <section
       ref={refEl}
-      className="py-20 md:py-24"
-      style={{
-        background: 'linear-gradient(180deg, #f0f6ff 0%, #ffffff 55%, #f0f6ff 100%)',
-      }}
+      className="relative w-full overflow-hidden py-20 px-4"
+      style={{ background: '#f0f6ff' }}
     >
-      <div className="container mx-auto px-4 md:px-6 lg:px-10">
-        <TakeActionHeader
-          title={title}
-          subtitle={subtitle}
-          titleFontSize={titleFontSize}
-          subtitleFontSize={subtitleFontSize}
-          isInView={isInView}
-        />
+      {/* Decorative blurred circles */}
+      <div className="absolute top-0 left-0 w-[400px] h-[400px] rounded-full bg-[#FB5535]/[0.03] blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-[#030F35]/[0.02] blur-[100px] pointer-events-none" />
 
-        {hasPrimary ? (
-          <div className="grid gap-6 max-w-6xl mx-auto">
-            {primaryCard ? (
+      <div className="relative z-10 max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="inline-block rounded-full bg-[#FB5535]/10 text-[#FB5535] text-xs font-bold tracking-widest uppercase px-3 py-1 border border-[#FB5535]/20 mb-4">
+            TAKE ACTION
+          </span>
+          <h2
+            className="font-extrabold text-[#030F35] mb-3 text-3xl md:text-4xl"
+            style={{ fontSize: titleFontSize }}
+          >
+            {title}
+          </h2>
+          <p
+            className="text-gray-500 text-base max-w-xl mx-auto"
+            style={{ fontSize: subtitleFontSize }}
+          >
+            {subtitle}
+          </p>
+        </motion.div>
+
+        {/* 2-col grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          {cards.slice(0, 3).map((card, i) => {
+            const meta = cardMeta[i] ?? cardMeta[2];
+            const isHovered = hoveredCard === card.title;
+            const locked = isActionLocked(card);
+            const IconComp = card.icon;
+
+            return (
               <motion.div
+                key={card.title}
                 variants={itemVariants}
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-                className="group relative p-8 md:p-10 rounded-3xl border shadow-[0_18px_36px_rgba(0,0,0,0.12)] bg-gradient-to-br from-[#131e42] via-[#1f2c63] to-[#e1513b] text-white"
+                className={`group relative rounded-2xl overflow-hidden transition-all duration-300 ${meta.colSpan}`}
+                style={{
+                  boxShadow: isHovered
+                    ? '0 8px 32px -8px rgba(0,0,0,0.1)'
+                    : '0 2px 16px -4px rgba(0,0,0,0.06)',
+                  transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+                }}
+                onMouseEnter={() => setHoveredCard(card.title)}
+                onMouseLeave={() => setHoveredCard(null)}
               >
-                <div className="flex flex-col md:flex-row md:items-start md:gap-6">
-                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
-                    <primaryCard.icon className="h-7 w-7" style={{ color: '#f0f6ff' }} />
-                  </div>
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-semibold tracking-[0.18em] uppercase text-[#fbd7cd]">
-                        {primaryCard.badge}
-                      </span>
-                      <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/15 border border-white/10 text-white">
-                        Start
-                      </span>
+                {/* Inner card */}
+                <div
+                  className="bg-white rounded-2xl border transition-colors duration-300 overflow-hidden h-full"
+                  style={{ borderColor: isHovered ? 'transparent' : '#f3f4f6' }}
+                >
+                  {/* Top gradient bar */}
+                  <div
+                    className="h-1 w-full"
+                    style={{ background: `linear-gradient(90deg, ${meta.gradientFrom}, ${meta.gradientTo})` }}
+                  />
+
+                  {/* Corner glow */}
+                  <div
+                    className="absolute top-0 right-0 w-8 h-8 rounded-full blur-xl pointer-events-none transition-opacity duration-300"
+                    style={{
+                      background: meta.accent,
+                      opacity: isHovered ? 0.08 : 0.04,
+                    }}
+                  />
+
+                  {/* Decorative dot */}
+                  <div
+                    className="absolute top-4 right-4 w-2 h-2 rounded-full pointer-events-none transition-opacity duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${meta.gradientFrom}, ${meta.gradientTo})`,
+                      opacity: isHovered ? 0.5 : 0.2,
+                    }}
+                  />
+
+                  <div className="relative p-5 md:p-6 flex flex-col h-full">
+                    {/* Icon + label row */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="relative flex-shrink-0">
+                        {/* Glow behind icon */}
+                        <div
+                          className="absolute inset-0 rounded-xl blur-md pointer-events-none transition-opacity duration-300"
+                          style={{
+                            background: `linear-gradient(135deg, ${meta.gradientFrom}, ${meta.gradientTo})`,
+                            opacity: isHovered ? 0.4 : 0,
+                          }}
+                        />
+                        <div
+                          className="relative w-10 h-10 rounded-xl flex items-center justify-center ring-2 ring-white transition-transform duration-300"
+                          style={{
+                            background: `linear-gradient(135deg, ${meta.gradientFrom}, ${meta.gradientTo})`,
+                            transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                          }}
+                        >
+                          <IconComp className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                      <div>
+                        <p
+                          className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1"
+                          style={{ color: meta.accent }}
+                        >
+                          {meta.label}
+                        </p>
+                        <h3 className="text-xl font-bold text-[#030F35] leading-tight">
+                          {card.title}
+                        </h3>
+                      </div>
                     </div>
-                    <h3 className="ghc-font-display text-2xl md:text-3xl font-semibold">
-                      {primaryCard.title}
-                    </h3>
-                    <p className="text-base md:text-lg text-white/90 leading-relaxed">
-                      {primaryCard.description}
+
+                    {/* Description */}
+                    <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                      {card.description}
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {primaryCard.tags.map((tag) => (
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1.5 mb-5">
+                      {card.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center gap-1 rounded-full bg-white/15 text-white px-3 py-1 text-xs font-medium border border-white/20"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-gray-600 bg-gray-50 border border-gray-100"
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
+                          <span
+                            className="w-1 h-1 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: meta.accent }}
+                          />
                           {tag}
                         </span>
                       ))}
                     </div>
-                  </div>
-                </div>
-                <div className="mt-6">
-                  <button
-                    type="button"
-                    onClick={primaryLocked ? undefined : () => handleNavigate(primaryCard.path)}
-                    aria-disabled={primaryLocked}
-                    className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-[#131e42] font-semibold shadow-[0_10px_24px_rgba(0,0,0,0.18)] hover:bg-[#f0f6ff] transition-colors ${
-                      primaryLocked ? 'opacity-60 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {primaryLocked ? <Lock className="h-5 w-5" /> : null}
-                    {primaryCard.cta}
-                    {primaryLocked ? (
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-[#e5e5e5]">(Coming soon)</span>
-                    ) : (
-                      <ArrowRight className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </motion.div>
-            ) : null}
 
-            {secondaryCards.length ? (
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-                variants={containerVariants}
-                custom={0}
-              >
-                {secondaryCards.map((item) => {
-                  const locked = isActionLocked(item);
-                  return (
-                    <motion.div
-                      key={item.title}
-                      variants={itemVariants}
-                      whileHover={{ y: -6 }}
-                      className={`group relative p-7 md:p-8 rounded-3xl ${item.bg} border border-[#e3e8f5] shadow-[0_10px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.09)] transition-all`}
+                    {/* CTA */}
+                    <button
+                      type="button"
+                      onClick={locked ? undefined : () => handleNavigate(card.path)}
+                      aria-disabled={locked}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 -ml-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 mt-auto"
+                      style={{ color: locked ? '#9ca3af' : meta.accent }}
                     >
-                      <div className="flex items-start gap-4 md:gap-5">
-                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-[0_6px_16px_rgba(0,0,0,0.08)] flex items-center justify-center">
-                          <item.icon className="h-6 w-6" style={{ color: item.iconColor }} />
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <p className={`text-xs font-semibold tracking-[0.18em] uppercase ${item.badgeColor}`}>
-                            {item.badge}
-                          </p>
-                          <h3 className="ghc-font-display text-xl md:text-2xl font-semibold text-[#131e42]">
-                            {item.title}
-                          </h3>
-                          <p className="text-sm md:text-base text-[#4a5678] leading-relaxed">{item.description}</p>
-                          <div className="flex flex-wrap gap-2 pt-2">
-                            {item.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center gap-1 rounded-full bg-white/75 text-[#131e42] px-3 py-1 text-xs font-medium shadow-sm cursor-default"
-                              >
-                                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: item.iconColor }} />
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={locked ? undefined : () => handleNavigate(item.path)}
-                        aria-disabled={locked}
-                        className={`inline-flex items-center gap-1 text-sm font-semibold mt-6 ${
-                          locked ? 'text-[#9aa4c6] cursor-not-allowed' : `${item.accent} group-hover:underline`
-                        }`}
-                      >
-                        {item.cta}
-                        {locked ? <Lock className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-                        {locked ? (
-                          <span className="text-[10px] uppercase tracking-[0.18em] text-[#9aa4c6]">(Coming soon)</span>
-                        ) : null}
-                      </button>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            ) : null}
-          </div>
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto"
-            initial="hidden"
-            animate={isInView ? 'visible' : 'hidden'}
-            variants={containerVariants}
-            custom={0}
-          >
-            {cards.map((item) => {
-              const locked = isActionLocked(item);
-              return (
-                <motion.div
-                  key={item.title}
-                  variants={itemVariants}
-                  whileHover={{ y: -8 }}
-                  className={`group relative p-7 md:p-9 rounded-3xl ${item.bg} shadow-[0_10px_24px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] transition-all`}
-                >
-                  <div className="flex items-start gap-4 md:gap-5">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-[0_6px_16px_rgba(0,0,0,0.08)] flex items-center justify-center">
-                      <item.icon className="h-6 w-6" style={{ color: item.iconColor }} />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className={`text-xs font-semibold tracking-[0.18em] uppercase ${item.badgeColor}`}>
-                        {item.badge}
-                      </p>
-                      <h3 className="ghc-font-display text-xl md:text-2xl font-semibold text-[#131e42]">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm md:text-base text-[#4a5678]">{item.description}</p>
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {item.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex items-center gap-1 rounded-full bg-white/75 text-[#131e42] px-3 py-1 text-xs font-medium shadow-sm cursor-default"
-                          >
-                            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: item.iconColor }} />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                      {card.cta}
+                      <ArrowRight
+                        className="w-3.5 h-3.5 transition-transform duration-300"
+                        style={{ transform: isHovered && !locked ? 'translateX(6px)' : 'translateX(0)' }}
+                      />
+                    </button>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={locked ? undefined : () => handleNavigate(item.path)}
-                    aria-disabled={locked}
-                    className={`inline-flex items-center gap-1 text-sm font-semibold mt-6 ${
-                      locked ? 'text-[#9aa4c6] cursor-not-allowed' : `${item.accent} group-hover:underline`
-                    }`}
-                  >
-                    {item.cta}
-                    {locked ? <Lock className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-                    {locked ? (
-                      <span className="text-[10px] uppercase tracking-[0.18em] text-[#9aa4c6]">(Coming soon)</span>
-                    ) : null}
-                  </button>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        )}
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
       </div>
     </section>
   );
-};
+}
 function SectionTakeAction({ navigate, content }: { navigate: (path: string) => void; content?: LandingOverrides }) { // NOSONAR: complexity acceptable for action section rendering
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
@@ -1834,353 +1869,110 @@ function SectionTakeAction({ navigate, content }: { navigate: (path: string) => 
     }
   };
 
-  if (takeActionLayout === 'grid') {
+  // "feature" layout — new premium 2-col card grid
+  if (takeActionLayout === 'feature') {
     return (
-      <section
-        ref={ref}
-        className="py-12 md:py-16"
-        style={{
-          background: 'linear-gradient(180deg, #f0f6ff 0%, #ffffff 55%, #f0f6ff 100%)',
-        }}
-      >
-        <div className="container mx-auto px-4 md:px-6 lg:px-10">
-          <motion.div
-            className="text-center mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-[0.2em] bg-[#f0f6ff]/40 border border-[#e0e7ff] text-[#131e42] shadow-sm backdrop-blur mx-auto mb-1.5">
-              TAKE ACTION
-            </p>
-            <h2
-              className="ghc-font-display text-3xl md:text-4xl font-semibold text-[#131e42] mb-1.5"
-              style={{ fontSize: takeActionTitleFontSize ?? '36px' }}
-            >
-              {takeActionTitle}
-            </h2>
-            <p
-              className="text-[#4a5678] max-w-3xl mx-auto text-base md:text-lg"
-              style={{ fontSize: takeActionSubtitleFontSize ?? '18px' }}
-            >
-              {takeActionSubtitle}
-            </p>
-            <p className="text-[#6b7280] text-sm mt-1.5">Start small, then go deeper.</p>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 max-w-6xl mx-auto"
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? 'visible' : 'hidden'}
-          >
-            {actionCards.map((card, idx) => {
-              const stripColors = ['from-[#dfe9ff] to-[#c7d7ff]', 'from-[#e9dcff] to-[#d7c4ff]', 'from-[#ffe8d6] to-[#ffd7b5]'];
-              const strip = stripColors[idx] ?? stripColors[0];
-              const isPrimary = card.variant === 'primary';
-              return (
-                <motion.div
-                  key={card.title}
-                  variants={itemVariants}
-                  whileHover={{ y: -6 }}
-                  className="rounded-xl p-5 shadow-sm border border-[#e6eaf5] bg-white flex flex-col min-h-[300px] transition-all hover:shadow-md hover:border-[#cfd7f0]"
-                >
-                  <div className={`h-2 w-full rounded-t-xl -mt-5 -mx-5 mb-4 bg-gradient-to-r ${strip}`} />
-
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#f5f7ff] border border-[#e6eaf5] flex items-center justify-center">
-                      <card.icon className="h-5 w-5" style={{ color: card.iconColor }} />
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                        isPrimary ? 'bg-[#131e42] text-white' : 'bg-[#eef1fb] text-[#131e42]'
-                      }`}
-                    >
-                      {card.badge}
-                    </span>
-                  </div>
-
-                  <h3 className="mt-3 text-[22px] font-semibold text-[#131e42]">{card.title}</h3>
-                  <p className="mt-2 text-sm text-[#4a5678] leading-relaxed whitespace-pre-line">{card.description}</p>
-
-                  {card.tags?.length ? (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {card.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2.5 py-1 rounded-full bg-[#f5f7ff] text-[#4a5678] text-[11px] font-medium border border-[#e6eaf5]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <button
-                    type="button"
-                    onClick={isActionLocked(card) ? undefined : () => handleNavigate(card.path)}
-                    aria-disabled={isActionLocked(card)}
-                    className={`mt-auto w-full inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg border px-3 py-2 transition ${(() => {
-                      if (isActionLocked(card)) return 'opacity-50 cursor-not-allowed border-[#e6eaf5] text-[#9aa4c6]';
-                      if (isPrimary) return 'bg-[#131e42] text-white border-[#131e42] hover:opacity-90';
-                      return 'border-[#d5dbea] text-[#131e42] bg-white hover:bg-[#f5f7ff]';
-                    })()}`}
-                  >
-                    {isActionLocked(card) ? <Lock className="h-4 w-4" /> : null}
-                    {card.cta}
-                    {isActionLocked(card) ? (
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-[#9aa4c6]">(Coming soon)</span>
-                    ) : (
-                      <ArrowRight className="h-4 w-4" />
-                    )}
-                  </button>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
-      </section>
+      <TakeActionPrimaryLayout
+        refEl={ref}
+        isInView={isInView}
+        cards={actionCards}
+        title={takeActionTitle}
+        subtitle={takeActionSubtitle}
+        titleFontSize={takeActionTitleFontSize}
+        subtitleFontSize={takeActionSubtitleFontSize}
+        handleNavigate={handleNavigate}
+        isActionLocked={isActionLocked}
+      />
     );
   }
 
-  const primaryCard = actionCards.find((card) => card.variant === 'primary') ?? actionCards[0];
-  const secondaryCards = actionCards.filter((card) => card !== primaryCard);
-  const hasPrimary = Boolean(primaryCard);
-  const isPrimaryLight = Boolean(primaryCard?.bg?.includes('#e6ebff'));
-
+  // "grid" layout — compact 3-col grid
   return (
     <section
       ref={ref}
-      className="py-20 md:py-24"
+      className="py-12 md:py-16"
       style={{
         background: 'linear-gradient(180deg, #f0f6ff 0%, #ffffff 55%, #f0f6ff 100%)',
       }}
     >
       <div className="container mx-auto px-4 md:px-6 lg:px-10">
         <motion.div
-          className="text-center mb-12"
+          className="text-center mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
         >
-          <p className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-[#f0f6ff]/20 border border-[#e1513b]/50 text-[#e1513b] shadow-sm backdrop-blur mx-auto mb-2">
+          <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-[0.2em] bg-[#f0f6ff]/40 border border-[#e0e7ff] text-[#131e42] shadow-sm backdrop-blur mx-auto mb-1.5">
             TAKE ACTION
           </p>
           <h2
-            className="ghc-font-display text-3xl md:text-4xl font-semibold text-[#131e42] mb-3"
+            className="ghc-font-display text-3xl md:text-4xl font-semibold text-[#131e42] mb-1.5"
             style={{ fontSize: takeActionTitleFontSize ?? '36px' }}
           >
             {takeActionTitle}
           </h2>
           <p
-            className="text-[#4a5678] max-w-2xl mx-auto text-lg"
-            style={{ fontSize: takeActionSubtitleFontSize ?? '18px', whiteSpace: 'nowrap' }}
+            className="text-[#4a5678] max-w-3xl mx-auto text-base md:text-lg"
+            style={{ fontSize: takeActionSubtitleFontSize ?? '18px' }}
           >
             {takeActionSubtitle}
           </p>
         </motion.div>
 
-        {hasPrimary ? (
-          <div className="grid gap-6 max-w-6xl mx-auto">
-            {primaryCard ? (
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 max-w-6xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          {actionCards.map((card, idx) => {
+            const stripColors = ['from-[#dfe9ff] to-[#c7d7ff]', 'from-[#e9dcff] to-[#d7c4ff]', 'from-[#ffe8d6] to-[#ffd7b5]'];
+            const strip = stripColors[idx] ?? stripColors[0];
+            const isPrimary = card.variant === 'primary';
+            return (
               <motion.div
+                key={card.title}
                 variants={itemVariants}
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-                className={`group relative p-8 md:p-10 rounded-3xl border shadow-[0_18px_36px_rgba(0,0,0,0.12)] ${
-                  primaryCard?.bg ?? 'bg-gradient-to-br from-[#131e42] via-[#1f2c63] to-[#e1513b]'
-                } ${isPrimaryLight ? 'text-[#131e42]' : 'text-white'}`}
+                whileHover={{ y: -6 }}
+                className="rounded-xl p-5 shadow-sm border border-[#e6eaf5] bg-white flex flex-col min-h-[300px] transition-all hover:shadow-md hover:border-[#cfd7f0]"
               >
-                <div className="flex flex-col md:flex-row md:items-start md:gap-6">
-                  <div
-                    className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center shadow-[0_6px_16px_rgba(0,0,0,0.12)] ${
-                      isPrimaryLight ? 'bg-white border border-[#d9e3ff]' : 'bg-white/15 border border-white/20'
-                    }`}
-                  >
-                    <primaryCard.icon className="h-7 w-7" style={{ color: isPrimaryLight ? '#e1513b' : '#f0f6ff' }} />
+                <div className={`h-2 w-full rounded-t-xl -mt-5 -mx-5 mb-4 bg-gradient-to-r ${strip}`} />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#f5f7ff] border border-[#e6eaf5] flex items-center justify-center">
+                    <card.icon className="h-5 w-5" style={{ color: card.iconColor }} />
                   </div>
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`text-xs font-semibold tracking-[0.18em] uppercase ${
-                          isPrimaryLight ? 'text-[#131e42]' : 'text-[#fbd7cd]'
-                        }`}
-                      >
-                        {primaryCard.badge}
+                  <span className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-[0.14em] ${isPrimary ? 'bg-[#131e42] text-white' : 'bg-[#eef1fb] text-[#131e42]'}`}>
+                    {card.badge}
+                  </span>
+                </div>
+                <h3 className="mt-3 text-[22px] font-semibold text-[#131e42]">{card.title}</h3>
+                <p className="mt-2 text-sm text-[#4a5678] leading-relaxed">{card.description}</p>
+                {card.tags?.length ? (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {card.tags.map((tag) => (
+                      <span key={tag} className="px-2.5 py-1 rounded-full bg-[#f5f7ff] text-[#4a5678] text-[11px] font-medium border border-[#e6eaf5]">
+                        {tag}
                       </span>
-                      <span
-                        className={`inline-flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-full ${
-                          isPrimaryLight ? 'bg-white border border-[#d9e3ff] text-[#131e42]' : 'bg-white/15 border border-white/10 text-white'
-                        }`}
-                      >
-                        Start
-                      </span>
-                    </div>
-                    <h3 className="ghc-font-display text-2xl md:text-3xl font-semibold">
-                      {primaryCard.title}
-                    </h3>
-                    <p className={`text-base md:text-lg leading-relaxed ${isPrimaryLight ? 'text-[#4a5678]' : 'text-white/90'}`}>
-                      {primaryCard.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {primaryCard.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
-                            isPrimaryLight ? 'bg-white text-[#131e42] border border-[#d9e3ff]' : 'bg-white/15 text-white border border-white/20'
-                          }`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${isPrimaryLight ? 'bg-[#e1513b]' : 'bg-white/80'}`} />
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                    ))}
                   </div>
-                </div>
-                <div className="mt-6">
-                  <button
-                    type="button"
-                    onClick={isActionLocked(primaryCard) ? undefined : () => handleNavigate(primaryCard.path)}
-                    aria-disabled={isActionLocked(primaryCard)}
-                    className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-colors ${
-                      isPrimaryLight
-                        ? 'bg-transparent border border-[#d9e3ff] text-[#131e42] hover:bg-white/60'
-                        : 'bg-white text-[#131e42] shadow-[0_10px_24px_rgba(0,0,0,0.18)] hover:bg-[#f0f6ff]'
-                    }`}
-                  >
-                    {isActionLocked(primaryCard) ? <Lock className="h-5 w-5" /> : null}
-                    {primaryCard.cta}
-                    {isActionLocked(primaryCard) ? (
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-[#9aa4c6]">(Coming soon)</span>
-                    ) : null}
-                    <ArrowRight className="h-5 w-5" />
-                  </button>
-                </div>
-              </motion.div>
-            ) : null}
-
-            {secondaryCards.length ? (
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-                variants={containerVariants}
-                custom={0}
-              >
-                {secondaryCards.map((item) => (
-                  <motion.div
-                    key={item.title}
-                    variants={itemVariants}
-                    whileHover={{ y: -6 }}
-                    className={`group relative p-7 md:p-8 rounded-3xl ${item.bg} border border-[#e3e8f5] shadow-[0_10px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.09)] transition-all`}
-                  >
-                    <div className="flex items-start gap-4 md:gap-5">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-[0_6px_16px_rgba(0,0,0,0.08)] flex items-center justify-center">
-                        <item.icon className="h-6 w-6" style={{ color: item.iconColor }} />
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <p className={`text-xs font-semibold tracking-[0.18em] uppercase ${item.badgeColor}`}>
-                          {item.badge}
-                        </p>
-                        <h3 className="ghc-font-display text-xl md:text-2xl font-semibold text-[#131e42]">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm md:text-base text-[#4a5678] leading-relaxed">{item.description}</p>
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {item.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center gap-1 rounded-full bg-white/75 text-[#131e42] px-3 py-1 text-xs font-medium shadow-sm cursor-default"
-                            >
-                              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: item.iconColor }} />
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={isActionLocked(item) ? undefined : () => handleNavigate(item.path)}
-                      aria-disabled={isActionLocked(item)}
-                      className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold mt-6 border transition-colors ${
-                        isActionLocked(item)
-                          ? 'text-[#9aa4c6] cursor-not-allowed border-[#e6eaf5]'
-                          : 'border-[#d5dbea] text-[#131e42] bg-white hover:bg-[#f5f7ff]'
-                      }`}
-                    >
-                      {isActionLocked(item) ? <Lock className="h-4 w-4" /> : null}
-                      {item.cta}
-                      {isActionLocked(item) ? (
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-[#9aa4c6]">(Coming soon)</span>
-                      ) : null}
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : null}
-          </div>
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto"
-            initial="hidden"
-            animate={isInView ? 'visible' : 'hidden'}
-            variants={containerVariants}
-            custom={0}
-          >
-            {actionCards.map((item) => (
-              <motion.div
-                key={item.title}
-                variants={itemVariants}
-                whileHover={{ y: -8 }}
-                className={`group relative p-7 md:p-9 rounded-3xl ${item.bg} shadow-[0_10px_24px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] transition-all`}
-              >
-                <div className="flex items-start gap-4 md:gap-5">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-[0_6px_16px_rgba(0,0,0,0.08)] flex items-center justify-center">
-                    <item.icon className="h-6 w-6" style={{ color: item.iconColor }} />
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <p className={`text-xs font-semibold tracking-[0.18em] uppercase ${item.badgeColor}`}>
-                      {item.badge}
-                    </p>
-                    <h3 className="ghc-font-display text-xl md:text-2xl font-semibold text-[#131e42]">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm md:text-base text-[#4a5678]">{item.description}</p>
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {item.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1 rounded-full bg-white/75 text-[#131e42] px-3 py-1 text-xs font-medium shadow-sm cursor-default"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: item.iconColor }} />
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
+                ) : null}
                 <button
                   type="button"
-                  onClick={isActionLocked(item) ? undefined : () => handleNavigate(item.path)}
-                  aria-disabled={isActionLocked(item)}
-                  className={`inline-flex items-center gap-1 text-sm font-semibold mt-6 ${
-                    isActionLocked(item) ? 'text-[#9aa4c6] cursor-not-allowed' : `${item.accent} group-hover:underline`
-                  }`}
+                  onClick={isActionLocked(card) ? undefined : () => handleNavigate(card.path)}
+                  aria-disabled={isActionLocked(card)}
+                  className={`mt-auto w-full inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg border px-3 py-2 transition ${(() => {
+                    if (isActionLocked(card)) return 'opacity-50 cursor-not-allowed border-[#e6eaf5] text-[#9aa4c6]';
+                    if (isPrimary) return 'bg-[#131e42] text-white border-[#131e42] hover:opacity-90';
+                    return 'border-[#d5dbea] text-[#131e42] bg-white hover:bg-[#f5f7ff]';
+                  })()}`}
                 >
-                  {isActionLocked(item) ? <Lock className="h-4 w-4" /> : null}
-                  {item.cta}
-                  {isActionLocked(item) ? (
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-[#9aa4c6]">(Coming soon)</span>
-                  ) : null}
+                  {card.cta}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </motion.div>
-            ))}
-          </motion.div>
-        )}
+            );
+          })}
+        </motion.div>
       </div>
     </section>
   );
@@ -2208,48 +2000,53 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden dq-gradient-animated"
+      className="relative overflow-hidden"
       style={{
-        background: 'linear-gradient(120deg, #131e42 0%, #1b2553 45%, #e1513b 100%)',
+        background: 'linear-gradient(135deg, #030F35 0%, #0A1840 30%, #3D1A30 60%, #FB5535 100%)',
       }}
     >
-      <div className="dq-digital-bg" aria-hidden="true">
-        <svg viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="dq-digital-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(240,246,255,0.6)" />
-              <stop offset="100%" stopColor="rgba(225,81,59,0.6)" />
-            </linearGradient>
-          </defs>
-          <path className="dq-digital-line" d="M-40 140 L240 90 L520 160 L820 110 L1160 170 L1480 120" />
-          <path className="dq-digital-line alt" d="M-60 260 L180 220 L520 300 L860 240 L1180 320 L1500 260" />
-          <path className="dq-digital-line" d="M-40 400 L260 360 L520 420 L820 370 L1120 430 L1460 380" />
-          <path className="dq-digital-line alt" d="M-80 520 L220 500 L520 560 L840 520 L1160 580 L1500 540" />
-          <path className="dq-digital-line" d="M120 60 L280 180 L460 80 L640 200 L820 120 L1040 220 L1240 140" />
-          <path className="dq-digital-line alt" d="M240 120 L420 260 L620 150 L840 300 L1040 190 L1260 320" />
+      {/* Top edge accent */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FB5535]/20 to-transparent" />
+      {/* Bottom edge accent */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <circle className="dq-digital-dot" cx="240" cy="90" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="520" cy="160" r="4" />
-          <circle className="dq-digital-dot" cx="820" cy="110" r="3" />
-          <circle className="dq-digital-dot alt" cx="1160" cy="170" r="4.5" />
-          <circle className="dq-digital-dot" cx="180" cy="220" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="300" r="4" />
-          <circle className="dq-digital-dot" cx="860" cy="240" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1180" cy="320" r="4" />
-          <circle className="dq-digital-dot" cx="260" cy="360" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="420" r="4" />
-          <circle className="dq-digital-dot" cx="820" cy="370" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1120" cy="430" r="4" />
-          <circle className="dq-digital-dot" cx="220" cy="500" r="3" />
-          <circle className="dq-digital-dot alt" cx="520" cy="560" r="4" />
-          <circle className="dq-digital-dot" cx="840" cy="520" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1160" cy="580" r="4" />
-          <circle className="dq-digital-dot" cx="420" cy="260" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="640" cy="200" r="4" />
-          <circle className="dq-digital-dot" cx="1040" cy="220" r="3.5" />
-          <circle className="dq-digital-dot alt" cx="1260" cy="320" r="4" />
-        </svg>
+      {/* Animated dot grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,1) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+          opacity: 0.04,
+          animation: 'sixFinalDotDrift 8s linear infinite',
+        }}
+      />
+
+      {/* Glow orbs */}
+      <div className="absolute pointer-events-none rounded-full"
+        style={{ width: 500, height: 500, top: '-10%', left: '-10%', background: '#030F35', filter: 'blur(120px)', animation: 'sixFinalGlow1 6s ease-in-out infinite' }} />
+      <div className="absolute pointer-events-none rounded-full"
+        style={{ width: 600, height: 600, bottom: 0, right: 0, background: '#FB5535', filter: 'blur(150px)', transform: 'translate(25%, 25%)', animation: 'sixFinalGlow2 8s ease-in-out infinite' }} />
+      <div className="absolute pointer-events-none rounded-full"
+        style={{ width: 400, height: 400, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#FB5535', opacity: 0.1, filter: 'blur(100px)', animation: 'sixFinalGlow3 10s ease-in-out 2s infinite' }} />
+
+      {/* Floating hexagons */}
+      <div className="absolute top-8 right-12 pointer-events-none" style={{ animation: 'sixFinalHex1 12s ease-in-out infinite' }}>
+        <Hexagon className="w-16 h-16 text-white" style={{ opacity: 0.04 }} />
       </div>
+      <div className="absolute bottom-10 left-10 pointer-events-none" style={{ animation: 'sixFinalHex2 15s ease-in-out infinite' }}>
+        <Hexagon className="w-20 h-20 text-white" style={{ opacity: 0.03 }} />
+      </div>
+      <div className="absolute top-1/2 right-1/4 pointer-events-none" style={{ animation: 'sixFinalHex3 10s ease-in-out 1s infinite' }}>
+        <Hexagon className="w-10 h-10 text-white" style={{ opacity: 0.03 }} />
+      </div>
+      <div className="absolute top-12 left-16 pointer-events-none" style={{ animation: 'sixFinalHex4 14s ease-in-out 3s infinite' }}>
+        <Hexagon className="w-8 h-8 text-[#FB5535]" style={{ opacity: 0.05 }} />
+      </div>
+      <div className="absolute bottom-8 right-20 pointer-events-none" style={{ animation: 'sixFinalHex5 11s ease-in-out 2s infinite' }}>
+        <Hexagon className="w-12 h-12 text-white" style={{ opacity: 0.02 }} />
+      </div>
+
+      {/* Keyframes */}
       <div className="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
         <div className="relative min-h-[420px] lg:min-h-[520px] flex items-center">
           <motion.div
@@ -2258,6 +2055,14 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
+            <motion.p
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-white/15 border border-[#FB5535]/50 text-[#FB5535] backdrop-blur mb-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              AGILE 6XD
+            </motion.p>
             <motion.h2
               className="ghc-font-display font-bold text-4xl sm:text-5xl md:text-5xl lg:text-6xl leading-[1.1] text-white tracking-tight"
               initial={{ opacity: 0, y: 20 }}
@@ -2276,14 +2081,12 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
             >
               {finalSubtitle}
             </motion.p>
-
             <motion.div
-              className="mt-8 flex flex-wrap gap-4"
+              className="mt-8 flex flex-wrap gap-3"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.35 }}
             >
-            <div className="flex flex-wrap gap-3">
               {finalCTALabel && finalCTATo ? (
                 <button
                   type="button"
@@ -2294,10 +2097,10 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
                       navigate(finalCTATo);
                     }
                   }}
-                  className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg bg-white text-[#131e42] font-semibold text-base shadow-xl shadow-black/12 transition transform hover:-translate-y-0.5 hover:bg-white/95"
+                  className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg bg-white text-[#030F35] font-semibold text-base shadow-xl shadow-black/12 transition transform hover:-translate-y-0.5 hover:bg-white/95"
                 >
                   {finalCTALabel}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               ) : null}
               {finalCTASecondaryLabel && finalCTASecondaryTo ? (
@@ -2313,11 +2116,10 @@ function SectionFinalCTA({ navigate, content }: { navigate: (path: string) => vo
                   className="inline-flex items-center gap-2.5 h-[52px] px-7 rounded-lg border border-white/60 text-white font-semibold text-base shadow-lg shadow-black/10 transition transform hover:-translate-y-0.5 hover:bg-white/10"
                 >
                   {finalCTASecondaryLabel}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               ) : null}
-            </div>
-        </motion.div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

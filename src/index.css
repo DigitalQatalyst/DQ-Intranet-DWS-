@@ -761,3 +761,156 @@ textarea:-webkit-autofill {
   margin: 1.5rem 0;
   font-style: italic;
 }
+
+/* ─── Shared hero & section animation keyframes ─────────────────────────── */
+/* Used by GHCLanding.tsx, SixXDLandingLayout.tsx hero sections */
+@keyframes heroDotDrift {
+  0% { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+@keyframes heroGlow1 {
+  0%, 100% { opacity: 0.20; transform: scale(1); }
+  50% { opacity: 0.30; transform: scale(1.2); }
+}
+@keyframes heroGlow2 {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.15); }
+}
+@keyframes heroGlow3 {
+  0%, 100% { opacity: 0.05; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.12; transform: translate(-50%, -50%) scale(1.1); }
+}
+@keyframes heroRing1 {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
+  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+}
+@keyframes heroRing2 {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
+  100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+}
+@keyframes heroFracture1 {
+  0%, 100% { opacity: 0.06; } 50% { opacity: 0.15; }
+}
+@keyframes heroFracture2 {
+  0%, 100% { opacity: 0.06; } 50% { opacity: 0.15; }
+}
+@keyframes heroFracture3 {
+  0%, 100% { opacity: 0.06; } 50% { opacity: 0.15; }
+}
+@keyframes heroHex1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(30px, -40px) rotate(8deg); }
+}
+@keyframes heroHex2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-35px, 50px) rotate(-8deg); }
+}
+@keyframes heroHex3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(40px, -25px) rotate(6deg); }
+}
+@keyframes heroHex4 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-25px, 45px) rotate(-7deg); }
+}
+@keyframes heroHex5 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(30px, -30px) rotate(8deg); }
+}
+@keyframes heroHex6 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-30px, 35px) rotate(-6deg); }
+}
+@keyframes heroHex7 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(25px, -20px) rotate(5deg); }
+}
+/* 6xD hero uses same keyframes with sixHero prefix — aliased here */
+@keyframes sixHeroDotDrift { 0% { background-position: 0 0; } 100% { background-position: 48px 48px; } }
+@keyframes sixHeroGlow1 { 0%, 100% { opacity: 0.20; transform: scale(1); } 50% { opacity: 0.30; transform: scale(1.2); } }
+@keyframes sixHeroGlow2 { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.25; transform: scale(1.15); } }
+@keyframes sixHeroGlow3 { 0%, 100% { opacity: 0.05; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.12; transform: translate(-50%, -50%) scale(1.1); } }
+@keyframes sixHeroRing1 { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; } 100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; } }
+@keyframes sixHeroRing2 { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; } 100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; } }
+@keyframes sixHeroFracture { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.15; } }
+@keyframes sixHeroHex1 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(30px, -40px) rotate(8deg); } }
+@keyframes sixHeroHex2 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-35px, 50px) rotate(-8deg); } }
+@keyframes sixHeroHex3 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(40px, -25px) rotate(6deg); } }
+@keyframes sixHeroHex4 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-25px, 45px) rotate(-7deg); } }
+@keyframes sixHeroHex5 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(30px, -30px) rotate(8deg); } }
+@keyframes sixHeroHex6 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-30px, 35px) rotate(-6deg); } }
+@keyframes sixHeroHex7 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(25px, -20px) rotate(5deg); } }
+/* Final CTA section keyframes */
+@keyframes dotGridDrift { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+@keyframes glowPulse1 { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.25; transform: scale(1.15); } }
+@keyframes glowPulse2 { 0%, 100% { opacity: 0.10; transform: translate(25%, 25%) scale(1); } 50% { opacity: 0.20; transform: translate(25%, 25%) scale(1.2); } }
+@keyframes glowPulse3 { 0%, 100% { opacity: 0.08; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.14; transform: translate(-50%, -50%) scale(1.1); } }
+@keyframes floatHex1 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(20px, -30px) rotate(6deg); } }
+@keyframes floatHex2 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-25px, 40px) rotate(-6deg); } }
+@keyframes floatHex3 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(30px, -20px) rotate(5deg); } }
+@keyframes floatHex4 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-20px, 35px) rotate(-5deg); } }
+@keyframes floatHex5 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(25px, -25px) rotate(6deg); } }
+@keyframes sixFinalDotDrift { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+@keyframes sixFinalGlow1 { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.25; transform: scale(1.15); } }
+@keyframes sixFinalGlow2 { 0%, 100% { opacity: 0.10; transform: translate(25%, 25%) scale(1); } 50% { opacity: 0.20; transform: translate(25%, 25%) scale(1.2); } }
+@keyframes sixFinalGlow3 { 0%, 100% { opacity: 0.08; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.14; transform: translate(-50%, -50%) scale(1.1); } }
+@keyframes sixFinalHex1 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(20px, -30px) rotate(6deg); } }
+@keyframes sixFinalHex2 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-25px, 40px) rotate(-6deg); } }
+@keyframes sixFinalHex3 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(30px, -20px) rotate(5deg); } }
+@keyframes sixFinalHex4 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-20px, 35px) rotate(-5deg); } }
+@keyframes sixFinalHex5 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(25px, -25px) rotate(6deg); } }
+/* Onboarding hero keyframes */
+@keyframes obDotDrift { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+@keyframes obGlow1 { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.25; transform: scale(1.15); } }
+@keyframes obGlow2 { 0%, 100% { opacity: 0.10; transform: translate(25%, 25%) scale(1); } 50% { opacity: 0.20; transform: translate(25%, 25%) scale(1.2); } }
+@keyframes obGlow3 { 0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.15); } }
+@keyframes obHex1 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(20px, -30px) rotate(6deg); } }
+@keyframes obHex2 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-25px, 40px) rotate(-6deg); } }
+@keyframes obHex3 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(30px, -20px) rotate(5deg); } }
+@keyframes obHex4 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-20px, 35px) rotate(-5deg); } }
+@keyframes obHex5 { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(25px, -25px) rotate(6deg); } }
+@keyframes obShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+/* Onboarding HeroAnimatedBackground keyframes */
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(40px, -30px) rotate(8deg); }
+  50% { transform: translate(-15px, -50px) rotate(-4deg); }
+  75% { transform: translate(-35px, -15px) rotate(6deg); }
+}
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-25px, 30px) rotate(-8deg); }
+  50% { transform: translate(20px, 45px) rotate(4deg); }
+  75% { transform: translate(30px, 12px) rotate(-5deg); }
+}
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(25px, -35px) scale(1.1) rotate(10deg); }
+  66% { transform: translate(-20px, -20px) scale(0.95) rotate(-5deg); }
+}
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.15); }
+}
+@keyframes pulseGlow2 {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.2); }
+}
+@keyframes driftDots {
+  0% { background-position: 0px 0px; }
+  100% { background-position: 40px 40px; }
+}
+@keyframes crackGlow {
+  0%, 100% { opacity: 0.06; }
+  50% { opacity: 0.15; }
+}
+@keyframes ringPulse {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.08; }
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(200%) rotate(25deg); }
+}
