@@ -48,248 +48,122 @@ const supportOptions: SupportCard[] = [
   },
 ];
 
-const HeroAnimatedBackground = () => (
+HeroAnimatedBackground = () => (
   <>
-    <div 
+    {/* Base gradient */}
+    <div
       className="absolute inset-0 z-0"
       style={{
-        background: 'linear-gradient(135deg, #030F35 0%, #1A2E6E 30%, #030F35 60%, #1A2E6E 90%, #030F35 100%)',
-        backgroundSize: '400% 400%',
-        animation: 'gradientDrift 15s ease infinite'
+        background: 'linear-gradient(135deg, #3D2054 0%, #5D3060 20%, #8B4455 40%, #7D4050 55%, #C85A45 75%, #E8573A 100%)',
       }}
     />
 
-    <div className="absolute inset-0 opacity-[0.12] z-[1]">
-      <svg className="w-full h-full" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <linearGradient id="meshGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FB5535" stopOpacity="0.3" />
-            <stop offset="50%" stopColor="#1A2E6E" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#030F35" stopOpacity="0.15" />
-          </linearGradient>
-          <linearGradient id="meshGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1A2E6E" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#FB5535" stopOpacity="0.2" />
-          </linearGradient>
-        </defs>
-        <g stroke="url(#meshGradient)" strokeWidth="1">
-          {[...Array(15)].map((_, i) => ( // NOSONAR: Array() is intentional for creating empty array
-            <line
-              key={`v-${i}`} // NOSONAR: index is stable for static grid lines
-              x1={i * 128}
-              y1="0"
-              x2={i * 128}
-              y2="1080"
-              opacity="0.4"
-              style={{
-                animation: `pulse ${6 + i * 0.5}s ease-in-out infinite`,
-                animationDelay: `${i * 0.2}s`
-              }}
-            />
-          ))}
-          {[...Array(12)].map((_, i) => ( // NOSONAR: Array() is intentional for creating empty array
-            <line
-              key={`h-${i}`} // NOSONAR: index is stable for static grid lines
-              x1="0"
-              y1={i * 90}
-              x2="1920"
-              y2={i * 90}
-              opacity="0.4"
-              style={{
-                animation: `pulse ${8 + i * 0.5}s ease-in-out infinite`,
-                animationDelay: `${i * 0.3}s`
-              }}
-            />
-          ))}
-        </g>
-      </svg>
-    </div>
+    {/* Top edge accent */}
+    <div className="absolute top-0 left-0 right-0 h-px z-10 bg-gradient-to-r from-transparent via-[#E8573A]/20 to-transparent" />
+    {/* Bottom edge accent */}
+    <div className="absolute bottom-0 left-0 right-0 h-px z-10 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
-      {[...Array(12)].map((_, i) => ( // NOSONAR: Array() is intentional for creating empty array
-        <div
-          key={i} // NOSONAR: index is stable for static floating elements
-          className="absolute rounded-full"
-          style={{
-            width: `${60 + (i % 4) * 20}px`,
-            height: `${60 + (i % 4) * 20}px`,
-            left: `${5 + (i * 8)}%`,
-            top: `${10 + (i % 5) * 18}%`,
-            background: i % 3 === 0 
-              ? 'radial-gradient(circle, rgba(251, 85, 53, 0.4) 0%, rgba(251, 85, 53, 0.1) 50%, transparent 80%)' 
-              : 'radial-gradient(circle, rgba(26, 46, 110, 0.3) 0%, rgba(26, 46, 110, 0.1) 50%, transparent 80%)',
-            animation: `floatSlow ${12 + i * 2}s ease-in-out infinite`,
-            animationDelay: `${i * 0.8}s`,
-            filter: 'blur(20px)',
-            boxShadow: i % 3 === 0 
-              ? '0 0 60px rgba(251, 85, 53, 0.3)' 
-              : '0 0 60px rgba(26, 46, 110, 0.2)',
-          }}
-        />
-      ))}
-    </div>
-
-    <div className="absolute inset-0 z-[2] pointer-events-none">
-      <svg className="w-full h-full" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <linearGradient id="shapeGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FB5535" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#1A2E6E" stopOpacity="0.2" />
-          </linearGradient>
-          <linearGradient id="shapeGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1A2E6E" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#030F35" stopOpacity="0.15" />
-          </linearGradient>
-          <filter id="glowFilter">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        
-        <g style={{ animation: 'floatSlow 20s ease-in-out infinite' }} filter="url(#glowFilter)">
-          <circle cx="300" cy="300" r="120" fill="url(#shapeGradient1)" opacity="0.4" />
-          <circle cx="300" cy="300" r="80" fill="none" stroke="url(#shapeGradient2)" strokeWidth="2" opacity="0.5" />
-        </g>
-        
-        <g style={{ animation: 'floatSlow 25s ease-in-out infinite reverse', animationDelay: '3s' }} filter="url(#glowFilter)">
-          <circle cx="1600" cy="600" r="150" fill="url(#shapeGradient2)" opacity="0.35" />
-          <circle cx="1600" cy="600" r="100" fill="none" stroke="url(#shapeGradient1)" strokeWidth="2" opacity="0.45" />
-        </g>
-        
-        <g transform="translate(1000, 200)" style={{ animation: 'rotateSlow 40s linear infinite' }} filter="url(#glowFilter)">
-          <polygon
-            points="0,-70 60,-35 60,35 0,70 -60,35 -60,-35"
-            fill="none"
-            stroke="url(#shapeGradient1)"
-            strokeWidth="2"
-            opacity="0.4"
-          />
-          <polygon
-            points="0,-50 43,-25 43,25 0,50 -43,25 -43,-25"
-            fill="none"
-            stroke="url(#shapeGradient2)"
-            strokeWidth="1.5"
-            opacity="0.5"
-          />
-        </g>
-        
-        <g transform="translate(500, 700)" style={{ animation: 'rotateSlow 35s linear infinite reverse' }} filter="url(#glowFilter)">
-          <polygon
-            points="0,-55 48,-27.5 48,27.5 0,55 -48,27.5 -48,-27.5"
-            fill="none"
-            stroke="url(#shapeGradient2)"
-            strokeWidth="2"
-            opacity="0.4"
-          />
-        </g>
-        
-        <path
-          d="M 0 400 Q 400 300, 800 400 T 1600 400 T 1920 400"
-          stroke="url(#shapeGradient1)"
-          strokeWidth="3"
-          fill="none"
-          filter="url(#glowFilter)"
-          opacity="0.5"
-          style={{
-            animation: 'floatSlow 30s ease-in-out infinite',
-            strokeDasharray: '10,10'
-          }}
-        />
-        <path
-          d="M 0 600 Q 500 500, 1000 600 T 1920 600"
-          stroke="url(#shapeGradient2)"
-          strokeWidth="2.5"
-          fill="none"
-          filter="url(#glowFilter)"
-          opacity="0.4"
-          style={{
-            animation: 'floatSlow 35s ease-in-out infinite reverse',
-            animationDelay: '2s',
-            strokeDasharray: '12,12'
-          }}
-        />
-      </svg>
-    </div>
-
-    <div className="absolute inset-0 z-[1] pointer-events-none">
-      <div
-        className="absolute rounded-full"
-        style={{
-          width: '600px',
-          height: '600px',
-          left: '20%',
-          top: '30%',
-          background: 'radial-gradient(circle, rgba(251, 85, 53, 0.2) 0%, transparent 70%)',
-          filter: 'blur(80px)',
-          animation: 'pulse 8s ease-in-out infinite'
-        }}
-      />
-      <div
-        className="absolute rounded-full"
-        style={{
-          width: '700px',
-          height: '700px',
-          right: '15%',
-          bottom: '25%',
-          background: 'radial-gradient(circle, rgba(26, 46, 110, 0.25) 0%, transparent 70%)',
-          filter: 'blur(90px)',
-          animation: 'pulse 10s ease-in-out infinite',
-          animationDelay: '4s'
-        }}
-      />
-    </div>
-
-    <div className="absolute inset-0 z-[1] pointer-events-none">
-      <svg className="w-full h-full" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <linearGradient id="journeyStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#FB5535" stopOpacity="0.25" />
-            <stop offset="50%" stopColor="#ffffff" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#1A2E6E" stopOpacity="0.25" />
-          </linearGradient>
-          <linearGradient id="journeyHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#FFD0C0" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#7fb7ff" stopOpacity="0.6" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M-80 720 C 320 640, 640 820, 960 680 S 1580 520, 2000 660"
-          fill="none"
-          stroke="url(#journeyStroke)"
-          strokeWidth="3"
-          strokeDasharray="14 10"
-          strokeLinecap="round"
-          style={{ animation: 'dashMove 14s linear infinite' }}
-          opacity="0.8"
-        />
-        <path
-          d="M-80 720 C 320 640, 640 820, 960 680 S 1580 520, 2000 660"
-          fill="none"
-          stroke="url(#journeyHighlight)"
-          strokeWidth="6"
-          strokeDasharray="90 520"
-          strokeLinecap="round"
-          style={{ animation: 'shimmerDash 7s linear infinite' }}
-          opacity="0.9"
-        />
-        <circle cx="260" cy="700" r="9" fill="#FB5535" opacity="0.75" style={{ animation: 'pulseDot 3.8s ease-in-out infinite' }} />
-        <circle cx="720" cy="780" r="9" fill="#F2B9A3" opacity="0.75" style={{ animation: 'pulseDot 4.2s ease-in-out infinite', animationDelay: '0.4s' }} />
-        <circle cx="1180" cy="640" r="9" fill="#8FB7FF" opacity="0.75" style={{ animation: 'pulseDot 3.5s ease-in-out infinite', animationDelay: '0.8s' }} />
-        <circle cx="1640" cy="600" r="9" fill="#FFFFFF" opacity="0.8" style={{ animation: 'pulseDot 4.6s ease-in-out infinite', animationDelay: '1.2s' }} />
-      </svg>
-    </div>
-
+    {/* Animated dot grid */}
     <div
-      className="absolute inset-0 z-[1]"
+      className="absolute inset-0 pointer-events-none z-[1]"
       style={{
-        background: 'radial-gradient(ellipse 900px 120% at 0% 50%, rgba(3, 15, 53, 0.6) 0%, rgba(3, 15, 53, 0.3) 45%, transparent 75%)',
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,1) 1px, transparent 1px)',
+        backgroundSize: '40px 40px',
+        opacity: 0.04,
+        animation: 'obDotDrift 8s linear infinite',
       }}
     />
+
+    {/* Glow orbs */}
+    <div className="absolute pointer-events-none rounded-full z-[1]"
+      style={{ width: 500, height: 500, top: '-10%', left: '-10%', background: '#3D2054', filter: 'blur(120px)', animation: 'obGlow1 6s ease-in-out infinite' }} />
+    <div className="absolute pointer-events-none rounded-full z-[1]"
+      style={{ width: 600, height: 600, bottom: 0, right: 0, background: '#E8573A', filter: 'blur(150px)', transform: 'translate(25%, 25%)', animation: 'obGlow2 8s ease-in-out infinite' }} />
+    <div className="absolute pointer-events-none rounded-full z-[1]"
+      style={{ width: 400, height: 400, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#8B4455', opacity: 0.2, filter: 'blur(100px)', animation: 'obGlow3 10s ease-in-out 2s infinite' }} />
+
+    {/* Floating hexagons */}
+    <div className="absolute top-8 right-12 pointer-events-none z-[2]" style={{ animation: 'obHex1 12s ease-in-out infinite' }}>
+      <svg viewBox="0 0 24 24" className="w-16 h-16 text-white" style={{ opacity: 0.04 }} fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
+      </svg>
+    </div>
+    <div className="absolute bottom-10 left-10 pointer-events-none z-[2]" style={{ animation: 'obHex2 15s ease-in-out infinite' }}>
+      <svg viewBox="0 0 24 24" className="w-20 h-20 text-white" style={{ opacity: 0.03 }} fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
+      </svg>
+    </div>
+    <div className="absolute top-1/2 right-1/4 pointer-events-none z-[2]" style={{ animation: 'obHex3 10s ease-in-out 1s infinite' }}>
+      <svg viewBox="0 0 24 24" className="w-10 h-10 text-white" style={{ opacity: 0.03 }} fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
+      </svg>
+    </div>
+    <div className="absolute top-12 left-16 pointer-events-none z-[2]" style={{ animation: 'obHex4 14s ease-in-out 3s infinite' }}>
+      <svg viewBox="0 0 24 24" className="w-8 h-8" style={{ opacity: 0.05, color: '#E8573A' }} fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
+      </svg>
+    </div>
+    <div className="absolute bottom-8 right-20 pointer-events-none z-[2]" style={{ animation: 'obHex5 11s ease-in-out 2s infinite' }}>
+      <svg viewBox="0 0 24 24" className="w-12 h-12 text-white" style={{ opacity: 0.02 }} fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
+      </svg>
+    </div>
+
+    {/* Card shimmer overlay */}
+    <div
+      className="absolute inset-0 pointer-events-none z-[2]"
+      style={{
+        background: 'linear-gradient(25deg, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%)',
+        backgroundSize: '200% 100%',
+        animation: 'obShimmer 6s ease-in-out infinite',
+      }}
+    />
+
+    {/* Keyframes */}
+    <style>{`
+      @keyframes obDotDrift {
+        0% { background-position: 0 0; }
+        100% { background-position: 40px 40px; }
+      }
+      @keyframes obGlow1 {
+        0%, 100% { opacity: 0.15; transform: scale(1); }
+        50% { opacity: 0.25; transform: scale(1.15); }
+      }
+      @keyframes obGlow2 {
+        0%, 100% { opacity: 0.10; transform: translate(25%, 25%) scale(1); }
+        50% { opacity: 0.20; transform: translate(25%, 25%) scale(1.2); }
+      }
+      @keyframes obGlow3 {
+        0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
+        50% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.15); }
+      }
+      @keyframes obHex1 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(20px, -30px) rotate(6deg); }
+      }
+      @keyframes obHex2 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-25px, 40px) rotate(-6deg); }
+      }
+      @keyframes obHex3 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(30px, -20px) rotate(5deg); }
+      }
+      @keyframes obHex4 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-20px, 35px) rotate(-5deg); }
+      }
+      @keyframes obHex5 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(25px, -25px) rotate(6deg); }
+      }
+      @keyframes obShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+    `}</style>
   </>
-);
+)
 
 export function OnboardingLanding() {
   const navigate = useNavigate();
