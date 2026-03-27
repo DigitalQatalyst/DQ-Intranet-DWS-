@@ -262,9 +262,9 @@ const ACTION_CARDS_DEFAULT: ActionCard[] = [
     cta: 'Read the story',
     path: 'https://preview.shorthand.com/Pg0KQCF1Rp904ao7',
     bg: 'bg-white',
-    accent: 'text-[#E8573A]',
-    badgeColor: 'text-[#E8573A]',
-    iconColor: '#E8573A',
+    accent: 'text-[#FB5535]',
+    badgeColor: 'text-[#FB5535]',
+    iconColor: '#FB5535',
   },
   {
     title: 'Learning Center',
@@ -276,9 +276,9 @@ const ACTION_CARDS_DEFAULT: ActionCard[] = [
     cta: 'Start learning',
     path: '/lms',
     bg: 'bg-white',
-    accent: 'text-[#E8573A]',
-    badgeColor: 'text-[#E8573A]',
-    iconColor: '#E8573A',
+    accent: 'text-[#FB5535]',
+    badgeColor: 'text-[#FB5535]',
+    iconColor: '#FB5535',
   },
   {
     title: 'Knowledge Center',
@@ -290,9 +290,9 @@ const ACTION_CARDS_DEFAULT: ActionCard[] = [
     cta: 'Find what you need',
     path: '/marketplace/guides',
     bg: 'bg-white',
-    accent: 'text-[#C62828]',
-    badgeColor: 'text-[#C62828]',
-    iconColor: '#C62828',
+    accent: 'text-[#030F35]',
+    badgeColor: 'text-[#030F35]',
+    iconColor: '#030F35',
   },
   {
     title: 'Viva Engage',
@@ -304,9 +304,9 @@ const ACTION_CARDS_DEFAULT: ActionCard[] = [
     cta: 'Join the conversation',
     path: 'https://engage.cloud.microsoft/main/feed',
     bg: 'bg-white',
-    accent: 'text-[#B71C1C]',
-    badgeColor: 'text-[#B71C1C]',
-    iconColor: '#B71C1C',
+    accent: 'text-[#030F35]',
+    badgeColor: 'text-[#030F35]',
+    iconColor: '#030F35',
   },
 ];
 
@@ -1183,10 +1183,10 @@ const TakeActionGridLayout = ({
       title: 'Storybooks',
       label: 'STORYBOOKS',
       icon: BookOpen,
-      gradientFrom: '#E8573A',
-      gradientTo: '#F4845F',
+      gradientFrom: '#FB5535',
+      gradientTo: '#0A1E5C',
       glowColor: 'rgba(232,87,58,0.15)',
-      accent: '#E8573A',
+      accent: '#FB5535',
       tags: ['Leadership', 'Practices', 'Culture'],
       description: cards[0]?.description ?? '',
       cta: 'Read the story',
@@ -1197,10 +1197,10 @@ const TakeActionGridLayout = ({
       title: 'Learning Center',
       label: 'LEARNING',
       icon: GraduationCap,
-      gradientFrom: '#E8573A',
-      gradientTo: '#FF8A65',
+      gradientFrom: '#FB5535',
+      gradientTo: '#1A2D6B',
       glowColor: 'rgba(255,138,101,0.15)',
-      accent: '#E8573A',
+      accent: '#FB5535',
       tags: ['Facilitation', 'Problem', 'Paths'],
       description: cards[1]?.description ?? '',
       cta: 'Start learning',
@@ -1211,10 +1211,10 @@ const TakeActionGridLayout = ({
       title: 'Knowledge Center',
       label: 'ADVANCED',
       icon: FileText,
-      gradientFrom: '#C62828',
-      gradientTo: '#E8573A',
+      gradientFrom: '#030F35',
+      gradientTo: '#FB5535',
       glowColor: 'rgba(198,40,40,0.15)',
-      accent: '#C62828',
+      accent: '#030F35',
       tags: ['Maps', 'Guardrails', 'References'],
       description: cards[2]?.description ?? '',
       cta: 'Find what you need',
@@ -1225,10 +1225,10 @@ const TakeActionGridLayout = ({
       title: 'Viva Engage',
       label: 'COMMUNITY',
       icon: Users,
-      gradientFrom: '#B71C1C',
-      gradientTo: '#D84315',
+      gradientFrom: '#030F35',
+      gradientTo: '#1A2D6B',
       glowColor: 'rgba(183,28,28,0.15)',
-      accent: '#B71C1C',
+      accent: '#030F35',
       tags: ['Conversations', 'Collaboration', 'Community'],
       description: cards[3]?.description ?? '',
       cta: 'Join the conversation',
@@ -1248,7 +1248,7 @@ const TakeActionGridLayout = ({
         style={{
           width: 400, height: 400,
           top: '-10%', left: '-10%',
-          background: '#E8573A',
+          background: '#FB5535',
           opacity: 0.03,
           filter: 'blur(100px)',
         }}
@@ -1258,7 +1258,7 @@ const TakeActionGridLayout = ({
         style={{
           width: 400, height: 400,
           bottom: '-10%', right: '-5%',
-          background: '#C62828',
+          background: '#030F35',
           opacity: 0.02,
           filter: 'blur(100px)',
         }}
@@ -1272,11 +1272,11 @@ const TakeActionGridLayout = ({
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
         >
-          <span className="inline-block px-3 py-1 rounded-full bg-[#E8573A]/10 text-[#E8573A] text-xs font-bold tracking-widest uppercase border border-[#E8573A]/20 mb-4">
+          <span className="inline-block px-3 py-1 rounded-full bg-[#FB5535]/10 text-[#FB5535] text-xs font-bold tracking-widest uppercase border border-[#FB5535]/20 mb-4">
             TAKE ACTION
           </span>
           <h2
-            className="font-extrabold text-[#1a1a2e] mb-3 tracking-tight text-3xl md:text-4xl"
+            className="font-extrabold text-[#030F35] mb-3 tracking-tight text-3xl md:text-4xl"
             style={{ fontSize: titleFontSize }}
           >
             {title}
@@ -1382,7 +1382,7 @@ const TakeActionGridLayout = ({
                         >
                           {card.label}
                         </p>
-                        <h3 className="text-lg font-bold text-[#1a1a2e] leading-tight">
+                        <h3 className="text-lg font-bold text-[#030F35] leading-tight">
                           {card.title}
                         </h3>
                       </div>
