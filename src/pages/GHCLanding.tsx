@@ -1282,7 +1282,7 @@ const TakeActionGridLayout = ({
             {title}
           </h2>
           <p
-            className="text-gray-500 max-w-xl mx-auto text-base leading-relaxed"
+            className="text-gray-500 max-w-3xl mx-auto text-base leading-relaxed whitespace-nowrap"
             style={{ fontSize: subtitleFontSize }}
           >
             {subtitle}
