@@ -250,139 +250,88 @@ const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
   );
 };
 
-const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
-  subtitle = 'Explore DQ teams, capabilities, and factories delivering solutions, services, and innovation across the ecosystem.',
-}) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  
-  // Fetch units and associates from DQ Work Directory
-  const { units: workUnits, loading: workUnitsLoading } = useWorkUnits();
-  const { associates: workAssociates, loading: workAssociatesLoading } = useAssociates();
+// ── Custom hook: encapsulates all filter/search/URL-sync logic ────────────────
 
-  // State
+function useDirectoryFilters(workUnits: WorkUnit[], workAssociates: WorkAssociate[]) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
-  const [viewMode, setViewMode] = useState<ViewMode>(
-    (searchParams.get('view') as ViewMode) || 'units'
-  );
+  const [viewMode, setViewMode] = useState<ViewMode>((searchParams.get('view') as ViewMode) || 'units');
   const [selectedSectors, setSelectedSectors] = useState<SectorType[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedAssociateProfile, setSelectedAssociateProfile] =
-    useState<DirectoryAssociateProfile | null>(null);
-  const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
 
-  // Debounce search
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 300);
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Update URL params
   useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedQuery) params.set('q', debouncedQuery);
     if (viewMode !== 'units') params.set('view', viewMode);
     if (selectedSectors.length > 0) params.set('sectors', selectedSectors.join(','));
     if (selectedStreams.length > 0) params.set('streams', selectedStreams.join(','));
-    
     setSearchParams(params, { replace: true });
   }, [debouncedQuery, viewMode, selectedSectors, selectedStreams, setSearchParams]);
 
-  // Use Work Directory associates instead of hardcoded data
-  const showcaseAssociates = useMemo<Associate[]>(() => {
-    return workAssociates.map(mapWorkAssociateToAssociate);
-  }, [workAssociates]);
+  const showcaseAssociates = useMemo<Associate[]>(() => workAssociates.map(mapWorkAssociateToAssociate), [workAssociates]);
 
-  // Filter logic for Work Directory units
   const filteredWorkUnits = useMemo(() => {
     let filtered = [...workUnits];
-
-    // Search
     if (debouncedQuery.trim()) {
       const lower = debouncedQuery.toLowerCase();
-      filtered = filtered.filter((unit) =>
-        [
-          unit.unitName,
-          unit.mandate,
-          unit.currentFocus,
-          unit.sector,
-          unit.unitType,
-          ...(unit.focusTags || []),
-          ...(unit.wiAreas || []),
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .includes(lower)
+      filtered = filtered.filter(unit =>
+        [unit.unitName, unit.mandate, unit.currentFocus, unit.sector, unit.unitType, ...(unit.focusTags || []), ...(unit.wiAreas || [])]
+          .filter(Boolean).join(' ').toLowerCase().includes(lower)
       );
     }
-
-    // Sector filter
-    if (selectedSectors.length > 0) {
-      filtered = filtered.filter((unit) => selectedSectors.includes(unit.sector as SectorType));
-    }
-
+    if (selectedSectors.length > 0) filtered = filtered.filter(unit => selectedSectors.includes(unit.sector as SectorType));
     return filtered;
   }, [debouncedQuery, selectedSectors, workUnits]);
 
   const filteredAssociates = useMemo(() => {
     let filtered = [...showcaseAssociates];
-
-    // Search
     if (debouncedQuery.trim()) {
       const lower = debouncedQuery.toLowerCase();
-      filtered = filtered.filter((person) =>
-        [
-          person.name,
-          person.title,
-          person.role,
-          person.unit,
-          person.sector,
-          person.tag,
-          person.email,
-          person.mobile,
-          person.location,
-          person.company,
-          person.website,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .includes(lower)
+      filtered = filtered.filter(person =>
+        [person.name, person.title, person.role, person.unit, person.sector, person.tag, person.email, person.mobile, person.location, person.company, person.website]
+          .filter(Boolean).join(' ').toLowerCase().includes(lower)
       );
     }
-
-    // Sector filter
-    if (selectedSectors.length > 0) {
-      filtered = filtered.filter(
-        (person) => person.sector && selectedSectors.includes(person.sector)
-      );
-    }
-
+    if (selectedSectors.length > 0) filtered = filtered.filter(person => person.sector && selectedSectors.includes(person.sector));
     return filtered;
   }, [debouncedQuery, selectedSectors, showcaseAssociates]);
-  const visibleAssociates = useMemo(
-    () => filteredAssociates.slice(0, 9),
-    [filteredAssociates]
-  );
 
-  const toggleSector = (sector: SectorType) => {
-    setSelectedSectors((prev) =>
-      prev.includes(sector) ? prev.filter((s) => s !== sector) : [...prev, sector]
-    );
-  };
+  const toggleSector = (sector: SectorType) =>
+    setSelectedSectors(prev => prev.includes(sector) ? prev.filter(s => s !== sector) : [...prev, sector]);
 
-  const clearFilters = () => {
-    setSelectedSectors([]);
-    setSelectedStreams([]);
-    setSearchQuery('');
-  };
+  const clearFilters = () => { setSelectedSectors([]); setSelectedStreams([]); setSearchQuery(''); };
 
-  const hasActiveFilters = selectedSectors.length > 0 || selectedStreams.length > 0 || searchQuery.trim();
+  const hasActiveFilters = selectedSectors.length > 0 || selectedStreams.length > 0 || !!searchQuery.trim();
+
+  return { searchQuery, setSearchQuery, viewMode, setViewMode, selectedSectors, selectedStreams, filteredWorkUnits, filteredAssociates, toggleSector, clearFilters, hasActiveFilters };
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
+  subtitle = 'Explore DQ teams, capabilities, and factories delivering solutions, services, and innovation across the ecosystem.',
+}) => {
+  const navigate = useNavigate();
+  const { units: workUnits, loading: workUnitsLoading } = useWorkUnits();
+  const { associates: workAssociates, loading: workAssociatesLoading } = useAssociates();
+
+  const {
+    searchQuery, setSearchQuery, viewMode, setViewMode,
+    selectedSectors, filteredWorkUnits, filteredAssociates,
+    toggleSector, clearFilters, hasActiveFilters,
+  } = useDirectoryFilters(workUnits, workAssociates);
+
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedAssociateProfile, setSelectedAssociateProfile] = useState<DirectoryAssociateProfile | null>(null);
+  const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
+
+  const visibleAssociates = useMemo(() => filteredAssociates.slice(0, 9), [filteredAssociates]);
   const sectors: SectorType[] = ['Governance', 'Operations', 'Platform', 'Delivery'];
   
   // Map and filter Work Directory units for display (limit to 9)

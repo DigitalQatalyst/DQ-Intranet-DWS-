@@ -40,8 +40,7 @@ export const formatDateVeryShort = (input: string): string => {
   try {
     return new Date(input).toLocaleDateString('en-US', { 
       month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
+      day: 'numeric' 
     });
   } catch {
     return '';
@@ -73,97 +72,79 @@ export const toTitleCase = (text: string): string => {
   return text;
 };
 
+const TITLE_OVERRIDES: Record<string, string> = {
+  'dq-scrum-master-structure-update': 'Updated Scrum Master Structure',
+  'company-wide-lunch-break-schedule': 'Company-wide Lunch Break Schedule',
+  'grading-review-program-grp': 'Grading Review Program (GRP)',
+  'dq-storybook-latest-links': 'DQ Storybook (Latest Version and Links)',
+  'dq-storybook-live': 'The DQ Storybook Goes Live!',
+  'riyadh-horizon-hub': 'Riyadh Horizon Hub Opens',
+};
+
+const LOCATION_ABBREVIATIONS: Record<string, string> = {
+  'Dubai': 'DXB',
+  'Nairobi': 'NBO',
+  'Riyadh': 'KSA',
+  'Remote': 'Remote',
+};
+
+const joinWithParts = (parts: string[], text: string): string =>
+  parts.length > 0 ? `${parts.join(' | ')} | ${text}` : text;
+
+const buildTitleParts = (item: NewsItem): string[] => {
+  const parts: string[] = [];
+  if (item.location) {
+    parts.push(LOCATION_ABBREVIATIONS[item.location] ?? item.location);
+  }
+  if (item.newsType) {
+    parts.push(item.newsType);
+  } else if (item.type) {
+    parts.push(item.type === 'Thought Leadership' ? 'Blog' : item.type);
+  }
+  return parts;
+};
+
+const buildTitleFromExcerpt = (item: NewsItem, parts: string[]): string | null => {
+  if (!item.excerpt?.trim()) return null;
+  const titleFromExcerpt = item.excerpt.trim().split(' ').slice(0, 8).join(' ');
+  if (titleFromExcerpt.length <= 20) return null;
+  return toTitleCase(joinWithParts(parts, titleFromExcerpt));
+};
+
+const buildTitleFromContent = (item: NewsItem, parts: string[]): string | null => {
+  if (!item.content) return null;
+  const firstLine = item.content.split('\n').find(line => line.trim() && !line.trim().startsWith('#'));
+  if (!firstLine) return null;
+  const cleanLine = firstLine.trim().replace(/^#+\s+/, '').replace(/\*\*/g, '').substring(0, 60);
+  if (cleanLine.length <= 15) return null;
+  return toTitleCase(joinWithParts(parts, cleanLine));
+};
+
+const buildTitleFromId = (item: NewsItem, parts: string[]): string | null => {
+  if (!item.id) return null;
+  const meaningfulParts = item.id
+    .split('-')
+    .filter(part => part.length > 2 && !['dq', 'the', 'and', 'for'].includes(part.toLowerCase()))
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1));
+  if (meaningfulParts.length === 0) return null;
+  return toTitleCase(joinWithParts(parts, meaningfulParts.join(' ')));
+};
+
 /**
  * Generate an appropriate title for news items that don't have one
  */
 export const generateTitle = (item: NewsItem): string => {
-  // Explicit overrides for specific items where we want a custom display title
-  const titleOverrides: Record<string, string> = {
-    'dq-scrum-master-structure-update': 'Updated Scrum Master Structure',
-    'company-wide-lunch-break-schedule': 'Company-wide Lunch Break Schedule',
-    'grading-review-program-grp': 'Grading Review Program (GRP)',
-    'dq-storybook-latest-links': 'DQ Storybook (Latest Version and Links)',
-    'dq-storybook-live': 'The DQ Storybook Goes Live!',
-    'riyadh-horizon-hub': 'Riyadh Horizon Hub Opens',
-  };
+  if (item.id && TITLE_OVERRIDES[item.id]) return TITLE_OVERRIDES[item.id];
+  if (item.title?.trim()) return toTitleCase(item.title.trim());
 
-  if (item.id && titleOverrides[item.id]) {
-    return titleOverrides[item.id];
-  }
+  const parts = buildTitleParts(item);
 
-  // If title exists and is not empty, return it
-  if (item.title?.trim()) {
-    return toTitleCase(item.title.trim());
-  }
-
-  // Generate title based on available information
-  const parts: string[] = [];
-
-  // Add location prefix if available
-  if (item.location) {
-    const locationMap: Record<string, string> = {
-      'Dubai': 'DXB',
-      'Nairobi': 'NBO',
-      'Riyadh': 'KSA',
-      'Remote': 'Remote'
-    };
-    parts.push(locationMap[item.location] || item.location);
-  }
-
-  // Add type/newsType information
-  if (item.newsType) {
-    parts.push(item.newsType);
-  } else if (item.type) {
-    if (item.type === 'Thought Leadership') {
-      parts.push('Blog');
-    } else {
-      parts.push(item.type);
-    }
-  }
-
-  // Try to extract title from excerpt
-  if (item.excerpt?.trim()) {
-    const excerptWords = item.excerpt.trim().split(' ');
-    if (excerptWords.length > 0) {
-      // Take first 8 words and capitalize
-      const titleFromExcerpt = excerptWords.slice(0, 8).join(' ');
-      if (titleFromExcerpt.length > 20) {
-        const generated = parts.length > 0 ? `${parts.join(' | ')} | ${titleFromExcerpt}` : titleFromExcerpt;
-        return toTitleCase(generated);
-      }
-    }
-  }
-
-  // Try to extract from content if available
-  if (item.content) {
-    const firstLine = item.content.split('\n').find(line => line.trim() && !line.trim().startsWith('#'));
-    if (firstLine) {
-      const cleanLine = firstLine.trim().replace(/^#+\s+/, '').replace(/\*\*/g, '').substring(0, 60);
-      if (cleanLine.length > 15) {
-        const generated = parts.length > 0 ? `${parts.join(' | ')} | ${cleanLine}` : cleanLine;
-        return toTitleCase(generated);
-      }
-    }
-  }
-
-  // Fallback based on ID patterns
-  if (item.id) {
-    const idParts = item.id.split('-');
-    const meaningfulParts = idParts
-      .filter(part => part.length > 2 && !['dq', 'the', 'and', 'for'].includes(part.toLowerCase()))
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1));
-    
-    if (meaningfulParts.length > 0) {
-      const idTitle = meaningfulParts.join(' ');
-      const generated = parts.length > 0 ? `${parts.join(' | ')} | ${idTitle}` : idTitle;
-      return toTitleCase(generated);
-    }
-  }
-
-  // Final fallback
-  const typeLabel = item.type === 'Thought Leadership' ? 'Blog' : (item.newsType || item.type || 'Announcement');
-  const generated = parts.length > 0 ? `${parts.join(' | ')} | ${typeLabel}` : typeLabel;
-  return toTitleCase(generated);
+  return (
+    buildTitleFromExcerpt(item, parts) ??
+    buildTitleFromContent(item, parts) ??
+    buildTitleFromId(item, parts) ??
+    toTitleCase(joinWithParts(parts, item.type === 'Thought Leadership' ? 'Blog' : (item.newsType ?? item.type ?? 'Announcement')))
+  );
 };
 
 /**
@@ -187,23 +168,17 @@ export const getNewsTypeDisplay = (item: NewsItem): { label: string; color: stri
   }
   
   const newsTypeColor: Record<NonNullable<NewsItem['newsType']>, string> = {
-    'Policy Update': '#0f2055',        // Dark blue for policy/guidelines
+    'Policy Update': '#8B5CF6',        // Purple for policy/guidelines
     'Upcoming Events': '#F97316',      // Orange for events
     'Company News': '#0EA5E9',         // Blue for company news
-    'Holidays': '#16A34A',             // Green for holidays/notices
-    'Leadership Messages': '#7C3AED',  // Purple for leadership
-    'Product Updates': '#0EA5E9',      // Blue for product updates
-    'Operational Notices': '#F97316'   // Orange for operational notices
+    'Holidays': '#16A34A'              // Green for holidays/notices
   };
 
   const newsTypeLabel: Record<NonNullable<NewsItem['newsType']>, string> = {
     'Policy Update': 'Policy Update',
     'Upcoming Events': 'Upcoming Events',
     'Company News': 'Company News',
-    'Holidays': 'Holidays',
-    'Leadership Messages': 'Leadership Messages',
-    'Product Updates': 'Product Updates',
-    'Operational Notices': 'Operational Notices'
+    'Holidays': 'Holidays'
   };
 
   if (item.newsType) {
@@ -216,7 +191,7 @@ export const getNewsTypeDisplay = (item: NewsItem): { label: string; color: stri
   // Fallback to type if newsType is missing
   const typeFallback: Record<NewsItem['type'], { label: string; color: string }> = {
     Announcement: { label: 'Company News', color: '#0EA5E9' },      // Blue
-    Guidelines: { label: 'Policy Update', color: '#0f2055' },        // Dark blue
+    Guidelines: { label: 'Policy Update', color: '#8B5CF6' },        // Purple
     Notice: { label: 'Holidays', color: '#16A34A' },                  // Green
     'Thought Leadership': { label: 'Blog', color: '#14B8A6' }         // Teal for blogs
   };

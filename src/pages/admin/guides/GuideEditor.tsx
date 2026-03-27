@@ -8,6 +8,57 @@ import { knowledgeHubSupabase } from '../../../services/knowledgeHubClient'
 
 const empty: Guide = { title: '', status: 'draft', contributors: [], steps: [], attachments: [], templates: [], relatedTools: [] };
 
+const GHC_SLUGS = ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'] as const;
+
+const isGhcSlug = (slug: string | undefined): boolean => !!slug && (GHC_SLUGS as readonly string[]).includes(slug);
+
+/** Returns true if submit should proceed, false if aborted by user. */
+function validateSlugChange(currentSlug: string | undefined, newSlug: string | undefined): boolean {
+  if (!newSlug || !currentSlug || newSlug === currentSlug) return true;
+  if (isGhcSlug(currentSlug) && isGhcSlug(newSlug)) {
+    alert(`❌ ERROR: Cannot change GHC element slug!\n\nYou are trying to change "${currentSlug}" to "${newSlug}".\n\nGHC element slugs are fixed and cannot be changed to other GHC slugs.\nThis prevents content from being shared between GHC elements.\n\nPlease keep the slug as "${currentSlug}".`);
+    return false;
+  }
+  return window.confirm(`⚠️ Warning: You are changing the slug from "${currentSlug}" to "${newSlug}".\n\nThis will affect how the guide is accessed.\n\nAre you sure you want to continue?`);
+}
+
+async function updateGuideRecord(id: string, guide: Guide, payload: Guide): Promise<void> {
+  if (isGhcSlug(guide.slug)) {
+    console.log(`[Admin Editor] Updating GHC guide: ${guide.slug} (ID: ${id})`);
+    console.log(`[Admin Editor] Title: ${guide.title}`);
+    console.log(`[Admin Editor] Body length: ${payload.body?.length || 0} chars`);
+    if (payload.slug !== guide.slug) console.error(`[Admin Editor] ERROR: Slug mismatch! Expected: ${guide.slug}, Got: ${payload.slug}`);
+  } else {
+    console.log(`[Admin Editor] Updating guide: id=${id}, slug=${guide.slug}, title=${guide.title}`);
+  }
+  await updateGuide(id, payload as any);
+  if (isGhcSlug(guide.slug)) console.log(`[Admin Editor] ✅ Successfully updated GHC guide: ${guide.slug}`);
+}
+
+async function checkForSharedContent(
+  currentSlug: string,
+  currentBody: string,
+  onWarning: (msg: string) => void,
+): Promise<void> {
+  if (!currentBody?.trim()) return;
+  try {
+    const { data } = await knowledgeHubSupabase
+      .from('guides')
+      .select('id, slug, title, body')
+      .in('slug', GHC_SLUGS);
+    if (!data) return;
+    const sharedWith = data.filter(g => g.slug !== currentSlug && g.body?.trim() === currentBody.trim());
+    if (sharedWith.length > 0) {
+      onWarning(
+        `⚠️ WARNING: This content is IDENTICAL to ${sharedWith.length} other GHC element(s): ${sharedWith.map(g => g.slug).join(', ')}. ` +
+        `This is why changes appear on multiple pages. Please make the content unique for each element.`
+      );
+    }
+  } catch (err) {
+    console.error('Error checking shared content:', err);
+  }
+}
+
 const GuideEditor: React.FC = () => {
   const { id } = useParams();
   const [guide, setGuide] = useState<Guide>(empty);
@@ -26,41 +77,12 @@ const GuideEditor: React.FC = () => {
         setTax(t);
         setGuide(g);
         
-        // Check for shared content if this is a GHC guide
-        if (id && g.slug && ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'].includes(g.slug)) {
-          checkForSharedContent(g.slug, g.body || '');
+        if (id && isGhcSlug(g.slug)) {
+          checkForSharedContent(g.slug!, g.body || '', setSharedContentWarning);
         }
       } finally { setLoading(false); }
     })();
   }, [id]);
-
-  async function checkForSharedContent(currentSlug: string, currentBody: string) {
-    if (!currentBody || currentBody.trim().length === 0) return;
-    
-    try {
-      const { data: allGHCGuides } = await knowledgeHubSupabase
-        .from('guides')
-        .select('id, slug, title, body')
-        .in('slug', ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd']);
-      
-      if (!allGHCGuides) return;
-      
-      const sharedWith = allGHCGuides.filter(g => 
-        g.slug !== currentSlug && 
-        g.body && 
-        g.body.trim() === currentBody.trim()
-      );
-      
-      if (sharedWith.length > 0) {
-        setSharedContentWarning(
-          `⚠️ WARNING: This content is IDENTICAL to ${sharedWith.length} other GHC element(s): ${sharedWith.map(g => g.slug).join(', ')}. ` +
-          `This is why changes appear on multiple pages. Please make the content unique for each element.`
-        );
-      }
-    } catch (err) {
-      console.error('Error checking shared content:', err);
-    }
-  }
 
   const onChange = (k: keyof Guide, v: any) => setGuide(prev => ({ ...prev, [k]: v }));
 
@@ -70,60 +92,18 @@ const GuideEditor: React.FC = () => {
     e.preventDefault();
     const payload: Guide = { ...guide };
     if (typeof payload.contributors === 'string') payload.contributors = parseList(payload.contributors as any);
-    
-    if (id) {
-      // GHC element slugs - prevent accidental changes
-      const GHC_SLUGS = ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd']
-      const isGHCGuide = guide.slug && GHC_SLUGS.includes(guide.slug)
-      
-      // Verify we're updating the correct guide by checking slug matches
-      if (payload.slug && guide.slug && payload.slug !== guide.slug) {
-        if (isGHCGuide && GHC_SLUGS.includes(payload.slug)) {
-          alert(
-            `❌ ERROR: Cannot change GHC element slug!\n\n` +
-            `You are trying to change "${guide.slug}" to "${payload.slug}".\n\n` +
-            `GHC element slugs are fixed and cannot be changed to other GHC slugs.\n` +
-            `This prevents content from being shared between GHC elements.\n\n` +
-            `Please keep the slug as "${guide.slug}".`
-          );
-          return;
-        }
-        
-        const confirmChange = window.confirm(
-          `⚠️ Warning: You are changing the slug from "${guide.slug}" to "${payload.slug}".\n\n` +
-          `This will affect how the guide is accessed.\n\n` +
-          `Are you sure you want to continue?`
-        );
-        if (!confirmChange) return;
-      }
-      
-      // For GHC guides, add extra validation
-      if (isGHCGuide) {
-        console.log(`[Admin Editor] Updating GHC guide: ${guide.slug} (ID: ${id})`);
-        console.log(`[Admin Editor] Title: ${guide.title}`);
-        console.log(`[Admin Editor] Body length: ${payload.body?.length || 0} chars`);
-        
-        // Double-check the slug hasn't changed
-        if (payload.slug !== guide.slug) {
-          console.error(`[Admin Editor] ERROR: Slug mismatch detected! Expected: ${guide.slug}, Got: ${payload.slug}`);
-        }
-      } else {
-        console.log(`[Admin Editor] Updating guide: id=${id}, slug=${guide.slug}, title=${guide.title}`);
-      }
-      
-      try {
-        await updateGuide(id, payload as any)
-        if (isGHCGuide) {
-          console.log(`[Admin Editor] ✅ Successfully updated GHC guide: ${guide.slug}`);
-        }
-        navigate('/admin/guides')
-      } catch (error: any) {
-        console.error('[Admin Editor] Update failed:', error);
-        alert(`Failed to update guide: ${error.message || 'Unknown error'}`);
-      }
-    } else {
-      const res = await createGuide(payload)
-      navigate(`/admin/guides/${(res as any).id}`)
+    if (!id) {
+      const res = await createGuide(payload);
+      navigate(`/admin/guides/${(res as any).id}`);
+      return;
+    }
+    if (!validateSlugChange(guide.slug, payload.slug)) return;
+    try {
+      await updateGuideRecord(id, guide, payload);
+      navigate('/admin/guides');
+    } catch (error: any) {
+      console.error('[Admin Editor] Update failed:', error);
+      alert(`Failed to update guide: ${error.message || 'Unknown error'}`);
     }
   };
 
@@ -136,29 +116,29 @@ const GuideEditor: React.FC = () => {
       {id && guide.slug && (
         <>
           <div className={`mb-4 p-3 border rounded-lg ${
-            ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'].includes(guide.slug)
+            isGhcSlug(guide.slug)
               ? 'bg-amber-50 border-amber-300' 
               : 'bg-blue-50 border-blue-200'
           }`}>
             <p className={`text-sm font-semibold ${
-              ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'].includes(guide.slug)
+              isGhcSlug(guide.slug)
                 ? 'text-amber-900' 
                 : 'text-blue-800'
             }`}>
               <strong>Editing:</strong> <code className={`px-2 py-1 rounded ${
-                ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'].includes(guide.slug)
+                isGhcSlug(guide.slug)
                   ? 'bg-amber-100' 
                   : 'bg-blue-100'
               }`}>{guide.slug}</code> 
               {guide.title && <span className="ml-2">({guide.title})</span>}
             </p>
-            {['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'].includes(guide.slug) && (
+            {isGhcSlug(guide.slug) && (
               <p className="text-xs text-amber-700 mt-1 font-medium">
                 ⚠️ GHC Element: Slug is fixed and cannot be changed to another GHC slug
               </p>
             )}
             <p className={`text-xs mt-1 ${
-              ['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'].includes(guide.slug)
+              isGhcSlug(guide.slug)
                 ? 'text-amber-600' 
                 : 'text-blue-600'
             }`}>
@@ -199,7 +179,7 @@ const GuideEditor: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium">Slug</label>
-            {['dq-vision', 'dq-hov', 'dq-persona', 'dq-agile-tms', 'dq-agile-sos', 'dq-agile-flows', 'dq-agile-6xd'].includes(guide.slug || '') ? (
+            {isGhcSlug(guide.slug || '') ? (
               <div>
                 <input 
                   className="border rounded px-3 py-2 w-full bg-gray-100 cursor-not-allowed" 

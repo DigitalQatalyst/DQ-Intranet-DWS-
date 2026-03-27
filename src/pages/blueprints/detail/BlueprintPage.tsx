@@ -40,6 +40,109 @@ interface GuideRecord {
   body?: string | null
 }
 
+// ── Parser helpers ────────────────────────────────────────────────────────────
+
+type BlueprintSection = { id: string; title: string; content: string }
+
+const SECTION_TITLE_PATTERNS: Array<[string, string]> = [
+  ['overview', 'Overview'],
+  ['feature', 'Features'],
+  ['ai tool', 'AI Tools'],
+]
+
+function normalizeSectionTitle(title: string): string {
+  const lower = title.toLowerCase()
+  const match = SECTION_TITLE_PATTERNS.find(([pattern]) => lower.includes(pattern))
+  return match ? match[1] : title
+}
+
+function orderSections(sections: BlueprintSection[]): BlueprintSection[] {
+  const overview  = sections.find(s => s.id === 'overview' || s.title.toLowerCase() === 'overview')
+  const features  = sections.find(s => s.id === 'features' || s.title.toLowerCase().includes('feature'))
+  const aiTools   = sections.find(s => s.id === 'ai-tools'  || s.title.toLowerCase().includes('ai tool'))
+  const pinned    = new Set([overview, features, aiTools].filter(Boolean))
+  const rest      = sections.filter(s => !pinned.has(s))
+  return ([overview, features, aiTools, ...rest].filter(Boolean) as BlueprintSection[])
+}
+
+function parseBlueprintSections(body: string): BlueprintSection[] {
+  const sections: BlueprintSection[] = []
+  let current: BlueprintSection | null = null
+
+  for (const line of body.split('\n')) {
+    const h2Match = line.match(/^##\s+(.+)$/)
+    if (h2Match) {
+      if (current) sections.push(current)
+      const title = normalizeSectionTitle(h2Match[1].trim())
+      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+      current = { id, title, content: '' }
+    } else if (current) {
+      current.content += line + '\n'
+    }
+  }
+  if (current) sections.push(current)
+  if (sections.length === 0 && body.trim()) {
+    return [{ id: 'overview', title: 'Overview', content: body }]
+  }
+  const ordered = orderSections(sections)
+  return ordered.length > 0 ? ordered : sections
+}
+
+function headerToAccessor(header: string): string {
+  return header.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/\*\*/g, '').trim()
+}
+
+type TableRowType = 'header' | 'separator' | 'data' | 'other'
+
+function detectTableRowType(line: string, inTable: boolean, foundFirst: boolean): TableRowType {
+  if (line.startsWith('|') && !inTable) return 'header'
+  if (inTable && line.includes('---') && foundFirst) return 'separator'
+  if (inTable && line.startsWith('|') && foundFirst) return 'data'
+  return 'other'
+}
+
+function parseBestPracticesTable(content: string) {
+  let overview = ''
+  let inTable = false
+  let foundFirst = false
+  let tableHeaders: string[] = []
+  const tableRows: Record<string, string>[] = []
+
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('##')) continue
+
+    const rowType = detectTableRowType(trimmed, inTable, foundFirst)
+
+    if (rowType === 'header') {
+      inTable = true
+      const cells = trimmed.split('|').map(c => c.trim()).filter(c => c)
+      if (cells.length > 0 && !cells[0].includes('---')) { tableHeaders = cells; foundFirst = true }
+    } else if (rowType === 'separator') {
+      // skip
+    } else if (rowType === 'data') {
+      const cells = trimmed.split('|').map(c => c.trim()).filter(c => c)
+      if (cells.length === tableHeaders.length) {
+        const row: Record<string, string> = {}
+        tableHeaders.forEach((h, i) => { row[headerToAccessor(h)] = (cells[i] || '').replace(/\*\*/g, '').trim() })
+        tableRows.push(row)
+      }
+    } else if (!inTable && trimmed.length > 0) {
+      overview += trimmed + ' '
+    } else if (inTable && trimmed.length === 0 && tableRows.length > 0) {
+      break
+    }
+  }
+
+  return {
+    overview: overview.trim(),
+    columns: tableHeaders.map(h => ({ header: h.replace(/\*\*/g, '').trim(), accessor: headerToAccessor(h) })),
+    data: tableRows,
+  }
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 function BlueprintPage() {
   const { itemId } = useParams()
   const location = useLocation() as any
@@ -54,74 +157,6 @@ function BlueprintPage() {
   const [featuresModalOpen, setFeaturesModalOpen] = useState(false)
   const [aiToolsModalOpen, setAiToolsModalOpen] = useState(false)
 
-  // Parse blueprint body into sections
-  const parseBlueprintSections = (body: string) => {
-    const sections: Array<{ id: string; title: string; content: string }> = []
-    const lines = body.split('\n')
-    let currentSection: { id: string; title: string; content: string } | null = null
-
-    for (const line of lines) {
-      // Check for H2 headers (## Title)
-      const h2Match = line.match(/^##\s+(.+)$/)
-      if (h2Match) {
-        // Save previous section
-        if (currentSection) {
-          sections.push(currentSection)
-        }
-        // Start new section
-        const title = h2Match[1].trim()
-        // Normalize section titles - ensure Overview, Features, and AI Tools are separate
-        let normalizedTitle = title
-        if (title.toLowerCase().includes('overview')) {
-          normalizedTitle = 'Overview'
-        } else if (title.toLowerCase().includes('feature')) {
-          normalizedTitle = 'Features'
-        } else if (title.toLowerCase().includes('ai tool')) {
-          normalizedTitle = 'AI Tools'
-        }
-        const id = normalizedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-        currentSection = { id, title: normalizedTitle, content: '' }
-      } else if (currentSection) {
-        currentSection.content += line + '\n'
-      }
-    }
-
-    // Add last section
-    if (currentSection) {
-      sections.push(currentSection)
-    }
-
-    // If no sections found, create an overview section
-    if (sections.length === 0 && body.trim()) {
-      sections.push({
-        id: 'overview',
-        title: 'Overview',
-        content: body
-      })
-    }
-
-    // Ensure Overview is first, then Features, then AI Tools, then others
-    const orderedSections: Array<{ id: string; title: string; content: string }> = []
-    const overviewSection = sections.find(s => s.id === 'overview' || s.title.toLowerCase() === 'overview')
-    const featuresSection = sections.find(s => s.id === 'features' || s.title.toLowerCase().includes('feature'))
-    const aiToolsSection = sections.find(s => s.id === 'ai-tools' || s.title.toLowerCase().includes('ai tool'))
-    const otherSections = sections.filter(s => 
-      s.id !== 'overview' && 
-      s.id !== 'features' && 
-      s.title.toLowerCase() !== 'overview' && 
-      !s.title.toLowerCase().includes('feature') &&
-      !s.title.toLowerCase().includes('ai tool')
-    )
-
-    if (overviewSection) orderedSections.push(overviewSection)
-    if (featuresSection) orderedSections.push(featuresSection)
-    if (aiToolsSection) orderedSections.push(aiToolsSection)
-    orderedSections.push(...otherSections)
-
-    return orderedSections.length > 0 ? orderedSections : sections
-  }
-
-
   const blueprintSections = useMemo(() => {
     if (!guide?.body) return []
     return parseBlueprintSections(guide.body)
@@ -133,77 +168,6 @@ function BlueprintPage() {
       label: section.title
     }))
   }, [blueprintSections])
-
-  // Parse Best Practices table from markdown content
-  const parseBestPracticesTable = (content: string) => {
-    const lines = content.split('\n')
-    let overview = ''
-    let inTable = false
-    let tableHeaders: string[] = []
-    const tableRows: Record<string, string>[] = []
-    let foundFirstTableRow = false
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim()
-      
-      // Skip the section title
-      if (line.startsWith('##')) continue
-      
-      // Detect table start (first row with |)
-      if (line.startsWith('|') && !inTable) {
-        inTable = true
-        // Parse headers (remove leading/trailing | and split)
-        const cells = line.split('|').map(c => c.trim()).filter(c => c)
-        if (cells.length > 0 && !cells[0].includes('---')) {
-          tableHeaders = cells
-          foundFirstTableRow = true
-        }
-        continue
-      }
-      
-      // Skip separator row (|---|---|)
-      if (inTable && line.includes('---') && foundFirstTableRow) {
-        continue
-      }
-      
-      // Parse table data rows
-      if (inTable && line.startsWith('|') && foundFirstTableRow) {
-        const cells = line.split('|').map(c => c.trim()).filter(c => c)
-        if (cells.length === tableHeaders.length) {
-          const row: Record<string, string> = {}
-          tableHeaders.forEach((header, idx) => {
-            // Convert header to accessor (lowercase, replace spaces with hyphens)
-            const accessor = header.toLowerCase()
-              .replace(/\s+/g, '-')
-              .replace(/[^a-z0-9-]/g, '')
-              .replace(/\*\*/g, '') // Remove bold markers
-              .trim()
-            row[accessor] = (cells[idx] || '').replace(/\*\*/g, '').trim() // Remove bold markers from data
-          })
-          tableRows.push(row)
-        }
-      } else if (!inTable && line.length > 0) {
-        // Collect overview paragraph (before table)
-        overview += line + ' '
-      } else if (inTable && line.length === 0 && tableRows.length > 0) {
-        // End of table (empty line after table)
-        break
-      }
-    }
-
-    return {
-      overview: overview.trim(),
-      columns: tableHeaders.map(header => ({
-        header: header.replace(/\*\*/g, '').trim(), // Remove bold markers
-        accessor: header.toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '')
-          .replace(/\*\*/g, '')
-          .trim()
-      })),
-      data: tableRows
-    }
-  }
 
   // Fetch guide data - using same approach as GuideDetailPage
   useEffect(() => {
