@@ -1812,353 +1812,110 @@ function SectionTakeAction({ navigate, content }: { navigate: (path: string) => 
     }
   };
 
-  if (takeActionLayout === 'grid') {
+  // "feature" layout — new premium 2-col card grid
+  if (takeActionLayout === 'feature') {
     return (
-      <section
-        ref={ref}
-        className="py-12 md:py-16"
-        style={{
-          background: 'linear-gradient(180deg, #f0f6ff 0%, #ffffff 55%, #f0f6ff 100%)',
-        }}
-      >
-        <div className="container mx-auto px-4 md:px-6 lg:px-10">
-          <motion.div
-            className="text-center mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-[0.2em] bg-[#f0f6ff]/40 border border-[#e0e7ff] text-[#131e42] shadow-sm backdrop-blur mx-auto mb-1.5">
-              TAKE ACTION
-            </p>
-            <h2
-              className="ghc-font-display text-3xl md:text-4xl font-semibold text-[#131e42] mb-1.5"
-              style={{ fontSize: takeActionTitleFontSize ?? '36px' }}
-            >
-              {takeActionTitle}
-            </h2>
-            <p
-              className="text-[#4a5678] max-w-3xl mx-auto text-base md:text-lg"
-              style={{ fontSize: takeActionSubtitleFontSize ?? '18px' }}
-            >
-              {takeActionSubtitle}
-            </p>
-            <p className="text-[#6b7280] text-sm mt-1.5">Start small, then go deeper.</p>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 max-w-6xl mx-auto"
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? 'visible' : 'hidden'}
-          >
-            {actionCards.map((card, idx) => {
-              const stripColors = ['from-[#dfe9ff] to-[#c7d7ff]', 'from-[#e9dcff] to-[#d7c4ff]', 'from-[#ffe8d6] to-[#ffd7b5]'];
-              const strip = stripColors[idx] ?? stripColors[0];
-              const isPrimary = card.variant === 'primary';
-              return (
-                <motion.div
-                  key={card.title}
-                  variants={itemVariants}
-                  whileHover={{ y: -6 }}
-                  className="rounded-xl p-5 shadow-sm border border-[#e6eaf5] bg-white flex flex-col min-h-[300px] transition-all hover:shadow-md hover:border-[#cfd7f0]"
-                >
-                  <div className={`h-2 w-full rounded-t-xl -mt-5 -mx-5 mb-4 bg-gradient-to-r ${strip}`} />
-
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#f5f7ff] border border-[#e6eaf5] flex items-center justify-center">
-                      <card.icon className="h-5 w-5" style={{ color: card.iconColor }} />
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                        isPrimary ? 'bg-[#131e42] text-white' : 'bg-[#eef1fb] text-[#131e42]'
-                      }`}
-                    >
-                      {card.badge}
-                    </span>
-                  </div>
-
-                  <h3 className="mt-3 text-[22px] font-semibold text-[#131e42]">{card.title}</h3>
-                  <p className="mt-2 text-sm text-[#4a5678] leading-relaxed whitespace-pre-line">{card.description}</p>
-
-                  {card.tags?.length ? (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {card.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2.5 py-1 rounded-full bg-[#f5f7ff] text-[#4a5678] text-[11px] font-medium border border-[#e6eaf5]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <button
-                    type="button"
-                    onClick={isActionLocked(card) ? undefined : () => handleNavigate(card.path)}
-                    aria-disabled={isActionLocked(card)}
-                    className={`mt-auto w-full inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg border px-3 py-2 transition ${(() => {
-                      if (isActionLocked(card)) return 'opacity-50 cursor-not-allowed border-[#e6eaf5] text-[#9aa4c6]';
-                      if (isPrimary) return 'bg-[#131e42] text-white border-[#131e42] hover:opacity-90';
-                      return 'border-[#d5dbea] text-[#131e42] bg-white hover:bg-[#f5f7ff]';
-                    })()}`}
-                  >
-                    {isActionLocked(card) ? <Lock className="h-4 w-4" /> : null}
-                    {card.cta}
-                    {isActionLocked(card) ? (
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-[#9aa4c6]">(Coming soon)</span>
-                    ) : (
-                      <ArrowRight className="h-4 w-4" />
-                    )}
-                  </button>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
-      </section>
+      <TakeActionPrimaryLayout
+        refEl={ref}
+        isInView={isInView}
+        cards={actionCards}
+        title={takeActionTitle}
+        subtitle={takeActionSubtitle}
+        titleFontSize={takeActionTitleFontSize}
+        subtitleFontSize={takeActionSubtitleFontSize}
+        handleNavigate={handleNavigate}
+        isActionLocked={isActionLocked}
+      />
     );
   }
 
-  const primaryCard = actionCards.find((card) => card.variant === 'primary') ?? actionCards[0];
-  const secondaryCards = actionCards.filter((card) => card !== primaryCard);
-  const hasPrimary = Boolean(primaryCard);
-  const isPrimaryLight = Boolean(primaryCard?.bg?.includes('#e6ebff'));
-
+  // "grid" layout — compact 3-col grid
   return (
     <section
       ref={ref}
-      className="py-20 md:py-24"
+      className="py-12 md:py-16"
       style={{
         background: 'linear-gradient(180deg, #f0f6ff 0%, #ffffff 55%, #f0f6ff 100%)',
       }}
     >
       <div className="container mx-auto px-4 md:px-6 lg:px-10">
         <motion.div
-          className="text-center mb-12"
+          className="text-center mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
         >
-          <p className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] bg-[#f0f6ff]/20 border border-[#e1513b]/50 text-[#e1513b] shadow-sm backdrop-blur mx-auto mb-2">
+          <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-[0.2em] bg-[#f0f6ff]/40 border border-[#e0e7ff] text-[#131e42] shadow-sm backdrop-blur mx-auto mb-1.5">
             TAKE ACTION
           </p>
           <h2
-            className="ghc-font-display text-3xl md:text-4xl font-semibold text-[#131e42] mb-3"
+            className="ghc-font-display text-3xl md:text-4xl font-semibold text-[#131e42] mb-1.5"
             style={{ fontSize: takeActionTitleFontSize ?? '36px' }}
           >
             {takeActionTitle}
           </h2>
           <p
-            className="text-[#4a5678] max-w-2xl mx-auto text-lg"
-            style={{ fontSize: takeActionSubtitleFontSize ?? '18px', whiteSpace: 'nowrap' }}
+            className="text-[#4a5678] max-w-3xl mx-auto text-base md:text-lg"
+            style={{ fontSize: takeActionSubtitleFontSize ?? '18px' }}
           >
             {takeActionSubtitle}
           </p>
         </motion.div>
 
-        {hasPrimary ? (
-          <div className="grid gap-6 max-w-6xl mx-auto">
-            {primaryCard ? (
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 max-w-6xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          {actionCards.map((card, idx) => {
+            const stripColors = ['from-[#dfe9ff] to-[#c7d7ff]', 'from-[#e9dcff] to-[#d7c4ff]', 'from-[#ffe8d6] to-[#ffd7b5]'];
+            const strip = stripColors[idx] ?? stripColors[0];
+            const isPrimary = card.variant === 'primary';
+            return (
               <motion.div
+                key={card.title}
                 variants={itemVariants}
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-                className={`group relative p-8 md:p-10 rounded-3xl border shadow-[0_18px_36px_rgba(0,0,0,0.12)] ${
-                  primaryCard?.bg ?? 'bg-gradient-to-br from-[#131e42] via-[#1f2c63] to-[#e1513b]'
-                } ${isPrimaryLight ? 'text-[#131e42]' : 'text-white'}`}
+                whileHover={{ y: -6 }}
+                className="rounded-xl p-5 shadow-sm border border-[#e6eaf5] bg-white flex flex-col min-h-[300px] transition-all hover:shadow-md hover:border-[#cfd7f0]"
               >
-                <div className="flex flex-col md:flex-row md:items-start md:gap-6">
-                  <div
-                    className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center shadow-[0_6px_16px_rgba(0,0,0,0.12)] ${
-                      isPrimaryLight ? 'bg-white border border-[#d9e3ff]' : 'bg-white/15 border border-white/20'
-                    }`}
-                  >
-                    <primaryCard.icon className="h-7 w-7" style={{ color: isPrimaryLight ? '#e1513b' : '#f0f6ff' }} />
+                <div className={`h-2 w-full rounded-t-xl -mt-5 -mx-5 mb-4 bg-gradient-to-r ${strip}`} />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#f5f7ff] border border-[#e6eaf5] flex items-center justify-center">
+                    <card.icon className="h-5 w-5" style={{ color: card.iconColor }} />
                   </div>
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`text-xs font-semibold tracking-[0.18em] uppercase ${
-                          isPrimaryLight ? 'text-[#131e42]' : 'text-[#fbd7cd]'
-                        }`}
-                      >
-                        {primaryCard.badge}
+                  <span className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-[0.14em] ${isPrimary ? 'bg-[#131e42] text-white' : 'bg-[#eef1fb] text-[#131e42]'}`}>
+                    {card.badge}
+                  </span>
+                </div>
+                <h3 className="mt-3 text-[22px] font-semibold text-[#131e42]">{card.title}</h3>
+                <p className="mt-2 text-sm text-[#4a5678] leading-relaxed">{card.description}</p>
+                {card.tags?.length ? (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {card.tags.map((tag) => (
+                      <span key={tag} className="px-2.5 py-1 rounded-full bg-[#f5f7ff] text-[#4a5678] text-[11px] font-medium border border-[#e6eaf5]">
+                        {tag}
                       </span>
-                      <span
-                        className={`inline-flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-full ${
-                          isPrimaryLight ? 'bg-white border border-[#d9e3ff] text-[#131e42]' : 'bg-white/15 border border-white/10 text-white'
-                        }`}
-                      >
-                        Start
-                      </span>
-                    </div>
-                    <h3 className="ghc-font-display text-2xl md:text-3xl font-semibold">
-                      {primaryCard.title}
-                    </h3>
-                    <p className={`text-base md:text-lg leading-relaxed ${isPrimaryLight ? 'text-[#4a5678]' : 'text-white/90'}`}>
-                      {primaryCard.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {primaryCard.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
-                            isPrimaryLight ? 'bg-white text-[#131e42] border border-[#d9e3ff]' : 'bg-white/15 text-white border border-white/20'
-                          }`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${isPrimaryLight ? 'bg-[#e1513b]' : 'bg-white/80'}`} />
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                    ))}
                   </div>
-                </div>
-                <div className="mt-6">
-                  <button
-                    type="button"
-                    onClick={isActionLocked(primaryCard) ? undefined : () => handleNavigate(primaryCard.path)}
-                    aria-disabled={isActionLocked(primaryCard)}
-                    className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-colors ${
-                      isPrimaryLight
-                        ? 'bg-transparent border border-[#d9e3ff] text-[#131e42] hover:bg-white/60'
-                        : 'bg-white text-[#131e42] shadow-[0_10px_24px_rgba(0,0,0,0.18)] hover:bg-[#f0f6ff]'
-                    }`}
-                  >
-                    {isActionLocked(primaryCard) ? <Lock className="h-5 w-5" /> : null}
-                    {primaryCard.cta}
-                    {isActionLocked(primaryCard) ? (
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-[#9aa4c6]">(Coming soon)</span>
-                    ) : null}
-                    <ArrowRight className="h-5 w-5" />
-                  </button>
-                </div>
-              </motion.div>
-            ) : null}
-
-            {secondaryCards.length ? (
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-                variants={containerVariants}
-                custom={0}
-              >
-                {secondaryCards.map((item) => (
-                  <motion.div
-                    key={item.title}
-                    variants={itemVariants}
-                    whileHover={{ y: -6 }}
-                    className={`group relative p-7 md:p-8 rounded-3xl ${item.bg} border border-[#e3e8f5] shadow-[0_10px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.09)] transition-all`}
-                  >
-                    <div className="flex items-start gap-4 md:gap-5">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-[0_6px_16px_rgba(0,0,0,0.08)] flex items-center justify-center">
-                        <item.icon className="h-6 w-6" style={{ color: item.iconColor }} />
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <p className={`text-xs font-semibold tracking-[0.18em] uppercase ${item.badgeColor}`}>
-                          {item.badge}
-                        </p>
-                        <h3 className="ghc-font-display text-xl md:text-2xl font-semibold text-[#131e42]">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm md:text-base text-[#4a5678] leading-relaxed">{item.description}</p>
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {item.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center gap-1 rounded-full bg-white/75 text-[#131e42] px-3 py-1 text-xs font-medium shadow-sm cursor-default"
-                            >
-                              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: item.iconColor }} />
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={isActionLocked(item) ? undefined : () => handleNavigate(item.path)}
-                      aria-disabled={isActionLocked(item)}
-                      className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold mt-6 border transition-colors ${
-                        isActionLocked(item)
-                          ? 'text-[#9aa4c6] cursor-not-allowed border-[#e6eaf5]'
-                          : 'border-[#d5dbea] text-[#131e42] bg-white hover:bg-[#f5f7ff]'
-                      }`}
-                    >
-                      {isActionLocked(item) ? <Lock className="h-4 w-4" /> : null}
-                      {item.cta}
-                      {isActionLocked(item) ? (
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-[#9aa4c6]">(Coming soon)</span>
-                      ) : null}
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : null}
-          </div>
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto"
-            initial="hidden"
-            animate={isInView ? 'visible' : 'hidden'}
-            variants={containerVariants}
-            custom={0}
-          >
-            {actionCards.map((item) => (
-              <motion.div
-                key={item.title}
-                variants={itemVariants}
-                whileHover={{ y: -8 }}
-                className={`group relative p-7 md:p-9 rounded-3xl ${item.bg} shadow-[0_10px_24px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] transition-all`}
-              >
-                <div className="flex items-start gap-4 md:gap-5">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-[0_6px_16px_rgba(0,0,0,0.08)] flex items-center justify-center">
-                    <item.icon className="h-6 w-6" style={{ color: item.iconColor }} />
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <p className={`text-xs font-semibold tracking-[0.18em] uppercase ${item.badgeColor}`}>
-                      {item.badge}
-                    </p>
-                    <h3 className="ghc-font-display text-xl md:text-2xl font-semibold text-[#131e42]">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm md:text-base text-[#4a5678]">{item.description}</p>
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {item.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1 rounded-full bg-white/75 text-[#131e42] px-3 py-1 text-xs font-medium shadow-sm cursor-default"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: item.iconColor }} />
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
+                ) : null}
                 <button
                   type="button"
-                  onClick={isActionLocked(item) ? undefined : () => handleNavigate(item.path)}
-                  aria-disabled={isActionLocked(item)}
-                  className={`inline-flex items-center gap-1 text-sm font-semibold mt-6 ${
-                    isActionLocked(item) ? 'text-[#9aa4c6] cursor-not-allowed' : `${item.accent} group-hover:underline`
-                  }`}
+                  onClick={isActionLocked(card) ? undefined : () => handleNavigate(card.path)}
+                  aria-disabled={isActionLocked(card)}
+                  className={`mt-auto w-full inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg border px-3 py-2 transition ${(() => {
+                    if (isActionLocked(card)) return 'opacity-50 cursor-not-allowed border-[#e6eaf5] text-[#9aa4c6]';
+                    if (isPrimary) return 'bg-[#131e42] text-white border-[#131e42] hover:opacity-90';
+                    return 'border-[#d5dbea] text-[#131e42] bg-white hover:bg-[#f5f7ff]';
+                  })()}`}
                 >
-                  {isActionLocked(item) ? <Lock className="h-4 w-4" /> : null}
-                  {item.cta}
-                  {isActionLocked(item) ? (
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-[#9aa4c6]">(Coming soon)</span>
-                  ) : null}
+                  {card.cta}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </motion.div>
-            ))}
-          </motion.div>
-        )}
+            );
+          })}
+        </motion.div>
       </div>
     </section>
   );
