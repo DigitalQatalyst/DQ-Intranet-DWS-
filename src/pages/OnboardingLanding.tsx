@@ -48,7 +48,7 @@ const supportOptions: SupportCard[] = [
   },
 ];
 
-HeroAnimatedBackground = () => (
+const HeroAnimatedBackground = () => (
   <>
     {/* Base gradient */}
     <div
