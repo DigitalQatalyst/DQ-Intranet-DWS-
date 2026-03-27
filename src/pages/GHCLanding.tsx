@@ -7,6 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Hexagon,
+  Brain,
+  RefreshCcw,
   GraduationCap,
   BookOpen,
   FileText,
@@ -672,78 +674,93 @@ function SectionWhatIsGHC({ content }: SectionWhatIsGHCProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
   const foundationTitle = content?.foundationTitle ?? 'What is the Golden Honeycomb?';
-  const foundationSubtitle = content?.foundationSubtitle ?? 'Not a framework to memorise, but an operating system for modern work.';
+  const foundationSubtitle = content?.foundationSubtitle ?? 'Not a framework to memorize, but an operating system for modern work.';
   const foundationTitleFontSize = content?.foundationTitleFontSize;
   const foundationSubtitleFontSize = content?.foundationSubtitleFontSize;
-  const foundationCards = content?.foundationCards ?? FEATURE_CARDS_DEFAULT;
-  const isTwoCardLayout = foundationCards.length === 2;
+
+  const cards = [
+    {
+      id: 'dna',
+      icon: Brain,
+      label: 'CORE PRINCIPLES',
+      title: 'Operating DNA',
+      description: 'Principles that guide how people think, decide, and act under pressure and change.',
+    },
+    {
+      id: 'change',
+      icon: RefreshCcw,
+      label: 'ADAPTIVE BY DESIGN',
+      title: 'Built for Change',
+      description: 'Because breakdowns won\'t wait for strategy, control, and governance.',
+    },
+    {
+      id: 'seven',
+      icon: Hexagon,
+      label: 'CONNECTED SYSTEM',
+      title: 'Seven Elements',
+      description: 'Connected responses that realign work when traditional models break.',
+    },
+  ];
 
   return (
-    <section id="ghc-what" ref={ref} className="py-20 md:py-28 bg-[#f0f6ff]">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+    <section id="ghc-what" ref={ref} className="w-full py-24 px-4 bg-white">
+      <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+        {/* Header */}
         <motion.div
-          className="text-center max-w-6xl mx-auto"
-          initial="hidden"
-          animate={isInView ? 'visible' : 'hidden'}
-          variants={containerVariants}
-          custom={0}
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center"
         >
-          <motion.p
-            variants={itemVariants}
-            className="inline-flex items-center gap-2 rounded-full bg-[#f0f6ff]/20 border border-[#e1513b]/50 shadow-sm px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-[#e1513b] backdrop-blur mb-4 mx-auto justify-center"
-          >
+          <span className="inline-block rounded-full bg-[#FB5535]/10 text-[#FB5535] text-xs font-bold tracking-widest uppercase px-3 py-1 mb-6 border border-[#FB5535]/20">
             THE FOUNDATION
-          </motion.p>
-          <div className="mx-auto w-fit text-center space-y-3">
-            <motion.h2
-              variants={itemVariants}
-              className="ghc-font-display text-4xl md:text-6xl font-bold text-[#131e42] text-center"
-              style={{
-                fontSize: foundationTitleFontSize ?? '36px',
-                lineHeight: 1.05,
-              }}
-            >
-              {foundationTitle}
-            </motion.h2>
-            <motion.p
-              variants={itemVariants}
-              className="text-[#4a5678] text-base md:text-lg leading-relaxed max-w-6xl mx-auto text-center"
-              style={{
-                fontSize: foundationSubtitleFontSize ?? '18px',
-                whiteSpace: 'pre-line',
-              }}
-            >
-              {foundationSubtitle}
-            </motion.p>
-          </div>
-
+          </span>
+          <h2
+            className="font-bold text-[#030F35] mb-4 text-3xl md:text-4xl"
+            style={{ fontSize: foundationTitleFontSize }}
+          >
+            {foundationTitle}
+          </h2>
+          <p
+            className="text-gray-600 max-w-2xl mb-16 text-lg"
+            style={{ fontSize: foundationSubtitleFontSize }}
+          >
+            {foundationSubtitle}
+          </p>
         </motion.div>
 
+        {/* Cards */}
         <motion.div
-          className={`grid grid-cols-1 ${isTwoCardLayout ? 'md:grid-cols-2 lg:grid-cols-2 max-w-5xl' : 'md:grid-cols-3 max-w-6xl'} gap-8 mt-14 mx-auto`}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full"
+          variants={containerVariants}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
-          variants={containerVariants}
           custom={1}
         >
-          {foundationCards.map((card) => (
-            <motion.div
-              key={card.title}
-              variants={itemVariants}
-              whileHover={{ y: -6 }}
-              className="rounded-3xl bg-white border border-[#e0e7ff] shadow-sm hover:shadow-md transition-shadow text-center px-10 py-10"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-[#ffe7e0] flex items-center justify-center mx-auto mb-6">
-                <card.icon className="h-6 w-6 text-[#e1513b]" />
-              </div>
-              <h3 className="ghc-font-display text-2xl font-semibold text-[#131e42] mb-4">
-                {card.title}
-              </h3>
-              <p className="text-[#4a5678] text-sm leading-relaxed max-w-[22rem] mx-auto">
-                {card.description}
-              </p>
-            </motion.div>
-          ))}
+          {cards.map((card) => {
+            const IconComp = card.icon;
+            return (
+              <motion.div
+                key={card.id}
+                variants={itemVariants}
+                whileHover={{ y: -4, transition: { duration: 0.3 } }}
+                className="bg-white rounded-2xl p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col items-center text-center transition-transform duration-300"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#FB5535]/10 text-[#FB5535] flex items-center justify-center mb-3">
+                  <IconComp className="w-5 h-5" />
+                </div>
+                <p className="text-[10px] font-bold tracking-widest uppercase text-[#FB5535] mb-4">
+                  {card.label}
+                </p>
+                <h3 className="text-xl font-bold text-[#030F35] mb-3">
+                  {card.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed text-sm">
+                  {card.description}
+                </p>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>
