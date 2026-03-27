@@ -1582,7 +1582,7 @@ const TakeActionGridLayout = ({
 );
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-TakeActionPrimaryLayout = ({
+const TakeActionPrimaryLayout = ({
   refEl,
   isInView,
   cards,
