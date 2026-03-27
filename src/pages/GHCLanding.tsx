@@ -9,9 +9,9 @@ import {
   Hexagon,
   GraduationCap,
   BookOpen,
+  FileText,
   ArrowRight,
   Users,
-  Briefcase,
   Zap,
   Target,
   Heart,
@@ -258,13 +258,13 @@ const ACTION_CARDS_DEFAULT: ActionCard[] = [
     badge: 'Storybooks',
     description:
       'See the thinking and stories behind the Golden Honeycomb and how DQ chose to work this way. Start here when you want the “why” that shaped the system.',
-    tags: ['Narratives', 'Decisions', 'Origins'],
+    tags: ['Leadership', 'Practices', 'Culture'],
     cta: 'Read the story',
     path: 'https://preview.shorthand.com/Pg0KQCF1Rp904ao7',
-    bg: 'bg-[#fde6de]',
-    accent: 'text-[#e1513b]',
-    badgeColor: 'text-[#e1513b]',
-    iconColor: '#e1513b',
+    bg: 'bg-white',
+    accent: 'text-[#E8573A]',
+    badgeColor: 'text-[#E8573A]',
+    iconColor: '#E8573A',
   },
   {
     title: 'Learning Center',
@@ -272,41 +272,41 @@ const ACTION_CARDS_DEFAULT: ActionCard[] = [
     badge: 'Learning',
     description:
       'Build the capabilities expected inside this operating system. Practical paths that help you apply GHC in real decisions and delivery.',
-    tags: ['Guided paths', 'Practice', 'Skills'],
+    tags: ['Facilitation', 'Problem', 'Paths'],
     cta: 'Start learning',
     path: '/lms',
-    bg: 'bg-[#f0f6ff]',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#e1513b',
+    bg: 'bg-white',
+    accent: 'text-[#E8573A]',
+    badgeColor: 'text-[#E8573A]',
+    iconColor: '#E8573A',
   },
   {
     title: 'Knowledge Center',
-    icon: Users,
-    badge: 'Guidance',
+    icon: FileText,
+    badge: 'Maps',
     description:
       'When work gets complex, this is where you find the plays, guardrails, and references that keep execution aligned and moving.',
-    tags: ['Plays', 'Guardrails', 'References'],
+    tags: ['Maps', 'Guardrails', 'References'],
     cta: 'Find what you need',
     path: '/marketplace/guides',
-    bg: 'bg-[#e6ebff]',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#131e42',
+    bg: 'bg-white',
+    accent: 'text-[#C62828]',
+    badgeColor: 'text-[#C62828]',
+    iconColor: '#C62828',
   },
   {
     title: 'Viva Engage',
-    icon: Briefcase,
-    badge: 'Community',
+    icon: Users,
+    badge: 'Conversations',
     description:
       'Watch GHC in motion through conversations and collaboration. Ask, share, and see how teams live the operating system every day.',
-    tags: ['Conversation', 'Collaboration', 'Community'],
+    tags: ['Conversations', 'Collaboration', 'Community'],
     cta: 'Join the conversation',
     path: 'https://engage.cloud.microsoft/main/feed',
     bg: 'bg-white',
-    accent: 'text-[#131e42]',
-    badgeColor: 'text-[#131e42]',
-    iconColor: '#e1513b',
+    accent: 'text-[#B71C1C]',
+    badgeColor: 'text-[#B71C1C]',
+    iconColor: '#B71C1C',
   },
 ];
 
@@ -1174,94 +1174,186 @@ const TakeActionGridLayout = ({
   titleFontSize?: string;
   subtitleFontSize?: string;
   handleNavigate: (path: string) => void;
-}) => (
-  <section
-    ref={refEl}
-    className="py-16 md:py-20"
-    style={{
-      background: 'linear-gradient(180deg, #f0f6ff 0%, #ffffff 55%, #f0f6ff 100%)',
-    }}
-  >
-    <div className="container mx-auto px-4 md:px-6 lg:px-10">
-      <TakeActionHeader
-        title={title}
-        subtitle={subtitle}
-        titleFontSize={titleFontSize}
-        subtitleFontSize={subtitleFontSize}
-        isInView={isInView}
-      />
+}) => {
+  const [hoveredCard, setHoveredCard] = React.useState<string | null>(null);
 
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-6xl mx-auto"
-        variants={containerVariants}
-        initial="hidden"
-        animate={isInView ? 'visible' : 'hidden'}
-      >
-        {cards.map((card, index) => (
-          <motion.article
-            key={card.title}
-            variants={itemVariants}
-            custom={index}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className={`group relative rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 ${card.bg} border border-white/60`}
+  const gradients: Record<string, string> = {
+    'Storybooks': 'linear-gradient(135deg, #E8573A, #F4845F)',
+    'Learning Center': 'linear-gradient(135deg, #E8573A, #FF8A65)',
+    'Knowledge Center': 'linear-gradient(135deg, #C62828, #E8573A)',
+    'Viva Engage': 'linear-gradient(135deg, #B71C1C, #D84315)',
+  };
+
+  const glowColors: Record<string, string> = {
+    'Storybooks': 'rgba(232,87,58,0.18)',
+    'Learning Center': 'rgba(232,87,58,0.18)',
+    'Knowledge Center': 'rgba(198,40,40,0.18)',
+    'Viva Engage': 'rgba(183,28,28,0.18)',
+  };
+
+  return (
+    <section
+      ref={refEl}
+      className="py-16 md:py-20 relative overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, #ffffff 0%, #fff8f6 50%, #ffffff 100%)',
+      }}
+    >
+      {/* Decorative blurred circles */}
+      <div className="absolute top-10 left-1/4 w-64 h-64 rounded-full opacity-20 blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, #E8573A, transparent)' }} />
+      <div className="absolute bottom-10 right-1/4 w-48 h-48 rounded-full opacity-15 blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, #C62828, transparent)' }} />
+
+      <div className="container mx-auto px-4 md:px-6 lg:px-10 relative z-10">
+        {/* Header */}
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-[0.24em] mb-4 text-white" style={{ background: 'linear-gradient(135deg, #E8573A, #F4845F)' }}>
+            TAKE ACTION
+          </span>
+          <h2
+            className="ghc-font-display font-bold text-[#131e42] mb-3"
+            style={{ fontSize: titleFontSize ?? '36px' }}
           >
-            {/* Decorative gradient overlay */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/40 to-transparent rounded-bl-[80px] opacity-60" />
-            
-            <div className="relative p-6 flex flex-col h-full">
-              {/* Icon */}
-              <div className="mb-4">
-                <div className="w-12 h-12 rounded-xl bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center group-hover:scale-105 transition-all duration-300">
-                  <card.icon className="h-6 w-6" style={{ color: card.iconColor }} />
-                </div>
-              </div>
+            {title}
+          </h2>
+          <p
+            className="text-[#4a5678] max-w-2xl mx-auto"
+            style={{ fontSize: subtitleFontSize ?? '18px' }}
+          >
+            {subtitle}
+          </p>
+        </motion.div>
 
-              {/* Content */}
-              <div className="flex-1 flex flex-col">
-                <div className="mb-4">
-                  <p className={`text-[9px] font-bold uppercase tracking-[0.18em] mb-2 ${card.badgeColor} opacity-80`}>
-                    {card.badge}
-                  </p>
-                  <h3 className="ghc-font-display text-xl font-bold text-[#131e42] leading-tight mb-2">
-                    {card.title}
-                  </h3>
-                  <p className="text-sm text-[#4a5678] leading-relaxed">
+        {/* 2×2 Card Grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          {cards.map((card) => {
+            const isHovered = hoveredCard === card.title;
+            const glow = glowColors[card.title] ?? 'rgba(232,87,58,0.15)';
+            const grad = gradients[card.title] ?? 'linear-gradient(135deg, #E8573A, #F4845F)';
+
+            return (
+              <motion.article
+                key={card.title}
+                variants={itemVariants}
+                className="group relative rounded-2xl bg-white border border-gray-200 overflow-hidden transition-all duration-300 cursor-pointer"
+                style={{
+                  boxShadow: isHovered
+                    ? `0 12px 32px ${glow}, 0 2px 8px rgba(0,0,0,0.06)`
+                    : '0 2px 12px rgba(0,0,0,0.06)',
+                  transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+                  borderColor: isHovered ? 'transparent' : undefined,
+                }}
+                onMouseEnter={() => setHoveredCard(card.title)}
+                onMouseLeave={() => setHoveredCard(null)}
+                onClick={() => handleNavigate(card.path)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleNavigate(card.path); }}
+                aria-label={`${card.title} - ${card.cta}`}
+              >
+                {/* Gradient border wash on hover */}
+                {isHovered && (
+                  <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ background: `linear-gradient(135deg, ${glow}, transparent 60%)` }} />
+                )}
+
+                {/* Top accent bar */}
+                <div className="h-1 w-full" style={{ background: grad }} />
+
+                {/* Accent radial glow top-right */}
+                <div
+                  className="absolute top-0 right-0 w-24 h-24 rounded-bl-full pointer-events-none transition-opacity duration-300"
+                  style={{
+                    background: `radial-gradient(circle at top right, ${glow}, transparent 70%)`,
+                    opacity: isHovered ? 1 : 0.4,
+                  }}
+                />
+
+                {/* Decorative dot top-right */}
+                <div
+                  className="absolute top-3 right-3 w-2 h-2 rounded-full pointer-events-none transition-opacity duration-300"
+                  style={{ background: grad, opacity: isHovered ? 1 : 0 }}
+                />
+
+                <div className="relative p-6 flex flex-col h-full">
+                  {/* Icon + label row */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="relative flex-shrink-0">
+                      {/* Glow ring behind icon */}
+                      {isHovered && (
+                        <div className="absolute inset-0 rounded-xl blur-md pointer-events-none" style={{ background: grad, opacity: 0.35 }} />
+                      )}
+                      <div
+                        className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-300"
+                        style={{
+                          background: grad,
+                          transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                        }}
+                      >
+                        <card.icon className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: card.iconColor }}>
+                        {card.badge}
+                      </p>
+                      <h3 className="ghc-font-display text-base font-bold text-[#131e42] leading-tight">
+                        {card.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-[13px] text-gray-500 leading-relaxed mb-4">
                     {card.description}
                   </p>
-                </div>
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {card.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 text-[#131e42] text-[11px] font-medium border border-[#e5e9f5] shadow-sm"
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5 mb-5">
+                    {card.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium"
+                        style={{
+                          backgroundColor: `${glow.replace('0.18', '0.08')}`,
+                          color: card.iconColor,
+                        }}
+                      >
+                        <span className="w-1 h-1 rounded-full" style={{ backgroundColor: card.iconColor }} />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <div className="mt-auto">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleNavigate(card.path); }}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:bg-gray-50"
+                      style={{ color: card.iconColor }}
                     >
-                      <span className="w-1 h-1 rounded-full" style={{ backgroundColor: card.iconColor }} />
-                      {tag}
-                    </span>
-                  ))}
+                      {card.cta}
+                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                    </button>
+                  </div>
                 </div>
-
-                {/* CTA Button */}
-                <div className="mt-auto">
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate(card.path)}
-                    className={`inline-flex items-center gap-1.5 text-sm font-bold ${card.accent} group-hover:gap-2 transition-all duration-300`}
-                  >
-                    {card.cta}
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </motion.article>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
+              </motion.article>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+};
 
 const TakeActionPrimaryLayout = ({
   refEl,
