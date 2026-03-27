@@ -1626,7 +1626,8 @@ const TakeActionPrimaryLayout = ({
   return (
     <section
       ref={refEl}
-      className="relative w-full overflow-hidden py-20 px-4 bg-gradient-to-b from-white via-[#fffbfa] to-white"
+      className="relative w-full overflow-hidden py-20 px-4"
+      style={{ background: '#f0f6ff' }}
     >
       {/* Decorative blurred circles */}
       <div className="absolute top-0 left-0 w-[400px] h-[400px] rounded-full bg-[#FB5535]/[0.03] blur-[100px] pointer-events-none" />
