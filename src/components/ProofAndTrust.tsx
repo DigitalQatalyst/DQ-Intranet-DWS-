@@ -1,193 +1,209 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Star,
-  Award,
-  Users,
   Play,
   X,
   ChevronLeft,
   ChevronRight,
-  Building2,
-  Landmark,
-  Network,
-  Users2,
-  Clock,
-  BookOpen,
-} from "lucide-react";
+  Lock,
+} from 'lucide-react';
 import {
   AnimatedCounter,
   FadeInUpOnScroll,
   StaggeredFadeIn,
   HorizontalScrollReveal,
   useInView,
-} from "./AnimationUtils";
+} from './AnimationUtils';
+import {
+  testimonials,
+  partnerCategories,
+  featuredSectors,
+  impactStats,
+  type Testimonial,
+} from '../data/landingPageContent';
 
-interface Testimonial {
+interface AssociateFeedback {
   id: string;
   name: string;
-  position: string;
-  company: string;
-  companyLogo: string;
-  avatar: string;
-  quote: string;
-  fullQuote: string;
-  rating: number;
-  videoThumbnail: string;
-  videoUrl: string;
-  metric: string;
-  metricLabel: string;
-  metricColor: "green" | "blue" | "orange";
+  role: string;
+  imageUrl: string;
+  rating?: number;
+  feedback: string;
 }
 
-const testimonials: Testimonial[] = [
+const associateFeedbacks: AssociateFeedback[] = [
   {
-    id: "1",
-    name: "Salem Wasike",
-    position: "Product Owner - DQ Deploys",
-    company: "Digital Qatalyst",
-    companyLogo:
-      "https://image2url.com/images/1760524231537-47b810dd-94eb-4571-a6a9-0a9c6fbfb390.jpg",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    quote:
-      "Agile Essentials and DTMF learning paths reduced blockers by 40% and sped up feature delivery.",
-    fullQuote:
-      "Through the DQ LMS, our teams completed Agile Essentials and DTMF learning paths. The shared practices cut delivery blockers by 40% and improved flow, which helped us ship features faster and with clearer ownership.",
+    id: 'vishnu',
+    name: 'Vishnu Chandran',
+    role: 'CoE Analyst, Digital Qatalyst',
+    imageUrl:
+      'https://i.ibb.co/XkGXwk4Z/Screenshot-2026-01-27-at-3-39-28-PM.png',
     rating: 5,
-    videoThumbnail:
-      "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    videoUrl: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-    metric: "40%",
-    metricLabel: "Faster Task Completion",
-    metricColor: "green",
+    feedback:
+      'DigitalQatalyst\'s values shifted my focus from completing tasks to creating measurable impact. They strengthened my ownership, decision-making, and accountability both professionally and personally.',
   },
   {
-    id: "2",
-    name: "Sharavi Chander",
-    position: "Head of DQ Deploys",
-    company: "Digital Qatalyst",
-    companyLogo:
-      "https://image2url.com/images/1760524231537-47b810dd-94eb-4571-a6a9-0a9c6fbfb390.jpg",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    quote:
-      "80+ team certifications built a learning culture that lifted consistency across releases.",
-    fullQuote:
-      "The LMS pathways and peer sessions led to 80+ certifications across Deploys. That shared foundation in tooling and governance raised our consistency and confidence from planning through release.",
+    id: 'jerry',
+    name: 'Jerry Ashie',
+    role: 'Accounts Manager & Scrum Master, Digital Qatalyst',
+    imageUrl:
+      'https://i.ibb.co/XMPk1nQ/Whats-App-Image-2026-01-23-at-11-20-35-AM-1.jpg',
     rating: 5,
-    videoThumbnail:
-      "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    videoUrl: "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-    metric: "80+",
-    metricLabel: "Team Certifications",
-    metricColor: "orange",
+    feedback:
+      'DigitalQatalyst\'s values drive me to learn continuously, adapt quickly, and take real ownership of outcomes. They\'ve strengthened my problem-solving, confidence, and resilience helping me deliver value, not just activity.',
   },
   {
-    id: "3",
-    name: "Mohamed Thameez",
-    position: "Product Manager",
-    company: "Digital Qatalyst",
-    companyLogo:
-      "https://image2url.com/images/1760524231537-47b810dd-94eb-4571-a6a9-0a9c6fbfb390.jpg",
-    avatar: "https://randomuser.me/api/portraits/men/22.jpg",
-    quote: "Cross-unit learning spaces cut our feature turnaround time by 30%.",
-    fullQuote:
-      "Standard playbooks, shared boards, and course-led upskilling created tighter handoffs between Design, Build, and Deploy. As a result, our feature turnaround time improved by 30% with fewer reworks.",
-    rating: 4,
-    videoThumbnail:
-      "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    videoUrl: "https://samplelib.com/lib/preview/mp4/sample-15s.mp4",
-    metric: "3x",
-    metricLabel: "Collaboration Growth",
-    metricColor: "blue",
+    id: 'sharon',
+    name: 'Sharon Adhiambo',
+    role: 'HR Analyst, Digital Qatalyst',
+    imageUrl:
+      'https://images.pexels.com/photos/3760853/pexels-photo-3760853.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    rating: 5,
+    feedback:
+      'DQ taught me the value of collaboration — I now ask for feedback early and share progress openly. This helps me deliver work that is better aligned, more efficient, and truly impactful.',
+  },
+  {
+    id: 'fadil',
+    name: 'Fadil Alli',
+    role: 'CoE Analyst',
+    imageUrl:
+      'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    rating: 5,
+    feedback:
+      'One key value at DQ that shaped my growth is ownership — I\'m learning to take full responsibility for challenges, not just tasks. As a Scrum Master, this mindset has improved collaboration, accountability, and the way our team works together.',
   },
 ];
 
-// Partner categories for the grid
-const partnerCategories = [
-  {
-    id: "government",
-    title: "Governance Sector",
-    subtitle:
-      "Leadership, strategy, and value management for enterprise alignment",
-    icon: <Building2 size={28} />,
-    metric: "4+",
-    color: "indigo-600",
-  },
-  {
-    id: "financial",
-    title: "Operations Sector",
-    subtitle:
-      "HR, Finance, and Deals support factories for day-to-day enablement",
-    icon: <Landmark size={28} />,
-    metric: "5+",
-    color: "yellow-500",
-  },
-  {
-    id: "service",
-    title: "Platform Sector",
-    subtitle:
-      "Intelligence, Solutions, Security, and Products driving digital platforms",
-    icon: <Users2 size={28} />,
-    metric: "6+",
-    color: "blue-600",
-  },
-  {
-    id: "network",
-    title: "Delivery Sector",
-    subtitle:
-      "Design, Deploys, and Accounts teams ensuring outcomes and engagements",
-    icon: <Network size={28} />,
-    metric: "3+",
-    color: "orange-500",
-  },
-];
+const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
+  const disclaimer = '(not approved for external publication)';
 
-const partnerLogos = [
-  { name: "Prodev", logo: "/logo/prodev.png" },
-  { name: "Soldev", logo: "/logo/soldev.png" },
-  { name: "Finance", logo: "/logo/finance.png" },
-  { name: "HRA", logo: "/logo/hra.png" },
-  { name: "Inteldev", logo: "/logo/inteldev.png" },
-];
+  return (
+    <div className="h-full rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md flex flex-col">
+      <div className="flex items-center gap-4 mb-4">
+        <div className="w-12 h-12 rounded-lg bg-white border-2 border-gray-200 flex items-center justify-center flex-shrink-0">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-gray-600"
+          >
+            <path
+              d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+              fill="currentColor"
+            />
+            <path
+              d="M12 14C7.58172 14 4 16.6863 4 20V22H20V20C20 16.6863 16.4183 14 12 14Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+        <div>
+          <p className="text-base font-semibold text-gray-900">
+            {testimonial.name}
+          </p>
+          <p className="text-sm text-gray-500">{testimonial.context}</p>
+          <p className="text-sm text-gray-400">{testimonial.role}</p>
+        </div>
+      </div>
+      <p className="text-gray-600 leading-relaxed text-base">
+        "{testimonial.quote}"
+        <span className="block text-xs text-gray-500 italic mt-2">{disclaimer}</span>
+      </p>
+      {testimonial.note && testimonial.note.toLowerCase().trim() !== disclaimer.replace(/[()]/g, '').toLowerCase() && (
+        <p className="text-xs text-amber-600 mt-4">
+          {testimonial.note}
+        </p>
+      )}
+    </div>
+  );
+};
 
-const strategicPartners = [
-  { name: "Prodev", logo: "/logo/prodev.png" },
-  { name: "Soldev", logo: "/logo/soldev.png" },
-  { name: "Finance", logo: "/logo/finance.png" },
-  { name: "HRA", logo: "/logo/hra.png" },
-  { name: "Inteldev", logo: "/logo/inteldev.png" },
-];
+const AssociateFeedbackCard = ({ feedback }: { feedback: AssociateFeedback }) => {
+  // Get initials from name
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
-/* =========================
-   ✅ UPDATED KPI CONTENT
-   ========================= */
-const impactStats = [
-  {
-    label: "Faster Task Closure",
-    value: 80,
-    prefix: "Over",
-    suffix: "%",
-    icon: <Users size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
-  },
-  {
-    label: "Focus Time Saved",
-    value: 6,
-    prefix: "+",
-    suffix: "hrs",
-    icon: <Clock size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
-  },
-  {
-    label: "Concepts Learned Daily",
-    value: 5,
-    prefix: "+",
-    icon: <BookOpen size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
-  },
-  {
-    label: "Collaboration Growth Rate",
-    value: 87,
-    suffix: "%",
-    icon: <Award size={20} strokeWidth={2.5} className="text-[#FB5535]" />,
-  },
-];
+  return (
+    <div
+      className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 mx-auto flex flex-col overflow-hidden"
+      style={{
+        width: '100%',
+        maxWidth: '1030px',
+        minHeight: 'auto'
+      }}
+    >
+      {/* Large quote mark */}
+      <div className="mb-4 flex-shrink-0">
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          className="text-coral-500"
+          style={{ color: 'rgba(251, 85, 53, 0.4)' }}
+        >
+          <path
+            d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+
+      {/* Testimonial text */}
+      <div className="mb-4 flex-1 min-h-0">
+        <p className="text-gray-700 leading-relaxed italic font-medium" style={{ fontSize: '17px' }}>
+          {feedback.feedback}
+        </p>
+      </div>
+
+      {/* Author info - contained within card */}
+      <div className="flex items-center gap-4 flex-shrink-0 w-full">
+        {/* Avatar with initials */}
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0"
+          style={{ backgroundColor: 'rgba(251, 85, 53, 0.4)' }}
+        >
+          {getInitials(feedback.name)}
+        </div>
+
+        {/* Name and role - properly contained */}
+        <div className="flex flex-col justify-center min-w-0 flex-1">
+          <p className="text-base font-semibold text-gray-900 leading-tight truncate">
+            {feedback.name}
+          </p>
+          <p className="text-sm text-gray-600 leading-tight truncate">
+            {feedback.role}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const TestimonialsShowcase = () => {
+  return (
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {testimonials.map((testimonial, index) => (
+          <FadeInUpOnScroll key={testimonial.id} delay={index * 0.08}>
+            <TestimonialCard testimonial={testimonial} />
+          </FadeInUpOnScroll>
+        ))}
+      </div>
+      <div className="flex justify-center mt-6">
+        <button
+          type="button"
+          className="px-5 py-2 text-sm font-semibold text-[var(--guidelines-primary-dark)] border border-gray-200 rounded-full bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]"
+        >
+          Show more stories
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const VideoTestimonialCard = ({
   testimonial,
@@ -198,8 +214,12 @@ const VideoTestimonialCard = ({
 }) => {
   const [isHovering, setIsHovering] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isImageOnly = testimonial.mediaType === "image";
 
   useEffect(() => {
+    if (isImageOnly) {
+      return;
+    }
     if (videoRef.current) {
       if (isHovering) {
         videoRef.current
@@ -222,22 +242,24 @@ const VideoTestimonialCard = ({
       {/* Video/Thumbnail Background */}
       <div className="absolute inset-0 bg-gray-900 overflow-hidden">
         <img
-          src={testimonial.videoThumbnail}
+          src={testimonial.imageUrl || testimonial.videoThumbnail}
           alt={`${testimonial.name} from ${testimonial.company}`}
           className={`w-full h-full object-cover transition-opacity duration-300 ${
-            isHovering ? "opacity-0" : "opacity-100"
+            !isImageOnly && isHovering ? "opacity-0" : "opacity-100"
           }`}
         />
-        <video
-          ref={videoRef}
-          src={testimonial.videoUrl}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-            isHovering ? "opacity-100" : "opacity-0"
-          }`}
-          muted
-          playsInline
-          loop
-        />
+        {!isImageOnly && (
+          <video
+            ref={videoRef}
+            src={testimonial.videoUrl}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+              isHovering ? "opacity-100" : "opacity-0"
+            }`}
+            muted
+            playsInline
+            loop
+          />
+        )}
       </div>
 
       {/* Overlay with content */}
@@ -259,6 +281,10 @@ const VideoTestimonialCard = ({
             className={`text-2xl font-bold mb-1 ${
               testimonial.metricColor === "green"
                 ? "text-green-500"
+                : testimonial.metricColor === "orange"
+                ? "text-orange-500"
+                : testimonial.metricColor === "red"
+                ? "text-red-500"
                 : "text-dq-coral"
             }`}
           >
@@ -336,16 +362,24 @@ const TestimonialModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all duration-300">
       <div
         ref={modalRef}
-        className="bg-white rounded-2xl overflow-hidden max-w-4xl w-full max-h-[90vh] shadow-2xl transform transition-all duration-300 animate-fadeIn"
+        className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] shadow-2xl transform transition-all duration-300 animate-fadeIn flex flex-col overflow-hidden"
       >
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <div className="w-full aspect-video bg-gray-900">
-            <video
-              src={testimonial.videoUrl}
-              controls
-              autoPlay
-              className="w-full h-full object-cover"
-            />
+            {testimonial.mediaType === "image" || !testimonial.videoUrl ? (
+              <img
+                src={testimonial.imageUrl || testimonial.videoThumbnail}
+                alt={testimonial.modalTitle || testimonial.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <video
+                src={testimonial.videoUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
           <button
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-all"
@@ -355,7 +389,7 @@ const TestimonialModal = ({
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1 min-h-0">
           <div className="flex items-center mb-4">
             <img
               src={testimonial.companyLogo}
@@ -364,7 +398,7 @@ const TestimonialModal = ({
             />
             <div>
               <h3 className="text-xl font-bold text-gray-900">
-                How {testimonial.company} scaled with Enterprise Journey
+                {testimonial.modalTitle || `How ${testimonial.company} scaled with Enterprise Journey`}
               </h3>
               <div className="flex items-center mt-1">
                 {[...Array(5)].map((_, i) => (
@@ -402,25 +436,19 @@ const TestimonialModal = ({
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    testimonial.metricColor === "green"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-dq-coral/10 text-dq-coral"
-                  }`}
-                >
-                  {testimonial.metric} {testimonial.metricLabel}
-                </span>
+            {testimonial.metric && testimonial.metricLabel && (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {testimonial.metric} {testimonial.metricLabel}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {testimonial.impactDescription ||
+                      "Impact achieved through DQ Workspace"}
+                  </p>
+                </div>
               </div>
-              <button
-                className="text-dq-coral hover:brightness-110 text-sm font-medium flex items-center"
-                onClick={onClose}
-              >
-                Close
-              </button>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -428,7 +456,7 @@ const TestimonialModal = ({
   );
 };
 
-const VideoTestimonialCarousel = () => {
+export const VideoTestimonialCarousel = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedTestimonial, setSelectedTestimonial] =
     useState<Testimonial | null>(null);
@@ -485,18 +513,18 @@ const VideoTestimonialCarousel = () => {
 
       <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center transform -translate-y-1/2 pointer-events-none px-4">
         <button
-          className="w-10 h-10 rounded-full bg-white/80 shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all pointer-events-auto"
+          className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-white pointer-events-auto flex items-center justify-center transition-all"
           onClick={handlePrev}
           aria-label="Previous testimonial"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={24} />
         </button>
         <button
-          className="w-10 h-10 rounded-full bg-white/80 shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all pointer-events-auto"
+          className="p-0 bg-transparent shadow-none border-none backdrop-blur-0 hover:bg-transparent cursor-pointer text-white pointer-events-auto flex items-center justify-center transition-all"
           onClick={handleNext}
           aria-label="Next testimonial"
         >
-          <ChevronRight size={20} />
+          <ChevronRight size={24} />
         </button>
       </div>
 
@@ -531,6 +559,120 @@ const VideoTestimonialCarousel = () => {
   );
 };
 
+const AssociateFeedbackCarousel = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % associateFeedbacks.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
+  useEffect(() => {
+    if (carouselRef.current) {
+      const cardWidth =
+        carouselRef.current.scrollWidth / associateFeedbacks.length;
+      const scrollAmount = activeIndex * cardWidth;
+      carouselRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+    }
+  }, [activeIndex]);
+
+  const handlePrev = () =>
+    setActiveIndex(
+      (prev) => (prev - 1 + associateFeedbacks.length) % associateFeedbacks.length
+    );
+  const handleNext = () =>
+    setActiveIndex((prev) => (prev + 1) % associateFeedbacks.length);
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX.current == null) {
+      setIsPaused(false);
+      return;
+    }
+    const deltaX = event.changedTouches[0]?.clientX - touchStartX.current;
+    const threshold = 40;
+    if (deltaX > threshold) {
+      handlePrev();
+    } else if (deltaX < -threshold) {
+      handleNext();
+    }
+    touchStartX.current = null;
+    setIsPaused(false);
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <div
+        ref={carouselRef}
+        className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth gap-6 pb-6"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {associateFeedbacks.map((feedback, index) => (
+          <div
+            key={feedback.id}
+            className="min-w-full flex-shrink-0 snap-center"
+          >
+            <FadeInUpOnScroll delay={index * 0.1}>
+              <AssociateFeedbackCard feedback={feedback} />
+            </FadeInUpOnScroll>
+          </div>
+        ))}
+      </div>
+
+      {/* Arrows */}
+      <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center transform -translate-y-1/2 pointer-events-none px-2">
+        <button
+          className="w-8 h-8 rounded-full bg-white/90 shadow-md flex items-center justify-center text-gray-700 hover:bg-white transition-all pointer-events-auto"
+          onClick={handlePrev}
+          aria-label="Previous associate reflection"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <button
+          className="w-8 h-8 rounded-full bg-white/90 shadow-md flex items-center justify-center text-gray-700 hover:bg-white transition-all pointer-events-auto"
+          onClick={handleNext}
+          aria-label="Next associate reflection"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      {/* Dots */}
+      <div className="flex justify-center mt-6 gap-2">
+        {associateFeedbacks.map((item, index) => (
+          <button
+            key={item.id}
+            className={`h-2 rounded-full transition-all ${
+              activeIndex === index
+                ? 'w-6 bg-coral-500'
+                : 'w-2 bg-gray-300 hover:bg-gray-400'
+            }`}
+            style={activeIndex === index ? { backgroundColor: '#FB5535' } : {}}
+            onClick={() => setActiveIndex(index)}
+            aria-label={`Go to associate reflection ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Partner Category Card component
 const PartnerCategoryCard = ({ category }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -544,14 +686,9 @@ const PartnerCategoryCard = ({ category }) => {
   return (
     <div
       ref={ref}
-      className={`relative overflow-hidden rounded-xl p-6 transition-all duration-500 ease-out transform ${
+      className={`relative overflow-hidden rounded-2xl bg-[#F6F7F9] p-6 md:p-8 transition-all duration-500 ease-out transform min-h-[220px] h-full flex flex-col ${
         isHovered ? "shadow-md scale-[1.02]" : "shadow-sm"
       }`}
-      style={{
-        background: isHovered
-          ? `linear-gradient(to bottom right, #f9fafb, #ffffff)`
-          : "#ffffff",
-      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -569,48 +706,38 @@ const PartnerCategoryCard = ({ category }) => {
             isHovered ? "animate-bounce-subtle" : ""
           }`}
         >
-          {category.icon}
+          {React.createElement(category.iconComponent, { size: category.iconSize || 28 })}
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
         {category.title}
       </h3>
-      <p className="text-sm text-gray-600 mb-4">{category.subtitle}</p>
-
-      <div
-        className={`text-3xl font-bold transition-all duration-300 ${
-          isHovered ? `text-${category.color}` : `text-${category.color}`
-        }`}
-      >
-        {hasAnimated && <AnimatedCounter value={parseInt(category.metric)} />}
-        {!hasAnimated && "0"}
-        {category.metric.includes("+") && "+"}
-      </div>
+      <p className="text-sm text-gray-600 mb-4 flex-grow">{category.subtitle}</p>
     </div>
   );
 };
 
 // Partner Logo
-const PartnerLogo = ({ partner }) => {
+const PartnerLogo = ({ sector }) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
     <div
-      className={`relative mx-6 my-2 transition-all duration-300 ease-out transform ${
-        isHovered ? "scale-110" : ""
+      className={`relative mx-5 my-2 transition-all duration-300 ease-out transform ${
+        isHovered ? 'scale-110' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <img
-        src={partner.logo}
-        alt={partner.name}
-        className="h-12 object-contain transition-all duration-500"
+        src={sector.logo}
+        alt={sector.name}
+        className="h-16 md:h-20 object-contain transition-all duration-500"
         style={{
           filter: isHovered ? "none" : "grayscale(100%)",
           opacity: isHovered ? 1 : 0.7,
           width: "auto",
-          maxWidth: "120px",
+          maxWidth: "160px",
         }}
       />
     </div>
@@ -620,7 +747,7 @@ const PartnerLogo = ({ partner }) => {
 // Featured Partners Carousel
 const FeaturedPartnersCarousel = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const allPartners = [...strategicPartners, ...partnerLogos];
+  const sectors = featuredSectors;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -657,27 +784,24 @@ const FeaturedPartnersCarousel = () => {
   };
 
   return (
-    <div className="relative py-8">
-      <FadeInUpOnScroll className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+    <div className="relative h-auto pt-8 pb-4 md:pt-10 md:pb-6">
+      <FadeInUpOnScroll className="text-center mb-8">
+        <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           Featured Sectors
         </h3>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-base md:text-lg">
           Trusted core factories and streams across DQ
         </p>
       </FadeInUpOnScroll>
 
-      <div className="relative overflow-hidden">
+      <div className="relative h-auto overflow-visible">
         <div
           ref={carouselRef}
-          className="flex overflow-x-auto py-4 scrollbar-hide"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className="flex overflow-x-auto py-6 md:py-8 scrollbar-hide gap-8"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {[...allPartners, ...allPartners].map((partner, index) => (
-            <PartnerLogo
-              key={`${partner.name}-${index}`}
-              partner={partner}
-            />
+          {[...sectors, ...sectors].map((sector, index) => (
+            <PartnerLogo key={`${sector.id}-${index}`} sector={sector} />
           ))}
         </div>
 
@@ -708,24 +832,23 @@ const FeaturedPartnersCarousel = () => {
 
 const ProofAndTrust: React.FC = () => {
   return (
-    <div className="bg-white py-16">
+    <div className="bg-white pt-16 pb-8">
       <div className="container mx-auto px-4">
         {/* Why Abu Dhabi / Platform Impact */}
         <div className="mb-16">
           <FadeInUpOnScroll className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-              Why Agile Working Accelerates Growth
+              Experience the Future of Work in DQ
             </h2>
             <div>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8 text-balance clamp-2">
-                Agile working empowers teams to adapt, collaborate, and grow
-                faster together.
+              <p className="text-base sm:text-lg text-gray-600 mx-auto mb-8 text-balance leading-tight whitespace-normal sm:whitespace-nowrap max-w-full sm:max-w-4xl">
+                DQ brings Agile to life through GHC and 7S ways of working driving alignment, feedback, and continuous improvement.
               </p>
             </div>
           </FadeInUpOnScroll>
 
           <StaggeredFadeIn
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
             staggerDelay={0.15}
           >
             {impactStats.map((stat, index) => {
@@ -736,67 +859,95 @@ const ProofAndTrust: React.FC = () => {
                 >
                   <div className="flex justify-center mb-4">
                     <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#FB5535]/10 text-[#FB5535]">
-                      {stat.icon}
+                      {React.createElement(stat.iconComponent, {
+                        size: stat.iconSize || 20,
+                        strokeWidth: 2.5,
+                        className: stat.iconClassName,
+                      })}
                     </span>
                   </div>
-                  <div className="text-3xl font-bold text-dq-navy mb-1 flex items-baseline justify-center">
-                    {stat.prefix && <span className="mr-1">{stat.prefix}</span>}
-                    <span className="inline-flex items-baseline tabular-nums">
-                      <AnimatedCounter value={stat.value} />
-                      <span>{stat.suffix ?? ""}</span>
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-600 text-center leading-tight mt-1 whitespace-normal break-words [text-overflow:clip] [overflow:visible] [display:block]">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
                     {stat.label}
-                  </div>
+                  </h3>
+                  <p className="text-sm text-gray-600 text-center leading-tight">
+                    {stat.description}
+                  </p>
                 </div>
               );
             })}
           </StaggeredFadeIn>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+            <a
+              href="/ghc"
+              className="px-6 py-3 bg-[#1b2e6e] hover:bg-[#1b2e6e]/90 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
+            >
+              Explore DQ GHC
+            </a>
+          </div>
         </div>
 
         {/* Success Stories */}
-        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 md:p-12 overflow-hidden relative">
-          <FadeInUpOnScroll className="text-center mb-10 relative z-10">
+        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 overflow-hidden relative">
+          <FadeInUpOnScroll className="text-center mb-8 relative z-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-              Success Stories from DQ Employees
+              Qatalyst Perspectives
             </h2>
             <div>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto clamp-2">
-                Discover how DQ teams work smarter and collaborate better every
-                day.
+              <p className="text-base sm:text-lg text-gray-600 mx-auto leading-tight whitespace-nowrap text-center overflow-hidden text-ellipsis">
+                Real reflections from Qatalysts on how DQ DNA shapes the way we think, collaborate, and create meaningful impact.
               </p>
             </div>
           </FadeInUpOnScroll>
-          <VideoTestimonialCarousel />
-        </div>
 
-        {/* Powered by Strategic Partnerships - NEW SECTION */}
-        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 md:p-12 overflow-hidden relative">
-          <HorizontalScrollReveal
-            direction="left"
-            className="text-center mb-10 relative z-10"
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-              Our Four Pillars of Success
-            </h2>
-            <div className="relative">
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto clamp-2">
-                Governance, Operations, Platforms, and Delivery — the four
-                pillars driving DQ’s success.
-              </p>
-            </div>
-          </HorizontalScrollReveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {partnerCategories.map((category, index) => (
-              <FadeInUpOnScroll key={category.id} delay={index * 0.15}>
-                <PartnerCategoryCard category={category} />
-              </FadeInUpOnScroll>
-            ))}
+          <div className="relative z-10 max-w-6xl mx-auto mb-8">
+            <AssociateFeedbackCarousel />
           </div>
 
-          <FeaturedPartnersCarousel />
+          {/* CTA */}
+          <div className="flex justify-center relative z-10">
+            <a
+              href="/marketplace/guides/associate-testimonials"
+              className="px-6 py-3 bg-[#1b2e6e] hover:bg-[#1b2e6e]/90 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center"
+            >
+              Read More Associate Stories
+            </a>
+          </div>
+        </div>
+
+        {/* Our Four Pillars of Success */}
+        <div className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 overflow-hidden relative">
+          <FadeInUpOnScroll className="text-center mb-8 relative z-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
+              Primary Work Sectors in DQ
+            </h2>
+            <div>
+              <p className="text-base sm:text-lg text-gray-600 mx-auto mb-8 leading-tight text-center whitespace-nowrap">
+                GHC sets the direction, and Agile Flows turn it into execution. These sectors show how ownership, governance, and delivery work together across DQ.
+              </p>
+            </div>
+          </FadeInUpOnScroll>
+
+          <StaggeredFadeIn
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto relative z-10 mb-8"
+            staggerDelay={0.15}
+          >
+            {partnerCategories.map((category) => (
+              <PartnerCategoryCard key={category.id} category={category} />
+            ))}
+          </StaggeredFadeIn>
+
+          {/* CTA */}
+          <div className="flex justify-center relative z-10">
+            <button
+              disabled
+              className="px-6 py-3 bg-gray-400 text-gray-200 font-bold rounded-lg shadow-lg cursor-not-allowed text-center flex items-center justify-center gap-2 opacity-60"
+            >
+              <Lock size={18} />
+              Explore the Work Directory
+            </button>
+          </div>
         </div>
 
         {/* Animations + CSS vars */}

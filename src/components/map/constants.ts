@@ -8,12 +8,12 @@ export type MarkerColorKey =
   | 'Default';
 
 export const MARKER_COLORS: Record<MarkerColorKey, string> = {
-  Headquarters: '#2559FF',
-  'Regional Office': '#6366F1',
-  Client: '#EC4899',
-  Authority: '#F97316',
-  Bank: '#10B981',
-  Utility: '#FACC15',
-  Default: '#4B5563',
+  Headquarters: '#162862', // DWS Primary Dark Blue
+  'Regional Office': '#162862',
+  Client: '#162862',
+  Authority: '#162862',
+  Bank: '#162862',
+  Utility: '#162862',
+  Default: '#162862',
 };
 

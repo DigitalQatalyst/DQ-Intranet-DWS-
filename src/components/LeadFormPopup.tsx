@@ -170,7 +170,7 @@ export default function LeadFormPopup() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="lead-form-title"
-        className="relative z-[101] w-full max-w-[720px] rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 p-6 md:p-8 opacity-0 scale-95 translate-y-2 transition-all duration-200 ease-out"
+        className="relative z-[101] w-full max-w-[720px] rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 p-6 md:p-8 opacity-0 scale-95 translate-y-2 transition-all duration-200 ease-out max-h-[90vh] overflow-y-auto"
         data-open={popupState}
         style={{
           opacity: popupState === "open" ? 1 : 0,
@@ -190,13 +190,13 @@ export default function LeadFormPopup() {
               id="lead-form-title"
               className="mt-2 text-2xl md:text-[26px] font-bold text-[#030F35] leading-snug"
             >
-              Become a Lead
+              Become a Scrum Master
             </h2>
             <p className="mt-2 text-sm md:text-[15px] text-gray-600">
-              Step forward in your DQ journey. Leads drive collaboration,
-              mentor associates, and shape how our digital workspace grows.
+              Step forward in your DQ journey. Scrum Masters facilitate agile practices,
+              remove impediments, and help teams deliver value effectively.
               Tell us where you'd like to contribute — we'll connect with you
-              about available leadership roles.
+              about available Scrum Master opportunities.
             </p>
             <p className="mt-2 text-sm">
               <strong className="font-medium text-[#131E42]">Before you apply:</strong>{" "}
@@ -206,7 +206,7 @@ export default function LeadFormPopup() {
                 rel="noopener noreferrer"
                 className="text-[#0030E3] underline underline-offset-4 hover:text-[#002180]"
               >
-                read the 6 leadership principles ↗
+                read the Scrum Master guidelines ↗
               </a>
             </p>
           </div>

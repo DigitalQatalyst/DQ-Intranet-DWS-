@@ -25,12 +25,12 @@ interface Marketplace {
 
 const marketplaces: Marketplace[] = [
   {
-    id: "non-financial",
+    id: "service-center",
     name: "Business Services",
     description:
       "Business registration, legal advisory, tax, compliance, and SME support services",
     icon: BuildingIcon,
-    href: "/marketplace/non-financial",
+    href: "/marketplace/services-center",
   },
   {
     id: "finance",
@@ -208,7 +208,7 @@ export function ExploreDropdown({ isCompact = false }: ExploreDropdownProps) {
             </p>
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[480px] overflow-y-auto">
             {marketplaces.map((marketplace, index) => {
               const Icon = marketplace.icon;
               const external = isExternal(marketplace.href);

@@ -94,26 +94,16 @@ export function useOnboardingForm(steps, onComplete, isRevisit) {
   };
 
   const findFieldDefinition = (fieldName) => {
-    // Search through all steps to find field definition
     for (const step of steps) {
-      if (step.sections) {
-        for (const section of step.sections) {
-          const field = section.fields?.find((f) => f.fieldName === fieldName);
-          if (field) return field;
-        }
-      } else if (step.fields) {
-        const field = step.fields.find((f) => f.fieldName === fieldName);
-        if (field) return field;
-      }
+      const fields = step.sections
+        ? step.sections.flatMap((s) => s.fields ?? [])
+        : (step.fields ?? []);
+      const field = fields.find((f) => f.fieldName === fieldName);
+      if (field) return field;
     }
-
-    // Handle welcome step fields
-    if (currentStep === 0) {
-      const welcomeFields = getWelcomeFields();
-      return welcomeFields.find((f) => f.fieldName === fieldName);
-    }
-
-    return null;
+    return currentStep === 0
+      ? getWelcomeFields().find((f) => f.fieldName === fieldName) ?? null
+      : null;
   };
 
   const getWelcomeFields = () => [

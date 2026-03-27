@@ -14,14 +14,15 @@ import {
   Calendar,
   GraduationCap
 } from "lucide-react";
-import { LMS_COURSE_DETAILS } from "../data/lmsCourseDetails";
+import { useLmsCourse, useLmsCourseDetails } from "../hooks/useLmsCourses";
+import type { LmsDetail } from "../data/lmsCourseDetails";
 import { ICON_BY_ID, resolveChipIcon } from "../utils/lmsIcons";
 import { BookOpenCheck } from "lucide-react";
 import { levelShortLabelFromCode } from "@/lms/levels";
 
 const formatList = (values: string[]) => values.join(", ");
 
-const formatChips = (course: (typeof LMS_COURSE_DETAILS)[number]) => {
+const formatChips = (course: LmsDetail) => {
   const chips: Array<{ key: string; label: string; iconValue?: string }> = [
     { key: "courseCategory", label: course.courseCategory },
     { key: "deliveryMode", label: course.deliveryMode, iconValue: course.deliveryMode },
@@ -45,19 +46,67 @@ export const LmsCourseDetail: React.FC = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const detail = useMemo(
-    () => LMS_COURSE_DETAILS.find((d) => d.slug === slug),
-    [slug]
-  );
+  // Fetch course data from Supabase - MUST be called before any conditional returns
+  const { data: detail, isLoading: detailLoading, error: detailError } = useLmsCourse(slug || '');
+  const { data: allCourses = [] } = useLmsCourseDetails();
 
   const relatedCourses = useMemo(() => {
     if (!detail) return [];
-    return LMS_COURSE_DETAILS.filter(
+    return allCourses.filter(
       (d) =>
         d.courseCategory === detail.courseCategory && d.id !== detail.id
     );
-  }, [detail]);
+  }, [detail, allCourses]);
 
+  // Show loading state
+  if (detailLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
+        <div className="flex-grow flex items-center justify-center px-4">
+          <div className="text-center max-w-md">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading course details...</p>
+          </div>
+        </div>
+        <Footer isLoggedIn={false} />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (detailError) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
+        <div className="flex-grow flex items-center justify-center px-4">
+          <div className="text-center max-w-md">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+              Error Loading Course
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {detailError.message || 'An error occurred while loading the course details.'}
+            </p>
+            <button
+              onClick={() => navigate("/lms")}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Back to LMS Courses
+            </button>
+          </div>
+        </div>
+        <Footer isLoggedIn={false} />
+      </div>
+    );
+  }
+
+  // Show not found state
   if (!detail) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">

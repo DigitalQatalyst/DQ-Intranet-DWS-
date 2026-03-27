@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/communities/contexts/AuthProvider';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { CommunitiesLayout } from './CommunitiesLayout';
-import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/KF eJP Library/PageLayout';
+import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs } from '@/communities/components/DesignSystem/PageLayout';
 import { TabsFeed } from '@/communities/components/feed/TabsFeed';
 import { FeedSidebar } from '@/communities/components/feed/FeedSidebar';
 import { InlineComposer } from '@/communities/components/post/InlineComposer';
 import { supabaseClient } from '../lib/supabaseClient';
 import { safeFetch } from '@/communities/utils/safeFetch';
-import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
+import { StickyActionButton } from '@/communities/components/DesignSystem/Button';
 import { Button } from '@/communities/components/ui/button';
 import { X, Search } from 'lucide-react';
 
@@ -63,7 +63,7 @@ export function CommunityFeed() {
     }
   }, [user, filterTag]);
 
-  const fetchMyPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+  const fetchMyPosts = async (sortBy = 'recent', offset = 0) => {
     if (!user) return;
     setMyLoading(true);
     
@@ -132,7 +132,7 @@ export function CommunityFeed() {
     }
   };
 
-  const fetchGlobalPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+  const fetchGlobalPosts = async (sortBy = 'recent', offset = 0) => {
     if (!user) return;
     setGlobalLoading(true);
     
@@ -193,7 +193,7 @@ export function CommunityFeed() {
     }
   };
 
-  const fetchTrendingPosts = async (sortBy: string = 'recent', offset: number = 0) => {
+  const fetchTrendingPosts = async (sortBy = 'recent', offset = 0) => {
     setTrendingLoading(true);
     
     try {

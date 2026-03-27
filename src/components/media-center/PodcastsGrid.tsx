@@ -1,0 +1,118 @@
+import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import type { NewsItem } from '@/data/media/news';
+import type { FiltersValue } from './types';
+import { PodcastSeriesCard } from './cards/PodcastSeriesCard';
+import { formatDuration } from '@/utils/newsUtils';
+
+interface GridProps {
+  query: {
+    tab: string;
+    q?: string;
+    filters?: FiltersValue;
+  };
+  items: NewsItem[];
+}
+
+export default function PodcastsGrid({ query, items }: GridProps) {
+  const location = useLocation();
+
+  // Get all podcast episodes
+  const podcastEpisodes = useMemo(() => {
+    return items.filter(
+      (item) =>
+        item.format === 'Podcast' ||
+        item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))
+    );
+  }, [items]);
+
+  // Separate episodes by series
+  const actionSolverEpisodes = useMemo(() => {
+    return podcastEpisodes.filter(ep => ep.audioUrl?.startsWith('/Podcasts/'));
+  }, [podcastEpisodes]);
+
+  const executionMindsetEpisodes = useMemo(() => {
+    return podcastEpisodes.filter(ep => ep.audioUrl?.includes('/02. Series 02 - The Execution Mindset/'));
+  }, [podcastEpisodes]);
+
+  const calcAvgDuration = (episodes: typeof podcastEpisodes) => {
+    if (episodes.length === 0) return 0;
+    const total = episodes.reduce((sum, ep) => {
+      if (ep.readingTime) {
+        const dur = formatDuration(ep.readingTime);
+        return sum + (parseInt(dur.replace(' min', '')) || 0);
+      }
+      return sum;
+    }, 0);
+    return Math.round(total / episodes.length);
+  };
+
+  // Helper function to check domain filter match
+  const hasDomainMatch = (episodes: typeof podcastEpisodes, domainFilter: string[]) => {
+    if (!domainFilter || domainFilter.length === 0) return true;
+    return episodes.some(episode => episode.domain && domainFilter.includes(episode.domain));
+  };
+
+  // Helper function to check duration filter match
+  const hasDurationMatch = (episodes: typeof podcastEpisodes, durationFilter: string[]) => {
+    if (!durationFilter || durationFilter.length === 0) return true;
+    
+    const avg = calcAvgDuration(episodes);
+    return durationFilter.some((filter) => {
+      if (filter === '10–20' || filter === '10–20 Min') {
+        return avg >= 10 && avg < 20;
+      } else if (filter === '20+' || filter === '20+ Min') {
+        return avg >= 20;
+      }
+      return false;
+    });
+  };
+
+  // Check if series matches filters
+  const shouldShowSeries = useMemo(() => {
+    const filters = query.filters || {};
+    
+    return hasDomainMatch(podcastEpisodes, filters.domain) &&
+           hasDurationMatch(podcastEpisodes, filters.readingTime);
+  }, [query.filters, podcastEpisodes]);
+
+  if (query.tab !== 'podcasts') {
+    return null;
+  }
+
+  if (!shouldShowSeries) {
+    return (
+      <section className="space-y-3">
+        <div className="flex items-center justify-between text-sm text-gray-600">
+          <h3 className="font-medium text-gray-800">Available Items (0)</h3>
+                </div>
+        <div className="text-center py-12 text-gray-500">No podcast series found matching the selected filters</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between text-sm text-gray-600">
+        <h3 className="font-medium text-gray-800">Available Items (2)</h3>
+            </div>
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 [&>*]:max-w-full">
+        <PodcastSeriesCard
+          href={`/marketplace/news/action-solver-podcast${location.search}`}
+          title="Action-Solver Podcast"
+          description="Short conversations that solve real work problems at DQ"
+          episodeCount={actionSolverEpisodes.length}
+          avgDuration={calcAvgDuration(actionSolverEpisodes)}
+        />
+        <PodcastSeriesCard
+          href={`/marketplace/news/the-execution-mindset${location.search}`}
+          title="The Execution Mindset"
+          description="Short conversations that solve real work problems at DQ."
+          episodeCount={executionMindsetEpisodes.length}
+          avgDuration={calcAvgDuration(executionMindsetEpisodes)}
+        />
+      </div>
+    </section>
+  );
+}
+

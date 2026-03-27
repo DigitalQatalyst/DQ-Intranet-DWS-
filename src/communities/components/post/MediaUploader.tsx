@@ -1,3 +1,4 @@
+import { secureRandom } from '../../../utils/secureRandom';
 import React, { useState, useCallback } from 'react';
 import { supabase } from '@/communities/integrations/supabase/client';
 import { Button } from '@/communities/components/ui/button';
@@ -30,7 +31,7 @@ export function MediaUploader({
   const uploadFile = async (file: File): Promise<UploadedFile | null> => {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `${userId}/${Date.now()}_${secureRandom().toString(36).substring(7)}.${fileExt}`;
       const {
         data,
         error

@@ -32,6 +32,7 @@ const DashboardLayout = ({
   isLoggedIn: boolean;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
 }) => {
+  const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen] = useState(true);
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -71,27 +72,30 @@ const DashboardLayout = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
-      <div className="min-h-screen bg-gray-50 flex">
-        {/* Sidebar */}
-        <Sidebar
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-          onboardingComplete={onboardingComplete}
-          companies={companies}
-          onCompanyChange={handleCompanyChange}
-          onAddNewEnterprise={handleAddNewEnterprise}
-          isLoggedIn={isLoggedIn}
-        />
+      <div className="flex-1 flex overflow-hidden bg-gray-50">
+        {!location.pathname.includes("/dashboard/onboarding") && (
+          <Sidebar
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            onboardingComplete={onboardingComplete}
+            companies={companies}
+            onCompanyChange={handleCompanyChange}
+            onAddNewEnterprise={handleAddNewEnterprise}
+            isLoggedIn={isLoggedIn}
+          />
+        )}
 
-        <div className="flex-1 flex flex-col">
-          <div className={`transition-all duration-300`}>
-            <div className="min-h-screen">{children}</div>
+        <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar bg-gray-50">
+          <div className="flex-1 relative">
+            <div className="min-h-full">{children}</div>
           </div>
-          <Footer isLoggedIn={isLoggedIn} />
+          {!location.pathname.includes("/dashboard/onboarding") && (
+            <Footer isLoggedIn={isLoggedIn} />
+          )}
         </div>
       </div>
     </div>
