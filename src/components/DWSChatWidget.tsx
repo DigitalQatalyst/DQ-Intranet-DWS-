@@ -164,16 +164,27 @@ function toAiMessages(history: ChatMessage[]): AiChatMessage[] {
 function matchGreeting(lower: string): string | null {
   const greetingKey = Object.keys(DWS_GREETINGS).find((k) => {
     const norm = k.toLowerCase();
-    return lower === norm || lower === norm + '!' || lower === norm + '.' ||
-      lower.startsWith(norm + ' ') || (norm.length >= 2 && lower.startsWith(norm));
+    return (
+      lower === norm ||
+      lower === norm + "!" ||
+      lower === norm + "." ||
+      lower.startsWith(norm + " ") ||
+      (norm.length >= 2 && lower.startsWith(norm))
+    );
   });
   if (greetingKey) {
     const options = DWS_GREETINGS[greetingKey];
     if (options?.length) return pickGreetingResponse(options);
   }
   if (lower.length <= 10) {
-    const shorts: Record<string, string[]> = { hi: DWS_GREETINGS.hi, hello: DWS_GREETINGS.hello, hey: DWS_GREETINGS.hey };
-    const key = Object.keys(shorts).find((k) => lower === k || lower === k + '!' || lower === k + '.');
+    const shorts: Record<string, string[]> = {
+      hi: DWS_GREETINGS.hi,
+      hello: DWS_GREETINGS.hello,
+      hey: DWS_GREETINGS.hey,
+    };
+    const key = Object.keys(shorts).find(
+      (k) => lower === k || lower === k + "!" || lower === k + ".",
+    );
     if (key && shorts[key]?.length) return pickGreetingResponse(shorts[key]);
   }
   return null;
@@ -181,7 +192,13 @@ function matchGreeting(lower: string): string | null {
 
 function matchQuickFact(lower: string): string | null {
   for (const [key, text] of Object.entries(DWS_QUICK_FACTS)) {
-    if (lower.includes(key) && (lower.includes('what') || lower.includes('explain') || lower.includes('tell me')) && lower.split(/\s+/).length <= 8) {
+    if (
+      lower.includes(key) &&
+      (lower.includes("what") ||
+        lower.includes("explain") ||
+        lower.includes("tell me")) &&
+      lower.split(/\s+/).length <= 8
+    ) {
       return text;
     }
   }
@@ -195,7 +212,10 @@ function generateAIResponse(userMessage: string): string {
   const greeting = matchGreeting(lower);
   if (greeting) return greeting;
 
-  if (/\b(help|what can you do|how can you help)\b/.test(lower) && lower.length < 50) {
+  if (
+    /\b(help|what can you do|how can you help)\b/.test(lower) &&
+    lower.length < 50
+  ) {
     return DWS_HELP_REPLY;
   }
 
@@ -209,7 +229,7 @@ function generateAIResponse(userMessage: string): string {
   if (quickFact) return quickFact;
 
   if (/\b(start|begin|get started|first day|new joiner)\b/.test(lower)) {
-    const getStarted = DWS_KNOWLEDGE['get_started'];
+    const getStarted = DWS_KNOWLEDGE["get_started"];
     if (getStarted) return formatKnowledgeReply(getStarted);
   }
 
@@ -311,26 +331,19 @@ export function DWSChatWidget({
     }
 
     try {
+      const updateMessage = (prev: ChatMessage[]) =>
+        prev.map((m) => (m.id === assistantId ? { ...m, content: reply } : m));
+      const onToken = (token: string) => {
+        reply += token;
+        setMessages(updateMessage);
+      };
       const aiResponse = await sendAiChat(
         { messages: aiMessages, context, stream: true },
-        {
-          onToken: (token) => {
-            reply += token;
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === assistantId ? { ...m, content: reply } : m,
-              ),
-            );
-          },
-        },
+        { onToken },
       );
       if (!reply && aiResponse.reply) {
         reply = aiResponse.reply;
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, content: reply } : m,
-          ),
-        );
+        setMessages(updateMessage);
       }
       setAiMode("live");
     } catch (err) {
