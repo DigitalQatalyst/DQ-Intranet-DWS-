@@ -7,7 +7,7 @@ const stats = [
   { value: '2015', label: 'Founded in UAE' },
 ];
 
-// EJP-style layered hero with background image and mountain layers
+// DWS-style layered hero with background image and mountain layers
 const DigitalLandscape: React.FC = () => {
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -98,7 +98,7 @@ const DigitalLandscape: React.FC = () => {
         />
       </svg>
 
-      {/* Layer 7: Foreground mountain silhouettes - EJP style, geometric/stepped, clearly visible and prominent */}
+      {/* Layer 7: Foreground mountain silhouettes - DWS style, geometric/stepped, clearly visible and prominent */}
       <svg
         className="absolute bottom-0 left-0 w-full z-[6]"
         viewBox="0 0 1200 300"
@@ -140,7 +140,7 @@ export const Discover_HeroSection: React.FC = () => {
   const navigate = useNavigate();
   return (
     <section className="relative isolate grid min-h-[90vh] place-items-center overflow-hidden bg-[#030F35] text-white font-sans py-12">
-      {/* EJP-style layered hero background */}
+      {/* DWS-style layered hero background */}
       <DigitalLandscape />
 
       {/* Layer 8: Soft reflection of mountain silhouettes below hero - subtle and atmospheric */}

@@ -23,7 +23,7 @@
 **Rules:**
 - Keep existing sections (Vision & Mission, DNA, Workspace Insights, D6 Cards, Directory) unchanged.
 - Reuse `MapCard` and `DQMap` components from `src/components/map/`.
-- Follow EJP design system (navy theme, card styles, button styles from `src/styles/theme.css`).
+- Follow DWS design system (navy theme, card styles, button styles from `src/styles/theme.css`).
 - Remove any mock/placeholder data; use structured static content or config files.
 - Component structure: Create `src/components/Discover/AboutLocationsModule.tsx` as the main module component.
 
@@ -42,7 +42,7 @@
 **Design Components to Reuse:**
 - `MapCard` from `src/components/map/MapCard.tsx`
 - `DQMap` from `src/components/DQMap.tsx`
-- EJP-style buttons (navy theme: `#0B1E67`, `var(--dws-navy)`)
+- DWS-style buttons (navy theme: `#0B1E67`, `var(--dws-navy)`)
 - Card styles from `src/styles/theme.css`
 - Typography: Playfair Display for headings, system fonts for body
 
@@ -117,7 +117,7 @@
 
 **Stats Cards:**
 - Display: Value (large, bold) + Label (small, uppercase)
-- Style: EJP navy theme, rounded cards with subtle shadow
+- Style: DWS navy theme, rounded cards with subtle shadow
 - Responsive: 1 column mobile, 2-3 columns tablet, 3-4 columns desktop
 
 **About DQ Content:**
@@ -125,7 +125,7 @@
 - Paragraphs: 14-16px, gray text (`#475569`), max-width 600px
 - Bullets: Checkmark or dot icons, 14px text
 - CTA buttons below content: "Explore Vision & Mission", "Discover DNA", "Browse Directory"
-- Buttons: EJP navy primary style, smooth scroll to anchors
+- Buttons: DWS navy primary style, smooth scroll to anchors
 
 **Locations Map:**
 - Uses `MapCard` component with filtered locations (only DQ offices)
@@ -301,7 +301,7 @@ export function useAboutDQ() {
    - Review `src/components/Discover/` for component structure patterns
    - Review `src/pages/DiscoverDQ.tsx` for page integration pattern
    - Review `src/api/MAPAPI.ts` for location data structure
-   - Review `src/styles/theme.css` for EJP design tokens
+   - Review `src/styles/theme.css` for DWS design tokens
 
 2. **Follow Conventions:**
    - Use TypeScript with strict types
@@ -313,7 +313,7 @@ export function useAboutDQ() {
 3. **Don't Duplicate:**
    - Reuse `MapCard` and `DQMap` components (don't create new map component)
    - Reuse animation utilities from `AnimationUtils.tsx`
-   - Reuse EJP button styles from theme (don't create new button component)
+   - Reuse DWS button styles from theme (don't create new button component)
 
 4. **Remove Mock Data:**
    - Replace any placeholder/mock data with structured static content
@@ -338,6 +338,6 @@ export function useAboutDQ() {
    - Three sections render correctly (Stats, About, Map)
    - Map shows only DQ offices (DXB, NBO, KSA) with interactive pins
    - CTAs navigate to correct sections via smooth scroll
-   - Design matches EJP navy theme and existing Discover page style
+   - Design matches DWS navy theme and existing Discover page style
    - No console errors or TypeScript warnings
 

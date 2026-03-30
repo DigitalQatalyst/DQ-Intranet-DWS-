@@ -287,7 +287,7 @@ const DQMap: React.FC<{
         </div>
       )}
 
-      {/* Gradient overlay for EJP style - subtle branded gradient */}
+      {/* Gradient overlay for DWS style - subtle branded gradient */}
       {!isMapLoading && (
         <div
           className="absolute inset-0 pointer-events-none"

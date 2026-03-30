@@ -91,7 +91,7 @@ The Discover DQ page consists of 6 main sections in order:
 **File**: `src/components/Discover/Discover_HeroSection.tsx`
 
 **Visual Elements**:
-- **Background Layers** (EJP-style layered hero):
+- **Background Layers** (DWS-style layered hero):
   1. Base navy/blue gradient (#030F35)
   2. Background image with blur and opacity
   3. Light gradient overlay
