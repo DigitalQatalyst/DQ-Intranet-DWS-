@@ -378,6 +378,7 @@ Key Points:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep%2001_Why%20Execution%20Beats%20Intelligence%20The%20Real%20Driver%20of%20Growth%20in%20DQ.m4a',
     content: `# Why Execution Beats Intelligence: The Real Driver of Growth in DQ
 
 Promoting execution over intelligence, stressing why getting things done is more powerful than just knowing the best approach.`
@@ -402,6 +403,7 @@ Promoting execution over intelligence, stressing why getting things done is more
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep%202_Why%20We%20Misdiagnose%20Problems%20-%20And%20How%20to%20Stop%20It.m4a',
     content: `# Why We Misdiagnose Problems — And How to Stop It
 
 Help us recognise when we're reacting to symptoms instead of diagnosing the real issue.`
@@ -426,6 +428,7 @@ Help us recognise when we're reacting to symptoms instead of diagnosing the real
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep%203_Turning%20Every%20Conversation%20Into%20Action.m4a',
     content: `# Turning Every Conversation Into Action
 
 Why conversations feel satisfying even when nothing moves.`
@@ -450,6 +453,7 @@ Why conversations feel satisfying even when nothing moves.`
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep05_Happy_Talkers_v2.m4a',
     content: `# Happy Talkers: Why Talking Feels Productive but Isn't
 
 Identifying and examining "happy talk," which feels energizing but is low consequence.`
@@ -474,6 +478,7 @@ Identifying and examining "happy talk," which feels energizing but is low conseq
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep%2007_Agile%20the%20DQ%20Way%20-%20Why%20Tasks%20Are%20the%20Core%20of%20Our%20Work%20System.m4a',
     content: `# Agile the DQ Way: Why Tasks Are the Core of Our Work System
 
 Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
@@ -910,6 +915,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep%2004_Why%20tasks%20don%27t%20close%20at%20DQ%20and%20how%20to%20fix%20it_v2.m4a',
   },
   {
     id: 'execution-styles-why-teams-work-differently',
@@ -931,6 +937,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep%2006_Execution%20Styles%20-%20Why%20Teams%20Work%20Differently%20and%20How%20to%20Align%20Them.m4a',
   },
   {
     id: 'leaders-as-multipliers-accelerate-execution',
@@ -952,6 +959,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep%2008_Leaders%20as%20Multipliers%20-%20How%20to%20Accelerate%20Team%20Execution.m4a',
   },
   {
     id: 'energy-management-for-high-action-days',
@@ -973,6 +981,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep%2009_Energy%20Management%20for%20High-Action%20Days.m4a',
   },
   {
     id: 'execution-metrics-that-drive-movement',
@@ -994,6 +1003,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-01/Ep10_Execution%20Metrics%20-%20Measuring%20Progress%20Over%20Activity.m4a',
   },
   {
     id: 'ownership-mindset-single-driver',
@@ -1014,7 +1024,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/02. Series 02 - The Execution Mindset/Ep 1_Ownership Mindset - Why Every Task Needs a Single Driver.m4a',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-02/Ep%201_Ownership%20Mindset%20-%20Why%20Every%20Task%20Needs%20a%20Single%20Driver.m4a',
   },
   {
     id: 'psychology-of-follow-through',
@@ -1035,7 +1045,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/02. Series 02 - The Execution Mindset/Ep 2_The Psychology of Follow-through - How to Finish What You Start.m4a',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-02/Ep%202_The%20Psychology%20of%20Follow-through%20-%20How%20to%20Finish%20What%20You%20Start.m4a',
   },
   {
     id: 'dont-mistake-motion-for-progress',
@@ -1056,7 +1066,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/02. Series 02 - The Execution Mindset/Don_t_Mistake_Motion_For_Progress (2).m4a',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-02/Ep%203_%20Movie%20Watchers%20Breaking%20the%20Habit%20of%20Waiting%20to%20Be%20Told.m4a',
   },
   {
     id: 'cutting-the-noise-focus-habits',
@@ -1077,7 +1087,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/02. Series 02 - The Execution Mindset/Ep 8_Cutting the Noise - Focus Habits for Digital Workers.m4a',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-02/Ep%208_Cutting%20the%20Noise%20-%20Focus%20Habits%20for%20Digital%20Workers.m4a',
   },
   {
     id: 'build-high-velocity-team-culture',
@@ -1098,7 +1108,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/02. Series 02 - The Execution Mindset/Ep 9_How to Build a High-Velocity Team Culture.m4a',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-02/Ep%209_How%20to%20Build%20a%20High-Velocity%20Team%20Culture.m4a',
   },
   {
     id: 'micro-actions-beat-big-plans',
@@ -1119,7 +1129,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/02. Series 02 - The Execution Mindset/Micro_Actions_Beat_Big_Plans (1).m4a',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-02/Ep%206_%20The%20Power%20of%20Micro-Actions%20Small%20Steps%20that%20Drive%20Big%20Progress.m4a',
   },
   {
     id: 'micro-actions-convert-intention-into-traction',
@@ -1140,7 +1150,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/02. Series 02 - The Execution Mindset/Micro-Actions_Convert_Intention_Into_Traction.m4a',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-02/Ep%205_%20From%20Noise%20to%20Clarity%20Turning%20Confusion%20into%20Actionable%20Insight.m4a',
   },
   {
     id: 'stop-discussion-start-action-clarity',
@@ -1161,7 +1171,7 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/02. Series 02 - The Execution Mindset/Stop_Discussion_Start_Action_Through_Clarity.m4a',
+    audioUrl: 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/series-02/Ep%207_%20Daily%20Interactions%20That%20Move%20Work%20Forward%20(Not%20Backwards).m4a',
   },
 ]
 

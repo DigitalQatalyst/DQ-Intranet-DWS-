@@ -16,25 +16,17 @@ export const ACTION_SOLVER_EPISODE_ORDER: string[] = [
 ];
 
 export function filterSeriesEpisodes(allNews: NewsItem[], isExecutionMindsetSeries: boolean): NewsItem[] {
-  const SUPABASE_STORAGE_BASE = 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/';
+  const SERIES2_PREFIX = 'series-02/';
   const allPodcastEpisodes = allNews.filter(
     (item) => item.format === 'Podcast' || item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))
   );
   return allPodcastEpisodes.filter((item) => {
     if (!item.audioUrl) return false;
-    if (isExecutionMindsetSeries) {
-      return (
-        item.audioUrl.includes('/02. Series 02 - The Execution Mindset/') ||
-        item.tags?.some((tag) => tag.toLowerCase().includes('series-2'))
-      );
-    }
-    // Action-Solver: Supabase storage URLs or local /Podcasts/ paths, excluding Series 02
-    return (
-      item.audioUrl.startsWith(SUPABASE_STORAGE_BASE) ||
-      (item.audioUrl.startsWith('/Podcasts/') &&
-        !item.audioUrl.includes('/02. Series 02 - The Execution Mindset/') &&
-        !item.tags?.some((tag) => tag.toLowerCase().includes('series-2')))
-    );
+    const isSeriesTwo =
+      item.audioUrl.includes(SERIES2_PREFIX) ||
+      item.audioUrl.includes('/02. Series 02 - The Execution Mindset/') ||
+      item.tags?.some((tag) => tag.toLowerCase().includes('series-2'));
+    return isExecutionMindsetSeries ? isSeriesTwo : !isSeriesTwo;
   });
 }
 
