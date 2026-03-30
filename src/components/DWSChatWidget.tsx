@@ -161,79 +161,58 @@ function toAiMessages(history: ChatMessage[]): AiChatMessage[] {
     }));
 }
 
+function matchGreeting(lower: string): string | null {
+  const greetingKey = Object.keys(DWS_GREETINGS).find((k) => {
+    const norm = k.toLowerCase();
+    return lower === norm || lower === norm + '!' || lower === norm + '.' ||
+      lower.startsWith(norm + ' ') || (norm.length >= 2 && lower.startsWith(norm));
+  });
+  if (greetingKey) {
+    const options = DWS_GREETINGS[greetingKey];
+    if (options?.length) return pickGreetingResponse(options);
+  }
+  if (lower.length <= 10) {
+    const shorts: Record<string, string[]> = { hi: DWS_GREETINGS.hi, hello: DWS_GREETINGS.hello, hey: DWS_GREETINGS.hey };
+    const key = Object.keys(shorts).find((k) => lower === k || lower === k + '!' || lower === k + '.');
+    if (key && shorts[key]?.length) return pickGreetingResponse(shorts[key]);
+  }
+  return null;
+}
+
+function matchQuickFact(lower: string): string | null {
+  for (const [key, text] of Object.entries(DWS_QUICK_FACTS)) {
+    if (lower.includes(key) && (lower.includes('what') || lower.includes('explain') || lower.includes('tell me')) && lower.split(/\s+/).length <= 8) {
+      return text;
+    }
+  }
+  return null;
+}
+
 /** Generate DWS chatbot reply using the full knowledge base. */
 function generateAIResponse(userMessage: string): string {
   const lower = normalizeInput(userMessage);
 
-  // 1. Greetings / small talk — check first so "hi", "hello", "hey" always get a greeting
-  const greetingKey = Object.keys(DWS_GREETINGS).find((k) => {
-    const norm = k.toLowerCase();
-    return (
-      lower === norm ||
-      lower === norm + "!" ||
-      lower === norm + "." ||
-      lower.startsWith(norm + " ") ||
-      (norm.length >= 2 && lower.startsWith(norm))
-    );
-  });
-  if (greetingKey) {
-    const options = DWS_GREETINGS[greetingKey];
-    if (options && options.length > 0) {
-      return pickGreetingResponse(options);
-    }
-  }
+  const greeting = matchGreeting(lower);
+  if (greeting) return greeting;
 
-  // Also treat very short likely-greetings (e.g. "hi", "hey") so they never fall through
-  const shortGreetings: Record<string, string[]> = {
-    hi: DWS_GREETINGS.hi,
-    hello: DWS_GREETINGS.hello,
-    hey: DWS_GREETINGS.hey,
-  };
-  if (lower.length <= 10) {
-    const key = Object.keys(shortGreetings).find(
-      (k) => lower === k || lower === k + "!" || lower === k + ".",
-    );
-    if (key && shortGreetings[key]?.length) {
-      return pickGreetingResponse(shortGreetings[key]);
-    }
-  }
-
-  // 2. Help / what can you do
-  if (
-    /\b(help|what can you do|how can you help)\b/.test(lower) &&
-    lower.length < 50
-  ) {
+  if (/\b(help|what can you do|how can you help)\b/.test(lower) && lower.length < 50) {
     return DWS_HELP_REPLY;
   }
 
-  // 3. Topic triggers → knowledge entry (includes "what is dws/dq" and full answers)
   for (const { topicId, keywords } of DWS_TOPIC_TRIGGERS) {
-    const matched = keywords.some((kw) => lower.includes(kw));
-    if (matched && DWS_KNOWLEDGE[topicId]) {
+    if (keywords.some((kw) => lower.includes(kw)) && DWS_KNOWLEDGE[topicId]) {
       return formatKnowledgeReply(DWS_KNOWLEDGE[topicId]);
     }
   }
 
-  // 4. Quick facts for very short "what is X" that didn’t match a topic
-  for (const [key, text] of Object.entries(DWS_QUICK_FACTS)) {
-    if (
-      lower.includes(key) &&
-      (lower.includes("what") ||
-        lower.includes("explain") ||
-        lower.includes("tell me")) &&
-      lower.split(/\s+/).length <= 8
-    ) {
-      return text;
-    }
-  }
+  const quickFact = matchQuickFact(lower);
+  if (quickFact) return quickFact;
 
-  // 5. Start / begin / get started
   if (/\b(start|begin|get started|first day|new joiner)\b/.test(lower)) {
-    const getStarted = DWS_KNOWLEDGE["get_started"];
+    const getStarted = DWS_KNOWLEDGE['get_started'];
     if (getStarted) return formatKnowledgeReply(getStarted);
   }
 
-  // 6. Default
   return DWS_DEFAULT_REPLY;
 }
 
