@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ServiceRequestForm } from "../../components/Forms/FormPreview";
 import { facilitateCommunicationSchema } from "../../components/Forms/form-schemas/FacilitateCommunicationSchema";
 
-function BookConsultationForEntrepreneurship() {
+function FacilitateCommunicationForm() {
   const [formData, setFormData] = useState<any>({});
 
   const handleSubmit = async (data: any) => {
@@ -29,6 +29,6 @@ function BookConsultationForEntrepreneurship() {
 }
 
 // Export the specific form name
-export const BookConsultationForEntrepreneurshipForm =
+export const FacilitateCommunicationFormSchema =
   BookConsultationForEntrepreneurship;
-export default BookConsultationForEntrepreneurship;
+export default FacilitateCommunicationForm;

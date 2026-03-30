@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ServiceRequestForm } from "../../components/Forms/FormPreview";
 import { loanCancellationSchema } from "../../components/Forms/form-schemas/CancelLoans";
 
-function BookConsultationForEntrepreneurship() {
+function CancelLoanForm() {
   const [formData, setFormData] = useState<any>({});
 
   const handleSubmit = async (data: any) => {
@@ -29,6 +29,6 @@ function BookConsultationForEntrepreneurship() {
 }
 
 // Export the specific form name
-export const BookConsultationForEntrepreneurshipForm =
+export const CancelLoanFormSchema =
   BookConsultationForEntrepreneurship;
-export default BookConsultationForEntrepreneurship;
+export default CancelLoanForm;
