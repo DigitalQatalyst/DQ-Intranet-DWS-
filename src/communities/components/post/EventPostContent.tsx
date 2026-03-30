@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify';
 import { Calendar, MapPin, Clock, Users, ExternalLink } from 'lucide-react';
 import { Button } from '@/communities/components/ui/button';
 import { format, isPast } from 'date-fns';
@@ -113,9 +114,10 @@ export function EventPostContent({
       </div>
       {/* Event Description */}
       <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600">
-        {content_html ? <div dangerouslySetInnerHTML={{
-        __html: content_html
-      }} /> : content ? <p className="whitespace-pre-wrap leading-relaxed">{content}</p> : metadata?.description ? <p className="whitespace-pre-wrap leading-relaxed">
+        {content_html ? (
+          // codacy-disable-next-line react/no-danger
+          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content_html) }} />
+        ) : content ? <p className="whitespace-pre-wrap leading-relaxed">{content}</p> : metadata?.description ? <p className="whitespace-pre-wrap leading-relaxed">
             {metadata.description}
           </p> : null}
       </div>

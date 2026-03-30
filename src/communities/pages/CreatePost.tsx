@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import DOMPurify from 'dompurify';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/communities/components/layout/MainLayout';
 import { useAuth } from '@/communities/contexts/AuthProvider';
@@ -711,14 +712,15 @@ export default function CreatePost() {
                     </h3>
                     
                     {tags.length > 0 && <div className="flex flex-wrap gap-2 mb-4">
-                        {tags.map((tag, index) => <Badge key={index} variant="outline" className="text-xs">
+                        {tags.map((tag, index) => <Badge key={`tag-${tag}-${index}`} variant="outline" className="text-xs">
                             #{tag}
                           </Badge>)}
                       </div>}
                     
-                    {contentHtml ? <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{
-                  __html: contentHtml
-                }} /> : <p className="text-sm text-gray-500">No content yet...</p>}
+                    {contentHtml ? (
+                      // codacy-disable-next-line react/no-danger
+                      <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(contentHtml) }} />
+                    ) : <p className="text-sm text-gray-500">No content yet...</p>}
                     
                     {postType === 'media' && uploadedFiles.length > 0 && <div className="mt-4 space-y-2">
                         {uploadedFiles.map((file, index) => <div key={file.id}>

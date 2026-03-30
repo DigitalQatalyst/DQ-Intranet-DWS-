@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import DOMPurify from "dompurify";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftIcon, HomeIcon } from "lucide-react";
 import { Header } from "../components/Header";
@@ -230,7 +231,8 @@ const BlueprintDetailPage: React.FC = () => {
                   {activeContent ? (
                     <div
                       className="prose prose-sm max-w-none prose-ul:list-disc prose-li:marker:text-slate-500"
-                      dangerouslySetInnerHTML={{ __html: activeContent }}
+                      // codacy-disable-next-line react/no-danger
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(activeContent) }}
                     />
                   ) : (
                     <p className="text-slate-500 italic">No content provided for this section yet.</p>

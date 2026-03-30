@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { supabase } from '@/communities/integrations/supabase/client';
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { useAuth } from '@/communities/contexts/AuthProvider';
@@ -151,9 +152,10 @@ export function PollPostContent({
   return <div className="space-y-6">
       {/* Poll Question/Context */}
       {(content || content_html) && <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600">
-          {content_html ? <div dangerouslySetInnerHTML={{
-        __html: content_html
-      }} /> : <p className="whitespace-pre-wrap leading-relaxed">{content}</p>}
+          {content_html ? (
+            // codacy-disable-next-line react/no-danger
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content_html) }} />
+          ) : <p className="whitespace-pre-wrap leading-relaxed">{content}</p>}
         </div>}
 
       {/* Poll Options */}

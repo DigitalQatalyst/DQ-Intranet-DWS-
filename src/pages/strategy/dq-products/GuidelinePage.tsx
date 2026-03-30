@@ -11,6 +11,7 @@ import { SideNav } from '../shared/SideNav'
 import { GuidelineSection } from '../shared/GuidelineSection'
 import { GuideCard } from '../../../components/guides/GuideCard'
 import React from 'react'
+import { parseSections } from '../../../utils/parseSections'
 const Markdown = React.lazy(() => import('../../../components/guides/MarkdownRenderer'))
 
 interface RelatedGuide {
@@ -69,46 +70,6 @@ function GuidelinePage() {
       })()
     return () => { cancelled = true }
   }, [currentSlug])
-
-  // Parse body into sections
-  const parseSections = (body: string) => {
-    const sections: Array<{ id: string; title: string; content: string }> = []
-    const lines = body.split('\n')
-    let currentSection: { id: string; title: string; content: string } | null = null
-
-    for (const line of lines) {
-      // Check for H2 headers (## Title)
-      const h2Match = line.match(/^##\s+(.+)$/)
-      if (h2Match) {
-        // Save previous section
-        if (currentSection) {
-          sections.push(currentSection)
-        }
-        // Start new section
-        const title = h2Match[1].trim()
-        const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-        currentSection = { id, title, content: '' }
-      } else if (currentSection) {
-        currentSection.content += line + '\n'
-      }
-    }
-
-    // Add last section
-    if (currentSection) {
-      sections.push(currentSection)
-    }
-
-    // If no sections found, create an overview section
-    if (sections.length === 0 && body.trim()) {
-      sections.push({
-        id: 'overview',
-        title: 'Overview',
-        content: body
-      })
-    }
-
-    return sections
-  }
 
   const sections = useMemo(() => {
     if (!currentGuide?.body) return []

@@ -10,6 +10,7 @@ import { HeroSection } from '../shared/HeroSection'
 import { SideNav } from '../shared/SideNav'
 import { GuidelineSection } from '../shared/GuidelineSection'
 import MarkdownRenderer from '../../../components/guides/MarkdownRenderer'
+import { parseSections } from '../../../utils/parseSections'
 
 function GuidelinePage() {
   const { user } = useAuth()
@@ -51,40 +52,6 @@ function GuidelinePage() {
     return () => { cancelled = true }
   }, [currentSlug])
 
-  // Parse markdown body into sections
-  const parseSections = (body: string) => {
-    const sections: { id: string; title: string; content: string }[] = []
-    if (!body) return sections
-    
-    const lines = body.split('\n')
-    let currentSection: { id: string; title: string; content: string } | null = null
-    
-    for (const line of lines) {
-      // Check for level 1 or level 2 headings
-      if (line.startsWith('# ') || line.startsWith('## ')) {
-        if (currentSection) {
-          sections.push(currentSection)
-        }
-        const title = line.replace(/^#+\s+/, '').trim()
-        const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-        currentSection = { id, title, content: '' }
-      } else if (currentSection) {
-        currentSection.content += line + '\n'
-      } else {
-        // If we have content before any heading, create a default section
-        if (!currentSection) {
-          currentSection = { id: 'overview', title: 'Overview', content: '' }
-        }
-        currentSection.content += line + '\n'
-      }
-    }
-    
-    if (currentSection) {
-      sections.push(currentSection)
-    }
-    
-    return sections
-  }
 
   const sections = guide?.body ? parseSections(guide.body) : []
   const navSections = sections.filter(s => s.title !== 'Learn More').map(s => ({ id: s.id, label: s.title }))

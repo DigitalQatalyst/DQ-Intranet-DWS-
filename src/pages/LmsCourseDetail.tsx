@@ -229,7 +229,7 @@ export const LmsCourseDetail: React.FC = () => {
                 <ul className="space-y-3">
                   {detail.highlights.map((highlight, index) => (
                     <li
-                      key={index}
+                      key={`highlight-${index}-${highlight.slice(0, 20)}`}
                       className="flex items-start gap-3 text-gray-700"
                     >
                       <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -246,7 +246,7 @@ export const LmsCourseDetail: React.FC = () => {
                 <ul className="space-y-3">
                   {detail.outcomes.map((outcome, index) => (
                     <li
-                      key={index}
+                      key={`outcome-${index}-${outcome.slice(0, 20)}`}
                       className="flex items-start gap-3 text-gray-700"
                     >
                       <GraduationCap className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
