@@ -10,7 +10,7 @@ const currentMonth = now.getMonth();
 // Mock event data
 export const mockEvents: Event[] = [{
   id: '1',
-  title: 'Digital Qatalyst Town Hall',
+  title: 'DQ Town Hall',
   start: createDate(currentYear, currentMonth, 15, 10, 0),
   end: createDate(currentYear, currentMonth, 15, 11, 30),
   category: 'Internal',

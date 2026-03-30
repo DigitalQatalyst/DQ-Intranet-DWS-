@@ -38,11 +38,11 @@ export function CommunityHome() {
                 </div>
                 
                 <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-white max-w-4xl">
-                  Welcome to DQ Intranet Communities
+                  Welcome to DWS Communities
                 </h1>
                 
                 <p className="mt-3 text-white/90 text-lg max-w-2xl mx-auto leading-relaxed">
-                  Join your colleagues in meaningful discussions, share knowledge, and collaborate across teams to drive innovation at Digital Qatalyst.
+                  Join your colleagues in meaningful discussions, share knowledge, and collaborate across teams to drive innovation at DQ.
                 </p>
                 
                 <div className="mt-6 flex items-center justify-center gap-4 flex-wrap">
@@ -110,7 +110,7 @@ export function CommunityHome() {
                     Drive Innovation
                   </h3>
                   <p className="text-gray-600">
-                    Discover opportunities for collaboration, stay updated on company initiatives, and contribute to Digital Qatalyst's success.
+                    Discover opportunities for collaboration, stay updated on company initiatives, and contribute to DQ's success.
                   </p>
                 </div>
               </div>
@@ -125,7 +125,7 @@ export function CommunityHome() {
                   Ready to Get Started?
                 </h2>
                 <p className="mt-2 text-white/90 text-center max-w-2xl mx-auto">
-                  Join your Digital Qatalyst colleagues in building a stronger, more connected workplace. Sign in to start collaborating today.
+                  Join your DQ colleagues in building a stronger, more connected workplace. Sign in to start collaborating today.
                 </p>
                 <div className="mt-6 flex justify-center">
                   <Button onClick={() => setLoginModalOpen(true)} className="bg-white text-primary hover:bg-white/90 font-medium px-6 py-2.5" size="lg">

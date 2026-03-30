@@ -11,7 +11,7 @@ export const mockKnowledgeHubItems = [
     format: 'In-Depth Reports',
     popularity: 'Trending',
     provider: {
-      name: 'Digital Qatalyst',
+      name: 'DQ',
       logoUrl: '/DWS-Logo.png',
       description: 'Supporting entrepreneurs and SMEs in Abu Dhabi.',
     },
@@ -171,7 +171,7 @@ export const mockKnowledgeHubItems = [
     format: 'Recorded Media',
     popularity: 'Latest',
     provider: {
-      name: 'Digital Qatalyst',
+      name: 'DQ',
       logoUrl: '/DWS-Logo.png',
       description: 'Supporting entrepreneurs and SMEs in Abu Dhabi.',
     },
@@ -214,7 +214,7 @@ export const mockKnowledgeHubItems = [
     format: 'Downloadable Templates',
     popularity: 'Most Downloaded',
     provider: {
-      name: 'Digital Qatalyst',
+      name: 'DQ',
       logoUrl: '/DWS-Logo.png',
       description: 'Supporting entrepreneurs and SMEs in Abu Dhabi.',
     },

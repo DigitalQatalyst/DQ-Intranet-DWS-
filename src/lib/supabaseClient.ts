@@ -67,7 +67,7 @@ export const supabaseClient = createClient<Database>(url as string, anon as stri
     headers: {
       apikey: anon as string,
       Authorization: `Bearer ${anon as string}`,
-      'x-client-info': 'dq-intranet-dws-communities',
+      'x-client-info': 'dws-communities',
     },
   },
   db: {
