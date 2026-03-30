@@ -1,19 +1,47 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/communities/contexts/AuthProvider';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/communities/contexts/AuthProvider";
 import { supabase } from "@/lib/supabaseClient";
-import { safeFetch } from '@/communities/utils/safeFetch';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/communities/components/ui/dialog';
-import { Button } from '@/communities/components/ui/button';
-import { Input } from '@/communities/components/ui/input';
-import { Label } from '@/communities/components/ui/label';
-import { Badge } from '@/communities/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/communities/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/communities/components/ui/tabs';
-import { RichTextEditor } from './RichTextEditor';
-import { TagAutocomplete } from './TagAutocomplete';
-import { SignInModal } from '@/communities/components/auth/SignInModal';
-import { Loader2, X, Plus, FileText, Image as ImageIcon, BarChart3, Calendar, MapPin, Link as LinkIcon, Tag as TagIcon } from 'lucide-react';
-import { toast } from 'sonner';
+import { safeFetch } from "@/communities/utils/safeFetch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/communities/components/ui/dialog";
+import { Button } from "@/communities/components/ui/button";
+import { Input } from "@/communities/components/ui/input";
+import { Label } from "@/communities/components/ui/label";
+import { Badge } from "@/communities/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/communities/components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/communities/components/ui/tabs";
+import { RichTextEditor } from "./RichTextEditor";
+import { TagAutocomplete } from "./TagAutocomplete";
+import { SignInModal } from "@/communities/components/auth/SignInModal";
+import {
+  Loader2,
+  X,
+  Plus,
+  FileText,
+  Image as ImageIcon,
+  BarChart3,
+  Calendar,
+  MapPin,
+  Link as LinkIcon,
+  Tag as TagIcon,
+} from "lucide-react";
+import { toast } from "sonner";
 interface Community {
   id: string;
   name: string;
@@ -24,44 +52,41 @@ interface PostComposerProps {
   onPostCreated: () => void;
   communityId?: string;
 }
-type PostType = 'text' | 'media' | 'poll' | 'event';
+type PostType = "text" | "media" | "poll" | "event";
 export function PostComposer({
   open,
   onOpenChange,
   onPostCreated,
-  communityId: initialCommunityId
+  communityId: initialCommunityId,
 }: PostComposerProps) {
-  const {
-    user,
-    isAuthenticated
-  } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Form state
-  const [postType, setPostType] = useState<PostType>('text');
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [contentHtml, setContentHtml] = useState('');
-  const [communityId, setCommunityId] = useState('');
+  const [postType, setPostType] = useState<PostType>("text");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [contentHtml, setContentHtml] = useState("");
+  const [communityId, setCommunityId] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
 
   // Media post fields
-  const [mediaUrl, setMediaUrl] = useState('');
-  const [caption, setCaption] = useState('');
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [caption, setCaption] = useState("");
 
   // Poll post fields
-  const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
-  const [pollDuration, setPollDuration] = useState('7');
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [pollDuration, setPollDuration] = useState("7");
 
   // Event post fields
-  const [eventStart, setEventStart] = useState('');
-  const [eventEnd, setEventEnd] = useState('');
-  const [eventLocation, setEventLocation] = useState('');
-  const [eventImage, setEventImage] = useState('');
-  const [rsvpLimit, setRsvpLimit] = useState('');
+  const [eventStart, setEventStart] = useState("");
+  const [eventEnd, setEventEnd] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
+  const [eventImage, setEventImage] = useState("");
+  const [rsvpLimit, setRsvpLimit] = useState("");
 
   // Character counts
   const titleCharCount = title.length;
@@ -85,47 +110,50 @@ export function PostComposer({
     }
   }, [open]);
   const resetForm = () => {
-    setPostType('text');
-    setTitle('');
-    setContent('');
-    setContentHtml('');
+    setPostType("text");
+    setTitle("");
+    setContent("");
+    setContentHtml("");
     setTags([]);
-    setTagInput('');
-    setMediaUrl('');
-    setCaption('');
-    setPollOptions(['', '']);
-    setPollDuration('7');
-    setEventStart('');
-    setEventEnd('');
-    setEventLocation('');
-    setEventImage('');
-    setRsvpLimit('');
+    setTagInput("");
+    setMediaUrl("");
+    setCaption("");
+    setPollOptions(["", ""]);
+    setPollDuration("7");
+    setEventStart("");
+    setEventEnd("");
+    setEventLocation("");
+    setEventImage("");
+    setRsvpLimit("");
     if (!initialCommunityId) {
-      setCommunityId('');
+      setCommunityId("");
     }
   };
   const fetchUserCommunities = async () => {
     if (!user) return;
     setLoading(true);
-    const {
-      data: memberships,
-      error: membershipsError
-    } = await supabase.from('memberships').select('community_id').eq('user_id', user.id);
+    const { data: memberships, error: membershipsError } = await supabase
+      .from("memberships")
+      .select("community_id")
+      .eq("user_id", user.id);
     if (membershipsError) {
-      toast.error('Failed to load your communities');
+      toast.error("Failed to load your communities");
       setLoading(false);
       return;
     }
-    const communityIds = memberships?.map(m => m.community_id) || [];
+    const communityIds = memberships?.map((m) => m.community_id) || [];
     if (communityIds.length === 0) {
       setCommunities([]);
       setLoading(false);
       return;
     }
-    const query = supabase.from('communities').select('id, name').in('id', communityIds);
+    const query = supabase
+      .from("communities")
+      .select("id, name")
+      .in("id", communityIds);
     const [data, error] = await safeFetch(query);
     if (error) {
-      toast.error('Failed to load your communities');
+      toast.error("Failed to load your communities");
     } else if (data) {
       setCommunities(data as Community[]);
     }
@@ -136,14 +164,14 @@ export function PostComposer({
   };
   const handleAddPollOption = () => {
     if (pollOptions.length >= 5) {
-      toast.error('Maximum 5 poll options allowed');
+      toast.error("Maximum 5 poll options allowed");
       return;
     }
-    setPollOptions([...pollOptions, '']);
+    setPollOptions([...pollOptions, ""]);
   };
   const handleRemovePollOption = (index: number) => {
     if (pollOptions.length <= 2) {
-      toast.error('Minimum 2 poll options required');
+      toast.error("Minimum 2 poll options required");
       return;
     }
     setPollOptions(pollOptions.filter((_, i) => i !== index));
@@ -153,158 +181,136 @@ export function PostComposer({
     newOptions[index] = value;
     setPollOptions(newOptions);
   };
-  const validateForm = (): boolean => {
-    if (!title.trim()) {
-      toast.error('Title is required');
+  const validateTypeSpecific = (): boolean => {
+    if (postType === "media" && !mediaUrl.trim()) {
+      toast.error("Media URL is required for media posts");
       return false;
     }
-    if (title.length > 100) {
-      toast.error('Title must be 100 characters or less');
-      return false;
-    }
-    if (!content.trim()) {
-      toast.error('Content is required');
-      return false;
-    }
-    if (content.length > 1000) {
-      toast.error('Content must be 1000 characters or less');
-      return false;
-    }
-    if (!communityId) {
-      toast.error('Please select a community');
-      return false;
-    }
-
-    // Type-specific validation
-    if (postType === 'media' && !mediaUrl.trim()) {
-      toast.error('Media URL is required for media posts');
-      return false;
-    }
-    if (postType === 'poll') {
-      const validOptions = pollOptions.filter(opt => opt.trim());
+    if (postType === "poll") {
+      const validOptions = pollOptions.filter((opt) => opt.trim());
       if (validOptions.length < 2) {
-        toast.error('At least 2 poll options are required');
+        toast.error("At least 2 poll options are required");
         return false;
       }
     }
-    if (postType === 'event') {
+    if (postType === "event") {
       if (!eventStart) {
-        toast.error('Event start date/time is required');
+        toast.error("Event start date/time is required");
         return false;
       }
       if (!eventLocation.trim()) {
-        toast.error('Event location is required');
+        toast.error("Event location is required");
         return false;
       }
     }
     return true;
   };
+
+  const validateForm = (): boolean => {
+    if (!title.trim()) {
+      toast.error("Title is required");
+      return false;
+    }
+    if (title.length > 100) {
+      toast.error("Title must be 100 characters or less");
+      return false;
+    }
+    if (!content.trim()) {
+      toast.error("Content is required");
+      return false;
+    }
+    if (content.length > 1000) {
+      toast.error("Content must be 1000 characters or less");
+      return false;
+    }
+    if (!communityId) {
+      toast.error("Please select a community");
+      return false;
+    }
+    return validateTypeSpecific();
+  };
+  const buildPostContent = () => {
+    let postContent = contentHtml || content;
+    if (postType === "media" && mediaUrl) {
+      const mediaHtml = `<div class="media-content"><img src="${mediaUrl.trim()}" alt="${caption || "Media"}" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 12px;" />${caption ? `<p class="text-sm text-gray-600 mt-2">${caption}</p>` : ""}</div>`;
+      postContent = postContent ? `${postContent}\n${mediaHtml}` : mediaHtml;
+    }
+    return postContent;
+  };
+
+  const insertPollOptions = async (postId: string) => {
+    const validOptions = pollOptions.filter((opt) => opt.trim());
+    const optionsToInsert = validOptions.map((option) => ({
+      post_id: postId,
+      option_text: option.trim(),
+      vote_count: 0,
+    }));
+    const optionsQuery = supabase.from("poll_options").insert(optionsToInsert);
+    const [, optionsError] = await safeFetch(optionsQuery);
+    if (optionsError) {
+      console.error("Failed to insert poll options:", optionsError);
+      toast.error("Post created but poll options failed", {
+        description:
+          optionsError?.message ||
+          "Your post was created but poll options could not be added",
+        duration: 5000,
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // User should be authenticated via Azure AD at app level
     if (!user) {
-      toast.error('Please wait for authentication to complete');
+      toast.error("Please wait for authentication to complete");
       return;
     }
     if (!validateForm()) return;
+    if (!user.id) {
+      console.error("❌ User not authenticated");
+      toast.error("Unable to verify authentication. Please sign in again.");
+      return;
+    }
     setSubmitting(true);
     try {
-      // Prepare metadata based on post type
-      const metadata: any = {};
-      if (postType === 'media') {
-        metadata.media_url = mediaUrl;
-        metadata.caption = caption;
-      }
-      if (postType === 'poll') {
-        metadata.poll_duration_days = parseInt(pollDuration);
-      }
-      if (postType === 'event') {
-        metadata.start_datetime = eventStart;
-        if (eventEnd) metadata.end_datetime = eventEnd;
-        metadata.location = eventLocation;
-        if (eventImage) metadata.image = eventImage;
-        if (rsvpLimit) metadata.rsvp_limit = parseInt(rsvpLimit);
-      }
-
-      // Get user ID from Azure AD authentication
-      if (!user?.id) {
-        console.error('❌ User not authenticated');
-        toast.error('Unable to verify authentication. Please sign in again.');
-        setSubmitting(false);
-        return;
-      }
-
-      const userId = user.id;
-
-      // Insert the post into posts_v2 (simplified schema)
-      // Note: posts_v2 only has: id, community_id, user_id, title, content, created_at, updated_at
-      // Additional metadata (post_type, tags, etc.) can be stored in content or handled separately
-      let postContent = contentHtml || content; // Use HTML if available, otherwise plain text
-
-      // If media post, add media HTML to content immediately
-      if (postType === 'media' && mediaUrl) {
-        const mediaHtml = `<div class="media-content"><img src="${mediaUrl.trim()}" alt="${caption || 'Media'}" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 12px;" />${caption ? `<p class="text-sm text-gray-600 mt-2">${caption}</p>` : ''}</div>`;
-        postContent = postContent ? `${postContent}\n${mediaHtml}` : mediaHtml;
-      }
-
-      const query = supabase.from('posts_v2').insert({
-        title: title.trim(),
-        content: postContent.trim(),
-        community_id: communityId,
-        user_id: userId // Must match auth.uid() for RLS
-      }).select().single();
+      const postContent = buildPostContent();
+      const query = supabase
+        .from("posts_v2")
+        .insert({
+          title: title.trim(),
+          content: postContent.trim(),
+          community_id: communityId,
+          user_id: user.id,
+        })
+        .select()
+        .single();
       const [postData, postError] = await safeFetch(query);
       if (postError || !postData) {
-        console.error('Post creation failed:', postError);
-
-        // Extract specific error details
-        const errorMessage = postError?.message || 'Failed to create post';
-        const errorDetails = postError?.details || '';
-        const errorHint = postError?.hint || 'Please check all required fields and try again';
-        toast.error(errorMessage, {
-          description: errorDetails || errorHint,
-          duration: 5000
+        console.error("Post creation failed:", postError);
+        toast.error(postError?.message || "Failed to create post", {
+          description:
+            postError?.details ||
+            postError?.hint ||
+            "Please check all required fields and try again",
+          duration: 5000,
         });
         setSubmitting(false);
         return;
       }
-
-      // If poll, insert poll options
-      if (postType === 'poll' && postData) {
-        const validOptions = pollOptions.filter(opt => opt.trim());
-        const optionsToInsert = validOptions.map(option => ({
-          post_id: postData.id,
-          option_text: option.trim(),
-          vote_count: 0
-        }));
-        const optionsQuery = supabase.from('poll_options').insert(optionsToInsert);
-        const [, optionsError] = await safeFetch(optionsQuery);
-        if (optionsError) {
-          console.error('Failed to insert poll options:', optionsError);
-          toast.error('Post created but poll options failed', {
-            description: optionsError?.message || 'Your post was created but poll options could not be added',
-            duration: 5000
-          });
-        }
+      if (postType === "poll") {
+        await insertPollOptions(postData.id);
       }
-
-      // Media is already included in content above, so no need to save separately
-      // Note: media_files table has foreign key to posts(id), not posts_v2(id), so we store in content instead
-      if (postType === 'media' && mediaUrl) {
-        console.log('✅ Media included in post content');
-      }
-
-      toast.success('Post created successfully!');
+      toast.success("Post created successfully!");
       resetForm();
       onPostCreated();
       onOpenChange(false);
     } catch (error) {
-      console.error('Post creation error:', error);
-      toast.error('Failed to create post');
+      console.error("Post creation error:", error);
+      toast.error("Failed to create post");
     }
     setSubmitting(false);
   };
-  const isFormValid = title.trim() && content.trim() && communityId && !submitting;
+  const isFormValid =
+    title.trim() && content.trim() && communityId && !submitting;
 
   // User should be authenticated via Azure AD at app level
   // If user is not available, show loading state
@@ -328,16 +334,21 @@ export function PostComposer({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Authentication Required</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">
+              Authentication Required
+            </DialogTitle>
             <DialogDescription>
-              You need to be signed in to create posts. Redirecting to sign in...
+              You need to be signed in to create posts. Redirecting to sign
+              in...
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-3 pt-4">
-            <Button onClick={() => {
-              signIn();
-              onOpenChange(false);
-            }}>
+            <Button
+              onClick={() => {
+                signIn();
+                onOpenChange(false);
+              }}
+            >
               Sign In with Microsoft
             </Button>
           </div>
@@ -351,7 +362,9 @@ export function PostComposer({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Create New Post</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">
+              Create New Post
+            </DialogTitle>
             <DialogDescription>
               Share your thoughts, media, polls, or events with your community
             </DialogDescription>
@@ -359,21 +372,37 @@ export function PostComposer({
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Post Type Tabs */}
-            <Tabs value={postType} onValueChange={value => setPostType(value as PostType)} className="w-full">
+            <Tabs
+              value={postType}
+              onValueChange={(value) => setPostType(value as PostType)}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-4 bg-muted h-auto p-1">
-                <TabsTrigger value="text" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="text"
+                  className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
                   <FileText className="h-4 w-4" />
                   Text
                 </TabsTrigger>
-                <TabsTrigger value="media" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="media"
+                  className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
                   <ImageIcon className="h-4 w-4" />
                   Media
                 </TabsTrigger>
-                <TabsTrigger value="poll" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="poll"
+                  className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
                   <BarChart3 className="h-4 w-4" />
                   Poll
                 </TabsTrigger>
-                <TabsTrigger value="event" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="event"
+                  className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
                   <Calendar className="h-4 w-4" />
                   Event
                 </TabsTrigger>
@@ -382,40 +411,68 @@ export function PostComposer({
               {/* Common Fields */}
               <div className="space-y-4 mt-4">
                 {/* Community Selection */}
-                {!initialCommunityId && <div className="space-y-2">
-                  <Label htmlFor="community">Community</Label>
-                  <Select value={communityId} onValueChange={setCommunityId} disabled={loading || submitting}>
-                    <SelectTrigger id="community">
-                      <SelectValue placeholder="Select a community" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {communities.map(community => <SelectItem key={community.id} value={community.id}>
-                        {community.name}
-                      </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  {communities.length === 0 && !loading && <p className="text-sm text-muted-foreground">
-                    Join a community first to create posts
-                  </p>}
-                </div>}
+                {!initialCommunityId && (
+                  <div className="space-y-2">
+                    <Label htmlFor="community">Community</Label>
+                    <Select
+                      value={communityId}
+                      onValueChange={setCommunityId}
+                      disabled={loading || submitting}
+                    >
+                      <SelectTrigger id="community">
+                        <SelectValue placeholder="Select a community" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {communities.map((community) => (
+                          <SelectItem key={community.id} value={community.id}>
+                            {community.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {communities.length === 0 && !loading && (
+                      <p className="text-sm text-muted-foreground">
+                        Join a community first to create posts
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Title */}
                 <div className="space-y-2">
                   <Label htmlFor="title">
-                    Title <span className="text-muted-foreground text-xs">({titleCharCount}/100)</span>
+                    Title{" "}
+                    <span className="text-muted-foreground text-xs">
+                      ({titleCharCount}/100)
+                    </span>
                   </Label>
-                  <Input id="title" placeholder="Enter post title..." value={title} onChange={e => setTitle(e.target.value)} required disabled={submitting} maxLength={100} />
+                  <Input
+                    id="title"
+                    placeholder="Enter post title..."
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    disabled={submitting}
+                    maxLength={100}
+                  />
                 </div>
 
                 {/* Content */}
                 <div className="space-y-2">
                   <Label htmlFor="content">
-                    Content <span className="text-muted-foreground text-xs">({contentCharCount}/1000)</span>
+                    Content{" "}
+                    <span className="text-muted-foreground text-xs">
+                      ({contentCharCount}/1000)
+                    </span>
                   </Label>
-                  <RichTextEditor content={contentHtml} onUpdate={(html, text) => {
-                    setContentHtml(html);
-                    setContent(text);
-                  }} placeholder="What's on your mind?" />
+                  <RichTextEditor
+                    content={contentHtml}
+                    onUpdate={(html, text) => {
+                      setContentHtml(html);
+                      setContent(text);
+                    }}
+                    placeholder="What's on your mind?"
+                  />
                 </div>
 
                 {/* Tags */}
@@ -424,7 +481,11 @@ export function PostComposer({
                     <TagIcon className="h-4 w-4" />
                     Tags (Optional)
                   </Label>
-                  <TagAutocomplete selectedTags={tags} onTagsChange={handleTagsChange} maxTags={5} />
+                  <TagAutocomplete
+                    selectedTags={tags}
+                    onTagsChange={handleTagsChange}
+                    maxTags={5}
+                  />
                 </div>
               </div>
 
@@ -435,31 +496,74 @@ export function PostComposer({
                     <ImageIcon className="h-4 w-4" />
                     Media URL *
                   </Label>
-                  <Input id="mediaUrl" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://example.com/image.jpg" disabled={submitting} required />
+                  <Input
+                    id="mediaUrl"
+                    value={mediaUrl}
+                    onChange={(e) => setMediaUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    disabled={submitting}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="caption">Caption (Optional)</Label>
-                  <Input id="caption" value={caption} onChange={e => setCaption(e.target.value)} placeholder="Add a caption..." disabled={submitting} />
+                  <Input
+                    id="caption"
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    placeholder="Add a caption..."
+                    disabled={submitting}
+                  />
                 </div>
               </TabsContent>
 
               <TabsContent value="poll" className="space-y-4">
                 <div className="space-y-2">
                   <Label>Poll Options</Label>
-                  {pollOptions.map((option, index) => <div key={index} className="flex gap-2">
-                    <Input value={option} onChange={e => handlePollOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`} disabled={submitting} maxLength={200} />
-                    {pollOptions.length > 2 && <Button type="button" variant="outline" size="icon" onClick={() => handleRemovePollOption(index)} disabled={submitting}>
-                      <X className="h-4 w-4" />
-                    </Button>}
-                  </div>)}
-                  {pollOptions.length < 5 && <Button type="button" variant="outline" onClick={handleAddPollOption} disabled={submitting} className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Option
-                  </Button>}
+                  {pollOptions.map((option, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={option}
+                        onChange={(e) =>
+                          handlePollOptionChange(index, e.target.value)
+                        }
+                        placeholder={`Option ${index + 1}`}
+                        disabled={submitting}
+                        maxLength={200}
+                      />
+                      {pollOptions.length > 2 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleRemovePollOption(index)}
+                          disabled={submitting}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  {pollOptions.length < 5 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddPollOption}
+                      disabled={submitting}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Option
+                    </Button>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pollDuration">Poll Duration (Days)</Label>
-                  <Select value={pollDuration} onValueChange={setPollDuration} disabled={submitting}>
+                  <Select
+                    value={pollDuration}
+                    onValueChange={setPollDuration}
+                    disabled={submitting}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -478,41 +582,87 @@ export function PostComposer({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="eventStart">Start Date/Time *</Label>
-                    <Input id="eventStart" type="datetime-local" value={eventStart} onChange={e => setEventStart(e.target.value)} disabled={submitting} required />
+                    <Input
+                      id="eventStart"
+                      type="datetime-local"
+                      value={eventStart}
+                      onChange={(e) => setEventStart(e.target.value)}
+                      disabled={submitting}
+                      required
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="eventEnd">End Date/Time</Label>
-                    <Input id="eventEnd" type="datetime-local" value={eventEnd} onChange={e => setEventEnd(e.target.value)} disabled={submitting} />
+                    <Input
+                      id="eventEnd"
+                      type="datetime-local"
+                      value={eventEnd}
+                      onChange={(e) => setEventEnd(e.target.value)}
+                      disabled={submitting}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="eventLocation" className="flex items-center gap-2">
+                  <Label
+                    htmlFor="eventLocation"
+                    className="flex items-center gap-2"
+                  >
                     <MapPin className="h-4 w-4" />
                     Location *
                   </Label>
-                  <Input id="eventLocation" value={eventLocation} onChange={e => setEventLocation(e.target.value)} placeholder="Event location..." disabled={submitting} required />
+                  <Input
+                    id="eventLocation"
+                    value={eventLocation}
+                    onChange={(e) => setEventLocation(e.target.value)}
+                    placeholder="Event location..."
+                    disabled={submitting}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="eventImage">Cover Image URL</Label>
-                  <Input id="eventImage" value={eventImage} onChange={e => setEventImage(e.target.value)} placeholder="https://example.com/event-cover.jpg" disabled={submitting} />
+                  <Input
+                    id="eventImage"
+                    value={eventImage}
+                    onChange={(e) => setEventImage(e.target.value)}
+                    placeholder="https://example.com/event-cover.jpg"
+                    disabled={submitting}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="rsvpLimit">RSVP Limit (Optional)</Label>
-                  <Input id="rsvpLimit" type="number" value={rsvpLimit} onChange={e => setRsvpLimit(e.target.value)} placeholder="Max attendees..." disabled={submitting} min="1" />
+                  <Input
+                    id="rsvpLimit"
+                    type="number"
+                    value={rsvpLimit}
+                    onChange={(e) => setRsvpLimit(e.target.value)}
+                    placeholder="Max attendees..."
+                    disabled={submitting}
+                    min="1"
+                  />
                 </div>
               </TabsContent>
             </Tabs>
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={submitting}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={!isFormValid || submitting}>
-                {submitting ? <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </> : 'Create Post'}
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Post"
+                )}
               </Button>
             </div>
           </form>
