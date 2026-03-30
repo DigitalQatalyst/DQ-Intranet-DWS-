@@ -263,7 +263,13 @@ export default function PodcastSeriesPage() {
         </div>
       </section>
 
-      {audio.currentlyPlaying && (
+      {audio.audioError && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-red-50 border-t border-red-200 px-6 py-3 text-sm text-red-700 text-center">
+          {audio.audioError} Please ensure the audio file has been uploaded to the server.
+        </div>
+      )}
+
+      {audio.currentlyPlaying && !audio.audioError && (
         <AudioPlayerBar
           currentlyPlaying={audio.currentlyPlaying}
           isPlaying={audio.isPlaying}
@@ -289,7 +295,7 @@ export default function PodcastSeriesPage() {
         />
       )}
 
-      {audio.currentlyPlaying && <div className="h-20" />}
+      {(audio.currentlyPlaying || audio.audioError) && <div className="h-20" />}
       <Footer />
     </div>
   );

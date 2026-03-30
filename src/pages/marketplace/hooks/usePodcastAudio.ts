@@ -27,6 +27,7 @@ export function usePodcastAudio({
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [audioError, setAudioError] = useState<string | null>(null);
 
   const handlePlayEpisode = async (episode: NewsItem, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -41,7 +42,7 @@ export function usePodcastAudio({
     }
 
     try {
-      setCurrentTime(0); setDuration(0);
+      setCurrentTime(0); setDuration(0); setAudioError(null);
       audio.src = episode.audioUrl;
       audio.playbackRate = playbackSpeed;
       audio.load();
@@ -94,8 +95,10 @@ export function usePodcastAudio({
     audio.addEventListener('canplay', updateDuration);
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('ended', handleEnded);
+    const handleAudioError = () => { setAudioError('Audio file could not be loaded.'); setIsPlaying(false); setCurrentlyPlaying(null); };
     audio.addEventListener('play', () => setIsPlaying(true));
     audio.addEventListener('pause', () => setIsPlaying(false));
+    audio.addEventListener('error', handleAudioError);
     audio.volume = isMuted ? 0 : volume;
     audio.playbackRate = playbackSpeed;
     if (audio.readyState >= 1) updateDuration();
@@ -106,6 +109,7 @@ export function usePodcastAudio({
       audio.removeEventListener('canplay', updateDuration);
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleAudioError);
     };
   }, [currentlyPlaying, volume, isMuted, playbackSpeed]);
 
@@ -159,7 +163,7 @@ export function usePodcastAudio({
 
   return {
     audioRef,
-    currentlyPlaying, isPlaying, currentTime, duration, volume, isMuted, playbackSpeed,
+    currentlyPlaying, isPlaying, currentTime, duration, volume, isMuted, playbackSpeed, audioError,
     handlePlayEpisode, handleSeek, handleSeekMouseUp,
     skipBackward, skipForward,
     handleVolumeChange, toggleMute, handlePlaybackSpeedChange,
