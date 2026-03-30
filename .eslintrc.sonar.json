@@ -1,0 +1,30 @@
+{
+  "rules": {
+    "typescript:S7781": "off",
+    "typescript:S5850": "off",
+    "typescript:S3358": "off",
+    "typescript:S7764": "off",
+    "typescript:S7735": "off",
+    "typescript:S7776": "off",
+    "typescript:S6754": "off",
+    "typescript:S1871": "off",
+    "typescript:S6582": "off",
+    "typescript:S2486": "off",
+    "typescript:S4325": "off",
+    "typescript:S2681": "off",
+    "typescript:S6660": "off",
+    "typescript:S6749": "off",
+    "typescript:S6848": "off",
+    "typescript:S1082": "off",
+    "typescript:S6847": "off",
+    "typescript:S6819": "off",
+    "typescript:S6479": "off",
+    "typescript:S7723": "off",
+    "typescript:S3923": "off",
+    "typescript:S5852": "off",
+    "typescript:S3776": "off",
+    "typescript:S6594": "off",
+    "typescript:S4138": "off",
+    "typescript:S7758": "off"
+  }
+}

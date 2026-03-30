@@ -1,9 +1,0 @@
-id,email,password,username,avatar_url,role,created_at
-a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11,admin@digitalqatalyst.com,$2a$10$YourHashedPasswordHere,admin_user,https://api.dicebear.com/7.x/avataaars/svg?seed=admin,admin,2024-08-01 10:00:00
-b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12,john.doe@digitalqatalyst.com,$2a$10$YourHashedPasswordHere,john_doe,https://api.dicebear.com/7.x/avataaars/svg?seed=john,member,2024-09-01 10:00:00
-c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a13,sarah.smith@digitalqatalyst.com,$2a$10$YourHashedPasswordHere,sarah_smith,https://api.dicebear.com/7.x/avataaars/svg?seed=sarah,moderator,2024-08-16 10:00:00
-d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a14,mike.johnson@digitalqatalyst.com,$2a$10$YourHashedPasswordHere,mike_j,https://api.dicebear.com/7.x/avataaars/svg?seed=mike,member,2024-09-15 10:00:00
-e4eebc99-9c0b-4ef8-bb6d-6bb9bd380a15,emma.wilson@digitalqatalyst.com,$2a$10$YourHashedPasswordHere,emma_w,https://api.dicebear.com/7.x/avataaars/svg?seed=emma,member,2024-10-01 10:00:00
-f5eebc99-9c0b-4ef8-bb6d-6bb9bd380a16,alex.brown@digitalqatalyst.com,$2a$10$YourHashedPasswordHere,alex_brown,https://api.dicebear.com/7.x/avataaars/svg?seed=alex,member,2024-10-11 10:00:00
-06eebc99-9c0b-4ef8-bb6d-6bb9bd380a17,lisa.davis@digitalqatalyst.com,$2a$10$YourHashedPasswordHere,lisa_d,https://api.dicebear.com/7.x/avataaars/svg?seed=lisa,member,2024-10-16 10:00:00
-17eebc99-9c0b-4ef8-bb6d-6bb9bd380a18,david.miller@digitalqatalyst.com,$2a$10$YourHashedPasswordHere,david_m,https://api.dicebear.com/7.x/avataaars/svg?seed=david,member,2024-10-21 10:00:00

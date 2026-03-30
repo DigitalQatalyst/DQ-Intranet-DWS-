@@ -104,7 +104,7 @@ export function Footer({
                   </a>
                 </li>
                 <li>
-                  <a href="/marketplace/non-financial" className="text-blue-100 hover:text-white transition-colors text-sm block">
+                  <a href="/marketplace/services-center" className="text-blue-100 hover:text-white transition-colors text-sm block">
                     Business Services
                   </a>
                 </li>
@@ -220,7 +220,7 @@ export function Footer({
                   </a>
                 </li>
                 <li>
-                  <a href="/marketplace/non-financial" className="text-blue-100 hover:text-white transition-colors text-sm">
+                  <a href="/marketplace/services-center" className="text-blue-100 hover:text-white transition-colors text-sm">
                     Business Services
                   </a>
                 </li>

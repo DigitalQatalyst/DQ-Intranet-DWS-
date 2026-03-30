@@ -1,3 +1,4 @@
+import { secureRandom } from '../utils/secureRandom';
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { BookmarkIcon, ScaleIcon, Calendar, MapPin, StarIcon, CheckCircleIcon, ExternalLinkIcon, ChevronRightIcon, HomeIcon } from 'lucide-react';
@@ -15,8 +16,8 @@ interface CourseDetailPageProps {
 }
 export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   bookmarkedCourses = [],
-  onToggleBookmark = () => {},
-  onAddToComparison = () => {}
+  onToggleBookmark = () => undefined,
+  onAddToComparison = () => undefined
 }) => {
   const {
     courseId
@@ -33,8 +34,23 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Generate a random rating between 4.0 and 5.0
-  const rating = (4 + Math.random()).toFixed(1);
-  const reviewCount = Math.floor(Math.random() * 50) + 10;
+  const rating = (() => {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return (4 + (buf[0] / 0xffffffff)).toFixed(1);
+    }
+    return (4 + secureRandom()).toFixed(1);
+  })();
+  
+  const reviewCount = (() => {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return Math.floor((buf[0] / 0xffffffff) * 50) + 10;
+    }
+    return Math.floor(secureRandom() * 50) + 10;
+  })();
   useEffect(() => {
     const fetchCourseDetails = async () => {
       if (!courseId) return;
@@ -183,8 +199,8 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
             <div className="flex flex-col lg:flex-row items-start gap-8">
               {/* Left side - Course info */}
               <div className="lg:w-2/3">
+                {/* Provider Section - Logo removed */}
                 <div className="flex items-center mb-3">
-                  <img src={course.provider.logoUrl} alt={`${course.provider.name} logo`} className="h-12 w-12 object-contain mr-3 rounded-md shadow-sm" />
                   <span className="text-gray-600 font-medium">
                     {course.provider.name}
                   </span>
@@ -265,7 +281,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   {course.learningOutcomes.slice(0, 4).map((outcome, index) => <div key={index} className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-100 h-full">
-                      <CheckCircleIcon size={20} className="text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <CheckCircleIcon size={20} className="text-dqYellow mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{outcome}</span>
                     </div>)}
                 </div>
@@ -453,25 +469,25 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                     </h4>
                     <ul className="space-y-2">
                       <li className="flex items-start">
-                        <CheckCircleIcon size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                        <CheckCircleIcon size={16} className="text-dqYellow mr-2 mt-1 flex-shrink-0" />
                         <span className="text-gray-700 text-sm">
                           Comprehensive course materials
                         </span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircleIcon size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                        <CheckCircleIcon size={16} className="text-dqYellow mr-2 mt-1 flex-shrink-0" />
                         <span className="text-gray-700 text-sm">
                           Expert-led sessions
                         </span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircleIcon size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                        <CheckCircleIcon size={16} className="text-dqYellow mr-2 mt-1 flex-shrink-0" />
                         <span className="text-gray-700 text-sm">
                           Certificate of completion
                         </span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircleIcon size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                        <CheckCircleIcon size={16} className="text-dqYellow mr-2 mt-1 flex-shrink-0" />
                         <span className="text-gray-700 text-sm">
                           Access to exclusive resources
                         </span>
@@ -480,10 +496,6 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   </div>
                   <button id="enroll-section" className="w-full px-4 py-3 text-white font-bold rounded-md bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-700 transition-colors shadow-md mb-3">
                     Enroll Now
-                  </button>
-                  <button onClick={handleAddToComparison} className="w-full px-4 py-3 text-blue-600 font-medium bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center">
-                    <ScaleIcon size={16} className="mr-2" />
-                    Add to Comparison
                   </button>
                 </div>
               </div>

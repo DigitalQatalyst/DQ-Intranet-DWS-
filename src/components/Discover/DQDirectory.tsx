@@ -1,11 +1,15 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { DirectoryCard, DirectoryCardData } from '../Directory/DirectoryCard';
+import DirectoryProfileModal from '../Directory/DirectoryProfileModal';
+import DirectoryAssociateModal, {
+  DirectoryAssociateProfile,
+} from '../Directory/DirectoryAssociateModal';
 import { unitsData } from '../../data/directoryData';
 import type { Unit, ViewMode, SectorType } from '../../types/directory';
 
-interface DQDirectoryProps {
+interface Discover_DirectorySectionProps {
   title?: string;
   subtitle?: string;
 }
@@ -13,13 +17,12 @@ interface DQDirectoryProps {
 /**
  * Map Unit to unified DirectoryCardData
  */
-const mapUnitToCard = (unit: Unit, onViewProfile: () => void): DirectoryCardData => ({
+const mapUnitToCard = (unit: Unit): DirectoryCardData => ({
   logoUrl: unit.logoUrl,
   title: unit.name,
   tag: unit.sector,
   description: unit.description || '',
   towers: unit.streams,
-  onClick: onViewProfile,
 });
 
 type Associate = {
@@ -141,6 +144,19 @@ const getOneLiner = (a: Associate): string => {
   const parts = [a.title?.trim(), a.role?.trim()].filter(Boolean);
   return parts.join(' • ');
 };
+
+const mapAssociateToProfile = (associate: Associate): DirectoryAssociateProfile => ({
+  name: associate.name,
+  roleTitle: getOneLiner(associate) || associate.title || associate.role,
+  unitName: associate.unit || 'DigitalQatalyst',
+  tag: associate.tag,
+  email: associate.email,
+  phone: associate.mobile,
+  location: associate.location,
+  studio: associate.company,
+  description: getDescription(associate) || undefined,
+  skills: associate.tag ? [associate.tag] : undefined,
+});
 
 const CARD_BASE =
   'rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:ring-1 hover:ring-slate-200 transition';
@@ -269,166 +285,7 @@ const AssociateCard: React.FC<AssociateCardProps> = ({ associate, onOpen }) => {
   );
 };
 
-interface ProfileModalProps {
-  open: boolean;
-  onClose: () => void;
-  person: Associate | null;
-}
-
-const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose, person }) => {
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
-    };
-  }, [open, onClose]);
-
-  if (!open || !person) return null;
-
-  const { name, tag, title, role, unit, email, mobile, location, company, website } = person;
-  const mailHref = email ? `mailto:${email}` : undefined;
-  const phoneHref = mobile ? `tel:${sanitizeTelHref(mobile)}` : undefined;
-  const displayWebsite = website;
-  const description = getDescription(person);
-  const showTitleLine = Boolean(title && title.trim() && title.trim() !== description);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="profile-modal-title"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg rounded-3xl bg-white shadow-xl ring-1 ring-slate-200"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-6">
-          <div className="flex items-start gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-sm font-semibold text-slate-700">
-              {initials(name)}
-            </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 id="profile-modal-title" className="text-xl font-semibold text-slate-900">
-                  {name}
-                </h2>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                  {tag}
-                </span>
-              </div>
-              <p className="mt-2 text-sm text-slate-600 clamp-2">{description}</p>
-              {showTitleLine && (
-                <p className="mt-1 text-xs font-medium text-slate-500">{title}</p>
-              )}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
-            aria-label="Close profile"
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
-        </div>
-        <div className="px-6 py-6 space-y-6">
-          <div className="rounded-2xl bg-slate-50 p-5">
-            <p className="text-sm font-semibold text-slate-900">{role}</p>
-            <p className="mt-2 text-sm text-slate-600">{unit}</p>
-          </div>
-          <div className="space-y-3">
-            {mobile && (
-              <a
-                href={phoneHref}
-                className="flex items-center gap-3 text-sm text-slate-700 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
-                  <span aria-hidden="true">📞</span>
-                </div>
-                {mobile}
-              </a>
-            )}
-            {email && (
-              <a
-                href={mailHref}
-                className="flex items-center gap-3 text-sm text-slate-700 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
-                  <span aria-hidden="true">✉️</span>
-                </div>
-                {email}
-              </a>
-            )}
-            {(displayWebsite || location) && (
-              <div className="flex items-center gap-3 text-sm text-slate-700">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
-                  <span aria-hidden="true">🌐</span>
-                </div>
-                {displayWebsite ? (
-                  <a
-                    href={displayWebsite.startsWith('http') ? displayWebsite : `https://${displayWebsite}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline underline-offset-2 transition hover:text-slate-900"
-                  >
-                    {displayWebsite.replace(/^https?:\/\//, '')}
-                  </a>
-                ) : (
-                  <span>{location}</span>
-                )}
-              </div>
-            )}
-            {company && (
-              <div className="flex items-center gap-3 text-sm text-slate-700">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
-                  <span aria-hidden="true">🏢</span>
-                </div>
-                {company}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-5 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 sm:w-auto"
-          >
-            Close
-          </button>
-          {email && (
-            <a
-              href={mailHref}
-              className="w-full rounded-2xl border-2 border-[#1E40FF] px-4 py-2.5 text-center text-sm font-semibold text-[#1E40FF] transition hover:bg-[#1E40FF] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 sm:w-auto"
-            >
-              Email
-            </a>
-          )}
-          {mobile && (
-            <a
-              href={phoneHref}
-              className="w-full rounded-2xl border-2 border-slate-900 px-4 py-2.5 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 sm:w-auto"
-            >
-              Call
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const DQDirectory: React.FC<DQDirectoryProps> = ({
+const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
   subtitle = 'Connect with DQ sectors, teams, and associates driving collaboration, delivery, and innovation across the Digital Workspace.',
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -442,8 +299,11 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
   const [selectedSectors, setSelectedSectors] = useState<SectorType[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [selected, setSelected] = useState<Associate | null>(null);
-  const [open, setOpen] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
+  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
+  const [selectedAssociateProfile, setSelectedAssociateProfile] =
+    useState<DirectoryAssociateProfile | null>(null);
+  const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -533,6 +393,10 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
 
     return filtered;
   }, [debouncedQuery, selectedSectors, showcaseAssociates]);
+  const visibleAssociates = useMemo(
+    () => filteredAssociates.slice(0, 9),
+    [filteredAssociates]
+  );
 
   const toggleSector = (sector: SectorType) => {
     setSelectedSectors((prev) =>
@@ -548,15 +412,34 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
 
   const hasActiveFilters = selectedSectors.length > 0 || selectedStreams.length > 0 || searchQuery.trim();
   const sectors: SectorType[] = ['Governance', 'Operations', 'Platform', 'Delivery'];
-  const resultCount = viewMode === 'units' ? filteredUnits.length : filteredAssociates.length;
-  const openModal = (person: Associate) => {
-    setSelected(person);
-    setOpen(true);
+  const filteredSectionUnits = filteredUnits.filter(
+    (unit) =>
+      unit.name !== 'DQ Delivery (Designs)' && unit.name !== 'DQ Delivery (Accounts)'
+  );
+  const handleViewFullDirectory = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.open('/marketplace/directory', '_blank', 'noopener,noreferrer');
+    }
+  }, []);
+
+  const openUnitModal = (unit: Unit) => {
+    setSelectedUnit(unit);
+    setIsUnitModalOpen(true);
   };
 
-  const closeModal = () => {
-    setOpen(false);
-    setTimeout(() => setSelected(null), 200);
+  const closeUnitModal = () => {
+    setIsUnitModalOpen(false);
+    setTimeout(() => setSelectedUnit(null), 200);
+  };
+
+  const openAssociateModal = (person: Associate) => {
+    setSelectedAssociateProfile(mapAssociateToProfile(person));
+    setIsAssociateModalOpen(true);
+  };
+
+  const closeAssociateModal = () => {
+    setIsAssociateModalOpen(false);
+    setTimeout(() => setSelectedAssociateProfile(null), 200);
   };
 
   return (
@@ -718,43 +601,60 @@ const DQDirectory: React.FC<DQDirectoryProps> = ({
 
         {/* Grid */}
         {viewMode === 'associates' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {filteredAssociates.map((person, index) => (
-              <AssociateCard
-                key={`${person.name}-${person.unit}-${index}`}
-                associate={person}
-                onOpen={openModal}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {visibleAssociates.map((person, index) => (
+                <AssociateCard
+                  key={`${person.name}-${person.unit}-${index}`}
+                  associate={person}
+                  onOpen={openAssociateModal}
+                />
+              ))}
+            </div>
+            {filteredAssociates.length > 9 && (
+              <div className="mt-10 flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleViewFullDirectory}
+                  className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
+                >
+                  View Full Directory →
+                </button>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {filteredUnits.map((unit) => (
-              <DirectoryCard
-                key={unit.id}
-                {...mapUnitToCard(unit, () => {
-                  window.open(unit.marketplaceUrl, '_blank');
-                })}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {filteredSectionUnits.map((unit) => (
+                <DirectoryCard
+                  key={unit.id}
+                  {...mapUnitToCard(unit)}
+                  onViewProfile={() => openUnitModal(unit)}
+                />
+              ))}
+            </div>
+            <div className="mt-10 flex justify-center">
+              <button
+                type="button"
+                onClick={handleViewFullDirectory}
+                className="inline-flex items-center rounded-2xl bg-[#030F35] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#020b29]"
+              >
+                View Full Directory →
+              </button>
+            </div>
+          </>
         )}
 
-        {/* Footer CTA */}
-        <div className="text-center mt-12">
-          <a
-            href="/marketplace/directory"
-            className="dws-btn-primary inline-flex items-center gap-2"
-            aria-label="View full directory in marketplace"
-          >
-            View Full Directory
-          </a>
-        </div>
       </div>
-
-      <ProfileModal open={open} onClose={closeModal} person={selected} />
+      <DirectoryAssociateModal
+        open={isAssociateModalOpen}
+        profile={selectedAssociateProfile}
+        onClose={closeAssociateModal}
+      />
+      <DirectoryProfileModal open={isUnitModalOpen} unit={selectedUnit} onClose={closeUnitModal} />
     </section>
   );
 };
 
-export default DQDirectory;
+export default Discover_DirectorySection;

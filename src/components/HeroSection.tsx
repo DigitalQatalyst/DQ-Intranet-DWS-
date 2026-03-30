@@ -1,174 +1,98 @@
-import React, { useEffect, useState } from "react";
-import { Send, ChevronDown, ArrowRight, Users } from "lucide-react";
+import React from 'react';
+import { ArrowRight, Sparkles, Lock } from 'lucide-react';
 import {
   AnimatedText,
   FadeInUpOnScroll,
   StaggeredFadeIn,
-} from "./AnimationUtils";
-import { scrollToReadyMove } from "../utils/scroll";
-import { Link } from "react-router-dom";
-import { useAuth } from "./Header";
+} from './AnimationUtils';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './Header';
+import { heroContent } from '../data/landingPageContent';
+import ParticleWaveBackground from './ParticleWaveBackground';
+
 interface HeroSectionProps {
   "data-id"?: string;
 }
+
 const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const isAuthenticated = Boolean(user);
-  const onboardingPath = "/onboarding/start";
-  const ctaHref = isAuthenticated
-    ? onboardingPath
-    : `/signin?redirect=${encodeURIComponent(onboardingPath)}`;
-  const [prompt, setPrompt] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const handleSubmitPrompt = () => {
-    if (!prompt.trim()) return;
-    setIsProcessing(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      setPrompt("");
-      // Here you would typically handle the actual AI response
-    }, 1500);
+  const onboardingPath = "/onboarding/welcome";
+  const navigate = useNavigate();
+  const handleOnboardingCta = () => {
+    navigate(onboardingPath);
   };
-  const scrollToMarketplaces = () => {
-    const marketplacesSection = document.getElementById("marketplaces-section");
-    if (marketplacesSection) {
-      marketplacesSection.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
-  };
-  // Show suggestion pills with delay after focus
-  useEffect(() => {
-    let timer;
-    if (isSearchFocused) {
-      timer = setTimeout(() => {
-        setShowSuggestions(true);
-      }, 500);
-    } else {
-      setShowSuggestions(false);
-    }
-    return () => clearTimeout(timer);
-  }, [isSearchFocused]);
-  const suggestionPills = [
-    "Open an IT service request",
-    "Where’s the HR leave policy?",
-    'Start "Day in DQ" onboarding',
-    "Show this week’s LMS courses",
-  ];
+
   return (
     <div
-      className="relative w-full bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 overflow-hidden"
+      className="relative w-full overflow-hidden"
       style={{
-        backgroundImage:
-          "linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url('https://images.unsplash.com/photo-1517651685227-828652601fa3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2670')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        background: 'linear-gradient(135deg, #e85d4a 0%, #6b4c7a 50%, #1e3a5f 100%)',
         height: "100vh",
       }}
       data-id={dataId}
     >
-      {/* Animated gradient overlay */}
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-blue-500/40 to-purple-600/40 mix-blend-multiply"
-        style={{
-          animation: "pulse-gradient 8s ease-in-out infinite alternate",
-        }}
-      ></div>
+      {/* Three.js particle wave */}
+      <ParticleWaveBackground />
+
+      {/* Atmospheric glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(232,93,74,0.15) 0%, transparent 70%)', filter: 'blur(150px)' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(107,76,122,0.20) 0%, transparent 70%)', filter: 'blur(120px)' }} />
+      <div className="absolute top-1/4 left-0 w-80 h-80 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(219,112,147,0.10) 0%, transparent 70%)', filter: 'blur(140px)' }} />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(67,97,238,0.15) 0%, transparent 70%)', filter: 'blur(160px)' }} />
+
+      {/* Vignette overlay */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(30,20,40,0.7) 100%)' }} />
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight overflow-hidden">
-            <AnimatedText text="Your Digital Workspace" gap="1rem" />
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-normal overflow-visible whitespace-nowrap">
+            <AnimatedText text={heroContent.title} gap="1rem" />
           </h1>
           <FadeInUpOnScroll delay={0.8}>
             <p className="text-xl text-white/90 mb-8">
-              One trusted hub for tools, requests, learning, and collaboration
-              so every Qatalyst can move work forward, fast.
+              {heroContent.subtitle}
             </p>
           </FadeInUpOnScroll>
         </div>
-        {/* AI Prompt Interface with animation */}
+        {/* Coming Soon AI Search Bar */}
         <FadeInUpOnScroll delay={1.2} className="w-full max-w-3xl mb-10">
-          <div
-            className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 ${
-              isSearchFocused ? "shadow-xl transform scale-105" : ""
-            }`}
-          >
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            {/* Search input row */}
             <div className="p-2 md:p-3">
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 {/* Input field */}
                 <div className="flex-grow relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <Sparkles className="w-5 h-5 text-gray-300" />
+                  </div>
                   <input
                     type="text"
-                    placeholder="Find tools, policies, or service requests…"
-                    className={`w-full py-3 px-4 outline-none text-gray-700 rounded-lg bg-gray-50 transition-all duration-300 ${
-                      isSearchFocused ? "bg-white" : ""
-                    }`}
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    onFocus={() => setIsSearchFocused(true)}
-                    onBlur={() =>
-                      setTimeout(() => setIsSearchFocused(false), 200)
+                    disabled
+                    placeholder={
+                      isAuthenticated
+                        ? `Hi ${user?.firstName ?? 'there'}, your AI assistant is coming soon...`
+                        : 'AI-powered search — coming soon...'
                     }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSubmitPrompt();
-                      }
-                    }}
+                    className="w-full py-3 pl-12 pr-4 outline-none text-gray-400 rounded-lg bg-gray-50 cursor-not-allowed select-none"
                   />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                      {" "}Coming Soon
+                    </span>
+                  </div>
                 </div>
-                {/* Submit button */}
+                {/* Disabled submit button */}
                 <button
-                  onClick={handleSubmitPrompt}
-                  disabled={isProcessing || !prompt.trim()}
-                  className={`ml-2 p-3 rounded-lg flex items-center justify-center transition-all ${
-                    isProcessing || !prompt.trim()
-                      ? "bg-gray-200 cursor-not-allowed text-gray-400"
-                      : "bg-[image:var(--dq-cta-gradient)] hover:brightness-105 text-white"
-                  }`}
+                  type="button"
+                  disabled
+                  className="ml-1 p-3 rounded-lg bg-gray-100 cursor-not-allowed text-gray-300 flex items-center justify-center"
                 >
-                  <Send
-                    size={20}
-                    className={isProcessing ? "animate-pulse" : ""}
-                  />
+                  <Lock className="w-5 h-5" />
                 </button>
               </div>
             </div>
-            {/* Example prompts with staggered animation */}
-            <div
-              className={`bg-gray-50 px-4 py-3 border-t border-gray-100 transition-all duration-500 ease-in-out ${
-                showSuggestions
-                  ? "opacity-100 max-h-24"
-                  : "opacity-0 max-h-0 overflow-hidden"
-              }`}
-            >
-              <p className="text-xs text-gray-500 mb-2">Try asking:</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestionPills.map((pill, index) => (
-                  <button
-                    key={index}
-                    className="text-xs bg-white border border-gray-200 rounded-full px-3 py-1 text-gray-600 hover:bg-gray-100 transition-colors"
-                    style={{
-                      opacity: showSuggestions ? 1 : 0,
-                      transform: showSuggestions
-                        ? "translateY(0)"
-                        : "translateY(10px)",
-                      transition:
-                        "opacity 0.3s ease-out, transform 0.3s ease-out",
-                      transitionDelay: `${0.1 + index * 0.1}s`,
-                    }}
-                    onClick={() => {
-                      setPrompt(pill);
-                      setIsSearchFocused(true);
-                    }}
-                  >
-                    {pill}
-                  </button>
-                ))}
-              </div>
-            </div>
+
           </div>
         </FadeInUpOnScroll>
         {/* Call to Action Buttons with animations */}
@@ -176,12 +100,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
           staggerDelay={0.2}
           className="flex flex-col sm:flex-row gap-4 mt-2"
         >
-          <Link
-            to={ctaHref}
-            className="px-8 py-3 bg-[linear-gradient(135deg,_#FB5535_0%,_#1A2E6E_50%,_#030F35_100%)] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group"
+          <button
+            onClick={() => {
+              const section = document.getElementById('tools-resources-services');
+              section?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }}
+            className="px-8 py-3 bg-[#1b2e6e] hover:brightness-105 text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center overflow-hidden group"
           >
             <span className="relative z-10">
-              Start Your Digital Workspace Journey
+              Browse Marketplaces
             </span>
             <ArrowRight
               size={18}
@@ -191,51 +121,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({ "data-id": dataId }) => {
             <span className="absolute inset-0 overflow-hidden rounded-lg">
               <span className="absolute inset-0 bg-white/20 transform scale-0 opacity-0 group-hover:scale-[2.5] group-hover:opacity-100 rounded-full transition-all duration-700 origin-center"></span>
             </span>
-          </Link>
-          <a
-            href="#ready-move"
-            className="group px-8 py-3 rounded-lg border border-[#1A2E6E] bg-white text-[#1A2E6E] font-semibold shadow-lg inline-flex items-center justify-center gap-2 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-[#1A2E6E] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#FB5535]"
-            onClick={(event) => {
-              event.preventDefault();
-              scrollToReadyMove();
-            }}
+          </button>
+          <button
+            type="button"
+            onClick={handleOnboardingCta}
+            className="px-8 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-center flex items-center justify-center border-2 border-gray-200"
           >
-            Become a Lead
-            <Users
+            <span>Start Your Onboarding Journey</span>{' '}
+            <ArrowRight
               size={18}
-              className="text-[#1A2E6E] transition-colors duration-300 group-hover:text-white"
+              className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
             />
-          </a>
+          </button>
         </StaggeredFadeIn>
       </div>
-      {/* Scroll indicator with animation */}
-      <div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer"
-        onClick={() => {
-          const nextSection = document.querySelector("main > div:nth-child(2)");
-          nextSection?.scrollIntoView({
-            behavior: "smooth",
-          });
-        }}
-      >
-        <ChevronDown size={24} className="text-white" />
-        <span className="sr-only">Scroll down</span>
-      </div>
-      {/* Add keyframes for gradient animation */}
-      <style>{`
-        @keyframes pulse-gradient {
-          0% {
-            opacity: 0.4;
-          }
-          50% {
-            opacity: 0.6;
-          }
-          100% {
-            opacity: 0.4;
-          }
-        }
-      `}</style>
     </div>
   );
 };
+
 export default HeroSection;

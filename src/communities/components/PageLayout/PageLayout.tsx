@@ -127,7 +127,9 @@ export function PageLayout({
       'moderation': 'Moderation',
       'analytics': 'Analytics',
       'activity': 'Activity',
-      'messages': 'Messages'
+      'messages': 'Messages',
+      'services-center': 'Services Center',
+      'marketplace': 'Marketplace'
     };
     let cumulative = '';
     segments.forEach((seg, idx) => {

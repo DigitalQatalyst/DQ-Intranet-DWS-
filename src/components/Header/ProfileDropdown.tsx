@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogOutIcon, BellIcon, ChevronDownIcon, UserIcon } from 'lucide-react';
+import { LogOutIcon, BellIcon, ChevronDownIcon, UserIcon, HomeIcon } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 interface ProfileDropdownProps {
@@ -111,6 +111,14 @@ export function ProfileDropdown({
             {unreadNotifications > 0 && <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center">
               {unreadNotifications}
             </span>}
+          </button>
+          <button className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={e => {
+            e.preventDefault();
+            closeDropdown();
+            navigate('/dashboard');
+          }}>
+            <HomeIcon size={16} className="mr-3 text-gray-500" />
+            <span>Dashboard</span>
           </button>
         </div>
         <div className="py-1 border-t border-gray-200">

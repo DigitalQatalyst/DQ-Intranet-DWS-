@@ -1,69 +1,308 @@
-import React from 'react'
-import { Calendar, Clock, Building2 } from 'lucide-react'
+﻿import React from 'react'
 import { toTimeBucket } from '../../utils/guides'
 import { getGuideImageUrl } from '../../utils/guideImageMap'
+import { getProductMetadata } from '../../utils/productMetadata'
 
-export interface GuideCardProps {
-  guide: any
-  onClick: () => void
+function formatLabel(value?: string | null): string {
+  if (!value) return ''
+  return value
+    .replaceAll(/[_-]+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
 }
 
-export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
-  const timeBucket = toTimeBucket(guide.estimatedTimeMin)
-  const hasTemplate = Array.isArray(guide.templates) && guide.templates.length > 0
-  const hasInteractive = Array.isArray(guide.templates) && guide.templates.some((t: any) => (t.kind || '').toLowerCase() === 'interactive')
-  const cta = hasInteractive ? 'Open Tool' : hasTemplate ? 'Use Template' : 'View Guide'
-  const lastUpdated = guide.lastUpdatedAt ? new Date(guide.lastUpdatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''
-  const domain = guide.domain as string | undefined
-  const domainStyles = (d?: string) => {
-    const normalized = (d || '').toLowerCase()
-    switch (normalized) {
-      case 'digital workspace': return 'bg-indigo-50 text-indigo-700 border border-indigo-100';
-      case 'digital core business': return 'bg-emerald-50 text-emerald-700 border border-emerald-100';
-      case 'digital backoffice': return 'bg-amber-50 text-amber-700 border border-amber-100';
-      case 'digital enablement': return 'bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100';
-      case 'strategy': return 'bg-sky-50 text-sky-700 border border-sky-100';
-      case 'guidelines': return 'bg-emerald-50 text-emerald-700 border border-emerald-100';
-      case 'blueprints': return 'bg-cyan-50 text-cyan-700 border border-cyan-100';
-      default: return 'bg-gray-100 text-gray-700 border border-gray-200';
+function normalizeTag(value?: string | null): string {
+  if (!value) return ''
+  const cleaned = value.toLowerCase().replaceAll(/[_-]+/g, ' ').trim()
+  return cleaned.endsWith('s') ? cleaned.slice(0, -1) : cleaned
+}
+
+function formatAuthorText(authorName?: string, authorOrg?: string): string | null {
+  const orgSuffix = authorOrg ? ` - ${authorOrg}` : ''
+  const text = `${authorName || ''}${orgSuffix}`.trim()
+  return (text.toLowerCase() === 'bb' || text.length <= 2) ? null : text
+}
+
+const GHC_TITLE_BY_SLUG: Record<string, string> = {
+  'dq-ghc': 'GHC Overview',
+  'dq-vision': 'GHC 1 - Vision (Purpose)',
+  'dq-hov': 'GHC 2 - House of Values (HoV)',
+  'dq-persona': 'GHC 3 - Persona',
+  'dq-agile-tms': 'GHC 4 - Agile TMS',
+  'dq-agile-sos': 'GHC 5 - Agile SoS',
+  'dq-agile-flows': 'GHC 6 - Agile Flows',
+  'dq-agile-6xd': 'GHC 7 - Agile 6xD (Products)',
+}
+
+const HOV_ORDER = [
+  'dq-competencies-emotional-intelligence', 'dq-competencies-growth-mindset',
+  'dq-competencies-purpose', 'dq-competencies-perceptive', 'dq-competencies-proactive',
+  'dq-competencies-perseverance', 'dq-competencies-precision', 'dq-competencies-customer',
+  'dq-competencies-learning', 'dq-competencies-collaboration',
+  'dq-competencies-responsibility', 'dq-competencies-trust',
+]
+
+const KNOWN_PRODUCT_NAMES = [
+  'Digital Workspace System (DWS)',
+  'Digital Transformation Management Academy (DTMA)',
+  'Digital Business Platforms (DBP Assists)',
+  'Digital Transformation Management Platform (DTMP)',
+  'DTO4T - Digital Transformation Operating Framework',
+  'TMaaS - Transformation Management as a Service',
+]
+
+// Helper function to check if guide should show author info
+const shouldShowAuthorInfo = (guide: any, isBlueprint: boolean, isGhcOverview: boolean, domain?: string) => {
+  return !isBlueprint && 
+         !isGhcOverview && 
+         domain?.toLowerCase() !== 'strategy' && 
+         domain?.toLowerCase() !== 'guidelines' && 
+         (guide.authorName || guide.authorOrg);
+};
+
+function hovTitleFromSlug(s: string): string | null {
+  const idx = HOV_ORDER.indexOf(s)
+  if (idx === -1) return null
+  const label = s.replaceAll('dq-competencies-', '').replaceAll('-', ' ')
+  const nice = label.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  return `HoV ${idx + 1} - ${nice}`
+}
+
+function resolveGhcTitle(rawTitle: string, slug: string): string {
+  if (GHC_TITLE_BY_SLUG[slug]) return GHC_TITLE_BY_SLUG[slug]
+  const hovTitle = hovTitleFromSlug(slug)
+  if (hovTitle) return hovTitle
+  if (rawTitle.toLowerCase().includes('golden honeycomb')) return 'GHC Overview'
+  const ghcMatch = /^GHC\s+Competency\s+(\d+):\s*(.+)/i.exec(rawTitle)
+  if (ghcMatch) return `GHC ${ghcMatch[1]} - ${ghcMatch[2].trim()}`
+  return rawTitle
+}
+
+function resolveDwsTitle(title: string, cleanedTitle: string, productMetadata: any): string | null {
+  const lower = title.toLowerCase()
+  if (!lower.includes('dws') || lower.includes('digital workspace system')) return null
+  if (productMetadata && (lower.includes('dws') || lower.includes('digital workspace'))) return 'Digital Workspace System (DWS)'
+  if (cleanedTitle.toLowerCase() === 'dws') return 'Digital Workspace System (DWS)'
+  if (cleanedTitle.toLowerCase().startsWith('dws')) return cleanedTitle.replaceAll(/^dws\s*/i, 'Digital Workspace System (DWS)')
+  return null
+}
+
+function matchKnownProduct(productMetadata: any): string | null {
+  if (!productMetadata) return null
+  for (const productName of KNOWN_PRODUCT_NAMES) {
+    const meta = getProductMetadata(productName)
+    if (meta && meta.productType === productMetadata.productType && meta.productStage === productMetadata.productStage) {
+      return productName
     }
   }
-  const formatLabel = (value?: string | null) => {
-    if (!value) return ''
-    return value
-      .replace(/[_-]+/g, ' ')
-      .split(' ')
-      .filter(Boolean)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ')
+  return null
+}
+
+function resolveBlueprintTitle(title: string, hasStaticProps: boolean, productMetadata: any): string {
+  if (hasStaticProps) return title
+  const cleanedTitle = title.replaceAll(/\s*Blueprint\s*/gi, ' ').trim() // NOSONAR - bounded by title string length, not user input
+  const dwsTitle = resolveDwsTitle(title, cleanedTitle, productMetadata)
+  if (dwsTitle) return dwsTitle
+  const finalTitle = cleanedTitle.replaceAll(/\s*blueprint\s*/gi, ' ').trim() // NOSONAR - bounded by title string length, not user input
+  const knownProduct = matchKnownProduct(productMetadata)
+  if (knownProduct) return knownProduct
+  return (!finalTitle || finalTitle.toLowerCase() === 'blueprint') ? 'Product' : finalTitle
+}
+
+function isGhcStrategySlug(slug: string, subDomain: string): boolean {
+  if (slug === 'dq-hov' || slug.includes('competencies')) return true
+  if (subDomain.includes('hov') || subDomain.includes('competencies')) return true
+  if (slug === 'dq-vision' || slug === 'dq-persona' || slug.includes('agile-')) return true
+  if (subDomain.includes('ghc') && !subDomain.includes('competencies')) return true
+  return false
+}
+
+function getBadgeLabel(isBlueprint: boolean, domain: string | undefined, guide: any): string {
+  if (isBlueprint) return 'Product'
+  if (domain?.toLowerCase() === 'strategy') {
+    const slug = (guide.slug || '').toLowerCase()
+    const subDomain = (guide.subDomain || guide.sub_domain || '').toLowerCase()
+    if (isGhcStrategySlug(slug, subDomain)) return 'GHC'
+    return formatLabel(domain)
   }
-  const domainLabel = formatLabel(domain)
-  const imageUrl = getGuideImageUrl({ heroImageUrl: guide.heroImageUrl, domain: guide.domain, guideType: guide.guideType })
+  return formatLabel(domain)
+}
+
+function resolveProductMetadata(isBlueprint: boolean, guide: any): Record<string, string> | null {
+  if (!isBlueprint) return null
+  if (guide.productType && guide.productStage) {
+    return { productType: guide.productType, productStage: guide.productStage, description: guide.summary || '', imageUrl: guide.heroImageUrl || '' }
+  }
+  return getProductMetadata(guide.title)
+}
+
+function resolveDisplayTitle(isBlueprint: boolean, guide: any, productMetadata: any): string {
+  if (!isBlueprint) return resolveGhcTitle(guide.title || '', (guide.slug || '').toLowerCase())
+  return resolveBlueprintTitle(guide.title || '', !!(guide.productType && guide.productStage), productMetadata)
+}
+
+function handleImageError(e: React.SyntheticEvent<HTMLImageElement, Event>): void {
+  const target = e.currentTarget
+  if (target.src && !target.src.includes('/image.png')) {
+    target.src = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+  }
+}
+
+function resolveIsBlueprint(guide: any): boolean {
+  return (guide.domain || '').toLowerCase().includes('blueprint') ||
+    (guide.guideType || '').toLowerCase().includes('blueprint') ||
+    guide.domain === 'Product' ||
+    !!(guide.productType && guide.productStage)
+}
+
+function resolveIsTestimonial(guide: any): boolean {
+  return (guide.domain || '').toLowerCase().includes('testimonial') ||
+    (guide.guideType || '').toLowerCase().includes('testimonial')
+}
+
+function resolveHeroImage(guide: any): string | null {
+  return guide.heroImageUrl || guide.hero_image_url || null
+}
+
+interface GuideCardProps {
+  guide: any
+  onClick: () => void
+  imageOverrideUrl?: string
+}
+
+function handleCardKeyDown(onClick: () => void, isDraft: boolean) {
+  return (e: React.KeyboardEvent) => {
+    if (!isDraft && (e.key === 'Enter' || e.key === ' ')) onClick()
+  }
+}
+
+export const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick, imageOverrideUrl }) => {
+  const timeBucket = toTimeBucket(guide.estimatedTimeMin)
+  const lastUpdated = guide.lastUpdatedAt
+    ? new Date(guide.lastUpdatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : ''
+  const domain: string | undefined = guide.domain
+
+  const isBlueprint = resolveIsBlueprint(guide)
+  const isTestimonial = resolveIsTestimonial(guide)
+
+
+  const domainLabel = getBadgeLabel(isBlueprint, domain, guide)
+  const isDuplicateTag = normalizeTag(domain) !== '' && normalizeTag(domain) === normalizeTag(guide.guideType)
+
+  const productMetadata = resolveProductMetadata(isBlueprint, guide)
+
+  const displayTitle = resolveDisplayTitle(isBlueprint, guide, productMetadata)
+  const heroImage = resolveHeroImage(guide)
+  const subDomain = guide.subDomain || guide.sub_domain || null
+
+  const defaultImageUrl = isBlueprint && productMetadata?.imageUrl
+    ? productMetadata.imageUrl
+    : getGuideImageUrl({
+        heroImageUrl: heroImage,
+        domain: guide.domain,
+        guideType: guide.guideType,
+        subDomain: subDomain,
+        id: guide.id,
+        slug: guide.slug || guide.id,
+        title: guide.title,
+      })
+
+  const imageUrl = imageOverrideUrl || defaultImageUrl
+  const isGhcOverview = (guide.slug || '').toLowerCase() === 'dq-ghc'
+  const displayDescription = productMetadata?.description || guide.summary || ''
+
+  const isDraft = guide.status === 'Draft'
+
   return (
-    <div className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col" onClick={onClick}>
+    <div
+      className="bg-white rounded-2xl shadow border border-gray-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden"
+      role={isDraft ? undefined : 'button'}
+      tabIndex={isDraft ? undefined : 0}
+      onClick={isDraft ? undefined : onClick}
+      onKeyDown={isDraft ? undefined : handleCardKeyDown(onClick, isDraft)}
+    >
       {imageUrl && (
-        <img src={imageUrl} alt={guide.title} className="w-full h-40 object-cover rounded mb-3" loading="lazy" decoding="async" width={640} height={180} />
-      )}
-      <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[40px]" title={guide.title}>{guide.title}</h3>
-      <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px] mb-3">{guide.summary}</p>
-      <div className="flex flex-wrap gap-1 mb-3">
-        {domain && <span className={`px-2 py-0.5 text-xs rounded-full ${domainStyles(domain)}`}>{domainLabel}</span>}
-        {guide.guideType && <span className="px-2 py-0.5 text-[var(--guidelines-primary)] bg-[var(--guidelines-primary-surface)] text-xs rounded-full">{formatLabel(guide.guideType)}</span>}
-      </div>
-      <div className="flex items-center text-xs text-gray-500 gap-3 mb-3">
-        {timeBucket && <span className="flex items-center"><Clock size={14} className="mr-1" />{timeBucket}</span>}
-        {lastUpdated && <span className="flex items-center"><Calendar size={14} className="mr-1" />{lastUpdated}</span>}
-      </div>
-      {(guide.authorName || guide.authorOrg) && (
-        <div className="flex items-center text-xs text-gray-600 mb-3">
-          <Building2 size={14} className="mr-1" />
-          <span className="truncate" title={`${guide.authorName || ''}${guide.authorOrg ? ' • ' + guide.authorOrg : ''}`}>{guide.authorName || ''}{guide.authorOrg ? ` • ${guide.authorOrg}` : ''}</span>
+        <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>
+          <img
+            src={imageUrl}
+            alt={displayTitle}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+            width={640}
+            height={180}
+            onError={handleImageError}
+            crossOrigin="anonymous"
+          />
         </div>
       )}
-      <div className="mt-auto">
-        <button className="w-full px-4 py-2 text-sm font-bold text-white bg-[var(--guidelines-primary-solid)] hover:bg-[var(--guidelines-primary-solid-hover)] rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--guidelines-ring-color)]">
-          {cta}
-        </button>
+      <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
+        <div className="flex flex-wrap gap-2 mb-2 flex-shrink-0">
+          {!isBlueprint && (
+            <>
+              {domain && (
+                <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                  {domainLabel}
+                </span>
+              )}
+              {guide.guideType && !isTestimonial && !isDuplicateTag && (guide.slug || '').toLowerCase() !== 'dq-ghc' && (
+                <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                  {formatLabel(guide.guideType)}
+                </span>
+              )}
+              {isTestimonial && guide.unit && (
+                <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                  {formatLabel(guide.unit)}
+                </span>
+              )}
+              {isTestimonial && guide.location && (
+                <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                  {formatLabel(guide.location)}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+        <h3
+          className="font-semibold text-gray-900 mb-1.5 flex-shrink-0"
+          title={displayTitle}
+          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.375rem' }}
+        >
+          {displayTitle}
+        </h3>
+        <p
+          className="text-sm text-gray-600 mb-2 flex-shrink-0"
+          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.25rem' }}
+        >
+          {displayDescription}
+        </p>
+        <div className="flex items-center text-xs text-gray-400 gap-3 mb-3 flex-shrink-0">
+          {lastUpdated && <span>{lastUpdated}</span>}
+          {timeBucket && <span>{timeBucket}</span>}
+        </div>
+        {!isBlueprint && !isGhcOverview && domain?.toLowerCase() !== 'strategy' && domain?.toLowerCase() !== 'guidelines' && (guide.authorName || guide.authorOrg) && (
+          <div className="text-xs text-gray-500 mb-2 flex-shrink-0 truncate">
+            {formatAuthorText(guide.authorName, guide.authorOrg)}
+          </div>
+        )}
+        <div className="mt-auto flex-shrink-0">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); if (!isDraft && !isBlueprint) onClick() }}
+            disabled={isDraft || isBlueprint}
+            className={`w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2.5 transition-all focus:outline-none focus:ring-2 ${
+              isDraft || isBlueprint
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-[#030E31] text-white hover:bg-[#020A28] focus:ring-[#030E31]'
+            }`}
+            aria-label={isDraft || isBlueprint ? 'Coming soon' : 'View Details'}
+          >
+            {isDraft || isBlueprint ? 'Coming Soon' : 'View Details'}
+          </button>
+        </div>
       </div>
     </div>
   )

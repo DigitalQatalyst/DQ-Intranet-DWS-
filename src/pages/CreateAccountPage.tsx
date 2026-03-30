@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 /**
  * CreateAccountPage
  * - Lightweight account creation before the HR-style onboarding form
- * - After creation, redirect to /onboarding/start (your full form + uploads)
+ * - After creation, redirect to /onboarding/welcome (your full form + uploads)
  * Wire this endpoint:
  *   POST /api/auth/create-account   { name, email }
  */
@@ -18,9 +18,9 @@ export default function CreateAccountPage() {
   const redirectTarget = useMemo(() => {
     const params = new URLSearchParams(location.search);
     const redirect = params.get("redirect");
-    if (!redirect) return "/onboarding/start";
-    if (/^https?:\/\//i.test(redirect)) return "/onboarding/start";
-    return redirect.startsWith("/") ? redirect : "/onboarding/start";
+    if (!redirect) return "/onboarding/welcome";
+    if (/^https?:\/\//i.test(redirect)) return "/onboarding/welcome";
+    return redirect.startsWith("/") ? redirect : "/onboarding/welcome";
   }, [location.search]);
 
   async function handleCreate(e: FormEvent) {

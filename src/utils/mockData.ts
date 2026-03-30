@@ -1,3 +1,4 @@
+import { secureRandom } from './secureRandom';
 // Mock data for the Course Marketplace
 export interface ProviderType {
   id: string;
@@ -81,8 +82,8 @@ export const mockCourses: CourseType[] = [
     learningOutcomes: [
       "Submit IT support requests efficiently",
       "Provide detailed problem descriptions",
-      "Include relevant error messages",
-      "Track support request progress",
+      "Include relevant error messages or screenshots"
+     
     ],
     startDate: "Available Now",
     price: "Free",
@@ -530,11 +531,20 @@ export const mockOnboardingFlowsData = {
 // Helper function to assign random statuses to fields
 const assignFieldStatuses = (fields: any) => {
   const statuses = ["locked", "editable", "completed"];
-  return fields.map((field: any) => ({
-    ...field,
-    status:
-      field.status || statuses[Math.floor(Math.random() * statuses.length)], // Randomly assign a status
-  }));
+  return fields.map((field: any) => {
+    let randomIndex = 0;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      randomIndex = Math.floor((buf[0] / 0xffffffff) * statuses.length);
+    } else {
+      randomIndex = Math.floor(secureRandom() * statuses.length);
+    }
+    return {
+      ...field,
+      status: field.status || statuses[randomIndex],
+    };
+  });
 };
 
 // Add some empty fields to demonstrate placeholder styling

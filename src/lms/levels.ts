@@ -10,7 +10,7 @@ const clean = (input: string) =>
     .trim();
 
 const stripLevelPrefix = (label: string) =>
-  label.replace(/^l[1-8]\s*(?:-|\u2013|\u2014)?\s*/i, '');
+  label.replace(/^l[0-8]\s*(?:-|\u2013|\u2014)?\s*/i, '');
 
 const CODE_SET = new Set<LevelCode>(LEVELS.map(level => level.code));
 
@@ -43,7 +43,7 @@ export const normalizeLevel = (value?: string): LevelCode | undefined => {
   if (!value) return undefined;
   const cleaned = clean(value);
   if (!cleaned) return undefined;
-  if (/^l[1-8]$/.test(cleaned)) {
+  if (/^l[0-8]$/.test(cleaned)) {
     return cleaned.toUpperCase() as LevelCode;
   }
   const aliasMatch = aliasTable[cleaned];

@@ -5,7 +5,7 @@ import { supabase } from '@/communities/integrations/supabase/client';
 import { safeFetch } from '@/communities/utils/safeFetch';
 import { MainLayout } from '@/communities/components/layout/MainLayout';
 import { Button } from '@/communities/components/ui/button';
-import { StickyActionButton } from '@/communities/components/KF eJP Library/Button';
+import { StickyActionButton } from '@/communities/components/DesignSystem/Button';
 import { Users, UserPlus, UserMinus, AlertCircle, Plus, Settings, Home, ChevronRight, Upload, X, Pencil, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { MemberList } from '@/communities/components/communities/MemberList';
@@ -17,7 +17,7 @@ import { format } from 'date-fns';
 import { PostCard } from '@/communities/components/posts/PostCard';
 import { Skeleton } from '@/communities/components/ui/skeleton';
 // Import PageLayout components
-import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs, BreadcrumbItem } from '@/communities/components/KF eJP Library/PageLayout';
+import { PageLayout, PageSection, SectionHeader, SectionContent, Breadcrumbs, BreadcrumbItem } from '@/communities/components/DesignSystem/PageLayout';
 interface Community {
   id: string;
   name: string;
@@ -458,7 +458,7 @@ export default function Community() {
             {/* Preview */}
             {newImageUrl && <div className="relative h-32 w-full overflow-hidden rounded-md border border-gray-200">
                 <img src={newImageUrl} alt="Preview" className="h-full w-full object-cover" onError={e => {
-              ;
+              
               (e.target as HTMLImageElement).src = fallbackImageUrl;
             }} />
               </div>}
