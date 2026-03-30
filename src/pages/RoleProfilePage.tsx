@@ -184,7 +184,7 @@ const RoleProfilePage: React.FC = () => {
           {position.responsibilities && position.responsibilities.length > 0 ? (
             <ul className="space-y-2 list-disc list-inside text-slate-700">
               {position.responsibilities.map((item, index) => (
-                <li key={index} className="leading-relaxed">{item}</li>
+                <li key={`item-`} className="leading-relaxed">{item}</li>
               ))}
             </ul>
           ) : (

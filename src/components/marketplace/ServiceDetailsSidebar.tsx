@@ -56,7 +56,7 @@ export function ServiceDetailsSidebar({
       <div className="p-4">
         <div className="space-y-2 mb-4">
           {detailItems.map((detail, index) => (
-            <div key={index} className="flex justify-between items-center">
+            <div key={`detail-${detail.label}`} className="flex justify-between items-center">
               <span className="text-sm text-gray-500">{detail.label}:</span>
               <span className="text-sm font-medium text-gray-900">
                 {detail.value || 'N/A'}
@@ -68,7 +68,7 @@ export function ServiceDetailsSidebar({
           <h4 className="text-sm font-medium text-gray-800 mb-3">{getInclusionsLabel()}</h4>
           <ul className="space-y-2">
             {highlights.slice(0, 4).map((highlight, index) => (
-              <li key={index} className="flex items-start">
+              <li key={`hl-${index}`} className="flex items-start">
                 <CheckCircleIcon
                   size={14}
                   className="text-dqYellow mr-2 mt-1 flex-shrink-0"

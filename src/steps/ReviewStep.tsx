@@ -137,7 +137,7 @@ export function ReviewStep({ formData, isRevisit }) {
 
             <div className="space-y-6">
                 {dataGroups.map((group, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                    <div key={`item-`} className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
                         <div className="bg-gray-100 px-5 py-3 border-b border-gray-200">
                             <h3 className="font-medium text-gray-700">{group.title}</h3>
                         </div>

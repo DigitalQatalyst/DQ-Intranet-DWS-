@@ -153,7 +153,7 @@ function ProductDetailPage() {
                     <ul className="list-disc list-inside space-y-2 text-gray-700">
                       {scopeAndCapabilities.length > 0 ? (
                         scopeAndCapabilities.map((item: string, index: number) => (
-                          <li key={index}>
+                          <li key={`item-`}>
                             {typeof item === 'string' ? item : String(item || '')}
                           </li>
                         ))
@@ -172,7 +172,7 @@ function ProductDetailPage() {
                             <h3 className="text-xl font-semibold text-gray-900 mb-3">Internal Usage</h3>
                             <ul className="list-disc list-inside space-y-2 text-gray-700">
                               {product.howItsUsed.internal.map((item: string, index: number) => (
-                                <li key={index}>{typeof item === 'string' ? item : String(item || '')}</li>
+                                <li key={`item-`}>{typeof item === 'string' ? item : String(item || '')}</li>
                               ))}
                             </ul>
                           </div>
@@ -182,7 +182,7 @@ function ProductDetailPage() {
                             <h3 className="text-xl font-semibold text-gray-900 mb-3">Delivery Usage</h3>
                             <ul className="list-disc list-inside space-y-2 text-gray-700">
                               {product.howItsUsed.delivery.map((item: string, index: number) => (
-                                <li key={index}>{typeof item === 'string' ? item : String(item || '')}</li>
+                                <li key={`item-`}>{typeof item === 'string' ? item : String(item || '')}</li>
                               ))}
                             </ul>
                           </div>
@@ -192,7 +192,7 @@ function ProductDetailPage() {
                             <h3 className="text-xl font-semibold text-gray-900 mb-3">Client-Facing Usage</h3>
                             <ul className="list-disc list-inside space-y-2 text-gray-700">
                               {product.howItsUsed.client.map((item: string, index: number) => (
-                                <li key={index}>{typeof item === 'string' ? item : String(item || '')}</li>
+                                <li key={`item-`}>{typeof item === 'string' ? item : String(item || '')}</li>
                               ))}
                             </ul>
                           </div>
@@ -204,7 +204,7 @@ function ProductDetailPage() {
                         <ul className="list-disc list-inside space-y-2 text-gray-700">
                           {usedInArray.length > 0 ? (
                             usedInArray.map((item: string, index: number) => (
-                              <li key={index}>
+                              <li key={`item-`}>
                                 {typeof item === 'string' ? item : String(item || '')}
                               </li>
                             ))

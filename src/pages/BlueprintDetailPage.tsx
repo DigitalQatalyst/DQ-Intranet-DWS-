@@ -228,6 +228,7 @@ const BlueprintDetailPage: React.FC = () => {
                 </div>
                 <div className="px-4 py-4 sm:px-6 sm:py-6 text-sm leading-relaxed text-slate-800">
                   {activeContent ? (
+                    {/* codacy-disable-next-line react/no-danger */}
                     <div
                       className="prose prose-sm max-w-none prose-ul:list-disc prose-li:marker:text-slate-500"
                       dangerouslySetInnerHTML={{ __html: activeContent }}

@@ -134,7 +134,7 @@ export const CourseQuickViewModal: React.FC<CourseQuickViewModalProps> = ({
               Key Highlights
             </h3>
             <ul className="space-y-2">
-              {keyHighlights.map((highlight, index) => <li key={index} className="flex items-start">
+              {keyHighlights.map((highlight, index) => <li key={`highlight-${index}`} className="flex items-start">
                   <CheckCircleIcon size={18} className="text-dqYellow mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">{highlight}</span>
                 </li>)}

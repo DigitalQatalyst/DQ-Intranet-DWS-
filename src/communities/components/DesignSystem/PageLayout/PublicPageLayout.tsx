@@ -32,7 +32,7 @@ export function PublicHeader({
           </div>
           {/* Desktop Navigation */}
           <nav className="hidden md:flex md:items-center md:gap-6">
-            {navLinks.map((link, index) => <a key={index} href={link.href} className={`text-sm font-medium transition-colors ${link.active ? 'text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>
+            {navLinks.map((link, index) => <a key={link.href} href={link.href} className={`text-sm font-medium transition-colors ${link.active ? 'text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>
                 {link.label}
               </a>)}
           </nav>
@@ -46,7 +46,7 @@ export function PublicHeader({
         {/* Mobile Navigation */}
         {mobileMenuOpen && <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col gap-3">
-              {navLinks.map((link, index) => <a key={index} href={link.href} className={`text-sm font-medium transition-colors ${link.active ? 'text-gray-900' : 'text-gray-600 hover:text-gray-900'}`} onClick={() => setMobileMenuOpen(false)}>
+              {navLinks.map((link, index) => <a key={link.href} href={link.href} className={`text-sm font-medium transition-colors ${link.active ? 'text-gray-900' : 'text-gray-600 hover:text-gray-900'}`} onClick={() => setMobileMenuOpen(false)}>
                   {link.label}
                 </a>)}
               {ctaButton && <div className="pt-2">{ctaButton}</div>}
@@ -90,7 +90,7 @@ export function PublicFooter({
             {logo || <div className="text-xl font-bold text-gray-900 mb-4">Logo</div>}
           </div>
           {/* Footer Sections */}
-          {sections.map((section, index) => <div key={index} className="col-span-1">
+          {sections.map((section, index) => <div key={section.title} className="col-span-1">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">
                 {section.title}
               </h3>
@@ -132,7 +132,7 @@ function PublicBreadcrumbs({
   'data-id': dataId
 }: PublicBreadcrumbsProps) {
   return <nav className={`flex items-center gap-2 text-sm ${className}`} aria-label="Breadcrumb" data-id={dataId}>
-      {items.map((item, index) => <Fragment key={index}>
+      {items.map((item, index) => <Fragment key={item.label}>
           {index > 0 && <ChevronRight className="w-3 h-3 opacity-60" />}
           {item.current ? <span className="font-medium flex items-center">
               {index === 0 && <Home className="w-4 h-4 opacity-60 mr-1" />}

@@ -240,7 +240,7 @@ const CampaignsCarousel = () => {
           <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2">
             {Array.from({ length: totalSlides }).map((_, index) => (
               <button
-                key={index}
+                key={`item-`}
                 className={`h-2 rounded-full transition-all ${
                   currentSlide === index ? "bg-white w-10" : "bg-white/50 w-2"
                 }`}
@@ -986,7 +986,7 @@ const ProgramsInitiativesSection = () => {
             length: Math.max(1, featuredPrograms.length - 2),
           }).map((_, index) => (
             <button
-              key={index}
+              key={`item-`}
               className={`w-2.5 h-2.5 rounded-full ${
                 index === startIndex ? "bg-primary" : "bg-gray-300"
               }`}
@@ -1237,7 +1237,7 @@ const SmartAssistant = () => {
             <div className="h-80 overflow-y-auto p-4 space-y-3 bg-gray-50">
               {messages.map((message, index) => (
                 <div
-                  key={index}
+                  key={`item-`}
                   className={`flex ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}

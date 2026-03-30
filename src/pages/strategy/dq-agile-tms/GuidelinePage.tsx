@@ -193,8 +193,7 @@ function GuidelinePage() {
                   <div className="space-y-6">
                     {/* Main Description */}
                     <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
-                      {content.shortOverview.split('\n\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
+                      {content.shortOverview.split('\n\n').map((paragraph, index) => (<p key={`para-`}>{paragraph}</p>
                       ))}
                     </div>
 
@@ -205,7 +204,7 @@ function GuidelinePage() {
                         const [title, ...descParts] = highlight.split(':')
                         const description = descParts.join(':').trim()
                         return (
-                          <div key={index} className="flex items-start gap-3">
+                          <div key={`item-`} className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-1">
                               <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -242,8 +241,7 @@ function GuidelinePage() {
                   <div className="space-y-6">
                     {/* Storybook Description */}
                     <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
-                      {content.storybookIntro.split('\n\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
+                      {content.storybookIntro.split('\n\n').map((paragraph, index) => (<p key={`para-`}>{paragraph}</p>
                       ))}
                     </div>
 
@@ -254,7 +252,7 @@ function GuidelinePage() {
                         const [title, ...descParts] = item.split(':')
                         const description = descParts.join(':').trim()
                         return (
-                          <div key={index} className="flex items-start gap-3">
+                          <div key={`item-`} className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-1">
                               <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -289,8 +287,7 @@ function GuidelinePage() {
                   <div className="space-y-6">
                     {/* Course Description */}
                     <div className="prose prose-base max-w-none text-gray-700 leading-relaxed space-y-4">
-                      {content.courseIntro?.split('\n\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
+                      {content.courseIntro?.split('\n\n').map((paragraph, index) => (<p key={`para-`}>{paragraph}</p>
                       ))}
                     </div>
 
@@ -301,7 +298,7 @@ function GuidelinePage() {
                         const [title, ...descParts] = item.split(':')
                         const description = descParts.join(':').trim()
                         return (
-                          <div key={index} className="flex items-start gap-3">
+                          <div key={`item-`} className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-1">
                               <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />

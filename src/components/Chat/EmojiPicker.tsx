@@ -111,7 +111,7 @@ export function EmojiPicker({ onEmojiSelect, onClose }: EmojiPickerProps) {
                 <div className="grid grid-cols-6 gap-1">
                     {emojis.map((emoji, index) => (
                         <button
-                            key={index}
+                            key={`emoji-${index}`}
                             onClick={() => {
                                 onEmojiSelect(emoji);
                                 onClose();
@@ -130,7 +130,7 @@ export function EmojiPicker({ onEmojiSelect, onClose }: EmojiPickerProps) {
                 <div className="flex mt-1">
                     {emojis.slice(0, 6).map((emoji, index) => (
                         <button
-                            key={index}
+                            key={`recent-emoji-${index}`}
                             onClick={() => {
                                 onEmojiSelect(emoji);
                                 onClose();

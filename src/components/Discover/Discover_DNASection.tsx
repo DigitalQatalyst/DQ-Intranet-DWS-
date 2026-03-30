@@ -350,7 +350,7 @@ function DimensionModal({ dimension, isOpen, onClose, onNavigate }: DimensionMod
 
   if (!isOpen || !dimension) return null;
 
-  const prefersReducedMotion = typeof window !== "undefined" 
+  const prefersReducedMotion = globalThis.window !== undefined 
     ? window.matchMedia("(prefers-reduced-motion: reduce)").matches 
     : false;
 

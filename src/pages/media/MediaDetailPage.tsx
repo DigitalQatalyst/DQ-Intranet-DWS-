@@ -783,7 +783,7 @@ const MediaDetailPage: React.FC = () => {
                       },
                     ].map((highlight, index) => (
                       <button
-                        key={index}
+                        key={`item-`}
                         className="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition-colors flex items-start group"
                         onClick={() => {
                           if (videoRef.current) {
@@ -1792,7 +1792,7 @@ const MediaDetailPage: React.FC = () => {
                 <div className="flex flex-wrap gap-2 mb-6">
                   {(item.tags || []).map((tag, index) => (
                     <span
-                      key={index}
+                      key={`item-`}
                       className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${index % 3 === 0 ? 'bg-blue-50 text-blue-700' : index % 3 === 1 ? 'bg-indigo-50 text-indigo-700' : 'bg-purple-50 text-purple-700'}`}
                     >
                       {tag}
@@ -2037,7 +2037,7 @@ const MediaDetailPage: React.FC = () => {
                           },
                         ].map((highlight, index) => (
                           <button
-                            key={index}
+                            key={`item-`}
                             className="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition-colors flex items-start group"
                             onClick={() => {
                               if (videoRef.current) {

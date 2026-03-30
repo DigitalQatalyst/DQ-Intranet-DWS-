@@ -23,7 +23,7 @@ export function PageLayout({ title, breadcrumbs, headerSubtitle, children, class
       {breadcrumbs && (
         <nav className="flex text-sm text-gray-500 mb-2">
           {breadcrumbs.map((item, index) => (
-            <React.Fragment key={index}>
+            <React.Fragment key={item.label}>
               {item.href && !item.current ? (
                 <a href={item.href} className="hover:text-gray-700">
                   {item.label}
@@ -107,7 +107,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
   return (
     <nav className={cn('flex text-sm text-gray-500', className)}>
       {items.map((item, index) => (
-        <React.Fragment key={index}>
+        <React.Fragment key={item.label}>
           {item.href && !item.current ? (
             <a href={item.href} className="hover:text-gray-700">
               {item.label}

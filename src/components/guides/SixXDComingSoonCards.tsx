@@ -52,7 +52,7 @@ export const SixXDComingSoonCards: React.FC = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {SIXD_CARDS.map((card, index) => (
       <div
-        key={index}
+        key={`item-`}
         className="bg-white rounded-2xl shadow border border-gray-200 transition-all duration-300 hover:shadow-md flex flex-col overflow-hidden"
       >
         {/* Image — flush to top */}

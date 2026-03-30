@@ -176,7 +176,7 @@ export const LmsLessonPage: React.FC = () => {
                       <h4 className="font-medium text-gray-900 mb-2">References</h4>
                       <ul className="space-y-2">
                         {course.references.map((ref: any, index: number) => (
-                          <li key={index} className="flex items-start gap-2">
+                          <li key={`item-`} className="flex items-start gap-2">
                             <FileText size={16} className="text-gray-400 mt-0.5" />
                             <div>
                               <p className="text-gray-900 font-medium">{ref.title}</p>

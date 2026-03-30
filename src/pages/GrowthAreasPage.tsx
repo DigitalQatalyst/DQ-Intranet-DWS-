@@ -416,7 +416,7 @@ const GrowthAreasPage: React.FC = () => {
               {whyInvestReasons.map((reason, index) => {
                 const IconComponent = reason.icon;
                 return (
-                  <div key={index} className="space-y-4">
+                  <div key={`item-`} className="space-y-4">
                     <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
                       <IconComponent size={32} className={reason.iconColor} />
                     </div>

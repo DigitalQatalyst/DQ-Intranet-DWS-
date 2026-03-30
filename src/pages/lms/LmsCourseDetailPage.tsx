@@ -935,7 +935,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                   <div className="space-y-4">
                     {course.faq.map((item, index) => (
                       <div
-                        key={index}
+                        key={`item-`}
                         className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
                       >
                         <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-start">
@@ -1018,7 +1018,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">Reviews</h2>
                   <div className="space-y-4">
                     {course.testimonials.map((testimonial, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-6">
+                      <div key={`item-`} className="bg-white border border-gray-200 rounded-lg p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div>
                             <h3 className="font-semibold text-gray-900">{testimonial.author}</h3>
@@ -1047,7 +1047,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">Case Studies</h2>
                   <div className="space-y-4">
                     {course.caseStudies.map((caseStudy, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-6">
+                      <div key={`item-`} className="bg-white border border-gray-200 rounded-lg p-6">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h3 className="font-semibold text-gray-900 mb-2">{caseStudy.title}</h3>
@@ -1077,7 +1077,7 @@ export const LmsCourseDetailPage: React.FC = () => {
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">References</h2>
                   <div className="space-y-4">
                     {course.references.map((reference, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-6">
+                      <div key={`item-`} className="bg-white border border-gray-200 rounded-lg p-6">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h3 className="font-semibold text-gray-900 mb-2">{reference.title}</h3>

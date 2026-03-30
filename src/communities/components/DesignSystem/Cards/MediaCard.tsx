@@ -360,7 +360,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({
           </div>}
         {/* Tags */}
         {tags.length > 0 && <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
-            {tags.map((tag, index) => <span key={index} className={`inline-flex items-center ${designTokens.spacing.pill.padding} rounded-full text-xs font-medium truncate ${tagVariants[tag.variant || 'primary']}`}>
+            {tags.map((tag, index) => <span key={`${tag.text}-${index}`} className={`inline-flex items-center ${designTokens.spacing.pill.padding} rounded-full text-xs font-medium truncate ${tagVariants[tag.variant || 'primary']}`}>
                 {tag.text}
               </span>)}
           </div>}

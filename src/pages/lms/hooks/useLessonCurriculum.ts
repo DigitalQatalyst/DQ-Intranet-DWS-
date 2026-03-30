@@ -44,7 +44,7 @@ export function useLessonCurriculum(
   setExpandedModules: Dispatch<SetStateAction<Set<string>>>
 ) {
   useEffect(() => {
-    if (courseSlug && typeof window !== 'undefined') {
+    if (courseSlug && globalThis.window !== undefined) {
       localStorage.setItem(`${COURSE_STARTED_PREFIX}${courseSlug}`, 'true');
     }
   }, [courseSlug]);

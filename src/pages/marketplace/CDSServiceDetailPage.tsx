@@ -587,7 +587,7 @@ Ultimately, this governance cycle transforms campaign development from a one-tim
                       </h2>
                       <div className="prose prose-gray max-w-none">
                         {section.content.split('\n\n').map((paragraph: string, index: number) => (
-                          <div key={index} className="mb-4">
+                          <div key={`item-`} className="mb-4">
                             <SectionParagraph paragraph={paragraph} />
                           </div>
                         ))}

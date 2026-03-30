@@ -69,7 +69,7 @@ export function CommunityCard({ item, onJoin, onViewDetails }: CommunityCardProp
         <div className="flex flex-wrap gap-1 mb-4">
           {item.tags.slice(0, 3).map((tag, index) => (
             <span
-              key={index}
+              key={`${tag}-${index}`}
               className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700"
             >
               {tag}

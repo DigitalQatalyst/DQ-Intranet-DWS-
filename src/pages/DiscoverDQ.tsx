@@ -14,7 +14,7 @@ const DiscoverDQ: React.FC = () => {
 
   const prefersReducedMotion = useMemo(
     () =>
-      typeof window !== "undefined" &&
+      globalThis.window !== undefined &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     [],
   );

@@ -30,8 +30,7 @@ const TabContent: React.FC<TabContentProps> = ({ tabs, className }) => {
         case 'heading':
           return (
             <h2 
-              key={index}
-              className="text-2xl font-bold text-[hsl(0_0%_4%)] mb-4 relative pl-4"
+              key={`block-${index}`}
             >
               {block.accentColor && (
                 <span 
@@ -45,16 +44,16 @@ const TabContent: React.FC<TabContentProps> = ({ tabs, className }) => {
 
         case 'paragraph':
           return (
-            <p key={index} className="text-[hsl(0_0%_64%)] leading-relaxed mb-4">
+            <p key={`block-${index}`} className="text-[hsl(0_0%_64%)] leading-relaxed mb-4">
               {block.content}
             </p>
           );
 
         case 'checklist':
           return (
-            <ul key={index} className="space-y-2 mb-4">
+            <ul key={`block-${index}`} className="space-y-2 mb-4">
               {block.items?.map((item, itemIndex) => (
-                <li key={itemIndex} className="flex items-start gap-2">
+                <li key={`item-${itemIndex}`} className="flex items-start gap-2">
                   <Check 
                     size={16} 
                     className="text-[hsl(160_100%_50%)] mt-0.5 flex-shrink-0" 
@@ -68,13 +67,13 @@ const TabContent: React.FC<TabContentProps> = ({ tabs, className }) => {
         case 'divider':
           return (
             <hr 
-              key={index} 
+              key={`block-${index}`} 
               className="border-[hsl(0_0%_88%)] my-6"
             />
           );
 
         case 'custom':
-          return <div key={index}>{block.custom}</div>;
+          return <div key={`block-${index}`}>{block.custom}</div>;
 
         default:
           return null;

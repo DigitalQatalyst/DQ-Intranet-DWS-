@@ -16,7 +16,7 @@ export function ProcedureStages({ config, className = '' }: ProcedureStagesProps
         {/* Stages */}
         <div className="space-y-8">
           {config.stages.map((stage, index) => (
-            <div key={index} className="relative flex gap-6">
+            <div key={`item-`} className="relative flex gap-6">
               {/* Stage number circle */}
               <div className="relative z-10 flex-shrink-0">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-md" style={{ backgroundColor: '#030F35' }}>

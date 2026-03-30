@@ -80,10 +80,10 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               )}
             </>
           )}
-          {!course.duration && course.tags && course.tags.map((tag, index) => <span key={index} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate ${index === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+          {!course.duration && course.tags && course.tags.map((tag, index) => <span key={`${tag}-${index}`} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate ${index === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
             {tag}
           </span>)}
-          {!course.duration && !course.tags && [course.category, course.deliveryMode].map((tag, index) => <span key={index} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate ${index === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+          {!course.duration && !course.tags && [course.category, course.deliveryMode].map((tag, index) => <span key={`${tag}-${index}`} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate ${index === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
             {tag}
           </span>)}
         </div>

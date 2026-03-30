@@ -58,7 +58,7 @@ export const EventsPage: React.FC = () => {
   const [queryParams, setQueryParams] = useState(
     () =>
       new URLSearchParams(
-        typeof window !== "undefined" ? window.location.search : ""
+        globalThis.window !== undefined ? window.location.search : ""
       )
   );
 

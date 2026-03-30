@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Metadata Rows */}
         <div className="p-4 space-y-3">
           {metadata.map((item, index) => (
-            <div key={index} className="flex justify-between items-center">
+            <div key={`meta-${item.label}`} className="flex justify-between items-center">
               <span className="text-sm text-[hsl(0_0%_64%)]">{item.label}</span>
               <span className="text-sm font-medium text-[hsl(0_0%_4%)]">{item.value}</span>
             </div>

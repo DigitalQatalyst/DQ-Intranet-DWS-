@@ -417,7 +417,7 @@ const Discover_DirectorySection: React.FC<Discover_DirectorySectionProps> = ({
       unit.name !== 'DQ Delivery (Designs)' && unit.name !== 'DQ Delivery (Accounts)'
   );
   const handleViewFullDirectory = useCallback(() => {
-    if (typeof window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       window.open('/marketplace/directory', '_blank', 'noopener,noreferrer');
     }
   }, []);

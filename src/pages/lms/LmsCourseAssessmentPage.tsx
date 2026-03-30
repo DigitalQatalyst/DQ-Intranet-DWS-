@@ -201,7 +201,7 @@ export default function LmsCourseAssessmentPage() {
                                     const isSelected = selectedOption === index;
                                     return (
                                         <button
-                                            key={index}
+                                            key={`item-`}
                                             onClick={() => handleOptionSelect(index)}
                                             disabled={isAnswerChecked}
                                             className={`w-full text-left p-4 rounded-lg border-2 transition-all flex justify-between items-center ${isSelected

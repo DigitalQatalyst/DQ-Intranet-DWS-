@@ -60,7 +60,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         {/* Tags and Actions */}
         <div className="flex justify-between items-center mt-auto">
           <div className="flex flex-wrap gap-1 max-w-[70%]">
-            {item.tags.slice(0, 2).map((tag, index) => <TagChip key={index} text={tag} variant={index === 0 ? 'primary' : 'secondary'} />)}
+            {item.tags.slice(0, 2).map((tag, index) => <TagChip key={`${tag}-${index}`} text={tag} variant={index === 0 ? 'primary' : 'secondary'} />)}
           </div>
           {onToggleBookmark && <button onClick={handleToggleBookmark} className={`p-1.5 rounded-full transition-colors ${item.isBookmarked ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`} aria-label={item.isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
               <Bookmark size={16} className={item.isBookmarked ? 'fill-yellow-600' : ''} />

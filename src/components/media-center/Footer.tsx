@@ -109,7 +109,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
 
           {/* Link Columns */}
           {footerColumns.map((column, index) => (
-            <div key={index} className="space-y-4">
+            <div key={column.title} className="space-y-4">
               <h3 className="font-semibold text-[hsl(0_0%_98%)]">
                 {column.title}
               </h3>

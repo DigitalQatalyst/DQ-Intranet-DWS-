@@ -446,7 +446,7 @@ export function PostComposer({
               <TabsContent value="poll" className="space-y-4">
                 <div className="space-y-2">
                   <Label>Poll Options</Label>
-                  {pollOptions.map((option, index) => <div key={index} className="flex gap-2">
+                  {pollOptions.map((option, index) => <div key={`poll-${index}`} className="flex gap-2">
                     <Input value={option} onChange={e => handlePollOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`} disabled={submitting} maxLength={200} />
                     {pollOptions.length > 2 && <Button type="button" variant="outline" size="icon" onClick={() => handleRemovePollOption(index)} disabled={submitting}>
                       <X className="h-4 w-4" />

@@ -88,7 +88,7 @@ export function useLessonQuiz(params: {
     setQuizSubmitted(true);
     setQuizPassed(passed);
 
-    if (typeof window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       const submissionKey = `${QUIZ_STORAGE_PREFIX}${quiz.id}_${lessonId}`;
       localStorage.setItem(submissionKey, JSON.stringify({
         quizId: quiz.id, lessonId, courseId: course?.id || '',

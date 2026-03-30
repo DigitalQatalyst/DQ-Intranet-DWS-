@@ -19,7 +19,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         Home
       </Link>
       {items.map((item, index) => (
-        <React.Fragment key={index}>
+        <React.Fragment key={item.label}>
           <ChevronRightIcon size={16} className="mx-2 text-gray-400" />
           {item.href ? (
             <Link 

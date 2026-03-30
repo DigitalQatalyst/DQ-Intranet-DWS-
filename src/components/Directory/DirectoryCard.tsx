@@ -39,7 +39,7 @@ export const DirectoryCard: React.FC<DirectoryCardData> = ({
         <div className="flex flex-wrap gap-2">
           {towers!.map((tower, index) => (
             <span
-              key={index}
+              key={`${tower}-${index}`}
               className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700"
               style={{ border: '1px solid #E3E7F8' }}
             >

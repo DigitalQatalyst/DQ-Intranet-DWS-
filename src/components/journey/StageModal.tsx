@@ -157,7 +157,7 @@ const StageModal = ({ stage, isOpen, onClose }: StageModalProps) => {
                   <h4 className="text-lg font-bold text-gray-900 mb-3">Growth Expectations</h4>
                   <ul className="space-y-2.5 text-sm text-gray-700">
                     {stage.growthExpectations.map((expectation, index) => (
-                      <li key={index} className="flex items-start gap-2.5">
+                      <li key={`exp-${index}`} className="flex items-start gap-2.5">
                         <span className="mt-1.5 h-2 w-2 rounded-full bg-[#FB5535] flex-shrink-0" aria-hidden="true" />
                         <span className="leading-relaxed">{expectation}</span>
                       </li>
@@ -169,7 +169,7 @@ const StageModal = ({ stage, isOpen, onClose }: StageModalProps) => {
                   <h4 className="text-lg font-bold text-gray-900 mb-3">What Good Looks Like</h4>
                   <ul className="space-y-2.5 text-sm text-gray-700">
                     {stage.whatGoodLooksLike.map((item, index) => (
-                      <li key={index} className="flex items-start gap-2.5">
+                      <li key={`wgl-${index}`} className="flex items-start gap-2.5">
                         <span className="mt-1.5 h-2 w-2 rounded-full bg-[#FB5535] flex-shrink-0" aria-hidden="true" />
                         <span className="leading-relaxed">{item}</span>
                       </li>

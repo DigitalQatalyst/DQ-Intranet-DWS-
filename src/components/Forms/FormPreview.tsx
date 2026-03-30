@@ -1144,7 +1144,7 @@ const FormField: React.FC<{
               <div className="space-y-2">
                 {files.map((file: File, index: number) => (
                   <div
-                    key={index}
+                    key={`item-`}
                     className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
                   >
                     <div className="flex items-center flex-1 min-w-0">
@@ -1263,7 +1263,7 @@ const ProgressIndicator: React.FC<{
       </div>
       <div className="flex items-center justify-between">
         {steps.map((step, index) => (
-          <div key={index} className="flex items-center flex-1">
+          <div key={`item-`} className="flex items-center flex-1">
             <div className="flex items-center">
               <button
                 onClick={() => completedSteps.has(index) && onStepClick(index)}
@@ -1459,7 +1459,7 @@ const FormPreview: React.FC<{
             </div>
           ) : (
             visibleFields.map(({ group, field, value }, index) => (
-              <div key={index} className="border-b border-gray-200 pb-4">
+              <div key={`item-`} className="border-b border-gray-200 pb-4">
                 <h3 className="text-sm font-semibold text-blue-600 mb-2">
                   {group.groupTitle}
                 </h3>
@@ -1800,7 +1800,7 @@ const CourseTableField: React.FC<{
                     <tbody className="bg-white divide-y divide-gray-200">
                     {currentCourses.map((course, index) => (
                         <tr
-                            key={index}
+                            key={`item-`}
                             onClick={() => handleRowClick(course)}
                             className="hover:bg-blue-50 cursor-pointer transition-colors"
                         >
@@ -2297,7 +2297,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 const isCollapsed = isMobile && collapsedSections.has(index);
                 return (
                   <div
-                    key={index}
+                    key={`item-`}
                     className="rounded-lg border border-gray-200 bg-white"
                   >
                     <div className="px-8 py-6 pb-0">

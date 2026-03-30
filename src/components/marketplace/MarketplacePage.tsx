@@ -19,11 +19,11 @@ import { MarketplaceSearchBarSection } from './MarketplaceSearchBarSection';
 import { MarketplaceMainContent } from './MarketplaceMainContent';
 
 interface MarketplacePageProps {
-  marketplaceType: string;
-  filters: Record<string, string | string[]>;
-  searchQuery: string;
-  isServicesCenter: boolean;
-  activeServiceTab: string;
+  readonly marketplaceType: string;
+  readonly filters: Record<string, string | string[]>;
+  readonly searchQuery: string;
+  readonly isServicesCenter: boolean;
+  readonly activeServiceTab: string;
 }
 
 function runCoursesLoad(s: ItemSetters, searchFilteredItemsLength: number): void {
@@ -140,7 +140,7 @@ async function runMainGuidesLoad(s: GuidesSetters, params: GuidesRunParams): Pro
       const next = new URLSearchParams(queryParams.toString());
       if (subDomains.length) next.set('sub_domain', subDomains.join(','));
       else next.delete('sub_domain');
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         window.history.replaceState(null, '', `${window.location.pathname}${next.toString() ? '?' + next.toString() : ''}`);
       }
       s.setLoading(false);
@@ -408,7 +408,7 @@ async function runMainGuidesLoad(s: GuidesSetters, params: GuidesRunParams): Pro
     if (currentPage > lastPage) {
       const next = new URLSearchParams(queryParams.toString());
       if (lastPage <= 1) next.delete('page'); else next.set('page', '1');
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         window.history.replaceState(null, '', `${window.location.pathname}${next.toString() ? '?' + next.toString() : ''}`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }

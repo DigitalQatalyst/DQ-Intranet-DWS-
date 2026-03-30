@@ -358,7 +358,7 @@ export const MyLearningDashboard: React.FC = () => {
                       );
                       const passed = activity.passed !== undefined ? activity.passed : scorePercentage >= 80;
                       return (
-                        <div key={index} className={`flex items-start gap-3 p-3 rounded-lg ${passed ? 'bg-green-50' : 'bg-red-50'
+                        <div key={`item-`} className={`flex items-start gap-3 p-3 rounded-lg ${passed ? 'bg-green-50' : 'bg-red-50'
                           }`}>
                           <div className="flex-shrink-0 mt-0.5">
                             {passed ? (

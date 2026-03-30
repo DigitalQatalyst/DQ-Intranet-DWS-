@@ -58,7 +58,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({
         </div>
         {/* Tags */}
         <div className="flex flex-wrap gap-1 mt-auto">
-          {item.tags.slice(0, 2).map((tag, index) => <TagChip key={index} text={tag} variant={index === 0 ? 'warning' : 'info'} />)}
+          {item.tags.slice(0, 2).map((tag, index) => <TagChip key={`${tag}-${index}`} text={tag} variant={index === 0 ? 'warning' : 'info'} />)}
         </div>
       </CardHeader>
       <CardFooter primaryCTA={{

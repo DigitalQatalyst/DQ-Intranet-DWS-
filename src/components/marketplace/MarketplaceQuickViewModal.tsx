@@ -103,7 +103,7 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
         </h1>
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {displayTags.map((tag: string, index: number) => <span key={index} className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${index % 3 === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : index % 3 === 1 ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}>
+          {displayTags.map((tag: string, index: number) => <span key={`${tag}-${index}`} className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${index % 3 === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : index % 3 === 1 ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}>
             {tag}
           </span>)}
         </div>
@@ -111,7 +111,7 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           {config.attributes.slice(0, 4).map((attr, index) => {
             if (item[attr.key]) {
-              return <div key={index} className="flex items-center text-gray-700">
+              return <div key={`attr-${index}`} className="flex items-center text-gray-700">
                 {attr.icon}
                 <span>
                   {attr.label && `${attr.label}: `}
@@ -135,7 +135,7 @@ export const MarketplaceQuickViewModal: React.FC<MarketplaceQuickViewModalProps>
             Key Highlights
           </h3>
           <ul className="space-y-2">
-            {highlightItems.map((highlight: string, index: number) => <li key={index} className="flex items-start">
+            {highlightItems.map((highlight: string, index: number) => <li key={`hl-${index}`} className="flex items-start">
               <CheckCircleIcon size={18} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
               <span className="text-gray-700">{highlight}</span>
             </li>)}

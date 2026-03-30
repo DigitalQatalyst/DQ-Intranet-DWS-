@@ -85,7 +85,7 @@ const QuizQuestion: React.FC<{
                 : 'border-gray-200 opacity-60'
               : isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300';
             return (
-              <label key={index} className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${optionClass} ${isAnswerChecked ? 'pointer-events-none' : ''}`}>
+              <label key={`opt-${index}`} className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${optionClass} ${isAnswerChecked ? 'pointer-events-none' : ''}`}>
                 <input type="radio" name="quiz-option" checked={isSelected} onChange={() => onOptionSelect(index)} disabled={isAnswerChecked} className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500" />
                 <span className={`flex-1 ${isSelected ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>{option}</span>
                 {isSelected && isAnswerChecked && (isAnswerCorrect ? <CheckCircle2 className="text-green-500" size={20} /> : <X className="text-red-500" size={20} />)}

@@ -27,7 +27,7 @@ export function Breadcrumbs({
   return <nav className={`flex items-center gap-2 text-sm ${className}`} style={{
     whiteSpace: 'nowrap'
   }} aria-label="Breadcrumb" data-id={dataId}>
-      {items.map((item, index) => <Fragment key={index}>
+      {items.map((item, index) => <Fragment key={item.label}>
           {index > 0 && <ChevronRight className={`w-3 h-3 ${defaultIconColor}`} />}
           {item.current ? <span className={`${defaultCurrentColor} font-medium flex items-center`}>
               {index === 0 && <Home className={`w-4 h-4 ${defaultIconColor} mr-1`} />}

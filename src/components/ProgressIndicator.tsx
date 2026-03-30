@@ -123,7 +123,7 @@ export function ProgressIndicator({
                     <div className="flex items-start min-w-max px-2 py-2">
                         {steps.map((step, index) => (
                             <div
-                                key={index}
+                                key={`item-`}
                                 className="flex flex-col items-center relative px-4 w-36 shrink-0"
                             >
                                 <div

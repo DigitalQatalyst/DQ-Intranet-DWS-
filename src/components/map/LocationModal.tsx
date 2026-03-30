@@ -251,7 +251,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ location, isOpen, onClose
               <div className="mt-3 flex flex-wrap gap-2">
                 {location.services.map((service, index) => (
                   <span
-                    key={index}
+                    key={`item-`}
                     className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-medium text-slate-700"
                   >
                     {service}

@@ -242,7 +242,7 @@ export function ServiceRequestDetails({
                                 const status = getStepStatus(index);
                                 return (
                                     <div
-                                        key={index}
+                                        key={`item-`}
                                         className="flex flex-col items-center relative"
                                         style={{
                                             width: index === 1 ? '34%' : '33%',
@@ -398,7 +398,7 @@ export function ServiceRequestDetails({
                                     </h3>
                                     <div className="space-y-4">
                                         {generateTimeline().map((event, index) => (
-                                            <div key={index} className="relative pl-6 pb-4">
+                                            <div key={`item-`} className="relative pl-6 pb-4">
                                                 {/* Timeline dot and line */}
                                                 <div
                                                     className={`absolute left-0 top-0 w-4 h-4 rounded-full ${event.type === 'approved' ? 'bg-green-100' : event.type === 'rejected' ? 'bg-red-100' : 'bg-blue-100'} flex items-center justify-center`}

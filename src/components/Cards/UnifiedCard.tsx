@@ -151,7 +151,7 @@ export const UnifiedCard: React.FC<UnifiedCardProps> = ({
     const maxTags = variant.maxTags || 2;
     const displayTags = content.tags.slice(0, maxTags);
     return <div className="flex flex-wrap gap-1">
-        {displayTags.map((tag, index) => <span key={index} className={`inline-flex items-center ${designTokens.spacing.pill.padding} rounded-full text-xs font-medium truncate ${tagVariants[tag.variant || 'primary']}`}>
+        {displayTags.map((tag, index) => <span key={`${tag.text}-${index}`} className={`inline-flex items-center ${designTokens.spacing.pill.padding} rounded-full text-xs font-medium truncate ${tagVariants[tag.variant || 'primary']}`}>
             {tag.text}
           </span>)}
       </div>;

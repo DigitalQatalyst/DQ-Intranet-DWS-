@@ -169,7 +169,7 @@ const EnterpriseStages: React.FC = () => {
               />
               {stages.map((_, index) => (
                 <div
-                  key={index}
+                  key={`item-`}
                   className={`absolute top-0 h-6 w-6 -translate-y-1/2 transform rounded-full transition-all duration-500 ${
                     index <= activeIndex ? "bg-dq-coral border-2 border-white" : "bg-gray-300"
                   }`}
@@ -244,7 +244,7 @@ const EnterpriseStages: React.FC = () => {
           <div className="flex space-x-1">
             {stages.map((_, index) => (
               <button
-                key={index}
+                key={`item-`}
                 className={`h-1 rounded-full transition-all duration-300 ${
                   index === activeIndex ? "w-10 bg-dq-coral" : "w-6 bg-gray-300"
                 }`}

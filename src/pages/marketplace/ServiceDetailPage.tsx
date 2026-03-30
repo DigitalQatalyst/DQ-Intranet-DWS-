@@ -8,20 +8,20 @@ import { supabaseClient } from '../../lib/supabaseClient'
 import { GUIDE_CONTENT, GuideContent } from '../../constants/guideContent'
 
 interface ServiceDetail {
-  id: string
-  title: string
-  description: string
-  category: string
-  service_type: string
-  delivery_mode: string
-  provider: string
-  location?: string
-  response_time?: string
-  highlights?: string[]
-  request_process?: any
-  faqs?: any[]
-  contact_info?: any
-  sla_details?: any
+  readonly id: string
+  readonly title: string
+  readonly description: string
+  readonly category: string
+  readonly service_type: string
+  readonly delivery_mode: string
+  readonly provider: string
+  readonly location?: string
+  readonly response_time?: string
+  readonly highlights?: string[]
+  readonly request_process?: any
+  readonly faqs?: any[]
+  readonly contact_info?: any
+  readonly sla_details?: any
 }
 
 // GHC service IDs that should use GUIDE_CONTENT instead of Supabase data

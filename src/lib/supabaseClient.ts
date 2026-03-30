@@ -35,7 +35,7 @@ if (!url || !anon) {
   throw new Error('Supabase env vars not set. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
 }
 
-if (typeof window !== 'undefined') {
+if (globalThis.window !== undefined) {
   try {
     const host = new URL(url).host
     const payload = decodeJwtPayload(anon)
@@ -60,7 +60,7 @@ export const supabaseClient = createClient<Database>(url as string, anon as stri
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-    redirectTo: redirectUrl || (typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : undefined),
+    redirectTo: redirectUrl || (globalThis.window !== undefined ? window.location.origin + '/auth/callback' : undefined),
     detectSessionInUrl: true,
   },
   global: {
@@ -81,12 +81,12 @@ export const supabaseClient = createClient<Database>(url as string, anon as stri
 });
 
 // Debug: Verify client is initialized
-if (typeof window !== 'undefined') {
+if (globalThis.window !== undefined) {
   console.log('✅ supabaseClient initialized:', !!supabaseClient);
 }
 
 // Export site URL for use in auth flows
-export const supabaseSiteUrl = siteUrl || (typeof window !== 'undefined' ? window.location.origin : '');
+export const supabaseSiteUrl = siteUrl || (globalThis.window !== undefined ? window.location.origin : '');
 
 // Backwards compatibility: also export as 'supabase'
 export const supabase = supabaseClient

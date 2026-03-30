@@ -531,7 +531,7 @@ export const VideoTestimonialCarousel = () => {
       <div className="flex justify-center mt-4 gap-2">
         {testimonials.map((_, index) => (
           <button
-            key={index}
+            key={`item-`}
             className={`w-2 h-2 rounded-full transition-all ${
               activeIndex === index ? "bg-dq-coral w-6" : "bg-gray-300"
             }`}
@@ -854,7 +854,7 @@ const ProofAndTrust: React.FC = () => {
             {impactStats.map((stat, index) => {
               return (
                 <div
-                  key={index}
+                  key={`item-`}
                   className="rounded-2xl bg-[#F6F7F9] p-6 md:p-8 text-center shadow-sm hover:shadow-md transition-all duration-300 min-h-[220px] h-full flex flex-col items-center"
                 >
                   <div className="flex justify-center mb-4">

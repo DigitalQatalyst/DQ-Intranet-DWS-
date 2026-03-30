@@ -280,7 +280,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   Key Highlights
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {course.learningOutcomes.slice(0, 4).map((outcome, index) => <div key={index} className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-100 h-full">
+                  {course.learningOutcomes.slice(0, 4).map((outcome, index) => <div key={`item-`} className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-100 h-full">
                       <CheckCircleIcon size={20} className="text-dqYellow mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{outcome}</span>
                     </div>)}
@@ -317,7 +317,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   What You'll Learn
                 </h2>
                 <div className="grid gap-4">
-                  {course.learningOutcomes.map((outcome, index) => <div key={index} className="flex items-start bg-white p-5 rounded-lg shadow-sm">
+                  {course.learningOutcomes.map((outcome, index) => <div key={`item-`} className="flex items-start bg-white p-5 rounded-lg shadow-sm">
                       <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center mr-4 flex-shrink-0 mt-0.5">
                         <span className="text-sm font-bold">{index + 1}</span>
                       </div>

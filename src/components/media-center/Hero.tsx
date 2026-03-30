@@ -56,7 +56,7 @@ const Hero: React.FC<HeroProps> = ({ title, description, badge, metadata, classN
             <div className="flex flex-wrap gap-3">
               {metadata.map((item, index) => (
                 <div 
-                  key={index}
+                  key={`meta-${item.label}`}
                   className="inline-flex items-center px-3 py-1.5 rounded-lg bg-black/5 border border-white/10"
                 >
                   <span className="text-xs font-medium text-white/70">{item.label}:</span>

@@ -119,7 +119,7 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
           </div>}
         {/* Tags */}
         <div className="flex flex-wrap gap-1 mt-auto">
-          {item.tags.slice(0, 3).map((tag, index) => <TagChip key={index} text={tag} variant={index === 0 ? 'primary' : 'secondary'} size="sm" />)}
+          {item.tags.slice(0, 3).map((tag, index) => <TagChip key={`${tag}-${index}`} text={tag} variant={index === 0 ? 'primary' : 'secondary'} size="sm" />)}
         </div>
       </div>
       <CardFooter primaryCTA={{

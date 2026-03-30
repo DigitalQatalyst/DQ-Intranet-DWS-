@@ -189,7 +189,7 @@ export const Discover_InsightsSection: React.FC<Discover_InsightsSectionProps> =
                               {payload[0].payload.name}
                             </div>
                             {payload.map((entry: any, index: number) => (
-                              <div key={index} className="flex items-center gap-2 text-xs">
+                              <div key={`item-`} className="flex items-center gap-2 text-xs">
                                 <div 
                                   className="w-2 h-2 rounded-full" 
                                   style={{ backgroundColor: entry.color }}
@@ -226,7 +226,7 @@ export const Discover_InsightsSection: React.FC<Discover_InsightsSectionProps> =
                         return (
                           <div className="flex items-center justify-center gap-6 mt-4">
                             {items.map((entry: any, index: number) => (
-                              <div key={index} className="flex items-center gap-2">
+                              <div key={`item-`} className="flex items-center gap-2">
                                 <div
                                   className="w-2 h-2 rounded-full"
                                   style={{ backgroundColor: entry.color }}

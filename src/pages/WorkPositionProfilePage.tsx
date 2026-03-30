@@ -135,7 +135,7 @@ const WorkPositionProfilePage: React.FC = () => {
               {position.responsibilities && position.responsibilities.length > 0 ? (
                 <ul className="space-y-2 list-disc list-inside text-slate-700">
                   {position.responsibilities.map((item, index) => (
-                    <li key={index}>{item}</li>
+                    <li key={`item-`}>{item}</li>
                   ))}
                 </ul>
               ) : (

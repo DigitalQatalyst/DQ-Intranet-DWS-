@@ -86,7 +86,7 @@ export const MarketplaceCard: React.FC<MarketplaceCardProps> = ({
         {/* Tags and Actions in same row - fixed position */}
         <div className="flex justify-between items-center mt-auto">
           <div className="flex flex-wrap gap-1 max-w-[70%]">
-            {displayTags.map((tag, index) => <span key={index} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate ${index === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+            {displayTags.map((tag, index) => <span key={tag} className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium truncate ${index === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
                 {tag}
               </span>)}
           </div>

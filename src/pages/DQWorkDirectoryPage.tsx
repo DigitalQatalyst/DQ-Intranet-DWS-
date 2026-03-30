@@ -757,7 +757,7 @@ export function DQWorkDirectoryPage() {
         {responsibilitiesDisplay && responsibilitiesDisplay.length > 0 ? (
           <ul className="mb-4 space-y-2 flex-1">
             {responsibilitiesDisplay.map((item, index) => (
-              <li key={index} className="flex items-start gap-2 text-sm text-slate-700">
+              <li key={`item-`} className="flex items-start gap-2 text-sm text-slate-700">
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></span>
                 <span className="line-clamp-2">{item}</span>
               </li>

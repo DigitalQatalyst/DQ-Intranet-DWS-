@@ -1069,7 +1069,7 @@ This structured approach ensures each publication is deliberate, traceable, and 
                       </h2>
                       <div className="prose prose-gray max-w-none">
                         {section.content.split('\n\n').map((paragraph, index) => (
-                          <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+                          <p key={`item-`} className="mb-4 text-gray-700 leading-relaxed">
                             {paragraph}
                           </p>
                         ))}
