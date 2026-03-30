@@ -40,7 +40,7 @@ export async function loadEpisodeDurations(episodes: NewsItem[]): Promise<Map<st
   const loadPromises = episodes.map((episode) => {
     if (!episode.audioUrl) return Promise.resolve();
     return new Promise<void>((resolve) => {
-      const audio = new Audio(episode.audioUrl);
+      const audio = new Audio(encodeURI(episode.audioUrl!));
       audio.addEventListener('loadedmetadata', () => {
         if (audio.duration && isFinite(audio.duration) && !isNaN(audio.duration)) {
           durations.set(episode.id, audio.duration);
@@ -121,7 +121,8 @@ export function isTrustedAudioUrl(audioUrl: string): boolean {
       '/public/Podcasts/',
       '/02. Series 02 - The Execution Mindset/',
     ];
-    return allowedPrefixes.some((prefix) => parsed.pathname.startsWith(prefix));
+    // parsed.pathname is URL-encoded, so encode the prefixes before comparing
+    return allowedPrefixes.some((prefix) => parsed.pathname.startsWith(encodeURI(prefix)));
   } catch {
     return false;
   }

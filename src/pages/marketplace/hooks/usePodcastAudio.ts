@@ -43,7 +43,8 @@ export function usePodcastAudio({
 
     try {
       setCurrentTime(0); setDuration(0); setAudioError(null);
-      audio.src = episode.audioUrl;
+      // Encode the URL so spaces and special chars in filenames are handled correctly
+      audio.src = encodeURI(episode.audioUrl);
       audio.playbackRate = playbackSpeed;
       audio.load();
       setCurrentlyPlaying(episode.id);
