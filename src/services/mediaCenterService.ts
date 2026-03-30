@@ -378,7 +378,6 @@ Key Points:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Execution_Beats_Intelligence__Why_Action_Wins.m4a',
     content: `# Why Execution Beats Intelligence: The Real Driver of Growth in DQ
 
 Promoting execution over intelligence, stressing why getting things done is more powerful than just knowing the best approach.`
@@ -403,7 +402,6 @@ Promoting execution over intelligence, stressing why getting things done is more
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Why We Misdiagnose Problems — And How to Stop It.m4a',
     content: `# Why We Misdiagnose Problems — And How to Stop It
 
 Help us recognise when we're reacting to symptoms instead of diagnosing the real issue.`
@@ -428,7 +426,6 @@ Help us recognise when we're reacting to symptoms instead of diagnosing the real
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Turning_Every_Conversation _Into _Action.m4a',
     content: `# Turning Every Conversation Into Action
 
 Why conversations feel satisfying even when nothing moves.`
@@ -453,7 +450,6 @@ Why conversations feel satisfying even when nothing moves.`
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Stop_Happy_Talk_and_Start_Executing.m4a',
     content: `# Happy Talkers: Why Talking Feels Productive but Isn't
 
 Identifying and examining "happy talk," which feels energizing but is low consequence.`
@@ -478,7 +474,6 @@ Identifying and examining "happy talk," which feels energizing but is low conseq
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Agile_is_Task_Movement_Not_Ceremony.m4a',
     content: `# Agile the DQ Way: Why Tasks Are the Core of Our Work System
 
 Establishing tasks as the fundamental "heartbeat" and smallest unit of value.`
@@ -915,7 +910,6 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Why_Smart_Teams_Fail_To_Finish.m4a',
   },
   {
     id: 'execution-styles-why-teams-work-differently',
@@ -937,7 +931,6 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Stop_Judging_Intent_Coordinate_Work_Styles.m4a',
   },
   {
     id: 'leaders-as-multipliers-accelerate-execution',
@@ -959,7 +952,6 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Execution_Beats_Intelligence__Why_Action_Wins (1).m4a',
   },
   {
     id: 'energy-management-for-high-action-days',
@@ -981,7 +973,6 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/Stop_Clock_Watching_Start_Managing_Energy.m4a',
   },
   {
     id: 'execution-metrics-that-drive-movement',
@@ -1003,7 +994,6 @@ Key Highlights:
     focusArea: 'Culture & People',
     format: 'Podcast',
     source: 'DigitalQatalyst',
-    audioUrl: '/Podcasts/The_Four_Metrics_That_Drive_Execution_Speed.m4a',
   },
   {
     id: 'ownership-mindset-single-driver',

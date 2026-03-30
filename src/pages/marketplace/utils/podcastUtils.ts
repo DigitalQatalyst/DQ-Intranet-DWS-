@@ -16,6 +16,7 @@ export const ACTION_SOLVER_EPISODE_ORDER: string[] = [
 ];
 
 export function filterSeriesEpisodes(allNews: NewsItem[], isExecutionMindsetSeries: boolean): NewsItem[] {
+  const SUPABASE_STORAGE_BASE = 'https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/';
   const allPodcastEpisodes = allNews.filter(
     (item) => item.format === 'Podcast' || item.tags?.some((tag) => tag.toLowerCase().includes('podcast'))
   );
@@ -27,20 +28,25 @@ export function filterSeriesEpisodes(allNews: NewsItem[], isExecutionMindsetSeri
         item.tags?.some((tag) => tag.toLowerCase().includes('series-2'))
       );
     }
-    // Action-Solver: exclude Execution Mindset episodes
+    // Action-Solver: Supabase storage URLs or local /Podcasts/ paths, excluding Series 02
     return (
-      !item.audioUrl.includes('/02. Series 02 - The Execution Mindset/') &&
-      !item.tags?.some((tag) => tag.toLowerCase().includes('series-2'))
+      item.audioUrl.startsWith(SUPABASE_STORAGE_BASE) ||
+      (item.audioUrl.startsWith('/Podcasts/') &&
+        !item.audioUrl.includes('/02. Series 02 - The Execution Mindset/') &&
+        !item.tags?.some((tag) => tag.toLowerCase().includes('series-2')))
     );
   });
 }
 
 export async function loadEpisodeDurations(episodes: NewsItem[]): Promise<Map<string, number>> {
   const durations = new Map<string, number>();
+  const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
   const loadPromises = episodes.map((episode) => {
     if (!episode.audioUrl) return Promise.resolve();
     return new Promise<void>((resolve) => {
-      const audio = new Audio(encodeURI(episode.audioUrl!));
+      const isAbsolute = episode.audioUrl!.startsWith('http');
+      const src = isAbsolute ? episode.audioUrl! : encodeURI(base + episode.audioUrl!);
+      const audio = new Audio(src);
       audio.addEventListener('loadedmetadata', () => {
         if (audio.duration && isFinite(audio.duration) && !isNaN(audio.duration)) {
           durations.set(episode.id, audio.duration);
@@ -113,16 +119,23 @@ export function sortEpisodes(episodes: NewsItem[], sortBy: 'latest' | 'most-list
 }
 
 export function isTrustedAudioUrl(audioUrl: string): boolean {
+  // Allow Supabase Storage public URLs
+  if (audioUrl.startsWith('https://jmhtrffmxjxhoxpesubv.supabase.co/storage/v1/object/public/podcasts/')) {
+    return true;
+  }
   try {
-    const parsed = new URL(audioUrl, window.location.origin);
+    const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+    const parsed = new URL(encodeURI(base + audioUrl), window.location.origin);
     if (parsed.origin !== window.location.origin) return false;
     const allowedPrefixes = [
       '/Podcasts/',
       '/public/Podcasts/',
       '/02. Series 02 - The Execution Mindset/',
     ];
-    // parsed.pathname is URL-encoded, so encode the prefixes before comparing
-    return allowedPrefixes.some((prefix) => parsed.pathname.startsWith(encodeURI(prefix)));
+    return allowedPrefixes.some((prefix) =>
+      parsed.pathname.startsWith(encodeURI(base + prefix)) ||
+      parsed.pathname.startsWith(encodeURI(prefix))
+    );
   } catch {
     return false;
   }

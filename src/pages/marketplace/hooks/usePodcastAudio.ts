@@ -43,8 +43,11 @@ export function usePodcastAudio({
 
     try {
       setCurrentTime(0); setDuration(0); setAudioError(null);
-      // Encode the URL so spaces and special chars in filenames are handled correctly
-      audio.src = encodeURI(episode.audioUrl);
+      // Supabase Storage URLs are absolute — use as-is
+      // Local paths need BASE_URL prefix + encoding for spaces
+      const isAbsolute = episode.audioUrl.startsWith('http');
+      const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+      audio.src = isAbsolute ? episode.audioUrl : encodeURI(base + episode.audioUrl);
       audio.playbackRate = playbackSpeed;
       audio.load();
       setCurrentlyPlaying(episode.id);
@@ -99,7 +102,6 @@ export function usePodcastAudio({
     const handleAudioError = () => {
       const audio = audioRef.current;
       const errorCode = audio?.error?.code;
-      // MEDIA_ERR_SRC_NOT_SUPPORTED (4) or MEDIA_ERR_NETWORK (2) — file not found or unreachable
       const msg = errorCode === 2
         ? 'Network error while loading audio. Please check your connection.'
         : 'This episode audio is not available yet.';
