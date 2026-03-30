@@ -21,8 +21,17 @@ export function filterSeriesEpisodes(allNews: NewsItem[], isExecutionMindsetSeri
   );
   return allPodcastEpisodes.filter((item) => {
     if (!item.audioUrl) return false;
-    if (isExecutionMindsetSeries) return item.audioUrl.includes('/02. Series 02 - The Execution Mindset/');
-    return item.audioUrl.startsWith('/Podcasts/');
+    if (isExecutionMindsetSeries) {
+      return (
+        item.audioUrl.includes('/02. Series 02 - The Execution Mindset/') ||
+        item.tags?.some((tag) => tag.toLowerCase().includes('series-2'))
+      );
+    }
+    // Action-Solver: exclude Execution Mindset episodes
+    return (
+      !item.audioUrl.includes('/02. Series 02 - The Execution Mindset/') &&
+      !item.tags?.some((tag) => tag.toLowerCase().includes('series-2'))
+    );
   });
 }
 
@@ -107,7 +116,11 @@ export function isTrustedAudioUrl(audioUrl: string): boolean {
   try {
     const parsed = new URL(audioUrl, window.location.origin);
     if (parsed.origin !== window.location.origin) return false;
-    const allowedPrefixes = ['/Podcasts/', '/public/Podcasts/'];
+    const allowedPrefixes = [
+      '/Podcasts/',
+      '/public/Podcasts/',
+      '/02. Series 02 - The Execution Mindset/',
+    ];
     return allowedPrefixes.some((prefix) => parsed.pathname.startsWith(prefix));
   } catch {
     return false;

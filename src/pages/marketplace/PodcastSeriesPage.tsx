@@ -264,8 +264,15 @@ export default function PodcastSeriesPage() {
       </section>
 
       {audio.audioError && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-red-50 border-t border-red-200 px-6 py-3 text-sm text-red-700 text-center">
-          {audio.audioError} Please ensure the audio file has been uploaded to the server.
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-red-50 border-t border-red-200 px-6 py-3 text-sm text-red-700 text-center flex items-center justify-center gap-3">
+          <span>{audio.audioError}</span>
+          <button
+            type="button"
+            className="ml-4 text-red-500 hover:text-red-700 font-medium underline"
+            onClick={() => audio.handleClosePlayer()}
+          >
+            Dismiss
+          </button>
         </div>
       )}
 

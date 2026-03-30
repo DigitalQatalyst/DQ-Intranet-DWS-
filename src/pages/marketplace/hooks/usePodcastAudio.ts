@@ -95,7 +95,17 @@ export function usePodcastAudio({
     audio.addEventListener('canplay', updateDuration);
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('ended', handleEnded);
-    const handleAudioError = () => { setAudioError('Audio file could not be loaded.'); setIsPlaying(false); setCurrentlyPlaying(null); };
+    const handleAudioError = () => {
+      const audio = audioRef.current;
+      const errorCode = audio?.error?.code;
+      // MEDIA_ERR_SRC_NOT_SUPPORTED (4) or MEDIA_ERR_NETWORK (2) — file not found or unreachable
+      const msg = errorCode === 2
+        ? 'Network error while loading audio. Please check your connection.'
+        : 'This episode audio is not available yet.';
+      setAudioError(msg);
+      setIsPlaying(false);
+      setCurrentlyPlaying(null);
+    };
     audio.addEventListener('play', () => setIsPlaying(true));
     audio.addEventListener('pause', () => setIsPlaying(false));
     audio.addEventListener('error', handleAudioError);
@@ -158,7 +168,7 @@ export function usePodcastAudio({
 
   const handleClosePlayer = () => {
     const audio = audioRef.current; if (audio) audio.pause();
-    setCurrentlyPlaying(null); setIsPlaying(false); setCurrentTime(0);
+    setCurrentlyPlaying(null); setIsPlaying(false); setCurrentTime(0); setAudioError(null);
   };
 
   return {
