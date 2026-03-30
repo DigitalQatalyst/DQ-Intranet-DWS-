@@ -135,14 +135,10 @@ export const MediaCard: React.FC<MediaCardProps> = ({
   const detailsHref = getDetailsHref({
     cta,
   });
-  // Video/Podcast specific handlers
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    // Handle video autoplay
+  const startMediaPlayback = () => {
     if (videoRef.current && videoUrl && type === "video") {
       videoRef.current.play();
       setIsPlaying(true);
-      // Auto-pause after 10 seconds
       hoverTimeoutRef.current = setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.pause();
@@ -150,11 +146,9 @@ export const MediaCard: React.FC<MediaCardProps> = ({
         }
       }, 10000);
     }
-    // Handle podcast audio autoplay
     if (audioRef.current && audioUrl && type === "podcast") {
       audioRef.current.play();
       setIsPlaying(true);
-      // Auto-pause after 10 seconds
       hoverTimeoutRef.current = setTimeout(() => {
         if (audioRef.current) {
           audioRef.current.pause();
@@ -163,55 +157,59 @@ export const MediaCard: React.FC<MediaCardProps> = ({
       }, 10000);
     }
   };
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    // Handle video cleanup
+
+  const stopMediaPlayback = () => {
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
       setIsPlaying(false);
     }
-    // Handle audio cleanup
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
     }
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
   };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    startMediaPlayback();
+  };
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    stopMediaPlayback();
+  };
+
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (type === "video" && videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        videoRef.current.play();
-        setIsPlaying(true);
-      }
-    }
-    if (type === "podcast" && audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        audioRef.current.play();
-        setIsPlaying(true);
-      }
+    const ref =
+      type === "video"
+        ? videoRef.current
+        : type === "podcast"
+          ? audioRef.current
+          : null;
+    if (!ref) return;
+    if (isPlaying) {
+      ref.pause();
+      setIsPlaying(false);
+    } else {
+      ref.play();
+      setIsPlaying(true);
     }
   };
+
   const handleMuteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (type === "video" && videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-    if (type === "podcast" && audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
+    const ref =
+      type === "video"
+        ? videoRef.current
+        : type === "podcast"
+          ? audioRef.current
+          : null;
+    if (!ref) return;
+    ref.muted = !isMuted;
+    setIsMuted(!isMuted);
   };
   // Updated navigation handler - used for both card and CTA clicks
   const handleNavigation = (e?: React.MouseEvent) => {
@@ -252,6 +250,112 @@ export const MediaCard: React.FC<MediaCardProps> = ({
   }));
   const ctaColorClass = "bg-[#030F35] hover:bg-[#021028]";
   const isCtaDisabled = !detailsHref;
+
+  const renderMetadata = () => {
+    if (Object.keys(metadata).length === 0) return null;
+    if (type === "event")
+      return (
+        <div className="mb-4 flex-shrink-0 space-y-2">
+          {metadata.location && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <MapPin size={14} />
+              <span>{metadata.location}</span>
+            </div>
+          )}
+          {metadata.time && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Clock size={14} />
+              <span>{metadata.time}</span>
+            </div>
+          )}
+          {metadata.attendees && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Users size={14} />
+              <span>{metadata.attendees} attendees</span>
+            </div>
+          )}
+        </div>
+      );
+    if (type === "report" || type === "toolkit")
+      return (
+        <div className="mb-4 flex-shrink-0 flex justify-between items-center text-xs text-gray-500 p-2 bg-gray-50 rounded">
+          <div className="flex items-center gap-2">
+            {metadata.fileSize && <span>{metadata.fileSize}</span>}
+            {metadata.fileSize && metadata.updated && <span>•</span>}
+            {metadata.updated && <span>Updated {metadata.updated}</span>}
+          </div>
+          <div className="flex items-center gap-1">
+            <Download size={12} />
+            {metadata.downloadCount || "0"}
+          </div>
+        </div>
+      );
+    return (
+      <div
+        className={`mb-4 flex-shrink-0 ${designTokens.typography.metadata.size} ${designTokens.typography.metadata.color} flex items-center gap-2`}
+      >
+        {metadata.date && <span>{metadata.date}</span>}
+        {metadata.date && (metadata.author || metadata.speaker) && (
+          <span>•</span>
+        )}
+        {(metadata.author || metadata.speaker) && (
+          <span>{metadata.author || metadata.speaker}</span>
+        )}
+        {metadata.industry && <span>{metadata.industry}</span>}
+        {metadata.updated && <span>Updated {metadata.updated}</span>}
+      </div>
+    );
+  };
+
+  const renderCTAIcon = () => {
+    if (type === "video") return <Play size={16} />;
+    if (type === "podcast") return <Mic size={16} />;
+    if (type === "event") return <Calendar size={16} />;
+    if (type === "report" || type === "toolkit") return <Download size={16} />;
+    if (type === "news" || type === "blog" || type === "case-study")
+      return <FileText size={16} />;
+    if (type === "infographic") return <ZoomIn size={16} />;
+    if (type === "tool" || type === "announcement")
+      return <ExternalLink size={16} />;
+    return null;
+  };
+
+  const renderCTA = () => {
+    if (type === "event" && secondaryCta)
+      return (
+        <div className="flex gap-2">
+          <button
+            onClick={handleCTA}
+            disabled={isCtaDisabled}
+            aria-disabled={isCtaDisabled}
+            className={`flex-1 px-4 py-3 text-sm font-bold text-white rounded-md transition-colors flex items-center justify-center gap-2 ${isCtaDisabled ? "bg-gray-400 cursor-not-allowed" : ctaColorClass}`}
+            aria-label={`Register for event: ${title}`}
+          >
+            <Calendar size={16} />
+            Register Now
+          </button>
+          <button
+            onClick={handleSecondaryCTA}
+            className="px-3 py-3 text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors flex items-center justify-center"
+            aria-label="Add to calendar"
+          >
+            {secondaryCta.icon || <Calendar size={16} />}
+          </button>
+        </div>
+      );
+    return (
+      <button
+        onClick={handleCTA}
+        disabled={isCtaDisabled}
+        aria-disabled={isCtaDisabled}
+        className={`w-full px-4 py-3 text-sm font-bold text-white rounded-md transition-colors flex items-center justify-center gap-2 ${isCtaDisabled ? "bg-gray-400 cursor-not-allowed" : ctaColorClass} focus:outline-none focus:ring-2 focus:ring-[#030F35]/30`}
+        aria-label={`${getCTAText(type)}: ${title}`}
+      >
+        {renderCTAIcon()}
+        {getCTAText(type)}
+      </button>
+    );
+  };
   const renderPlaybackOverlay = () => {
     if (type === "video") {
       return (
@@ -472,109 +576,9 @@ export const MediaCard: React.FC<MediaCardProps> = ({
           )}
         </div>
         {/* Metadata Section */}
-        {Object.keys(metadata).length > 0 && (
-          <div className="mb-4 flex-shrink-0">
-            {/* Event-specific metadata */}
-            {type === "event" && (
-              <div className="space-y-2">
-                {metadata.location && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <MapPin size={14} />
-                    <span>{metadata.location}</span>
-                  </div>
-                )}
-                {metadata.time && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Clock size={14} />
-                    <span>{metadata.time}</span>
-                  </div>
-                )}
-                {metadata.attendees && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Users size={14} />
-                    <span>{metadata.attendees} attendees</span>
-                  </div>
-                )}
-              </div>
-            )}
-            {/* Report/Toolkit metadata */}
-            {(type === "report" || type === "toolkit") && (
-              <div className="flex justify-between items-center text-xs text-gray-500 p-2 bg-gray-50 rounded">
-                <div className="flex items-center gap-2">
-                  {metadata.fileSize && <span>{metadata.fileSize}</span>}
-                  {metadata.fileSize && metadata.updated && <span>•</span>}
-                  {metadata.updated && <span>Updated {metadata.updated}</span>}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Download size={12} />
-                  {metadata.downloadCount || "0"}
-                </div>
-              </div>
-            )}
-            {/* General metadata for other types */}
-            {!["event", "report", "toolkit"].includes(type) && (
-              <div
-                className={`${designTokens.typography.metadata.size} ${designTokens.typography.metadata.color} flex items-center gap-2`}
-              >
-                {metadata.date && <span>{metadata.date}</span>}
-                {metadata.date && (metadata.author || metadata.speaker) && (
-                  <span>•</span>
-                )}
-                {(metadata.author || metadata.speaker) && (
-                  <span>{metadata.author || metadata.speaker}</span>
-                )}
-                {metadata.industry && <span>{metadata.industry}</span>}
-                {metadata.updated && <span>Updated {metadata.updated}</span>}
-              </div>
-            )}
-          </div>
-        )}
+        {renderMetadata()}
         {/* CTA Buttons - Pinned to bottom */}
-        <div className="mt-auto flex-shrink-0">
-          {type === "event" && secondaryCta ? (
-            <div className="flex gap-2">
-              <button
-                onClick={handleCTA}
-                disabled={isCtaDisabled}
-                aria-disabled={isCtaDisabled}
-                className={`flex-1 px-4 py-3 text-sm font-bold text-white rounded-md transition-colors flex items-center justify-center gap-2 ${isCtaDisabled ? "bg-gray-400 cursor-not-allowed" : ctaColorClass}`}
-                aria-label={`Register for event: ${title}`}
-              >
-                <Calendar size={16} />
-                Register Now
-              </button>
-              <button
-                onClick={handleSecondaryCTA}
-                className="px-3 py-3 text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors flex items-center justify-center"
-                aria-label="Add to calendar"
-              >
-                {secondaryCta.icon || <Calendar size={16} />}
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={handleCTA}
-              disabled={isCtaDisabled}
-              aria-disabled={isCtaDisabled}
-              className={`w-full px-4 py-3 text-sm font-bold text-white rounded-md transition-colors flex items-center justify-center gap-2 ${isCtaDisabled ? "bg-gray-400 cursor-not-allowed" : ctaColorClass} focus:outline-none focus:ring-2 focus:ring-[#030F35]/30`}
-              aria-label={`${getCTAText(type)}: ${title}`}
-            >
-              {type === "video" && <Play size={16} />}
-              {type === "podcast" && <Mic size={16} />}
-              {type === "event" && <Calendar size={16} />}
-              {(type === "report" || type === "toolkit") && (
-                <Download size={16} />
-              )}
-              {(type === "news" ||
-                type === "blog" ||
-                type === "case-study") && <FileText size={16} />}
-              {type === "infographic" && <ZoomIn size={16} />}
-              {type === "tool" && <ExternalLink size={16} />}
-              {type === "announcement" && <ExternalLink size={16} />}
-              {getCTAText(type)}
-            </button>
-          )}
-        </div>
+        <div className="mt-auto flex-shrink-0">{renderCTA()}</div>
       </div>
     </div>
   );
