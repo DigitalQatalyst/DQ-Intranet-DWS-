@@ -1,7 +1,7 @@
-import { secureRandom } from '../utils/secureRandom';
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Send, Minimize2, Maximize2, Bot, Loader } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import { secureRandom } from "../utils/secureRandom";
+import React, { useState, useEffect, useRef } from "react";
+import { X, Send, Minimize2, Maximize2, Bot, Loader } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import {
   DWS_KNOWLEDGE,
   DWS_TOPIC_TRIGGERS,
@@ -9,17 +9,18 @@ import {
   DWS_QUICK_FACTS,
   DWS_DEFAULT_REPLY,
   DWS_HELP_REPLY,
-} from '@/data/dwsChatKnowledge';
-import { DWS_GUIDELINES } from '@/data/dwsGuidelines';
-import { sendAiChat, AiChatMessage, checkAiHealth } from '@/utils/aiChatClient';
+} from "@/data/dwsChatKnowledge";
+import { DWS_GUIDELINES } from "@/data/dwsGuidelines";
+import { sendAiChat, AiChatMessage, checkAiHealth } from "@/utils/aiChatClient";
 
 const LIVE_AI_ENABLED =
-  typeof import.meta !== 'undefined' && import.meta.env?.VITE_ENABLE_LIVE_AI !== 'false';
+  typeof import.meta !== "undefined" &&
+  import.meta.env?.VITE_ENABLE_LIVE_AI !== "false";
 
 interface ChatMessage {
   id: string;
   content: string;
-  sender: 'user' | 'assistant';
+  sender: "user" | "assistant";
   timestamp: Date;
 }
 
@@ -30,10 +31,15 @@ interface DWSChatWidgetProps {
 }
 
 /** Build DWS-style reply from a knowledge entry. */
-function formatKnowledgeReply(entry: { summary: string; details: string; related?: string[]; nextStep?: string }): string {
+function formatKnowledgeReply(entry: {
+  summary: string;
+  details: string;
+  related?: string[];
+  nextStep?: string;
+}): string {
   let out = `${entry.summary}\n\n${entry.details}`;
   if (entry.related && entry.related.length > 0) {
-    out += `\n\nRelated: ${entry.related.join(', ')}`;
+    out += `\n\nRelated: ${entry.related.join(", ")}`;
   }
   if (entry.nextStep) {
     out += `\n\n${entry.nextStep}`;
@@ -45,21 +51,21 @@ let lastGreetingResponse: string | null = null;
 
 function pickGreetingResponse(options: string[]): string {
   if (options.length === 1) return options[0];
-  
+
   let choice: string;
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
     const buf = new Uint32Array(1);
     crypto.getRandomValues(buf);
     choice = options[Math.floor((buf[0] / 0xffffffff) * options.length)];
   } else {
     choice = options[Math.floor(secureRandom() * options.length)];
   }
-  
+
   if (lastGreetingResponse && options.length > 1) {
     const maxAttempts = 3;
     let attempts = 0;
     while (choice === lastGreetingResponse && attempts < maxAttempts) {
-      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
         const buf = new Uint32Array(1);
         crypto.getRandomValues(buf);
         choice = options[Math.floor((buf[0] / 0xffffffff) * options.length)];
@@ -78,8 +84,8 @@ function normalizeInput(s: string): string {
   return s
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .replace(/[.!?,;:]+\s*$/, '');
+    .replace(/\s+/g, " ")
+    .replace(/[.!?,;:]+\s*$/, "");
 }
 
 /** Build a compact context block from the local DWS knowledge base to guide the live model. */
@@ -88,47 +94,69 @@ function buildContextFromKnowledge(userMessage: string): string | null {
   const context: string[] = [];
   const seen = new Set<string>();
 
-  for (const { topicId, keywords } of DWS_TOPIC_TRIGGERS) {
-    if (keywords.some((kw) => lower.includes(kw))) {
-      const entry = DWS_KNOWLEDGE[topicId];
-      if (entry) {
-        const text = formatKnowledgeReply(entry);
-        if (!seen.has(text)) {
-          context.push(text);
-          seen.add(text);
-        }
-      }
-    }
-  }
+  collectTopicContext(lower, context, seen);
+  collectQuickFacts(lower, context, seen);
+  collectGuidelinesContext(lower, context, seen);
 
+  if (!context.length) return null;
+  return context.slice(0, 2).join("\n\n---\n\n");
+}
+
+function collectTopicContext(
+  lower: string,
+  context: string[],
+  seen: Set<string>,
+): void {
+  for (const { topicId, keywords } of DWS_TOPIC_TRIGGERS) {
+    if (!keywords.some((kw) => lower.includes(kw))) continue;
+    const entry = DWS_KNOWLEDGE[topicId];
+    if (!entry) continue;
+    const text = formatKnowledgeReply(entry);
+    if (seen.has(text)) continue;
+    context.push(text);
+    seen.add(text);
+  }
+}
+
+function collectQuickFacts(
+  lower: string,
+  context: string[],
+  seen: Set<string>,
+): void {
   for (const [key, text] of Object.entries(DWS_QUICK_FACTS)) {
     if (lower.includes(key) && !seen.has(text)) {
       context.push(text);
       seen.add(text);
     }
   }
+}
 
-  // If user asks about guidelines, include a compact list of guideline highlights
-  if (/\bguideline|policy|dress code|leave|wfh|shifts|ado|devops\b/.test(lower)) {
-    const list = DWS_GUIDELINES.map((g) => `• ${g.title}: ${g.summary}`).join('\n');
-    const guidelinesBlock = `DQ Guidelines (Knowledge Center → Guidelines):\n${list}`;
-    if (!seen.has(guidelinesBlock)) {
-      context.push(guidelinesBlock);
-      seen.add(guidelinesBlock);
-    }
+function collectGuidelinesContext(
+  lower: string,
+  context: string[],
+  seen: Set<string>,
+): void {
+  if (
+    !/\bguideline|policy|dress code|leave|wfh|shifts|ado|devops\b/.test(lower)
+  )
+    return;
+  const list = DWS_GUIDELINES.map((g) => `• ${g.title}: ${g.summary}`).join(
+    "\n",
+  );
+  const guidelinesBlock = `DQ Guidelines (Knowledge Center → Guidelines):\n${list}`;
+  if (!seen.has(guidelinesBlock)) {
+    context.push(guidelinesBlock);
+    seen.add(guidelinesBlock);
   }
-
-  if (!context.length) return null;
-  return context.slice(0, 2).join('\n\n---\n\n');
 }
 
 /** Convert UI messages into OpenAI-style chat messages, trimming history to the most recent turns. */
 function toAiMessages(history: ChatMessage[]): AiChatMessage[] {
   return history
-    .filter((m) => m.sender === 'assistant' || m.sender === 'user')
+    .filter((m) => m.sender === "assistant" || m.sender === "user")
     .slice(-12)
     .map((m) => ({
-      role: m.sender === 'assistant' ? 'assistant' : 'user',
+      role: m.sender === "assistant" ? "assistant" : "user",
       content: m.content,
     }));
 }
@@ -142,9 +170,9 @@ function generateAIResponse(userMessage: string): string {
     const norm = k.toLowerCase();
     return (
       lower === norm ||
-      lower === norm + '!' ||
-      lower === norm + '.' ||
-      lower.startsWith(norm + ' ') ||
+      lower === norm + "!" ||
+      lower === norm + "." ||
+      lower.startsWith(norm + " ") ||
       (norm.length >= 2 && lower.startsWith(norm))
     );
   });
@@ -162,14 +190,19 @@ function generateAIResponse(userMessage: string): string {
     hey: DWS_GREETINGS.hey,
   };
   if (lower.length <= 10) {
-    const key = Object.keys(shortGreetings).find((k) => lower === k || lower === k + '!' || lower === k + '.');
+    const key = Object.keys(shortGreetings).find(
+      (k) => lower === k || lower === k + "!" || lower === k + ".",
+    );
     if (key && shortGreetings[key]?.length) {
       return pickGreetingResponse(shortGreetings[key]);
     }
   }
 
   // 2. Help / what can you do
-  if (/\b(help|what can you do|how can you help)\b/.test(lower) && lower.length < 50) {
+  if (
+    /\b(help|what can you do|how can you help)\b/.test(lower) &&
+    lower.length < 50
+  ) {
     return DWS_HELP_REPLY;
   }
 
@@ -183,14 +216,20 @@ function generateAIResponse(userMessage: string): string {
 
   // 4. Quick facts for very short "what is X" that didn’t match a topic
   for (const [key, text] of Object.entries(DWS_QUICK_FACTS)) {
-    if (lower.includes(key) && (lower.includes('what') || lower.includes('explain') || lower.includes('tell me')) && lower.split(/\s+/).length <= 8) {
+    if (
+      lower.includes(key) &&
+      (lower.includes("what") ||
+        lower.includes("explain") ||
+        lower.includes("tell me")) &&
+      lower.split(/\s+/).length <= 8
+    ) {
       return text;
     }
   }
 
   // 5. Start / begin / get started
   if (/\b(start|begin|get started|first day|new joiner)\b/.test(lower)) {
-    const getStarted = DWS_KNOWLEDGE['get_started'];
+    const getStarted = DWS_KNOWLEDGE["get_started"];
     if (getStarted) return formatKnowledgeReply(getStarted);
   }
 
@@ -198,12 +237,18 @@ function generateAIResponse(userMessage: string): string {
   return DWS_DEFAULT_REPLY;
 }
 
-export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidgetProps) {
+export function DWSChatWidget({
+  isOpen,
+  onToggle,
+  initialMessage,
+}: DWSChatWidgetProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [aiMode, setAiMode] = useState<'live' | 'fallback'>(LIVE_AI_ENABLED ? 'live' : 'fallback');
+  const [aiMode, setAiMode] = useState<"live" | "fallback">(
+    LIVE_AI_ENABLED ? "live" : "fallback",
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -213,14 +258,16 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
   // Initialize with welcome message (DWS-style)
   useEffect(() => {
     if (messages.length === 0) {
-      setMessages([{
-        id: '1',
-        content: LIVE_AI_ENABLED
-          ? "Hi! I'm your DWS AI Assistant, powered by a live GPT-4 class model. I know the DQ Digital Workspace inside out—onboarding, services, learning, execution, collaboration, updates, and people. Ask me anything about DQ or general topics: \"What is DWS?\", \"Where do I request IT?\", \"How do I start onboarding?\", or \"Explain zero trust security.\""
-          : "Hi! I'm your DWS AI Assistant running in free offline mode. I know the DQ Digital Workspace—onboarding, services, learning, execution, collaboration, updates, and people. Ask me anything about DQ, or basic general topics.",
-        sender: 'assistant',
-        timestamp: new Date()
-      }]);
+      setMessages([
+        {
+          id: "1",
+          content: LIVE_AI_ENABLED
+            ? 'Hi! I\'m your DWS AI Assistant, powered by a live GPT-4 class model. I know the DQ Digital Workspace inside out—onboarding, services, learning, execution, collaboration, updates, and people. Ask me anything about DQ or general topics: "What is DWS?", "Where do I request IT?", "How do I start onboarding?", or "Explain zero trust security."'
+            : "Hi! I'm your DWS AI Assistant running in free offline mode. I know the DQ Digital Workspace—onboarding, services, learning, execution, collaboration, updates, and people. Ask me anything about DQ, or basic general topics.",
+          sender: "assistant",
+          timestamp: new Date(),
+        },
+      ]);
     }
   }, []);
 
@@ -232,10 +279,12 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
       const ok = await checkAiHealth();
       if (cancelled) return;
       if (!ok) {
-        setAiMode('fallback');
-        setErrorMessage('Live AI is unavailable. Showing best effort from built-in knowledge.');
+        setAiMode("fallback");
+        setErrorMessage(
+          "Live AI is unavailable. Showing best effort from built-in knowledge.",
+        );
       } else {
-        setAiMode('live');
+        setAiMode("live");
       }
     })();
     return () => {
@@ -250,8 +299,8 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content: text,
-      sender: 'user',
-      timestamp: new Date()
+      sender: "user",
+      timestamp: new Date(),
     };
 
     const historyWithUser = [...messages, userMessage];
@@ -260,23 +309,23 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
     const assistantId = `${Date.now() + 1}`;
     const assistantPlaceholder: ChatMessage = {
       id: assistantId,
-      content: '…',
-      sender: 'assistant',
-      timestamp: new Date()
+      content: "…",
+      sender: "assistant",
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage, assistantPlaceholder]);
-    setInputValue('');
+    setMessages((prev) => [...prev, userMessage, assistantPlaceholder]);
+    setInputValue("");
     setIsTyping(true);
     setErrorMessage(null);
 
-    let reply = '';
+    let reply = "";
 
     if (!LIVE_AI_ENABLED) {
       reply = generateAIResponse(text);
-      setAiMode('fallback');
-      setMessages(prev =>
-        prev.map((m) => (m.id === assistantId ? { ...m, content: reply } : m))
+      setAiMode("fallback");
+      setMessages((prev) =>
+        prev.map((m) => (m.id === assistantId ? { ...m, content: reply } : m)),
       );
       setIsTyping(false);
       return;
@@ -288,26 +337,32 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
         {
           onToken: (token) => {
             reply += token;
-            setMessages(prev =>
-              prev.map((m) => (m.id === assistantId ? { ...m, content: reply } : m))
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId ? { ...m, content: reply } : m,
+              ),
             );
           },
-        }
+        },
       );
       if (!reply && aiResponse.reply) {
         reply = aiResponse.reply;
-        setMessages(prev =>
-          prev.map((m) => (m.id === assistantId ? { ...m, content: reply } : m))
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId ? { ...m, content: reply } : m,
+          ),
         );
       }
-      setAiMode('live');
+      setAiMode("live");
     } catch (err) {
-      console.error('AI chat error', err);
+      console.error("AI chat error", err);
       reply = generateAIResponse(text);
-      setAiMode('fallback');
-      setErrorMessage('Live AI is unavailable. Showing best effort from built-in knowledge.');
-      setMessages(prev =>
-        prev.map((m) => (m.id === assistantId ? { ...m, content: reply } : m))
+      setAiMode("fallback");
+      setErrorMessage(
+        "Live AI is unavailable. Showing best effort from built-in knowledge.",
+      );
+      setMessages((prev) =>
+        prev.map((m) => (m.id === assistantId ? { ...m, content: reply } : m)),
       );
     } finally {
       setIsTyping(false);
@@ -337,16 +392,22 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
       }
     };
 
-    window.addEventListener('dws-chat-send-message', handleExternalMessage as EventListener);
-    
+    window.addEventListener(
+      "dws-chat-send-message",
+      handleExternalMessage as EventListener,
+    );
+
     return () => {
-      window.removeEventListener('dws-chat-send-message', handleExternalMessage as EventListener);
+      window.removeEventListener(
+        "dws-chat-send-message",
+        handleExternalMessage as EventListener,
+      );
     };
   }, [isOpen]);
 
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Focus input when opened
@@ -367,7 +428,7 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
     <div
       id="dws-chat-widget"
       className={`fixed bottom-20 right-4 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-[10000] transition-all duration-300 ${
-        isMinimized ? 'h-14' : 'h-[600px]'
+        isMinimized ? "h-14" : "h-[600px]"
       }`}
       aria-label="DWS AI Assistant Chat"
     >
@@ -380,17 +441,17 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
         <div className="flex items-center gap-2">
           <span
             className={`text-xs px-2 py-1 rounded-full border ${
-              aiMode === 'live'
-                ? 'bg-emerald-500/15 border-emerald-300/40 text-emerald-100'
-                : 'bg-amber-500/15 border-amber-300/40 text-amber-100'
+              aiMode === "live"
+                ? "bg-emerald-500/15 border-emerald-300/40 text-emerald-100"
+                : "bg-amber-500/15 border-amber-300/40 text-amber-100"
             }`}
           >
-            {aiMode === 'live' ? 'Live AI' : 'Offline mode'}
+            {aiMode === "live" ? "Live AI" : "Offline mode"}
           </span>
           <button
             onClick={() => setIsMinimized(!isMinimized)}
             className="p-1 hover:bg-white/10 rounded transition-colors"
-            aria-label={isMinimized ? 'Maximize' : 'Minimize'}
+            aria-label={isMinimized ? "Maximize" : "Minimize"}
           >
             {isMinimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}
           </button>
@@ -411,33 +472,54 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-[80%] rounded-lg px-4 py-3 shadow-sm ${
-                    message.sender === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-800 border border-gray-200'
+                    message.sender === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-gray-800 border border-gray-200"
                   }`}
                 >
-                  {message.sender === 'assistant' ? (
+                  {message.sender === "assistant" ? (
                     <ReactMarkdown
                       className="text-sm leading-relaxed space-y-2"
                       components={{
-                        ul: (props) => <ul className="list-disc pl-5 space-y-1" {...props} />,
-                        ol: (props) => <ol className="list-decimal pl-5 space-y-1" {...props} />,
-                        li: (props) => <li className="marker:text-blue-600" {...props} />,
-                        strong: (props) => <strong className="font-semibold text-gray-900" {...props} />,
-                        p: (props) => <p className="text-sm leading-relaxed" {...props} />,
+                        ul: (props) => (
+                          <ul className="list-disc pl-5 space-y-1" {...props} />
+                        ),
+                        ol: (props) => (
+                          <ol
+                            className="list-decimal pl-5 space-y-1"
+                            {...props}
+                          />
+                        ),
+                        li: (props) => (
+                          <li className="marker:text-blue-600" {...props} />
+                        ),
+                        strong: (props) => (
+                          <strong
+                            className="font-semibold text-gray-900"
+                            {...props}
+                          />
+                        ),
+                        p: (props) => (
+                          <p className="text-sm leading-relaxed" {...props} />
+                        ),
                       }}
                     >
                       {message.content}
                     </ReactMarkdown>
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap">
+                      {message.content}
+                    </p>
                   )}
                   <span className="text-xs opacity-70 mt-1 block">
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </span>
                 </div>
               </div>
@@ -461,12 +543,15 @@ export function DWSChatWidget({ isOpen, onToggle, initialMessage }: DWSChatWidge
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 bg-white">
+          <form
+            onSubmit={handleSubmit}
+            className="p-4 border-t border-gray-200 bg-white"
+          >
             <div className="flex gap-2">
               <input
                 ref={inputRef}
