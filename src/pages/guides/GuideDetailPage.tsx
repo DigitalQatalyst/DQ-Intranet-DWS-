@@ -283,7 +283,7 @@ const ensureBulletedTitleCaseLine = (raw: string): string => {
   const m3 = regex3.exec(line)
   if (m3) return `- **${toTitleCaseLabel(stripLeadingEmoji(m3[1]))}**: ${m3[2]}`
   // Label: text (leading letter, avoid headers/lists)
-  const regex4 = /^[A-Za-z][^:]*:\s*.*$/
+  const regex4 = /^[A-Za-z][^:]*:.*$/
   const m4 = regex4.exec(line)
   if (m4) {
     const idx = line.indexOf(':')
