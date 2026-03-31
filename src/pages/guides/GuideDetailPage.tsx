@@ -193,17 +193,17 @@ const isValidDomainForSections = (domain?: string | null) =>
   ['Guidelines', 'Strategy', 'Testimonials', 'Testimonial', 'Blueprint'].includes(domain || '')
 
 const extractOverview = (body: string): GuideSection | null => {
-  const descRegex = /## Description[ \t]*\n+([\s\S]*?)(?=\n#|$)/
-  const highlightsRegex = /## Key Highlights:?[ \t]*\n+([\s\S]*?)(?=\n#|$)/
+  const descRegex = /## Description[ \t]*\n+([^\n][\s\S]*?)?(?=\n#|$)/
+  const highlightsRegex = /## Key Highlights:?[ \t]*\n+([^\n][\s\S]*?)?(?=\n#|$)/
   const descMatch = descRegex.exec(body)
   const highlightsMatch = highlightsRegex.exec(body)
   if (descMatch || highlightsMatch) {
     let overviewContent = ''
-    if (descMatch) overviewContent += descMatch[1].trim() + '\n\n'
-    if (highlightsMatch) overviewContent += '## Key Highlights\n\n' + highlightsMatch[1].trim()
+    if (descMatch) overviewContent += (descMatch[1] ?? '').trim() + '\n\n'
+    if (highlightsMatch) overviewContent += '## Key Highlights\n\n' + (highlightsMatch[1] ?? '').trim()
     return { id: 'overview', title: 'Overview', content: overviewContent }
   }
-  const firstSectionRegex = /^# [^\n]+\n\n([\s\S]*?)(?=\n##|\n#|$)/
+  const firstSectionRegex = /^# [^\n]+\n\n([^\n][\s\S]*?)?(?=\n#|$)/
   const firstSectionMatch = firstSectionRegex.exec(body)
   if (firstSectionMatch?.[1]?.trim()) {
     const sectionCount = (body.match(/^## /gm) || []).length
