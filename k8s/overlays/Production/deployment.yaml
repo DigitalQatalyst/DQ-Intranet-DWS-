@@ -1,0 +1,43 @@
+# Deployment configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dws-frontend 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets:
+      - name: registrycred  # Make sure the secret is created as mentioned before
+      containers:
+      - name: frontend
+        image: u4c2j2w9.c1.gra9.container-registry.ovh.net/dws/frontend-prod:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+            ephemeral-storage: "1Gi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+            ephemeral-storage: "2Gi"
+        envFrom:
+          - configMapRef:
+              name: dws-config
+          - secretRef:
+              name: dws-secret                                                                     
+
+---
+
+      
+      

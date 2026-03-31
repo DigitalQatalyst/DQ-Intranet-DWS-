@@ -1,27 +1,27 @@
-import React from 'react';
-import { BuildingIcon, PencilIcon, SaveIcon } from 'lucide-react';
-import { profileConfig } from '../utils/profileConfig';
+import { BuildingIcon } from 'lucide-react';
 
 export function WelcomeStep({
     formData,
     errors,
-    isEditingWelcome,
-    editedFields,
-    isRevisit,
     onInputChange,
-    onToggleEdit
 }) {
-    const companyStageInfo = profileConfig.companyStages.find(
-        stage => stage.id === formData.companyStage
-    ) || profileConfig.companyStages[0];
-
-    const welcomeFields = [
-        { id: 'tradeName', label: 'Company Name', fieldName: 'tradeName', required: true, minLength: 2 },
-        { id: 'industry', label: 'Industry', fieldName: 'industry', required: true },
-        { id: 'contactName', label: 'Contact Name', fieldName: 'contactName', required: true, minLength: 3, pattern: '^[a-zA-Z\\s.-]+$' },
-        { id: 'email', label: 'Email', fieldName: 'email', required: true, type: 'email' },
-        { id: 'phone', label: 'Phone', fieldName: 'phone', required: true, type: 'tel' },
+    const departments = [
+        { id: 'solutions', label: 'Solutions', roles: ['Full Stack Developer', 'Feature Developer', 'Product Owner', 'DevOps'] },
+        { id: 'hra', label: 'HRA', roles: ['H2O', 'O2P'] },
+        { id: 'content', label: 'Content', roles: ['Marketing', 'Stories'] },
+        { id: 'deals', label: 'Deals', roles: ['Finance', 'Business Development'] },
+        { id: 'support', label: 'Support', roles: ['Desk24'] },
+        { id: 'coe', label: 'CoE', roles: ['CTO', 'CEO', 'HR'] },
     ];
+
+    const currentDepartment = departments.find(d => d.id === formData.department);
+    const roleOptions = currentDepartment ? currentDepartment.roles : [];
+
+    const handleDepartmentChange = (deptId: string) => {
+        onInputChange('department', deptId);
+        // Reset role when department changes
+        onInputChange('role', '');
+    };
 
     return (
         <div className="space-y-8">
@@ -32,117 +32,124 @@ export function WelcomeStep({
             </div>
 
             <div className="text-center">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-3">
-                    {isRevisit ? 'Review Your Onboarding Information' : 'Welcome to Enterprise Journey'}
+                <h2 className="text-2xl font-semibold text-gray-800 mb-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700">
+                    Welcome to DWS Dashboard
                 </h2>
                 <p className="text-gray-600 max-w-md mx-auto">
-                    {isRevisit
-                        ? 'You can review and update your onboarding information at any time.'
-                        : 'We already have some information from your sign-up. Please review it and complete a few additional details to get started.'}
+                    Please provide your department, role, and studio to customize your onboarding experience. Your basic information has been pre-filled.
                 </p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
-                <div className="flex justify-between items-center mb-5">
-                    <h3 className="font-medium text-gray-800">Your Information</h3>
-                    <button
-                        type="button"
-                        onClick={onToggleEdit}
-                        className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
-                    >
-                        {isEditingWelcome ? (
-                            <>
-                                <SaveIcon size={16} className="mr-1" />
-                                Save Changes
-                            </>
-                        ) : (
-                            <>
-                                <PencilIcon size={16} className="mr-1" />
-                                Edit Information
-                            </>
-                        )}
-                    </button>
-                </div>
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+                <h3 className="font-semibold text-gray-800 mb-6 flex items-center">
+                    <span className="w-1 h-5 bg-blue-600 rounded-full mr-2"></span>
+                    Professional Details
+                </h3>
 
-                {isEditingWelcome ? (
-                    <div className="space-y-5">
-                        {welcomeFields.map(field => (
-                            <div key={field.id} className="space-y-1">
-                                <label className="block text-sm font-medium text-gray-700 flex items-center">
-                                    {field.label}
-                                    {field.required && <span className="ml-1 text-red-500">*</span>}
-                                </label>
-                                <input
-                                    type={field.type || 'text'}
-                                    value={formData[field.fieldName] || ''}
-                                    onChange={e => onInputChange(field.fieldName, e.target.value)}
-                                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${errors[field.fieldName] ? 'border-red-300' : 'border-gray-300'
-                                        }`}
-                                />
-                                {errors[field.fieldName] && (
-                                    <div className="text-red-500 text-sm mt-1">
-                                        {errors[field.fieldName]}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                        <div className="space-y-1">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Company Stage
-                            </label>
-                            <select
-                                value={formData.companyStage || 'startup'}
-                                onChange={e => onInputChange('companyStage', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                {profileConfig.companyStages.map(stage => (
-                                    <option key={stage.id} value={stage.id}>
-                                        {stage.label}
-                                    </option>
-                                ))}
-                            </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Read-only Name */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-600">Name</label>
+                        <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed flex items-center">
+                            {formData.tradeName || formData.name || 'Not provided'}
                         </div>
                     </div>
-                ) : (
-                    <div className="space-y-4">
-                        {[
-                            { key: 'tradeName', label: 'Company Name' },
-                            { key: 'industry', label: 'Industry' },
-                            { key: 'companyStage', label: 'Company Stage', special: 'stage' },
-                            { key: 'contactName', label: 'Contact Name' },
-                            { key: 'email', label: 'Email' },
-                            { key: 'phone', label: 'Phone' },
-                        ].map(item => (
-                            <div key={item.key} className="flex justify-between">
-                                <span className="text-sm font-medium text-gray-500">{item.label}:</span>
-                                <div className="flex items-center">
-                                    <span className="text-sm text-gray-800 flex items-center">
-                                        {item.special === 'stage' ? (
-                                            <>
-                                                {companyStageInfo.label || 'Not provided'}
-                                                <span className={`ml-2 inline-block w-2 h-2 rounded-full ${companyStageInfo.color}`} />
-                                            </>
-                                        ) : (
-                                            formData[item.key] || 'Not provided'
-                                        )}
-                                    </span>
-                                    {editedFields[item.key] && (
-                                        <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
-                                            Updated
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+
+                    {/* Read-only Email */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-600">Email</label>
+                        <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed flex items-center">
+                            {formData.email || 'Not provided'}
+                        </div>
                     </div>
-                )}
+
+                    {/* Studio Selection */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-700">
+                            Studio <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={formData.studio || ''}
+                            onChange={e => onInputChange('studio', e.target.value)}
+                            className={`w-full px-4 py-3 bg-white border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all ${errors.studio ? 'border-red-300 ring-2 ring-red-500/10' : 'border-gray-300'
+                                }`}
+                        >
+                            <option value="">Select Studio</option>
+                            <option value="NBO">NBO (Nairobi)</option>
+                            <option value="DXB">DXB (Dubai)</option>
+                        </select>
+                        {errors.studio && (
+                            <p className="text-red-500 text-xs mt-1">{errors.studio}</p>
+                        )}
+                    </div>
+
+                    {/* Department Selection */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-700">
+                            Department <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={formData.department || ''}
+                            onChange={e => handleDepartmentChange(e.target.value)}
+                            className={`w-full px-4 py-3 bg-white border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all ${errors.department ? 'border-red-300 ring-2 ring-red-500/10' : 'border-gray-300'
+                                }`}
+                        >
+                            <option value="">Select Department</option>
+                            {departments.map(dept => (
+                                <option key={dept.id} value={dept.id}>{dept.label}</option>
+                            ))}
+                        </select>
+                        {errors.department && (
+                            <p className="text-red-500 text-xs mt-1">{errors.department}</p>
+                        )}
+                    </div>
+
+                    {/* Role Selection (Dependent on Department) */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-700">
+                            Role <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={formData.role || ''}
+                            onChange={e => onInputChange('role', e.target.value)}
+                            disabled={!formData.department}
+                            className={`w-full px-4 py-3 bg-white border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all ${!formData.department ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''
+                                } ${errors.role ? 'border-red-300 ring-2 ring-red-500/10' : 'border-gray-300'
+                                }`}
+                        >
+                            <option value="">{formData.department ? 'Select Role' : 'Select Department first'}</option>
+                            {roleOptions.map(role => (
+                                <option key={role} value={role}>{role}</option>
+                            ))}
+                        </select>
+                        {errors.role && (
+                            <p className="text-red-500 text-xs mt-1">{errors.role}</p>
+                        )}
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-1.5 text-transparent bg-clip-text">
+                        <label className="block text-sm font-semibold text-gray-700">
+                            Phone Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="tel"
+                            placeholder="e.g. +254 7XX XXX XXX"
+                            value={formData.phone || ''}
+                            onChange={e => onInputChange('phone', e.target.value)}
+                            className={`w-full px-4 py-3 bg-white border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all ${errors.phone ? 'border-red-300 ring-2 ring-red-500/10' : 'border-gray-300'
+                                }`}
+                        />
+                        {errors.phone && (
+                            <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-5">
-                <p className="text-sm text-blue-700">
-                    {isRevisit
-                        ? 'You can navigate through all steps to review and update your information. Your changes will be saved automatically.'
-                        : "We'll guide you through a few steps to complete your business profile. Your progress will be saved automatically."}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6">
+                <p className="text-sm text-blue-800/80 leading-relaxed font-medium">
+                    We'll guide you through a few steps to complete your profile. Your progress is saved automatically so you can resume at any time.
                 </p>
             </div>
         </div>

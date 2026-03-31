@@ -14,7 +14,7 @@ export interface CallState {
  * @returns A promise that resolves with the local media stream
  */
 export const initializeLocalMedia = async (
-  video: boolean = false
+  video = false
 ): Promise<MediaStream> => {
   try {
     console.log("Requesting media access with video:", video);
@@ -411,8 +411,14 @@ export const createDummyRemoteStream = async (): Promise<MediaStream> => {
     const ctx = canvas.getContext("2d");
 
     // Create a media stream from the canvas
-    // @ts-ignore - Some browsers may not support this API
-    const stream = canvas.captureStream(30); // 30 FPS
+    const stream = (canvas as HTMLCanvasElement & {
+      captureStream?: (fps?: number) => MediaStream;
+    }).captureStream
+      ? // Some browsers may not support captureStream; guard usage
+        (canvas as HTMLCanvasElement & {
+          captureStream: (fps?: number) => MediaStream;
+        }).captureStream(30)
+      : new MediaStream();
 
     // Add audio track if needed
     try {

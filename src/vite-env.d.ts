@@ -2,6 +2,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_MAPBOX_TOKEN: string;
+  readonly VITE_AI_CHAT_ENDPOINT?: string;
+  readonly VITE_ENABLE_LIVE_AI?: string;
 }
 
 interface ImportMeta {

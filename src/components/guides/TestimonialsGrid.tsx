@@ -1,0 +1,127 @@
+import React from "react"
+import { useNavigate } from "react-router-dom"
+
+interface Props {
+  items: any[]
+  onClickGuide?: (guide: any) => void
+}
+
+const TestimonialsGrid: React.FC<Props> = ({ items, onClickGuide }) => {
+  const navigate = useNavigate()
+  const disclaimer = '(not approved for external publication)'
+  
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  // Separate service cards from other testimonials
+  const serviceCards = (items || []).filter(item => item.testimonialType === 'service-card')
+  const otherTestimonials = (items || []).filter(item => item.testimonialType !== 'service-card')
+
+  return (
+    <div className="space-y-6">
+      {/* Service cards row */}
+      {serviceCards.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {serviceCards.map((card) => (
+            <div key={card.id} className="bg-white rounded-2xl shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+              {/* Image — flush to top */}
+              <div className="w-full flex-shrink-0 bg-slate-50" style={{ height: '180px' }}>
+                <img
+                  src={card.heroImageUrl}
+                  alt={card.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Card body */}
+              <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
+                {/* Badge */}
+                <div className="flex flex-wrap gap-2 mb-2 flex-shrink-0">
+                  <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border" style={{ backgroundColor: 'var(--dws-chip-bg)', color: 'var(--dws-chip-text)', borderColor: 'var(--dws-card-border)' }}>
+                    {card.testimonialCategory === 'client-feedback' ? 'Clients' : 'Associates'}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="font-semibold text-gray-900 mb-1.5 flex-shrink-0" style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  lineHeight: '1.375rem'
+                }}>{card.title}</h3>
+
+                {/* Description */}
+                <p className="text-sm text-gray-600 mb-2 flex-shrink-0" style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  lineHeight: '1.25rem'
+                }}>
+                  {card.summary}
+                </p>
+
+                {/* Date */}
+                <div className="flex items-center text-xs text-gray-400 gap-3 mb-3 flex-shrink-0">
+                  <span>{formatDate(card.lastUpdatedAt)}</span>
+                </div>
+
+                {/* Button — no separator */}
+                <div className="mt-auto flex-shrink-0">
+                  <div className="w-full inline-flex items-center justify-center rounded-full text-sm font-semibold px-4 py-2.5 bg-gray-100 text-gray-400 cursor-not-allowed select-none">
+                    Coming Soon
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Other testimonial cards */}
+      {otherTestimonials.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          {otherTestimonials.map((item) => {
+            const name = item.author_name || item.title || "Unnamed Testimonial"
+            const organization = item.author_org || item.domain || ""
+            const quote = (item.summary || item.body || "").trim()
+
+            return (
+              <div
+                key={item.id || item.slug}
+                className="h-full min-h-[340px] rounded-2xl border border-gray-200 bg-white text-left p-5 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => onClickGuide && onClickGuide(item)}
+              >
+                <div className="flex items-start gap-4 mb-3">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {/* Generic user icon */}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-600">
+                      <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="currentColor" />
+                      <path d="M12 14C7.58172 14 4 16.6863 4 20V22H20V20C20 16.6863 16.4183 14 12 14Z" fill="currentColor" />
+                    </svg>
+                  </div>
+                  <div className="leading-tight">
+                    <p className="font-semibold text-gray-900">{name}</p>
+                    {organization && (
+                      <p className="text-xs text-gray-500 whitespace-pre-line">{organization}</p>
+                    )}
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  "{quote}"
+                  <span className="block text-xs text-gray-500 italic mt-2">{disclaimer}</span>
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default TestimonialsGrid

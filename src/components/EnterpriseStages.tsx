@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Lightbulb, Rocket, TrendingUp, BarChart3, BadgeCheck, ShieldCheck, Globe, Sparkles, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { Lightbulb, Rocket, TrendingUp, BarChart3, BadgeCheck, ShieldCheck, Globe, Sparkles, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { FadeInUpOnScroll, HorizontalScrollReveal } from './AnimationUtils';
 import { dwsStages } from '../data/dwsStages';
-import StageModal from './journey/StageModal';
 interface StageCardProps {
   stageId: string;
   title: string;
@@ -28,48 +27,48 @@ const StageCard: React.FC<StageCardProps> = ({
   setActiveIndex
 }) => {
   const isActive = index === activeIndex;
-  const baseClasses = 'bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 min-w-[300px] flex flex-col flex-shrink-0 md:min-w-0 relative h-full min-h-[420px]';
-  const activeClasses = 'ring-2 ring-blue-500 shadow-lg';
-  const inactiveClasses = 'hover:shadow-lg hover:-translate-y-1';
-  return <div className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`} onMouseEnter={() => setActiveIndex(index)}>
+  const baseClasses = 'bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 flex flex-col flex-shrink-0 relative h-[380px] w-full max-w-[485px] hover:shadow-md hover:border-gray-300';
+  return <div className={`${baseClasses}`} onMouseEnter={() => setActiveIndex(index)}>
       <div className="p-6 flex flex-col h-full">
-        <div className="flex items-center mb-4">
-          <div className={`p-3 rounded-full mr-4 transition-colors duration-300 ${isActive ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-600'}`}>
+        {/* Header with icon and title */}
+        <div className="flex items-start gap-3 mb-4">
+          <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300 ${isActive ? 'bg-blue-500 text-white' : 'bg-blue-50 text-blue-600'}`}>
             {icon}
           </div>
-          <h3 className="text-xl font-bold text-gray-800 clamp-1">{title}</h3>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-bold text-gray-800 leading-tight">{title}</h3>
+          </div>
+          {/* Stage number badge */}
+          <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${isActive ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}>
+            {String(index).padStart(2, '0')}
+          </div>
         </div>
-        <p className="text-gray-600 mb-4 clamp-2">{description}</p>
-        <div className="mb-6">
-          <h4 className="font-semibold text-gray-700 mb-2">Key Benefits:</h4>
-          <ul className="text-gray-600 space-y-1">
+        
+        {/* Description */}
+        <p className="text-sm text-gray-700 mb-4 leading-relaxed">{description}</p>
+        
+        {/* Key Benefits */}
+        <div className="mb-6 flex-grow">
+          <h4 className="text-sm font-bold text-gray-800 mb-2">At this level you will:</h4>
+          <ul className="text-sm text-gray-700 space-y-1.5">
             {benefits.map((benefit, i) => <li key={i} className="flex items-start">
-                <span className={`mr-2 transition-colors duration-300 ${isActive ? 'text-dq-coral' : 'text-dq-navy'}`}>
-                  •
-                </span>
-                <span>{benefit}</span>
+                <span className="mr-2 text-gray-600 text-xs">•</span>
+                <span className="leading-relaxed">{benefit}</span>
               </li>)}
           </ul>
         </div>
+        
+        {/* CTA Button */}
         <button
           type="button"
-          onClick={onClick}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              onClick();
-            }
-          }}
-          data-stage-trigger={stageId}
-          className="mt-auto text-white font-medium py-2 px-4 rounded-md transition-all duration-300 flex items-center justify-center overflow-hidden group bg-[#131E42] hover:bg-[#0F1A4F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#99B2FF]"
+          disabled
+          className="mt-auto w-full rounded-lg bg-gray-200 text-gray-500 text-sm font-bold py-2.5 px-4 transition-all duration-300 flex items-center justify-center cursor-not-allowed"
         >
-          {ctaText}
-          <ArrowRight size={16} className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+          <span className="flex items-center justify-center">
+            <Lock size={16} className="mr-2" />
+            {ctaText}
+          </span>
         </button>
-      </div>
-      {/* Stage number indicator */}
-      <div className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isActive ? 'bg-dq-coral text-white' : 'bg-gray-200 text-gray-600'}`}>
-        {index + 1}
       </div>
     </div>;
 };
@@ -77,7 +76,6 @@ const EnterpriseStages: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [selectedStageId, setSelectedStageId] = useState<string | null>(null);
   const [isInView, setIsInView] = useState(false);
   const [page, setPage] = useState(0);
 
@@ -122,11 +120,6 @@ const EnterpriseStages: React.FC = () => {
   const pages = useMemo(() => [stages.slice(0, 6), stages.slice(6)], [stages]);
   const firstPageCount = pages[0].length;
 
-  const selectedStage = useMemo(
-    () => stages.find((stage) => stage.id === selectedStageId) ?? null,
-    [stages, selectedStageId]
-  );
-
   const handleSetStageIndex = (index: number) => {
     setActiveIndex(index);
     if (index >= firstPageCount && pages[1].length) {
@@ -150,24 +143,15 @@ const EnterpriseStages: React.FC = () => {
     }
   };
 
-  const handleOpenStage = (stageId: string, order: number) => {
-    setSelectedStageId(stageId);
-    setActiveIndex(order - 1);
-  };
-
-  const handleCloseStage = () => {
-    setSelectedStageId(null);
-  };
-
   return (
     <div className="bg-gray-50 py-16">
       <div className="container mx-auto px-4">
         <FadeInUpOnScroll className="mb-8 text-center">
           <h2 className="clamp-1 mb-3 text-3xl font-bold text-gray-900">
-            Associate Growth Journey
+            Your Growth Journey (SFIA+ Levels)
           </h2>
-          <p className="clamp-2 mx-auto max-w-3xl text-lg text-gray-600">
-            Every step of your journey matters — learn, collaborate, and grow to shape your success at DQ.
+          <p className="mx-auto max-w-4xl text-lg text-gray-600 whitespace-nowrap">
+            DQ uses SFIA+ to define autonomy, influence, and impact. Explore levels to understand expectations and progress confidently.
           </p>
         </FadeInUpOnScroll>
 
@@ -224,7 +208,7 @@ const EnterpriseStages: React.FC = () => {
 
         <div
           ref={scrollContainerRef}
-          className="scrollbar-hide flex gap-6 overflow-x-auto pb-6 md:grid md:grid-cols-2 md:overflow-x-visible lg:grid-cols-3"
+          className="scrollbar-hide flex gap-6 overflow-x-auto pb-6 md:grid md:grid-cols-2 md:gap-6 md:overflow-x-visible lg:grid-cols-3"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {pages[page].map((stage) => {
@@ -246,7 +230,7 @@ const EnterpriseStages: React.FC = () => {
                   benefits={stage.keyBenefits}
                   icon={icon}
                   ctaText={stage.ctaLabel}
-                  onClick={() => handleOpenStage(stage.id, stage.order)}
+                  onClick={() => {}}
                   index={stageIndex}
                   activeIndex={activeIndex}
                   setActiveIndex={handleSetStageIndex}
@@ -270,13 +254,19 @@ const EnterpriseStages: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
 
-      <StageModal
-        stage={selectedStage}
-        isOpen={selectedStageId !== null}
-        onClose={handleCloseStage}
-      />
+        {/* CTA Button */}
+        <div className="mt-8 flex justify-center">
+          <a
+            href="https://sfia-online.org/en"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-6 py-3 bg-[#1A2E6E] hover:bg-[#152654] text-white font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
+            Explore SFIA Framework
+          </a>
+        </div>
+      </div>
     </div>
   );
 };

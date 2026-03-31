@@ -26,7 +26,15 @@ const AdminGuidesList: React.FC = () => {
     <div className="container mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Guides Admin</h1>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={() => navigate('/admin/guides/new')}>New Guide</button>
+        <div className="flex gap-2">
+          <Link 
+            to="/admin/ghc-inspector" 
+            className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+          >
+            GHC Inspector
+          </Link>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={() => navigate('/admin/guides/new')}>New Guide</button>
+        </div>
       </div>
       <div className="flex gap-2 mb-4">
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search title" className="border rounded px-3 py-2 w-full max-w-sm" />

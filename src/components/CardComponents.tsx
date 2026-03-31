@@ -1,13 +1,23 @@
+import { secureRandom } from '../utils/secureRandom';
 import React from 'react';
 import { NewsCard as CardsNewsCard, ResourceCard as CardsResourceCard, EventCard as CardsEventCard, ServiceHighlightCard } from './Cards';
-import { Download, ExternalLink, FileText, BookOpen, Calculator } from 'lucide-react';
+import { Download, ExternalLink, FileText, BookOpen, Calculator, Play } from 'lucide-react';
 
 // NewsCard wrapper
 export const NewsCard = ({
   content,
   onQuickView,
-  onReadMore = () => {}, // Add default empty function to make it optional in the wrapper
-  ...props
+  onReadMore = () => { /* no-op */ },
+  icon = null,
+  ctaLabel,
+  'data-id': dataId,
+}: {
+  content: any;
+  onQuickView?: () => void;
+  onReadMore?: () => void;
+  icon?: React.ReactNode;
+  ctaLabel?: string;
+  'data-id'?: string;
 }) => {
   const newsItem = {
     id: content.title,
@@ -15,14 +25,33 @@ export const NewsCard = ({
     description: content.description,
     excerpt: content.description || content.title.substring(0, 100) + (content.title.length > 100 ? '...' : ''),
     imageUrl: content.imageUrl,
+    sourceLogoUrl: icon ? undefined : (content.sourceLogoUrl || content.imageUrl),
     tags: content.tags || [],
     date: content.date,
     category: content.tags?.[0] || 'News',
     source: content.source || 'TechNews Daily',
-    sourceLogoUrl: content.sourceLogoUrl
+    mediaIcon: icon,
   };
-  
-  return <CardsNewsCard item={newsItem} onQuickView={onQuickView} onReadMore={onReadMore} {...props} />;
+
+  const pill =
+    (content.tags || []).some((tag) =>
+      typeof tag === 'string'
+        ? tag.toLowerCase().includes('podcast')
+        : false
+    )
+      ? { text: 'Play', icon: <Play size={12} />, variant: 'info' as const }
+      : undefined;
+
+  return (
+    <CardsNewsCard
+      item={newsItem}
+      pill={pill}
+      onQuickView={onQuickView}
+      onReadMore={onReadMore}
+      ctaLabel={ctaLabel}
+      data-id={dataId}
+    />
+  );
 };
 
 // EventCard wrapper
@@ -30,7 +59,7 @@ export const EventCard = ({
   content,
   isUpcoming,
   onQuickView,
-  onRegister = () => {}, // Add default empty function
+  onRegister = () => undefined, // Add default no-op function
   ...props
 }) => {
   const eventItem = {
@@ -57,7 +86,7 @@ export const EventCard = ({
 export const ResourceCard = ({
   content,
   onQuickView,
-  onAccessResource = () => {}, // Add default for required callback
+  onAccessResource = () => undefined, // Add default for required callback
   onDownload,
   ...props
 }) => {
@@ -103,9 +132,30 @@ export const ResourceCard = ({
     description: content.description,
     tags: content.tags || [],
     resourceType: mapResourceType(content.type), // Required: resourceType field
-    fileSize: content.fileSize || (Math.random() * 5).toFixed(1) + ' MB',
-    downloadCount: content.downloadCount || Math.floor(Math.random() * 1000) + 100,
-    accessCount: content.accessCount || Math.floor(Math.random() * 5000) + 500,
+    fileSize: content.fileSize || (() => {
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        return ((buf[0] / 0xffffffff) * 5).toFixed(1) + ' MB';
+      }
+      return (secureRandom() * 5).toFixed(1) + ' MB';
+    })(),
+    downloadCount: content.downloadCount || (() => {
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        return Math.floor((buf[0] / 0xffffffff) * 1000) + 100;
+      }
+      return Math.floor(secureRandom() * 1000) + 100;
+    })(),
+    accessCount: content.accessCount || (() => {
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        return Math.floor((buf[0] / 0xffffffff) * 5000) + 500;
+      }
+      return Math.floor(secureRandom() * 5000) + 500;
+    })(),
     thumbnailUrl: content.imageUrl, // Map imageUrl to thumbnailUrl
     isExternal: content.isExternal || false,
     lastUpdated: content.lastUpdated || 'January 2024'

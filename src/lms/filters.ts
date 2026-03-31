@@ -12,6 +12,9 @@ export type Facets = {
   department?: string[];
   owner?: string[];
   track?: string[];
+  provider?: string[];
+  courseType?: string[];
+  sfiaRating?: string[];
 };
 
 const allowedLocationSet = new Set<string>(LOCATION_ALLOW);
@@ -33,7 +36,10 @@ export const parseFacets = (sp: URLSearchParams): Facets => {
     status: list('status'),
     department: list('department'),
     owner: list('owner'),
-    track: list('track')
+    track: list('track'),
+    provider: list('provider'),
+    courseType: list('courseType'),
+    sfiaRating: list('sfiaRating')
   };
 
   if (!facets.level?.length) {
@@ -64,6 +70,8 @@ export const applyFilters = <
     status?: string;
     department?: string[];
     owner?: string;
+    provider?: string;
+    courseType?: string;
   }
 >(
   items: T[],
@@ -72,12 +80,12 @@ export const applyFilters = <
   items.filter(item => {
     const locations = item.locations && item.locations.length
       ? item.locations
-      : ['Global'];
+      : ['Riyadh'];
     const locationMatches =
       !facets.location?.length ||
       locations.some(location => {
-        if (location === 'Global') {
-          // Global courses should match any selected location
+        if (location === 'Riyadh') {
+          // Riyadh courses should match any selected location
           return true;
         }
         return facets.location?.includes(location);
@@ -88,6 +96,7 @@ export const applyFilters = <
       inOne(item.deliveryMode, facets.delivery) &&
       inOne(item.duration, facets.duration) &&
       inOne(item.levelCode, facets.level as unknown as string[]) &&
+      inOne(item.levelCode, facets.sfiaRating as unknown as string[]) &&
       locationMatches &&
       hasAny(item.audience, facets.audience) &&
       hasAny(
@@ -95,6 +104,8 @@ export const applyFilters = <
         facets.department
       ) &&
       inOne(item.owner, facets.owner) &&
-      inOne(item.status, facets.status)
+      inOne(item.status, facets.status) &&
+      inOne(item.provider, facets.provider) &&
+      inOne(item.courseType, facets.courseType)
     );
   });

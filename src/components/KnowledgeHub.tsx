@@ -1,62 +1,27 @@
-import React, { useEffect, useState, useRef, Component } from "react";
-import {
-  Calendar,
-  BookOpen,
-  Newspaper,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  Tag,
-  FileText,
-  Download,
-  ExternalLink,
-  Calculator,
-  Loader,
-  AlertCircle,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Loader, AlertCircle, Radio, BookOpen, Monitor, Users, Video, FileText, ScrollText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { FadeInUpOnScroll, StaggeredFadeIn, useInView } from "./AnimationUtils";
-import { EventCard, NewsCard, ResourceCard } from "./CardComponents";
+import { FadeInUpOnScroll } from "./AnimationUtils";
+import { NewsCard } from "./CardComponents";
+import { getLmsCourses, LmsCard } from '@/data/lmsCourseDetails';
+import { fetchLatestGuides } from '@/services/marketplace';
+import { getGuideImageUrl } from '@/utils/guideImageMap';
 
-interface NewsItem {
+interface GuideItem {
   id: string;
+  slug: string;
   title: string;
-  excerpt: string;
-  date: string;
-  category: string;
-  imageUrl: string;
-  source?: string;
+  summary: string;
+  hero_image_url?: string;
+  guide_type: string;
+  sub_domain?: string;
+  domain?: string;
+  last_updated_at: string;
 }
 
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  type: string;
-  imageUrl?: string;
-  organizer?: string;
-}
-
-interface Resource {
-  id: string;
-  title: string;
-  type: string;
-  description: string;
-  icon: React.ReactNode;
-  downloadUrl?: string;
-  fileSize?: string;
-  downloadCount?: number;
-  lastUpdated?: string;
-  isExternal?: boolean;
-  tags?: string[];
-}
-
-interface KnowledgeHubProps {
-  graphqlEndpoint?: string;
-}
-
-// Mock data for fallback - keep the existing data
+// Legacy hardcoded news data - now replaced by Supabase-backed public.news
+// All news data is fetched from Supabase via fetchAllNews() in mediaCenterService
+/*
 const newsItems: NewsItem[] = [
   {
     id: "1",
@@ -82,7 +47,7 @@ const newsItems: NewsItem[] = [
   },
   {
     id: "3",
-    title: "Leadership Principles | What’s Your Superpower?",
+    title: "Leadership Principles | What's Your Superpower?",
     excerpt:
       "Uncover what makes effective leaders thrive at DQ and explore practical tools to grow your leadership strengths.",
     date: "August 19, 2025",
@@ -125,153 +90,12 @@ const newsItems: NewsItem[] = [
       "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
   },
 ];
+*/
 
-const events: Event[] = [
-  {
-    id: "1",
-    title: "DQ Strategy & Mission Forum 2025",
-    date: "October 18–19, 2025",
-    location: "OPAL Tower, Business Bay, Dubai",
-    type: "Forum",
-    organizer: "Digital Qatalyst",
-    imageUrl:
-      "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    id: "2",
-    title: "Agile Delivery Circle – Sprint Planning Masterclass",
-    date: "October 25, 2025",
-    location: "OPAL Tower, Business Bay, Dubai",
-    type: "Workshop",
-    organizer: "DQ Agile office",
-    imageUrl:
-      "https://images.unsplash.com/photo-1591115765373-5207764f72e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    id: "3",
-    title: "Leadership & Emotional Intelligence Session",
-    date: "November 4, 2025",
-    location: "OPAL Tower, Business Bay, Dubai",
-    type: "Workshop",
-    organizer: "DQ Culture & Community",
-    imageUrl:
-      "https://images.unsplash.com/photo-1540317580384-e5d43867caa6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    id: "4",
-    title: "Data Fluency Week – Power BI Hands-on",
-    date: "November 11–15, 2025",
-    location: "OPAL Tower, Business Bay, Dubai",
-    type: "Bootcamp",
-    organizer: "DQ Analytics Office",
-    imageUrl:
-      "https://images.unsplash.com/photo-1559223607-a43f990c095d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    id: "5",
-    title: "Product Growth & Value Streams Meetup",
-    date: "November 21, 2025",
-    location: "OPAL Tower, Business Bay, Dubai",
-    type: "Meetup",
-    organizer: "DQ Deploy Team",
-    imageUrl:
-      "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80",
-  },
-  {
-    id: "6",
-    title: "DQ End-of-Year Learning Showcase",
-    date: "December 10, 2025",
-    location: "OPAL Tower, Business Bay, Dubai",
-    type: "Showcase",
-    organizer: "DQ Academy",
-    imageUrl:
-      "https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-  },
-];
-
-const resources: Resource[] = [
-  {
-    id: "1",
-    title: "DQ Handbook – Working the Catalyst Way",
-    type: "Guide",
-    description:
-      "Your essential guide to Digital Qatalyst — principles, culture, and collaboration practices that power every team.",
-    icon: <FileText size={24} className="text-blue-600" />,
-    downloadUrl: "#",
-    fileSize: "2.5 MB",
-    downloadCount: 1847,
-    lastUpdated: "January 2024",
-    tags: ["Culture", "Guide"],
-  },
-  {
-    id: "2",
-    title: "Agile Playbook – SEDU Framework",
-    type: "Template",
-    description:
-      "Standard agile templates and sprint planning boards aligned to the SEDU delivery model for teams across DQ.",
-    icon: <BookOpen size={24} className="text-blue-600" />,
-    downloadUrl: "#",
-    fileSize: "4.1 MB",
-    downloadCount: 3254,
-    lastUpdated: "December 2023",
-    tags: ["Agile", "Delivery"],
-  },
-  {
-    id: "3",
-    title: "Power BI Dashboard Starter Pack",
-    type: "Toolkit",
-    description:
-      "Get prebuilt dashboard templates and data model examples for reporting within DQ projects.",
-    icon: <FileText size={24} className="text-blue-600" />,
-    downloadUrl: "#",
-    fileSize: "1.8 MB",
-    downloadCount: 5632,
-    lastUpdated: "February 2024",
-    tags: ["Analytics", "Power BI"],
-  },
-  {
-    id: "4",
-    title: "LLAD Template – Repository Setup",
-    type: "Template",
-    description:
-      "A ready-to-use Logical Layered Architecture Document (LLAD) format for Ardoq and Abacus repository configurations.",
-    icon: <BookOpen size={24} className="text-blue-600" />,
-    downloadUrl: "#",
-    fileSize: "3.2 MB",
-    downloadCount: 2187,
-    lastUpdated: "January 2024",
-    tags: ["Architechture", "Template"],
-  },
-  {
-    id: "5",
-    title: "DQ Governance & Compliance Guide",
-    type: "Guide",
-    description:
-      "Comprehensive overview of DQ governance workflows, approvals, and compliance practices for associates.",
-    icon: <BookOpen size={24} className="text-blue-600" />,
-    downloadUrl: "#",
-    fileSize: "4.5 MB",
-    downloadCount: 8967,
-    lastUpdated: "December 2023",
-    tags: ["Governace", "Comliance"],
-  },
-  {
-    id: "6",
-    title: "Collaboration Toolkit – Viva & Teams",
-    type: "Tool",
-    description:
-      "Quick-access resources for setting up Viva Engage posts, Teams collaboration boards, and L&D channels.",
-    icon: <Calculator size={24} className="text-blue-600" />,
-    downloadUrl: "#",
-    fileSize: "External",
-    downloadCount: 12456,
-    lastUpdated: "February 2024",
-    tags: ["Collaboration", "L&D"],
-  },
-];
+// Event and Resource mock data removed (unused) to satisfy noUnusedLocals.
 
 // Define interface for tab items
-type TabId = "news" | "events" | "resources";
+type TabId = "ghc" | "guidelines" | "learning";
 
 interface TabItem {
   id: TabId;
@@ -291,20 +115,24 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
   onTabChange,
 }) => {
   return (
-    <div className="w-full flex justify-center mb-6">
+    <div className="w-full flex justify-center mb-6" role="tablist" aria-label="Knowledge Hub tabs">
       <div className="inline-flex items-center rounded-full bg-white shadow-sm ring-1 ring-black/5 px-1 py-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`kh-panel-${tab.id}`}
+              id={`kh-tab-${tab.id}`}
               onClick={() => onTabChange(tab.id)}
               className={`relative mx-0.5 px-4 sm:px-5 py-2 rounded-full text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8EFF]/40 inline-flex items-center ${
                 isActive
                   ? "bg-[#DDE8FF] text-[#030F35] shadow-[inset_0_-2px_0_0_#5B8EFF]"
                   : "text-[#3b4a66] hover:bg-[#F5F8FF]"
               }`}
-              aria-pressed={isActive}
             >
               <span className="mr-2" aria-hidden="true">
                 {tab.icon}
@@ -338,28 +166,26 @@ const ErrorMessage = ({ message }) => (
 );
 
 // KnowledgeHub Content Component
-const KnowledgeHubContent = ({ graphqlEndpoint }) => {
+const KnowledgeHubContent = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabId>("news");
+  const [activeTab, setActiveTab] = useState<TabId>("guidelines");
   const [isTabChanging, setIsTabChanging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<{ message: string } | null>(null);
+  const [ghcGuides] = useState<GuideItem[]>([]);
+  const [guidelinesGuides, setGuidelinesGuides] = useState<GuideItem[]>([]);
+  const [learningCourses, setLearningCourses] = useState<LmsCard[]>([]);
 
   const tabs: TabItem[] = [
     {
-      id: "news",
-      label: "News",
-      icon: <Newspaper size={16} className="#030F35-600" />,
+      id: "guidelines",
+      label: "Guidelines",
+      icon: <Radio size={16} className="#030F35-600" />,
     },
     {
-      id: "events",
-      label: "Events",
-      icon: <Calendar size={16} className="#030F35-600" />,
-    },
-    {
-      id: "resources",
-      label: "Resources",
-      icon: <BookOpen size={16} className="#030F35-600" />,
+      id: "learning",
+      label: "Learning",
+      icon: <Radio size={16} className="#030F35-600" />,
     },
   ];
 
@@ -373,93 +199,73 @@ const KnowledgeHubContent = ({ graphqlEndpoint }) => {
     }, 300);
   };
 
-  // Get data based on active tab
-  const getNewsData = () => newsItems;
-  const getEventsData = () => events;
-  const getResourcesData = () => resources;
+  // Fetch guidelines from Supabase and LMS courses
+  useEffect(() => {
+    let isMounted = true;
 
-  // Helper function to get the appropriate icon for a resource type
-  const getResourceIconByType = (type) => {
-    switch (type?.toLowerCase()) {
-      case "guide":
-        return <BookOpen size={24} className="#030F35-600" />;
-      case "templates":
-        return <FileText size={24} className="#030F35-600" />;
-      case "tool":
-        return <Calculator size={24} className="#030F35-600" />;
-      default:
-        return <FileText size={24} className="#030F35-600" />;
-    }
-  };
+    async function loadData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [guidelines, courses] = await Promise.all([
+          fetchLatestGuides({ limit: 6 }),
+          getLmsCourses(),
+        ]);
 
-  // Add this function to handle event registration
-  const handleEventRegister = (event: Event) => {
-    // Here you can implement what happens when someone registers for an event
-    // For example, open a registration modal, navigate to a registration page, etc.
-    console.log("Registering for event:", event.title);
-
-    // Example: Open a registration URL if available
-    // if (event.registrationUrl) {
-    //   window.open(event.registrationUrl, '_blank');
-    // }
-
-    // Or show a confirmation message
-    alert(`Registration for "${event.title}" will be available soon!`);
-  };
-
-  // Add function to handle resource downloads
-  const handleResourceDownload = (resource: Resource) => {
-    console.log("Downloading resource:", resource.title);
-
-    if (resource.isExternal) {
-      // For external resources, open in new tab
-      if (resource.downloadUrl) {
-        window.open(resource.downloadUrl, "_blank");
-      }
-    } else {
-      // For internal resources, trigger download
-      if (resource.downloadUrl) {
-        // Create a temporary link element to trigger download
-        const link = document.createElement("a");
-        link.href = resource.downloadUrl;
-        link.download = `${resource.title}.${
-          resource.fileSize?.includes("PDF") ? "pdf" : "zip"
-        }`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        // Fallback for demo purposes
-        alert(`Download for "${resource.title}" will begin shortly!`);
+        if (!isMounted) return;
+        setGuidelinesGuides(guidelines);
+        setLearningCourses(courses.slice(0, 6));
+      } catch (err) {
+        if (!isMounted) return;
+        console.error("Error loading knowledge hub data:", err); // NOSONAR
+        setError({ message: "Unable to load content. Please try again later." });
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     }
+
+    loadData();
+  }, []);
+
+  // Pick an icon for a course based on its category/deliveryMode
+  const getCourseIcon = (course: LmsCard) => {
+    const cat = (course.courseCategory || '').toLowerCase();
+    const mode = (course.deliveryMode || '').toLowerCase();
+    if (mode === 'video') return <Video size={24} />;
+    if (mode === 'workshop') return <Users size={24} />;
+    if (cat.includes('ghc') || cat.includes('competenc')) return <BookOpen size={24} />;
+    if (cat.includes('tech') || cat.includes('tool') || cat.includes('microsoft')) return <Monitor size={24} />;
+    return <FileText size={24} />;
   };
 
-  // Add function to handle resource access
-  const handleResourceAccess = (resource: Resource) => {
-    console.log("Accessing resource:", resource.title);
+  // Map guide data to card format
+  const mapGuideToCard = (guide: GuideItem) => ({
+    id: guide.id,
+    title: guide.title,
+    excerpt: guide.summary || '',
+    date: new Date(guide.last_updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    category: guide.guide_type || '',
+    tags: [guide.guide_type, guide.sub_domain, guide.domain].filter(Boolean) as string[],
+    source: guide.domain || 'DQ',
+    imageUrl: guide.hero_image_url || getGuideImageUrl({
+      slug: guide.slug,
+      title: guide.title,
+      domain: guide.domain,
+      guideType: guide.guide_type,
+      heroImageUrl: guide.hero_image_url,
+    }),
+  });
 
-    if (resource.isExternal) {
-      // For external resources, open in new tab
-      if (resource.downloadUrl) {
-        window.open(resource.downloadUrl, "_blank");
-      }
-    } else {
-      // For internal resources, navigate to detail page
-      navigate(`/resources/${resource.id}`);
-    }
-  };
 
   return (
     <div className="bg-gray-50 py-16">
       <div className="container mx-auto px-4">
         <FadeInUpOnScroll className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-3 clamp-1">
-            Stay Ahead with Workspace Insights
+            Latest DQ Developments
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto clamp-2">
-            Stay current with DQ updates, insights, and events designed to help
-            you work smarter and grow every day.
+          <p className="text-base sm:text-lg text-gray-600 mx-auto clamp-2 leading-relaxed max-w-4xl">
+            Explore the latest GHC courses and guidelines designed to boost your skills and accelerate your DQ journey.
           </p>
         </FadeInUpOnScroll>
         {/* Segmented Tabs */}
@@ -476,95 +282,145 @@ const KnowledgeHubContent = ({ graphqlEndpoint }) => {
         >
           {/* Loading State */}
           {isLoading && <LoadingIndicator />}
-          {/* Error State */}
+
+          {/* Error banner (content still shown below if fallback available) */}
           {error && !isLoading && <ErrorMessage message={error.message} />}
-          {/* News Tab */}
-          {activeTab === "news" && !isLoading && !error && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getNewsData().map((item, index) => (
-                <div
-                  key={item.id}
-                  className="animate-fade-in-up"
-                  style={{
-                    animationDelay: `${index * 0.1}s`,
-                  }}
-                >
-                  <NewsCard
-                    content={{
-                      title: item.title,
-                      description: item.excerpt,
-                      imageUrl: item.imageUrl,
-                      tags: [item.category],
-                      date: item.date,
-                      source: item.source,
-                    }}
-                    onQuickView={() => navigate(`/news/${item.id}`)}
-                  />
-                </div>
-              ))}
-            </div>
+
+          {/* GHC Tab */}
+          {activeTab === "ghc" && !isLoading && (
+            <section
+              id="kh-panel-ghc"
+              aria-label="GHC content"
+              aria-live="polite"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {ghcGuides.length === 0 ? (
+                  <div className="col-span-full text-center text-gray-600">
+                    No GHC guides available right now.
+                  </div>
+                ) : (
+                  ghcGuides.map((guide, index) => {
+                    const cardData = mapGuideToCard(guide);
+                    return (
+                      <div
+                        key={guide.id}
+                        className="animate-fade-in-up"
+                        style={{
+                          animationDelay: `${index * 0.1}s`,
+                        }}
+                      >
+                        <NewsCard
+                          content={{
+                            title: cardData.title,
+                            description: cardData.excerpt,
+                            imageUrl: cardData.imageUrl,
+                            tags: cardData.tags,
+                            date: cardData.date,
+                            source: cardData.source,
+                          }}
+                          ctaLabel="Explore GHC"
+                          onQuickView={() => {
+                            navigate(`/marketplace/guides/${guide.slug}`);
+                          }}
+                          onReadMore={() => {
+                            navigate(`/marketplace/guides/${guide.slug}`);
+                          }}
+                        />
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </section>
           )}
-          {/* Events Tab */}
-          {activeTab === "events" && !isLoading && !error && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getEventsData().map((event, index) => (
-                <div
-                  key={event.id}
-                  className="animate-fade-in-up"
-                  style={{
-                    animationDelay: `${index * 0.1}s`,
-                  }}
-                >
-                  <EventCard
-                    content={{
-                      title: event.title,
-                      description: `${event.type} at ${event.location}`,
-                      dateTime: event.date,
-                      location: event.location,
-                      imageUrl: event.imageUrl,
-                      tags: [event.type],
-                      organizer: event.organizer,
-                    }}
-                    isUpcoming={index === 0}
-                    onQuickView={() => navigate(`/events/${event.id}`)}
-                    onRegister={() => handleEventRegister(event)}
-                  />
-                </div>
-              ))}
-            </div>
+
+          {/* Guidelines Tab */}
+          {activeTab === "guidelines" && !isLoading && (
+            <section
+              id="kh-panel-guidelines"
+              aria-label="Guidelines content"
+              aria-live="polite"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {guidelinesGuides.length === 0 ? (
+                  <div className="col-span-full text-center text-gray-600">
+                    No guidelines available right now.
+                  </div>
+                ) : (
+                  guidelinesGuides.map((guide, index) => {
+                    const cardData = mapGuideToCard(guide);
+                    return (
+                      <div
+                        key={guide.id}
+                        className="animate-fade-in-up"
+                        style={{
+                          animationDelay: `${index * 0.1}s`,
+                        }}
+                      >
+                        <NewsCard
+                          content={{
+                            title: cardData.title,
+                            description: cardData.excerpt,
+                            tags: cardData.tags,
+                            date: cardData.date,
+                            source: cardData.source,
+                          }}
+                          icon={<ScrollText size={24} />}
+                          ctaLabel="Open Guideline"
+                          onQuickView={() => {
+                            navigate(`/marketplace/guides/${guide.slug}`);
+                          }}
+                          onReadMore={() => {
+                            navigate(`/marketplace/guides/${guide.slug}`);
+                          }}
+                        />
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </section>
           )}
-          {/* Resources Tab */}
-          {activeTab === "resources" && !isLoading && !error && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getResourcesData().map((resource, index) => (
-                <div
-                  key={resource.id}
-                  className="animate-zoom-in"
-                  style={{
-                    animationDelay: `${index * 0.1}s`,
-                  }}
-                >
-                  <ResourceCard
-                    content={{
-                      title: resource.title,
-                      description: resource.description,
-                      type: resource.type,
-                      icon: resource.icon,
-                      tags: resource.tags,
-                      downloadUrl: resource.downloadUrl,
-                      fileSize: resource.fileSize,
-                      downloadCount: resource.downloadCount,
-                      lastUpdated: resource.lastUpdated,
-                      isExternal: resource.isExternal,
-                    }}
-                    onQuickView={() => navigate(`/resources/${resource.id}`)}
-                    onAccessResource={() => handleResourceAccess(resource)}
-                    onDownload={() => handleResourceDownload(resource)}
-                  />
-                </div>
-              ))}
-            </div>
+
+          {/* Learning Tab */}
+          {activeTab === "learning" && !isLoading && (
+            <section
+              id="kh-panel-learning"
+              aria-label="Learning content"
+              aria-live="polite"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {learningCourses.length === 0 ? (
+                  <div className="col-span-full text-center text-gray-600">
+                    No courses available right now.
+                  </div>
+                ) : (
+                  learningCourses.map((course, index) => (
+                    <div
+                      key={course.id}
+                      className="animate-fade-in-up"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <NewsCard
+                        content={{
+                          title: course.title,
+                          description: course.excerpt || course.summary || '',
+                          tags: [course.courseCategory, course.deliveryMode].filter(Boolean) as string[],
+                          date: course.duration || '',
+                          source: course.provider || 'DQ Learning',
+                        }}
+                        icon={getCourseIcon(course)}
+                        ctaLabel="View Course"
+                        onQuickView={() => { navigate(`/lms/${course.slug}`); }}
+                        onReadMore={() => { navigate(`/lms/${course.slug}`); }}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
           )}
+
         </div>
       </div>
       {/* Add keyframes for animations */}
@@ -646,9 +502,9 @@ const KnowledgeHubContent = ({ graphqlEndpoint }) => {
 };
 
 // Main KnowledgeHub component
-const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ graphqlEndpoint }) => {
+const KnowledgeHub: React.FC = () => {
   // Always render without Apollo since we don't have the dependency
-  return <KnowledgeHubContent graphqlEndpoint={null} />;
+  return <KnowledgeHubContent />;
 };
 
 export default KnowledgeHub;

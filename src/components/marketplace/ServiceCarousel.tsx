@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type Service = {
   id: string;
@@ -86,24 +87,28 @@ export default function ServiceCarousel({
       </div>
 
       {/* Arrows */}
-      <div className="absolute top-1/2 left-0 right-0 flex justify-between -translate-y-1/2 px-2 pointer-events-none">
-        <button
-          onClick={handlePrev}
-          disabled={activeIndex === 0}
-          aria-label="Previous"
-          className={`h-8 w-8 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center pointer-events-auto ${
-            activeIndex === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
-          }`}
-        >‹</button>
-        <button
-          onClick={handleNext}
-          disabled={activeIndex === totalSlides - 1}
-          aria-label="Next"
-          className={`h-8 w-8 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center pointer-events-auto ${
-            activeIndex === totalSlides - 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
-          }`}
-        >›</button>
-      </div>
+      <button
+        type="button"
+        onClick={handlePrev}
+        disabled={activeIndex === 0}
+        aria-label="Previous"
+        className={`absolute left-0 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center pointer-events-auto ${
+          activeIndex === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+        }`}
+      >
+        <ChevronLeft className="h-4 w-4 text-[#101848]" />
+      </button>
+      <button
+        type="button"
+        onClick={handleNext}
+        disabled={activeIndex === totalSlides - 1}
+        aria-label="Next"
+        className={`absolute right-0 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center pointer-events-auto ${
+          activeIndex === totalSlides - 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+        }`}
+      >
+        <ChevronRight className="h-4 w-4 text-[#101848]" />
+      </button>
 
       {/* Line dots */}
       <div className="mt-4 flex justify-center gap-2">

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find d:/DQ/DWS/News-Marketpalce-25-Mar/DQ-Intranet-DWS/src -type f -name *marketplace* -o -name *market*)",
+      "Bash(find /d/DQ/DWS/News-Marketpalce-25-Mar/DQ-Intranet-DWS/src/assets -type f \\\\\\(-name *marketplace* -o -name *media* \\\\\\))",
+      "Bash(xargs wc -l)"
+    ]
+  }
+}

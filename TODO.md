@@ -1,0 +1,5 @@
+- [x] Update PodcastsGrid hook order to remove conditional hook execution.
+- [x] Run targeted lint to verify `react-hooks/rules-of-hooks` is resolved for PodcastsGrid.
+- [x] Fix runtime blocker in `NewsPage.tsx` (`sidebarCollapsed is not defined`) by removing undefined guard and rendering desktop FiltersPanel directly.
+- [ ] Run focused runtime sanity check for `/marketplace/news` and podcasts tab flows after NewsPage fix.
+- [ ] Update TODO progress and report results.

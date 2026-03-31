@@ -1,3 +1,4 @@
+import { secureRandom } from '../../../utils/secureRandom';
 import React, { useState } from 'react';
 import { supabase } from '@/communities/integrations/supabase/client';
 import { Button } from '@/communities/components/ui/button';
@@ -25,7 +26,7 @@ export function InlineMediaUpload({
     try {
       setUploading(true);
       const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `${userId}/${Date.now()}_${secureRandom().toString(36).substring(7)}.${fileExt}`;
       const {
         data,
         error

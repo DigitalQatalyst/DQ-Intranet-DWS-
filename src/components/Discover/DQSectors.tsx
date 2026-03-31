@@ -125,7 +125,7 @@ export const DQSectors: React.FC<DQSectorsProps> = ({
           </p>
         </div>
 
-        {/* Sector Cards - EJP Business Directory Style */}
+        {/* Sector Cards - DQ Business Directory Style */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 mb-12">
           {sectorCards.map((card) => {
             const chipStyle = getChipStyle(card.tag.colorKey);
