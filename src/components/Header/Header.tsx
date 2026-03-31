@@ -117,45 +117,34 @@ export function Header({
 
           {/* Right Navigation */}
           <div className="flex items-center ml-auto relative">
+            {/* Request Support — always visible */}
+            <div className="hidden md:flex items-center mr-3">
+              <button
+                className={`px-4 py-2 bg-white text-[#030F35] font-medium rounded-md hover:bg-white/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
+                  isSticky ? 'text-sm px-3 py-1.5' : ''
+                }`}
+                onClick={handleRequestSupport}
+              >
+                Request Support
+              </button>
+            </div>
+
             {user ? (
               <ProfileDropdown
                 onViewNotifications={toggleNotificationsMenu}
                 unreadNotifications={unreadCount}
               />
             ) : (
-              <>
-                {/* Desktop CTAs */}
-                <div className="hidden lg:flex items-center space-x-3">
-                  <button
-                    className={`px-4 py-2 bg-white text-[#030F35] font-medium rounded-md hover:bg-white/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
-                      isSticky ? 'text-sm px-3 py-1.5' : ''
-                    }`}
-                    onClick={handleRequestSupport}
-                  >
-                    Request Support
-                  </button>
-                  <button
-                    className={`px-4 py-2 text-white border border-white/40 rounded-md hover:bg-white hover:text-[#030F35] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
-                      isSticky ? 'text-sm px-3 py-1.5' : ''
-                    }`}
-                    onClick={handleSignIn}
-                  >
-                    Sign In
-                  </button>
-                </div>
-
-                {/* Tablet Button */}
-                <div className="hidden md:flex lg:hidden items-center">
-                  <button
-                    className={`px-3 py-2 bg-white text-[#030F35] rounded-md hover:bg-white/90 transition-all duration-200 font-medium ${
-                      isSticky ? 'text-sm px-2 py-1.5' : 'text-sm'
-                    }`}
-                    onClick={handleRequestSupport}
-                  >
-                    Request Support
-                  </button>
-                </div>
-              </>
+              <div className="hidden lg:flex items-center">
+                <button
+                  className={`px-4 py-2 text-white border border-white/40 rounded-md hover:bg-white hover:text-[#030F35] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
+                    isSticky ? 'text-sm px-3 py-1.5' : ''
+                  }`}
+                  onClick={handleSignIn}
+                >
+                  Sign In
+                </button>
+              </div>
             )}
 
             {/* Mobile Drawer */}
