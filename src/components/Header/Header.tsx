@@ -7,7 +7,7 @@ import { NotificationCenter } from './notifications/NotificationCenter';
 import { mockNotifications } from './utils/mockNotifications';
 import { useAuth } from './context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { scrollToSupport } from '../../utils/scroll';
+
 import { assetPath } from '../../utils/assetPath';
 
 interface HeaderProps {
@@ -58,9 +58,7 @@ export function Header({
     login(onboardingPath);
   };
   const handleSignUp = () => console.log('Sign up clicked');
-  const handleRequestSupport = () => {
-    scrollToSupport();
-  };
+  const REQUEST_SUPPORT_URL = 'https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl';
 
   useEffect(() => {
     if (!user) {
@@ -119,14 +117,16 @@ export function Header({
           <div className="flex items-center ml-auto relative">
             {/* Request Support — always visible */}
             <div className="hidden md:flex items-center mr-3">
-              <button
+              <a
+                href={REQUEST_SUPPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`px-4 py-2 bg-white text-[#030F35] font-medium rounded-md hover:bg-white/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 ${
                   isSticky ? 'text-sm px-3 py-1.5' : ''
                 }`}
-                onClick={handleRequestSupport}
               >
                 Request Support
-              </button>
+              </a>
             </div>
 
             {user ? (
