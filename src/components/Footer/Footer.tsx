@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 interface FooterProps {
   'data-id'?: string;
   isLoggedIn?: boolean;
@@ -26,10 +25,6 @@ export function Footer({
   'data-id': dataId,
   isLoggedIn = false
 }: FooterProps) {
-  const navigate = useNavigate();
-  const handleFooterLinkClick = (title: string) => {
-    navigate(`/workspace-link-coming-soon?title=${encodeURIComponent(title)}`);
-  };
   const externalLinks = [
     {
       label: 'Viva Engage',
@@ -85,18 +80,6 @@ export function Footer({
             Workspace
           </h2>
         </div>
-        {/* Newsletter - Mobile Full Width */}
-        <div className="mb-8">
-          <p className="text-white/80 text-sm mb-4 leading-relaxed">
-            Stay connected with the latest tools, learning resources, and workspace updates from DQ.
-          </p>
-          <div className="space-y-3">
-            <input type="email" placeholder="Enter your DQ email" className="w-full px-4 py-3 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-dq-coral/40" aria-label="Email address for newsletter" />
-            <button type="submit" className="w-full bg-white text-dq-navy px-4 py-3 rounded-md hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-dq-coral/40 transition-colors font-medium" aria-label="Subscribe to newsletter">
-              Subscribe
-            </button>
-          </div>
-        </div>
         {/* Accordion Sections */}
         <div className="mb-8">
           <AccordionSection title="For You">
@@ -151,29 +134,14 @@ export function Footer({
       {/* Desktop Layout */}
       <div className="hidden lg:block">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-3 gap-12 mb-8">
-          {/* Logo and Newsletter Section */}
+        <div className="flex items-start justify-between mb-8">
+          {/* Logo */}
           <div>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold tracking-tight">
-                DQ | Digital
-                <br />
-                Workspace
-              </h2>
-            </div>
-            <div className="mb-6">
-              <p className="text-white/80 text-sm mb-4 leading-relaxed">
-                Stay connected with the latest tools, learning resources, and workspace updates from DQ.
-              </p>
-              <div className="bg-white rounded-md flex items-center justify-between px-4 py-3">
-                <span className="text-gray-600 text-sm">
-                  Enter your DQ email
-                </span>
-                <button type="submit" className="bg-white text-dq-navy p-2 rounded-md hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-dq-coral/40 transition-colors" aria-label="Subscribe to newsletter">
-                  <ArrowRight size={16} />
-                </button>
-              </div>
-            </div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              DQ | Digital
+              <br />
+              Workspace
+            </h2>
           </div>
           {/* For You */}
           <div>
