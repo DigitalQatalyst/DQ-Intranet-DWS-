@@ -78,7 +78,7 @@ function GuidelinePage() {
 
     for (const line of lines) {
       // Check for H2 headers (## Title)
-      const h2Match = line.match(/^##\s+(.+)$/)
+      const h2Match = line.match(/^##\s+(\S.*)$/)
       if (h2Match) {
         // Save previous section
         if (currentSection) {
@@ -86,7 +86,7 @@ function GuidelinePage() {
         }
         // Start new section
         const title = h2Match[1].trim()
-        const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+        const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
         currentSection = { id, title, content: '' }
       } else if (currentSection) {
         currentSection.content += line + '\n'

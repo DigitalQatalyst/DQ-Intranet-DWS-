@@ -134,7 +134,7 @@ const sanitizeDecorators = (text: string): string => {
     // For list items: convert inline images to their alt text (remove icon but keep name)
     if (prefix) {
       line = line
-        .replace(/<img[^>]*?\balt=(?:"([^"]+)"|'([^']+)")[^>]*>/gi, '$1$2')
+        .replace(/<img[^>]*?\balt=(?:"([^"]+)"|'([^']+)')[^>]*>/gi, '$1$2')
         .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
     }
     // Drop stray heading-only lines like '#', '##', '###'
