@@ -909,13 +909,10 @@ const ProofAndTrust: React.FC = () => {
           <div className="flex justify-center relative z-10">
             <button
               disabled
-              className="px-6 py-3 bg-gray-300 text-gray-500 font-bold rounded-lg shadow cursor-not-allowed select-none flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-gray-400 text-gray-200 font-bold rounded-lg shadow-lg cursor-not-allowed text-center flex items-center justify-center gap-2 opacity-60"
             >
+              <Lock size={18} />
               Read More Associate Stories
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                Coming Soon
-              </span>
             </button>
           </div>
         </div>
