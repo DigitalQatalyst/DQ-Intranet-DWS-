@@ -7,7 +7,7 @@ export const truncateWords = (input: string, maxWords: number): string => {
 
 export const toTitleCase = (input: string): string => {
   if (!input) return '';
-  const acronyms = new Set(['dq', 'dxb', 'ksa', 'nbo', 'wfh', 'eoy', 'hr', 'hra']);
+  const acronyms = new Set(['dq', 'dxb', 'ksa', 'nbo', 'wfh', 'eoy', 'hr', 'hra', 'ghc']);
   const smallWords = new Set(['and', 'or', 'for', 'of', 'the', 'a', 'an', 'to', 'in', 'on', 'at', 'by', 'with']);
 
   return input
