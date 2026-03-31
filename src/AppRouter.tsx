@@ -17,16 +17,16 @@ const LmsCourseDetailPageWrapper = () => {
   const { slug } = useParams<{ slug: string }>();
   return <LmsCourseDetailPage key={slug} />;
 };
-import LmsCourses from "./pages/LmsCourses";
+import LmsCourses from "./pages/LearningCenterPage";
 import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import OnboardingLanding from "./pages/OnboardingLanding";
-import { OnboardingJourney } from "./pages/OnboardingJourney";
+import { OnboardingJourney } from "./pages/OnboardingJourneyPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import GrowthSectorsComingSoon from "./pages/GrowthSectorsComingSoon";
-import SixXDProductsLanding from "./pages/6XDProductsLanding";
+import SixXDProductsLanding from "./pages/SixXDProductsPage";
 import NotFound from "./pages/NotFound";
 import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
@@ -38,8 +38,8 @@ import UnitProfilePage from "./pages/UnitProfilePage";
 import WorkPositionProfilePage from "./pages/WorkPositionProfilePage";
 import RoleProfilePage from "./pages/RoleProfilePage";
 import WomenEntrepreneursPage from "./pages/WomenEntrepreneursPage";
-import GHCLanding from "./pages/GHCLanding";
-import SixXDLanding from "./pages/6XDLanding";
+import GHCLanding from "./pages/GHCStrategyPage";
+import SixXDLanding from "./pages/SixXDStrategyPage";
 
 export function AppRouter() {
   return (

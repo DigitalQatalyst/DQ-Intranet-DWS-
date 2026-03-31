@@ -1,4 +1,4 @@
-import GHCLanding from "./SixXDLandingLayout";
+import GHCLanding from "./SixXDStrategyLayout";
 import type { LucideIcon } from "lucide-react";
 import { Target, Brain, Layers, GitBranch, Users, Zap, BookOpen, Briefcase, GraduationCap } from "lucide-react";
 
