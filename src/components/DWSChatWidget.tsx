@@ -79,7 +79,7 @@ function normalizeInput(s: string): string {
     .trim()
     .toLowerCase()
     .replace(/\s+/g, ' ')
-    .replace(/[.!?,;:]+\s*$/, '');
+    .replace(/[.!?,;:]+$/, '');
 }
 
 /** Build a compact context block from the local DWS knowledge base to guide the live model. */

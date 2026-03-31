@@ -92,7 +92,7 @@ function parseEpisodeContent(content: string): JSX.Element[] {
       continue;
     }
 
-    const headingMatch = trimmed.match(/^(##+)\s+(.+)$/);
+    const headingMatch = trimmed.match(/^(##+)\s+(\S.*)$/);
     if (headingMatch) {
       const { action, inFocusSection: newFocus } = handleHeadingLine(headingMatch, inFocusSection, state);
       inFocusSection = newFocus;

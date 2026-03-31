@@ -193,8 +193,8 @@ const isValidDomainForSections = (domain?: string | null) =>
   ['Guidelines', 'Strategy', 'Testimonials', 'Testimonial', 'Blueprint'].includes(domain || '')
 
 const extractOverview = (body: string): GuideSection | null => {
-  const descRegex = /## Description\s*\n+([\s\S]*?)(?=\n##|\n#|$)/
-  const highlightsRegex = /## Key Highlights:?\s*\n+([\s\S]*?)(?=\n##|\n#|$)/
+  const descRegex = /## Description[ \t]*\n+([\s\S]*?)(?=\n#|$)/
+  const highlightsRegex = /## Key Highlights:?[ \t]*\n+([\s\S]*?)(?=\n#|$)/
   const descMatch = descRegex.exec(body)
   const highlightsMatch = highlightsRegex.exec(body)
   if (descMatch || highlightsMatch) {
@@ -264,22 +264,22 @@ const stripLeadingEmoji = (s: string): string => {
   // Remove leading emojis/symbols commonly used as icons
   // Unicode ranges: \u{1F300}-\u{1FAFF} covers most emojis including \u{1F900}-\u{1F9FF}
   // eslint-disable-next-line no-misleading-character-class
-  return s.replaceAll(/^[\u200d\ufe0f\u2060\s]*[\u{1F300}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
+  return s.replaceAll(/^[\u200d\ufe0f\u2060]*[\u{1F300}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
 }
 
 const ensureBulletedTitleCaseLine = (raw: string): string => {
   const line = stripLeadingEmoji(raw.trim())
   if (!line || line.startsWith('##')) return raw
   // - **Label**: text
-  const regex1 = /^-\s*\*\*([^*]+)\*\*\s*:\s*(.*)$/
+  const regex1 = /^-[ \t]*\*\*([^*]+)\*\*[ \t]*:[ \t]*(.*)$/
   const m1 = regex1.exec(line)
   if (m1) return `- **${toTitleCaseLabel(stripLeadingEmoji(m1[1]))}**: ${m1[2]}`
   // **Label**: text
-  const regex2 = /^\*\*([^*]+)\*\*\s*:\s*(.*)$/
+  const regex2 = /^\*\*([^*]+)\*\*[ \t]*:[ \t]*(.*)$/
   const m2 = regex2.exec(line)
   if (m2) return `- **${toTitleCaseLabel(stripLeadingEmoji(m2[1]))}**: ${m2[2]}`
   // - Label: text
-  const regex3 = /^-\s*([^:]+)\s*:\s*(.*)$/
+  const regex3 = /^-[ \t]*(\S[^:]*\S|\S):[ \t]*(.*)$/
   const m3 = regex3.exec(line)
   if (m3) return `- **${toTitleCaseLabel(stripLeadingEmoji(m3[1]))}**: ${m3[2]}`
   // Label: text (leading letter, avoid headers/lists)
@@ -357,7 +357,7 @@ const parseBlueprintSections = (body: string) => { // NOSONAR: acceptable comple
   }
 
   for (const line of lines) {
-    const h2Regex = /^##\s+(.+)$/
+    const h2Regex = /^##\s+(\S.*)$/
     const h2Match = h2Regex.exec(line)
     if (h2Match) {
       if (currentSection) {
@@ -393,8 +393,8 @@ const parseGuideSections = (body: string) => { // NOSONAR: acceptable complexity
   let currentSection: { title: string; content: string[] } | null = null
 
   for (const line of lines) {
-    const h2Regex = /^##\s+(.+)$/
-    const h3Regex = /^###\s+(.+)$/
+    const h2Regex = /^##\s+(\S.*)$/
+    const h3Regex = /^###\s+(\S.*)$/
     const h2Match = h2Regex.exec(line)
     const h3Match = h3Regex.exec(line)
 

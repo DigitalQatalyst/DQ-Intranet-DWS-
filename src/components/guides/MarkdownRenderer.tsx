@@ -55,11 +55,11 @@ const isIconNode = (node: any): boolean => {
 
 const stripText = (s: string) => {
   return (s || '')
-    .replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '') // geometric shapes
-    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}]+\s*/u, '') // emoji basic
-    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F900}-\u{1F9FF}]+\s*/u, '') // emoji extended
-    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
-    .replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
+    .replace(/^[\u25A0-\u25FF][\u25A0-\u25FF\uFE0F\s]*/, '') // geometric shapes
+    .replace(/^[\s\u200d\u2060\ufe0f]*[\u{1F300}-\u{1FAFF}]+\s*/u, '') // emoji basic
+    .replace(/^[\s\u200d\u2060\ufe0f]*[\u{1F900}-\u{1F9FF}]+\s*/u, '') // emoji extended
+    .replace(/^[\s\u200d\u2060\ufe0f]*[\u{1F1E6}-\u{1F1FF}]+\s*/u, '') // flags
+    .replace(/^[\s\u200d\u2060\ufe0f]*[\u{2600}-\u{27BF}]+\s*/u, '') // symbols
 }
 
 const handleTextNode = (node: any, arr: any[]) => {
@@ -124,17 +124,17 @@ const sanitizeDecorators = (text: string): string => {
     const prefix = m ? m[1] : ''
     if (prefix) line = line.slice(prefix.length)
     // Remove leading geometric-shape arrows/bullets (includes ▶, ►, ▸ and many others)
-    line = line.replace(/^(?:[\u25A0-\u25FF]\uFE0F?\s*)+/, '')
+    line = line.replace(/^[\u25A0-\u25FF][\u25A0-\u25FF\uFE0F\s]*/, '')
     // Remove leading emoji pictographs
-    line = line.replace(/^(?:[\s\u200d\u2060]|\ufe0f)*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
+    line = line.replace(/^[\s\u200d\u2060\ufe0f]*[\u{1F300}-\u{1FAFF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
     // Replace leading markdown/HTML image icons with their alt text (to keep names)
     line = line
-      .replace(/^<img[^>]*alt=["']?([^"'>]+)[^>]*>\s*/i, '$1 ')
+      .replace(/^<img[^>]*?\balt=(?:"([^"]+)"|'([^']+)')[^>]*>\s*/i, '$1$2 ')
       .replace(/^!\[([^\]]*)\]\([^)]*\)\s*/i, '$1 ')
     // For list items: convert inline images to their alt text (remove icon but keep name)
     if (prefix) {
       line = line
-        .replace(/<img[^>]*alt=["']?([^"'>]+)[^>]*>/gi, '$1')
+        .replace(/<img[^>]*?\balt=(?:"([^"]+)"|'([^']+)")[^>]*>/gi, '$1$2')
         .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
     }
     // Drop stray heading-only lines like '#', '##', '###'

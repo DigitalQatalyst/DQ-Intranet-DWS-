@@ -62,7 +62,7 @@ function BlueprintPage() {
 
     for (const line of lines) {
       // Check for H2 headers (## Title)
-      const h2Match = line.match(/^##\s+(.+)$/)
+      const h2Match = line.match(/^##\s+(\S.*)$/)
       if (h2Match) {
         // Save previous section
         if (currentSection) {
@@ -79,7 +79,7 @@ function BlueprintPage() {
         } else if (title.toLowerCase().includes('ai tool')) {
           normalizedTitle = 'AI Tools'
         }
-        const id = normalizedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+        const id = normalizedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
         currentSection = { id, title: normalizedTitle, content: '' }
       } else if (currentSection) {
         currentSection.content += line + '\n'

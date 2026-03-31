@@ -56,7 +56,7 @@ const getHeadingFromContent = (content?: string): string => {
 const findMarkdownHeading = (lines: string[]): string => {
   for (const line of lines) {
     const trimmed = line.trim();
-    const headingMatch = trimmed.match(/^#+\s+(.+)$/);
+    const headingMatch = trimmed.match(/^#+\s+(\S.*)$/);
     if (!headingMatch) continue;
 
     const headingText = headingMatch[1].trim().replace(/\*\*/g, '').replace(/\*/g, '');

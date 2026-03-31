@@ -54,10 +54,10 @@ export const sanitizeHtml = (html: string): string => {
   let sanitized = removeScriptTags(html);
   
   // Remove dangerous attributes
-  sanitized = sanitized.replaceAll(/\s*on\w+\s*=\s*["'][^"']*["']/gi, ''); // onclick, onload, etc.
-  sanitized = sanitized.replaceAll(/\s*javascript\s*:/gi, ''); // javascript: URLs
-  sanitized = sanitized.replaceAll(/\s*data\s*:/gi, ''); // data: URLs
-  sanitized = sanitized.replaceAll(/\s*vbscript\s*:/gi, ''); // vbscript: URLs
+  sanitized = sanitized.replaceAll(/[ \t]*on\w+[ \t]*=[ \t]*["'][^"']*["']/gi, ''); // onclick, onload, etc.
+  sanitized = sanitized.replaceAll(/[ \t]*javascript[ \t]*:/gi, ''); // javascript: URLs
+  sanitized = sanitized.replaceAll(/[ \t]*data[ \t]*:/gi, ''); // data: URLs
+  sanitized = sanitized.replaceAll(/[ \t]*vbscript[ \t]*:/gi, ''); // vbscript: URLs
   
   // Remove dangerous tags
   const dangerousTags = ['object', 'embed', 'form', 'input', 'textarea', 'select', 'button', 'iframe', 'frame', 'frameset'];

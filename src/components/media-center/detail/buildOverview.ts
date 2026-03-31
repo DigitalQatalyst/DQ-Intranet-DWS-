@@ -62,7 +62,7 @@ const extractWFHProcessSteps = (content: string): string[] => {
   for (const line of lines) {
     const trimmed = line.trim();
 
-    if (trimmed.match(/^##+\s+.*[Ww]FH\s+[Pp]rocess/i) || trimmed.match(/^##+\s+.*[Pp]rocess/i)) {
+    if (trimmed.match(/^##+\s+(?=\S)[^\n]*[Ww]FH\s+(?=\S)[Pp]rocess/i) || trimmed.match(/^##+\s+(?=\S)[^\n]*[Pp]rocess/i)) {
       inProcessSection = true;
       continue;
     }
@@ -152,7 +152,7 @@ const extractContentSections = (content: string): string[] => {
       continue;
     }
 
-    const headingMatch = trimmed.match(/^##+\s+(.+)$/);
+    const headingMatch = trimmed.match(/^##+\s+(\S.*)$/);
     if (headingMatch) {
       flushSection();
       const headingText = headingMatch[1].trim().replace(/\*\*/g, '').replace(/\*/g, '');

@@ -25,7 +25,7 @@ type CategoryOption = (typeof CATEGORY_OPTIONS)[number];
 
 // Email validation helper
 const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
   return emailRegex.test(email.trim());
 };
 
