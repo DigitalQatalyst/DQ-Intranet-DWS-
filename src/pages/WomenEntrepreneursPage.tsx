@@ -169,8 +169,8 @@ const CampaignsCarousel = () => {
             Awareness <span className="text-teal-600">Campaigns</span>
           </h2>
           <p className="mt-3 text-gray-600 max-w-2xl mx-auto">
-            Upcoming events and initiatives to support women entrepreneurs across
-            the Emirates.
+            Upcoming events and initiatives to support women entrepreneurs
+            across the Emirates.
           </p>
         </div>
         <div
@@ -230,9 +230,7 @@ const CampaignsCarousel = () => {
           </button>
           <button
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 text-white p-3 rounded-full hover:bg-white/50 transition-colors"
-            onClick={() =>
-              setCurrentSlide((prev) => (prev + 1) % totalSlides)
-            }
+            onClick={() => setCurrentSlide((prev) => (prev + 1) % totalSlides)}
             aria-label="Next slide"
           >
             <ChevronRight />
@@ -255,6 +253,82 @@ const CampaignsCarousel = () => {
   );
 };
 
+function getStatIcon(iconName: string): React.ElementType {
+  switch (iconName) {
+    case "Users":
+      return Users;
+    case "DollarSign":
+      return (props: React.HTMLAttributes<HTMLElement>) => (
+        <span {...props}>د.إ</span>
+      );
+    case "Briefcase":
+      return (props: React.HTMLAttributes<HTMLElement>) => (
+        <span {...props}>💼</span>
+      );
+    case "UserPlus":
+      return (props: React.HTMLAttributes<HTMLElement>) => (
+        <span {...props}>🤝</span>
+      );
+    default:
+      return Users;
+  }
+}
+
+interface AnimatorState {
+  element: HTMLSpanElement;
+  numericValue: number;
+  finalValue: string;
+  duration: number;
+  start: number | null;
+}
+
+function runCounterFrame(state: AnimatorState, timestamp: number): void {
+  if (!state.start) state.start = timestamp;
+  const progress = Math.min((timestamp - state.start) / state.duration, 1);
+  state.element.textContent = new Intl.NumberFormat("en-US").format(
+    Math.floor(progress * state.numericValue),
+  );
+  if (progress < 1) {
+    requestAnimationFrame((ts) => runCounterFrame(state, ts));
+  } else {
+    state.element.textContent = state.finalValue;
+  }
+}
+
+function createCounterAnimator(
+  element: HTMLSpanElement,
+  numericValue: number,
+  finalValue: string,
+) {
+  const state: AnimatorState = {
+    element,
+    numericValue,
+    finalValue,
+    duration: 1500,
+    start: null,
+  };
+  return (timestamp: number) => runCounterFrame(state, timestamp);
+}
+
+function createCounterObserver(
+  element: HTMLSpanElement,
+  numericValue: number,
+  finalValue: string,
+): IntersectionObserver {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        requestAnimationFrame(
+          createCounterAnimator(element, numericValue, finalValue),
+        );
+        observer.disconnect();
+      }
+    },
+    { threshold: 0.5 },
+  );
+  return observer;
+}
+
 const ImpactStatsBar = () => {
   const countersRef = useRef<(HTMLSpanElement | null)[]>([]);
   useEffect(() => {
@@ -263,31 +337,14 @@ const ImpactStatsBar = () => {
       if (!element) return;
       const targetValue = impactStats[index];
       if (!targetValue) return;
-      const numericValue = parseInt(targetValue.value.replace(/[^0-9]/g, ""), 10);
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              let start: number | null = null;
-              const duration = 1500;
-              const animate = (timestamp: number) => {
-                if (!start) start = timestamp;
-                const progress = Math.min((timestamp - start) / duration, 1);
-                const current = Math.floor(progress * numericValue);
-                const formatted = new Intl.NumberFormat("en-US").format(current);
-                element.textContent = formatted;
-                if (progress < 1) {
-                  requestAnimationFrame(animate);
-                } else {
-                  element.textContent = targetValue.value;
-                }
-              };
-              requestAnimationFrame(animate);
-              observer.disconnect();
-            }
-          });
-        },
-        { threshold: 0.5 }
+      const numericValue = Number.parseInt(
+        targetValue.value.replaceAll(/\D/g, ""),
+        10,
+      );
+      const observer = createCounterObserver(
+        element,
+        numericValue,
+        targetValue.value,
       );
       observer.observe(element);
       observers.push(observer);
@@ -301,27 +358,16 @@ const ImpactStatsBar = () => {
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {impactStats.map((stat, index) => {
-            const IconComponent = (() => {
-              switch (stat.iconName) {
-                case "Users":
-                  return Users;
-                case "DollarSign":
-                  return ({ ...props }) => <span {...props}>د.إ</span>;
-                case "Briefcase":
-                  return ({ ...props }) => <span {...props}>💼</span>;
-                case "UserPlus":
-                  return ({ ...props }) => <span {...props}>🤝</span>;
-                default:
-                  return Users;
-              }
-            })();
+            const IconComponent = getStatIcon(stat.iconName);
             return (
               <div
                 key={stat.id}
                 className="relative overflow-hidden rounded-2xl bg-white/10 border border-white/15 p-6 backdrop-blur"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${stat.iconBgColor} ${stat.iconColor}`}>
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${stat.iconBgColor} ${stat.iconColor}`}
+                  >
                     {typeof IconComponent === "function" ? (
                       <IconComponent className="text-xl" />
                     ) : (
@@ -517,8 +563,8 @@ const CommunitiesResources = () => {
             Connect · Learn · <span className="text-teal-600">Grow</span>
           </h2>
           <p className="mt-3 text-gray-600 max-w-3xl mx-auto">
-            Discover communities, resources, and programs built to help women-led
-            ventures scale from the UAE to the world.
+            Discover communities, resources, and programs built to help
+            women-led ventures scale from the UAE to the world.
           </p>
         </div>
         <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 shadow-inner">
@@ -537,14 +583,16 @@ const CommunitiesResources = () => {
               >
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{item.title}</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      {item.title}
+                    </h3>
                     <p className="text-sm text-gray-500 mt-1">
                       {item.womenFocused ? "Women-focused" : "Inclusive"}
                     </p>
                   </div>
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${getEmirateColor(
-                      item.emirate
+                      item.emirate,
                     )}`}
                   >
                     {item.emirate}
@@ -720,7 +768,7 @@ const FeaturedStoriesSection = () => {
       ? featuredStories
       : featuredStories.filter(
           (story) =>
-            story.category.toLowerCase() === activeCategory.toLowerCase()
+            story.category.toLowerCase() === activeCategory.toLowerCase(),
         );
   return (
     <section className="py-16 md:py-20 bg-white" id="stories">
@@ -790,7 +838,7 @@ const FeaturedStoriesSection = () => {
 const ProgramsAndPartnersSection = () => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [activeSubTab, setActiveSubTab] = useState<"networks" | "hubs">(
-    "networks"
+    "networks",
   );
   const sections: TabSection[] = [
     { id: "programs", title: "Programs" },
@@ -1107,10 +1155,10 @@ const JoinCommunitySection = () => {
                 Join the UAE&apos;s Women Entrepreneurship Movement
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Be part of a connected network of founders, mentors, and partners
-                shaping the UAE&apos;s global entrepreneurship story. Share your
-                journey, learn from others, and contribute to the growing
-                ecosystem.
+                Be part of a connected network of founders, mentors, and
+                partners shaping the UAE&apos;s global entrepreneurship story.
+                Share your journey, learn from others, and contribute to the
+                growing ecosystem.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
@@ -1190,7 +1238,7 @@ const SmartAssistant = () => {
     setIsTyping(true);
     const answer =
       assistantData.find((item) =>
-        item.question.toLowerCase().includes(userMessage.content.toLowerCase())
+        item.question.toLowerCase().includes(userMessage.content.toLowerCase()),
       )?.answer ??
       "I don't have specific information on that topic yet. Try asking about funding, mentorship, networking, tech startups, or export assistance.";
     setTimeout(() => {
@@ -1311,8 +1359,8 @@ const RegionalHighlightsSection = () => {
               Regional Highlights
             </h2>
             <p className="mt-2 text-gray-600 max-w-xl">
-              Explore women entrepreneur communities across the seven emirates of
-              the UAE.
+              Explore women entrepreneur communities across the seven emirates
+              of the UAE.
             </p>
           </div>
           <div className="hidden md:flex gap-2">
@@ -1400,4 +1448,3 @@ const WomenEntrepreneursPage = () => {
 };
 
 export default WomenEntrepreneursPage;
-
