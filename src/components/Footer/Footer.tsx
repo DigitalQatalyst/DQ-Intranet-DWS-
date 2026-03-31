@@ -52,13 +52,6 @@ export function Footer({
       href: 'https://digitalqatalyst.com/'
     }
   ];
-  const getToKnowUsLinks = [
-    'About DQ Workspace',
-    'Help Centre',
-    'DQ Governance & Guidelines',
-    'Privacy Policy',
-    'Terms of Use'
-  ];
   const FOR_YOU_ITEMS = [
     { label: 'DQ Learning Center', type: 'route', href: '/lms' },
     { label: 'Services & Requests', type: 'external', href: 'https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl' },
@@ -106,21 +99,6 @@ export function Footer({
         </div>
         {/* Accordion Sections */}
         <div className="mb-8">
-          <AccordionSection title="Get to Know Us">
-            <ul className="space-y-3">
-              {getToKnowUsLinks.map((label) => (
-                <li key={label}>
-                  <button
-                    type="button"
-                    onClick={() => handleFooterLinkClick(label)}
-                    className="text-white/90 hover:text-white transition-colors text-sm block text-left w-full"
-                  >
-                    {label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </AccordionSection>
           <AccordionSection title="For You">
             <ul className="space-y-3">
               {FOR_YOU_ITEMS.map((item) => (
@@ -173,7 +151,7 @@ export function Footer({
       {/* Desktop Layout */}
       <div className="hidden lg:block">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-4 gap-12 mb-8">
+        <div className="grid grid-cols-3 gap-12 mb-8">
           {/* Logo and Newsletter Section */}
           <div>
             <div className="mb-6">
@@ -196,23 +174,6 @@ export function Footer({
                 </button>
               </div>
             </div>
-          </div>
-          {/* Get to Know Us */}
-          <div>
-            <h3 className="font-semibold text-lg mb-6">Get to Know Us</h3>
-            <ul className="space-y-4">
-              {getToKnowUsLinks.map((label) => (
-                <li key={label}>
-                  <button
-                    type="button"
-                    onClick={() => handleFooterLinkClick(label)}
-                    className="text-white/90 hover:text-white transition-colors text-sm text-left w-full"
-                  >
-                    {label}
-                  </button>
-                </li>
-              ))}
-            </ul>
           </div>
           {/* For You */}
           <div>
