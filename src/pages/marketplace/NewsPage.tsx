@@ -37,7 +37,6 @@ const SECONDARY_FACETS: Record<MediaCenterTabKey, FacetConfig[]> = {
     }
   ],
   insights: [
-    { key: 'location', label: 'Location', options: LOCATION_OPTIONS },
     {
       key: 'readingTime',
       label: 'Reading Time',

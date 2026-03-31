@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
@@ -8,6 +8,7 @@ import { HeroSection } from '@/components/media-center/detail/HeroSection';
 import { ArticleContent } from '@/components/media-center/detail/ArticleContent';
 import { ArticleSummary } from '@/components/media-center/detail/ArticleSummary';
 import { ErrorState } from '@/components/media-center/detail/ErrorState';
+import { ArticleSkeleton } from '@/components/media-center/detail/ArticleSkeleton';
 
 const NewsDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,7 +18,20 @@ const NewsDetailPage: React.FC = () => {
   const { article, related, isLoading, loadError } = useArticleData(id);
   useEngagementMetrics(id, article?.id);
 
+  useEffect(() => {
+    globalThis.window?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, [id]);
+
   if (!article) {
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex flex-col bg-background">
+          <Header toggleSidebar={() => {}} sidebarOpen={false} />
+          <ArticleSkeleton />
+          <Footer isLoggedIn={false} />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header toggleSidebar={() => {}} sidebarOpen={false} />

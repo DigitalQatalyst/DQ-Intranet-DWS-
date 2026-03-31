@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 import type { NewsItem } from '@/data/media/news';
 import { getNewsTypeDisplay } from '@/utils/newsUtils';
@@ -150,12 +150,15 @@ const RelatedSection = ({
   if (!items.length) return null;
 
   const filtered = (() => {
-    if (kind === 'blog') return items.filter(i => i.type === 'Thought Leadership' && i.format !== 'Podcast');
-    if (kind === 'podcast') return items.filter(i => i.format === 'Podcast' || i.tags?.some(t => t.toLowerCase().includes('podcast')));
-    return items.filter(i => i.type !== 'Thought Leadership');
+    const nonArchived = items.filter(i => !i.archived);
+    if (kind === 'blog') return nonArchived.filter(i => i.type === 'Thought Leadership' && i.format !== 'Podcast');
+    if (kind === 'podcast') return nonArchived.filter(i => i.format === 'Podcast' || i.tags?.some(t => t.toLowerCase().includes('podcast')));
+    return nonArchived.filter(i => i.type !== 'Thought Leadership');
   })();
 
-  const visible = filtered.slice(0, 3);
+  // Sort by date descending so the newest related items are shown first
+  const sorted = [...filtered].sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime());
+  const visible = sorted.slice(0, 3);
   if (!visible.length) return null;
 
   const heading = kind === 'blog' ? 'Related Blogs' : kind === 'podcast' ? 'Related Podcasts' : 'Related Announcements';
@@ -165,12 +168,12 @@ const RelatedSection = ({
     <section className="border-t border-border bg-muted/30 px-0 py-12 mt-8">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-foreground">{heading}</h2>
-        <a
-          href={`/marketplace/media-center${locationSearch || ''}`}
+        <Link
+          to={`/marketplace/media-center${locationSearch || ''}`}
           className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           {browseLabel} <ArrowRight className="h-4 w-4" />
-        </a>
+        </Link>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map(item => {
@@ -191,12 +194,12 @@ const RelatedSection = ({
               <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2 flex-grow">
                 {item.excerpt || 'No description available.'}
               </p>
-              <a
-                href={`/marketplace/news/${item.id}${locationSearch || ''}`}
+              <Link
+                to={`/marketplace/news/${item.id}${locationSearch || ''}`}
                 className="flex items-center gap-1 text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors mt-1"
               >
                 {linkLabel} <ArrowRight className="h-3 w-3" />
-              </a>
+              </Link>
             </div>
           );
         })}

@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import type { NewsItem } from '@/data/media/news';
 import { HeroSection } from '@/components/media-center/detail/HeroSection';
 import { ArticleSummary } from '@/components/media-center/detail/ArticleSummary';
+import { ArticleSkeleton } from '@/components/media-center/detail/ArticleSkeleton';
 import { SeriesTabContent } from '@/components/podcast/SeriesTabContent';
 import { AudioPlayerBar } from '@/components/podcast/AudioPlayerBar';
 import { usePodcastEpisodes } from './hooks/usePodcastEpisodes';
@@ -156,9 +157,9 @@ export default function PodcastSeriesPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col bg-gray-50">
+      <div className="flex min-h-screen flex-col bg-white">
         <Header />
-        <main className="flex-1 p-8"><div className="mx-auto max-w-7xl text-center text-gray-600">Loading...</div></main>
+        <ArticleSkeleton />
         <Footer />
       </div>
     );
@@ -235,30 +236,30 @@ export default function PodcastSeriesPage() {
       <section className="mx-auto px-6 py-10 border-t border-border" style={{ maxWidth: '1336px' }}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-foreground">Related Podcasts</h2>
-          <a href={`/marketplace/media-center?tab=podcasts${location.search ? '&' + location.search.slice(1) : ''}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+          <Link to={`/marketplace/media-center?tab=podcasts${location.search ? '&' + location.search.slice(1) : ''}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
             Browse all podcasts <span>→</span>
-          </a>
+          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {!isExecutionMindsetSeries && (
-            <div className="flex flex-col rounded-2xl p-6 bg-card border border-border hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer" onClick={() => navigate(`/marketplace/news/the-execution-mindset${location.search}`)}>
+            <Link to={`/marketplace/news/the-execution-mindset${location.search}`} className="flex flex-col rounded-2xl p-6 bg-card border border-border hover:shadow-md hover:-translate-y-1 transition-all no-underline">
               <div className="flex flex-col flex-grow space-y-3">
                 <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide text-muted-foreground border border-border self-start">Podcast</span>
                 <h3 className="text-base font-semibold text-foreground leading-snug">The Execution Mindset</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-grow">Short conversations that solve real work problems at DQ.</p>
                 <span className="inline-flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors mt-auto">Listen now →</span>
               </div>
-            </div>
+            </Link>
           )}
           {isExecutionMindsetSeries && (
-            <div className="flex flex-col rounded-2xl p-6 bg-card border border-border hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer" onClick={() => navigate(`/marketplace/news/action-solver-podcast${location.search}`)}>
+            <Link to={`/marketplace/news/action-solver-podcast${location.search}`} className="flex flex-col rounded-2xl p-6 bg-card border border-border hover:shadow-md hover:-translate-y-1 transition-all no-underline">
               <div className="flex flex-col flex-grow space-y-3">
                 <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide text-muted-foreground border border-border self-start">Podcast</span>
                 <h3 className="text-base font-semibold text-foreground leading-snug">Action-Solver Podcast</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-grow">Short conversations that solve real work problems at DQ.</p>
                 <span className="inline-flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors mt-auto">Listen now →</span>
               </div>
-            </div>
+            </Link>
           )}
         </div>
       </section>

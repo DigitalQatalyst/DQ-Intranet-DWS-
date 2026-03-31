@@ -13,6 +13,11 @@ export function useArticleData(id: string | undefined) {
     if (!id) return;
     let isMounted = true;
 
+    // Reset immediately so the skeleton shows while the new article loads
+    setArticle(null);
+    setRelated([]);
+    setLoadError(null);
+
     async function loadArticle() {
       setIsLoading(true);
       try {
@@ -21,7 +26,7 @@ export function useArticleData(id: string | undefined) {
         setArticle(item);
         
         // Filter related articles based on current article type
-        let filteredRelated = allNews.filter((newsItem) => newsItem.id !== id);
+        let filteredRelated = allNews.filter((newsItem) => newsItem.id !== id && !newsItem.archived);
         
         // If current article is a blog, only show other blogs
         if (item && item.type === 'Thought Leadership' && item.format !== 'Podcast') {
@@ -29,7 +34,10 @@ export function useArticleData(id: string | undefined) {
             (newsItem) => newsItem.type === 'Thought Leadership' && newsItem.format !== 'Podcast'
           );
         }
-        
+
+        // Sort by date descending so newest items always appear first
+        filteredRelated.sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime());
+
         setRelated(filteredRelated.slice(0, 6));
         if (item) {
           markMediaItemSeen('news', item.id);
