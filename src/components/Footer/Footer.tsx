@@ -59,12 +59,12 @@ export function Footer({
     'Privacy Policy',
     'Terms of Use'
   ];
-  const forYouLinks = [
-    'DQ LMS Courses',
-    'Services & Requests',
-    'Communities & Surveys',
-    'News & Announcements'
-  ];
+  const FOR_YOU_ITEMS = [
+    { label: 'DQ Learning Center', type: 'route', href: '/lms' },
+    { label: 'Services & Requests', type: 'external', href: 'https://forms.office.com/pages/responsepage.aspx?id=Db2eGYYpPU-GWUOIxbKnJCT2lmSqJbRJkPMD7v6Rk31UNjlVQjlRSjFBUk5MSTNGUDJNTjk0S1NMVi4u&route=shorturl' },
+    { label: 'Communities & Surveys', type: 'coming-soon' },
+    { label: 'News & Announcements', type: 'route', href: '/marketplace/media-center?tab=announcements' },
+  ] as const;
   // Minimal App Footer (Post-login)
   if (isLoggedIn) {
     return <footer data-id={dataId} className="bg-gray-50 border-t border-gray-100 w-full h-10">
@@ -123,20 +123,23 @@ export function Footer({
           </AccordionSection>
           <AccordionSection title="For You">
             <ul className="space-y-3">
-              <li>
-                <a href="/lms" className="text-white/90 hover:text-white transition-colors text-sm block">
-                  DQ Learning Center
-                </a>
-              </li>
-              {forYouLinks.filter(label => label !== 'DQ LMS Courses').map((label) => (
-                <li key={label}>
-                  <button
-                    type="button"
-                    onClick={() => handleFooterLinkClick(label)}
-                    className="text-white/90 hover:text-white transition-colors text-sm block text-left w-full"
-                  >
-                    {label}
-                  </button>
+              {FOR_YOU_ITEMS.map((item) => (
+                <li key={item.label}>
+                  {item.type === 'route' && (
+                    <a href={item.href} className="text-white/90 hover:text-white transition-colors text-sm block">
+                      {item.label}
+                    </a>
+                  )}
+                  {item.type === 'external' && (
+                    <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-white/90 hover:text-white transition-colors text-sm block">
+                      {item.label}
+                    </a>
+                  )}
+                  {item.type === 'coming-soon' && (
+                    <span className="text-white/40 text-sm cursor-not-allowed select-none">
+                      {item.label}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -215,20 +218,23 @@ export function Footer({
           <div>
             <h3 className="font-semibold text-lg mb-6">For You</h3>
             <ul className="space-y-4">
-              <li>
-                <a href="/lms" className="text-white/90 hover:text-white transition-colors text-sm">
-                  DQ Learning Center
-                </a>
-              </li>
-              {forYouLinks.filter(label => label !== 'DQ LMS Courses').map((label) => (
-                <li key={label}>
-                  <button
-                    type="button"
-                    onClick={() => handleFooterLinkClick(label)}
-                    className="text-white/90 hover:text-white transition-colors text-sm text-left w-full"
-                  >
-                    {label}
-                  </button>
+              {FOR_YOU_ITEMS.map((item) => (
+                <li key={item.label}>
+                  {item.type === 'route' && (
+                    <a href={item.href} className="text-white/90 hover:text-white transition-colors text-sm">
+                      {item.label}
+                    </a>
+                  )}
+                  {item.type === 'external' && (
+                    <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-white/90 hover:text-white transition-colors text-sm">
+                      {item.label}
+                    </a>
+                  )}
+                  {item.type === 'coming-soon' && (
+                    <span className="text-white/40 text-sm cursor-not-allowed select-none">
+                      {item.label}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
