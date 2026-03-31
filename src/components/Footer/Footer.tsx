@@ -133,67 +133,62 @@ export function Footer({
       </div>
       {/* Desktop Layout */}
       <div className="hidden lg:block">
-        {/* Main Footer Content */}
-        <div className="flex items-start justify-between mb-8">
+        {/* Top: Logo + columns side by side */}
+        <div className="flex items-start justify-between mb-10">
           {/* Logo */}
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              DQ | Digital
-              <br />
-              Workspace
-            </h2>
-          </div>
-          {/* For You */}
-          <div>
-            <h3 className="font-semibold text-lg mb-6">For You</h3>
-            <ul className="space-y-4">
-              {FOR_YOU_ITEMS.map((item) => (
-                <li key={item.label}>
-                  {item.type === 'route' && (
-                    <a href={item.href} className="text-white/90 hover:text-white transition-colors text-sm">
+          <h2 className="text-2xl font-bold tracking-tight leading-snug">
+            DQ | Digital<br />Workspace
+          </h2>
+          {/* Links */}
+          <div className="flex gap-24">
+            {/* For You */}
+            <div>
+              <h3 className="font-semibold text-base mb-5">For You</h3>
+              <ul className="space-y-3">
+                {FOR_YOU_ITEMS.map((item) => (
+                  <li key={item.label}>
+                    {item.type === 'route' && (
+                      <a href={item.href} className="text-white/80 hover:text-white transition-colors text-sm">
+                        {item.label}
+                      </a>
+                    )}
+                    {item.type === 'external' && (
+                      <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white transition-colors text-sm">
+                        {item.label}
+                      </a>
+                    )}
+                    {item.type === 'coming-soon' && (
+                      <span className="text-white/30 text-sm cursor-not-allowed select-none">{item.label}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Find Us */}
+            <div>
+              <h3 className="font-semibold text-base mb-5">Find Us</h3>
+              <ul className="space-y-3">
+                {externalLinks.map((item) => (
+                  <li key={item.label}>
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/80 hover:text-white transition-colors text-sm inline-flex items-center gap-1.5"
+                    >
                       {item.label}
+                      <ExternalLink size={12} />
                     </a>
-                  )}
-                  {item.type === 'external' && (
-                    <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-white/90 hover:text-white transition-colors text-sm">
-                      {item.label}
-                    </a>
-                  )}
-                  {item.type === 'coming-soon' && (
-                    <span className="text-white/40 text-sm cursor-not-allowed select-none">
-                      {item.label}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-          {/* Find Us */}
-          <div>
-            <h3 className="font-semibold text-lg mb-6">Find Us</h3>
-            <ul className="space-y-4">
-              {externalLinks.map((item) => (
-                <li key={item.label}>
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/90 hover:text-white transition-colors text-sm inline-flex items-center gap-2"
-                  >
-                    {item.label}
-                    <ExternalLink size={14} />
-                  </a>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
         {/* Copyright - Desktop */}
-        <div className="border-t border-dq-navy/20 pt-6 flex items-center justify-between">
-          <p className="text-white/70 text-sm">
-            © 2025 DQ | Digital Workspace. All rights reserved.
-          </p>
-          <p className="text-white/70 text-sm">Version v2.1.0</p>
+        <div className="border-t border-white/10 pt-5 flex items-center justify-between">
+          <p className="text-white/50 text-xs">© 2025 DQ | Digital Workspace. All rights reserved.</p>
+          <p className="text-white/50 text-xs">Version v2.1.0</p>
         </div>
       </div>
     </div>
