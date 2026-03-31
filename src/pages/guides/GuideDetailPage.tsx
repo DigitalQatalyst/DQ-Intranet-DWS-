@@ -8,6 +8,14 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useParams, Link } from 'react-router-dom'
+import { fromMarkdown } from 'mdast-util-from-markdown'
+import type { Heading } from 'mdast'
+import { visit, SKIP } from 'unist-util-visit'
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import emojiRegex from 'emoji-regex'
+// @ts-expect-error — github-slugger v1.5.0 has no bundled type declarations
+import GithubSlugger from 'github-slugger'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { ChevronRightIcon, HomeIcon, CheckCircle, Download, AlertTriangle, ExternalLink } from 'lucide-react'
@@ -192,25 +200,39 @@ const buildGuideFlags = (guide: GuideRecord | null): GuideFlags => {
 const isValidDomainForSections = (domain?: string | null) =>
   ['Guidelines', 'Strategy', 'Testimonials', 'Testimonial', 'Blueprint'].includes(domain || '')
 
+const _getHeadingText = (h: Heading): string =>
+  h.children.map(c => ('value' in c ? (c as { value: string }).value : '')).join('').replace(/\*\*/g, '').trim()
+
+const _getHeadingContent = (lines: string[], h: Heading, nextH?: Heading): string => {
+  const startLine = h.position!.end.line  // 1-based; used as 0-based slice index into lines[]
+  const endLine = nextH ? nextH.position!.start.line - 1 : lines.length
+  return lines.slice(startLine, endLine).join('\n').trim()
+}
+
 const extractOverview = (body: string): GuideSection | null => {
-  const descRegex = /## Description[ \t]*\n+([^\n][\s\S]*?)?(?=\n#|$)/
-  const highlightsRegex = /## Key Highlights:?[ \t]*\n+([^\n][\s\S]*?)?(?=\n#|$)/
-  const descMatch = descRegex.exec(body)
-  const highlightsMatch = highlightsRegex.exec(body)
-  if (descMatch || highlightsMatch) {
+  const tree = fromMarkdown(body)
+  const lines = body.split('\n')
+  const h2s = tree.children.filter((n): n is Heading => n.type === 'heading' && n.depth === 2)
+
+  const descIdx = h2s.findIndex(h => _getHeadingText(h).toLowerCase() === 'description')
+  const khIdx = h2s.findIndex(h => _getHeadingText(h).toLowerCase().startsWith('key highlights'))
+
+  if (descIdx !== -1 || khIdx !== -1) {
     let overviewContent = ''
-    if (descMatch) overviewContent += (descMatch[1] ?? '').trim() + '\n\n'
-    if (highlightsMatch) overviewContent += '## Key Highlights\n\n' + (highlightsMatch[1] ?? '').trim()
-    return { id: 'overview', title: 'Overview', content: overviewContent }
+    if (descIdx !== -1) overviewContent += _getHeadingContent(lines, h2s[descIdx], h2s[descIdx + 1]) + '\n\n'
+    if (khIdx !== -1) overviewContent += '## Key Highlights\n\n' + _getHeadingContent(lines, h2s[khIdx], h2s[khIdx + 1])
+    return { id: 'overview', title: 'Overview', content: overviewContent.trim() }
   }
-  const firstSectionRegex = /^# [^\n]+\n\n([^\n][\s\S]*?)?(?=\n#|$)/
-  const firstSectionMatch = firstSectionRegex.exec(body)
-  if (firstSectionMatch?.[1]?.trim()) {
-    const sectionCount = (body.match(/^## /gm) || []).length
-    if (sectionCount > 1) {
-      return { id: 'overview', title: 'Overview', content: firstSectionMatch[1].trim() }
-    }
+
+  // Fallback: first content block after H1, if multiple H2s exist
+  const h1 = tree.children.find((n): n is Heading => n.type === 'heading' && n.depth === 1)
+  if (h1 && h2s.length > 1) {
+    const startLine = h1.position!.end.line
+    const endLine = h2s[0].position!.start.line - 1
+    const content = lines.slice(startLine, endLine).join('\n').trim()
+    if (content) return { id: 'overview', title: 'Overview', content }
   }
+
   return null
 }
 
@@ -226,46 +248,39 @@ const pushSection = (
 }
 
 const splitSections = (body: string, hasOverview: boolean): GuideSection[] => {
+  const tree = fromMarkdown(body)
   const lines = body.split('\n')
   const processed = new Set<string>(['overview', 'description', 'key-highlights'])
   const sections: GuideSection[] = []
-  let current: { id: string; title: string; content: string[] } | null = null
 
-  for (const line of lines) {
-    const trimmed = line.trim()
-    const isH2 = trimmed.startsWith('## ') && !trimmed.startsWith('### ')
-    if (isH2) {
-      if (current && current.content.length > 0) {
-        pushSection(sections, processed, current)
-      }
-      const title = line.replaceAll(/^##\s+/, '').trim().replaceAll('**', '').trim()
-      const skip = hasOverview && (title === 'Description' || title === 'Key Highlights')
-      if (skip) {
-        current = null
-        continue
-      }
-      const sectionId = title.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')
-      current = { id: sectionId, title, content: [] }
-    } else if (current) {
-      current.content.push(line)
+  const h2s = tree.children.filter((n): n is Heading => n.type === 'heading' && n.depth === 2)
+
+  h2s.forEach((h, idx) => {
+    const title = _getHeadingText(h)
+    const skip = hasOverview && (title === 'Description' || title === 'Key Highlights')
+    if (skip) return
+
+    const sectionId = GithubSlugger.slug(title)
+    if (processed.has(sectionId)) return
+
+    const content = _getHeadingContent(lines, h, h2s[idx + 1])
+    if (content.length > 0) {
+      processed.add(sectionId)
+      sections.push({ id: sectionId, title, content })
     }
-  }
-
-  if (current && current.content.length > 0) {
-    pushSection(sections, processed, current)
-  }
+  })
 
   return sections
 }
 
 const toTitleCaseLabel = (s: string): string => (s || '').split(/\s+/).map(w => w ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(' ')
 
-const stripLeadingEmoji = (s: string): string => {
-  // Remove leading emojis/symbols commonly used as icons
-  // Unicode ranges: \u{1F300}-\u{1FAFF} covers most emojis including \u{1F900}-\u{1F9FF}
-  // eslint-disable-next-line no-misleading-character-class
-  return s.replaceAll(/^[\u200d\ufe0f\u2060]*[\u{1F300}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{27BF}]+\s*/u, '')
-}
+const _emojiRe = emojiRegex()
+const stripLeadingEmoji = (s: string): string =>
+  s.replace(_emojiRe, '').trimStart()
+
+// Module-scope processor — built once, reused for every derivedSummary computation
+const _mdProcessor = unified().use(remarkParse)
 
 const ensureBulletedTitleCaseLine = (raw: string): string => {
   const line = stripLeadingEmoji(raw.trim())
@@ -336,11 +351,9 @@ const makeFeaturesPrecise = (_content: string): string => {
   return standardFeatures.map(f => `- **${f.title}**: ${f.description}`).join('\n')
 }
 
-const parseBlueprintSections = (body: string) => { // NOSONAR: acceptable complexity for parsing markdown
+const parseBlueprintSections = (body: string) => {
   const sections: Record<string, string> = {}
   const lines = body.split('\n')
-  let currentSection = ''
-  let currentContent: string[] = []
 
   const sectionMappings: Record<string, string> = {
     'overview': 'Overview',
@@ -356,89 +369,44 @@ const parseBlueprintSections = (body: string) => { // NOSONAR: acceptable comple
     'template': 'Templates'
   }
 
-  for (const line of lines) {
-    const h2Regex = /^##\s+(\S.*)$/
-    const h2Match = h2Regex.exec(line)
-    if (h2Match) {
-      if (currentSection) {
-        const content = currentContent.join('\n').trim()
-        if (currentSection === 'Features') {
-          sections[currentSection] = makeFeaturesPrecise(content)
-        } else {
-          sections[currentSection] = content
-        }
-      }
-      const sectionTitle = h2Match[1].trim().replaceAll('**', '')
-      const normalized = sectionTitle.toLowerCase()
-      currentSection = sectionMappings[normalized] || sectionTitle
-      currentContent = []
-    } else {
-      currentContent.push(line)
-    }
-  }
-  if (currentSection) {
-    const content = currentContent.join('\n').trim()
-    if (currentSection === 'Features') {
-      sections[currentSection] = makeFeaturesPrecise(content)
-    } else {
-      sections[currentSection] = content
-    }
-  }
+  const tree = fromMarkdown(body)
+  const h2s = tree.children.filter((n): n is Heading => n.type === 'heading' && n.depth === 2)
+
+  h2s.forEach((h, idx) => {
+    const rawTitle = _getHeadingText(h)
+    const normalized = rawTitle.toLowerCase()
+    const sectionKey = sectionMappings[normalized] || rawTitle
+    const content = _getHeadingContent(lines, h, h2s[idx + 1])
+    sections[sectionKey] = sectionKey === 'Features' ? makeFeaturesPrecise(content) : content
+  })
+
   return sections
 }
 
-const parseGuideSections = (body: string) => { // NOSONAR: acceptable complexity for parsing markdown
+const parseGuideSections = (body: string) => {
   const sections: Array<{ title: string; content: string; isTile?: boolean }> = []
+  const tree = fromMarkdown(body)
   const lines = body.split('\n')
-  let currentSection: { title: string; content: string[] } | null = null
 
-  for (const line of lines) {
-    const h2Regex = /^##\s+(\S.*)$/
-    const h3Regex = /^###\s+(\S.*)$/
-    const h2Match = h2Regex.exec(line)
-    const h3Match = h3Regex.exec(line)
-
-    if (h3Match) {
-      const h3Title = h3Match[1].trim().replaceAll('**', '').trim()
-      const normalizedH3 = h3Title.toLowerCase()
-
-      if (normalizedH3 === 'ai tools' || normalizedH3 === 'model provider') {
-        if (currentSection && currentSection.content.length > 0) {
-          let content = currentSection.content.join('\n').trim()
-          if (currentSection.title.toLowerCase().includes('feature')) {
-            content = makeFeaturesPrecise(content)
-          }
-          sections.push({ title: currentSection.title, content })
-        }
-        currentSection = { title: h3Title, content: [] }
-        continue
-      }
+  // Collect h2 nodes and qualifying h3 nodes (AI Tools / Model Provider) in document order
+  const relevantNodes = tree.children.filter((n): n is Heading => {
+    if (n.type !== 'heading') return false
+    if (n.depth === 2) return true
+    if (n.depth === 3) {
+      const t = _getHeadingText(n).toLowerCase()
+      return t === 'ai tools' || t === 'model provider'
     }
+    return false
+  })
 
-    if (h2Match) {
-      if (currentSection && currentSection.content.length > 0) {
-        let content = currentSection.content.join('\n').trim()
-        if (currentSection.title.toLowerCase().includes('feature')) {
-          content = makeFeaturesPrecise(content)
-        }
-        const isTile = currentSection.title.toLowerCase() === 'ai tools' || currentSection.title.toLowerCase() === 'model provider'
-        sections.push({ title: currentSection.title, content, isTile })
-      }
-      let title = h2Match[1].trim()
-      title = title.replaceAll('**', '').trim()
-      currentSection = { title, content: [] }
-    } else if (currentSection) {
-      currentSection.content.push(line)
-    }
-  }
-  if (currentSection && currentSection.content.length > 0) {
-    let content = currentSection.content.join('\n').trim()
-    if (currentSection.title.toLowerCase().includes('feature')) {
-      content = makeFeaturesPrecise(content)
-    }
-    const isTile = currentSection.title.toLowerCase() === 'ai tools' || currentSection.title.toLowerCase() === 'model provider'
-    sections.push({ title: currentSection.title, content, isTile })
-  }
+  relevantNodes.forEach((h, idx) => {
+    const title = _getHeadingText(h)
+    const isTile = title.toLowerCase() === 'ai tools' || title.toLowerCase() === 'model provider'
+    let content = _getHeadingContent(lines, h, relevantNodes[idx + 1])
+    if (title.toLowerCase().includes('feature')) content = makeFeaturesPrecise(content)
+    sections.push({ title, content, isTile })
+  })
+
   return sections
 }
 
@@ -869,16 +837,14 @@ const TAB_LABELS: Record<GuideTabKey, string> = {
     if (guide.summary && guide.summary.trim().length > 0) return guide.summary.trim()
     const src = guide.body || ''
     if (!src) return null
-    // Strip basic Markdown/HTML for a clean snippet
-    const withoutMd = src
-      .replaceAll(/```[\s\S]*?```/g, ' ') // code blocks
-      .replaceAll(/`[^`]*`/g, ' ') // inline code
-      .replaceAll(/^#+\s.*$/gm, ' ') // headings
-      .replaceAll(/\*\*|__/g, '') // bold markers
-      .replaceAll(/\*|_|~|>\s?/g, ' ') // other markers
-      .replaceAll(/<[^>]+>/g, ' ') // html tags
-      .replaceAll(/\s+/g, ' ') // collapse spaces
-      .trim()
+    // Extract plain text from markdown AST — no regex stripping needed
+    const tree = _mdProcessor.parse(src)
+    const parts: string[] = []
+    visit(tree, (node) => {
+      if (node.type === 'heading' || node.type === 'code' || node.type === 'html') return SKIP
+      if (node.type === 'text') parts.push((node as { type: string; value: string }).value)
+    })
+    const withoutMd = parts.join(' ').replace(/\s+/g, ' ').trim()
     if (!withoutMd) return null
     const max = 480
     if (withoutMd.length <= max) return withoutMd
