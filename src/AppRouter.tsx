@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "./components/Header";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
 import { CommunitiesRouter } from "./communities/CommunitiesRouter";
@@ -47,61 +48,63 @@ export function AppRouter() {
       <AuthProvider>
         <DWSChatProvider>
             <Routes>
-            <Route path="/discover-dq" element={<ComingSoonPage />} />
+            {/* Public routes — no auth required */}
+            <Route path="/404" element={<NotFound />} />
             <Route path="/coming-soon" element={<ComingSoonPage />} />
             <Route path="/growth-sectors-coming-soon" element={<GrowthSectorsComingSoon />} />
-            <Route path="/products" element={<SixXDProductsLanding />} />
-            <Route path="/dq-products" element={<SixXDProductsLanding />} />
-            <Route path="/knowledge-center/products" element={<SixXDProductsLanding />} />
+
+            {/* All other routes require authentication */}
+            <Route path="/discover-dq" element={<ProtectedRoute><ComingSoonPage /></ProtectedRoute>} />
+            <Route path="/products" element={<ProtectedRoute><SixXDProductsLanding /></ProtectedRoute>} />
+            <Route path="/dq-products" element={<ProtectedRoute><SixXDProductsLanding /></ProtectedRoute>} />
+            <Route path="/knowledge-center/products" element={<ProtectedRoute><SixXDProductsLanding /></ProtectedRoute>} />
             {/* Strategy pages */}
-            <Route path="/ghc" element={<GHCLanding />} />
-            <Route path="/6xd" element={<SixXDLanding />} />
-            <Route path="/6xd-products" element={<SixXDProductsLanding />} />
+            <Route path="/ghc" element={<ProtectedRoute><GHCLanding /></ProtectedRoute>} />
+            <Route path="/6xd" element={<ProtectedRoute><SixXDLanding /></ProtectedRoute>} />
+            <Route path="/6xd-products" element={<ProtectedRoute><SixXDProductsLanding /></ProtectedRoute>} />
             {/* LMS */}
-            <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
-            <Route path="/lms" element={<LmsCourses />} />
-            <Route path="/lms/:slug/reviews" element={<LmsCourseReviewsPage />} />
-            <Route path="/lms/:slug/assessment" element={<LmsCourseAssessmentPage />} />
-            <Route path="/lms/:courseSlug/lesson/:lessonId" element={<LmsLessonPage />} />
-            <Route path="/lms/:slug" element={<LmsCourseDetailPageWrapper />} />
-            
-            {/* Onboarding - specific routes before wildcard */}
-            <Route path="/onboarding/welcome" element={<OnboardingLanding />} />
-            <Route path="/onboarding/journey" element={<OnboardingJourney />} />
-            <Route path="/onboarding/start" element={<div>HR-style form lives here</div>} />
-            <Route path="/onboarding/profile" element={<div className="p-10 text-center text-lg font-semibold text-[#030F35]">Profile setup experience will be available shortly.</div>} />
-            <Route path="/onboarding/tools" element={<div className="p-10 text-center text-lg font-semibold text-[#030F35]">Tool exploration hub is on the way.</div>} />
-            <Route path="/onboarding/first-task" element={<div className="p-10 text-center text-lg font-semibold text-[#030F35]">Guided first task templates launch soon.</div>} />
-            <Route path="/onboarding/:itemId/details" element={<MarketplaceDetailsPage marketplaceType="onboarding" />} />
-            <Route path="/onboarding/:itemId" element={<MarketplaceDetailsPage marketplaceType="onboarding" />} />
+            <Route path="/courses/:itemId" element={<ProtectedRoute><LmsCourseDetailPage /></ProtectedRoute>} />
+            <Route path="/lms" element={<ProtectedRoute><LmsCourses /></ProtectedRoute>} />
+            <Route path="/lms/:slug/reviews" element={<ProtectedRoute><LmsCourseReviewsPage /></ProtectedRoute>} />
+            <Route path="/lms/:slug/assessment" element={<ProtectedRoute><LmsCourseAssessmentPage /></ProtectedRoute>} />
+            <Route path="/lms/:courseSlug/lesson/:lessonId" element={<ProtectedRoute><LmsLessonPage /></ProtectedRoute>} />
+            <Route path="/lms/:slug" element={<ProtectedRoute><LmsCourseDetailPageWrapper /></ProtectedRoute>} />
+            {/* Onboarding */}
+            <Route path="/onboarding/welcome" element={<ProtectedRoute><OnboardingLanding /></ProtectedRoute>} />
+            <Route path="/onboarding/journey" element={<ProtectedRoute><OnboardingJourney /></ProtectedRoute>} />
+            <Route path="/onboarding/start" element={<ProtectedRoute><div>HR-style form lives here</div></ProtectedRoute>} />
+            <Route path="/onboarding/profile" element={<ProtectedRoute><div className="p-10 text-center text-lg font-semibold text-[#030F35]">Profile setup experience will be available shortly.</div></ProtectedRoute>} />
+            <Route path="/onboarding/tools" element={<ProtectedRoute><div className="p-10 text-center text-lg font-semibold text-[#030F35]">Tool exploration hub is on the way.</div></ProtectedRoute>} />
+            <Route path="/onboarding/first-task" element={<ProtectedRoute><div className="p-10 text-center text-lg font-semibold text-[#030F35]">Guided first task templates launch soon.</div></ProtectedRoute>} />
+            <Route path="/onboarding/:itemId/details" element={<ProtectedRoute><MarketplaceDetailsPage marketplaceType="onboarding" /></ProtectedRoute>} />
+            <Route path="/onboarding/:itemId" element={<ProtectedRoute><MarketplaceDetailsPage marketplaceType="onboarding" /></ProtectedRoute>} />
             {/* Marketplace */}
-            <Route path="/marketplace/*" element={<MarketplaceRouter />} />
+            <Route path="/marketplace/*" element={<ProtectedRoute><MarketplaceRouter /></ProtectedRoute>} />
             <Route path="/guides" element={<Navigate to="/marketplace/guides" replace />} />
             <Route path="/knowledge-hub" element={<Navigate to="/marketplace/guides" replace />} />
             {/* Admin */}
-            <Route path="/admin/guides" element={<AdminGuidesList />} />
-            <Route path="/admin/guides/new" element={<GuideEditor />} />
-            <Route path="/admin/guides/:id" element={<GuideEditor />} />
-            <Route path="/admin/ghc-inspector" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GHCInspectorPage /></React.Suspense>} />
+            <Route path="/admin/guides" element={<ProtectedRoute><AdminGuidesList /></ProtectedRoute>} />
+            <Route path="/admin/guides/new" element={<ProtectedRoute><GuideEditor /></ProtectedRoute>} />
+            <Route path="/admin/guides/:id" element={<ProtectedRoute><GuideEditor /></ProtectedRoute>} />
+            <Route path="/admin/ghc-inspector" element={<ProtectedRoute><React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GHCInspectorPage /></React.Suspense></ProtectedRoute>} />
             {/* Dashboard */}
-            <Route path="/dashboard/*" element={<DashboardRouter />} />
+            <Route path="/dashboard/*" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
             {/* Other pages */}
-            <Route path="/asset-library" element={<AssetLibraryPage />} />
-            <Route path="/blueprints" element={<BlueprintsPage />} />
-            <Route path="/blueprints/:projectId" element={<BlueprintsPage />} />
-            <Route path="/blueprints/:projectId/:folderId" element={<BlueprintsPage />} />
-            <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
-            <Route path="/thank-you" element={<ThankYou />} />
+            <Route path="/asset-library" element={<ProtectedRoute><AssetLibraryPage /></ProtectedRoute>} />
+            <Route path="/blueprints" element={<ProtectedRoute><BlueprintsPage /></ProtectedRoute>} />
+            <Route path="/blueprints/:projectId" element={<ProtectedRoute><BlueprintsPage /></ProtectedRoute>} />
+            <Route path="/blueprints/:projectId/:folderId" element={<ProtectedRoute><BlueprintsPage /></ProtectedRoute>} />
+            <Route path="/play/dq-agile-kpis" element={<ProtectedRoute><DQAgileKPIsPage /></ProtectedRoute>} />
+            <Route path="/thank-you" element={<ProtectedRoute><ThankYou /></ProtectedRoute>} />
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/communities/*" element={<CommunitiesRouter />} />
-            <Route path="/work-directory/units/:slug" element={<UnitProfilePage />} />
-            <Route path="/work-directory/positions/:slug" element={<WorkPositionProfilePage />} />
-            <Route path="/roles/:slug" element={<RoleProfilePage />} />
-            <Route path="/women-entrepreneurs" element={<WomenEntrepreneursPage />} />
-            <Route path="/404" element={<NotFound />} />
+            <Route path="/events" element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
+            <Route path="/communities/*" element={<ProtectedRoute><CommunitiesRouter /></ProtectedRoute>} />
+            <Route path="/work-directory/units/:slug" element={<ProtectedRoute><UnitProfilePage /></ProtectedRoute>} />
+            <Route path="/work-directory/positions/:slug" element={<ProtectedRoute><WorkPositionProfilePage /></ProtectedRoute>} />
+            <Route path="/roles/:slug" element={<ProtectedRoute><RoleProfilePage /></ProtectedRoute>} />
+            <Route path="/women-entrepreneurs" element={<ProtectedRoute><WomenEntrepreneursPage /></ProtectedRoute>} />
             {/* App catch-all - must be last */}
-            <Route path="/*" element={<App />} />
+            <Route path="/*" element={<ProtectedRoute><App /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
         </DWSChatProvider>
