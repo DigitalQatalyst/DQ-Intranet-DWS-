@@ -1,3 +1,4 @@
+footer = """\
 import React, { useState } from 'react';
 import { ExternalLink, ChevronDown, ChevronUp, Linkedin, Youtube, Globe } from 'lucide-react';
 
@@ -155,3 +156,9 @@ export function Footer({ 'data-id': dataId, isLoggedIn = false }: FooterProps) {
     </footer>
   );
 }
+"""
+
+with open('src/components/Footer/Footer.tsx', 'w') as f:
+    f.write(footer)
+
+print('Written', len(footer), 'chars')
