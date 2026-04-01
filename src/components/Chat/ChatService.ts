@@ -1,3 +1,4 @@
+import { secureRandom } from '../../utils/secureRandom';
 import {
   Message,
   MessageStatus,
@@ -26,7 +27,7 @@ class ChatService {
   private messageListeners: MessageListener[] = [];
   private typingStatusListeners: TypingStatusListener[] = [];
   private connectionStatusListeners: ConnectionStatusListener[] = [];
-  private isAdvisorTyping: boolean = false;
+  private isAdvisorTyping = false;
   private connectionStatus: ConnectionStatus = ConnectionStatus.IDLE;
   private typingTimeout: NodeJS.Timeout | null = null;
   private connectionTimeout: NodeJS.Timeout | null = null;
@@ -44,7 +45,15 @@ class ChatService {
     this.setConnectionStatus(ConnectionStatus.CONNECTING);
     // Simulate connection process with random success/failure
     this.connectionTimeout = setTimeout(() => {
-      const isSuccess = Math.random() > 0.1; // 10% chance of failure for demo purposes
+      let isSuccess: boolean;
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        isSuccess = (buf[0] / 0xffffffff) > 0.1; // 10% chance of failure for demo purposes
+      } else {
+        isSuccess = secureRandom() > 0.1;
+      }
+      
       if (isSuccess) {
         this.setConnectionStatus(ConnectionStatus.CONNECTED);
       } else {
@@ -155,9 +164,9 @@ class ChatService {
       replyTo: replyToId,
       voiceMessage: voiceMessage
         ? {
-            duration: voiceMessage.duration,
-            audioUrl: voiceMessage.audioUrl,
-          }
+          duration: voiceMessage.duration,
+          audioUrl: voiceMessage.audioUrl,
+        }
         : undefined,
     };
     // Add message to local storage
@@ -176,7 +185,14 @@ class ChatService {
           // Show typing indicator
           this.setAdvisorTyping(true);
           // Simulate advisor typing and responding
-          const typingTime = 1500 + Math.random() * 2000; // Random typing time between 1.5-3.5 seconds
+          let typingTime: number;
+          if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            const buf = new Uint32Array(1);
+            crypto.getRandomValues(buf);
+            typingTime = 1500 + (buf[0] / 0xffffffff) * 2000; // Random typing time between 1.5-3.5 seconds
+          } else {
+            typingTime = 1500 + secureRandom() * 2000;
+          }
           this.typingTimeout = setTimeout(() => {
             this.setAdvisorTyping(false);
             this.simulateAdvisorResponse(
@@ -191,14 +207,14 @@ class ChatService {
   // Simulate advisor response
   private simulateAdvisorResponse(
     replyToId?: string,
-    withVoice: boolean = false
+    withVoice = false
   ): void {
     // 30% chance to reply to the message
-    const shouldReply = Math.random() < 0.3 && replyToId;
+    const shouldReply = secureRandom() < 0.3 && replyToId;
     // 20% chance to reply with voice if the original message was voice
-    const shouldReplyWithVoice = withVoice && Math.random() < 0.2;
+    const shouldReplyWithVoice = withVoice && secureRandom() < 0.2;
     // Select a random response
-    const responseIndex = Math.floor(Math.random() * advisorResponses.length);
+    const responseIndex = Math.floor(secureRandom() * advisorResponses.length);
     const responseContent = shouldReplyWithVoice
       ? "Voice message"
       : advisorResponses[responseIndex];
@@ -220,9 +236,9 @@ class ChatService {
       replyTo: shouldReply ? replyToId : undefined,
       voiceMessage: shouldReplyWithVoice
         ? {
-            duration: 5 + Math.floor(Math.random() * 25),
-            audioUrl,
-          }
+          duration: 5 + Math.floor(secureRandom() * 25),
+          audioUrl,
+        }
         : undefined,
     };
     // Add message to storage
@@ -283,10 +299,10 @@ class ChatService {
       this.messages = this.messages.map((msg) =>
         msg.id === messageId
           ? {
-              ...msg,
-              content: "This message was deleted",
-              isDeletedForMe: true,
-            }
+            ...msg,
+            content: "This message was deleted",
+            isDeletedForMe: true,
+          }
           : msg
       );
     }

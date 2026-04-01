@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import { OnboardingStep } from './OnboardingStep';
 
 import { ArrowLeftIcon } from 'lucide-react';
@@ -23,7 +23,7 @@ export function OnboardingForm({ onComplete, isRevisit = false }) {
         loading,
         setCurrentStep,
         setShowStepsDropdown,
-        setIsEditingWelcome,
+        setIsEditingWelcome: _setIsEditingWelcome,
         handleInputChange,
         validateCurrentStep,
         validateField,

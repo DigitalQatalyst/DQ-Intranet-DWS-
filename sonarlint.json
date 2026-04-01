@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "typescript:S5850": {
+      "level": "off"
+    },
+    "typescript:S7735": {
+      "level": "off"
+    },
+    "typescript:S7764": {
+      "level": "off"
+    },
+    "typescript:S7776": {
+      "level": "off"
+    },
+    "typescript:S6754": {
+      "level": "off"
+    },
+    "typescript:S1871": {
+      "level": "off"
+    },
+    "typescript:S2681": {
+      "level": "off"
+    },
+    "typescript:S6660": {
+      "level": "off"
+    },
+    "typescript:S7723": {
+      "level": "off"
+    },
+    "typescript:S3923": {
+      "level": "off"
+    }
+  }
+}

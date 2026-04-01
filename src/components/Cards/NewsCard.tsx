@@ -1,6 +1,8 @@
 import React from 'react';
 import { UnifiedCard, CardContent, CardVariantConfig } from './UnifiedCard';
-import { Calendar, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+import { toTitleCase } from '../../utils/textUtils';
+
 export interface NewsItem {
   id: string;
   title: string;
@@ -10,31 +12,43 @@ export interface NewsItem {
   tags: string[];
   imageUrl?: string;
   sourceLogoUrl?: string;
+  mediaIcon?: React.ReactNode;
 }
+
 export interface NewsCardProps {
   item: NewsItem;
   onReadMore: () => void;
   onQuickView?: () => void;
+  pill?: CardContent['pill'];
+  ctaLabel?: string;
   'data-id'?: string;
 }
+
 export const NewsCard: React.FC<NewsCardProps> = ({
   item,
   onReadMore,
   onQuickView,
+  pill,
+  ctaLabel = 'Details',
   'data-id': dataId
 }) => {
+
   const handleReadMore = (e: React.MouseEvent) => {
     e.stopPropagation();
     onReadMore();
   };
+
+  const displayTitle = toTitleCase(item.title);
+
   const content: CardContent = {
-    title: item.title,
+    title: displayTitle,
     subtitle: item.source,
     description: item.excerpt,
     media: {
-      type: item.sourceLogoUrl ? 'image' : 'icon',
-      src: item.sourceLogoUrl,
+      type: item.mediaIcon ? 'icon' : (item.sourceLogoUrl ? 'image' : 'icon'),
+      src: item.mediaIcon ? undefined : item.sourceLogoUrl,
       alt: `${item.source} logo`,
+      icon: item.mediaIcon,
       fallbackIcon: <ExternalLink size={24} />
     },
     tags: item.tags.slice(0, 2).map((tag, index) => ({
@@ -44,15 +58,18 @@ export const NewsCard: React.FC<NewsCardProps> = ({
     metadata: {
       date: item.date
     },
+    pill,
     primaryCTA: {
-      text: 'Read More',
+      text: ctaLabel,
       onClick: handleReadMore
     }
   };
+
   const variant: CardVariantConfig = {
     type: 'news',
     layout: 'standard',
     maxTags: 2
   };
+
   return <UnifiedCard content={content} variant={variant} onQuickView={onQuickView} data-id={dataId} />;
 };

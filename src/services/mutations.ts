@@ -4,8 +4,7 @@
  * This module provides functions for performing mutations related to courses,
  * such as enrolling in a course, bookmarking a course, etc.
  */
-import { graphqlClient } from './graphql/client';
-import { CourseType } from '../types/course';
+import { error as secureError } from '../utils/secureLogger';
 /**
  * Enrolls a user in a course
  *
@@ -29,7 +28,7 @@ export const enrollInCourse = async (courseId: string, userId: string): Promise<
       message: 'Successfully enrolled in the course'
     };
   } catch (error) {
-    console.error('Error enrolling in course:', error);
+    secureError('Error enrolling in course:', error);
     throw new Error('Failed to enroll in the course. Please try again later.');
   }
 };
@@ -55,7 +54,7 @@ export const toggleCourseBookmark = async (courseId: string, userId: string, isC
       isBookmarked: !isCurrentlyBookmarked
     };
   } catch (error) {
-    console.error('Error toggling course bookmark:', error);
+    secureError('Error toggling course bookmark:', error);
     throw new Error('Failed to update bookmark status. Please try again later.');
   }
 };
@@ -82,7 +81,7 @@ export const addCourseToComparison = async (courseId: string, userId: string): P
       message: 'Course added to comparison list'
     };
   } catch (error) {
-    console.error('Error adding course to comparison:', error);
+    secureError('Error adding course to comparison:', error);
     throw new Error('Failed to add course to comparison. Please try again later.');
   }
 };
@@ -109,7 +108,7 @@ export const removeCourseFromComparison = async (courseId: string, userId: strin
       message: 'Course removed from comparison list'
     };
   } catch (error) {
-    console.error('Error removing course from comparison:', error);
+    secureError('Error removing course from comparison:', error);
     throw new Error('Failed to remove course from comparison. Please try again later.');
   }
 };

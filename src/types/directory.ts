@@ -10,7 +10,7 @@ export type Unit = {
   description?: string;
   marketplaceUrl: string;
   tags?: string[];
-  logoUrl?: string; // For EJP card style
+  logoUrl?: string; // For DQ card style
 };
 
 export type Studio = "DXB" | "NBO" | "KSA" | "Home" | "Other";

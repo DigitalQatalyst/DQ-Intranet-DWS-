@@ -1,3 +1,4 @@
+import { secureRandom } from '../utils/secureRandom';
 // Mock data for Asset Library files - Blueprint style
 export interface AssetFile {
   id: string;
@@ -298,7 +299,7 @@ export function getFilesByCategory(category: string | null, subcategory: string 
     
     // Generate mock files based on the category path
     const pathParts = category.split('-');
-    const fileCount = Math.floor(Math.random() * 6) + 3; // 3-8 files
+    const fileCount = Math.floor(secureRandom() * 6) + 3; // 3-8 files
     
     const mockFiles: AssetFile[] = [];
     for (let i = 1; i <= fileCount; i++) {
@@ -307,10 +308,10 @@ export function getFilesByCategory(category: string | null, subcategory: string 
         name: `${pathParts[pathParts.length - 1]} Document ${i}.pdf`,
         description: `Important document ${i} for ${pathParts[pathParts.length - 1]} operations and procedures.`,
         url: '/assets/sample-document.pdf',
-        size: Math.floor(Math.random() * 5000000) + 500000,
-        lastModified: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        size: Math.floor(secureRandom() * 5000000) + 500000,
+        lastModified: new Date(Date.now() - secureRandom() * 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         author: `${pathParts[pathParts.length - 1]} Team`,
-        type: ['pdf', 'docx', 'pptx', 'xlsx'][Math.floor(Math.random() * 4)] as any,
+        type: ['pdf', 'docx', 'pptx', 'xlsx'][Math.floor(secureRandom() * 4)] as any,
         category: pathParts[0] || 'General',
         subcategory: pathParts[1] || 'Files'
       });

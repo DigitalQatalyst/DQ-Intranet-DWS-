@@ -10,7 +10,7 @@ export function CommunitiesLayout({ children }: CommunitiesLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header
-        toggleSidebar={() => {}}
+        toggleSidebar={() => undefined}
         sidebarOpen={false}
       />
       <main className="flex-grow">

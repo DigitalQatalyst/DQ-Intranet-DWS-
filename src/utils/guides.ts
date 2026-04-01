@@ -26,7 +26,6 @@ export const freshnessBuckets = [
 ]
 
 export const sortOptions = [
-  { id: 'relevance', name: 'Relevance' },
   { id: 'updated', name: 'Last Updated' },
   { id: 'downloads', name: 'Most Downloaded' },
   { id: 'editorsPick', name: "Editor's Pick" },

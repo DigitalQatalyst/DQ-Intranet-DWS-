@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MenuIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon, BookOpen } from 'lucide-react';
+import {
+  BuildingIcon,
+  GraduationCapIcon,
+  CalendarIcon,
+  UsersIcon,
+  NewspaperIcon,
+  SparklesIcon,
+  BookOpen,
+  CreditCardIcon,
+} from 'lucide-react';
 import { scrollToSupport } from '../../../utils/scroll';
 interface MobileDrawerProps {
   isCompact?: boolean;
@@ -9,61 +18,71 @@ interface MobileDrawerProps {
   onSignUp: () => void;
   isSignedIn: boolean;
 }
-const marketplaces = [{
-  id: 'non-financial',
-  name: 'IT & Systems Support',
-  description: 'Helpdesk, access requests, device & app support.',
-  icon: BuildingIcon,
-  href: '/marketplace/non-financial'
-}, {
-  id: 'finance',
-  name: 'HR & Finance Services',
-  description: 'Leave, payroll, benefits, and reimbursements.',
-  icon: CreditCardIcon,
-  href: '/marketplace/finance'
-}, {
-  id: 'media',
-  name: 'Facilities & Logistics',
-  description: 'Office access, seating, travel, and logistics.',
-  icon: NewspaperIcon,
-  href: '/marketplace/media'
-}, {
-  id: 'community',
-  name: 'Associates Directory',
-  description: 'Find people, teams, and contacts across DQ.',
-  icon: UsersIcon,
-  href: '/marketplace/community'
-}, {
-  id: 'course',
-  name: 'DQ LMS Courses',
-  description: '7x GHC, 6x Digital, 12x HoV, 1x Day in DQ, Key Tools.',
-  icon: GraduationCapIcon,
-  href: '/marketplace/courses'
-}, {
-  id: 'investment',
-  name: 'Certifications & Onboarding',
-  description: 'Mandatory training and new associate onboarding.',
-  icon: TrendingUpIcon,
-  href: '/marketplace/investment'
-}, {
-    id: 'calendar',
-    name: 'Calendar & Events',
-    description: 'Digital platform that connects event organizers with attendees, vendors, and service providers.',
+
+interface DrawerMarketplace {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<any>;
+  href: string;
+  isComingSoon?: boolean;
+}
+
+const marketplaces: DrawerMarketplace[] = [
+  {
+    id: 'learning-center',
+    name: 'DQ Learning Center',
+    description: 'Courses, learning tracks, and associate reviews.',
+    icon: GraduationCapIcon,
+    href: '/lms',
+    isComingSoon: true,
+  },
+  {
+    id: 'services-center',
+    name: 'DQ Services Center',
+    description: 'Business services, technology services, and digital worker tools.',
+    icon: BuildingIcon,
+    href: '/dq-services-center',
+  },
+  {
+    id: 'work-center',
+    name: 'DQ Work Center',
+    description: 'Daily sessions, project work, and execution trackers.',
     icon: CalendarIcon,
     href: '/events',
-  },{
-  id: 'opportunity',
-  name: 'News & Announcements',
-  description: 'Company updates and internal notices.',
-  icon: SparklesIcon,
-  href: '/marketplace/opportunities'
-}, {
-  id: 'guides',
-  name: 'Guidelines Marketplace',
-  description: 'Access practical guidelines, templates, and processes.',
-  icon: BookOpen,
-  href: '/marketplace/guides'
-}];
+    isComingSoon: true,
+  },
+  {
+    id: 'work-directory',
+    name: 'DQ Work Directory',
+    description: 'Units, positions, and associate profiles.',
+    icon: UsersIcon,
+    href: '/marketplace/work-directory',
+    isComingSoon: true,
+  },
+  {
+    id: 'media-center',
+    name: 'DQ Media Center',
+    description: 'News, announcements, job openings, and blogs.',
+    icon: NewspaperIcon,
+    href: '/marketplace/media-center?tab=announcements',
+  },
+  {
+    id: 'work-communities',
+    name: 'DQ Work Communities',
+    description: 'Discussion rooms, pulse updates, and events.',
+    icon: SparklesIcon,
+    href: '/dq-work-communities',
+    isComingSoon: true,
+  },
+  {
+    id: 'knowledge-center',
+    name: 'DQ Knowledge Center',
+    description: 'Strategy guides, blueprints, libraries, and testimonials.',
+    icon: BookOpen,
+    href: '/marketplace/guides',
+  },
+];
 export function MobileDrawer({
   isCompact = false,
   onSignIn,
@@ -159,7 +178,17 @@ export function MobileDrawer({
                   {marketplaces.map(marketplace => {
                     const Icon = marketplace.icon;
                     const isActive = marketplace.id === 'guides' && (location.pathname.startsWith('/marketplace/guides') || location.pathname.startsWith('/marketplace/knowledge-hub'));
-                    return <button key={marketplace.id} className={`w-full flex items-start px-2.5 py-2 text-left hover:bg-dq-coral/10 rounded-lg transition-colors md:py-1.5 sm:py-1 ${isActive ? 'border-l-4 border-dq-coral bg-dq-coral/5 font-semibold' : ''}`} onClick={() => handleMarketplaceClick(marketplace.href)} aria-current={isActive ? 'page' : undefined}>
+                    const isComingSoon = marketplace.isComingSoon;
+                    return <button
+                      key={marketplace.id}
+                      className={`w-full flex items-start px-2.5 py-2 text-left hover:bg-dq-coral/10 rounded-lg transition-colors md:py-1.5 sm:py-1 ${isActive ? 'border-l-4 border-dq-coral bg-dq-coral/5 font-semibold' : ''} ${isComingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                      onClick={() => {
+                        if (isComingSoon) return;
+                        handleMarketplaceClick(marketplace.href);
+                      }}
+                      aria-current={isActive ? 'page' : undefined}
+                      aria-disabled={isComingSoon || undefined}
+                    >
                       <div className="flex-shrink-0 mt-0.5">
                         <Icon size={14} className="text-dq-coral md:w-3 md:h-3 sm:w-3 sm:h-3" />
                       </div>

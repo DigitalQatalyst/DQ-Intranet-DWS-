@@ -1,121 +1,111 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { CourseType } from "./utils/mockData";
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "./components/Header";
+
 import { MarketplaceRouter } from "./pages/marketplace/MarketplaceRouter";
 import { CommunitiesRouter } from "./communities/CommunitiesRouter";
 import { App } from './App';
 
 import MarketplaceDetailsPage from "./pages/marketplace/MarketplaceDetailsPage";
 import LmsCourseDetailPage from "./pages/lms/LmsCourseDetailPage";
-import LmsCourseDetail from "./pages/LmsCourseDetail";
+import LmsCourseReviewsPage from "./pages/lms/LmsCourseReviewsPage";
+import LmsCourseAssessmentPage from "./pages/lms/LmsCourseAssessmentPage";
+import LmsLessonPage from "./pages/lms/LmsLessonPage";
+
+// Wrapper component to force remount on slug change
+const LmsCourseDetailPageWrapper = () => {
+  const { slug } = useParams<{ slug: string }>();
+  return <LmsCourseDetailPage key={slug} />;
+};
 import LmsCourses from "./pages/LmsCourses";
 import AssetLibraryPage from "./pages/assetLibrary";
 import BlueprintsPage from "./pages/blueprints";
 import DQAgileKPIsPage from "./pages/play/DQAgileKPIsPage";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
-import ProtectedRoute from "./components/ProtectedRoute";
-import DiscoverDQ from "./pages/DiscoverDQ";
+import OnboardingLanding from "./pages/OnboardingLanding";
+import { OnboardingJourney } from "./pages/OnboardingJourney";
+import ComingSoonPage from "./pages/ComingSoonPage";
+import GrowthSectorsComingSoon from "./pages/GrowthSectorsComingSoon";
+import SixXDProductsLanding from "./pages/6XDProductsLanding";
 import NotFound from "./pages/NotFound";
 import AdminGuidesList from "./pages/admin/guides/AdminGuidesList";
 import GuideEditor from "./pages/admin/guides/GuideEditor";
-import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
-import { ApolloProvider } from "@apollo/client/react";
+const GHCInspectorPage = React.lazy(() => import("./pages/admin/ghc-inspector/GHCInspectorPage"));
 import EventsPage from "./pages/events/EventsPage";
-import KfBot from "./bot/KfBot";
+import { DWSChatProvider } from "./components/DWSChatProvider";
 import ThankYou from "./pages/ThankYou";
+import UnitProfilePage from "./pages/UnitProfilePage";
+import WorkPositionProfilePage from "./pages/WorkPositionProfilePage";
+import RoleProfilePage from "./pages/RoleProfilePage";
+import WomenEntrepreneursPage from "./pages/WomenEntrepreneursPage";
+import GHCLanding from "./pages/GHCLanding";
+import SixXDLanding from "./pages/6XDLanding";
 
 export function AppRouter() {
-  const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([]);
-  const [compareCourses, setCompareCourses] = useState<CourseType[]>([]);
-  const toggleBookmark = (courseId: string) => {
-    setBookmarkedCourses((prev) => {
-      if (prev.includes(courseId)) {
-        return prev.filter((id) => id !== courseId);
-      } else {
-        return [...prev, courseId];
-      }
-    });
-  };
-  const handleAddToComparison = (course: CourseType) => {
-    if (
-      compareCourses.length < 3 &&
-      !compareCourses.some((c) => c.id === course.id)
-    ) {
-      setCompareCourses((prev) => [...prev, course]);
-    }
-  };
-
-  const client = new ApolloClient({
-    link: new HttpLink({
-      uri: "https://9609a7336af8.ngrok-free.app/services-api",
-    }), // <-- Use HttpLink
-    cache: new InMemoryCache(),
-  });
-
   return (
-    <ApolloProvider client={client}>
-      <BrowserRouter>
-        <AuthProvider>
-          <KfBot />
-          <Routes>
-            <Route path="/discover-dq" element={<DiscoverDQ />} />
-            <Route path="/*" element={<App />} />
+    <BrowserRouter>
+      <AuthProvider>
+        <DWSChatProvider>
+            <Routes>
+            <Route path="/discover-dq" element={<ComingSoonPage />} />
+            <Route path="/coming-soon" element={<ComingSoonPage />} />
+            <Route path="/growth-sectors-coming-soon" element={<GrowthSectorsComingSoon />} />
+            <Route path="/products" element={<SixXDProductsLanding />} />
+            <Route path="/dq-products" element={<SixXDProductsLanding />} />
+            <Route path="/knowledge-center/products" element={<SixXDProductsLanding />} />
+            {/* Strategy pages */}
+            <Route path="/ghc" element={<GHCLanding />} />
+            <Route path="/6xd" element={<SixXDLanding />} />
+            <Route path="/6xd-products" element={<SixXDProductsLanding />} />
+            {/* LMS */}
             <Route path="/courses/:itemId" element={<LmsCourseDetailPage />} />
             <Route path="/lms" element={<LmsCourses />} />
-            <Route path="/lms/:slug" element={<LmsCourseDetail />} />
-            <Route
-              path="/onboarding/:itemId"
-              element={
-                <MarketplaceDetailsPage
-                  marketplaceType="onboarding"
-                />
-              }
-            />
-            <Route
-              path="/onboarding/:itemId/details"
-              element={
-                <MarketplaceDetailsPage
-                  marketplaceType="onboarding"
-                />
-              }
-            />
+            <Route path="/lms/:slug/reviews" element={<LmsCourseReviewsPage />} />
+            <Route path="/lms/:slug/assessment" element={<LmsCourseAssessmentPage />} />
+            <Route path="/lms/:courseSlug/lesson/:lessonId" element={<LmsLessonPage />} />
+            <Route path="/lms/:slug" element={<LmsCourseDetailPageWrapper />} />
+            
+            {/* Onboarding - specific routes before wildcard */}
+            <Route path="/onboarding/welcome" element={<OnboardingLanding />} />
+            <Route path="/onboarding/journey" element={<OnboardingJourney />} />
+            <Route path="/onboarding/start" element={<div>HR-style form lives here</div>} />
+            <Route path="/onboarding/profile" element={<div className="p-10 text-center text-lg font-semibold text-[#030F35]">Profile setup experience will be available shortly.</div>} />
+            <Route path="/onboarding/tools" element={<div className="p-10 text-center text-lg font-semibold text-[#030F35]">Tool exploration hub is on the way.</div>} />
+            <Route path="/onboarding/first-task" element={<div className="p-10 text-center text-lg font-semibold text-[#030F35]">Guided first task templates launch soon.</div>} />
+            <Route path="/onboarding/:itemId/details" element={<MarketplaceDetailsPage marketplaceType="onboarding" />} />
+            <Route path="/onboarding/:itemId" element={<MarketplaceDetailsPage marketplaceType="onboarding" />} />
+            {/* Marketplace */}
             <Route path="/marketplace/*" element={<MarketplaceRouter />} />
-            {/* Admin - Guides CRUD */}
+            <Route path="/guides" element={<Navigate to="/marketplace/guides" replace />} />
+            <Route path="/knowledge-hub" element={<Navigate to="/marketplace/guides" replace />} />
+            {/* Admin */}
             <Route path="/admin/guides" element={<AdminGuidesList />} />
             <Route path="/admin/guides/new" element={<GuideEditor />} />
             <Route path="/admin/guides/:id" element={<GuideEditor />} />
-          {/* Canonical and compatibility routes for Guides marketplace */}
-          <Route path="/guides" element={<Navigate to="/marketplace/guides" replace />} />
-          <Route path="/knowledge-hub" element={<Navigate to="/marketplace/guides" replace />} />
-            <Route
-              path="/dashboard/*"
-              element={
-                // <ProtectedRoute>
-                <DashboardRouter />
-                // </ProtectedRoute>
-              }
-            />
+            <Route path="/admin/ghc-inspector" element={<React.Suspense fallback={<div className="p-6 text-center">Loading...</div>}><GHCInspectorPage /></React.Suspense>} />
+            {/* Dashboard */}
+            <Route path="/dashboard/*" element={<DashboardRouter />} />
+            {/* Other pages */}
             <Route path="/asset-library" element={<AssetLibraryPage />} />
             <Route path="/blueprints" element={<BlueprintsPage />} />
             <Route path="/blueprints/:projectId" element={<BlueprintsPage />} />
-            <Route
-              path="/blueprints/:projectId/:folderId"
-              element={<BlueprintsPage />}
-            />
+            <Route path="/blueprints/:projectId/:folderId" element={<BlueprintsPage />} />
             <Route path="/play/dq-agile-kpis" element={<DQAgileKPIsPage />} />
-            <Route path="/discover-dq" element={<DiscoverDQ />} />
             <Route path="/thank-you" element={<ThankYou />} />
-            {/* Redirect encoded leading-space path to canonical route */}
             <Route path="/%20marketplace/news" element={<Navigate to="/marketplace/news" replace />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/communities/*" element={<CommunitiesRouter />} />
+            <Route path="/work-directory/units/:slug" element={<UnitProfilePage />} />
+            <Route path="/work-directory/positions/:slug" element={<WorkPositionProfilePage />} />
+            <Route path="/roles/:slug" element={<RoleProfilePage />} />
+            <Route path="/women-entrepreneurs" element={<WomenEntrepreneursPage />} />
             <Route path="/404" element={<NotFound />} />
-
+            {/* App catch-all - must be last */}
+            <Route path="/*" element={<App />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </ApolloProvider>
+        </DWSChatProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
