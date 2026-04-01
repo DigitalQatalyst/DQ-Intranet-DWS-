@@ -12,7 +12,7 @@ echo "=========================================="
 echo ""
 
 # Check if .env file exists
-if [ ! -f ".env" ]; then
+if [[ ! -f ".env" ]]; then
     echo "❌ Error: .env file not found"
     exit 1
 fi
@@ -21,7 +21,7 @@ fi
 source .env
 
 # Check if required variables are set
-if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+if [[ -z "$VITE_SUPABASE_URL" ]] || [[ -z "$VITE_SUPABASE_ANON_KEY" ]]; then
     echo "❌ Error: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set in .env"
     exit 1
 fi
@@ -94,7 +94,7 @@ echo "=========================================="
 echo ""
 read -p "Run connection test now? (y/n): " run_test
 
-if [ "$run_test" = "y" ] || [ "$run_test" = "Y" ]; then
+if [[ "$run_test" = "y" ]] || [[ "$run_test" = "Y" ]]; then
     echo ""
     echo "Running connection test..."
     echo ""
